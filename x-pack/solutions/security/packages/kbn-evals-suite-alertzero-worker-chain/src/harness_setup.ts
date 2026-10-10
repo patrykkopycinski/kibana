@@ -53,12 +53,15 @@ export const setupWorkerChainHarness = async ({
   state,
   log,
   pinnedServiceAccountId,
+  roleDefinitions,
 }: {
   fetch: HttpHandler;
   ctx: KbnRequestContext;
   state: WorkerChainHarnessState;
   log: ToolingLog;
   pinnedServiceAccountId?: string;
+  /** G20: role definitions the Worker service accounts are provisioned from (identity cell). */
+  roleDefinitions?: Parameters<typeof provisionWorkerServiceAccounts>[2];
 }): Promise<void> => {
   state.restoreAlertZeroSetting = await enableAlertZeroInSpace(ctx);
   log.info(`Enabled securitySolution:enableAlertZero in space "${ctx.spaceId}"`);
@@ -68,7 +71,7 @@ export const setupWorkerChainHarness = async ({
   const workerIds = Object.values(WORKER_IDS);
   const provisioned = pinnedServiceAccountId
     ? pinnedServiceAccountId
-    : await provisionWorkerServiceAccounts(fetch, workerIds);
+    : await provisionWorkerServiceAccounts(fetch, workerIds, roleDefinitions);
   state.workerServiceAccounts = await preflightWorkerServiceAccounts(ctx, workerIds, provisioned);
   log.info(
     `Worker service accounts (R1): ${Object.entries(state.workerServiceAccounts)

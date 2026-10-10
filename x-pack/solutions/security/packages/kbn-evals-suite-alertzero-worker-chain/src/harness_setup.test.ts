@@ -13,6 +13,7 @@ import {
   setupWorkerChainHarness,
   teardownWorkerChainHarness,
 } from './harness_setup';
+import { resolveIdentitySpaceCell } from './identity_space_cells';
 
 const SETTING_URL = '/internal/kibana/settings';
 const WORKERS_URL = '/internal/alertzero/workers';
@@ -179,6 +180,23 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(state.snapshots.map((s) => s.workerId)).toEqual([
       WORKER_IDS.alertTriage,
       WORKER_IDS.attackDiscovery,
+    ]);
+  });
+
+  it("G20: provisions the Worker accounts from the identity cell's role definitions", async () => {
+    const stack = makeStack();
+    const state = createHarnessState();
+    const cell = resolveIdentitySpaceCell('worker-sa-space-no-entities');
+    await setupWorkerChainHarness({
+      fetch: stack.fetch,
+      ctx: ctxFor(stack.fetch),
+      state,
+      log: makeLog(),
+      roleDefinitions: cell.roleDefinitions,
+    });
+    expect(stack.accounts.map((a) => a.name).sort()).toEqual([
+      'alertzero_alert_triage',
+      'alertzero_attack_discovery_g20_no_entities',
     ]);
   });
 

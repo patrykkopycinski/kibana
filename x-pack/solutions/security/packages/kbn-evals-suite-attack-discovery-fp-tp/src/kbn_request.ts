@@ -15,15 +15,19 @@ const statusOf = (error: unknown): number | undefined => {
   return typeof error.status === 'number' ? error.status : undefined;
 };
 
+/** `/s/<space>` prefix for a non-default space (G20); the entity store and detection routes are per space. */
+export const spaceScopedPath = (path: string, spaceId?: string): string =>
+  spaceId && spaceId !== 'default' ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
+
 /**
  * Adapts the evals `fetch` fixture, which throws on HTTP errors, to the seeding
  * helpers' request shape, which reads the status code instead.
  */
 export const kbnRequestFromFetch =
-  (fetch: HttpHandler): FpTpLiveKbnRequest =>
+  (fetch: HttpHandler, spaceId?: string): FpTpLiveKbnRequest =>
   async ({ method, path, body, version }) => {
     try {
-      const response = await fetch(path, {
+      const response = await fetch(spaceScopedPath(path, spaceId), {
         method,
         version,
         headers: version ? { 'elastic-api-version': version } : undefined,

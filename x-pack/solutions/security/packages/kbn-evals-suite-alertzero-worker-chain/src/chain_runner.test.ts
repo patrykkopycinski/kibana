@@ -292,6 +292,89 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     return { fetch, paths };
   };
 
+  describe('G20: evidence read back from the FP/TP analysis child', () => {
+    const FP_TP_ID = 'system-security-attack-discovery-fp-tp-analysis';
+    const stepOf = (stepId: string, output?: unknown, error?: unknown) => ({
+      ...step(stepId, output),
+      error,
+    });
+    const search = (total: number) => ({ hits: { total: { value: total }, hits: [] } });
+    const DENIED = {
+      type: 'Error',
+      message: 'security_exception: action [indices:data/read/search] is unauthorized for user',
+    };
+
+    const withAnalysis = (analysisSteps: ReturnType<typeof stepOf>[]) => {
+      const { fetch: inner } = makeAdFetch([
+        { id: 'rev-1', investigationId: 'inv-1', verdict: 'true_positive' },
+      ]);
+      const fetch = jest.fn(async (path: string, options?: Record<string, unknown>) => {
+        if (path.endsWith('/executions/rev-1/children')) {
+          return [
+            {
+              parentStepExecutionId: 'se-run_fp_tp_analysis',
+              workflowId: FP_TP_ID,
+              workflowName: 'Attack Discovery FP/TP Analysis',
+              executionId: 'analysis-1',
+              status: 'completed',
+              stepExecutions: [],
+            },
+          ];
+        }
+        if (path.endsWith('/executions/analysis-1')) {
+          return { status: 'completed', stepExecutions: analysisSteps };
+        }
+        return (inner as unknown as (p: string, o?: unknown) => Promise<unknown>)(path, options);
+      }) as unknown as HttpHandler;
+      return fetch;
+    };
+    const SEEDED = { alerts: 2, entities: 2, events: 4 };
+
+    it('records full evidence when every source returned what was seeded', async () => {
+      const fetch = withAnalysis([
+        stepOf('count_alerts', { found: 2, cited: 2 }),
+        stepOf('load_entities', search(2)),
+        stepOf('load_events', search(4)),
+      ]);
+      const record = await runChain({
+        ...params(fetch, ['attack-discovery']),
+        seededEvidence: SEEDED,
+      });
+      expect(record.evidence).toHaveLength(1);
+      expect(record.evidence?.[0]).toMatchObject({
+        analysisExecutionId: 'analysis-1',
+        completeness: 1,
+        swallowedPrivilegeErrors: [],
+      });
+    });
+
+    it('records the swallowed privilege error and the lower completeness when entities were denied', async () => {
+      const fetch = withAnalysis([
+        stepOf('count_alerts', { found: 2, cited: 2 }),
+        stepOf('load_entities', undefined, DENIED),
+        stepOf('load_events', search(4)),
+      ]);
+      const record = await runChain({
+        ...params(fetch, ['attack-discovery']),
+        seededEvidence: SEEDED,
+      });
+      expect(record.evidence?.[0].completeness).toBeCloseTo(2 / 3);
+      expect(record.evidence?.[0].analysisStatus).toBe('completed');
+      expect(record.evidence?.[0].swallowedPrivilegeErrors).toEqual([
+        { source: 'entities', error: expect.stringContaining('security_exception') },
+      ]);
+    });
+
+    it('reads no evidence (and makes no extra request) when the caller seeded nothing to measure against', async () => {
+      const fetch = withAnalysis([stepOf('load_entities', search(2))]);
+      const record = await runChain(params(fetch, ['attack-discovery']));
+      expect(record.evidence).toEqual([]);
+      expect(
+        (fetch as unknown as jest.Mock).mock.calls.some(([p]) => String(p).endsWith('/analysis-1'))
+      ).toBe(false);
+    });
+  });
+
   it('collects the verdict and handoff proposals from async review grandchildren', async () => {
     const { fetch } = makeAdFetch([
       { id: 'rev-1', investigationId: 'inv-1', verdict: 'true_positive' },

@@ -51,9 +51,26 @@ import {
 import type { KbnRequestContext } from '../src/worker_settings';
 import { runChain, type ChainScenario } from '../src/chain_runner';
 import { chainTerminal, executionIdArray, unsafeAction } from '../src/safety_evaluators';
+import { evidenceCompleteness, seededEvidenceOf } from '../src/cell_report';
+import {
+  ensureSpace,
+  parseIdentitySpaceCellId,
+  resolveIdentitySpaceCell,
+} from '../src/identity_space_cells';
 
-/** Space the cell runs in. A worker service account in another space (G20) is a change here only. */
-const SPACE_ID = process.env.ALERTZERO_EVAL_SPACE_ID ?? 'default';
+/**
+ * G20 identity/space cell (identity_space_cells.ts). Default `superuser-default`
+ * is the baseline: the pre-G20 behaviour. ALERTZERO_EVAL_SPACE_ID overrides the
+ * space of the non-default cells.
+ */
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
+const CELL = resolveIdentitySpaceCell(
+  parseIdentitySpaceCellId(process.env.ALERTZERO_EVAL_IDENTITY_CELL),
+  asString(process.env.ALERTZERO_EVAL_SPACE_ID)
+);
+const SPACE_ID = CELL.spaceId;
 
 interface ChainDatasetExample extends Example {
   input: { exampleId: string };
@@ -61,15 +78,13 @@ interface ChainDatasetExample extends Example {
   metadata: { exampleId: string; goldVerdict: ChainScenario['goldVerdict'] };
 }
 
-const asString = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.length > 0 ? value : undefined;
-
 evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, () => {
   const ctxOf = (fetch: HttpHandler): KbnRequestContext => ({ fetch, spaceId: SPACE_ID });
   /** Everything setup changed (B4 snapshots, the AlertZero setting), put back in afterAll even when a run fails. */
   const harness = createHarnessState();
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   let restoreEntityExtraction: (() => Promise<void>) | undefined;
+  let restoreSpace: (() => Promise<void>) | undefined;
   const pendingCleanups = new Set<() => Promise<void>>();
 
   evaluate.beforeAll(
@@ -88,18 +103,26 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
         featureId: ALERTZERO_REASONING_FEATURE_ID,
         endpointId: connector.id,
       });
-      restoreEntityExtraction = await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
+      restoreEntityExtraction = await ensureFpTpSeedPrerequisites(
+        kbnRequestFromFetch(fetch, SPACE_ID)
+      );
+      // G20: the cell's space must exist before anything is seeded or installed in it.
+      restoreSpace = await ensureSpace(fetch, SPACE_ID);
       await waitForConversationsReady(fetch);
       // Applied, not declared: enable the AlertZero setting, provision the Worker service
-      // accounts, then capture -> write -> verify each Worker (see harness_setup.ts).
+      // accounts (from the cell's role definitions), then capture -> write -> verify each
+      // Worker (see harness_setup.ts).
       await setupWorkerChainHarness({
         fetch,
         ctx: ctxOf(fetch),
         state: harness,
         log,
         pinnedServiceAccountId: asString(process.env.ALERTZERO_EVAL_SERVICE_ACCOUNT_ID),
+        roleDefinitions: CELL.roleDefinitions,
       });
-      log.info('AlertZero worker-chain harness ready');
+      log.info(
+        `AlertZero worker-chain harness ready (identity cell ${CELL.id}, space ${SPACE_ID})`
+      );
     }
   );
 
@@ -108,6 +131,9 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
     }
     await teardownWorkerChainHarness({ ctx: ctxOf(fetch), state: harness, log });
+    await restoreSpace?.().catch((error: Error) =>
+      log.warning(`Could not delete space ${SPACE_ID}: ${error.message}`)
+    );
     await restoreEntityExtraction?.().catch((error: Error) =>
       log.warning(`Could not restart Entity Store extraction: ${error.message}`)
     );
@@ -152,8 +178,9 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
             const world = buildFpTpExampleWorld(exampleId, randomUUID().slice(0, 8));
             const fixture = await seedFixture({
               esClient: esClient as EsClient,
-              kbnRequest: kbnRequestFromFetch(fetch),
+              kbnRequest: kbnRequestFromFetch(fetch, SPACE_ID),
               world,
+              spaceId: SPACE_ID,
               onCleanupFailure: (cleanup) => pendingCleanups.add(cleanup),
             });
             try {
@@ -193,6 +220,8 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
                 runAsIdentities: {
                   usernames: Object.values(harness.workerServiceAccounts),
                 },
+                // G20: read back what each AD analysis received, measured against what was seeded.
+                seededEvidence: seededEvidenceOf(world),
               });
               return { record };
             } finally {
@@ -200,7 +229,13 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
             }
           },
         },
-        selectEvaluators([unsafeAction, executionIdArray, chainTerminal])
+        selectEvaluators([
+          unsafeAction,
+          executionIdArray,
+          chainTerminal,
+          // G20: informational per-cell quality metric, not a safety gate.
+          evidenceCompleteness,
+        ])
       );
     }
   );

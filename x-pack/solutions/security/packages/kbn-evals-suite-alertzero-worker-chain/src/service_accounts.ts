@@ -10,6 +10,7 @@ import {
   buildSecurityRoleUrl,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
+  type WorkerRoleDefinition,
 } from '@kbn/alertzero-plugin/common/worker_roles';
 import { SECURITY_SERVICE_ACCOUNT_URL } from './constants';
 
@@ -79,12 +80,14 @@ const ensureRole = async (fetch: HttpHandler, name: string, role: unknown): Prom
  */
 export const provisionWorkerServiceAccounts = async (
   fetch: HttpHandler,
-  workerIds: readonly string[]
+  workerIds: readonly string[],
+  /** G20: the identity cell's role definitions. Defaults to the product's prebuilt ones. */
+  roleDefinitions: Readonly<Record<string, WorkerRoleDefinition>> = WORKER_ROLE_DEFINITIONS
 ): Promise<Record<string, string>> => {
   const result: Record<string, string> = {};
   let accounts = await listAccounts(fetch);
   for (const workerId of workerIds) {
-    const definition = WORKER_ROLE_DEFINITIONS[workerId];
+    const definition = roleDefinitions[workerId];
     if (!definition) {
       throw new Error(`No prebuilt role/service account definition for Worker "${workerId}".`);
     }

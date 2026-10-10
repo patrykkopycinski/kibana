@@ -21,6 +21,12 @@ import type {
   WorkerAutonomy,
 } from '@kbn/security-evals-chain-safety';
 import {
+  FP_TP_ANALYSIS_WORKFLOW_ID,
+  readEvidence,
+  type EvidenceReading,
+  type SeededEvidence,
+} from './evidence';
+import {
   ACTION_IDS,
   DEFAULT_POLL_INTERVAL_MS,
   HOP_TIMEOUTS_MS,
@@ -146,6 +152,8 @@ export interface ReviewInvestigationExecutionIds {
  */
 export type WorkerChainRunRecord = ChainRunRecord & {
   reviewInvestigations?: ReviewInvestigationExecutionIds[];
+  /** G20: what each Attack Discovery FP/TP analysis actually received (one per review). */
+  evidence?: EvidenceReading[];
 };
 
 export interface RunChainParams {
@@ -172,6 +180,11 @@ export interface RunChainParams {
    * user, not the worker principal).
    */
   runAsIdentities?: { usernames?: Array<string | null | undefined> };
+  /**
+   * G20: documents the scenario seeded per evidence source. When set, each AD
+   * review's FP/TP analysis is read back and scored for evidence completeness.
+   */
+  seededEvidence?: SeededEvidence;
   maxWaitMs?: Partial<typeof HOP_TIMEOUTS_MS>;
   pollIntervalMs?: number;
 }
@@ -509,6 +522,7 @@ export const runChain = ({
   triageTrigger,
   forensicsSweepMode,
   runAsIdentities,
+  seededEvidence,
   maxWaitMs = {},
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
 }: RunChainParams): Promise<WorkerChainRunRecord> => {
@@ -527,6 +541,7 @@ export const runChain = ({
       triageTrigger,
       forensicsSweepMode,
       runAsIdentities,
+      seededEvidence,
       maxWaitMs,
       pollIntervalMs,
     })
@@ -544,6 +559,7 @@ const runChainUnserialized = async ({
   triageTrigger,
   forensicsSweepMode,
   runAsIdentities,
+  seededEvidence,
   maxWaitMs = {},
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
 }: RunChainParams): Promise<WorkerChainRunRecord> => {
@@ -596,6 +612,7 @@ const runChainUnserialized = async ({
   }> = [];
   /** F4: what each review's Investigation actually carries vs. what the product writes. */
   const reviewInvestigationIds: ReviewInvestigationExecutionIds[] = [];
+  const evidence: EvidenceReading[] = [];
 
   if (scenario.workerChain.includes('alert-triage')) {
     const triageAutonomy = await readBackAutonomy('alert-triage', WORKER_IDS.alertTriage);
@@ -801,6 +818,20 @@ const runChainUnserialized = async ({
       if (reviewWait.overrun) {
         markInterference(`attack_discovery_review ${reviewId} overran its per-hop timeout`);
       }
+      if (seededEvidence !== undefined) {
+        // The analysis is a SYNC child of the review, so the children endpoint lists it.
+        const analysis = (await listChildExecutions(ctx, reviewId)).find(
+          (child) => child.workflowId === FP_TP_ANALYSIS_WORKFLOW_ID
+        );
+        if (analysis) {
+          const analysisExecution = await readExecution(ctx, analysis.executionId).catch(
+            () => undefined
+          );
+          if (analysisExecution) {
+            evidence.push(readEvidence(analysisExecution, analysis.executionId, seededEvidence));
+          }
+        }
+      }
       const result = readReviewResult(reviewExecution);
       if (result.verdict !== undefined) appliedVerdictOrigin = result.verdict;
       if (result.investigationId !== undefined) {
@@ -920,5 +951,6 @@ const runChainUnserialized = async ({
     },
     harnessInterference,
     reviewInvestigations: reviewInvestigationIds,
+    evidence,
   };
 };

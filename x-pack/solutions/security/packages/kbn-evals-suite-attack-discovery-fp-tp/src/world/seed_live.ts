@@ -29,6 +29,11 @@ export type FpTpLiveKbnRequest = (options: {
 }) => Promise<{ statusCode: number; body: unknown }>;
 
 export interface FpTpLiveSeedPlan {
+  /** Kibana space the world is seeded for (G20). `default` unless a cell runs elsewhere. */
+  readonly spaceId: string;
+  /** Alias the workflow reads entities through in `spaceId`. */
+  readonly entityReadAlias: string;
+  readonly alertsIndex: string;
   readonly attackIndex: string;
   readonly attackId: string;
   readonly attackDocument?: Record<string, unknown>;
@@ -106,7 +111,32 @@ const hostIdOf = (source: Record<string, unknown>): string | undefined => {
   return typeof host?.id === 'string' ? host.id : undefined;
 };
 
-export const buildLiveSeedPlan = (world: FpTpWorld, now: Date = new Date()): FpTpLiveSeedPlan => {
+const DEFAULT_SPACE_ID = 'default';
+
+/** Space-scoped names of the indices a world is seeded into (the workflows read `...-{{ workflow.spaceId }}`). */
+export const spaceIndexNames = (spaceId: string) =>
+  spaceId === DEFAULT_SPACE_ID
+    ? {
+        alertsIndex: AD2_ALERTS_INDEX,
+        attackIndex: FP_TP_ATTACK_ADHOC_INDEX,
+        entityReadAlias: FP_TP_ENTITY_READ_ALIAS,
+      }
+    : {
+        alertsIndex: `.alerts-security.alerts-${spaceId}`,
+        attackIndex: `.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`,
+        entityReadAlias: `entities-latest-${spaceId}`,
+      };
+
+/** The authored documents say `default`; a cell in another space must say its own, or the workflow's space filter drops them. */
+const inSpace = (source: Record<string, unknown>, spaceId: string): Record<string, unknown> =>
+  spaceId === DEFAULT_SPACE_ID ? source : { ...source, 'kibana.space_ids': [spaceId] };
+
+export const buildLiveSeedPlan = (
+  world: FpTpWorld,
+  now: Date = new Date(),
+  spaceId: string = DEFAULT_SPACE_ID
+): FpTpLiveSeedPlan => {
+  const { alertsIndex, attackIndex, entityReadAlias } = spaceIndexNames(spaceId);
   const shifted = shiftTwinToNow(world, now);
   const hostIds = new Set(
     [...shifted.alerts, ...shifted.events]
@@ -115,13 +145,18 @@ export const buildLiveSeedPlan = (world: FpTpWorld, now: Date = new Date()): FpT
   );
 
   return {
-    attackIndex: FP_TP_ATTACK_ADHOC_INDEX,
+    spaceId,
+    entityReadAlias,
+    alertsIndex,
+    attackIndex,
     attackId: shifted.attackId,
-    attackDocument: shifted.attack ? toAttackAlertDocument(shifted.attack) : undefined,
+    attackDocument: shifted.attack
+      ? inSpace(toAttackAlertDocument(shifted.attack), spaceId)
+      : undefined,
     alertIds: shifted.alerts.map((alert) => alert.id),
     alertOperations: shifted.alerts.flatMap((alert) => [
-      { index: { _index: AD2_ALERTS_INDEX, _id: alert.id } },
-      alert.source,
+      { index: { _index: alertsIndex, _id: alert.id } },
+      inSpace(alert.source, spaceId),
     ]),
     events: shifted.events.map(({ index, id }) => ({ index, id })),
     eventOperations: shifted.events.flatMap((event) => [
@@ -282,13 +317,14 @@ const createEntity = async (
 
 const writeIdentityFields = async (
   esClient: EsClient,
-  request: FpTpEntityCrudRequest
+  request: FpTpEntityCrudRequest,
+  entityReadAlias: string
 ): Promise<void> => {
   if (request.identityFields === undefined) {
     return;
   }
   const { updated } = await esClient.updateByQuery({
-    index: FP_TP_ENTITY_READ_ALIAS,
+    index: entityReadAlias,
     refresh: true,
     query: { term: { 'entity.id': request.entityId } },
     script: {
@@ -380,13 +416,14 @@ const ENTITIES_ON_HOSTS_PAGE_SIZE = 100;
 const deleteEntitiesOnHosts = async (
   esClient: EsClient,
   kbnRequest: FpTpLiveKbnRequest,
-  hostIds: readonly string[]
+  hostIds: readonly string[],
+  entityReadAlias: string
 ): Promise<void> => {
   if (hostIds.length === 0) {
     return;
   }
   const response = await esClient.search<{ entity?: { id?: string } }>({
-    index: FP_TP_ENTITY_READ_ALIAS,
+    index: entityReadAlias,
     ignore_unavailable: true,
     size: ENTITIES_ON_HOSTS_PAGE_SIZE,
     _source: ['entity.id'],
@@ -410,14 +447,14 @@ const cleanupLiveSeedPlan = async ({
   plan: FpTpLiveSeedPlan;
 }): Promise<void> => {
   await deleteDocumentsById(esClient, [
-    ...plan.alertIds.map((id) => ({ index: AD2_ALERTS_INDEX, id })),
+    ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
     ...plan.events,
     { index: plan.attackIndex, id: plan.attackId },
   ]);
   for (const entity of plan.entities) {
     await deleteEntity(kbnRequest, entity.entityId);
   }
-  await deleteEntitiesOnHosts(esClient, kbnRequest, plan.hostIds);
+  await deleteEntitiesOnHosts(esClient, kbnRequest, plan.hostIds, plan.entityReadAlias);
 };
 
 /**
@@ -431,15 +468,19 @@ export const seedFixture = async ({
   kbnRequest,
   world,
   now = new Date(),
+  spaceId = DEFAULT_SPACE_ID,
   onCleanupFailure,
 }: {
   esClient: EsClient;
+  /** Must already address `spaceId` (see `kbnRequestFromFetch`): the entity CRUD routes are per space. */
   kbnRequest: FpTpLiveKbnRequest;
   world: FpTpWorld;
   now?: Date;
+  /** Space the workflows under test run in. Documents, indices and entities are seeded for it. */
+  spaceId?: string;
   onCleanupFailure?: (cleanup: () => Promise<void>) => void;
 }): Promise<FpTpSeededFixture> => {
-  const plan = buildLiveSeedPlan(world, now);
+  const plan = buildLiveSeedPlan(world, now, spaceId);
   const cleanup = () => cleanupLiveSeedPlan({ esClient, kbnRequest, plan });
 
   try {
@@ -465,7 +506,7 @@ export const seedFixture = async ({
     }
     for (const entity of plan.entities) {
       await createEntity(kbnRequest, entity);
-      await writeIdentityFields(esClient, entity);
+      await writeIdentityFields(esClient, entity, plan.entityReadAlias);
     }
   } catch (error) {
     await cleanup().catch(() => onCleanupFailure?.(cleanup));
@@ -497,7 +538,7 @@ export const seedTwinLive = async ({
   for (const entity of plan.entities) {
     await deleteEntity(kbnRequest, entity.entityId);
   }
-  await deleteEntitiesOnHosts(esClient, kbnRequest, plan.hostIds);
+  await deleteEntitiesOnHosts(esClient, kbnRequest, plan.hostIds, plan.entityReadAlias);
 
   await seedFixture({ esClient, kbnRequest, world: twinToWorld(twin), now });
 

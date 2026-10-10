@@ -69,6 +69,40 @@ describe('buildLiveSeedPlan', () => {
   });
 });
 
+describe('buildLiveSeedPlan in a non-default space (G20)', () => {
+  const now = new Date('2026-09-17T16:00:00.000Z');
+  const world = twinToWorld(buildEncodedPowershellTwin('fp'));
+  const plan = buildLiveSeedPlan(world, now, 'sp1');
+
+  it('returns the space-suffixed indices and entity alias the workflows read', () => {
+    expect(plan.spaceId).toBe('sp1');
+    expect(plan.alertsIndex).toBe('.alerts-security.alerts-sp1');
+    expect(plan.attackIndex).toBe('.adhoc.alerts-security.attack.discovery.alerts-sp1');
+    expect(plan.entityReadAlias).toBe('entities-latest-sp1');
+  });
+
+  it('returns alert operations that target the space index and scope each alert to the space', () => {
+    expect(plan.alertOperations[0]).toEqual({
+      index: { _index: '.alerts-security.alerts-sp1', _id: plan.alertIds[0] },
+    });
+    const sources = plan.alertOperations.filter((_, i) => i % 2 === 1);
+    expect(sources.length).toBeGreaterThan(0);
+    for (const source of sources) expect(source['kibana.space_ids']).toEqual(['sp1']);
+  });
+
+  it('returns an attack document scoped to the space', () => {
+    expect(plan.attackDocument?.['kibana.space_ids']).toEqual(['sp1']);
+  });
+
+  it('keeps the default-space plan identical to the pre-G20 plan', () => {
+    const defaults = buildLiveSeedPlan(world, now);
+    expect(defaults.alertsIndex).toBe(AD2_ALERTS_INDEX);
+    expect(defaults.attackIndex).toBe(FP_TP_ATTACK_ADHOC_INDEX);
+    expect(defaults.entityReadAlias).toBe('entities-latest-default');
+    expect(defaults).toEqual(buildLiveSeedPlan(world, now, 'default'));
+  });
+});
+
 describe('cleanupManualSeedLive', () => {
   it('returns a delete-by-id query for leftover data-stream events', async () => {
     const deleteByQuery = jest.fn().mockResolvedValue({});
@@ -168,6 +202,32 @@ describe('seedFixture', () => {
       updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
+  });
+
+  it('seeds and cleans up through the space-scoped indices when run in a non-default space', async () => {
+    const { cleanup } = await seedFixture({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      world,
+      spaceId: 'sp1',
+    });
+    await cleanup();
+
+    const bulkedIndices = esClient.bulk.mock.calls.flatMap(([params]) =>
+      (params.operations as Array<Record<string, { _index?: string }>>)
+        .map((op) => (op.index ?? op.create)?._index)
+        .filter((i): i is string => i !== undefined)
+    );
+    expect(bulkedIndices).toContain('.alerts-security.alerts-sp1');
+    expect(bulkedIndices).not.toContain(AD2_ALERTS_INDEX);
+    const touched = JSON.stringify([
+      ...esClient.search.mock.calls,
+      ...esClient.updateByQuery.mock.calls,
+      ...esClient.deleteByQuery.mock.calls,
+      ...esClient.index.mock.calls,
+    ]);
+    expect(touched).not.toContain('entities-latest-default');
+    expect(touched).not.toContain(FP_TP_ATTACK_ADHOC_INDEX);
   });
 
   it('returns a cleanup that deletes the seeded Attack Discovery by id', async () => {

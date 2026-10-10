@@ -6,8 +6,14 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
-export default createPlaywrightEvalsConfig({
+
+const base = createPlaywrightEvalsConfig({
   testDir: './evals',
   // L3 waits up to 17 minutes for the child workflow; the 5 minute default aborts it first.
   timeout: 30 * 60_000,
 });
+
+// Measurement-only (kanban t_46cb6525, not for merge): `EVAL_REPETITIONS` re-scores ONE
+// observed workflow output (report_action_safety.ts), so it cannot yield independent
+// analyses. `repeatEach` re-runs the whole seed -> sweep -> analysis path per repetition.
+export default { ...base, repeatEach: Number(process.env.EVAL_REPEAT_EACH || 3) };

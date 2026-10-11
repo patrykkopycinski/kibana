@@ -255,7 +255,7 @@ const C: EndpointFixture = {
   iocs: {
     expected: {
       malicious_commands: ['rundll32.exe C:\\Users\\Public\\update.dll,DllMain'],
-      ips: [AFFECTED_REGION],
+      ips: [C2_DESTINATION_IP],
       file_paths: ['update.dll'],
     },
     forbidden: ['C:\\Windows\\splwow64.exe 12288', 'C:\\Windows\\splwow64.exe'],

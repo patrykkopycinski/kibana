@@ -150,7 +150,7 @@ describe('mutation pairs: break the derivation input -> red, restore -> green', 
     const red = scoreIocsCorrect(t.output, reference);
     expect(red.score).toBe(0);
     expect(red.explanation).toBe(
-      'forbidden reported, absent from this fixture\'s telemetry (fabrication): file_paths:C:\\Windows\\splwow64.exe'
+      "forbidden reported, absent from this fixture's telemetry (fabrication): file_paths:C:\\Windows\\splwow64.exe"
     );
     paths.pop();
     expect(scoreIocsCorrect(t.output, reference).score).toBe(1);

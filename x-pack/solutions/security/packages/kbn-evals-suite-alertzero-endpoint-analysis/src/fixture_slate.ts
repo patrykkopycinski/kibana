@@ -339,8 +339,9 @@ export const seededTelemetryTokens = (fixture: EndpointFixture): readonly string
     normalizeToken(event.image),
     normalizeToken(event.commandLine),
     ...(event.network
-      ? [normalizeToken(event.network.destinationIp), normalizeToken(event.network.destinationDomain ?? '')].filter(
-          Boolean
-        )
+      ? [
+          normalizeToken(event.network.destinationIp),
+          normalizeToken(event.network.destinationDomain ?? ''),
+        ].filter(Boolean)
       : []),
   ]);

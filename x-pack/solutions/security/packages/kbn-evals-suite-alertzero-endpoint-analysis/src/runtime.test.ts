@@ -48,7 +48,14 @@ interface IndexedDocument {
   index: string;
   id?: string;
   document: Record<string, unknown> & {
-    process?: { command_line?: string };
+    process?: {
+      name?: string;
+      command_line?: string;
+      parent?: { name: string; entity_id: string };
+    };
+    host?: { name?: string };
+    event?: { category?: string[] };
+    destination?: { ip?: string; domain?: string };
     attributes?: { attack_discovery_alert_id?: string };
   };
 }
@@ -585,9 +592,7 @@ describe('seedAlertZeroEndpoint', () => {
         if (event.network) {
           expect(document.destination).toEqual({
             ip: event.network.destinationIp,
-            ...(event.network.destinationDomain
-              ? { domain: event.network.destinationDomain }
-              : {}),
+            ...(event.network.destinationDomain ? { domain: event.network.destinationDomain } : {}),
           });
           expect(document.event?.category).toEqual(['network']);
         } else {
@@ -615,13 +620,8 @@ describe('seedAlertZeroEndpoint', () => {
       'vssadmin.exe',
       'cmd.exe',
     ]);
-    expect(parents.map((parent: { entity_id: string }) => parent.entity_id)).toEqual([
-      'root',
-      ids[0],
-      ids[1],
-      ids[1],
-    ]);
-    expect(parents.map((parent: { name: string }) => parent.name)).toEqual([
+    expect(parents.map((parent) => parent?.entity_id)).toEqual(['root', ids[0], ids[1], ids[1]]);
+    expect(parents.map((parent) => parent?.name)).toEqual([
       'explorer.exe',
       'WINWORD.EXE',
       'powershell.exe',

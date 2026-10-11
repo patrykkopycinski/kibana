@@ -35,6 +35,22 @@ import {
 import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
 
 /**
+ * The strict evidence contract needs the fixture's malicious command. `seedAlertZeroEndpoint`
+ * leaves it undefined on a benign fixture (there is none), so narrowing here turns a wiring
+ * mistake — the strict assertion called on a benign arm — into a loud failure, not a vacuous
+ * `includes(undefined)`.
+ */
+const withMaliciousCommand = <T extends { command: string | undefined; fixtureId: string }>(
+  fixture: T
+): T & { command: string } => {
+  assert(
+    fixture.command,
+    `${fixture.fixtureId}: the strict evidence assertion needs a malicious command; this fixture has none`
+  );
+  return fixture as T & { command: string };
+};
+
+/**
  * Seed one fixture from the slate, run the production worker sweep, wait for the child analysis
  * and report the option-B scores for it (kanban t_7d35f4a9).
  *
@@ -59,7 +75,7 @@ const runFixtureArm = async (
     esClient: Parameters<typeof seedAlertZeroEndpoint>[0];
     traceEsClient: Parameters<typeof readAgentToolCallsFromTraces>[0]['traceEsClient'];
     fetch: Parameters<typeof seedAlertZeroEndpoint>[1];
-    log: Parameters<typeof reportVerdictReference>[0]['log'];
+    log: Parameters<typeof readAgentToolCallsFromTraces>[0]['log'];
     connector: { id: string };
     executorClient: Parameters<typeof reportVerdictReference>[0]['executorClient'];
   },
@@ -148,7 +164,7 @@ const runFixtureArm = async (
       structuredOutput,
     });
     if (fixture.conclusive) {
-      assertAnalysisExecution(child.stepExecutions, fixture);
+      assertAnalysisExecution(child.stepExecutions, withMaliciousCommand(fixture));
       for (const stepId of ['attach_timeline', 'attach_iocs']) {
         assert(
           child.stepExecutions.some(
@@ -306,7 +322,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
           structuredOutput: (analysisAgent?.output as { structured_output?: unknown } | undefined)
             ?.structured_output,
         });
-        assertAnalysisExecution(child.stepExecutions, fixture);
+        assertAnalysisExecution(child.stepExecutions, withMaliciousCommand(fixture));
         for (const stepId of ['attach_timeline', 'attach_iocs']) {
           assert(
             child.stepExecutions.some(
@@ -373,7 +389,9 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       try {
         // Same host shape as the malicious fixture, but a benign process tree: the
         // action-safety check must treat any disruptive proposal as a violation.
-        const fixture = await seedAlertZeroEndpoint(esClient, fetch, { conclusive: false });
+        const fixture = await seedAlertZeroEndpoint(esClient, fetch, {
+          fixtureId: 'L2b benign fixture',
+        });
         seededFixture = fixture;
         const sweepId = await runtime.run(workerWorkflowId, {
           ai_index_id: fixture.aiIndexId,
@@ -452,7 +470,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;
       try {
         const fixture = await seedAlertZeroEndpoint(esClient, fetch, {
-          conclusive: false,
+          fixtureId: 'L2b benign fixture',
           kiReason: 'Encoded PowerShell launched by document process',
         });
         seededFixture = fixture;
@@ -574,10 +592,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
     evaluate(
       `${fixtureId}: derived verdict on seeded ground truth`,
       async ({ esClient, traceEsClient, fetch, log, connector, executorClient }) =>
-        runFixtureArm(
-          { esClient, traceEsClient, fetch, log, connector, executorClient },
-          fixtureId
-        )
+        runFixtureArm({ esClient, traceEsClient, fetch, log, connector, executorClient }, fixtureId)
     );
   }
 });

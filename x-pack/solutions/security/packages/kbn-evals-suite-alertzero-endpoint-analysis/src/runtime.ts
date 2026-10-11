@@ -36,11 +36,7 @@ import {
   proposalWorkflowId,
   gateWorkflowId,
 } from './contracts';
-import {
-  ENDPOINT_FIXTURES,
-  fixtureById,
-  type EndpointFixture,
-} from './fixture_slate';
+import { ENDPOINT_FIXTURES, fixtureById, type EndpointFixture } from './fixture_slate';
 
 const workflowHeaders = { 'elastic-api-version': '2023-10-31', 'kbn-xsrf': 'true' };
 

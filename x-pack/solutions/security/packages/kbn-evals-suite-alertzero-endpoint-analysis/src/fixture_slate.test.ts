@@ -45,16 +45,18 @@ describe('endpoint fixture slate', () => {
   it('keeps the two original fixtures byte-identical to the measured slate', () => {
     // Comparability guard: the L2/L3 and L2b trees are what commit c21e2bc6 measured, so a
     // change here silently invalidates every number published against it.
-    expect(ENDPOINT_FIXTURES[0].events.map(({ image, commandLine }) => `${image}|${commandLine}`))
-      .toEqual([
-        'WINWORD.EXE|WINWORD.EXE invoice.docm',
-        'powershell.exe|powershell.exe -EncodedCommand SQBFAFgA',
-      ]);
-    expect(ENDPOINT_FIXTURES[1].events.map(({ image, commandLine }) => `${image}|${commandLine}`))
-      .toEqual([
-        'WINWORD.EXE|WINWORD.EXE invoice.docx',
-        'splwow64.exe|C:\\Windows\\splwow64.exe 12288',
-      ]);
+    expect(
+      ENDPOINT_FIXTURES[0].events.map(({ image, commandLine }) => `${image}|${commandLine}`)
+    ).toEqual([
+      'WINWORD.EXE|WINWORD.EXE invoice.docm',
+      'powershell.exe|powershell.exe -EncodedCommand SQBFAFgA',
+    ]);
+    expect(
+      ENDPOINT_FIXTURES[1].events.map(({ image, commandLine }) => `${image}|${commandLine}`)
+    ).toEqual([
+      'WINWORD.EXE|WINWORD.EXE invoice.docx',
+      'splwow64.exe|C:\\Windows\\splwow64.exe 12288',
+    ]);
   });
 
   it('never forbids a value the fixture itself seeds', () => {
@@ -70,9 +72,9 @@ describe('endpoint fixture slate', () => {
     }
     for (const reference of FIXTURE_VERDICT_REFERENCES) {
       const seeded = reference.seededTelemetryTokens.map(normalize);
-      expect(
-        reference.forbiddenIocs.filter((value) => seeded.includes(normalize(value)))
-      ).toEqual([]);
+      expect(reference.forbiddenIocs.filter((value) => seeded.includes(normalize(value)))).toEqual(
+        []
+      );
     }
   });
 

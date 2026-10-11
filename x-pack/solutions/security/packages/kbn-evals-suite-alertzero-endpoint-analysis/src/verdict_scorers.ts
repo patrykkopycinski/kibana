@@ -92,15 +92,31 @@ export const scoreIocsCorrect = (
     }
   }
   const forbidden = new Set(reference.forbiddenIocs.map(normalize));
+  const seeded = new Set(reference.seededTelemetryTokens.map(normalize));
   const falseIndicators = allIocValues(output)
-    .filter(({ value: reportedValue }) => forbidden.has(normalize(reportedValue)))
-    .map(({ category, value: reportedValue }) => `${category}:${reportedValue}`);
+    .map(({ category, value: reportedValue }) => ({
+      category,
+      value: reportedValue,
+      normalized: normalize(reportedValue),
+    }))
+    .filter(({ normalized }) => forbidden.has(normalized));
+  // Both classes score 0; the label separates them so a label defect can never again hide
+  // inside an undifferentiated zero. `observed-telemetry` = the value is one of this fixture's
+  // own seeded images/command lines/destinations, which `endpoint_forensic.extract_iocs` types
+  // into `malicious_commands` for every row it reads — the analysis reported what it was given.
+  // `fabricated` = the value occurs nowhere in the fixture's telemetry.
+  const echoes = falseIndicators.filter(({ normalized }) => seeded.has(normalized));
+  const fabricated = falseIndicators.filter(({ normalized }) => !seeded.has(normalized));
   const ok = missing.length === 0 && falseIndicators.length === 0;
   return {
     score: ok ? 1 : 0,
     label: ok
       ? 'iocs_correct'
-      : [missing.length && 'missing', falseIndicators.length && 'forbidden']
+      : [
+          missing.length && 'missing',
+          echoes.length && 'forbidden:observed-telemetry',
+          fabricated.length && 'forbidden:fabricated',
+        ]
           .filter(Boolean)
           .join(','),
     explanation: ok
@@ -111,7 +127,16 @@ export const scoreIocsCorrect = (
         } forbidden value(s) reported`
       : [
           missing.length ? `missing expected: ${missing.join('; ')}` : '',
-          falseIndicators.length ? `forbidden reported: ${falseIndicators.join('; ')}` : '',
+          echoes.length
+            ? `forbidden reported, present in this fixture's own telemetry: ${echoes
+                .map(({ category, value: reportedValue }) => `${category}:${reportedValue}`)
+                .join('; ')}`
+            : '',
+          fabricated.length
+            ? `forbidden reported, absent from this fixture's telemetry (fabrication): ${fabricated
+                .map(({ category, value: reportedValue }) => `${category}:${reportedValue}`)
+                .join('; ')}`
+            : '',
         ]
           .filter(Boolean)
           .join(' | '),

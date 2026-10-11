@@ -23,6 +23,7 @@ import {
   seedAlertZeroEndpoint,
 } from '../src/runtime';
 import { assertActionSafety } from '../src/action_safety';
+import { fixtureById } from '../src/fixture_slate';
 import { reportActionSafety } from '../src/report_action_safety';
 import { reportVerdictReference } from '../src/report_verdict_reference';
 import {
@@ -32,6 +33,164 @@ import {
   assertPersistedProposal,
 } from '../src/assertions';
 import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
+
+/**
+ * Seed one fixture from the slate, run the production worker sweep, wait for the child analysis
+ * and report the option-B scores for it (kanban t_7d35f4a9).
+ *
+ * L2/L3, L2b and L2c keep their own bodies: they are the arms every published number was
+ * measured on, and re-pointing them at a shared helper would change the measured path without
+ * changing a single label. The A–D arms below are new, so they share one body.
+ *
+ * Malicious fixtures additionally assert the strict evidence contract (`assertAnalysisExecution`)
+ * before reporting anything, exactly as L2/L3 does — a schema or evidence breach must be loud,
+ * never a silent 0. Benign fixtures only assert the action-safety contract: the evidence
+ * assertions demand malicious IoCs a clean host cannot produce.
+ */
+const runFixtureArm = async (
+  {
+    esClient,
+    traceEsClient,
+    fetch,
+    log,
+    connector,
+    executorClient,
+  }: {
+    esClient: Parameters<typeof seedAlertZeroEndpoint>[0];
+    traceEsClient: Parameters<typeof readAgentToolCallsFromTraces>[0]['traceEsClient'];
+    fetch: Parameters<typeof seedAlertZeroEndpoint>[1];
+    log: Parameters<typeof reportVerdictReference>[0]['log'];
+    connector: { id: string };
+    executorClient: Parameters<typeof reportVerdictReference>[0]['executorClient'];
+  },
+  fixtureId: string
+) => {
+  const slate = fixtureById(fixtureId);
+  const runtime = new AlertZeroRuntime(fetch);
+  const restoreInference = await installWorkerAndPinConnector(
+    runtime,
+    fetch,
+    workerWorkflowId,
+    connector.id
+  );
+  let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;
+  try {
+    const fixture = await seedAlertZeroEndpoint(esClient, fetch, { fixtureId });
+    seededFixture = fixture;
+    // The process events must be searchable on the fixture's own host before the sweep runs; the
+    // connection event lives in the network stream, so it is asserted there instead.
+    const processIndexes = slate.events
+      .map((event, index) => (event.network ? undefined : index))
+      .filter((index): index is number => index !== undefined);
+    const seeded = await esClient.search<{ event: { id: string } }>({
+      index: fixture.index,
+      query: { term: { 'host.name': fixture.host } },
+      size: 10,
+    });
+    assert.deepEqual(
+      seeded.hits.hits.map((hit) => hit._source?.event.id).sort(),
+      processIndexes.map((index) => fixture.eventIds[index]).sort()
+    );
+    if (slate.events.some((event) => event.network)) {
+      const network = await esClient.search<{ event: { id: string } }>({
+        index: fixture.networkIndex,
+        query: { term: { 'host.name': fixture.host } },
+        size: 10,
+      });
+      assert.equal(
+        network.hits.hits.length,
+        1,
+        `${fixtureId}: the declared connection event was not seeded, so its ips expectation is unreachable`
+      );
+    }
+    const sweepId = await runtime.run(workerWorkflowId, {
+      ai_index_id: fixture.aiIndexId,
+      batch_size: 1,
+    });
+    const sweep = await runtime.wait(
+      sweepId,
+      (execution) => execution.status === ExecutionStatus.COMPLETED
+    );
+    const dispatched = sweep.stepExecutions.find((step) => step.stepId === 'start_run');
+    assert.equal(dispatched?.status, ExecutionStatus.COMPLETED);
+    const output = dispatched?.output as { executionId?: string } | undefined;
+    assert(output?.executionId, 'Sweep did not persist a child execution id');
+    runtime.executionIds.add(output.executionId);
+    const child = await runtime.wait(
+      output.executionId,
+      (execution) =>
+        execution.stepExecutions.some(
+          (step) => step.stepId === 'attach_iocs' && step.status === ExecutionStatus.COMPLETED
+        ),
+      1_020_000
+    );
+    assert.equal(child.workflowId, analysisWorkflowId);
+    const agent = child.stepExecutions.find(
+      (step) => step.stepId === 'forensic_analysis' && step.stepType === 'ai.agent'
+    );
+    const structuredOutput = (agent?.output as { structured_output?: unknown } | undefined)
+      ?.structured_output;
+    // Report before asserting, so a failing case still carries its score and a green run proves
+    // the evaluators ran (same order as L2/L3 and L2b).
+    await reportActionSafety({
+      executorClient,
+      log,
+      caseName: fixtureId,
+      structuredOutput,
+      context: { endpointIds: [fixture.endpointId], conclusive: fixture.conclusive },
+    });
+    await reportVerdictReference({
+      executorClient,
+      log,
+      caseName: fixtureId,
+      fixtureId,
+      scoringArm: 'measurement',
+      structuredOutput,
+    });
+    if (fixture.conclusive) {
+      assertAnalysisExecution(child.stepExecutions, fixture);
+      for (const stepId of ['attach_timeline', 'attach_iocs']) {
+        assert(
+          child.stepExecutions.some(
+            (step) => step.stepId === stepId && step.status === ExecutionStatus.COMPLETED
+          ),
+          `Missing real ${stepId}`
+        );
+      }
+      const conversationIds = extractAgentConversationIds(child.stepExecutions).map(
+        (entry) => entry.conversationId
+      );
+      // Production runs this agent with `create-conversation: false`: no conversation id exists
+      // to join agent spans on, so the trace check applies only when one is emitted.
+      if (conversationIds.length > 0) {
+        const calls = await readAgentToolCallsFromTraces({
+          traceEsClient,
+          conversationIds,
+          log,
+          includeFailures: true,
+        });
+        assert(
+          !calls.unavailable &&
+            calls.toolCallIds.some((toolId) => toolId.startsWith('security.endpoint_forensic.')),
+          'No endpoint analysis agent tool trace'
+        );
+      }
+    } else {
+      assert(agent?.status === 'completed', 'Benign analysis agent did not complete');
+    }
+    assertActionSafety(structuredOutput, {
+      endpointIds: [fixture.endpointId],
+      conclusive: fixture.conclusive,
+    });
+  } finally {
+    await runAllCleanups([
+      () => runtime.cancelAll(),
+      () => runtime.restoreWorker(),
+      async () => seededFixture?.cleanup(),
+      restoreInference,
+    ]);
+  }
+};
 
 evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.classic }, () => {
   evaluate('L1 endpoint forensic skill routing', async ({ esClient, agentBuilderClient }) => {
@@ -402,4 +561,23 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       });
     }
   });
+
+  // A–D from the t_6f302bf4 §5 slate (kanban t_7d35f4a9). One arm per fixture, all sharing
+  // `runFixtureArm`; each seeds a DIFFERENT process tree, so the derived-verdict estimate stops
+  // being a two-scenario coin flip. E is deliberately not seeded — see src/fixture_slate.ts.
+  for (const fixtureId of [
+    'A malicious WMI process creation',
+    'B malicious shadow-copy destruction',
+    'C malicious signed-binary C2',
+    'D benign admin script housekeeping',
+  ]) {
+    evaluate(
+      `${fixtureId}: derived verdict on seeded ground truth`,
+      async ({ esClient, traceEsClient, fetch, log, connector, executorClient }) =>
+        runFixtureArm(
+          { esClient, traceEsClient, fetch, log, connector, executorClient },
+          fixtureId
+        )
+    );
+  }
 });

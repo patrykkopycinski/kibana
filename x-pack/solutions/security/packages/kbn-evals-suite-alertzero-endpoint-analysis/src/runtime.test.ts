@@ -18,6 +18,7 @@ import {
   runAllCleanups,
   seedAlertZeroEndpoint,
 } from './runtime';
+import { ENDPOINT_FIXTURES } from './fixture_slate';
 import { ExecutionStatus } from '@kbn/workflows';
 
 const createEs = () => {
@@ -452,7 +453,7 @@ describe('seedAlertZeroEndpoint', () => {
 
     expect(es.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
-        index_patterns: [fixture.index],
+        index_patterns: expect.arrayContaining([fixture.index]),
         data_stream: {},
       })
     );
@@ -510,16 +511,16 @@ describe('seedAlertZeroEndpoint', () => {
     // The production writer (action_handoff_to_forensics.yaml) never writes
     // `attributes.reason`; frozen transcripts showed the analysis quoting this eval-only
     // annotation, so the measurement fixtures must not carry it (kanban t_46cb6525).
-    for (const conclusive of [true, false]) {
+    for (const fixtureId of ['L2/L3 malicious fixture', 'L2b benign fixture']) {
       const es = createEs();
-      const fixture = await seedAlertZeroEndpoint(es, createFetch(), { conclusive });
+      const fixture = await seedAlertZeroEndpoint(es, createFetch(), { fixtureId });
       const ki = indexed(es).find(({ id }) => id === fixture.kiId);
       expect(ki?.document.attributes).toBeDefined();
       expect(ki?.document.attributes).not.toHaveProperty('reason');
     }
     const es = createEs();
     const fixture = await seedAlertZeroEndpoint(es, createFetch(), {
-      conclusive: false,
+      fixtureId: 'L2b benign fixture',
       kiReason: 'inverted',
     });
     const ki = indexed(es).find(({ id }) => id === fixture.kiId);
@@ -555,6 +556,99 @@ describe('seedAlertZeroEndpoint', () => {
     const seededCommandLines = indexed(es).map(({ document }) => document.process?.command_line);
     expect(seededCommandLines).toContain(fixture.command);
     expect(fixture.command).not.toBe('EncodedCommand');
+  });
+
+  it('seeds exactly the declared process tree for every fixture in the slate', async () => {
+    for (const slate of ENDPOINT_FIXTURES) {
+      const es = createEs();
+      const fixture = await seedAlertZeroEndpoint(es, createFetch(), { fixtureId: slate.id });
+      const documents = indexed(es).filter(
+        ({ index }) => index === fixture.index || index === fixture.networkIndex
+      );
+      expect({ fixture: slate.id, n: documents.length }).toEqual({
+        fixture: slate.id,
+        n: slate.events.length,
+      });
+      // One document per declared event, in order: image + command line verbatim, on the
+      // fixture's own host, and (for a connection) the declared destination.
+      expect(documents.map(({ document }) => document.process?.name)).toEqual(
+        slate.events.map(({ image }) => image)
+      );
+      expect(documents.map(({ document }) => document.process?.command_line)).toEqual(
+        slate.events.map(({ commandLine }) => commandLine)
+      );
+      for (const { document } of documents) {
+        expect(document.host?.name).toBe(fixture.host);
+      }
+      slate.events.forEach((event, i) => {
+        const document = documents[i].document;
+        if (event.network) {
+          expect(document.destination).toEqual({
+            ip: event.network.destinationIp,
+            ...(event.network.destinationDomain
+              ? { domain: event.network.destinationDomain }
+              : {}),
+          });
+          expect(document.event?.category).toEqual(['network']);
+        } else {
+          expect(document.destination).toBeUndefined();
+          expect(document.event?.category).toEqual(['process']);
+        }
+      });
+    }
+  });
+
+  it('points each child at the process that actually spawned it', async () => {
+    // On a four-event chain the old `i ? eventIds[0] : 'root'` rule claimed vssadmin.exe was
+    // spawned by WINWORD.EXE; the parent must be the closest preceding event with that image.
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch(), {
+      fixtureId: 'B malicious shadow-copy destruction',
+    });
+    const documents = indexed(es).filter(({ index }) => index === fixture.index);
+    const ids = documents.map(({ id }) => id);
+    const parents = documents.map(({ document }) => document.process?.parent);
+
+    expect(documents.map(({ document }) => document.process?.name)).toEqual([
+      'WINWORD.EXE',
+      'powershell.exe',
+      'vssadmin.exe',
+      'cmd.exe',
+    ]);
+    expect(parents.map((parent: { entity_id: string }) => parent.entity_id)).toEqual([
+      'root',
+      ids[0],
+      ids[1],
+      ids[1],
+    ]);
+    expect(parents.map((parent: { name: string }) => parent.name)).toEqual([
+      'explorer.exe',
+      'WINWORD.EXE',
+      'powershell.exe',
+      'powershell.exe',
+    ]);
+  });
+
+  it('gives every fixture its own data streams, so one fixture cannot see another', async () => {
+    const es = createEs();
+    const a = await seedAlertZeroEndpoint(es, createFetch(), {
+      fixtureId: 'A malicious WMI process creation',
+    });
+    const c = await seedAlertZeroEndpoint(es, createFetch(), {
+      fixtureId: 'C malicious signed-binary C2',
+    });
+    expect(a.index).not.toBe(c.index);
+    expect(a.networkIndex).not.toBe(c.networkIndex);
+    // Only the fixture that declares a connection creates a network data stream.
+    expect(es.indices.createDataStream).toHaveBeenCalledWith({ name: a.index });
+    expect(es.indices.createDataStream).not.toHaveBeenCalledWith({ name: a.networkIndex });
+    expect(es.indices.createDataStream).toHaveBeenCalledWith({ name: c.networkIndex });
+  });
+
+  it('rejects an unknown fixture id instead of seeding a default tree', async () => {
+    await expect(
+      seedAlertZeroEndpoint(createEs(), createFetch(), { fixtureId: 'Z nowhere' })
+    ).rejects.toThrow(/Unknown endpoint fixture/);
   });
 
   it('creates the investigation conversation as public so the workflow service account can read it', async () => {

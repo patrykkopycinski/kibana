@@ -61,12 +61,32 @@ describe('derived verdict (option B) on frozen transcripts', () => {
       label: 'derived:malicious truth:benign',
     });
     expect(scores.IoCsCorrect.score).toBe(0);
+    expect(scores.IoCsCorrect.label).toBe('forbidden:observed-telemetry');
     expect(scores.IoCsCorrect.explanation).toContain('forbidden reported');
     expect(scores.IoCsCorrect.explanation).toContain('splwow64.exe 12288');
     expect(scores.NoFalsePositiveAttribution).toMatchObject({
       score: 0,
       label: 'false_positive_attribution',
     });
+  });
+
+  it('separates a fixture-seeded echo from a fabrication in the IoCsCorrect label', () => {
+    // Both classes are 0. The label is what tells a reader whether the analysis over-reported
+    // telemetry the tool handed it (`observed-telemetry`) or invented an indicator the fixture
+    // does not contain anywhere (`fabricated`) — the distinction the L2b column used to lose.
+    const echo = BEN_WRONG();
+    const echoScores = scoreIocsCorrect(echo.output, requireReference(FIXTURE.L2b));
+    expect(echoScores).toMatchObject({ score: 0, label: 'forbidden:observed-telemetry' });
+
+    const fabricated = MAL_OK();
+    const reference = requireReference(FIXTURE['L2/L3']);
+    const iocs = fabricated.output.iocs as Record<string, Array<{ value: string }>>;
+    // splwow64 is NOT anywhere in the L2/L3 telemetry (it belongs to the benign fixture), so
+    // naming it here is a fabrication rather than an echo.
+    iocs.file_paths = [...(iocs.file_paths ?? []), { value: 'C:\\Windows\\splwow64.exe' }];
+    const fabricatedScores = scoreIocsCorrect(fabricated.output, reference);
+    expect(fabricatedScores).toMatchObject({ score: 0, label: 'forbidden:fabricated' });
+    expect(fabricatedScores.explanation).toContain('fabrication');
   });
 
   it('agrees with ActionSafety on every frozen transcript where the derived verdict decides it', () => {
@@ -111,7 +131,9 @@ describe('mutation pairs: break the derivation input -> red, restore -> green', 
     paths.push({ value: 'C:\\Windows\\splwow64.exe', comment: 'mutant' });
     const red = scoreIocsCorrect(t.output, reference);
     expect(red.score).toBe(0);
-    expect(red.explanation).toBe('forbidden reported: file_paths:C:\\Windows\\splwow64.exe');
+    expect(red.explanation).toBe(
+      'forbidden reported, absent from this fixture\'s telemetry (fabrication): file_paths:C:\\Windows\\splwow64.exe'
+    );
     paths.pop();
     expect(scoreIocsCorrect(t.output, reference).score).toBe(1);
   });
@@ -183,8 +205,10 @@ describe('instrument controls', () => {
   });
 
   it('refuses an unseeded design-slate fixture instead of scoring it', () => {
+    // A–D are seeded now, so the refusal is exercised through `assertSeeded` with a well-formed
+    // proposal (see fixture_slate.test.ts) rather than through a slate entry.
     expect(() => requireReference('A proposed: Office macro -> WMI lateral movement')).toThrow(
-      /cannot be scored/
+      /No verdict reference/
     );
     expect(() => requireReference('no such fixture')).toThrow(/No verdict reference/);
   });

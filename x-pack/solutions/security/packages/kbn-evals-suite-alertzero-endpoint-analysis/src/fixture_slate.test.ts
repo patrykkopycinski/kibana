@@ -76,6 +76,19 @@ describe('endpoint fixture slate', () => {
     }
   });
 
+  it('never forbids a timeline marker the fixture own telemetry contains', () => {
+    // Same contradiction on the timeline side: EvidenceCoverage matches forbidden markers by
+    // case-insensitive substring, so a marker contained in any seeded command line fails every
+    // reconstruction that describes the telemetry accurately.
+    for (const fixture of ENDPOINT_FIXTURES) {
+      const telemetry = fixture.events.map((event) => normalize(event.commandLine));
+      const own = fixture.timeline.forbidden.filter((marker) =>
+        telemetry.some((line) => line.includes(normalize(marker)))
+      );
+      expect({ fixture: fixture.id, own }).toEqual({ fixture: fixture.id, own: [] });
+    }
+  });
+
   it('gates malicious fixtures on evidence and keeps benign fixtures free of required markers', () => {
     for (const fixture of ENDPOINT_FIXTURES) {
       const required = Object.values(fixture.iocs.expected).flat().length;

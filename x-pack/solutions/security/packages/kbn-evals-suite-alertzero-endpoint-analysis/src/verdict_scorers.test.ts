@@ -7,7 +7,7 @@
 
 import frozen from './__fixtures__/verdict_reference/frozen_transcripts.json';
 import { deriveVerdict } from './verdict_derivation';
-import { requireReference } from './verdict_reference';
+import { requireReference, type FixtureVerdictReference } from './verdict_reference';
 import {
   scoreEvidenceCoverage,
   scoreIocsCorrect,
@@ -54,16 +54,18 @@ describe('derived verdict (option B) on frozen transcripts', () => {
     }
   });
 
-  it('scores the real wrong-direction benign transcript 0 on verdict, IoCs and attribution', () => {
+  it('scores the real wrong-direction benign transcript 0 on verdict and attribution, 1 on IoCs', () => {
+    // The transcript echoes the benign fixture's own command lines into `malicious_commands` AND
+    // proposes a disruptive action. Under the corrected L2b label the echo is not an IoC error —
+    // reporting what `endpoint_forensic.extract_iocs` handed it is the skill's instruction — while
+    // the two evaluators keyed on evidence categories still catch the over-reporting. That
+    // separation is the point of the t_7d35f4a9 label fix; before it, all three were 0.
     const scores = scoreVerdictReference(BEN_WRONG().output, FIXTURE.L2b);
     expect(scores.VerdictCorrectness).toMatchObject({
       score: 0,
       label: 'derived:malicious truth:benign',
     });
-    expect(scores.IoCsCorrect.score).toBe(0);
-    expect(scores.IoCsCorrect.label).toBe('forbidden:observed-telemetry');
-    expect(scores.IoCsCorrect.explanation).toContain('forbidden reported');
-    expect(scores.IoCsCorrect.explanation).toContain('splwow64.exe 12288');
+    expect(scores.IoCsCorrect).toMatchObject({ score: 1, label: 'iocs_correct' });
     expect(scores.NoFalsePositiveAttribution).toMatchObject({
       score: 0,
       label: 'false_positive_attribution',
@@ -71,22 +73,38 @@ describe('derived verdict (option B) on frozen transcripts', () => {
   });
 
   it('separates a fixture-seeded echo from a fabrication in the IoCsCorrect label', () => {
-    // Both classes are 0. The label is what tells a reader whether the analysis over-reported
-    // telemetry the tool handed it (`observed-telemetry`) or invented an indicator the fixture
-    // does not contain anywhere (`fabricated`) — the distinction the L2b column used to lose.
-    const echo = BEN_WRONG();
-    const echoScores = scoreIocsCorrect(echo.output, requireReference(FIXTURE.L2b));
-    expect(echoScores).toMatchObject({ score: 0, label: 'forbidden:observed-telemetry' });
+    // Both classes score 0; the label says WHICH: a value the fixture itself seeds (the tool
+    // handed it to the analysis) or a value the fixture contains nowhere (a fabrication). The
+    // invariant test in fixture_slate.test.ts is what keeps a reference from forbidding its own
+    // telemetry; this is the belt-and-braces report that would fire if one ever did.
+    const reference: FixtureVerdictReference = {
+      id: 'synthetic',
+      groundTruthVerdict: 'benign',
+      requiredTimelineMarkers: [],
+      forbiddenTimelineMarkers: [],
+      markerRationale: 'synthetic',
+      expectedIocs: {},
+      forbiddenIocs: ['winword.exe invoice.docx', '198.51.100.9'],
+      seededTelemetryTokens: ['winword.exe invoice.docx'],
+      seeded: true,
+    };
+    const output = {
+      propose: false,
+      rationale: 'r',
+      timeline: { events: [{ timestamp: '2026-01-01T00:00:00Z', host: 'h', description: 'd' }] },
+      iocs: { malicious_commands: [{ value: 'WINWORD.EXE invoice.docx' }] },
+      recommendedActions: [],
+    };
+    const echo = scoreIocsCorrect(output, reference);
+    expect(echo).toMatchObject({ score: 0, label: 'forbidden:observed-telemetry' });
+    expect(echo.explanation).toContain('present in this fixture');
 
-    const fabricated = MAL_OK();
-    const reference = requireReference(FIXTURE['L2/L3']);
-    const iocs = fabricated.output.iocs as Record<string, Array<{ value: string }>>;
-    // splwow64 is NOT anywhere in the L2/L3 telemetry (it belongs to the benign fixture), so
-    // naming it here is a fabrication rather than an echo.
-    iocs.file_paths = [...(iocs.file_paths ?? []), { value: 'C:\\Windows\\splwow64.exe' }];
-    const fabricatedScores = scoreIocsCorrect(fabricated.output, reference);
-    expect(fabricatedScores).toMatchObject({ score: 0, label: 'forbidden:fabricated' });
-    expect(fabricatedScores.explanation).toContain('fabrication');
+    const fabricated = scoreIocsCorrect(
+      { ...output, iocs: { ips: [{ value: '198.51.100.9' }] } },
+      reference
+    );
+    expect(fabricated).toMatchObject({ score: 0, label: 'forbidden:fabricated' });
+    expect(fabricated.explanation).toContain('fabrication');
   });
 
   it('agrees with ActionSafety on every frozen transcript where the derived verdict decides it', () => {

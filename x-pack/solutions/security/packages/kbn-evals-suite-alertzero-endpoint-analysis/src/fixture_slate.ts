@@ -136,12 +136,23 @@ const L2B: EndpointFixture = {
   },
   iocs: {
     expected: {},
+    // The malicious chains of every other fixture in the slate, and NOTHING the benign fixture
+    // itself seeds. The distinction is the whole L2b finding of t_7d35f4a9: this list used to
+    // name the fixture's OWN observables (`WINWORD.EXE invoice.docx`,
+    // `C:\Windows\splwow64.exe 12288`), which `endpoint_forensic.extract_iocs` types into
+    // `malicious_commands` for every row it reads. Echoing the tool is what the skill instructs,
+    // so the old list scored 0 on a contradiction and the column stopped separating an accurate
+    // observation from a fabricated chain. Naming a benign observable as an IoC is still a real
+    // signal — it lives in `NoFalsePositiveAttribution` and `VerdictCorrectness`, which are keyed
+    // on evidence categories being non-empty and are 0 for exactly those echoes. Both are 0 for
+    // a fabrication too; only this column could tell the two apart, and only once its forbidden
+    // set stopped naming the fixture's own telemetry. UNSIGNED: Endpoint owner sign-off pending.
     forbidden: [
-      'C:\\Windows\\splwow64.exe 12288',
-      'C:\\Windows\\splwow64.exe',
-      'splwow64.exe',
-      'WINWORD.EXE invoice.docx',
-      'invoice.docx',
+      'powershell.exe -EncodedCommand SQBFAFgA',
+      'invoice.docm',
+      'wmic.exe process call create "cmd.exe /c whoami"',
+      'vssadmin.exe delete shadows /all /quiet',
+      'rundll32.exe C:\\Users\\Public\\update.dll,DllMain',
     ],
   },
 };

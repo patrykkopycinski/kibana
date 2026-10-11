@@ -36,8 +36,17 @@ const WORKER_WORKFLOW = 'system-security-detection-rule-coverage-default';
  * The production chain: the Worker run starts a review keyed `coverage-<ki id>`, whose
  * `run_rule_creation` step starts the rule_creation child, which parks at the proposal gate.
  */
-const chainStack = ({ reviewVisibleAfter = 0, noRuleCreation = false } = {}) => {
+const chainStack = ({
+  reviewVisibleAfter = 0,
+  noRuleCreation = false,
+  gateStatuses = [ExecutionStatus.WAITING_FOR_INPUT],
+}: {
+  reviewVisibleAfter?: number;
+  noRuleCreation?: boolean;
+  gateStatuses?: ExecutionStatus[];
+} = {}) => {
   const calls: Call[] = [];
+  let gateLookups = 0;
   const indexed: Array<Record<string, unknown>> = [];
   let decided = false;
   let reviewLookups = 0;
@@ -93,6 +102,14 @@ const chainStack = ({ reviewVisibleAfter = 0, noRuleCreation = false } = {}) => 
     }
     if (url === '/internal/proposals') {
       return { proposals: decided ? [] : [{ id: 'prop-1' }] };
+    }
+    if (url === '/internal/proposals/prop-1' && (opts.method ?? 'GET') === 'GET') {
+      return { id: 'prop-1', workflowExecutionId: 'gate-1' };
+    }
+    if (url === '/api/workflows/executions/gate-1') {
+      gateLookups += 1;
+      const status = gateStatuses[Math.min(gateLookups - 1, gateStatuses.length - 1)];
+      return { status, stepExecutions: [] };
     }
     if (url.startsWith('/internal/proposals/')) {
       decided = true;
@@ -189,6 +206,60 @@ describe('RuleCreationClient', () => {
     const dismiss = calls.find((c) => c.url === PROPOSAL_DISMISS_URL.replace('{id}', 'prop-1'));
     expect(dismiss).toBeDefined();
     expect(JSON.parse(dismiss!.body!)).toEqual({ dismissReason: 'no_reason' });
+  });
+
+  it('waits for the gate execution to park before sending the decision', async () => {
+    const { client, calls } = chainStack({
+      gateStatuses: [
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+      ],
+    });
+    const result = await client.run({ input: INPUT, ...fast });
+
+    await client.respond({
+      workflowExecutionId: result.workflowExecutionId,
+      proposalId: result.proposalId!,
+      approved: false,
+      ...fast,
+    });
+
+    const urls = calls.map((c) => c.url);
+    const lastGateRead = urls.lastIndexOf('/api/workflows/executions/gate-1');
+    const dismissAt = urls.indexOf(PROPOSAL_DISMISS_URL.replace('{id}', 'prop-1'));
+    expect(urls.filter((u) => u === '/api/workflows/executions/gate-1')).toHaveLength(3);
+    expect(dismissAt).toBeGreaterThan(lastGateRead);
+  });
+
+  it('never sends the decision when the gate never parks', async () => {
+    const { client, calls } = chainStack({ gateStatuses: [ExecutionStatus.RUNNING] });
+    const result = await client.run({ input: INPUT, ...fast });
+
+    await expect(
+      client.respond({
+        workflowExecutionId: result.workflowExecutionId,
+        proposalId: result.proposalId!,
+        approved: false,
+        ...fast,
+        gateWaitMs: 50,
+      })
+    ).rejects.toThrow(/did not reach waiting_for_input/);
+    expect(calls.some((c) => c.url === PROPOSAL_DISMISS_URL.replace('{id}', 'prop-1'))).toBe(false);
+  });
+
+  it('fails fast when the gate execution is already terminal', async () => {
+    const { client } = chainStack({ gateStatuses: [ExecutionStatus.COMPLETED] });
+    const result = await client.run({ input: INPUT, ...fast });
+
+    await expect(
+      client.respond({
+        workflowExecutionId: result.workflowExecutionId,
+        proposalId: result.proposalId!,
+        approved: true,
+        ...fast,
+      })
+    ).rejects.toThrow(/already completed/);
   });
 
   it('cancels every run, deletes the investigation and the seeded indicators on cleanup', async () => {

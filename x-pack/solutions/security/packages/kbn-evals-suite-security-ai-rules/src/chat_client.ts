@@ -48,10 +48,8 @@ export class SecurityRuleGenerationClient {
     error?: string;
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
-      capabilities: { visualizations: true },
       attachments: [
         {
           type: SECURITY_RULE_ATTACHMENT_TYPE,

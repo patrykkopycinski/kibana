@@ -17,24 +17,87 @@ import {
   pinAgenticConnector,
   runAllCleanups,
   seedAlertZeroEndpoint,
+  DEFEND_TELEMETRY_PATTERNS,
+  EXTRACT_IOCS_KEPT_COLUMNS,
 } from './runtime';
 import { ENDPOINT_FIXTURES } from './fixture_slate';
 import { ExecutionStatus } from '@kbn/workflows';
 
-const createEs = () => {
+interface MappingProperties {
+  [field: string]: { type?: string; properties?: MappingProperties };
+}
+const flattenMapping = (properties: MappingProperties, prefix = ''): string[] =>
+  Object.entries(properties).flatMap(([key, value]) =>
+    value.properties ? flattenMapping(value.properties, `${prefix}${key}.`) : [`${prefix}${key}`]
+  );
+
+/**
+ * An ES double faithful to the two behaviours the telemetry contract gate depends on: a pattern
+ * resolves only to data streams that were actually created, and the extract_iocs statement
+ * fails (like ES|QL's verification_exception) when the index template does not map a column it
+ * keeps. Overrides let a test break either behaviour on purpose.
+ */
+const createEs = (
+  overrides: {
+    resolveIndex?: (params: { name: string }) => unknown;
+    esqlQuery?: (params: { query: string }) => unknown;
+  } = {}
+) => {
+  const streams: string[] = [];
+  const written: Array<{ index: string; document: { host?: { name?: string } } }> = [];
+  let mappedColumns = new Set<string>();
   const es = {
     indices: {
       create: jest.fn(async () => ({})),
       delete: jest.fn(async () => ({})),
-      putIndexTemplate: jest.fn(async () => ({})),
-      createDataStream: jest.fn(async () => ({})),
+      putIndexTemplate: jest.fn(
+        async (params: { template?: { mappings?: { properties?: MappingProperties } } }) => {
+          mappedColumns = new Set(flattenMapping(params.template?.mappings?.properties ?? {}));
+          return {};
+        }
+      ),
+      createDataStream: jest.fn(async ({ name }: { name: string }) => {
+        streams.push(name);
+        return {};
+      }),
       deleteDataStream: jest.fn(async () => ({})),
       deleteIndexTemplate: jest.fn(async () => ({})),
+      resolveIndex: jest.fn(async (params: { name: string }) => {
+        if (overrides.resolveIndex) return overrides.resolveIndex(params);
+        const prefix = params.name.replace(/\*$/, '');
+        const matched = streams.filter((stream) => stream.startsWith(prefix));
+        if (matched.length === 0) throw new Error(`no such index [${params.name}]`);
+        return { indices: [], aliases: [], data_streams: matched.map((name) => ({ name })) };
+      }),
     },
-    index: jest.fn(async () => ({})),
+    esql: {
+      query: jest.fn(async (params: { query: string }) => {
+        if (overrides.esqlQuery) return overrides.esqlQuery(params);
+        const kept =
+          params.query
+            .match(/KEEP ([^|]+)\|/)?.[1]
+            .split(',')
+            .map((c) => c.trim()) ?? [];
+        const unknown = kept.filter(
+          (column) => column !== '@timestamp' && !mappedColumns.has(column)
+        );
+        if (unknown.length > 0) {
+          throw new Error(`verification_exception: Unknown column [${unknown.join(', ')}]`);
+        }
+        const host = params.query.match(/host\.name IN \("([^"]+)"\)/)?.[1];
+        const rows = written.filter(
+          ({ index, document }) => streams.includes(index) && document.host?.name === host
+        );
+        return { columns: kept.map((name) => ({ name })), values: rows.map(() => []) };
+      }),
+    },
+    index: jest.fn(async (params: (typeof written)[number]) => {
+      written.push(params);
+      return {};
+    }),
     delete: jest.fn(async () => ({})),
   };
-  return es as typeof es & Client;
+  return es as unknown as typeof es & Client;
 };
 
 type FetchMock = jest.Mock & HttpHandler;
@@ -639,10 +702,111 @@ describe('seedAlertZeroEndpoint', () => {
     });
     expect(a.index).not.toBe(c.index);
     expect(a.networkIndex).not.toBe(c.networkIndex);
-    // Only the fixture that declares a connection creates a network data stream.
-    expect(es.indices.createDataStream).toHaveBeenCalledWith({ name: a.index });
-    expect(es.indices.createDataStream).not.toHaveBeenCalledWith({ name: a.networkIndex });
-    expect(es.indices.createDataStream).toHaveBeenCalledWith({ name: c.networkIndex });
+    // Every fixture creates all four Defend streams, connection or not: discover_telemetry
+    // recommends all four patterns and an empty one is "No resource found" for the agent.
+    for (const fixture of [a, c]) {
+      for (const name of [
+        fixture.index,
+        fixture.networkIndex,
+        fixture.fileIndex,
+        fixture.registryIndex,
+      ]) {
+        expect(es.indices.createDataStream).toHaveBeenCalledWith({ name });
+      }
+    }
+    expect(a.fileIndex).not.toBe(c.fileIndex);
+    expect(a.registryIndex).not.toBe(c.registryIndex);
+  });
+
+  it('names every stream so the pattern discover_telemetry recommends matches it', async () => {
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch());
+    const matches = (pattern: string, name: string) => name.startsWith(pattern.slice(0, -1));
+    expect(
+      DEFEND_TELEMETRY_PATTERNS.map((pattern) => ({
+        pattern,
+        matched: [
+          fixture.index,
+          fixture.networkIndex,
+          fixture.fileIndex,
+          fixture.registryIndex,
+        ].filter((name) => matches(pattern, name)).length,
+      }))
+    ).toEqual(DEFEND_TELEMETRY_PATTERNS.map((pattern) => ({ pattern, matched: 1 })));
+  });
+
+  it('maps every column endpoint_forensic.extract_iocs projects, populated or not', async () => {
+    const es = createEs();
+    await seedAlertZeroEndpoint(es, createFetch());
+    const [{ template }] = es.indices.putIndexTemplate.mock.calls[0] as [
+      { template: { mappings: { properties: MappingProperties } } }
+    ];
+    const mapped = new Set(flattenMapping(template.mappings.properties));
+    expect(EXTRACT_IOCS_KEPT_COLUMNS.filter((column) => !mapped.has(column))).toEqual([]);
+  });
+
+  it('installs the template above the built-in logs template so its mapping is the one applied', async () => {
+    const es = createEs();
+    await seedAlertZeroEndpoint(es, createFetch());
+    const [{ priority }] = es.indices.putIndexTemplate.mock.calls[0] as [{ priority: number }];
+    // The built-in `logs` template (`logs-*-*`) has priority 100 and wins any tie or lower value.
+    expect(priority).toBeGreaterThan(100);
+  });
+
+  describe('pre-measurement telemetry contract', () => {
+    it('passes when the production discovery patterns and the extract_iocs statement both work', async () => {
+      const es = createEs();
+      await expect(seedAlertZeroEndpoint(es, createFetch())).resolves.toEqual(
+        expect.objectContaining({ host: expect.any(String) })
+      );
+      expect(es.indices.resolveIndex).toHaveBeenCalledTimes(DEFEND_TELEMETRY_PATTERNS.length);
+      expect(es.esql.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails seeding, and cleans up, when a recommended pattern does not resolve', async () => {
+      const es = createEs({
+        resolveIndex: ({ name }) => {
+          throw new Error(`no such index [${name}]`);
+        },
+      });
+      const fetch = createFetch();
+      await expect(seedAlertZeroEndpoint(es, fetch)).rejects.toThrow(
+        /not discoverable: 'logs-endpoint\.events\.process-\*' does not resolve/
+      );
+      expect(es.indices.deleteDataStream).toHaveBeenCalled();
+      expect(calls(fetch)).toContain('DELETE /api/agent_builder/conversations/conv-1');
+    });
+
+    it('fails seeding when a pattern resolves but not to the fixture stream', async () => {
+      const es = createEs({
+        resolveIndex: () => ({
+          indices: [],
+          aliases: [],
+          data_streams: [{ name: 'someone-else' }],
+        }),
+      });
+      await expect(seedAlertZeroEndpoint(es, createFetch())).rejects.toThrow(
+        /resolves to \[someone-else\] but not the fixture stream/
+      );
+    });
+
+    it('fails seeding when the mapping lacks a column extract_iocs projects', async () => {
+      const es = createEs({
+        esqlQuery: () => {
+          throw new Error('verification_exception: Unknown column [process.hash.sha256]');
+        },
+      });
+      await expect(seedAlertZeroEndpoint(es, createFetch())).rejects.toThrow(
+        /cannot back endpoint_forensic\.extract_iocs: .*process\.hash\.sha256/
+      );
+    });
+
+    it('fails seeding when extract_iocs would not see every seeded event', async () => {
+      const es = createEs({ esqlQuery: () => ({ columns: [], values: [] }) });
+      await expect(seedAlertZeroEndpoint(es, createFetch())).rejects.toThrow(
+        /would see 0 of the \d+ seeded events/
+      );
+    });
   });
 
   it('rejects an unknown fixture id instead of seeding a default tree', async () => {

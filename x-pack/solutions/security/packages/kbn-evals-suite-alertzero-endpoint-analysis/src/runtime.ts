@@ -394,12 +394,148 @@ const AD_ALERT_IDS_KEY = 'kibana.alert.attack_discovery.alert_ids';
 export type { EndpointFixture };
 
 /**
- * `logs-endpoint.events.process-*` and `...network-*` are separate data streams but share one
- * index template (the `logs-*` template only creates data streams, and the extract_iocs tool
- * queries `process`, `network`, `file` and `registry` patterns in one ES|QL statement).
+ * The four Defend event streams share one index template (the `logs-*` template only creates
+ * data streams, and the extract_iocs tool queries `process`, `network`, `file` and `registry`
+ * patterns in one ES|QL statement). Every fixture creates all four, as a real Defend deployment
+ * does: `endpoint_forensic.discover_telemetry` recommends all four patterns, and resolving a
+ * pattern that matches nothing fails ("No resource found") for the agent's ES|QL tools.
  */
 const PROCESS_STREAM_PREFIX = 'logs-endpoint.events.process-alertzero-eval-';
 const NETWORK_STREAM_PREFIX = 'logs-endpoint.events.network-alertzero-eval-';
+const FILE_STREAM_PREFIX = 'logs-endpoint.events.file-alertzero-eval-';
+const REGISTRY_STREAM_PREFIX = 'logs-endpoint.events.registry-alertzero-eval-';
+
+const DEFEND_EVENT_TEMPLATE_PRIORITY = 500;
+
+/**
+ * The fields `endpoint_forensic.extract_iocs` projects with `KEEP`. ES|QL fails the whole query
+ * with a `verification_exception` when a kept column is mapped in none of the targeted streams,
+ * so the seeded mapping must carry the Defend/ECS shape of every one of them, not only the
+ * fields the fixture events populate.
+ */
+const DEFEND_EVENT_MAPPING_PROPERTIES = {
+  '@timestamp': { type: 'date' },
+  event: {
+    properties: {
+      id: { type: 'keyword' },
+      category: { type: 'keyword' },
+      type: { type: 'keyword' },
+      action: { type: 'keyword' },
+    },
+  },
+  host: { properties: { name: { type: 'keyword' } } },
+  user: { properties: { name: { type: 'keyword' } } },
+  process: {
+    properties: {
+      name: { type: 'keyword' },
+      executable: { type: 'keyword' },
+      command_line: { type: 'keyword' },
+      entity_id: { type: 'keyword' },
+      hash: { properties: { sha256: { type: 'keyword' } } },
+      parent: {
+        properties: {
+          name: { type: 'keyword' },
+          command_line: { type: 'keyword' },
+          entity_id: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  file: { properties: { path: { type: 'keyword' } } },
+  registry: { properties: { path: { type: 'keyword' }, value: { type: 'keyword' } } },
+  // Fixture C's connection event. `endpoint_forensic.extract_iocs` keeps
+  // `destination.ip` / `destination.domain` and types them into `ips`.
+  destination: { properties: { ip: { type: 'ip' }, domain: { type: 'keyword' } } },
+} as const;
+
+/**
+ * The Defend patterns `endpoint_forensic.discover_telemetry` recommends, and the columns
+ * `endpoint_forensic.extract_iocs` projects from them. Restated here because this package does
+ * not depend on the security_solution plugin. If the tool's patterns or `KEEP` list drift, the
+ * gate below turns the drift into a seeding failure rather than a scored abstention.
+ */
+export const DEFEND_TELEMETRY_PATTERNS = [
+  'logs-endpoint.events.process-*',
+  'logs-endpoint.events.network-*',
+  'logs-endpoint.events.file-*',
+  'logs-endpoint.events.registry-*',
+] as const;
+export const EXTRACT_IOCS_KEPT_COLUMNS = [
+  'process.hash.sha256',
+  'process.executable',
+  'process.name',
+  'process.command_line',
+  'process.parent.name',
+  'process.parent.command_line',
+  'destination.ip',
+  'destination.domain',
+  'registry.path',
+  'registry.value',
+  'file.path',
+  'user.name',
+  'event.action',
+  'host.name',
+  '@timestamp',
+] as const;
+
+/**
+ * Pre-measurement gate, run at the end of seeding. A fixture the production tools cannot see
+ * would otherwise score as a model abstention ("insufficient evidence"), so a seeding regression
+ * must fail here, loudly, before any model is invoked:
+ *  - every pattern `discover_telemetry` recommends resolves, and resolves to this fixture's
+ *    stream (resolving a pattern that matches nothing is what makes the agent's ES|QL tools
+ *    answer "No resource found");
+ *  - the `extract_iocs` ES|QL statement runs without a `verification_exception` (an unmapped
+ *    kept column fails the whole statement) and returns every seeded event on the fixture host.
+ */
+export const assertSeededTelemetryContract = async (
+  es: Client,
+  seeded: { host: string; streams: readonly string[]; eventCount: number }
+) => {
+  for (const pattern of DEFEND_TELEMETRY_PATTERNS) {
+    const prefix = pattern.slice(0, -1);
+    const expected = seeded.streams.filter((stream) => stream.startsWith(prefix));
+    const resolved = await es.indices
+      .resolveIndex({ name: pattern, allow_no_indices: false, expand_wildcards: 'all' })
+      .catch((error: unknown) => {
+        throw new Error(
+          `Seeded telemetry is not discoverable: '${pattern}' does not resolve (${
+            error instanceof Error ? error.message : String(error)
+          })`
+        );
+      });
+    const names = resolved.data_streams.map((stream) => stream.name);
+    const missing = expected.filter((stream) => !names.includes(stream));
+    if (expected.length === 0 || missing.length > 0) {
+      throw new Error(
+        `Seeded telemetry is not discoverable: '${pattern}' resolves to [${names.join(
+          ', '
+        )}] but not the fixture stream ${missing.join(', ') || '(none seeded)'}`
+      );
+    }
+  }
+  const response = await es.esql
+    .query({
+      query: [
+        `FROM ${DEFEND_TELEMETRY_PATTERNS.join(', ')}`,
+        `| WHERE host.name IN ("${seeded.host}")`,
+        `| KEEP ${EXTRACT_IOCS_KEPT_COLUMNS.join(', ')}`,
+        '| LIMIT 500',
+      ].join(' '),
+    })
+    .catch((error: unknown) => {
+      throw new Error(
+        `Seeded mapping cannot back endpoint_forensic.extract_iocs: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+  if (response.values.length !== seeded.eventCount) {
+    throw new Error(
+      `extract_iocs would see ${response.values.length} of the ${seeded.eventCount} seeded events for ${seeded.host}`
+    );
+  }
+};
 
 /**
  * Which event a child's `process.parent.entity_id` points at: the closest PRECEDING event that
@@ -462,6 +598,9 @@ export const seedAlertZeroEndpoint = async (
   const endpointId = `alertzero-eval-${id}`;
   const index = `${PROCESS_STREAM_PREFIX}${id}`;
   const networkIndex = `${NETWORK_STREAM_PREFIX}${id}`;
+  const fileIndex = `${FILE_STREAM_PREFIX}${id}`;
+  const registryIndex = `${REGISTRY_STREAM_PREFIX}${id}`;
+  const streams = [index, networkIndex, fileIndex, registryIndex];
   const templateName = `logs-endpoint.events.alertzero-eval-${id}-tpl`;
   const aiIndexId = `alertzero-eval-${id}`;
   const aiIndexDest = `ai-index-idx-${aiIndexId}`;
@@ -488,8 +627,7 @@ export const seedAlertZeroEndpoint = async (
         }),
       async () =>
         Promise.all([
-          deleteDataStreamQuietly(es, index),
-          deleteDataStreamQuietly(es, networkIndex),
+          ...streams.map((stream) => deleteDataStreamQuietly(es, stream)),
           ignore404(() => es.indices.delete({ index: aiIndexDest, ignore_unavailable: true })),
           ignore404(() => es.indices.deleteIndexTemplate({ name: templateName })),
         ]),
@@ -536,44 +674,17 @@ export const seedAlertZeroEndpoint = async (
     // op_type create so every write lands on a fresh backing index.
     await es.indices.putIndexTemplate({
       name: templateName,
-      index_patterns: [index, networkIndex],
+      index_patterns: streams,
+      // Above the built-in `logs` template (`logs-*-*`, priority 100), which otherwise wins the
+      // match and leaves every field below dynamically mapped (or, for a field no event
+      // populates, unmapped).
+      priority: DEFEND_EVENT_TEMPLATE_PRIORITY,
       data_stream: {},
-      template: {
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            event: {
-              properties: {
-                id: { type: 'keyword' },
-                category: { type: 'keyword' },
-                type: { type: 'keyword' },
-              },
-            },
-            host: { properties: { name: { type: 'keyword' } } },
-            process: {
-              properties: {
-                name: { type: 'keyword' },
-                command_line: { type: 'keyword' },
-                entity_id: { type: 'keyword' },
-                parent: {
-                  properties: { name: { type: 'keyword' }, entity_id: { type: 'keyword' } },
-                },
-              },
-            },
-            // Fixture C's connection event. `endpoint_forensic.extract_iocs` keeps
-            // `destination.ip` / `destination.domain` and types them into `ips`.
-            destination: {
-              properties: { ip: { type: 'ip' }, domain: { type: 'keyword' } },
-            },
-          },
-        },
-      },
+      template: { mappings: { properties: DEFEND_EVENT_MAPPING_PROPERTIES } },
     });
     const { events } = fixture;
     const command = maliciousCommand(fixture);
-    const needsNetworkStream = events.some((event) => event.network);
-    await es.indices.createDataStream({ name: index });
-    if (needsNetworkStream) await es.indices.createDataStream({ name: networkIndex });
+    for (const stream of streams) await es.indices.createDataStream({ name: stream });
     const now = Date.now();
     const eventIds = events.map((_, i) => `${id}-${i}`);
     for (const [i, event] of events.entries()) {
@@ -677,6 +788,11 @@ export const seedAlertZeroEndpoint = async (
         },
       },
     });
+    await assertSeededTelemetryContract(es, {
+      host,
+      streams,
+      eventCount: events.length,
+    });
     return {
       host,
       endpointId,
@@ -686,6 +802,8 @@ export const seedAlertZeroEndpoint = async (
       conclusive,
       index,
       networkIndex,
+      fileIndex,
+      registryIndex,
       aiIndexId,
       kiId,
       conversationId: conversation.id,

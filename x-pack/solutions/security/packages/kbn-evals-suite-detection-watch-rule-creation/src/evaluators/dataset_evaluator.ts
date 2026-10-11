@@ -347,7 +347,19 @@ export const createEvaluateDataset =
       {
         name: dataset.name,
         datasets: [dataset],
-        task: async ({ input }) => ruleCreationClient.run({ input }),
+        task: async ({ input }) => {
+          try {
+            return await ruleCreationClient.run({ input });
+          } catch (err) {
+            // The coverage chain (alertzero_fast verdict, sweep scheduling) is harness state,
+            // not the model under test. Report it loudly as a classified failure per example
+            // instead of letting it surface as an opaque execution error that kills the run.
+            if (err.name === 'CoverageVerdictError') {
+              log.error(`Coverage verdict failure: ${err.message}`);
+            }
+            throw err;
+          }
+        },
       },
       withScoreCollection(allEvaluators, sink)
     );

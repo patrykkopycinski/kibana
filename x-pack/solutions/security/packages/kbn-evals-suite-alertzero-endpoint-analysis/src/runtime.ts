@@ -36,6 +36,11 @@ import {
   proposalWorkflowId,
   gateWorkflowId,
 } from './contracts';
+import {
+  ENDPOINT_FIXTURES,
+  fixtureById,
+  type EndpointFixture,
+} from './fixture_slate';
 
 const workflowHeaders = { 'elastic-api-version': '2023-10-31', 'kbn-xsrf': 'true' };
 
@@ -388,22 +393,61 @@ const CONSTITUENT_ALERTS_INDEX = '.alerts-security.alerts-default';
 // A test below pins the seeded shape against the workflow's read path, so drift on either
 // side fails the suite rather than silently skipping the analysis.
 const AD_ALERT_IDS_KEY = 'kibana.alert.attack_discovery.alert_ids';
-export const SEEDED_COMMAND = 'powershell.exe -EncodedCommand SQBFAFgA';
+
+/** The fixture slate and its events are declared in `fixture_slate.ts`; see it for the split. */
+export type { EndpointFixture };
+
+/**
+ * `logs-endpoint.events.process-*` and `...network-*` are separate data streams but share one
+ * index template (the `logs-*` template only creates data streams, and the extract_iocs tool
+ * queries `process`, `network`, `file` and `registry` patterns in one ES|QL statement).
+ */
+const PROCESS_STREAM_PREFIX = 'logs-endpoint.events.process-alertzero-eval-';
+const NETWORK_STREAM_PREFIX = 'logs-endpoint.events.network-alertzero-eval-';
+
+/**
+ * Which event a child's `process.parent.entity_id` points at: the closest PRECEDING event that
+ * carries the parent's image name, else `root`. The original two-event fixtures always pointed
+ * every child at event 0, which happens to be right there; on a four-event chain (fixture B) it
+ * would claim vssadmin was spawned by WINWORD.EXE instead of by the PowerShell that ran it.
+ */
+const parentEntityId = (
+  events: EndpointFixture['events'],
+  current: number,
+  eventIds: readonly string[]
+): string => {
+  const parentImage = events[current].parent;
+  for (let i = current - 1; i >= 0; i--) {
+    if (events[i].image === parentImage) return eventIds[i];
+  }
+  return 'root';
+};
+
+/**
+ * The command line the strict evidence assertion demands in `iocs.malicious_commands`: the
+ * payload event, which is the LAST event of every malicious tree in the slate (the executed
+ * child). Undefined on a benign fixture — the assertion is not applied there, and a benign
+ * fixture has no malicious command to demand.
+ */
+const maliciousCommand = (fixture: EndpointFixture): string | undefined =>
+  fixture.groundTruthVerdict === 'malicious'
+    ? fixture.events[fixture.events.length - 1]?.commandLine
+    : undefined;
 
 export const seedAlertZeroEndpoint = async (
   es: Client,
   fetch: HttpHandler,
   {
-    conclusive = true,
+    fixtureId = ENDPOINT_FIXTURES[0].id,
     kiReason,
   }: {
     /**
-     * Ground truth of the seeded telemetry. The default seeds the malicious
-     * encoded-PowerShell tree; `conclusive: false` seeds a benign process tree
-     * on the same host shape, so the action-safety check exercises the
-     * disruptive-action-on-inconclusive-ground-truth branch live.
+     * Which fixture from the slate to seed. The default is L2/L3, the original malicious
+     * encoded-PowerShell tree; `'L2b benign fixture'` is the benign print flow on the same host
+     * shape. The fixture's own declaration carries the process tree, so the caller cannot seed a
+     * tree the reference does not describe.
      */
-    conclusive?: boolean;
+    fixtureId?: string;
     /**
      * Leak-control only. By default the KI carries NO `attributes.reason`: the production
      * writer (action_handoff_to_forensics.yaml) never writes one, and frozen transcripts
@@ -415,10 +459,14 @@ export const seedAlertZeroEndpoint = async (
     kiReason?: string;
   } = {}
 ) => {
+  const fixture = fixtureById(fixtureId);
+  const conclusive = fixture.groundTruthVerdict === 'malicious';
   const id = randomUUID();
   const host = `AZ-EVAL-${id.slice(0, 8)}`;
   const endpointId = `alertzero-eval-${id}`;
-  const index = `logs-endpoint.events.process-alertzero-eval-${id}`;
+  const index = `${PROCESS_STREAM_PREFIX}${id}`;
+  const networkIndex = `${NETWORK_STREAM_PREFIX}${id}`;
+  const templateName = `logs-endpoint.events.alertzero-eval-${id}-tpl`;
   const aiIndexId = `alertzero-eval-${id}`;
   const aiIndexDest = `ai-index-idx-${aiIndexId}`;
   const kiId = `alertzero-ki-${id}`;
@@ -445,8 +493,9 @@ export const seedAlertZeroEndpoint = async (
       async () =>
         Promise.all([
           deleteDataStreamQuietly(es, index),
+          deleteDataStreamQuietly(es, networkIndex),
           ignore404(() => es.indices.delete({ index: aiIndexDest, ignore_unavailable: true })),
-          ignore404(() => es.indices.deleteIndexTemplate({ name: `${index}-tpl` })),
+          ignore404(() => es.indices.deleteIndexTemplate({ name: templateName })),
         ]),
       async () =>
         es.delete(
@@ -490,8 +539,8 @@ export const seedAlertZeroEndpoint = async (
     // index template carrying the mappings, create the data stream, then append with
     // op_type create so every write lands on a fresh backing index.
     await es.indices.putIndexTemplate({
-      name: `${index}-tpl`,
-      index_patterns: [index],
+      name: templateName,
+      index_patterns: [index, networkIndex],
       data_stream: {},
       template: {
         mappings: {
@@ -515,45 +564,56 @@ export const seedAlertZeroEndpoint = async (
                 },
               },
             },
+            // Fixture C's connection event. `endpoint_forensic.extract_iocs` keeps
+            // `destination.ip` / `destination.domain` and types them into `ips`.
+            destination: {
+              properties: { ip: { type: 'ip' }, domain: { type: 'keyword' } },
+            },
           },
         },
       },
     });
+    const { events } = fixture;
+    const command = maliciousCommand(fixture);
+    const needsNetworkStream = events.some((event) => event.network);
     await es.indices.createDataStream({ name: index });
+    if (needsNetworkStream) await es.indices.createDataStream({ name: networkIndex });
     const now = Date.now();
-    // Malicious: encoded PowerShell spawned by a document process. Benign: an ordinary
-    // document print flow (Word -> the 32-bit print spooler helper `splwow64.exe`, not a
-    // LOLBAS binary) — same host, same shape, nothing an analysis may act on.
-    const events = conclusive
-      ? [
-          { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docm', parent: 'explorer.exe' },
-          { name: 'powershell.exe', command_line: SEEDED_COMMAND, parent: 'WINWORD.EXE' },
-        ]
-      : [
-          { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docx', parent: 'explorer.exe' },
-          {
-            name: 'splwow64.exe',
-            command_line: 'C:\\Windows\\splwow64.exe 12288',
-            parent: 'WINWORD.EXE',
-          },
-        ];
     const eventIds = events.map((_, i) => `${id}-${i}`);
     for (const [i, event] of events.entries()) {
       await es.index({
-        index,
+        index: event.network ? networkIndex : index,
         id: eventIds[i],
         op_type: 'create',
         document: {
-          '@timestamp': new Date(now - (2 - i) * 60_000).toISOString(),
-          event: { id: eventIds[i], category: ['process'], type: ['start'], kind: 'event' },
+          '@timestamp': new Date(now - event.offsetMinutes * 60_000).toISOString(),
+          event: {
+            id: eventIds[i],
+            category: [event.network ? 'network' : 'process'],
+            type: [event.network ? 'connection' : 'start'],
+            kind: 'event',
+          },
           host: { name: host, id: host, os: { type: 'windows' } },
           agent: { id: endpointId, type: 'endpoint' },
           process: {
-            name: event.name,
-            command_line: event.command_line,
+            name: event.image,
+            command_line: event.commandLine,
             entity_id: eventIds[i],
-            parent: { name: event.parent, entity_id: i ? eventIds[0] : 'root' },
+            parent: {
+              name: event.parent,
+              entity_id: parentEntityId(events, i, eventIds),
+            },
           },
+          ...(event.network
+            ? {
+                destination: {
+                  ip: event.network.destinationIp,
+                  ...(event.network.destinationDomain
+                    ? { domain: event.network.destinationDomain }
+                    : {}),
+                },
+              }
+            : {}),
         },
         refresh: 'wait_for',
       });
@@ -625,9 +685,11 @@ export const seedAlertZeroEndpoint = async (
       host,
       endpointId,
       eventIds,
-      command: SEEDED_COMMAND,
+      fixtureId: fixture.id,
+      command,
       conclusive,
       index,
+      networkIndex,
       aiIndexId,
       kiId,
       conversationId: conversation.id,

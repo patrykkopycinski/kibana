@@ -30,46 +30,42 @@ import { COLLISION_EXAMPLES, filterCollisionExamples } from './collision_dataset
  * skill. A sibling score of 1.00 in BOTH arms means the dataset did not reproduce a collision and
  * must be hardened before any conclusion is drawn — an accurate null, not a green light.
  *
- * One test per pair, so the run's per-dataset table is the pairwise matrix and a misroute can be
- * read off the pair that owns it. Scope a rerun with `EVAL_EXAMPLES=<exampleId>,...` (ids are the
- * `metadata.exampleId` values in `collision_dataset.ts`) so both arms measure the same subset.
+ * Scope a rerun with `EVAL_EXAMPLES=<exampleId>,<exampleId>` (ids are the `metadata.exampleId`
+ * values in `collision_dataset.ts`) so both arms measure the same subset.
  */
-const selectedExamples = filterCollisionExamples(COLLISION_EXAMPLES);
-const pairs = [...new Set(selectedExamples.map(({ metadata }) => metadata.pair))];
-
 evaluate.describe(
   'Endpoint Forensic Analysis - routing collision boundary',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    for (const pair of pairs) {
-      const pairExamples = selectedExamples.filter(({ metadata }) => metadata.pair === pair);
+    evaluate(
+      'pairwise routing boundaries between endpoint-forensic-analysis and its siblings',
+      async ({ evaluateDataset }, testInfo) => {
+        const examples = filterCollisionExamples(COLLISION_EXAMPLES);
+        const pairs = [...new Set(examples.map(({ metadata }) => metadata.pair))];
 
-      evaluate(`${pair}: expected skill wins the boundary`, async ({ evaluateDataset }, testInfo) => {
-        const directions = [...new Set(pairExamples.map(({ metadata }) => metadata.direction))];
         testInfo.annotations.push({
           type: 'collision-scope',
-          description: `${pairExamples.length} examples, directions: ${directions.join(', ')}`,
-        });
-        testInfo.annotations.push({
-          type: 'collision-subset',
-          description: `${pairExamples.length}/${COLLISION_EXAMPLES.length} examples of the full collision set`,
+          description: `${examples.length}/${COLLISION_EXAMPLES.length} examples scored across pairs: ${pairs.join(
+            ', '
+          )}`,
         });
 
         await evaluateDataset({
           dataset: {
-            name: `agent builder: security-endpoint-forensic-collision-${pair}`,
+            name: 'agent builder: security-endpoint-forensic-analysis-routing-collision',
             description:
-              'Pairwise routing boundary between endpoint-forensic-analysis and one sibling skill. ' +
-              'Each example declares metadata.expectedSkill (or metadata.shouldNotActivateSkill) plus ' +
-              'direction and siblingSkill, so a misroute is attributed via the loadedNames metadata.',
-            examples: pairExamples.map(({ question, expected, metadata }) => ({
+              'Pairwise routing boundaries between endpoint-forensic-analysis and threat-hunting, ' +
+              'alert-analysis and elastic-defend-configuration-troubleshooting. Each example declares ' +
+              'metadata.expectedSkill (or metadata.shouldNotActivateSkill) plus the pair and direction, ' +
+              'so a misroute can be attributed to a specific sibling via the loadedNames metadata.',
+            examples: examples.map(({ question, expected, metadata }) => ({
               input: { question },
               output: { expected },
               metadata,
             })),
           },
         });
-      });
-    }
+      }
+    );
   }
 );

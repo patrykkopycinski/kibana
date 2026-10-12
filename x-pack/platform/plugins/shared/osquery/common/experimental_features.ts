@@ -47,6 +47,13 @@ export const allowedExperimentalValues = Object.freeze({
    * when CPS is disabled.
    */
   crossProjectSearch: false,
+  /**
+   * Enables the Osquery Agent Builder tools (live queries, packs, saved queries,
+   * table schema, integration checks, agent id resolution) when the Agent Builder
+   * plugin is available. Off by default; enable with
+   * `xpack.osquery.enableExperimental: [agentBuilderTools]`.
+   */
+  agentBuilderTools: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

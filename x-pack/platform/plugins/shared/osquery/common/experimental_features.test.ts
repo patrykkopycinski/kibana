@@ -70,3 +70,28 @@ describe('getExperimentalAllowedValues', () => {
     expect(allowedValues).toContain('queryHistoryRework');
   });
 });
+
+describe('agentBuilderTools flag', () => {
+  it('should be registered as an allowed experimental value, defaulting to off', () => {
+    expect(allowedExperimentalValues.agentBuilderTools).toBe(false);
+
+    const { features, invalid } = parseExperimentalConfigValue(['agentBuilderTools']);
+
+    expect(invalid).toEqual([]);
+    expect(features.agentBuilderTools).toBe(true);
+  });
+
+  it('should stay off when not requested', () => {
+    const { features, invalid } = parseExperimentalConfigValue([]);
+
+    expect(invalid).toEqual([]);
+    expect(features.agentBuilderTools).toBe(false);
+  });
+
+  it('should support the disable: prefix', () => {
+    const { features, invalid } = parseExperimentalConfigValue(['disable:agentBuilderTools']);
+
+    expect(invalid).toEqual([]);
+    expect(features.agentBuilderTools).toBe(false);
+  });
+});

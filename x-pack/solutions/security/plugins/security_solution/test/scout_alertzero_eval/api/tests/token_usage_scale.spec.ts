@@ -111,23 +111,24 @@ apiTest.describe(
 
             const requested = Number(sweep.outputs.reviews_requested ?? 0);
 
-            const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
-
-            // Attach BEFORE asserting: a failing assertion must not take its own evidence down with
-            // it (the first runs failed with the artifact never written).
-            await attachArtifact(
-              testInfo,
-              `alertzero-eval-token-usage-tuning-${tier}.json`,
-              buildArtifact(tier, [sweep], rows)
-            );
-
-            // One review per seeded noisy rule: a sweep that harvests fewer is a finding, not noise.
-            // The diagnosis names the worker step that came up empty (harvest vs candidate lookup).
+            // The sweep's own count is asserted BEFORE the token read: a broken harvest and a
+            // missing token index must not read as the same failure (measured:
+            // smoke-e01d0215577b44e8, where index_not_found masked the sweep's numbers).
             const diagnosis = requested === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
             expect(requested, `reviews_requested=${requested}\n${diagnosis}`).toBe(
               SCALE_TIERS[tier].rules
             );
             expect(requested).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
+
+            const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
+
+            // Attach BEFORE the row assertions: a failing assertion must not take its own evidence
+            // down with it (the first runs failed with the artifact never written).
+            await attachArtifact(
+              testInfo,
+              `alertzero-eval-token-usage-tuning-${tier}.json`,
+              buildArtifact(tier, [sweep], rows)
+            );
 
             assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
             expect(rows.length).toBeGreaterThan(0);
@@ -157,6 +158,15 @@ apiTest.describe(
 
             const started = Number(sweep.outputs.started ?? 0);
 
+            // `started` is the count the worker's own `start_reviews` foreach dispatched, which is
+            // the number of reviews the sweep fanned out to — the child-executions route reports the
+            // worker's own children, not one entry per review (measured: smoke-c6f1764679d04a23
+            // dispatched 50 and returned 1 child), so it is not the assertion to make here. Asserted
+            // before the token read so a missing token index cannot mask the sweep's own numbers.
+            const diagnosis = started === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
+            expect(started, `started=${started}\n${diagnosis}`).toBe(SCALE_TIERS[tier].gaps);
+            expect(started).toBeLessThanOrEqual(MAX_GAPS_PER_SWEEP);
+
             const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
 
             await attachArtifact(
@@ -164,14 +174,6 @@ apiTest.describe(
               `alertzero-eval-token-usage-coverage-${tier}.json`,
               buildArtifact(tier, [sweep], rows)
             );
-
-            // `started` is the count the worker's own `start_reviews` foreach dispatched, which is
-            // the number of reviews the sweep fanned out to — the child-executions route reports the
-            // worker's own children, not one entry per review (measured: smoke-c6f1764679d04a23
-            // dispatched 50 and returned 1 child), so it is not the assertion to make here.
-            const diagnosis = started === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
-            expect(started, `started=${started}\n${diagnosis}`).toBe(SCALE_TIERS[tier].gaps);
-            expect(started).toBeLessThanOrEqual(MAX_GAPS_PER_SWEEP);
 
             assertRowsAreAttributable(rows, {
               expectedPluginIds: [COVERAGE_PLUGIN_ID, RULE_CREATION_PLUGIN_ID],

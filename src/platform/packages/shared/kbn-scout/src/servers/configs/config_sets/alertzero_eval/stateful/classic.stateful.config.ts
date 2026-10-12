@@ -45,6 +45,14 @@ const pinnedConnectorId = (
 
 const DEFAULT_AI_CONNECTOR_ARG = '--uiSettings.overrides.genAiSettings:defaultAIConnector=';
 
+/**
+ * The eval measures tokens, so the token-usage rows must actually be written: the index
+ * `.kibana-inference-token-usage` does not exist until `genAiSettings:tokenUsageTracking` is on
+ * (default false), and every run failed at the first token read with `index_not_found_exception`
+ * while the sweeps themselves ran (measured: smoke-e01d0215577b44e8).
+ */
+const TOKEN_USAGE_TRACKING_ARG = '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true';
+
 export const servers: ScoutServerConfig = {
   ...e2eServers,
   kbnTestServer: {
@@ -56,6 +64,7 @@ export const servers: ScoutServerConfig = {
       ...e2eServers.kbnTestServer.serverArgs.filter(
         (arg) => !arg.startsWith(DEFAULT_AI_CONNECTOR_ARG)
       ),
+      TOKEN_USAGE_TRACKING_ARG,
       ...(pinnedConnectorId ? [`${DEFAULT_AI_CONNECTOR_ARG}${pinnedConnectorId}`] : []),
     ],
   },

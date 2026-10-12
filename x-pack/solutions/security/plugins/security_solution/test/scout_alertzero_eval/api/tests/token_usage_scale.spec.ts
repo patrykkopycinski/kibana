@@ -91,6 +91,10 @@ apiTest.describe(
     apiTest(
       'measures the rule tuning sweep at each scale tier',
       async ({ apiClient, samlAuth, esClient }, testInfo) => {
+        // Playwright's default test cap is 60s; the sweep budget is minutes. Raise it here or the
+        // run dies on 'Test timeout of 60000ms exceeded' long before the sweep can settle
+        // (measured: smoke-10d4d7b2bfbe41ff).
+        testInfo.setTimeout(SWEEP_TIMEOUT_MS + REVIEW_TIMEOUT_MS + 60_000);
         const api = await getAdminApi(apiClient, samlAuth);
         for (const tier of parseScaleTiers(process.env.ALERTZERO_EVAL_SCALES)) {
           const seed = await seedTuningNoise(esClient, api, {
@@ -142,6 +146,7 @@ apiTest.describe(
     apiTest(
       'measures the coverage sweep at each scale tier',
       async ({ apiClient, samlAuth, esClient }, testInfo) => {
+        testInfo.setTimeout(SWEEP_TIMEOUT_MS + REVIEW_TIMEOUT_MS + 60_000);
         const api = await getAdminApi(apiClient, samlAuth);
         for (const tier of parseScaleTiers(process.env.ALERTZERO_EVAL_SCALES)) {
           const seed = await seedCoverageGaps(esClient, {

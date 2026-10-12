@@ -104,9 +104,13 @@ export const ALERTS_GIST_URL_ENV = 'ALERTZERO_EVAL_ALERTS_GIST_URL';
 /**
  * Sweeps run real models over every seeded row, so the budget is per sweep rather than per test.
  * A timeout is a failure, never a skip: the point of the eval is the timing of a completed sweep.
+ *
+ * Defaults fit TWO sweep tests (tuning + coverage) plus seeding inside the cell lane's 2700s test
+ * budget. The first live run died on Playwright's 60s default test cap, so the spec also raises its
+ * own timeout from these values — keep them in step if you raise them.
  */
-export const SWEEP_TIMEOUT_MS = 30 * 60_000;
-export const REVIEW_TIMEOUT_MS = 20 * 60_000;
+export const SWEEP_TIMEOUT_MS = Number(process.env.ALERTZERO_EVAL_SWEEP_TIMEOUT_MS ?? 12 * 60_000);
+export const REVIEW_TIMEOUT_MS = Number(process.env.ALERTZERO_EVAL_REVIEW_TIMEOUT_MS ?? 8 * 60_000);
 
 /** The tuning sweep's own defaults are 7d / 10 FPs, which a scale-tier seed cannot reach cheaply. */
 export const TUNING_INPUTS = {

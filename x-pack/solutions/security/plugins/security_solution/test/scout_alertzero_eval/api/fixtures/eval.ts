@@ -26,6 +26,7 @@ import type { AlertZeroApi } from '../../../scout_alertzero_e2e/common/kbn';
 import {
   createServiceAccount,
   deleteServiceAccount,
+  describeExecution,
   getWorker,
   listExecutionIds,
   resetWorker,
@@ -260,10 +261,15 @@ export const runSweep = async (
     });
 
     if (settled.status !== 'completed') {
+      // Step-level detail, not just the status: the failure that matters (a step's own error) is
+      // only visible in the execution's steps and its children's steps.
+      const detail = await describeExecution(api, workflowExecutionId).catch(
+        (error: Error) => `describeExecution failed: ${error.message}`
+      );
       throw new Error(
         `Sweep ${workflowId} settled as ${settled.status}, not completed: ${JSON.stringify(
           settled.error ?? settled.cancellationReason ?? {}
-        )}`
+        )}\n${detail}`
       );
     }
 

@@ -204,35 +204,45 @@ export const runSweep = async (
   }
 ): Promise<SweepRun> => {
   const settings = sweepSettings(workflowId, tier);
+  const workerId = settings.workerId as string;
   const serviceAccountId = await createServiceAccount(api);
-  const worker = await getWorker(api, settings.workerId as string);
-  const workerWorkflowId = worker.workflowId;
+
+  // The workflow is installed BY the settings save (`WorkersService.persistWorker` ->
+  // `installRegisteredWorkerForRequest`), so a fresh worker legitimately carries no `workflowId`
+  // until that save runs; asserting before it is what made the first head report "no workflow
+  // installed". Save first, then read the id the save installed.
+  const before = await getWorker(api, workerId);
+  const saved = ok(
+    await updateWorker(api, workerId, {
+      settingsRevision: before.settingsRevision ?? null,
+      settings: { ...settings, serviceAccountId },
+    }),
+    `configure the ${workerId} sweep settings`
+  );
+  const workerWorkflowId = saved.workflowId ?? (await getWorker(api, workerId)).workflowId;
   if (!workerWorkflowId) {
-    throw new Error(`Worker ${settings.workerId} has no workflow installed`);
-  }
-  if (workerWorkflowId !== workflowId) {
+    // Diagnostic payload, not just a message: a second red run must explain itself.
     throw new Error(
-      `Worker ${settings.workerId} runs workflow ${workerWorkflowId}, the eval measures ${workflowId}`
+      `Worker ${workerId} has no workflow installed after the settings save; worker=${JSON.stringify(
+        saved
+      )} settings sent=${JSON.stringify(settings)}`
     );
   }
-
-  const settingsUpdate = ok(
-    await updateWorker(api, settings.workerId as string, {
-      settingsRevision: worker.settingsRevision ?? null,
-      settings: { ...(settings as { serviceAccountId?: string }), serviceAccountId },
-    }),
-    `configure the ${settings.workerId} sweep settings`
-  ).settings;
+  if (!workerWorkflowId.startsWith(workflowId)) {
+    throw new Error(
+      `Worker ${workerId} runs workflow ${workerWorkflowId}, the eval measures ${workflowId}`
+    );
+  }
 
   try {
     const knownExecutionIds = await listExecutionIds(api, workerWorkflowId);
     const started = new Date().toISOString();
     const enabled = ok(
-      await updateWorker(api, settings.workerId as string, { enabled: true }),
-      `enable the ${settings.workerId} worker`
+      await updateWorker(api, workerId, { enabled: true }),
+      `enable the ${workerId} worker`
     );
     if (!enabled.enabled) {
-      throw new Error(`enabling worker ${settings.workerId} did not stick`);
+      throw new Error(`enabling worker ${workerId} did not stick`);
     }
 
     const workflowExecutionId = await waitForNewExecution(

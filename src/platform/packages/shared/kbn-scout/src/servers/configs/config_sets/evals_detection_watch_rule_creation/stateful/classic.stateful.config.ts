@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
@@ -32,6 +33,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',

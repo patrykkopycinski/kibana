@@ -202,13 +202,12 @@ export const ScoutTestConfigSchema = z
       });
     }
   })
-  .transform(({ apiKeyEnv, ...cfg }) => ({
+  .transform((cfg) => ({
     ...cfg,
     uiam: cfg.uiam ?? cfg.serverless,
-    // Resolved here so every client reads one field; the env var is validated above.
-    apiKey: cfg.apiKey ?? (apiKeyEnv ? process.env[apiKeyEnv] : undefined),
     // API-key targets carry no basic-auth user; keep the field non-optional so existing
-    // basic-auth consumers still type-check. Clients prefer `apiKey` whenever it is set.
+    // basic-auth consumers still type-check. Clients resolve `apiKey`/`apiKeyEnv`
+    // (the env variable's presence is validated above).
     auth: cfg.auth ?? { username: '', password: '' },
   }));
 

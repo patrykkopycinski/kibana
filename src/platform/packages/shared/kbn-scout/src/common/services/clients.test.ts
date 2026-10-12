@@ -83,6 +83,24 @@ describe('scout clients auth', () => {
       expect(esClientMock().mock.calls[0][0].authOverride).toBeUndefined();
     });
 
+    it('resolves an apiKeyEnv config from the environment', () => {
+      process.env.SCOUT_TEST_PROJECT_API_KEY = 'env-key';
+      try {
+        const { getEsClient } = loadClients();
+
+        getEsClient(
+          { ...apiKeyConfig, apiKey: undefined, apiKeyEnv: 'SCOUT_TEST_PROJECT_API_KEY' },
+          noopLogger
+        );
+
+        expect(esClientMock().mock.calls[0][0]).toMatchObject({
+          auth: { apiKey: 'env-key' },
+        });
+      } finally {
+        delete process.env.SCOUT_TEST_PROJECT_API_KEY;
+      }
+    });
+
     it('keeps basic auth when the config has no API key', () => {
       const { getEsClient } = loadClients();
 

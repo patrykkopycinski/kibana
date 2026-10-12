@@ -380,14 +380,14 @@ describe('createScoutConfig', () => {
       expect(config.apiKey).toBe('inline-key');
     });
 
-    it('resolves apiKeyEnv from the environment so the secret is never in the file', () => {
+    it('passes apiKeyEnv through so the secret stays out of the file', () => {
       process.env[ENV_NAME] = 'env-key';
       writeConfig('cloud_mki', { ...mkiWithoutAuth, apiKeyEnv: ENV_NAME });
 
       const config = createScoutConfig(tmpDir, 'cloud_mki', noopLogger);
 
-      expect(config.apiKey).toBe('env-key');
-      expect(config).not.toHaveProperty('apiKeyEnv');
+      expect(config.apiKeyEnv).toBe(ENV_NAME);
+      expect(config.apiKey).toBeUndefined();
     });
 
     it('fails clearly when the apiKeyEnv variable is not set', () => {

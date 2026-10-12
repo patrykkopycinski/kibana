@@ -219,13 +219,13 @@ export const runSweep = async (
   // until that save runs; asserting before it is what made the first head report "no workflow
   // installed". Save first, then read the id the save installed.
   const before = await getWorker(api, workerId);
-  const saved = ok(
-    await updateWorker(api, workerId, {
-      settingsRevision: before.settingsRevision ?? null,
-      settings: { ...settings, serviceAccountId },
-    }),
-    `configure the ${workerId} sweep settings`
-  );
+  // NOT wrapped in `ok()`: `updateWorker` already returns the unwrapped WorkerRecord, and `ok()`
+  // reads `{statusCode, body}` — wrapping a plain record makes it return `undefined` (measured:
+  // smoke-405eff93acbf4364, "Cannot read properties of undefined (reading 'workflowId')").
+  const saved = await updateWorker(api, workerId, {
+    settingsRevision: before.settingsRevision ?? null,
+    settings: { ...settings, serviceAccountId },
+  });
   const workerWorkflowId = saved.workflowId ?? (await getWorker(api, workerId)).workflowId;
   if (!workerWorkflowId) {
     // Diagnostic payload, not just a message: a second red run must explain itself.
@@ -244,10 +244,7 @@ export const runSweep = async (
   try {
     const knownExecutionIds = await listExecutionIds(api, workerWorkflowId);
     const started = new Date().toISOString();
-    const enabled = ok(
-      await updateWorker(api, workerId, { enabled: true }),
-      `enable the ${workerId} worker`
-    );
+    const enabled = await updateWorker(api, workerId, { enabled: true });
     if (!enabled.enabled) {
       throw new Error(`enabling worker ${workerId} did not stick`);
     }

@@ -31,31 +31,31 @@
       ]
     },
     {
-      "id": "agent-builder-collision-baseline",
-      "name": "Agent Builder - endpoint-forensic-analysis routing collision (baseline, skill dark)",
+      "id": "alertzero-efa-collision-baseline",
+      "name": "AZ endpoint-forensic-analysis routing collision n30 (baseline, skill dark)",
       "slackChannel": "#agent-builder-alerts",
-      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/collision.playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/collision_n30.baseline.playwright.config.ts",
       "serverConfigSet": "evals_agent_builder",
       "tags": [
         "platform",
         "agent-builder"
       ],
       "ciLabels": [
-        "evals:agent-builder-collision-baseline"
+        "evals:alertzero-efa-collision-baseline"
       ]
     },
     {
-      "id": "agent-builder-collision-endpoint-forensic",
-      "name": "Agent Builder - endpoint-forensic-analysis routing collision (candidate, skill enabled)",
+      "id": "alertzero-efa-collision-candidate",
+      "name": "AZ endpoint-forensic-analysis routing collision n30 (candidate, skill enabled)",
       "slackChannel": "#agent-builder-alerts",
-      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/collision.playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/collision_n30.candidate.playwright.config.ts",
       "serverConfigSet": "evals_agent_builder_endpoint_forensic",
       "tags": [
         "platform",
         "agent-builder"
       ],
       "ciLabels": [
-        "evals:agent-builder-collision-endpoint-forensic"
+        "evals:alertzero-efa-collision-candidate"
       ]
     },
     {

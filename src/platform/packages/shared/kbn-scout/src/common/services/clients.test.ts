@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { ScoutLogger, ScoutTestConfig } from '../../types';
 
 jest.mock('@kbn/kbn-client', () => ({
   KbnClient: jest.fn((options: unknown) => ({ options })),
@@ -24,9 +24,11 @@ const noopLogger: ScoutLogger = {
   error: jest.fn(),
 } as unknown as ScoutLogger;
 
-const loadClients = () => {
+const loadClients = (): typeof import('./clients') => {
+  // The module memoizes its clients; reset the registry so each case starts clean.
   jest.resetModules();
-  return require('./clients') as typeof import('./clients');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require('./clients');
 };
 
 const kbnClientMock = () =>

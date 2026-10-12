@@ -13,12 +13,26 @@ import {
   COVERAGE_KI_TYPE,
   EVAL_RUN_MARKER_PREFIX,
   EVAL_SPACE_ID,
+  RULE_COVERAGE_SWEEP_WORKFLOW_ID,
+  RULE_COVERAGE_WORKER_ID,
+  RULE_TUNING_SWEEP_WORKFLOW_ID,
+  RULE_TUNING_WORKER_ID,
   SCALE_TIERS,
   TOKEN_USAGE_DATA_STREAM,
   type ScaleTier,
 } from '../../common/constants';
 import { ok, pollUntil } from '../../../scout_alertzero_e2e/common/kbn';
 import type { AlertZeroApi } from '../../../scout_alertzero_e2e/common/kbn';
+import {
+  createServiceAccount,
+  deleteServiceAccount,
+  getWorker,
+  listExecutionIds,
+  resetWorker,
+  updateWorker,
+  waitForExecution,
+  waitForNewExecution,
+} from '../../../scout_alertzero_e2e/api/fixtures/alertzero';
 import type { WorkflowExecution } from '../../../scout_alertzero_e2e/api/fixtures/alertzero';
 
 const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
@@ -146,60 +160,124 @@ export interface SweepRun {
 }
 
 /**
- * Starts a global sweep by hand (its only trigger is manual) and polls it to a state that ends the
- * measurement window. A failure to start, a non-`completed` sweep or a timeout throws: the eval
- * measures a sweep that ran, and a timeout is a failure, never a skip.
+ * Worker settings that make the enabled worker's immediate scheduled run behave like the sweep the
+ * eval measures: thresholds the seeded scale tiers exceed, and (coverage) the max gaps per run the
+ * tier seeds. `analysis_window_days` / `lookback_days` minimums are enforced by the settings
+ * contract, so they stay at the schema floor.
+ */
+const sweepSettings = (workflowId: string, tier: ScaleTier): Record<string, unknown> =>
+  workflowId === RULE_TUNING_SWEEP_WORKFLOW_ID
+    ? {
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 1, fpCountThreshold: 2, fpRateThresholdPct: 0 },
+      }
+    : {
+        workerId: RULE_COVERAGE_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '1h',
+        extras: { lookbackDays: 8, maxGapsPerRun: Math.min(SCALE_TIERS[tier].gaps, 50) },
+      };
+
+/**
+ * Drives a global Worker sweep the only way the product supports for managed Workers: the sweep
+ * workflow's `/run` route 404s for installed managed definitions (measured: smoke-404df3c634414bf7),
+ * so the worker is configured with sweep-shaped settings, a service account is bound, and enabling
+ * it makes Task Manager run the sweep at once as that account — the same supported path the
+ * alertzero e2e suite uses (`attack_discovery_to_isolate.spec.ts`). Returns once the sweep execution
+ * settles; a non-completed status or a timeout throws (a timeout is a failure, never a skip).
  */
 export const runSweep = async (
   api: AlertZeroApi,
   {
     workflowId,
-    inputs,
+    tier = 'large',
     timeoutMs,
     settledStatuses = SETTLED_EXECUTION_STATUSES,
   }: {
     workflowId: string;
-    inputs: Record<string, unknown>;
+    tier?: ScaleTier;
+    inputs?: Record<string, unknown>;
     timeoutMs: number;
     settledStatuses?: readonly string[];
   }
 ): Promise<SweepRun> => {
-  const started = new Date().toISOString();
-  const { workflowExecutionId } = ok(
-    await api.public<{ workflowExecutionId: string }>('POST', WORKFLOW_RUN_URL(workflowId), {
-      body: { inputs },
-    }),
-    `start the ${workflowId} sweep`
-  );
-
-  const settled = await pollUntil(
-    `${workflowId} to settle`,
-    async () => {
-      const execution = ok(
-        await api.public<WorkflowExecution>('GET', `${EXECUTIONS_URL}/${workflowExecutionId}`),
-        'read the sweep execution'
-      );
-      return settledStatuses.includes(execution.status) ? execution : undefined;
-    },
-    { timeoutMs }
-  );
-
-  if (settled.status !== 'completed') {
+  const settings = sweepSettings(workflowId, tier);
+  const serviceAccountId = await createServiceAccount(api);
+  const worker = await getWorker(api, settings.workerId as string);
+  const workerWorkflowId = worker.workflowId;
+  if (!workerWorkflowId) {
+    throw new Error(`Worker ${settings.workerId} has no workflow installed`);
+  }
+  if (workerWorkflowId !== workflowId) {
     throw new Error(
-      `Sweep ${workflowId} settled as ${settled.status}, not completed: ${JSON.stringify(
-        settled.error ?? settled.cancellationReason ?? {}
-      )}`
+      `Worker ${settings.workerId} runs workflow ${workerWorkflowId}, the eval measures ${workflowId}`
     );
   }
 
-  return {
-    executionId: workflowExecutionId,
-    workflowId,
-    status: settled.status,
-    startedAt: settled.startedAt ?? started,
-    finishedAt: settled.finishedAt ?? new Date().toISOString(),
-    outputs: settled.output ?? {},
-  };
+  const settingsUpdate = ok(
+    await updateWorker(api, settings.workerId as string, {
+      settingsRevision: worker.settingsRevision ?? null,
+      settings: { ...(settings as { serviceAccountId?: string }), serviceAccountId },
+    }),
+    `configure the ${settings.workerId} sweep settings`
+  ).settings;
+
+  try {
+    const knownExecutionIds = await listExecutionIds(api, workerWorkflowId);
+    const started = new Date().toISOString();
+    const enabled = ok(
+      await updateWorker(api, settings.workerId as string, { enabled: true }),
+      `enable the ${settings.workerId} worker`
+    );
+    if (!enabled.enabled) {
+      throw new Error(`enabling worker ${settings.workerId} did not stick`);
+    }
+
+    const workflowExecutionId = await waitForNewExecution(
+      api,
+      workerWorkflowId,
+      knownExecutionIds,
+      { timeoutMs }
+    );
+    const settled = await waitForExecution(api, `${workflowId} sweep`, workflowExecutionId, {
+      timeoutMs,
+    });
+
+    if (settled.status !== 'completed') {
+      throw new Error(
+        `Sweep ${workflowId} settled as ${settled.status}, not completed: ${JSON.stringify(
+          settled.error ?? settled.cancellationReason ?? {}
+        )}`
+      );
+    }
+
+    // Workflow outputs live on `context.output` for worker executions (execution-level `output`
+    // is null when the workflow ends via `workflow.output` emit steps); read both.
+    const raw = settled as typeof settled & {
+      finishedAt?: string;
+      context?: { output?: Record<string, unknown> };
+      output?: Record<string, unknown>;
+    };
+    return {
+      executionId: workflowExecutionId,
+      workflowId,
+      status: settled.status,
+      startedAt: settled.startedAt ?? started,
+      finishedAt: raw.finishedAt ?? new Date().toISOString(),
+      outputs: raw.context?.output ?? raw.output ?? {},
+    };
+  } finally {
+    // Always disable the worker and unbind the account, even on failure: an enabled worker keeps
+    // re-running on its schedule into the next test's measurement window.
+    const current = await getWorker(api, settings.workerId as string).catch(() => undefined);
+    if (current?.enabled) {
+      await updateWorker(api, settings.workerId as string, { enabled: false }).catch(() => undefined);
+    }
+    await resetWorker(api, settings.workerId as string).catch(() => undefined);
+    await deleteServiceAccount(api, serviceAccountId).catch(() => undefined);
+  }
 };
 
 /** The child executions a sweep fanned out to, one per review it started. */

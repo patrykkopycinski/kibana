@@ -650,6 +650,71 @@ export const collectTokenUsage = async (
 };
 
 /**
+ * Adds a settled read: a sweep's `start_reviews` foreach STARTS child reviews and returns, so rows
+ * keep arriving after the sweep execution completes (measured: smoke-c6f1764679d04a23 — 50 review
+ * children started in 53s, sweep test itself took 8.8 min). Poll until the row count stops growing
+ * for `quietMs`, so the dump is not a snapshot of a still-running fan-out.
+ */
+export const collectTokenUsageSettled = async (
+  esClient: EsClient,
+  { since, quietMs = 45_000, timeoutMs = 6 * 60_000 }: { since: string; quietMs?: number; timeoutMs?: number }
+): Promise<TokenUsageRow[]> => {
+  const deadline = Date.now() + timeoutMs;
+  let lastCount = -1;
+  let lastChange = Date.now();
+  let rows: TokenUsageRow[] = [];
+  for (;;) {
+    rows = await collectTokenUsage(esClient, { since, until: new Date().toISOString() });
+    if (rows.length !== lastCount) {
+      lastCount = rows.length;
+      lastChange = Date.now();
+    }
+    const quiet = Date.now() - lastChange >= quietMs;
+    if ((quiet && rows.length > 0) || Date.now() >= deadline) {
+      return rows;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
+  }
+};
+
+/**
+ * Why a sweep produced nothing: the worker's own step outputs. A harvest that found no rows and a
+ * harvest that found rows but no candidates both end as `reviews_requested: 0`, and only the step
+ * outputs say which. Truncated hard — this rides in a failure message.
+ */
+export const describeSweepDiagnosis = async (
+  api: AlertZeroApi,
+  executionId: string
+): Promise<string> => {
+  try {
+    const execution = ok(
+      await api.public<WorkflowExecution & { stepExecutions?: Array<Record<string, unknown>> }>(
+        'GET',
+        `${EXECUTIONS_URL}/${executionId}`
+      ),
+      'read the sweep execution for diagnosis'
+    );
+    return (execution.stepExecutions ?? [])
+      .filter((step) => {
+        const id = String(step.stepId ?? '');
+        return /harvest|candidate|fanout|dispatch|review/i.test(id);
+      })
+      .map((step) => {
+        const detail = JSON.stringify({
+          stepId: step.stepId,
+          status: step.status,
+          error: step.error,
+          output: step.output,
+        });
+        return `${String(step.stepId)}: ${detail.slice(0, 700)}`;
+      })
+      .join('\n');
+  } catch (error) {
+    return `could not read the sweep execution for diagnosis: ${(error as Error).message}`;
+  }
+};
+
+/**
  * Structural checks the eval asserts on every row: it was attributed to a Worker (`feature_id` is
  * one of the workflow step plugin-ids) and it was served by an EIS endpoint. A row that fails
  * either is a missing-attribution failure, not a measurement to average over.

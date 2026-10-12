@@ -26,18 +26,17 @@ import {
   assertRowsAreAttributable,
   attachArtifact,
   buildArtifact,
-  collectTokenUsage,
+  collectTokenUsageSettled,
+  describeSweepDiagnosis,
   getAdminApi,
   getAssignedEndpoints,
   isEisEndpointId,
-  listChildExecutions,
   runSweep,
   seedAlertDocsFromGist,
   seedCoverageGaps,
   seedTuningNoise,
   setModelTier,
   tags,
-  waitForReview,
 } from '../fixtures';
 
 /**
@@ -111,31 +110,27 @@ apiTest.describe(
             });
 
             const requested = Number(sweep.outputs.reviews_requested ?? 0);
-            expect(requested).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
-            // One review per seeded noisy rule: a sweep that harvests fewer is a finding, not noise.
-            expect(requested).toBe(SCALE_TIERS[tier].rules);
 
-            const children = await listChildExecutions(api, sweep.executionId);
-            expect(children).toHaveLength(requested);
-            for (const child of children) {
-              await waitForReview(api, {
-                executionId: child.executionId,
-                timeoutMs: REVIEW_TIMEOUT_MS,
-              });
-            }
+            const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
 
-            const rows = await collectTokenUsage(esClient, {
-              since: sweep.startedAt,
-              until: new Date().toISOString(),
-            });
-            assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
-            expect(rows.length).toBeGreaterThan(0);
-
+            // Attach BEFORE asserting: a failing assertion must not take its own evidence down with
+            // it (the first runs failed with the artifact never written).
             await attachArtifact(
               testInfo,
               `alertzero-eval-token-usage-tuning-${tier}.json`,
               buildArtifact(tier, [sweep], rows)
             );
+
+            // One review per seeded noisy rule: a sweep that harvests fewer is a finding, not noise.
+            // The diagnosis names the worker step that came up empty (harvest vs candidate lookup).
+            const diagnosis = requested === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
+            expect(requested, `reviews_requested=${requested}\n${diagnosis}`).toBe(
+              SCALE_TIERS[tier].rules
+            );
+            expect(requested).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
+
+            assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
+            expect(rows.length).toBeGreaterThan(0);
           } finally {
             await seed.cleanup();
           }
@@ -161,22 +156,23 @@ apiTest.describe(
             });
 
             const started = Number(sweep.outputs.started ?? 0);
+
+            const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
+
+            await attachArtifact(
+              testInfo,
+              `alertzero-eval-token-usage-coverage-${tier}.json`,
+              buildArtifact(tier, [sweep], rows)
+            );
+
+            // `started` is the count the worker's own `start_reviews` foreach dispatched, which is
+            // the number of reviews the sweep fanned out to — the child-executions route reports the
+            // worker's own children, not one entry per review (measured: smoke-c6f1764679d04a23
+            // dispatched 50 and returned 1 child), so it is not the assertion to make here.
+            const diagnosis = started === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
+            expect(started, `started=${started}\n${diagnosis}`).toBe(SCALE_TIERS[tier].gaps);
             expect(started).toBeLessThanOrEqual(MAX_GAPS_PER_SWEEP);
-            expect(started).toBe(SCALE_TIERS[tier].gaps);
 
-            const children = await listChildExecutions(api, sweep.executionId);
-            expect(children).toHaveLength(started);
-            for (const child of children) {
-              await waitForReview(api, {
-                executionId: child.executionId,
-                timeoutMs: REVIEW_TIMEOUT_MS,
-              });
-            }
-
-            const rows = await collectTokenUsage(esClient, {
-              since: sweep.startedAt,
-              until: new Date().toISOString(),
-            });
             assertRowsAreAttributable(rows, {
               expectedPluginIds: [COVERAGE_PLUGIN_ID, RULE_CREATION_PLUGIN_ID],
             });

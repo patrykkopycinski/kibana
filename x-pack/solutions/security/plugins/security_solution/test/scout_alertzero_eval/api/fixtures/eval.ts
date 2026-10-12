@@ -160,21 +160,28 @@ export interface SweepRun {
 }
 
 /**
- * Worker settings that make the enabled worker's immediate scheduled run behave like the sweep the
+ * Worker id each sweep drives. The id is the PATCH URL parameter, not a settings key: `settings` is
+ * `.strict()` (verified against `WorkerSettingsWrite`), and sending `workerId` inside it is a 400
+ * "settings: Unrecognized key" (measured: smoke-6819fe62, smoke-599301ea, smoke-b5c7ebd3).
+ */
+const sweepWorkerId = (workflowId: string): string =>
+  workflowId === RULE_TUNING_SWEEP_WORKFLOW_ID ? RULE_TUNING_WORKER_ID : RULE_COVERAGE_WORKER_ID;
+
+/**
+ * Settings patch that makes the enabled worker's immediate scheduled run behave like the sweep the
  * eval measures: thresholds the seeded scale tiers exceed, and (coverage) the max gaps per run the
- * tier seeds. `analysis_window_days` / `lookback_days` minimums are enforced by the settings
- * contract, so they stay at the schema floor.
+ * tier seeds. `analysisWindowDays` / `lookbackDays` minimums are enforced by the settings contract,
+ * so they stay at the schema floor. Only keys `WorkerSettingsWrite` declares: autonomy,
+ * scheduleInterval, serviceAccountId, extras — `extras` is whole-object and its keys are required.
  */
 const sweepSettings = (workflowId: string, tier: ScaleTier): Record<string, unknown> =>
   workflowId === RULE_TUNING_SWEEP_WORKFLOW_ID
     ? {
-        workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'assisted',
         scheduleInterval: '2h',
         extras: { analysisWindowDays: 1, fpCountThreshold: 2, fpRateThresholdPct: 0 },
       }
     : {
-        workerId: RULE_COVERAGE_WORKER_ID,
         autonomy: 'assisted',
         scheduleInterval: '1h',
         extras: { lookbackDays: 8, maxGapsPerRun: Math.min(SCALE_TIERS[tier].gaps, 50) },
@@ -203,8 +210,8 @@ export const runSweep = async (
     settledStatuses?: readonly string[];
   }
 ): Promise<SweepRun> => {
+  const workerId = sweepWorkerId(workflowId);
   const settings = sweepSettings(workflowId, tier);
-  const workerId = settings.workerId as string;
   const serviceAccountId = await createServiceAccount(api);
 
   // The workflow is installed BY the settings save (`WorkersService.persistWorker` ->
@@ -281,11 +288,11 @@ export const runSweep = async (
   } finally {
     // Always disable the worker and unbind the account, even on failure: an enabled worker keeps
     // re-running on its schedule into the next test's measurement window.
-    const current = await getWorker(api, settings.workerId as string).catch(() => undefined);
+    const current = await getWorker(api, workerId).catch(() => undefined);
     if (current?.enabled) {
-      await updateWorker(api, settings.workerId as string, { enabled: false }).catch(() => undefined);
+      await updateWorker(api, workerId, { enabled: false }).catch(() => undefined);
     }
-    await resetWorker(api, settings.workerId as string).catch(() => undefined);
+    await resetWorker(api, workerId).catch(() => undefined);
     await deleteServiceAccount(api, serviceAccountId).catch(() => undefined);
   }
 };

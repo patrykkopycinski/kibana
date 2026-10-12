@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout-security/api';
+import {
+  ALERTZERO_TIER_FEATURE_IDS,
+  COVERAGE_PLUGIN_ID,
+  EXPECTED_PLUGIN_IDS,
+  makeRunMarker,
+  MAX_GAPS_PER_SWEEP,
+  MAX_RULES_PER_SWEEP,
+  parseScaleTiers,
+  RULE_COVERAGE_SWEEP_WORKFLOW_ID,
+  RULE_CREATION_PLUGIN_ID,
+  RULE_TUNING_PLUGIN_ID,
+  RULE_TUNING_SWEEP_WORKFLOW_ID,
+  REVIEW_TIMEOUT_MS,
+  SCALE_TIERS,
+  SWEEP_TIMEOUT_MS,
+  TUNING_INPUTS,
+  apiTest,
+  assertRowsAreAttributable,
+  attachArtifact,
+  buildArtifact,
+  collectTokenUsage,
+  getAdminApi,
+  getAssignedEndpoints,
+  isEisEndpointId,
+  listChildExecutions,
+  runSweep,
+  seedAlertDocsFromGist,
+  seedCoverageGaps,
+  seedTuningNoise,
+  setModelTier,
+  tags,
+  waitForReview,
+} from '../fixtures';
+
+/**
+ * Endpoints every AlertZero tier is assigned for the run. The eval measures one model at a time, so
+ * one value pins both the stack's default connector (the `alertzero_eval` config set reads the same
+ * env) and the three AlertZero tiers. `ALERTZERO_EVAL_TIER_ENDPOINTS` overrides it with a
+ * comma-separated list for a run that wants, say, a cheap fast tier and a frontier agentic one.
+ */
+const tierEndpoints = (
+  process.env.ALERTZERO_EVAL_TIER_ENDPOINTS ??
+  process.env.ALERTZERO_EVAL_AI_CONNECTOR ??
+  ''
+)
+  .split(',')
+  .map((value) => value.trim())
+  .filter((value) => value.length > 0);
+
+/**
+ * Seeds alerts at each scale tier, drives each Worker sweep by hand, waits for the reviews it fans
+ * out to, and dumps the token rows the sweeps produced.
+ *
+ * Structural assertions only: the counts a sweep reports stay inside the Worker caps, every row is
+ * attributed to a Worker plugin-id and was served by an EIS endpoint. No expectation is phrased on
+ * a number a model chose, so the same spec is valid for every model the eval is run against.
+ *
+ * A timeout fails the run, never skips it: a sweep that never settles is the finding.
+ */
+apiTest.describe(
+  'AlertZero eval - token usage per worker sweep',
+  { tag: [...tags.stateful.classic] },
+  () => {
+    apiTest(
+      'pins every AlertZero inference tier to an EIS endpoint',
+      async ({ apiClient, samlAuth }) => {
+        if (tierEndpoints.length === 0) {
+          throw new Error(
+            'Set ALERTZERO_EVAL_AI_CONNECTOR (or ALERTZERO_EVAL_TIER_ENDPOINTS) to the EIS endpoint the eval should measure'
+          );
+        }
+        expect(tierEndpoints.every(isEisEndpointId)).toBe(true);
+
+        const api = await getAdminApi(apiClient, samlAuth);
+        for (const featureId of ALERTZERO_TIER_FEATURE_IDS) {
+          const response = await setModelTier(api, { featureId, endpointIds: tierEndpoints });
+          expect(response.invalidEndpoints ?? []).toStrictEqual([]);
+          expect(await getAssignedEndpoints(api, featureId)).toStrictEqual(tierEndpoints);
+        }
+      }
+    );
+
+    apiTest(
+      'measures the rule tuning sweep at each scale tier',
+      async ({ apiClient, samlAuth, esClient }, testInfo) => {
+        const api = await getAdminApi(apiClient, samlAuth);
+        for (const tier of parseScaleTiers(process.env.ALERTZERO_EVAL_SCALES)) {
+          const seed = await seedTuningNoise(esClient, api, {
+            tier,
+            runMarker: makeRunMarker(`tuning-${tier}`),
+          });
+          try {
+            expect(SCALE_TIERS[tier].rules).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
+
+            const sweep = await runSweep(api, {
+              workflowId: RULE_TUNING_SWEEP_WORKFLOW_ID,
+              inputs: { autonomy_level: 'assisted', ...TUNING_INPUTS },
+              timeoutMs: SWEEP_TIMEOUT_MS,
+            });
+
+            const requested = Number(sweep.outputs.reviews_requested ?? 0);
+            expect(requested).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
+            // One review per seeded noisy rule: a sweep that harvests fewer is a finding, not noise.
+            expect(requested).toBe(SCALE_TIERS[tier].rules);
+
+            const children = await listChildExecutions(api, sweep.executionId);
+            expect(children).toHaveLength(requested);
+            for (const child of children) {
+              await waitForReview(api, {
+                executionId: child.executionId,
+                timeoutMs: REVIEW_TIMEOUT_MS,
+              });
+            }
+
+            const rows = await collectTokenUsage(esClient, {
+              since: sweep.startedAt,
+              until: new Date().toISOString(),
+            });
+            assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
+            expect(rows.length).toBeGreaterThan(0);
+
+            await attachArtifact(
+              testInfo,
+              `alertzero-eval-token-usage-tuning-${tier}.json`,
+              buildArtifact(tier, [sweep], rows)
+            );
+          } finally {
+            await seed.cleanup();
+          }
+        }
+      }
+    );
+
+    apiTest(
+      'measures the coverage sweep at each scale tier',
+      async ({ apiClient, samlAuth, esClient }, testInfo) => {
+        const api = await getAdminApi(apiClient, samlAuth);
+        for (const tier of parseScaleTiers(process.env.ALERTZERO_EVAL_SCALES)) {
+          const seed = await seedCoverageGaps(esClient, {
+            tier,
+            runMarker: makeRunMarker(`coverage-${tier}`),
+          });
+          try {
+            const sweep = await runSweep(api, {
+              workflowId: RULE_COVERAGE_SWEEP_WORKFLOW_ID,
+              inputs: {
+                autonomy_level: 'assisted',
+                lookback_days: 1,
+                batch_size: SCALE_TIERS[tier].gaps,
+              },
+              timeoutMs: SWEEP_TIMEOUT_MS,
+            });
+
+            const started = Number(sweep.outputs.started ?? 0);
+            expect(started).toBeLessThanOrEqual(MAX_GAPS_PER_SWEEP);
+            expect(started).toBe(SCALE_TIERS[tier].gaps);
+
+            const children = await listChildExecutions(api, sweep.executionId);
+            expect(children).toHaveLength(started);
+            for (const child of children) {
+              await waitForReview(api, {
+                executionId: child.executionId,
+                timeoutMs: REVIEW_TIMEOUT_MS,
+              });
+            }
+
+            const rows = await collectTokenUsage(esClient, {
+              since: sweep.startedAt,
+              until: new Date().toISOString(),
+            });
+            assertRowsAreAttributable(rows, {
+              expectedPluginIds: [COVERAGE_PLUGIN_ID, RULE_CREATION_PLUGIN_ID],
+            });
+            expect(rows.length).toBeGreaterThan(0);
+            expect(rows.some((row) => row.featureId === COVERAGE_PLUGIN_ID)).toBe(true);
+
+            await attachArtifact(
+              testInfo,
+              `alertzero-eval-token-usage-coverage-${tier}.json`,
+              buildArtifact(tier, [sweep], rows)
+            );
+          } finally {
+            await seed.cleanup();
+          }
+        }
+      }
+    );
+
+    apiTest('seeds alerts from the #19901 gist', async ({ apiClient, samlAuth, esClient }) => {
+      const api = await getAdminApi(apiClient, samlAuth);
+      const runMarker = makeRunMarker('gist');
+      const seeded = await seedAlertDocsFromGist(esClient, { runMarker });
+
+      // The card names the gist as the alert source, so an unconfigured run is a failure that
+      // spells out what is missing rather than a pass that measured the in-repo seed instead.
+      if (seeded === undefined) {
+        throw new Error(
+          `ALERTZERO_EVAL_ALERTS_GIST_URL is not set, so the #19901 gist seeder did not run (${EXPECTED_PLUGIN_IDS.join(
+            ', '
+          )} are the plugin-ids the dump attributes rows to)`
+        );
+      }
+
+      await api.public('POST', '/api/detection_engine/index');
+      const indexed = await esClient.count({
+        index: ALERTS_INDEX,
+        query: { term: { tags: runMarker } },
+      });
+      expect(indexed.count).toBe(seeded.count);
+
+      await esClient.deleteByQuery({
+        index: ALERTS_INDEX,
+        conflicts: 'proceed',
+        refresh: true,
+        query: { term: { tags: runMarker } },
+      });
+    });
+  }
+);

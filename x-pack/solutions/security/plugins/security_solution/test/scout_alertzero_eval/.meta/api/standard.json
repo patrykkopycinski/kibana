@@ -1,0 +1,64 @@
+{
+  "sha1": "47e5a56b69553a3727f53f96cf4b74c085c116a9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b44e7e308061386-04ca81ce7267604",
+      "title": "AlertZero eval - token usage per worker sweep pins every AlertZero inference tier to an EIS endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
+        "line": 68,
+        "column": 17
+      }
+    },
+    {
+      "id": "b44e7e308061386-5e18880247a99fc",
+      "title": "AlertZero eval - token usage per worker sweep measures the rule tuning sweep at each scale tier",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
+        "line": 84,
+        "column": 78
+      }
+    },
+    {
+      "id": "b44e7e308061386-90f614d985149e8",
+      "title": "AlertZero eval - token usage per worker sweep measures the coverage sweep at each scale tier",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
+        "line": 130,
+        "column": 19
+      }
+    },
+    {
+      "id": "b44e7e308061386-efe65c98fc1bea8",
+      "title": "AlertZero eval - token usage per worker sweep seeds alerts from the #19901 gist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
+        "line": 190,
+        "column": 21
+      }
+    }
+  ]
+}

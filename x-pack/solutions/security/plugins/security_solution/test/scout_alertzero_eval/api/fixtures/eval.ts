@@ -458,12 +458,27 @@ export const seedAlertDocsFromGist = async (
   if (!response.ok) {
     throw new Error(`Fetching ${ALERTS_GIST_URL_ENV} (${url}) failed: ${response.status}`);
   }
-  const payload = (await response.json()) as unknown;
-  const documents: Array<Record<string, unknown>> = Array.isArray(payload)
-    ? (payload as Array<Record<string, unknown>>)
-    : Array.isArray((payload as { alerts?: unknown }).alerts)
-    ? (payload as { alerts: Array<Record<string, unknown>> }).alerts ?? []
-    : [];
+  const text = await response.text();
+  const documents: Array<Record<string, unknown>> = (() => {
+    try {
+      const payload = JSON.parse(text) as unknown;
+      if (Array.isArray(payload)) {
+        return payload as Array<Record<string, unknown>>;
+      }
+      const alerts = (payload as { alerts?: unknown }).alerts;
+      if (Array.isArray(alerts)) {
+        return alerts as Array<Record<string, unknown>>;
+      }
+      return [];
+    } catch {
+      throw new Error(
+        `${ALERTS_GIST_URL_ENV} (${url}) is not a JSON alert payload (first bytes: ${text
+          .slice(0, 24)
+          .replace(/\s+/g, ' ')}). #19901's gist is a bash seed script, not alert documents; ` +
+          `point the env at a raw JSON array of alert docs (or { "alerts": [...] }) or unset it.`
+      );
+    }
+  })();
   if (documents.length === 0) {
     throw new Error(`${ALERTS_GIST_URL_ENV} (${url}) carried no alerts`);
   }

@@ -14,6 +14,7 @@ import type { AlertZeroApi } from '../../../scout_alertzero_e2e/common/kbn';
 // are reused as-is; this suite only adds what the eval needs on top (scale-tier seeding, the
 // inference-settings write, the token-usage dump).
 export * from '../../../scout_alertzero_e2e/api/fixtures';
+export * from '../../common/constants';
 export * from './eval';
 
 /** Authenticates once per worker as the admin user and exposes the cookie-bearing API helper. */

@@ -27,7 +27,9 @@ import {
   seedAttackDiscovery,
   seedCitedAlerts,
   seedInvestigation,
+  seedRawEvidence,
 } from './workflow_task';
+import { buildEvidence } from './evidence';
 
 describe('seeder→reader index contract', () => {
   // The data generator route persists through the SCHEDULED AD rule, but the
@@ -241,6 +243,158 @@ const GUIDE_PAYLOAD = {
   EntityTypes: ['User', 'Ip'],
   EvidenceRoles: ['Impacted'],
 };
+
+describe('serverless seeding contract', () => {
+  const makeEsClient = () => {
+    const calls = {
+      get: [] as unknown[],
+      bulk: [] as Array<{ body: Array<Record<string, { _index?: string }>>; pipeline?: string }>,
+      putIndexTemplate: [] as unknown[],
+      createDataStream: [] as unknown[],
+      putPipeline: [] as unknown[],
+      indicesCreate: [] as unknown[],
+    };
+    const client = {
+      get: async (params: unknown) => {
+        calls.get.push(params);
+        return { found: true, _source: {} };
+      },
+      bulk: async (params: never) => {
+        calls.bulk.push(params);
+        return { errors: false };
+      },
+      deleteByQuery: async () => ({}),
+      indices: {
+        create: async (params: unknown) => {
+          calls.indicesCreate.push(params);
+          return {};
+        },
+        putIndexTemplate: async (params: unknown) => {
+          calls.putIndexTemplate.push(params);
+          return {};
+        },
+        createDataStream: async (params: unknown) => {
+          calls.createDataStream.push(params);
+          return {};
+        },
+      },
+      ingest: {
+        putPipeline: async (params: unknown) => {
+          calls.putPipeline.push(params);
+          return {};
+        },
+      },
+    };
+    return { calls, client };
+  };
+
+  it('does not read or copy to .adhoc on serverless (dot-prefixed names cannot exist there)', async () => {
+    const { calls, client } = makeEsClient();
+    await copyAttackDiscoveryToAdhocIndex(
+      { fetch: jest.fn(), log: mockLog(), esClient: client as never, serverless: true },
+      AD_DOC_ID
+    );
+    expect(calls.get).toEqual([]);
+    expect(calls.bulk).toEqual([]);
+  });
+
+  it('seeds cited alerts with create ops (the alerts index is a product data stream)', async () => {
+    const { calls, client } = makeEsClient();
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await seedCitedAlerts(
+      { fetch: jest.fn(), log: mockLog(), esClient: client as never, serverless: true },
+      doc,
+      AD_DOC_ID
+    );
+    const ops = calls.bulk[0].body.filter((op) => op && ('create' in op || 'index' in op));
+    expect(ops.length).toBe(doc.alertIds.length);
+    expect(ops.every((op) => 'create' in op && !('index' in op))).toBe(true);
+  });
+
+  it('keeps index ops for cited alerts on stateful', async () => {
+    const { calls, client } = makeEsClient();
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await seedCitedAlerts(
+      { fetch: jest.fn(), log: mockLog(), esClient: client as never },
+      doc,
+      AD_DOC_ID
+    );
+    const ops = calls.bulk[0].body.filter((op) => op && ('create' in op || 'index' in op));
+    expect(ops.every((op) => 'index' in op)).toBe(true);
+  });
+
+  describe('raw evidence', () => {
+    const payload = {
+      events: [
+        {
+          '@timestamp': '2026-10-12T20:00:00.000Z',
+          host: { name: 'ws-1' },
+          user: { name: 'alice' },
+          event: { category: ['process'] },
+          process: { name: 'powershell.exe' },
+        },
+        {
+          '@timestamp': '2026-10-12T20:01:00.000Z',
+          host: { name: 'ws-1' },
+          user: { name: 'alice' },
+          event: { category: ['network'] },
+        },
+      ],
+    };
+
+    it('writes events to the seeder-owned fp-tp streams, never the product -default ones', async () => {
+      const { calls, client } = makeEsClient();
+      await seedRawEvidence(
+        { fetch: jest.fn(), log: mockLog(), esClient: client as never, serverless: true },
+        buildEvidence(payload, AD_DOC_ID),
+        AD_DOC_ID
+      );
+      const eventBulk = calls.bulk[0];
+      const indices = eventBulk.body
+        .filter((op) => op && 'create' in op)
+        .map((op) => op.create._index);
+      expect(indices).toEqual([
+        'logs-endpoint.events.fp-tp-process',
+        'logs-endpoint.events.fp-tp-network',
+      ]);
+      // the @timestamp / event.ingested normalizing pipeline runs on every seeded event
+      expect(eventBulk.pipeline).toBe('alertzero-fp-tp-raw-events');
+      // the seeder-owned template + streams + pipeline are provisioned first
+      expect(calls.putIndexTemplate).toHaveLength(1);
+      expect(calls.createDataStream).toHaveLength(2);
+      expect(calls.putPipeline).toHaveLength(1);
+    });
+
+    it('does not create the entities index on serverless (the Entity Store owns the alias)', async () => {
+      const { calls, client } = makeEsClient();
+      await seedRawEvidence(
+        { fetch: jest.fn(), log: mockLog(), esClient: client as never, serverless: true },
+        buildEvidence(payload, AD_DOC_ID),
+        AD_DOC_ID
+      );
+      expect(calls.indicesCreate).toEqual([]);
+      expect(calls.bulk[1].body.some((op) => op && 'index' in op)).toBe(true);
+    });
+
+    it('keeps the stateful path: plain -default streams and a provisioned entities index', async () => {
+      const { calls, client } = makeEsClient();
+      await seedRawEvidence(
+        { fetch: jest.fn(), log: mockLog(), esClient: client as never },
+        buildEvidence(payload, AD_DOC_ID),
+        AD_DOC_ID
+      );
+      const indices = calls.bulk[0].body
+        .filter((op) => op && 'create' in op)
+        .map((op) => op.create._index);
+      expect(indices).toEqual([
+        'logs-endpoint.events.process-default',
+        'logs-endpoint.events.network-default',
+      ]);
+      expect(calls.bulk[0].pipeline).toBeUndefined();
+      expect(calls.indicesCreate).toHaveLength(1);
+    });
+  });
+});
 
 describe('deriveInvestigationId', () => {
   it('derives a UUIDv8 from the hex AD id exactly like resolve_investigation_id', () => {

@@ -28,6 +28,23 @@ export interface EvaluationTestOptions extends ScoutTestOptions {
   timeout?: number;
 }
 
+/** Scout projects an eval run can target; `local` is the stack Scout starts itself. */
+export const EVAL_SCOUT_PROJECTS = ['local', 'ech', 'mki'] as const;
+export type EvalScoutProject = (typeof EVAL_SCOUT_PROJECTS)[number];
+
+export const resolveScoutProject = (raw: string | undefined): EvalScoutProject => {
+  const value = raw?.trim();
+  if (!value) {
+    return 'local';
+  }
+  if (!(EVAL_SCOUT_PROJECTS as readonly string[]).includes(value)) {
+    throw new Error(
+      `EVAL_SCOUT_PROJECT must be one of ${EVAL_SCOUT_PROJECTS.join(', ')} (got "${value}")`
+    );
+  }
+  return value as EvalScoutProject;
+};
+
 /**
  * Exports a Playwright configuration specifically for offline evals
  */
@@ -97,17 +114,22 @@ export function createPlaywrightEvalsConfig({
   // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
   // project would leave a dangling reference and Playwright fails with "Project 'setup-local'
   // has unknown teardown project 'teardown-local'".
+  const scoutProject = resolveScoutProject(process.env.EVAL_SCOUT_PROJECT);
   const hookProjects =
     projects?.filter(
-      (project) => project.name === 'setup-local' || project.name === 'teardown-local'
+      (project) =>
+        project.name === `setup-${scoutProject}` || project.name === `teardown-${scoutProject}`
     ) ?? [];
 
-  // get just the 'local' project (for now)
+  // One Scout project is evaluated: 'local' (the Scout-started stack) unless EVAL_SCOUT_PROJECT
+  // points the run at a remote deployment configured in `.scout/servers/cloud_*.json`.
   const nextProjects = allConnectors.flatMap((connector) => {
     return (
       projects
-        ?.filter((project) => project.name === 'local')
-        .map((project) => {
+        ?.filter((project) => project.name === scoutProject)
+        // Scout's remote projects carry a 90s per-test timeout sized for UI tests, which would
+        // override this config's suite timeout; evals size their own.
+        .map(({ timeout: _scoutProjectTimeout, ...project }) => {
           return {
             ...project,
             name: connector.id,

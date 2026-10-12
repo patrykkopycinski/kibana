@@ -22,7 +22,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import type { EsClient } from '@kbn/scout';
+import type { EsClient, ScoutTestConfig } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   selectEvaluators,
@@ -116,7 +116,7 @@ const evalDatasets = (): EvaluationDataset[] => {
 
 evaluate.describe(
   'Attack Discovery — FP/TP verdict accuracy',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let restoreInferenceSettings: (() => Promise<void>) | undefined;
 
@@ -139,12 +139,14 @@ evaluate.describe(
       'runs the attack-discovery review workflow per corpus case and grades the verdict',
       async ({
         esClient,
+        config,
         executorClient,
         evaluators,
         fetch,
         log,
       }: {
         esClient: EsClient;
+        config: ScoutTestConfig;
         executorClient: { runExperiment: Function };
         evaluators: Pick<DefaultEvaluators, 'criteria'>;
         fetch: HttpHandler;
@@ -169,7 +171,16 @@ evaluate.describe(
               // which does not carry the payload (run8's crash source).
               const { caseId, payload } = example.input;
               log.info(`Running attack-discovery workflow for case ${caseId}`);
-              return runAttackDiscoveryWorkflow({ fetch, log, esClient, payload, caseId });
+              return runAttackDiscoveryWorkflow({
+                fetch,
+                log,
+                esClient,
+                // A remote serverless project cannot hold the stateful seeding contract
+                // (`.adhoc.*`, product-owned streams); see SeedingClients.serverless.
+                serverless: config.serverless,
+                payload,
+                caseId,
+              });
             },
           },
           selectedEvaluators

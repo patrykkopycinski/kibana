@@ -68,6 +68,11 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+import {
+  ensureFpTpRawEventStore,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
+  retargetRawEventIndex,
+} from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
 import { FP_TP_ANALYSIS_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 import { buildEvidence } from './evidence';
 
@@ -769,6 +774,13 @@ export interface SeedingClients {
    * back to trusting the route's write index (the pre-contract behavior).
    */
   esClient?: EsClientLike;
+  /**
+   * The target is a serverless project. There the stateful seeding contract does not
+   * hold (see `copyAttackDiscoveryToAdhocIndex`, `seedCitedAlerts`, `seedRawEvidence`):
+   * dot-prefixed `.adhoc` names cannot be created, and product data streams accept only
+   * `create` ops.
+   */
+  serverless?: boolean;
 }
 
 /**
@@ -782,6 +794,7 @@ export interface EsClientLike {
   bulk(params: {
     body: unknown[];
     refresh?: boolean | 'wait_for';
+    pipeline?: string;
   }): Promise<{ errors: boolean; items?: unknown[] }>;
   indices?: {
     create(params: { index: string; mappings: Record<string, unknown> }): Promise<unknown>;
@@ -820,9 +833,18 @@ const seedSpaceId = (): string => {
  * persists ad-hoc attack discoveries, so the suite writes it itself.
  */
 export const copyAttackDiscoveryToAdhocIndex = async (
-  { esClient, log }: SeedingClients,
+  { esClient, log, serverless }: SeedingClients,
   attackDiscoveryId: string
 ): Promise<void> => {
+  if (serverless) {
+    // `.adhoc.*` cannot exist on serverless (user creation of dot-prefixed names is
+    // rejected), so the managed workflow reads the product stream the data generator
+    // route already wrote to; there is nothing to copy.
+    log.info(
+      `Serverless target: AD ${attackDiscoveryId} stays in ${SCHEDULED_ATTACK_DISCOVERY_INDEX_PREFIX}${seedSpaceId()} (no .adhoc copy)`
+    );
+    return;
+  }
   if (!esClient) {
     log.warning(
       `No esClient provided; skipping the .adhoc copy of AD ${attackDiscoveryId} ` +
@@ -859,7 +881,7 @@ export const copyAttackDiscoveryToAdhocIndex = async (
  * at the incident level, so the entities are synthetic).
  */
 export const seedCitedAlerts = async (
-  { esClient, log }: SeedingClients,
+  { esClient, log, serverless }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
   attackDiscoveryId: string,
   evidence?: ReturnType<typeof buildEvidence>
@@ -883,7 +905,12 @@ export const seedCitedAlerts = async (
   const severity = 'medium';
   const body: unknown[] = [];
   for (const alertId of doc.alertIds) {
-    body.push({ index: { _index: index, _id: alertId } });
+    // The alerts index is a product data stream on serverless: `create` ops only.
+    body.push(
+      serverless
+        ? { create: { _index: index, _id: alertId } }
+        : { index: { _index: index, _id: alertId } }
+    );
     body.push({
       '@timestamp': timestamp,
       'kibana.alert.uuid': alertId,
@@ -974,7 +1001,7 @@ const rawEventIndexFor = (event: Record<string, unknown>): string => {
  * instead of silently grading as an abstention.
  */
 export const seedRawEvidence = async (
-  { esClient, log }: SeedingClients,
+  { esClient, log, serverless }: SeedingClients,
   evidence: ReturnType<typeof buildEvidence>,
   attackDiscoveryId: string
 ): Promise<void> => {
@@ -986,15 +1013,38 @@ export const seedRawEvidence = async (
   }
   // `logs-endpoint.events.*` is a data stream: it takes `create` ops only and
   // auto-creates on first write from the template installed here.
-  await ensureRawEventsTemplate(esClient);
-  const eventOps = evidence.events.flatMap((event) => [
-    { create: { _index: rawEventIndexFor(event) } },
-    event,
-  ]);
-  assertBulkOk('raw events', await esClient.bulk({ body: eventOps, refresh: true }));
+  if (serverless) {
+    // `logs-endpoint.events.<category>-default` are product-managed streams on serverless: the
+    // seeder writes to its own `logs-endpoint.events.fp-tp-<category>` streams instead, which the
+    // workflow's `logs-endpoint.events.*` read still matches.
+    const targets = evidence.events.map((event) => retargetRawEventIndex(rawEventIndexFor(event)));
+    await ensureFpTpRawEventStore(
+      esClient as unknown as Parameters<typeof ensureFpTpRawEventStore>[0],
+      targets
+    );
+    assertBulkOk(
+      'raw events',
+      await esClient.bulk({
+        body: evidence.events.flatMap((event, i) => [{ create: { _index: targets[i] } }, event]),
+        refresh: true,
+        pipeline: FP_TP_RAW_EVENT_INGEST_PIPELINE,
+      })
+    );
+  } else {
+    await ensureRawEventsTemplate(esClient);
+    const eventOps = evidence.events.flatMap((event) => [
+      { create: { _index: rawEventIndexFor(event) } },
+      event,
+    ]);
+    assertBulkOk('raw events', await esClient.bulk({ body: eventOps, refresh: true }));
+  }
 
   const entityIndex = `entities-latest-${seedSpaceId()}`;
-  await ensureEntityIndex(esClient, entityIndex);
+  // On serverless `entities-latest-<space>` is an alias the Entity Store owns: it takes `index`
+  // writes but cannot be created.
+  if (!serverless) {
+    await ensureEntityIndex(esClient, entityIndex);
+  }
   const entityOps = evidence.entities.flatMap((entity) => [
     { index: { _index: entityIndex, _id: entity.entity.id } },
     entity,
@@ -1021,7 +1071,7 @@ export const seedRawEvidence = async (
  * it: this is the seeder→reader contract.
  */
 export const seedAttackDiscovery = async (
-  { fetch, log, esClient }: SeedingClients,
+  { fetch, log, esClient, serverless }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
   caseId: string,
   payload: Record<string, unknown> = {}
@@ -1073,7 +1123,10 @@ export const seedAttackDiscovery = async (
   log.info(`Seeded attack discovery document ${persisted.id} (title: ${doc.title})`);
   // The route persisted into the SCHEDULED index; the workflow reads the
   // ad-hoc one. Copy the doc across (same _id) and seed the alerts it cites.
-  await copyAttackDiscoveryToAdhocIndex({ fetch: noopFetch, log, esClient }, persisted.id);
+  await copyAttackDiscoveryToAdhocIndex(
+    { fetch: noopFetch, log, esClient, serverless },
+    persisted.id
+  );
   const evidence = buildEvidence(payload, persisted.id);
   if (evidence.identities.length > 1) {
     throw new Error(
@@ -1081,8 +1134,13 @@ export const seedAttackDiscovery = async (
         'cited-alert projection supports exactly one'
     );
   }
-  await seedRawEvidence({ fetch: noopFetch, log, esClient }, evidence, persisted.id);
-  await seedCitedAlerts({ fetch: noopFetch, log, esClient }, doc, persisted.id, evidence);
+  await seedRawEvidence({ fetch: noopFetch, log, esClient, serverless }, evidence, persisted.id);
+  await seedCitedAlerts(
+    { fetch: noopFetch, log, esClient, serverless },
+    doc,
+    persisted.id,
+    evidence
+  );
   return persisted;
 };
 
@@ -1138,6 +1196,7 @@ export const runAttackDiscoveryWorkflow = async ({
   fetch,
   log,
   esClient,
+  serverless,
   payload,
   caseId,
   maxWaitMs = 12 * 60_000,
@@ -1147,6 +1206,8 @@ export const runAttackDiscoveryWorkflow = async ({
   log: ToolingLog;
   /** Direct ES client for the ad-hoc copy + cited-alert seeding (see SeedingClients). */
   esClient?: EsClientLike;
+  /** Target is a serverless project (see SeedingClients.serverless). */
+  serverless?: boolean;
   /** The corpus case payload — rendered into the seeded AD document. */
   payload: Record<string, unknown>;
   /** Corpus case id, used for synthetic alert ids and logging. */
@@ -1158,7 +1219,7 @@ export const runAttackDiscoveryWorkflow = async ({
   let investigationId: string;
   try {
     seeded = await seedAttackDiscovery(
-      { fetch, log, esClient },
+      { fetch, log, esClient, serverless },
       buildAttackDiscoveryFromPayload(caseId, payload),
       caseId,
       payload

@@ -31,6 +31,34 @@
       ]
     },
     {
+      "id": "agent-builder-collision-baseline",
+      "name": "Agent Builder - endpoint-forensic-analysis routing collision (baseline, skill dark)",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/collision.playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-collision-baseline"
+      ]
+    },
+    {
+      "id": "agent-builder-collision-endpoint-forensic",
+      "name": "Agent Builder - endpoint-forensic-analysis routing collision (candidate, skill enabled)",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/collision.playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder_endpoint_forensic",
+      "tags": [
+        "platform",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-collision-endpoint-forensic"
+      ]
+    },
+    {
       "id": "ml",
       "name": "ML Agent Builder Skills",
       "slackChannel": "#agent-builder-alerts",

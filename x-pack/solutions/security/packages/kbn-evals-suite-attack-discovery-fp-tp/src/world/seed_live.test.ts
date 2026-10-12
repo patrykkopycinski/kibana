@@ -12,7 +12,7 @@ import {
   ENCODED_POWERSHELL_ATTACK_ID,
   getEncodedPowershellIds,
 } from '../scenarios/encoded_powershell';
-import { FP_TP_ATTACK_ADHOC_INDEX } from './constants';
+import { FP_TP_ATTACK_ADHOC_INDEX, FP_TP_ATTACK_INDEX, FP_TP_TWIN_SEED_LABEL } from './constants';
 import {
   buildLiveSeedPlan,
   cleanupManualSeedLive,
@@ -32,20 +32,20 @@ describe('buildLiveSeedPlan', () => {
     expect(plan.attackId).toBe(ENCODED_POWERSHELL_ATTACK_ID);
   });
 
-  it('returns the adhoc Attack Discovery index', () => {
-    expect(plan.attackIndex).toBe(FP_TP_ATTACK_ADHOC_INDEX);
+  it('returns the product Attack Discovery index', () => {
+    expect(plan.attackIndex).toBe(FP_TP_ATTACK_INDEX);
   });
 
   it('returns alert bulk operations targeting the detection alerts index', () => {
     expect(plan.alertOperations[0]).toEqual({
-      index: { _index: AD2_ALERTS_INDEX, _id: plan.alertIds[0] },
+      create: { _index: AD2_ALERTS_INDEX, _id: plan.alertIds[0] },
     });
   });
 
-  it('returns event bulk operations that create into logs data streams', () => {
+  it('returns event bulk operations that create into the seeder-owned raw-event stream', () => {
     expect(plan.eventOperations[0]).toEqual({
       create: {
-        _index: 'logs-endpoint.events.process-default',
+        _index: 'logs-endpoint.events.fp-tp-process',
         _id: ids.process1Id,
       },
     });
@@ -75,16 +75,42 @@ describe('cleanupManualSeedLive', () => {
 
     await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient, [
       {
-        index: 'logs-endpoint.events.process-default',
+        index: 'logs-endpoint.events.fp-tp-process',
         id: ids.process1Id,
       },
     ]);
 
     expect(deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'logs-endpoint.events.process-default',
+        index: 'logs-endpoint.events.fp-tp-process',
         query: { ids: { values: [ids.process1Id] } },
       })
+    );
+  });
+
+  it('also removes a previous manual seed from the raw-event stream by seed label', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({});
+
+    await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient, [
+      { index: 'logs-endpoint.events.fp-tp-process', id: ids.process1Id },
+    ]);
+
+    expect(deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'logs-endpoint.events.fp-tp-process',
+        query: { term: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
+      })
+    );
+  });
+
+  it('also deletes the former ad-hoc Attack Discovery index during the transition', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({});
+
+    await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient);
+
+    const calledIndices = deleteByQuery.mock.calls.map(([params]) => params.index);
+    expect(calledIndices).toEqual(
+      expect.arrayContaining([FP_TP_ATTACK_INDEX, FP_TP_ATTACK_ADHOC_INDEX])
     );
   });
 });
@@ -152,22 +178,207 @@ describe('seedFixture', () => {
   const world = twinToWorld(buildEncodedPowershellTwin('tp'));
   let esClient: {
     bulk: jest.Mock;
-    index: jest.Mock;
+    create: jest.Mock;
     deleteByQuery: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
+    indices: {
+      getDataStream: jest.Mock;
+      getIndexTemplate: jest.Mock;
+      createDataStream: jest.Mock;
+      putIndexTemplate: jest.Mock;
+      create: jest.Mock;
+    };
+    ingest: {
+      putPipeline: jest.Mock;
+    };
   };
   let kbnRequest: jest.MockedFunction<FpTpLiveKbnRequest>;
 
   beforeEach(() => {
     esClient = {
       bulk: jest.fn().mockResolvedValue({ errors: false }),
-      index: jest.fn().mockResolvedValue({}),
+      create: jest.fn().mockResolvedValue({}),
       deleteByQuery: jest.fn().mockResolvedValue({}),
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
       updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
+      indices: {
+        getDataStream: jest
+          .fn()
+          .mockResolvedValue({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }),
+        getIndexTemplate: jest.fn().mockResolvedValue({
+          index_templates: [
+            {
+              name: '.alerts-security.alerts',
+              index_template: {
+                index_patterns: ['.alerts-security*'],
+                data_stream: {},
+                template: { mappings: {} },
+              },
+            },
+          ],
+        }),
+        createDataStream: jest.fn().mockResolvedValue({}),
+        putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+        create: jest.fn().mockResolvedValue({}),
+      },
+      ingest: {
+        putPipeline: jest.fn().mockResolvedValue({ acknowledged: true }),
+      },
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
+  });
+
+  it('retries only failed items of a mixed 409 bulk batch', async () => {
+    // plan.alertOperations pairs: first create succeeds, second 409s
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [
+          { create: { status: 201 } },
+          { create: { status: 409, error: { type: 'version_conflict_engine_exception' } } },
+        ],
+      })
+      .mockResolvedValueOnce({ errors: false });
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    const secondCall = esClient.bulk.mock.calls[1][0];
+    // only the failed pair (op + doc) is resent, not the whole batch
+    expect(secondCall.operations).toHaveLength(2);
+  });
+
+  it('accepts a lost createDataStream race only after re-verifying the stream exists', async () => {
+    esClient.indices.getDataStream
+      .mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 })) // preflight
+      .mockResolvedValueOnce({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }); // post-race recheck
+    esClient.indices.createDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('resource_already_exists_exception'), { statusCode: 400 })
+    );
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.create).toHaveBeenCalled();
+  });
+
+  it('throws when createDataStream 400s and the stream still does not exist', async () => {
+    esClient.indices.getDataStream.mockRejectedValue(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+    esClient.indices.createDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('invalid template'), { statusCode: 400 })
+    );
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow();
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses when only a non-data-stream template matches the target name', async () => {
+    esClient.indices.getDataStream.mockRejectedValue(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+    esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+      index_templates: [
+        {
+          name: '.alerts-security.alerts',
+          index_template: {
+            index_patterns: ['.alerts-security.alerts-*'],
+            template: { mappings: {} },
+          },
+        },
+      ],
+    });
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow(/no data-stream/);
+    expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
+
+  it('retries alert bulk item 409s after a delete-then-reseed race', async () => {
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [{ create: { status: 409, error: { type: 'version_conflict_engine_exception' } } }],
+      })
+      .mockResolvedValueOnce({ errors: false });
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(3);
+  });
+
+  // Serverless makes a delete visible on a refresh, not immediately, so every
+  // retry fired inside that window conflicts as well. The mock only clears the
+  // conflict after a wall-clock window, so the seed survives only if the helper
+  // waits between attempts — back-to-back retries exhaust the budget and fail a
+  // seed a short wait would have settled.
+  it('waits between bulk conflict retries so a slow serverless refresh can settle', async () => {
+    const startedAt = Date.now();
+    const conflictWindowMs = 400;
+    const bulkCallTimesMs: number[] = [];
+    esClient.bulk.mockImplementation(async () => {
+      bulkCallTimesMs.push(Date.now() - startedAt);
+      if (Date.now() - startedAt < conflictWindowMs) {
+        return {
+          errors: true,
+          items: [
+            { create: { status: 409, error: { type: 'version_conflict_engine_exception' } } },
+          ],
+        };
+      }
+      return { errors: false };
+    });
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    // The first attempt is inside the window; the retry has to land after it.
+    expect(bulkCallTimesMs[0]).toBeLessThan(conflictWindowMs);
+    expect(bulkCallTimesMs[1]).toBeGreaterThanOrEqual(conflictWindowMs);
+    // alert retry + the events bulk: the seed completed rather than exhausting
+    expect(esClient.bulk).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries a 409 version conflict once before failing the seed', async () => {
+    esClient.create
+      .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }))
+      .mockResolvedValueOnce({});
+    await seedFixture({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      world,
+    });
+
+    expect(esClient.create).toHaveBeenCalledTimes(2);
+  });
+
+  it('refuses to seed when the stream is absent and no template is installed', async () => {
+    esClient.indices.getDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+    esClient.indices.getIndexTemplate.mockRejectedValueOnce(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow(/no data-stream/);
+    expect(esClient.create).not.toHaveBeenCalled();
+    expect(esClient.bulk).not.toHaveBeenCalled();
+  });
+
+  it('provisions the data stream via the installed template when absent', async () => {
+    esClient.indices.getDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name: FP_TP_ATTACK_INDEX });
+    expect(esClient.create).toHaveBeenCalled();
   });
 
   it('returns a cleanup that deletes the seeded Attack Discovery by id', async () => {
@@ -180,7 +391,7 @@ describe('seedFixture', () => {
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: FP_TP_ATTACK_ADHOC_INDEX,
+        index: FP_TP_ATTACK_INDEX,
         query: { ids: { values: [ENCODED_POWERSHELL_ATTACK_ID] } },
       })
     );
@@ -255,7 +466,7 @@ describe('seedFixture', () => {
   });
 
   it('returns after deleting the partially seeded alerts when indexing fails', async () => {
-    esClient.index.mockRejectedValue(new Error('index failed'));
+    esClient.create.mockRejectedValue(new Error('index failed'));
 
     await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world }).catch(
       () => undefined
@@ -267,7 +478,7 @@ describe('seedFixture', () => {
   });
 
   it('returns the partial-seed cleanup to onCleanupFailure when that cleanup fails', async () => {
-    esClient.index.mockRejectedValue(new Error('index failed'));
+    esClient.create.mockRejectedValue(new Error('index failed'));
     esClient.deleteByQuery.mockRejectedValue(new Error('delete failed'));
     const onCleanupFailure = jest.fn();
 

@@ -18,8 +18,12 @@ export type {
 export type { FpTpEntityRoleKey } from './chain_entities';
 export {
   FP_TP_ATTACK_ADHOC_INDEX,
+  FP_TP_ATTACK_INDEX,
   FP_TP_BASE_TIME,
   FP_TP_ENTITY_INDEX,
+  FP_TP_RAW_EVENT_INDEX_PREFIX,
+  FP_TP_RAW_EVENT_INDEX_TEMPLATE,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_RAW_EVENT_WINDOW_MS,
   FP_TP_TWIN_SEED_LABEL,
 } from './constants';
@@ -34,6 +38,7 @@ export {
 } from './evidence_states';
 export { asRecord, withFieldMessage } from './event_message';
 export { joinKibanaUrl } from './join_kibana_url';
+export { createLiveKbnRequest } from './live_kbn_request';
 export {
   withCommandLine,
   withFilePath,
@@ -44,6 +49,18 @@ export {
   withProcessExecutable,
   withProcessParent,
 } from './mutations';
+export {
+  ensureFpTpRawEventIndices,
+  ensureFpTpRawEventPipeline,
+  ensureFpTpRawEventStore,
+  ensureFpTpRawEventTemplate,
+  rawEventIndexMappings,
+  rawEventIndexName,
+  rawEventIndexNames,
+  rawEventIndexSettings,
+  rawEventIngestPipeline,
+  retargetRawEventIndex,
+} from './raw_events';
 export {
   buildLiveSeedPlan,
   cleanupManualSeedLive,

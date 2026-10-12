@@ -8,46 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getFpTpScenario } from '../src/scenarios';
-import { FP_TP_TWIN_SEED_LABEL, joinKibanaUrl, seedTwinLive } from '../src/world';
-import type { FpTpLiveKbnRequest } from '../src/world';
-
-const createKbnRequest = ({
-  kibanaUrl,
-  username,
-  password,
-}: {
-  kibanaUrl: string;
-  username: string;
-  password: string;
-}): FpTpLiveKbnRequest => {
-  const authorization = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-
-  return async ({ method, path, body, version }) => {
-    const headers: Record<string, string> = {
-      Authorization: authorization,
-      'kbn-xsrf': 'true',
-      'x-elastic-internal-origin': 'kibana',
-      'Content-Type': 'application/json',
-    };
-    if (version !== undefined) {
-      headers['elastic-api-version'] = version;
-    }
-
-    const response = await fetch(joinKibanaUrl(kibanaUrl, path), {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    const text = await response.text();
-    let parsed: unknown = text;
-    try {
-      parsed = text.length > 0 ? JSON.parse(text) : undefined;
-    } catch {
-      parsed = text;
-    }
-    return { statusCode: response.status, body: parsed };
-  };
-};
+import { createLiveKbnRequest, FP_TP_TWIN_SEED_LABEL, seedTwinLive } from '../src/world';
 
 run(
   async ({ flags, log }) => {
@@ -62,16 +23,17 @@ run(
 
     const kibanaUrl = flags.kibanaUrl as string;
     const elasticsearchUrl = flags.elasticsearchUrl as string;
+    const apiKey = flags.apiKey as string | undefined;
     const username = flags.username as string;
     const password = flags.password as string;
 
     const esClient = new Client({
       node: elasticsearchUrl,
-      auth: { username, password },
+      auth: apiKey ? { apiKey } : { username, password },
     });
 
     try {
-      const kbnRequest = createKbnRequest({ kibanaUrl, username, password });
+      const kbnRequest = createLiveKbnRequest({ kibanaUrl, apiKey, username, password });
       const summary = await seedTwinLive({
         esClient,
         kbnRequest,
@@ -92,7 +54,15 @@ run(
     description:
       'Seeds one FP/TP scenario twin into a local Elasticsearch + Kibana for Workflows UI validation.',
     flags: {
-      string: ['scenario', 'variant', 'kibanaUrl', 'elasticsearchUrl', 'username', 'password'],
+      string: [
+        'scenario',
+        'variant',
+        'kibanaUrl',
+        'elasticsearchUrl',
+        'apiKey',
+        'username',
+        'password',
+      ],
       default: {
         scenario: 'encoded-powershell',
         variant: 'fp',
@@ -106,6 +76,7 @@ run(
         --variant                       Twin of the scenario to load, e.g. tp or fp (Default: fp). Only one at a time.
         --kibanaUrl                     Kibana URL (Default: http://127.0.0.1:5601)
         --elasticsearchUrl              Elasticsearch URL (Default: http://127.0.0.1:9200)
+        --apiKey                        Base64 API key for ApiKey auth (serverless projects; overrides username/password)
         --username                      Username (Default: elastic)
         --password                      Password (Default: changeme)
       `,

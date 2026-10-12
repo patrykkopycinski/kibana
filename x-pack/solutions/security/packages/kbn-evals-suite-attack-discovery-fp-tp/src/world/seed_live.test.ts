@@ -12,7 +12,7 @@ import {
   ENCODED_POWERSHELL_ATTACK_ID,
   getEncodedPowershellIds,
 } from '../scenarios/encoded_powershell';
-import { FP_TP_ATTACK_ADHOC_INDEX, FP_TP_ATTACK_INDEX } from './constants';
+import { FP_TP_ATTACK_ADHOC_INDEX, FP_TP_ATTACK_INDEX, FP_TP_TWIN_SEED_LABEL } from './constants';
 import {
   buildLiveSeedPlan,
   cleanupManualSeedLive,
@@ -42,10 +42,10 @@ describe('buildLiveSeedPlan', () => {
     });
   });
 
-  it('returns event bulk operations that create into logs data streams', () => {
+  it('returns event bulk operations that create into the seeder-owned raw-event stream', () => {
     expect(plan.eventOperations[0]).toEqual({
       create: {
-        _index: 'logs-endpoint.events.process-default',
+        _index: 'logs-endpoint.events.fp-tp-process',
         _id: ids.process1Id,
       },
     });
@@ -75,15 +75,30 @@ describe('cleanupManualSeedLive', () => {
 
     await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient, [
       {
-        index: 'logs-endpoint.events.process-default',
+        index: 'logs-endpoint.events.fp-tp-process',
         id: ids.process1Id,
       },
     ]);
 
     expect(deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'logs-endpoint.events.process-default',
+        index: 'logs-endpoint.events.fp-tp-process',
         query: { ids: { values: [ids.process1Id] } },
+      })
+    );
+  });
+
+  it('also removes a previous manual seed from the raw-event stream by seed label', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({});
+
+    await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient, [
+      { index: 'logs-endpoint.events.fp-tp-process', id: ids.process1Id },
+    ]);
+
+    expect(deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'logs-endpoint.events.fp-tp-process',
+        query: { term: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
       })
     );
   });
@@ -171,6 +186,11 @@ describe('seedFixture', () => {
       getDataStream: jest.Mock;
       getIndexTemplate: jest.Mock;
       createDataStream: jest.Mock;
+      putIndexTemplate: jest.Mock;
+      create: jest.Mock;
+    };
+    ingest: {
+      putPipeline: jest.Mock;
     };
   };
   let kbnRequest: jest.MockedFunction<FpTpLiveKbnRequest>;
@@ -199,6 +219,11 @@ describe('seedFixture', () => {
           ],
         }),
         createDataStream: jest.fn().mockResolvedValue({}),
+        putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+        create: jest.fn().mockResolvedValue({}),
+      },
+      ingest: {
+        putPipeline: jest.fn().mockResolvedValue({ acknowledged: true }),
       },
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });

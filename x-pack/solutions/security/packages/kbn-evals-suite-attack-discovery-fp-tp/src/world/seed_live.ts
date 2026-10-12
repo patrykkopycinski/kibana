@@ -15,10 +15,12 @@ import {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_ATTACK_INDEX,
   FP_TP_ENTITY_READ_ALIAS,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_TWIN_SEED_LABEL,
 } from './constants';
 import { toEntityCrudRequest } from './entity_crud';
 import type { FpTpEntityCrudRequest } from './entity_crud';
+import { ensureFpTpRawEventStore, rawEventIndexNames, retargetRawEventIndex } from './raw_events';
 import { shiftTwinToNow } from './shift_timestamps';
 import type { FpTpGold, FpTpTwin, FpTpWorld } from './types';
 
@@ -173,11 +175,19 @@ const bulkWithConflictRetry = async (
   esClient: EsClient,
   label: string,
   operations: unknown[],
-  { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
+  {
+    attempts = 3,
+    delayMs = 750,
+    pipeline,
+  }: { attempts?: number; delayMs?: number; pipeline?: string } = {}
 ): Promise<void> => {
   const pending = operations;
   for (let attempt = 1; attempt <= attempts; attempt++) {
-    const result = await esClient.bulk({ refresh: 'wait_for', operations: pending });
+    const result = await esClient.bulk({
+      refresh: 'wait_for',
+      operations: pending,
+      ...(pipeline === undefined ? {} : { pipeline }),
+    });
     if (result.errors !== true) {
       return;
     }
@@ -264,9 +274,9 @@ export const buildLiveSeedPlan = (world: FpTpWorld, now: Date = new Date()): FpT
       { create: { _index: AD2_ALERTS_INDEX, _id: alert.id } },
       alert.source,
     ]),
-    events: shifted.events.map(({ index, id }) => ({ index, id })),
+    events: shifted.events.map(({ index, id }) => ({ index: retargetRawEventIndex(index), id })),
     eventOperations: shifted.events.flatMap((event) => [
-      { create: { _index: event.index, _id: event.id } },
+      { create: { _index: retargetRawEventIndex(event.index), _id: event.id } },
       event.source,
     ]),
     entities: shifted.entities.map(toEntityCrudRequest),
@@ -509,7 +519,15 @@ export const cleanupManualSeedLive = async (
   esClient: EsClient,
   events: ReadonlyArray<{ index: string; id: string }> = []
 ): Promise<void> => {
-  for (const index of [...AD2_SCENARIO_ALL_INDICES, FP_TP_ATTACK_INDEX, FP_TP_ATTACK_ADHOC_INDEX]) {
+  for (const index of [
+    ...AD2_SCENARIO_ALL_INDICES,
+    FP_TP_ATTACK_INDEX,
+    FP_TP_ATTACK_ADHOC_INDEX,
+    // a seeded raw-event stream DOES index the seed label (unlike the product
+    // data streams the world used to target), so leftovers of a previous manual
+    // seed are removed by label before the id sweep
+    ...rawEventIndexNames(events),
+  ]) {
     await deleteBySeedLabel(esClient, index);
   }
   await deleteDocumentsById(esClient, events);
@@ -589,7 +607,10 @@ export const seedFixture = async ({
       await bulkWithConflictRetry(esClient, 'alerts', plan.alertOperations);
     }
     if (plan.eventOperations.length > 0) {
-      await bulkWithConflictRetry(esClient, 'events', plan.eventOperations);
+      await ensureFpTpRawEventStore(esClient, rawEventIndexNames(plan.events));
+      await bulkWithConflictRetry(esClient, 'events', plan.eventOperations, {
+        pipeline: FP_TP_RAW_EVENT_INGEST_PIPELINE,
+      });
     }
     if (plan.attackDocument) {
       await createWithConflictRetry(esClient, {

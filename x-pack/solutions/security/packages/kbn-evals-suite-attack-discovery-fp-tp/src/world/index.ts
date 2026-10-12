@@ -21,6 +21,9 @@ export {
   FP_TP_ATTACK_INDEX,
   FP_TP_BASE_TIME,
   FP_TP_ENTITY_INDEX,
+  FP_TP_RAW_EVENT_INDEX_PREFIX,
+  FP_TP_RAW_EVENT_INDEX_TEMPLATE,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_RAW_EVENT_WINDOW_MS,
   FP_TP_TWIN_SEED_LABEL,
 } from './constants';
@@ -46,6 +49,18 @@ export {
   withProcessExecutable,
   withProcessParent,
 } from './mutations';
+export {
+  ensureFpTpRawEventIndices,
+  ensureFpTpRawEventPipeline,
+  ensureFpTpRawEventStore,
+  ensureFpTpRawEventTemplate,
+  rawEventIndexMappings,
+  rawEventIndexName,
+  rawEventIndexNames,
+  rawEventIndexSettings,
+  rawEventIngestPipeline,
+  retargetRawEventIndex,
+} from './raw_events';
 export {
   buildLiveSeedPlan,
   cleanupManualSeedLive,

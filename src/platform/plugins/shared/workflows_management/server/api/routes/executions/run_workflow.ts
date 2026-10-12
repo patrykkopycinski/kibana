@@ -10,6 +10,10 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import {
+  MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE,
+  requiresInheritedServiceAccount,
+} from '../../../../common/lib/requires_inherited_service_account';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -74,6 +78,11 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
           if (!workflow.enabled) {
             return response.badRequest({
               body: { message: 'Workflow is disabled. Enable it to run it.' },
+            });
+          }
+          if (requiresInheritedServiceAccount(workflow)) {
+            return response.badRequest({
+              body: { message: MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE },
             });
           }
 

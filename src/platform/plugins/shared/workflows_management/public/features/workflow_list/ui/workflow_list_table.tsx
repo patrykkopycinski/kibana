@@ -30,6 +30,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import {
+  MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE,
+  requiresInheritedServiceAccount,
+} from '../../../../common/lib/requires_inherited_service_account';
+import {
   getRunTooltipContent,
   ManagedWorkflowBadge,
   StatusBadge,
@@ -285,18 +289,21 @@ export const WorkflowListTable = ({
               canExecuteWorkflow &&
               item.permissions?.execute !== false &&
               item.enabled &&
-              item.valid,
+              item.valid &&
+              !requiresInheritedServiceAccount(item),
             type: 'icon',
             color: 'text',
             name: i18n.translate('workflows.workflowList.run', { defaultMessage: 'Run' }),
             'data-test-subj': 'runWorkflowAction',
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
-              getRunTooltipContent({
-                isValid: item.valid,
-                canRunWorkflow: canExecuteWorkflow && item.permissions?.execute !== false,
-                isEnabled: item.enabled,
-              }) ?? i18n.translate('workflows.workflowList.run', { defaultMessage: 'Run' }),
+              requiresInheritedServiceAccount(item)
+                ? MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE
+                : getRunTooltipContent({
+                    isValid: item.valid,
+                    canRunWorkflow: canExecuteWorkflow && item.permissions?.execute !== false,
+                    isEnabled: item.enabled,
+                  }) ?? i18n.translate('workflows.workflowList.run', { defaultMessage: 'Run' }),
             onClick: (item: WorkflowListItemDto) => onRequestRun(item),
           },
           {

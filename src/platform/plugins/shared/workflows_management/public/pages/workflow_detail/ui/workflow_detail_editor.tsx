@@ -36,6 +36,10 @@ import { useContextOverrideData } from './use_context_override_data';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
+import {
+  MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE,
+  requiresInheritedServiceAccount,
+} from '../../../../common/lib/requires_inherited_service_account';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
   selectFocusedStepId,
@@ -221,19 +225,26 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
   const { handleRunClick: handleRunClickWithUnsavedCheck, runConfirmationModal } =
     useRunWorkflowWithConfirmation(openTestModal);
 
+  const runDisabled =
+    isExecutionsTab ||
+    !canExecuteWorkflow ||
+    !isSyntaxValid ||
+    isSaving ||
+    requiresInheritedServiceAccount(workflow);
+
   const runWorkflowTooltipContent = useMemo(
     () =>
-      getTestRunTooltipContent({
-        isExecutionsTab,
-        isValid: Boolean(isSyntaxValid),
-        canRunWorkflow: hasExecutePrivilege,
-        hasWorkflowAccess: workflow?.permissions?.execute !== false,
-        isSaving: Boolean(isSaving),
-      }),
+      requiresInheritedServiceAccount(workflow)
+        ? MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE
+        : getTestRunTooltipContent({
+            isExecutionsTab,
+            isValid: Boolean(isSyntaxValid),
+            canRunWorkflow: hasExecutePrivilege,
+            hasWorkflowAccess: workflow?.permissions?.execute !== false,
+            isSaving: Boolean(isSaving),
+          }),
     [isExecutionsTab, isSyntaxValid, hasExecutePrivilege, workflow, isSaving]
   );
-
-  const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
 
   const testWorkflowButton = useMemo(
     () => (

@@ -17,6 +17,7 @@ import {
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
 import { executionStepsQuerySchema } from './get_execution_steps';
+import { MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE } from '../../../../common/lib/requires_inherited_service_account';
 import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
@@ -257,6 +258,31 @@ describe('Execution Routes', () => {
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: 'Workflow is disabled. Enable it to run it.' },
       });
+    });
+
+    it('should return bad request when a managed workflow needs an inherited service account', async () => {
+      mockApi.getWorkflow.mockResolvedValue({
+        ...mockWorkflow,
+        managed: true,
+        definition: {
+          steps: [
+            {
+              name: 'call_child',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+      });
+      const h = handler('POST', path)!;
+      const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: MANAGED_INHERITANCE_MANUAL_RUN_MESSAGE },
+      });
+      expect(mockApi.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
     it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {

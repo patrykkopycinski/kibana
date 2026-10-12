@@ -79,11 +79,8 @@ export const endpointForensicAnalysisSkill = defineSkillType({
   description:
     'Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, ' +
     'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
-    'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
-    'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
-    'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
-    'performance/resource troubleshooting, or output/integration failures — even when the question names a specific host ' +
-    '(use elastic-defend-configuration-troubleshooting).',
+    'Use for incident-scoped questions naming specific hosts or outbreaks. ' +
+    'NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet).',
   content: `# Endpoint Forensic Analysis
 
 ## When to Use

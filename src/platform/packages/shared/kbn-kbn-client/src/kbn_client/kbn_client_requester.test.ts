@@ -128,6 +128,34 @@ describe('KbnClientRequester.request()', () => {
     expect(headers.Authorization).toBe('Basic ZWxhc3RpYzpjaGFuZ2VtZQ==');
   });
 
+  it('sends an ApiKey Authorization header and keeps the URL credential-free when apiKey is set', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const requester = new KbnClientRequester(log, {
+      url: 'https://project.kb.example.co',
+      apiKey: 'project-api-key',
+    });
+    await requester.request({ method: 'GET', path: '/api/foo', retries: 0 });
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('ApiKey project-api-key');
+  });
+
+  it('prefers apiKey over credentials embedded in the URL and still strips them', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const requester = new KbnClientRequester(log, {
+      url: 'https://elastic:changeme@project.kb.example.co',
+      apiKey: 'project-api-key',
+    });
+    await requester.request({ method: 'GET', path: '/api/foo', retries: 0 });
+
+    expect(fetchMock.mock.calls[0][0] as string).not.toContain('changeme');
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect((init.headers as Record<string, string>).Authorization).toBe('ApiKey project-api-key');
+  });
+
   // 429s and other retry-after responses send the hint as a `Retry-After` HTTP header.
   // Consumers (kbn-evals retry loop) need `.headers` on the thrown error to honor it.
   it('attaches response headers to KbnClientRequesterError on non-2xx', async () => {

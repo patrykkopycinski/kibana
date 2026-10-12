@@ -36,6 +36,16 @@ let esClientInstance: EsClient | null = null;
 let kbnClientInstance: KbnClient | null = null;
 
 export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
+  if (!esClientInstance && config.apiKey) {
+    // Serverless projects have no basic-auth user: authenticate with the project API key.
+    log.serviceLoaded('esClient');
+    esClientInstance = createEsClientForTesting({
+      esUrl: config.hosts.elasticsearch,
+      isCloud: config.isCloud,
+      auth: { apiKey: config.apiKey },
+    });
+  }
+
   if (!esClientInstance) {
     const { username, password } = config.auth;
     const elasticsearchUrl = createClientUrlWithAuth({
@@ -86,17 +96,23 @@ export function getLinkedEsClient(config: ScoutTestConfig, log: ScoutLogger) {
 
 export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
   if (!kbnClientInstance) {
-    const kibanaUrl = createClientUrlWithAuth({
-      serviceName: 'kbn',
-      url: config.hosts.kibana,
-      username: config.auth.username,
-      password: config.auth.password,
-      log,
-    });
+    const kibanaUrl = config.apiKey
+      ? config.hosts.kibana
+      : createClientUrlWithAuth({
+          serviceName: 'kbn',
+          url: config.hosts.kibana,
+          username: config.auth.username,
+          password: config.auth.password,
+          log,
+        });
+    if (config.apiKey) {
+      log.serviceLoaded('kbnClient');
+    }
 
     kbnClientInstance = new KbnClient({
       log,
       url: kibanaUrl,
+      ...(config.apiKey ? { apiKey: config.apiKey } : {}),
       ...(config.http2 ? { certificateAuthorities: [readFileSync(CA_CERT_PATH)] } : {}),
     });
   }

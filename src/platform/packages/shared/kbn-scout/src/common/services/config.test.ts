@@ -364,6 +364,72 @@ describe('createScoutConfig', () => {
     });
   });
 
+  describe('API-key auth (serverless projects)', () => {
+    const { auth: _basic, ...mkiWithoutAuth } = baseCloudMkiSecurityConfig;
+    const ENV_NAME = 'SCOUT_TEST_PROJECT_API_KEY';
+
+    afterEach(() => {
+      delete process.env[ENV_NAME];
+    });
+
+    it('accepts an inline apiKey with no basic auth and exposes it on the config', () => {
+      writeConfig('cloud_mki', { ...mkiWithoutAuth, apiKey: 'inline-key' });
+
+      const config = createScoutConfig(tmpDir, 'cloud_mki', noopLogger);
+
+      expect(config.apiKey).toBe('inline-key');
+    });
+
+    it('resolves apiKeyEnv from the environment so the secret is never in the file', () => {
+      process.env[ENV_NAME] = 'env-key';
+      writeConfig('cloud_mki', { ...mkiWithoutAuth, apiKeyEnv: ENV_NAME });
+
+      const config = createScoutConfig(tmpDir, 'cloud_mki', noopLogger);
+
+      expect(config.apiKey).toBe('env-key');
+      expect(config).not.toHaveProperty('apiKeyEnv');
+    });
+
+    it('fails clearly when the apiKeyEnv variable is not set', () => {
+      writeConfig('cloud_mki', { ...mkiWithoutAuth, apiKeyEnv: ENV_NAME });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
+        /'apiKeyEnv' names environment variable 'SCOUT_TEST_PROJECT_API_KEY', which is not set/
+      );
+    });
+
+    it('rejects apiKey and apiKeyEnv together', () => {
+      process.env[ENV_NAME] = 'env-key';
+      writeConfig('cloud_mki', { ...mkiWithoutAuth, apiKey: 'k', apiKeyEnv: ENV_NAME });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
+        /'apiKeyEnv' must not be set together with 'apiKey'/
+      );
+    });
+
+    it('still requires basic auth when no API key is given', () => {
+      writeConfig('cloud_mki', mkiWithoutAuth);
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
+        /'auth' is required unless 'apiKey' or 'apiKeyEnv' is set/
+      );
+    });
+
+    it('rejects API-key auth on a non-cloud config', () => {
+      writeConfig('local', { ...baseStatefulConfig, auth: undefined, apiKey: 'k' });
+
+      expect(() => createScoutConfig(tmpDir, 'local', noopLogger)).toThrow(
+        /API-key auth is only supported when 'isCloud' is true/
+      );
+    });
+
+    it('leaves apiKey undefined for basic-auth configs', () => {
+      writeConfig('local', baseStatefulConfig);
+
+      expect(createScoutConfig(tmpDir, 'local', noopLogger).apiKey).toBeUndefined();
+    });
+  });
+
   describe('validation: cloud rules', () => {
     it('requires cloudHostName when isCloud=true', () => {
       writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, cloudHostName: undefined });

@@ -115,6 +115,8 @@ const isJsonShapedBody = (body: unknown): boolean => {
 
 interface Options {
   url: string;
+  /** Sent as `Authorization: ApiKey <key>`; takes precedence over credentials embedded in `url`. */
+  apiKey?: string;
   certificateAuthorities?: Buffer[];
 }
 
@@ -140,13 +142,15 @@ export class KbnClientRequester {
     // `user:pass@host` credentials, so we strip them here and translate to a Basic auth header
     // that's applied to every outgoing request.
     const parsed = new URL(options.url);
-    if (parsed.username || parsed.password) {
+    if (options.apiKey) {
+      this.authorization = `ApiKey ${options.apiKey}`;
+    } else if (parsed.username || parsed.password) {
       this.authorization = `Basic ${Buffer.from(
         `${decodeURIComponent(parsed.username)}:${decodeURIComponent(parsed.password)}`
       ).toString('base64')}`;
-      parsed.username = '';
-      parsed.password = '';
     }
+    parsed.username = '';
+    parsed.password = '';
     this.urlForFetch = parsed.toString();
 
     this.dispatcher =

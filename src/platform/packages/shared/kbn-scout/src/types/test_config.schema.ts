@@ -81,11 +81,49 @@ export const ScoutTestConfigSchema = z
     productTier: ServerlessProductTierSchema.optional(),
     organizationId: z.string().min(1).optional(),
     hosts: HostsSchema,
-    auth: AuthSchema,
+    // Basic auth. Optional only when the target authenticates with an API key
+    // instead (see `apiKey` / `apiKeyEnv`).
+    auth: AuthSchema.optional(),
+    // Elastic Cloud serverless projects have no basic-auth user: clients send
+    // `Authorization: ApiKey <key>`. `apiKeyEnv` names an environment variable
+    // holding the key, resolved when the config is parsed, so the secret never
+    // has to be written to the config file.
+    apiKey: z.string().min(1, { error: 'must be a non-empty string' }).optional(),
+    apiKeyEnv: z.string().min(1, { error: 'must name an environment variable' }).optional(),
     linkedProject: LinkedProjectSchema.optional(),
     metadata: z.any().optional(),
   })
   .superRefine((cfg, ctx) => {
+    if (cfg.apiKey !== undefined && cfg.apiKeyEnv !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['apiKeyEnv'],
+        message: `must not be set together with 'apiKey'; pick one`,
+      });
+    }
+    if (cfg.apiKeyEnv !== undefined && !process.env[cfg.apiKeyEnv]) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['apiKeyEnv'],
+        message: `names environment variable '${cfg.apiKeyEnv}', which is not set`,
+      });
+    }
+    if (cfg.auth === undefined && cfg.apiKey === undefined && cfg.apiKeyEnv === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['auth'],
+        message: `is required unless 'apiKey' or 'apiKeyEnv' is set`,
+      });
+    }
+    if (cfg.apiKey !== undefined || cfg.apiKeyEnv !== undefined) {
+      if (!cfg.isCloud) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['apiKey'],
+          message: `API-key auth is only supported when 'isCloud' is true`,
+        });
+      }
+    }
     if (cfg.serverless) {
       if (cfg.projectType === undefined) {
         ctx.addIssue({
@@ -164,9 +202,14 @@ export const ScoutTestConfigSchema = z
       });
     }
   })
-  .transform((cfg) => ({
+  .transform(({ apiKeyEnv, ...cfg }) => ({
     ...cfg,
     uiam: cfg.uiam ?? cfg.serverless,
+    // Resolved here so every client reads one field; the env var is validated above.
+    apiKey: cfg.apiKey ?? (apiKeyEnv ? process.env[apiKeyEnv] : undefined),
+    // API-key targets carry no basic-auth user; keep the field non-optional so existing
+    // basic-auth consumers still type-check. Clients prefer `apiKey` whenever it is set.
+    auth: cfg.auth ?? { username: '', password: '' },
   }));
 
 /**

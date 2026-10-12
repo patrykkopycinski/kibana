@@ -22,6 +22,12 @@ import { KbnClientVersion } from './kbn_client_version';
 
 export interface KbnClientOptions {
   url: string;
+  /**
+   * Elastic Cloud / serverless project API key. When set, every request carries
+   * `Authorization: ApiKey <key>` instead of the Basic auth derived from
+   * `user:pass@` in `url` (serverless projects have no basic-auth user).
+   */
+  apiKey?: string;
   certificateAuthorities?: Buffer[];
   log: ToolingLog;
   uiSettingDefaults?: UiSettingValues;
@@ -58,6 +64,7 @@ export class KbnClient {
 
     this.requester = new KbnClientRequester(this.log, {
       url: options.url,
+      apiKey: options.apiKey,
       certificateAuthorities: options.certificateAuthorities,
     });
     this.status = new KbnClientStatus(this.requester);

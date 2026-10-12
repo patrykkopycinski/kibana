@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
@@ -25,6 +26,10 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * `initialize_managed_workflows.ts` never runs and the rule-creation workflow is never installed.
  * Nothing in the eval suite calls a route on either plugin directly, but both flags are
  * load-bearing and must not be removed.
+ *
+ * Service accounts are required the same way: alertzero's start() skips installing its
+ * managed workflows (including system-security-rule-creation) when
+ * `core.security.serviceAccounts.isEnabled()` is false, so the shared args spread them in.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -32,6 +37,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',

@@ -118,3 +118,44 @@ it against, `VerdictAccuracy`.
 runs the unit suite: loader validation against the real vendored corpora,
 corrupt-label/duplicate-id/mutation-spec mutation tests, evaluator scoring, and
 workflow task run/poll/verdict plumbing.
+
+## Running against a remote serverless project
+
+The suite is not tied to the Scout-started stack. With a `.scout/servers/cloud_mki.json`
+pointing at a serverless security project (API-key auth: the key is **never** written to
+the file — name the environment variable that holds it) and `EVAL_SCOUT_PROJECT=mki`, the
+same spec runs end-to-end against that project:
+
+```jsonc
+// .scout/servers/cloud_mki.json (gitignored)
+{
+  "serverless": true,
+  "projectType": "security",
+  "productTier": "complete",
+  "isCloud": true,
+  "cloudHostName": "qa.elastic.cloud",
+  "cloudUsersFilePath": "/path/to/role_users.json",
+  "hosts": { "kibana": "https://<project>.kb…", "elasticsearch": "https://<project>.es…" },
+  "apiKeyEnv": "MY_PROJECT_API_KEY"
+}
+```
+
+```bash
+export MY_PROJECT_API_KEY=…            # project API key, runtime only
+export EVAL_SCOUT_PROJECT=mki
+export EVAL_CONNECTOR_ID=<judge-inference-id>
+export KIBANA_TESTING_INFERENCE_ENDPOINTS='{"<subject-id>":{"name":"…","inferenceId":"<subject-id>","provider":"elastic","taskType":"chat_completion"},…}'
+export FP_TP_COHORT=evidenced FP_TP_MAX_EXAMPLES_PER_CORPUS=1
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow/playwright.config.ts --project <subject-id>
+```
+
+Serverless changes the seeding contract, not the grading: the `.adhoc` copy is skipped
+(the data-generator route already persists into the product stream the workflow reads),
+cited alerts and raw events are written with `create` ops into the product data stream /
+seeder-owned `logs-endpoint.events.fp-tp-*` streams, and `entities-latest-<space>` is
+written through its alias (Entity Store) instead of being provisioned.
+
+The target project must expose the workflow and its EIS connectors. If it does not run
+the Evaluations plugin (`xpack.evals.enabled=false`, `/internal/evals` → 404), point
+`EVAL_KBN_URL` (optionally `EVAL_KBN_API_KEY`) at a Kibana that does — the workflow under
+test stays on the project, only datasets/scores are stored elsewhere.

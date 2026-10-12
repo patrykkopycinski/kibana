@@ -111,24 +111,23 @@ apiTest.describe(
 
             const requested = Number(sweep.outputs.reviews_requested ?? 0);
 
-            // The sweep's own count is asserted BEFORE the token read: a broken harvest and a
-            // missing token index must not read as the same failure (measured:
+            const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
+
+            // Evidence ships before the verdict: a red assertion must not take its own data down.
+            await attachArtifact(
+              testInfo,
+              `alertzero-eval-token-usage-tuning-${tier}.json`,
+              buildArtifact(tier, [sweep], rows)
+            );
+
+            // The sweep's own count is asserted AFTER the evidence is attached: a broken harvest
+            // and a missing token index must not read as the same failure (measured:
             // smoke-e01d0215577b44e8, where index_not_found masked the sweep's numbers).
             const diagnosis = requested === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
             expect(requested, `reviews_requested=${requested}\n${diagnosis}`).toBe(
               SCALE_TIERS[tier].rules
             );
             expect(requested).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
-
-            const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
-
-            // Attach BEFORE the row assertions: a failing assertion must not take its own evidence
-            // down with it (the first runs failed with the artifact never written).
-            await attachArtifact(
-              testInfo,
-              `alertzero-eval-token-usage-tuning-${tier}.json`,
-              buildArtifact(tier, [sweep], rows)
-            );
 
             assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
             expect(rows.length).toBeGreaterThan(0);
@@ -175,9 +174,7 @@ apiTest.describe(
               buildArtifact(tier, [sweep], rows)
             );
 
-            assertRowsAreAttributable(rows, {
-              expectedPluginIds: [COVERAGE_PLUGIN_ID, RULE_CREATION_PLUGIN_ID],
-            });
+            assertRowsAreAttributable(rows, { expectedPluginIds: EXPECTED_PLUGIN_IDS });
             expect(rows.length).toBeGreaterThan(0);
             expect(rows.some((row) => row.featureId === COVERAGE_PLUGIN_ID)).toBe(true);
 

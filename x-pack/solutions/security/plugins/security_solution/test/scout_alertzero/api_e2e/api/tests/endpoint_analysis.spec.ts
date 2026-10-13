@@ -15,6 +15,7 @@ import {
   cleanupKnowledgeIndicators,
   createInvestigation,
   createServiceAccount,
+  ensureInvestigationsAiIndex,
   deleteServiceAccount,
   getAdminApi,
   getWorker,
@@ -80,6 +81,7 @@ const runEndpointAnalysis = async (
     `Endpoint analysis e2e ${seeded.runMarker}`,
     `Seeded investigation for run ${seeded.runMarker}`
   );
+  await ensureInvestigationsAiIndex(adminApi);
   const kiId = await seedKnowledgeIndicator(esClient, {
     kiId: `e2e-analyze-endpoint-${seeded.runMarker}`,
     type: 'security.analyze_endpoint',
@@ -282,6 +284,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         `Endpoint analysis e2e 2 ${seeded.runMarker}`,
         `Seeded investigation for run ${seeded.runMarker}`
       );
+      await ensureInvestigationsAiIndex(adminApi);
       const kiId = await seedKnowledgeIndicator(esClient, {
         kiId: `e2e-analyze-endpoint-${seeded.runMarker}`,
         type: 'security.analyze_endpoint',

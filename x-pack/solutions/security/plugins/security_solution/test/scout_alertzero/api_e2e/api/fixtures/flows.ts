@@ -9,6 +9,7 @@ import type { EsClient } from '@kbn/scout-security';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
 import {
   AI_INDEX_KI_BACKING_INDEX,
+  AI_INDEX_URL,
   CONVERSATIONS_URL,
   PROPOSALS_URL,
   SECURITY_INVESTIGATIONS_AI_INDEX_ID,
@@ -222,3 +223,24 @@ export const readKnowledgeIndicator = async (
 };
 
 export { SECURITY_INVESTIGATIONS_AI_INDEX_ID };
+
+/**
+ * Registers the `security-investigations` AI index record if the stack has none yet. Producers
+ * get it lazily from `context-engine.createKi`; seeding straight into the backing index skips
+ * that, and a sweep's `context-engine.updateKi` then fails with "AI index not found" before it
+ * dispatches anything. Idempotent: an existing record answers 409.
+ */
+export const ensureInvestigationsAiIndex = async (api: AlertZeroApi): Promise<void> => {
+  const result = await api.public('POST', AI_INDEX_URL, {
+    body: {
+      id: SECURITY_INVESTIGATIONS_AI_INDEX_ID,
+      dest: { type: 'index', value: AI_INDEX_KI_BACKING_INDEX },
+      automations: [],
+      sources: [],
+      traces: [],
+    },
+  });
+  if (result.statusCode !== 409) {
+    ok(result, 'register the security-investigations AI index');
+  }
+};

@@ -76,7 +76,8 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
         interval: '5m',
         from: 'now-10m',
         index: [testData.ALERTS_INDEX],
-        query: { language: 'kuery', filter: 'user.name:*' },
+        language: 'kuery',
+        query: 'user.name:*',
       },
     }),
     'create the detection rule'

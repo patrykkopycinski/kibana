@@ -32,6 +32,7 @@ export const INSTALL_PREBUILT_RULE_ACTION_ID = 'system-alertzero-action-install-
 export const SECURITY_INVESTIGATIONS_AI_INDEX_ID = 'security-investigations';
 export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS_AI_INDEX_ID}`;
 
+export const AI_INDEX_URL = '/api/context_engine/ai_index';
 export const PROPOSALS_URL = '/internal/proposals';
 export const CONVERSATIONS_URL = '/api/agent_builder/conversations';
 

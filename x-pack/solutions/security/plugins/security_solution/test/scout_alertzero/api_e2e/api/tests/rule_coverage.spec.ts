@@ -15,6 +15,7 @@ import {
   approveProposal,
   cleanupKnowledgeIndicators,
   createServiceAccount,
+  ensureInvestigationsAiIndex,
   deleteServiceAccount,
   dismissProposal,
   getAdminApi,
@@ -112,6 +113,7 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
       ];
 
       // A gap KI in the shape Hunt packaging writes: pending, in this space, with a technique.
+      await ensureInvestigationsAiIndex(adminApi);
       const kiId = await seedKnowledgeIndicator(esClient, {
         kiId: `e2e-coverage-${Date.now().toString(36)}`,
         type: 'security.coverage',
@@ -223,13 +225,13 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
       );
       expect(sweep.status).toBe('completed');
       const withOutput = ok(
-        await adminApi.public<{ output?: { search_failed?: unknown } }>(
+        await adminApi.public<{ context?: { output?: { search_failed?: unknown } } }>(
           'GET',
           `/api/workflows/executions/${encodeURIComponent(sweep.id)}?includeOutput=true`
         ),
         'read the sweep output'
       );
-      expect(withOutput.output?.search_failed).toBe(false);
+      expect(withOutput.context?.output?.search_failed).toBe(false);
     }
   );
 });

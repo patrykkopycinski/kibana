@@ -1001,7 +1001,7 @@ const ensureCitedAlertsIndex = async (esClient: EsClientLike, index: string): Pr
   try {
     await esClient.indices.create({ index, mappings: {} });
   } catch (error) {
-    if (!isAlreadyExists(error)) {
+    if (!isAlreadyExists(error) && !isAlreadyExistsAsAlias(error)) {
       throw error;
     }
   }
@@ -1036,6 +1036,18 @@ const isAlreadyExists = (error: unknown): boolean =>
   JSON.stringify((error as { meta?: { body?: unknown } })?.meta?.body ?? '').includes(
     'resource_already_exists_exception'
   );
+
+/**
+ * When the target name is already an alias (e.g. `.alerts-security.alerts-default` ->
+ * `.internal.alerts-security.alerts-default-000001`), `indices.create` fails with
+ * `invalid_index_name_exception ... already exists as alias` instead of
+ * `resource_already_exists_exception`. The target resolves, so it is the same
+ * "already there" outcome.
+ */
+const isAlreadyExistsAsAlias = (error: unknown): boolean => {
+  const body = JSON.stringify((error as { meta?: { body?: unknown } })?.meta?.body ?? '');
+  return body.includes('invalid_index_name_exception') && body.includes('already exists as alias');
+};
 
 const ensureEntityIndex = async (esClient: EsClientLike, index: string): Promise<void> => {
   if (!esClient.indices) {

@@ -211,6 +211,57 @@ describe('seedCitedAlerts', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('tolerates the target already existing as an alias (invalid_index_name_exception)', async () => {
+    const { bulks, client } = makeEsClient();
+    client.indices = {
+      create: async () => {
+        const err = new Error('invalid_index_name_exception');
+        (err as { meta?: unknown }).meta = {
+          body: {
+            error: {
+              type: 'invalid_index_name_exception',
+              reason:
+                'Invalid index name [.alerts-security.alerts-default], already exists as alias',
+            },
+          },
+        };
+        throw err;
+      },
+      putIndexTemplate: async () => ({}),
+      deleteIndexTemplate: async () => ({}),
+    };
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await expect(
+      seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID)
+    ).resolves.toBeUndefined();
+    expect(bulks).toHaveLength(1);
+  });
+
+  it('still rethrows other invalid_index_name_exception errors when provisioning the index', async () => {
+    const { bulks, client } = makeEsClient();
+    client.indices = {
+      create: async () => {
+        const err = new Error('invalid_index_name_exception');
+        (err as { meta?: unknown }).meta = {
+          body: {
+            error: {
+              type: 'invalid_index_name_exception',
+              reason: 'Invalid index name [X], must be lowercase',
+            },
+          },
+        };
+        throw err;
+      },
+      putIndexTemplate: async () => ({}),
+      deleteIndexTemplate: async () => ({}),
+    };
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await expect(
+      seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID)
+    ).rejects.toThrow(/invalid_index_name_exception/);
+    expect(bulks).toHaveLength(0);
+  });
+
   it('retries the bulk once when every item error is a lost auto-create race', async () => {
     const { bulks, client } = makeEsClient();
     let call = 0;

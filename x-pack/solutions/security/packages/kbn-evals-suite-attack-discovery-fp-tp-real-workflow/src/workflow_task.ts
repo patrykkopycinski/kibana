@@ -926,13 +926,17 @@ export const seedCitedAlerts = async (
     return;
   }
   // On serverless the alerts index is a product data stream that only accepts
-  // `create` ops, which conflict when a case re-run reseeds the same ids.
-  // Pre-delete the cited ids so the `create` below always lands.
-  if (serverless) {
-    const deletes: unknown[] = doc.alertIds.map((alertId) => ({
-      delete: { _index: index, _id: alertId },
-    }));
-    await esClient.bulk({ body: deletes, refresh: true });
+  // `create` ops — and bulk `delete` ops targeting the stream name are rejected
+  // outright ("only write ops with an op_type of create are allowed in data
+  // streams"). delete_by_query, however, resolves through the backing indices,
+  // so a re-run clears its own cited ids that way before the `create` bulk.
+  if (serverless && doc.alertIds.length > 0) {
+    await esClient.deleteByQuery({
+      index,
+      conflicts: 'proceed',
+      refresh: true,
+      query: { ids: { values: doc.alertIds } },
+    });
   }
   const result = await esClient.bulk({ body, refresh: true });
   if (result.errors) {

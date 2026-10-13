@@ -249,6 +249,7 @@ describe('serverless seeding contract', () => {
     const calls = {
       get: [] as unknown[],
       bulk: [] as Array<{ body: Array<Record<string, { _index?: string }>>; pipeline?: string }>,
+      deleteByQuery: [] as unknown[],
       putIndexTemplate: [] as unknown[],
       createDataStream: [] as unknown[],
       putPipeline: [] as unknown[],
@@ -263,7 +264,10 @@ describe('serverless seeding contract', () => {
         calls.bulk.push(params);
         return { errors: false };
       },
-      deleteByQuery: async () => ({}),
+      deleteByQuery: async (params: unknown) => {
+        calls.deleteByQuery.push(params);
+        return {};
+      },
       indices: {
         create: async (params: unknown) => {
           calls.indicesCreate.push(params);
@@ -306,12 +310,12 @@ describe('serverless seeding contract', () => {
       doc,
       AD_DOC_ID
     );
-    const ops = calls.bulk[1].body.filter((op) => op && ('create' in op || 'index' in op));
+    const ops = calls.bulk[0].body.filter((op) => op && ('create' in op || 'index' in op));
     expect(ops.length).toBe(doc.alertIds.length);
     expect(ops.every((op) => 'create' in op && !('index' in op))).toBe(true);
   });
 
-  it('pre-deletes cited alert ids on serverless so case re-runs do not conflict on create', async () => {
+  it('clears its own cited alert ids via delete_by_query on serverless so re-runs do not conflict on create', async () => {
     const { calls, client } = makeEsClient();
     const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
     await seedCitedAlerts(
@@ -319,8 +323,14 @@ describe('serverless seeding contract', () => {
       doc,
       AD_DOC_ID
     );
-    expect(calls.bulk[0].body.every((op: { delete?: object }) => 'delete' in op)).toBe(true);
-    expect(calls.bulk[0].body.length).toBe(doc.alertIds.length);
+    expect(calls.deleteByQuery).toEqual([
+      {
+        index: '.alerts-security.alerts-default',
+        conflicts: 'proceed',
+        refresh: true,
+        query: { ids: { values: doc.alertIds } },
+      },
+    ]);
   });
 
   it('keeps index ops for cited alerts on stateful', async () => {

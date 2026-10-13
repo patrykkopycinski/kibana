@@ -41,16 +41,16 @@ describe('resolveCohort', () => {
 });
 
 describe('corporaForCohort', () => {
-  it('all keeps every corpus (1,017 cases)', () => {
+  it('all keeps every corpus (1,019 cases)', () => {
     expect(corporaForCohort('all')).toEqual(CORPUS_NAMES);
-    expect(total(corporaForCohort('all'))).toBe(1017);
+    expect(total(corporaForCohort('all'))).toBe(1019);
   });
 
-  it('scored excludes guide-sanity and leaves the 267 non-sanity cases', () => {
+  it('scored excludes guide-sanity and leaves the 269 non-sanity cases', () => {
     const names = corporaForCohort('scored');
     expect(names).not.toContain('guide-sanity');
     expect(names).toHaveLength(CORPUS_NAMES.length - 1);
-    expect(total(names)).toBe(267);
+    expect(total(names)).toBe(269);
   });
 
   it('sanity is only guide-sanity (750 cases)', () => {
@@ -114,7 +114,7 @@ describe('evidenced cohort', () => {
     expect(hasEvidence({ events: 'x' })).toBe(false);
   });
 
-  it('grades all 21 uncontested evidenced rows by default; the 15/corpus cap would drop eligible rows', () => {
+  it('grades all 23 uncontested evidenced rows by default; the 15/corpus cap would drop eligible rows', () => {
     const graded = (rawMax: string | undefined) =>
       corporaForCohort('evidenced').reduce(
         (sum, name) =>
@@ -125,8 +125,8 @@ describe('evidenced cohort', () => {
           ).length,
         0
       );
-    expect(graded(undefined)).toBe(21);
-    expect(graded('2')).toBe(2 + 2 + 2);
+    expect(graded(undefined)).toBe(23);
+    expect(graded('2')).toBe(2 + 2 + 2 + 2);
   });
 
   it('only lifts the default cap for the evidenced cohort', () => {

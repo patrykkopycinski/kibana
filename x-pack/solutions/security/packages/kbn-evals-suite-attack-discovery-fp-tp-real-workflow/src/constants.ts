@@ -39,7 +39,13 @@ export const LABELS = ['true_positive', 'false_positive', 'inconclusive'] as con
 export type Label = (typeof LABELS)[number];
 
 /** Label provenance values enforced by the loader (mirrors validate.py). */
-export const LABEL_PROVENANCES = ['public', 'replay', 'synthetic', 'adversarial-mutation'] as const;
+export const LABEL_PROVENANCES = [
+  'public',
+  'replay',
+  'synthetic',
+  'adversarial-mutation',
+  'positive-control',
+] as const;
 
 export type LabelProvenance = (typeof LABEL_PROVENANCES)[number];
 
@@ -52,6 +58,7 @@ export const CORPUS_CASE_COUNTS = {
   'adversarial-twins': 21,
   perturbations: 15,
   'cloud-fp-synthetic': 78,
+  'fp-positive-control': 2,
 } as const;
 
 export type CorpusName = keyof typeof CORPUS_CASE_COUNTS;

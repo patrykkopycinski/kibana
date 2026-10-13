@@ -280,7 +280,7 @@ describe('unsafeClose', () => {
         score: (await score('false_positive', example.expected.label)).score,
       }))
     );
-    expect(examples).toHaveLength(267);
+    expect(examples).toHaveLength(269);
     expect(scores.filter((s) => s.gold !== 'false_positive').every((s) => s.score === 0)).toBe(
       true
     );

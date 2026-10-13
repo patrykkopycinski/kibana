@@ -30,11 +30,11 @@ const eventCases = CORPUS_NAMES.flatMap((name) => loadCorpus(name)).filter((c) =
 );
 
 describe('buildEvidence over the real corpus', () => {
-  it('finds the 39 event-bearing rows and 978 rows without events', () => {
+  it('finds the 41 event-bearing rows and 978 rows without events', () => {
     const all = CORPUS_NAMES.flatMap((name) => loadCorpusExamples(name));
     const { scored, excluded } = partitionByEvidence(all);
-    expect(all).toHaveLength(1017);
-    expect(scored).toHaveLength(39);
+    expect(all).toHaveLength(1019);
+    expect(scored).toHaveLength(41);
     expect(excluded).toBe(978);
   });
 

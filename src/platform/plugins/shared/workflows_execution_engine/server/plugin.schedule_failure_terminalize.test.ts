@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * "Elastic License 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; dual-licensed under the "Elastic License 2.0", the "GNU Affero
- * General Public License v3.0 only", and the "Server Side Public License v 1.0".
- */
-
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

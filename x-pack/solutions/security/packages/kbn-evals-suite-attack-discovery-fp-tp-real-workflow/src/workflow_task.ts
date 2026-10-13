@@ -925,6 +925,15 @@ export const seedCitedAlerts = async (
     log.warning(`Seeded AD ${attackDiscoveryId} cites no alerts; nothing seeded into ${index}`);
     return;
   }
+  // On serverless the alerts index is a product data stream that only accepts
+  // `create` ops, which conflict when a case re-run reseeds the same ids.
+  // Pre-delete the cited ids so the `create` below always lands.
+  if (serverless) {
+    const deletes: unknown[] = doc.alertIds.map((alertId) => ({
+      delete: { _index: index, _id: alertId },
+    }));
+    await esClient.bulk({ body: deletes, refresh: true });
+  }
   const result = await esClient.bulk({ body, refresh: true });
   if (result.errors) {
     throw new Error(`Bulk seeding cited alerts into ${index} reported errors`);

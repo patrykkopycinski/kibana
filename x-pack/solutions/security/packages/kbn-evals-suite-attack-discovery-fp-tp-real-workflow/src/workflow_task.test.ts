@@ -306,9 +306,21 @@ describe('serverless seeding contract', () => {
       doc,
       AD_DOC_ID
     );
-    const ops = calls.bulk[0].body.filter((op) => op && ('create' in op || 'index' in op));
+    const ops = calls.bulk[1].body.filter((op) => op && ('create' in op || 'index' in op));
     expect(ops.length).toBe(doc.alertIds.length);
     expect(ops.every((op) => 'create' in op && !('index' in op))).toBe(true);
+  });
+
+  it('pre-deletes cited alert ids on serverless so case re-runs do not conflict on create', async () => {
+    const { calls, client } = makeEsClient();
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await seedCitedAlerts(
+      { fetch: jest.fn(), log: mockLog(), esClient: client as never, serverless: true },
+      doc,
+      AD_DOC_ID
+    );
+    expect(calls.bulk[0].body.every((op: { delete?: object }) => 'delete' in op)).toBe(true);
+    expect(calls.bulk[0].body.length).toBe(doc.alertIds.length);
   });
 
   it('keeps index ops for cited alerts on stateful', async () => {

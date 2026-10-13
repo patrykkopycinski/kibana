@@ -38,6 +38,11 @@ export function buildTaskAttemptsExhaustedMessage(lastError: string): string {
   return `Task Manager exhausted all attempts for this workflow execution task. Last error: ${lastError}`;
 }
 
+export function buildTaskSchedulingFailedMessage(scheduleError: unknown): string {
+  const original = scheduleError instanceof Error ? scheduleError.message : String(scheduleError);
+  return `Task Manager failed to schedule the workflow execution task. Original error: ${original}`;
+}
+
 /**
  * Discriminated result for `workflow:run` interrupt recovery.
  * - `run_workflow`: continue into `runWorkflow`
@@ -372,6 +377,63 @@ export async function markScheduledExecutionFailedAfterTaskError(params: {
   } catch (markFailedErr) {
     logger.error(
       `Failed to mark scheduled workflow execution ${workflowRunId} as FAILED after task error: ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
+}
+
+/**
+ * After a create-then-schedule path creates a `pending` execution and `taskManager.schedule` /
+ * `taskManager.bulkSchedule` throws, best-effort mark that execution FAILED so the non-terminal
+ * doc cannot hold a concurrency slot forever (every later run on the key would be skipped).
+ * The failed doc's error carries the ORIGINAL schedule error. The caller rethrows it.
+ */
+export async function markScheduledExecutionFailedAfterScheduleError(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+  scheduleError: unknown;
+}): Promise<void> {
+  const {
+    workflowExecutionRepository,
+    stepExecutionRepository,
+    workflowRunId,
+    spaceId,
+    logger,
+    scheduleError,
+  } = params;
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (
+      !execution ||
+      isTerminalStatus(execution.status) ||
+      execution.status === ExecutionStatus.WAITING_FOR_INPUT
+    ) {
+      return;
+    }
+
+    await markExecutionFailedTaskRecovery(
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowRunId,
+      {
+        message: buildTaskSchedulingFailedMessage(scheduleError),
+      },
+      { refresh: 'wait_for' }
+    );
+    logger.warn(
+      `Marked workflow execution ${workflowRunId} FAILED after task scheduling failed (status was ${execution.status})`
+    );
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark scheduled workflow execution ${workflowRunId} as FAILED after task scheduling error: ${
         markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
       }`
     );

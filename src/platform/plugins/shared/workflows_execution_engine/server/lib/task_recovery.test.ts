@@ -16,7 +16,9 @@ import {
 } from './execution_identity';
 import {
   buildTaskAttemptsExhaustedMessage,
+  buildTaskSchedulingFailedMessage,
   failExecutionMissingIdentity,
+  markScheduledExecutionFailedAfterScheduleError,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
@@ -872,5 +874,108 @@ describe('failExecutionMissingIdentity', () => {
       )
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('update rejected'));
+  });
+});
+
+describe('markScheduledExecutionFailedAfterScheduleError', () => {
+  const { workflowExecutionsDataClient, repository, stepExecutionRepository } =
+    createRecoveryTestHarness();
+  const logger = loggingSystemMock.create().get('test');
+
+  it('marks a pending execution FAILED with the original schedule error message', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'run-1',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.PENDING,
+    } as EsWorkflowExecution);
+
+    await markScheduledExecutionFailedAfterScheduleError({
+      workflowExecutionRepository: repository,
+      stepExecutionRepository,
+      workflowRunId: 'run-1',
+      spaceId: 'default',
+      logger,
+      scheduleError: new Error('0xD38358 API key grant failed'),
+    });
+
+    expectFailedWorkflowUpdate(workflowExecutionsDataClient, 'run-1', {
+      type: TASK_RECOVERY_ERROR_TYPE,
+      message: buildTaskSchedulingFailedMessage(new Error('0xD38358 API key grant failed')),
+    });
+  });
+
+  it('preserves the original error message text in the failed doc', () => {
+    expect(buildTaskSchedulingFailedMessage(new Error('0xD38358 API key grant failed'))).toContain(
+      '0xD38358 API key grant failed'
+    );
+    expect(buildTaskSchedulingFailedMessage('plain string boom')).toContain('plain string boom');
+  });
+
+  it('leaves an already-terminal execution untouched', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'run-2',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.FAILED,
+    } as EsWorkflowExecution);
+    workflowExecutionsDataClient.bulk.mockClear();
+
+    await markScheduledExecutionFailedAfterScheduleError({
+      workflowExecutionRepository: repository,
+      stepExecutionRepository,
+      workflowRunId: 'run-2',
+      spaceId: 'default',
+      logger,
+      scheduleError: new Error('schedule boom'),
+    });
+
+    expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+  });
+
+  it('leaves a waiting_for_input execution untouched', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'run-3',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    } as EsWorkflowExecution);
+    workflowExecutionsDataClient.bulk.mockClear();
+
+    await markScheduledExecutionFailedAfterScheduleError({
+      workflowExecutionRepository: repository,
+      stepExecutionRepository,
+      workflowRunId: 'run-3',
+      spaceId: 'default',
+      logger,
+      scheduleError: new Error('schedule boom'),
+    });
+
+    expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not throw when the terminalizing update itself fails', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'run-4',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.PENDING,
+    } as EsWorkflowExecution);
+    workflowExecutionsDataClient.bulk.mockRejectedValueOnce(new Error('update rejected'));
+
+    await expect(
+      markScheduledExecutionFailedAfterScheduleError({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'run-4',
+        spaceId: 'default',
+        logger,
+        scheduleError: new Error('schedule boom'),
+      })
+    ).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('after task scheduling error')
+    );
   });
 });

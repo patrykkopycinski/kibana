@@ -60,6 +60,7 @@ import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_acces
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
+  markScheduledExecutionFailedAfterScheduleError,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
@@ -1527,10 +1528,24 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, {
-          request: request as KibanaRequest,
-          cloneApiKey: true,
-        });
+        try {
+          await plugins.taskManager.schedule(taskInstance, {
+            request: request as KibanaRequest,
+            cloneApiKey: true,
+          });
+        } catch (error) {
+          // The execution doc was already created as pending; terminalize it so it cannot
+          // hold a concurrency slot (and skip every later run on that key) forever.
+          await markScheduledExecutionFailedAfterScheduleError({
+            workflowExecutionRepository,
+            stepExecutionRepository,
+            workflowRunId: workflowExecution.id as string,
+            spaceId: workflowExecution.spaceId as string,
+            logger: this.logger,
+            scheduleError: error,
+          });
+          throw error;
+        }
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -1587,7 +1602,19 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      try {
+        await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      } catch (error) {
+        await markScheduledExecutionFailedAfterScheduleError({
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          workflowRunId: workflowExecution.id as string,
+          spaceId: workflowExecution.spaceId as string,
+          logger: this.logger,
+          scheduleError: error,
+        });
+        throw error;
+      }
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1802,7 +1829,25 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        try {
+          await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        } catch (error) {
+          // Terminalize every execution this batch created and was about to schedule;
+          // otherwise each stays pending and holds its concurrency slot forever.
+          await Promise.all(
+            toSchedule.map((p) =>
+              markScheduledExecutionFailedAfterScheduleError({
+                workflowExecutionRepository,
+                stepExecutionRepository,
+                workflowRunId: p.workflowExecution.id as string,
+                spaceId: (p.workflowExecution.spaceId as string) ?? 'default',
+                logger: this.logger,
+                scheduleError: error,
+              })
+            )
+          );
+          throw error;
+        }
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1865,7 +1910,19 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      try {
+        await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      } catch (error) {
+        await markScheduledExecutionFailedAfterScheduleError({
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          workflowRunId: workflowExecution.id as string,
+          spaceId: workflowExecution.spaceId as string,
+          logger: this.logger,
+          scheduleError: error,
+        });
+        throw error;
+      }
 
       return {
         workflowExecutionId: workflowExecution.id as string,

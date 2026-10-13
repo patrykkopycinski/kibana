@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate_setup';
 import { COLLISION_EXAMPLES, filterCollisionExamples } from './collision_dataset_n30';
+import { collisionTestBudgetMs, resolveRepetitions } from './collision_budget';
 
 /**
  * n>=30-per-pair powered variant of the routing-collision A/B (t_d9046fa9).
@@ -38,8 +39,8 @@ const ARM =
   process.env.COLLISION_ARM === 'candidate' || process.env.COLLISION_ARM === 'baseline'
     ? process.env.COLLISION_ARM
     : (process.env.EVAL_SUITE_ID ?? '').endsWith('efa-collision-candidate')
-      ? 'candidate'
-      : 'baseline';
+    ? 'candidate'
+    : 'baseline';
 
 const selectedExamples = filterCollisionExamples(COLLISION_EXAMPLES);
 
@@ -52,33 +53,46 @@ evaluate.describe(
     for (const pair of pairs) {
       const pairExamples = selectedExamples.filter(({ metadata }) => metadata.pair === pair);
 
-      evaluate(`${pair}: expected skill wins the boundary`, async ({ evaluateDataset }, testInfo) => {
-        const directions = [...new Set(pairExamples.map(({ metadata }) => metadata.direction))];
-        testInfo.annotations.push({
-          type: 'collision-scope',
-          description: `${pairExamples.length} examples, directions: ${directions.join(', ')}`,
-        });
-        testInfo.annotations.push({
-          type: 'collision-arm',
-          description: ARM,
-        });
+      evaluate(
+        `${pair}: expected skill wins the boundary`,
+        async ({ evaluateDataset }, testInfo) => {
+          // Size the budget from the work (examples x reps), never a constant: a truncated
+          // pair drops its slowest examples and biases the misroute rate (see collision_budget.ts).
+          const budgetMs = collisionTestBudgetMs(pairExamples.length, resolveRepetitions());
+          testInfo.setTimeout(budgetMs);
+          testInfo.annotations.push({
+            type: 'collision-budget',
+            description: `${Math.round(budgetMs / 60_000)} min for ${
+              pairExamples.length
+            } examples x ${resolveRepetitions()} reps`,
+          });
+          const directions = [...new Set(pairExamples.map(({ metadata }) => metadata.direction))];
+          testInfo.annotations.push({
+            type: 'collision-scope',
+            description: `${pairExamples.length} examples, directions: ${directions.join(', ')}`,
+          });
+          testInfo.annotations.push({
+            type: 'collision-arm',
+            description: ARM,
+          });
 
-        await evaluateDataset({
-          dataset: {
-            name: `alertzero-efa-collision-${ARM}-${pair}`,
-            description:
-              `Pairwise routing boundary between endpoint-forensic-analysis and one sibling skill ` +
-              `(${ARM} arm, n=${pairExamples.length}). Each example declares metadata.expectedSkill ` +
-              '(or metadata.shouldNotActivateSkill) plus direction and siblingSkill, so a misroute is ' +
-              'attributed via the loadedNames metadata.',
-            examples: pairExamples.map(({ question, expected, metadata }) => ({
-              input: { question },
-              output: { expected },
-              metadata,
-            })),
-          },
-        });
-      });
+          await evaluateDataset({
+            dataset: {
+              name: `alertzero-efa-collision-${ARM}-${pair}`,
+              description:
+                `Pairwise routing boundary between endpoint-forensic-analysis and one sibling skill ` +
+                `(${ARM} arm, n=${pairExamples.length}). Each example declares metadata.expectedSkill ` +
+                '(or metadata.shouldNotActivateSkill) plus direction and siblingSkill, so a misroute is ' +
+                'attributed via the loadedNames metadata.',
+              examples: pairExamples.map(({ question, expected, metadata }) => ({
+                input: { question },
+                output: { expected },
+                metadata,
+              })),
+            },
+          });
+        }
+      );
     }
   }
 );

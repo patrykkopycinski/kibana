@@ -12,8 +12,9 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
  * as its own suite with its own serverConfigSet:
  *   alertzero-efa-collision-baseline  -> evals_agent_builder (skill dark)
  *   alertzero-efa-collision-candidate -> evals_agent_builder_endpoint_forensic (skill live)
- * Per-pair runs are scoped with EVAL_EXAMPLES (48-52 ids per job) to stay inside the
- * 45-min smoke test cap; `repetitions: 1` here is overridden by the runner's --reps.
+ * Per-pair runs are scoped with EVAL_EXAMPLES; `repetitions: 1` here is overridden by the
+ * runner's --reps. `timeout` is only the fallback: each per-pair test sets its own budget from
+ * examples x reps (collision_budget.ts), because the old 40-min constant truncated 32x3 pairs.
  */
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals/security/endpoint_forensic_analysis_collision'),

@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/agentic-investigations-common'
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/safer-lodash-set'
   - '@kbn/datemath'
   - '@kbn/logging'
   - '@kbn/features-plugin'
@@ -56,6 +57,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-security-server'
+  - '@kbn/scout-security'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/charts-theme'
@@ -82,6 +84,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
@@ -93,6 +96,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

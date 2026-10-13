@@ -30,6 +30,10 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
+      // The AlertZero app renders its "unavailable" screen unless service accounts are
+      // enabled — alertzero gates its UI availability on
+      // `core.security.serviceAccounts.isEnabled()`.
+      '--xpack.security.serviceAccounts.enabled=true',
     ],
   },
 };

@@ -14,6 +14,7 @@ export { tags } from '@kbn/scout-security';
 export * as testData from '../../common/constants';
 export * from '../../common/kbn';
 export * from './alertzero';
+export * from './flows';
 
 /** Authenticates once per worker as the admin user and exposes the cookie-bearing API helper. */
 export const getAdminApi = async (

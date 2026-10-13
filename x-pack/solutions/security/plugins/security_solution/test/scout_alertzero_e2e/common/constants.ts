@@ -16,6 +16,25 @@ export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-
 export const HANDOFF_TO_FORENSICS_ACTION_ID = 'system-alertzero-action-handoff-to-forensics';
 export const ISOLATE_HOST_ACTION_ID = 'system-alertzero-action-isolate-host';
 
+// P2 (flows 3-5): the standalone endpoint analysis run, and the tuning / coverage workers.
+// The run workflow is global and enabled; the two workers are per-space and install their own
+// workflow on settings save, so the spec reads the workflow id from the worker record instead.
+export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
+  'system-security-forensics-run-endpoint-analysis';
+export const RULE_TUNING_WORKER_ID = 'system-security-detection-rule-tuning';
+export const RULE_COVERAGE_WORKER_ID = 'system-security-detection-rule-coverage';
+export const ADD_RULE_EXCEPTION_ACTION_ID = 'system-alertzero-action-add-rule-exception';
+export const EDIT_RULE_ACTION_ID = 'system-alertzero-action-edit-rule';
+export const ENABLE_RULE_ACTION_ID = 'system-alertzero-action-enable-rule';
+export const INSTALL_PREBUILT_RULE_ACTION_ID = 'system-alertzero-action-install-prebuilt-rule';
+
+/** Managed AI index the AlertZero producers write knowledge indicators into. */
+export const SECURITY_INVESTIGATIONS_AI_INDEX_ID = 'security-investigations';
+export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS_AI_INDEX_ID}`;
+
+export const PROPOSALS_URL = '/internal/proposals';
+export const CONVERSATIONS_URL = '/api/agent_builder/conversations';
+
 export const ALERTS_INDEX = '.alerts-security.alerts-default';
 export const ATTACK_DISCOVERY_ADHOC_INDEX =
   '.adhoc.alerts-security.attack.discovery.alerts-default';

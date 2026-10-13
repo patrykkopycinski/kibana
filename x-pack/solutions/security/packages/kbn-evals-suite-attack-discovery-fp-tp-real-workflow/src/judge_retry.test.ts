@@ -18,6 +18,16 @@ const smokeSocketClose = () =>
     { name: 'KbnClientRequesterError', status: undefined }
   );
 
+/** The error that aborted every remote-serverless run: project ingress 502. */
+const projectGateway502 = () =>
+  Object.assign(
+    new Error(
+      '[POST - https://project.kb.example/internal/inference/prompt] request failed (attempt=1/0): ' +
+        'undefined -- Status: 502, Cause: Bad Gateway {"ok":false,"message":"backend closed connection"}'
+    ),
+    { name: 'KbnClientRequesterError', status: 502 }
+  );
+
 const httpError = (status: number) =>
   Object.assign(new Error(`Request failed with status ${status}: fetch failed`), { status });
 
@@ -53,8 +63,15 @@ describe('isTransportFailure', () => {
     expect(isTransportFailure(err)).toBe(true);
   });
 
-  it('does not match any error that carries an HTTP status', () => {
-    for (const status of [400, 429, 500, 503, 504]) {
+  it('matches the gateway statuses a proxy returns when the backend drops the call', () => {
+    expect(isTransportFailure(projectGateway502())).toBe(true);
+    for (const status of [502, 503, 504]) {
+      expect(isTransportFailure(httpError(status))).toBe(true);
+    }
+  });
+
+  it('does not match a non-gateway HTTP status, even with a transport-looking message', () => {
+    for (const status of [400, 401, 404, 413, 429, 500]) {
       expect(isTransportFailure(httpError(status))).toBe(false);
     }
   });
@@ -80,19 +97,44 @@ describe('withJudgeTransportRetry', () => {
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('attempt 1/3'));
   });
 
-  it('gives up after maxAttempts and rethrows the last error', async () => {
-    const { sleep, opts } = setup(3);
-    const evaluate = jest.fn().mockRejectedValue(smokeSocketClose());
+  it('retries the project-gateway 502 and returns the judge result', async () => {
+    const { sleep, opts } = setup();
+    const evaluate = jest
+      .fn()
+      .mockRejectedValueOnce(projectGateway502())
+      .mockResolvedValueOnce({ score: 1 });
 
-    await expect(withJudgeTransportRetry(judge(evaluate), opts).evaluate(params)).rejects.toThrow(
-      'fetch failed'
+    const result = await withJudgeTransportRetry(judge(evaluate), opts).evaluate(params);
+
+    expect(result).toEqual({ score: 1 });
+    expect(evaluate).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledTimes(1);
+  });
+
+  it('records score=null (unavailable) after maxAttempts transient failures instead of throwing', async () => {
+    const { log, sleep, opts } = setup(3);
+    const evaluate = jest.fn().mockRejectedValue(projectGateway502());
+
+    const result = await withJudgeTransportRetry(judge(evaluate), opts).evaluate(params);
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+    expect(result.explanation).toContain('backend closed connection');
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ judgeUnavailable: true, attempts: 3, status: 502 })
     );
     expect(evaluate).toHaveBeenCalledTimes(3);
     expect(sleep.mock.calls).toEqual([[10], [20]]);
+    expect(log.warning).toHaveBeenLastCalledWith(expect.stringContaining('score=null'));
   });
 
-  it('does not retry HTTP errors or judge errors', async () => {
-    for (const err of [httpError(400), httpError(503), new Error('Missing scores for a')]) {
+  it('does not retry or swallow non-transient HTTP errors or judge errors', async () => {
+    for (const err of [
+      httpError(400),
+      httpError(429),
+      httpError(500),
+      new Error('Missing scores for a'),
+    ]) {
       const { opts } = setup();
       const evaluate = jest.fn().mockRejectedValue(err);
       await expect(withJudgeTransportRetry(judge(evaluate), opts).evaluate(params)).rejects.toBe(

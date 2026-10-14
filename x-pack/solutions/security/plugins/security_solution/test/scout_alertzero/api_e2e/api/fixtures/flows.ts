@@ -11,13 +11,14 @@ import {
   AI_INDEX_KI_BACKING_INDEX,
   AI_INDEX_URL,
   CONVERSATIONS_URL,
+  PROPOSAL_TIMEOUT_MS,
   PROPOSALS_URL,
   SECURITY_INVESTIGATIONS_AI_INDEX_ID,
 } from '../../common/constants';
 import { ok, pollUntil } from '../../common/kbn';
 import type { AlertZeroApi } from '../../common/kbn';
-import type { WorkflowExecution } from './alertzero';
-import { describeExecution, waitForExecution } from './alertzero';
+import type { ExecutionStep, WorkflowExecution } from './alertzero';
+import { describeExecution, waitForExecution, waitForExecutionStatus } from './alertzero';
 
 export interface PendingProposal {
   readonly id: string;
@@ -26,6 +27,7 @@ export interface PendingProposal {
   readonly comment: string;
   readonly actionWorkflowId?: string;
   readonly actionInput?: Record<string, unknown>;
+  readonly workflowExecutionId?: string;
   readonly createdAt: string;
 }
 
@@ -56,12 +58,25 @@ export const waitForProposal = async (
     { timeoutMs }
   );
 
-/** Approves a proposal exactly as the approval modal does. */
+/**
+ * Approves a proposal exactly as the approval modal does, but only once the execution backing it
+ * has parked in `waiting_for_input`. The route answers 409 earlier; retrying the 409 blindly would
+ * green the test without the run actually waiting for the human.
+ */
 export const approveProposal = async (
   api: AlertZeroApi,
   proposal: PendingProposal,
   actionInput?: Record<string, unknown>
 ): Promise<void> => {
+  if (proposal.workflowExecutionId) {
+    await waitForExecutionStatus(
+      api,
+      `the execution behind proposal ${proposal.id} to wait for input`,
+      proposal.workflowExecutionId,
+      'waiting_for_input',
+      { timeoutMs: PROPOSAL_TIMEOUT_MS }
+    );
+  }
   ok(
     await api.internal('POST', `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/approve`, {
       body: { actionInput: actionInput ?? proposal.actionInput },
@@ -259,8 +274,32 @@ export const explainMissingProposal = async (
   const held = pending
     .map((proposal) => `  ${proposal.actionWorkflowId ?? 'no action'}: ${proposal.title}`)
     .join('\n');
+  // Step-level state first and compact: failure reporters truncate the message, and the steps
+  // (own and children's) that did not complete say whether the model step, a child run or a
+  // gate stalled.
+  const unfinished = (steps: ExecutionStep[] | undefined, prefix: string) =>
+    (steps ?? [])
+      .filter((step) => step.status !== 'completed' && step.status !== 'skipped')
+      .map((step) => `${prefix}${step.stepId}=${step.status}`);
+  const stalled = await Promise.all([
+    api
+      .public<WorkflowExecution>('GET', `/api/workflows/executions/${executionId}`)
+      .then((response) => unfinished(ok(response, 'read the execution').stepExecutions, '')),
+    api
+      .public<Array<{ workflowId: string; stepExecutions: ExecutionStep[] }>>(
+        'GET',
+        `/api/workflows/executions/${executionId}/children`
+      )
+      .then((response) =>
+        ok(response, 'read the child executions').flatMap((child) =>
+          unfinished(child.stepExecutions, `${child.workflowId}:`)
+        )
+      ),
+  ])
+    .then((groups) => groups.flat().join(','))
+    .catch(() => 'unreadable');
   throw new Error(
-    `${(error as Error).message}\npending proposals:\n${
+    `${(error as Error).message}\n[stalled steps: ${stalled || 'none'}]\npending proposals:\n${
       held || '  none'
     }\n${await describeExecution(api, executionId)}`
   );

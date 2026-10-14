@@ -188,7 +188,7 @@ export const resetWorker = async (api: AlertZeroApi, workerId: string): Promise<
   }
 };
 
-interface ExecutionStep {
+export interface ExecutionStep {
   stepId: string;
   stepType?: string;
   status: string;

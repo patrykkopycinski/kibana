@@ -256,7 +256,9 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
   apiTest.fail(
     'keeps containment proposals for two hosts distinguishable (security-team#19991)',
     async ({ esClient }) => {
-      apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS);
+      // The poll below waits GENERATION_TIMEOUT_MS; the test timeout must outlast it, because a
+      // Playwright timeout is not an expected failure and would be reported red despite the marker.
+      apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
       esClientRef = esClient;
       const adminApi = api;
       if (!adminApi) {

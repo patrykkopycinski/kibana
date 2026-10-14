@@ -25,6 +25,7 @@ export const RULE_TUNING_WORKER_ID = 'system-security-detection-rule-tuning';
 export const RULE_COVERAGE_WORKER_ID = 'system-security-detection-rule-coverage';
 export const ADD_RULE_EXCEPTION_ACTION_ID = 'system-alertzero-action-add-rule-exception';
 export const EDIT_RULE_ACTION_ID = 'system-alertzero-action-edit-rule';
+export const CREATE_RULE_ACTION_ID = 'system-alertzero-action-create-rule';
 export const ENABLE_RULE_ACTION_ID = 'system-alertzero-action-enable-rule';
 export const INSTALL_PREBUILT_RULE_ACTION_ID = 'system-alertzero-action-install-prebuilt-rule';
 

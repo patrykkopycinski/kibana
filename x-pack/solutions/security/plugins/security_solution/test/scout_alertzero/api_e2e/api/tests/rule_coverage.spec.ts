@@ -18,6 +18,7 @@ import {
   ensureInvestigationsAiIndex,
   deleteServiceAccount,
   dismissProposal,
+  explainMissingProposal,
   getAdminApi,
   getWorker,
   listExecutionIds,
@@ -176,12 +177,13 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
               proposal.createdAt >= startedAt && proposal.comment.toLowerCase().includes('coverage')
           ),
         { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
-      );
+      ).catch((error: unknown) => explainMissingProposal(adminApi, error, reviewExecutionId));
       await approveProposal(adminApi, entryProposal);
 
-      // After approval the coverage skill runs (real model call) and proposes the cheapest fix
-      // on the same investigation: enable a disabled rule, install a prebuilt one, or a
-      // confirmation that an enabled rule already covers the gap.
+      // After approval the coverage skill runs (real model call) and proposes a fix on the same
+      // investigation. The verdict picks the shape: enable a disabled rule, install a prebuilt
+      // one, create a new one when nothing covers the gap (the stack has no LSASS rule, so this
+      // is the expected route), or a no-action confirmation that an enabled rule already covers it.
       const fixProposal = await pollUntil(
         'a coverage fix proposal',
         async () =>
@@ -192,13 +194,14 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
               proposal.createdAt >= startedAt &&
               (proposal.actionWorkflowId === testData.ENABLE_RULE_ACTION_ID ||
                 proposal.actionWorkflowId === testData.INSTALL_PREBUILT_RULE_ACTION_ID ||
+                proposal.actionWorkflowId === testData.CREATE_RULE_ACTION_ID ||
                 proposal.actionWorkflowId === testData.ADD_RULE_EXCEPTION_ACTION_ID ||
                 proposal.actionInput === undefined) &&
               proposal.id !== entryProposal.id &&
               proposal.conversationId === entryProposal.conversationId
           ),
         { timeoutMs: testData.GENERATION_TIMEOUT_MS }
-      );
+      ).catch((error: unknown) => explainMissingProposal(adminApi, error, reviewExecutionId));
       expect(fixProposal.conversationId).toBe(entryProposal.conversationId);
 
       // Settle the gate without side effects: dismissing records a decision and closes the

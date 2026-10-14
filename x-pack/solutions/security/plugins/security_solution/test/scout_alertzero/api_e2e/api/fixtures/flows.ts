@@ -17,7 +17,7 @@ import {
 import { ok, pollUntil } from '../../common/kbn';
 import type { AlertZeroApi } from '../../common/kbn';
 import type { WorkflowExecution } from './alertzero';
-import { waitForExecution } from './alertzero';
+import { describeExecution, waitForExecution } from './alertzero';
 
 export interface PendingProposal {
   readonly id: string;
@@ -243,4 +243,25 @@ export const ensureInvestigationsAiIndex = async (api: AlertZeroApi): Promise<vo
   if (result.statusCode !== 409) {
     ok(result, 'register the security-investigations AI index');
   }
+};
+
+/**
+ * Re-throws a failed wait with what the stack was actually holding: every pending proposal's
+ * action and title, plus the per-step breakdown of the execution that should have raised it. A
+ * proposal that never matches then names the one that did arrive instead of just timing out.
+ */
+export const explainMissingProposal = async (
+  api: AlertZeroApi,
+  error: unknown,
+  executionId: string
+): Promise<never> => {
+  const pending = await listPendingProposals(api).catch(() => [] as PendingProposal[]);
+  const held = pending
+    .map((proposal) => `  ${proposal.actionWorkflowId ?? 'no action'}: ${proposal.title}`)
+    .join('\n');
+  throw new Error(
+    `${(error as Error).message}\npending proposals:\n${
+      held || '  none'
+    }\n${await describeExecution(api, executionId)}`
+  );
 };

@@ -15,6 +15,7 @@ import {
   approveProposal,
   createServiceAccount,
   deleteServiceAccount,
+  explainMissingProposal,
   getAdminApi,
   getWorker,
   listExecutionIds,
@@ -77,7 +78,10 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
         from: 'now-10m',
         index: [testData.ALERTS_INDEX],
         language: 'kuery',
-        query: 'user.name:*',
+        // Must match nothing. The rule reads the alerts index it is seeded into, so a matching query
+        // makes the detection engine add open alerts of its own, which dilutes the seeded FP rate
+        // below the sweep's 50% harvest threshold. The sweep then starts zero reviews.
+        query: 'alertzero_e2e_never_matches:true',
       },
     }),
     'create the detection rule'
@@ -235,7 +239,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
               proposal.createdAt >= startedAt
           ),
         { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
-      );
+      ).catch((error: unknown) => explainMissingProposal(adminApi, error, sweepExecutionId));
       await approveProposal(adminApi, entryProposal);
 
       // The diagnosis then proposes the tuning itself: an exception (or an edit) on the rule.
@@ -256,7 +260,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
             );
           }),
         { timeoutMs: testData.GENERATION_TIMEOUT_MS }
-      );
+      ).catch((error: unknown) => explainMissingProposal(adminApi, error, sweepExecutionId));
 
       // The exception must be scoped to the observed FP pattern, not to the rule at large.
       const entries = JSON.stringify(tuningProposal.actionInput);

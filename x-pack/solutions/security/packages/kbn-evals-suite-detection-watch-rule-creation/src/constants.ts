@@ -38,12 +38,12 @@ export const INVESTIGATION_INPUT = 'investigation_id';
 
 /**
  * Inference feature the workflow's `ai.agent` step resolves its connector from
- * (`connector-id-by-feature`). Inlined to match ALERTZERO_REASONING_INFERENCE_FEATURE_ID in
+ * (`connector-id-by-feature`). Inlined to match ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in
  * @kbn/alertzero-common, which a test package cannot depend on.
  */
-export const RULE_CREATION_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+export const RULE_CREATION_INFERENCE_FEATURE_ID = 'alertzero_frontier';
 /** Feature the coverage review's `coverage_check` ai.agent step resolves its connector from. */
-export const COVERAGE_CHECK_INFERENCE_FEATURE_ID = 'alertzero_fast';
+export const COVERAGE_CHECK_INFERENCE_FEATURE_ID = 'alertzero_efficient';
 export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 

@@ -164,7 +164,7 @@ export const mergeFeatureOverride = (
 /**
  * Points the workflow's `ai.agent` step at the model under test.
  *
- * The step resolves its connector with `connector-id-by-feature: alertzero_reasoning`, not from
+ * The step resolves its connector with `connector-id-by-feature: alertzero_frontier`, not from
  * the eval connector. Without this, every cell of a multi-model run drafts on the stack's default
  * model and its scores are attributed to the wrong model. Returns a restore callback. The PUT
  * replaces the whole settings object, so this reads, merges and writes.

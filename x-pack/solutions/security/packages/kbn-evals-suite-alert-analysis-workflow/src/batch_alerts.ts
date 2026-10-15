@@ -85,7 +85,7 @@ export interface LabeledAlertBatch {
 }
 
 /** The rule every batch in this file shares the shape of: a behavioral injection rule. */
-const INJECTION_RULE: BatchRule = {
+export const INJECTION_RULE: BatchRule = {
   name: 'Malicious Behavior Detection Alert: Suspicious Process Injection',
   description:
     'Elastic Defend behavioral engine detected a process writing into another process’ memory, consistent with process injection.',
@@ -108,11 +108,11 @@ const WMIC_RULE: BatchRule = {
 const HOST_PREFIXES = ['ws-fin', 'ws-dev', 'ws-eng', 'ws-hr', 'srv-app', 'srv-db'];
 const USERS = ['jsmith', 'mchen', 'tluna', 'apatel', 'kobrien', 'rsilva', 'dwong', 'hkim'];
 
-const pad2 = (n: number): string => String(n).padStart(2, '0');
+export const pad2 = (n: number): string => String(n).padStart(2, '0');
 
-const hostFor = (n: number): string => `${HOST_PREFIXES[n % HOST_PREFIXES.length]}-${pad2(n)}`;
+export const hostFor = (n: number): string => `${HOST_PREFIXES[n % HOST_PREFIXES.length]}-${pad2(n)}`;
 
-const userFor = (n: number): string => `${USERS[n % USERS.length]}${pad2(n)}`;
+export const userFor = (n: number): string => `${USERS[n % USERS.length]}${pad2(n)}`;
 
 /**
  * Gate A/C archetype (true_positive): the same behavioral injection detection but the process is
@@ -121,7 +121,7 @@ const userFor = (n: number): string => `${USERS[n % USERS.length]}${pad2(n)}`;
  * randomized per alert (as masquerading binaries are) so the model has a per-alert token it can
  * name in its rationale.
  */
-const unsignedInjectorObservable = (
+export const unsignedInjectorObservable = (
   n: number
 ): { observable: Record<string, unknown>; markers: string[] } => {
   const host = hostFor(n);
@@ -156,7 +156,7 @@ const unsignedInjectorObservable = (
  * legitimate-use case the Tier 3 fixtures label false_positive. The scanned file is per-alert so
  * each alert keeps a token of its own.
  */
-const signedVendorObservable = (
+export const signedVendorObservable = (
   n: number
 ): { observable: Record<string, unknown>; markers: string[] } => {
   const host = hostFor(n);
@@ -187,7 +187,7 @@ const signedVendorObservable = (
 };
 
 /** Same two archetypes behind the WMI rule, for the ten-alert batch. */
-const unsignedWmiObservable = (
+export const unsignedWmiObservable = (
   n: number
 ): { observable: Record<string, unknown>; markers: string[] } => {
   const host = hostFor(n);
@@ -214,7 +214,7 @@ const unsignedWmiObservable = (
   };
 };
 
-const signedWmiObservable = (
+export const signedWmiObservable = (
   n: number
 ): { observable: Record<string, unknown>; markers: string[] } => {
   const host = hostFor(n);

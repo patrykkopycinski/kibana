@@ -10,11 +10,10 @@ import type { EsClient } from '@kbn/scout-security';
 import {
   apiTest,
   assertExecutionCompleted,
-  tags,
-  testData,
   approveProposal,
   createServiceAccount,
   deleteServiceAccount,
+  dismissProposal,
   explainMissingProposal,
   getAdminApi,
   getWorker,
@@ -23,36 +22,142 @@ import {
   ok,
   pollUntil,
   resetWorker,
+  tags,
+  testData,
   updateWorker,
   waitForExecution,
+  waitForExecutionStatus,
   waitForNewExecution,
 } from '../fixtures';
 import type { AlertZeroApi, PendingProposal } from '../fixtures';
 
 const WORKER_ID = testData.RULE_TUNING_WORKER_ID;
 const TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
+const ENTRY_PROPOSAL_TITLE = 'Review rule for tuning';
 
 // The FP pattern the tuning must scope to: one service account hammering one file server.
 const FP_HOST = 'srv-files-02';
 const FP_USER = 'svc-backup';
 const TP_USER = 'matt.hart';
-// 12 closed-FP of 21 total = 57.142...% — a rate whose unrounded rendering differs from the
-// rounded one, which is what the fp_rate known-fail marker below asserts on.
 const FP_COUNT = 12;
 const OPEN_COUNT = 9;
+const TOTAL_COUNT = FP_COUNT + OPEN_COUNT;
+// 12/21 = 57.1428...%: a rate whose rounded rendering differs from the unrounded one, which is
+// what the security-team#19992 assertion below reads out of the review's own proposal text.
+const FP_RATE_UNROUNDED = (FP_COUNT * 100) / TOTAL_COUNT;
+const FP_RATE_ROUNDED_TO_INTEGER = Math.round(FP_RATE_UNROUNDED); // 57
+const FP_RATE_ROUNDED_TO_ONE_DECIMAL = Math.round(FP_RATE_UNROUNDED * 10) / 10; // 57.1
 
 interface SeededRule {
   readonly ruleId: string;
   readonly revision: number;
   readonly runMarker: string;
-  readonly alertIds: readonly string[];
 }
+
+interface ExceptionEntry {
+  readonly field?: unknown;
+  readonly operator?: unknown;
+  readonly value?: unknown;
+  readonly values?: unknown;
+}
+
+interface ExceptionItem {
+  readonly id?: unknown;
+  readonly list_id?: unknown;
+  readonly entries?: ExceptionEntry[];
+}
+
+const INCLUSION_OPERATORS = ['is', 'is_one_of'];
+const EXCLUSION_OPERATORS = ['is_not', 'is_not_one_of', 'does_not_match'];
 
 let api: AlertZeroApi | undefined;
 let esClientRef: EsClient | undefined;
-let serviceAccountId: string | undefined;
-let seededRule: SeededRule | undefined;
-let entryProposal: PendingProposal | undefined;
+const serviceAccountIds: string[] = [];
+const seededRules: SeededRule[] = [];
+/** The rule the scoped exception was applied to: the negative control exercises that rule. */
+let tunedRule: SeededRule | undefined;
+/** Control index the negative control points the tuned rule at, for teardown. */
+let controlIndex: string | undefined;
+
+const actionTarget = (input: Record<string, unknown> | undefined): unknown =>
+  input?.rule_id ?? input?.id;
+
+const entryValues = (entry: ExceptionEntry): string[] => {
+  const values: string[] = [];
+  if (typeof entry.value === 'string') {
+    values.push(entry.value);
+  }
+  if (Array.isArray(entry.values)) {
+    entry.values.forEach((value) => {
+      if (typeof value === 'string') {
+        values.push(value);
+      }
+    });
+  }
+  return values;
+};
+
+const entryOperators = (entry: ExceptionEntry): string[] =>
+  typeof entry.operator === 'string' ? [entry.operator] : [];
+
+const readEntries = (
+  input: Record<string, unknown> | undefined,
+  label: string
+): ExceptionEntry[] => {
+  const entries = input?.entries;
+  if (!Array.isArray(entries)) {
+    throw new Error(`${label} carries no exception entries: ${JSON.stringify(input)}`);
+  }
+  return entries as ExceptionEntry[];
+};
+
+/**
+ * The exception has to name the observed false-positive pattern: `user.name is svc-backup` AND
+ * `host.name is srv-files-02` in one item, so both conditions must hold together. Either one
+ * alone either misses the noise (user alone) or excludes every other user on that host (host
+ * alone), so the entries are asserted field by field rather than through the serialized input.
+ */
+const assertScopedToFpPattern = (entries: ExceptionEntry[], label: string): void => {
+  const inclusions = entries.filter((entry) =>
+    entryOperators(entry).some((operator) => INCLUSION_OPERATORS.includes(operator))
+  );
+  const userEntry = inclusions.find(
+    (entry) => entry.field === 'user.name' && entryValues(entry).includes(FP_USER)
+  );
+  if (!userEntry) {
+    throw new Error(
+      `${label} has no "user.name is ${FP_USER}" entry, so it is not scoped to the service account: ${JSON.stringify(
+        entries
+      )}`
+    );
+  }
+  const hostEntry = inclusions.find(
+    (entry) => entry.field === 'host.name' && entryValues(entry).includes(FP_HOST)
+  );
+  if (!hostEntry) {
+    throw new Error(
+      `${label} has no "host.name is ${FP_HOST}" entry, so it is not scoped to the file server: ${JSON.stringify(
+        entries
+      )}`
+    );
+  }
+  const serialized = JSON.stringify(entries);
+  if (serialized.includes(TP_USER)) {
+    throw new Error(`${label} names the true-positive user ${TP_USER}: ${serialized}`);
+  }
+  const negated = entries.filter(
+    (entry) =>
+      (entry.field === 'user.name' || entry.field === 'host.name') &&
+      entryOperators(entry).some((operator) => EXCLUSION_OPERATORS.includes(operator))
+  );
+  if (negated.length > 0) {
+    throw new Error(
+      `${label} narrows the false-positive fields by exclusion instead of inclusion: ${JSON.stringify(
+        negated
+      )}`
+    );
+  }
+};
 
 /** Creates the noisy rule the sweep should pick, then indexes its FP and TP alerts. */
 const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promise<SeededRule> => {
@@ -120,7 +225,316 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
     throw new Error(`Seeding rule alerts failed: ${JSON.stringify(response.items.slice(0, 3))}`);
   }
 
-  return { ruleId: rule.id, revision: rule.revision, runMarker, alertIds: [] };
+  const seeded = { ruleId: rule.id, revision: rule.revision, runMarker };
+  seededRules.push(seeded);
+  return seeded;
+};
+
+/**
+ * Runs one tuning sweep through the Worker: saving its settings installs the Worker's workflow,
+ * and enabling it makes Task Manager run it once immediately as the bound service account. That
+ * run is the sweep under test; the review of the seeded rule is a child workflow.
+ */
+const runTuningSweep = async (adminApi: AlertZeroApi): Promise<string> => {
+  // An earlier test in this file leaves the Worker enabled; only a fresh enable runs it at once.
+  await resetWorker(adminApi, WORKER_ID);
+  const account = await createServiceAccount(adminApi);
+  serviceAccountIds.push(account);
+  const beforeSave = await getWorker(adminApi, WORKER_ID);
+  await updateWorker(adminApi, WORKER_ID, {
+    settingsRevision: beforeSave.settingsRevision ?? null,
+    settings: { serviceAccountId: account },
+  });
+  const worker = await pollUntil(
+    `worker ${WORKER_ID} to have a workflow installed`,
+    async () => {
+      const candidate = await getWorker(adminApi, WORKER_ID);
+      return candidate.workflowId ? candidate : undefined;
+    },
+    { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+  );
+  const workerWorkflowId = worker.workflowId;
+  if (!workerWorkflowId) {
+    throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
+  }
+  const knownExecutionIds = [
+    ...(await listExecutionIds(adminApi, workerWorkflowId)),
+    ...(await listExecutionIds(adminApi, TUNING_REVIEW_WORKFLOW_ID)),
+  ];
+  expect((await updateWorker(adminApi, WORKER_ID, { enabled: true })).enabled).toBe(true);
+  const sweepExecutionId = await waitForNewExecution(
+    adminApi,
+    workerWorkflowId,
+    knownExecutionIds,
+    { timeoutMs: testData.ACTION_TIMEOUT_MS }
+  );
+  const sweep = await waitForExecution(
+    adminApi,
+    'the rule tuning sweep execution to finish',
+    sweepExecutionId,
+    { timeoutMs: testData.GENERATION_TIMEOUT_MS }
+  );
+  await assertExecutionCompleted(adminApi, 'The rule tuning sweep execution', sweep);
+  return sweepExecutionId;
+};
+
+/**
+ * Manual autonomy gates the diagnosis behind a "Review rule for tuning" entry proposal on the
+ * rule's investigation. The proposal names the rule, and the run marker in that name keeps a
+ * re-run from reading the entry proposal of an earlier run.
+ */
+const waitForEntryProposal = async (
+  adminApi: AlertZeroApi,
+  rule: SeededRule,
+  since: string,
+  sweepExecutionId: string
+): Promise<PendingProposal> =>
+  pollUntil(
+    'the review-gate proposal for the seeded rule',
+    async () =>
+      (await listPendingProposals(adminApi)).find(
+        (proposal) =>
+          proposal.comment.includes(ENTRY_PROPOSAL_TITLE) &&
+          proposal.comment.includes(rule.runMarker) &&
+          proposal.createdAt >= since
+      ),
+    { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+  ).catch((error: unknown) => explainMissingProposal(adminApi, error, sweepExecutionId));
+
+/** The diagnosis then proposes the tuning itself: an exception (or an edit) on the rule. */
+const waitForTuningProposal = async (
+  adminApi: AlertZeroApi,
+  rule: SeededRule,
+  since: string,
+  sweepExecutionId: string
+): Promise<PendingProposal> =>
+  pollUntil(
+    'the tuning proposal for the seeded rule',
+    async () =>
+      (await listPendingProposals(adminApi)).find(
+        (proposal) =>
+          proposal.createdAt >= since &&
+          !!proposal.actionInput &&
+          actionTarget(proposal.actionInput) === rule.ruleId &&
+          (proposal.actionWorkflowId === testData.ADD_RULE_EXCEPTION_ACTION_ID ||
+            proposal.actionWorkflowId === testData.EDIT_RULE_ACTION_ID)
+      ),
+    { timeoutMs: testData.GENERATION_TIMEOUT_MS }
+  ).catch((error: unknown) => explainMissingProposal(adminApi, error, sweepExecutionId));
+
+/** Dismisses a proposal once the execution behind it is parked, so the queue does not keep it. */
+const dismissSettledProposal = async (
+  adminApi: AlertZeroApi,
+  proposal: PendingProposal
+): Promise<void> => {
+  if (proposal.workflowExecutionId) {
+    await waitForExecutionStatus(
+      adminApi,
+      `the execution behind proposal ${proposal.id} to wait for input`,
+      proposal.workflowExecutionId,
+      'waiting_for_input',
+      { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+    );
+  }
+  await dismissProposal(adminApi, proposal);
+};
+
+/** The rule's own exception items, read back from the exceptions API rather than the proposal. */
+const readRuleExceptionItems = async (
+  adminApi: AlertZeroApi,
+  rule: SeededRule
+): Promise<ExceptionItem[]> =>
+  ok(
+    await adminApi.public<{ data?: ExceptionItem[] }>(
+      'GET',
+      `/api/exception_lists/items?list_id=${encodeURIComponent(rule.ruleId)}&namespace_type=single`
+    ),
+    'read the rule exception items'
+  ).data ?? [];
+
+/**
+ * The exception has to be on the rule's own list (`list_id` is the rule id, i.e. rule-scoped and
+ * not a shared list) and its persisted entries have to match what the proposal claimed.
+ */
+const assertPersistedScopedException = async (
+  adminApi: AlertZeroApi,
+  rule: SeededRule
+): Promise<void> => {
+  const items = await pollUntil(
+    'the proposed exception to be persisted on the rule',
+    async () => {
+      const found = (await readRuleExceptionItems(adminApi, rule)).filter((item) =>
+        (item.entries ?? []).some((entry) => entryValues(entry).includes(FP_USER))
+      );
+      return found.length > 0 ? found : undefined;
+    },
+    { timeoutMs: testData.ACTION_TIMEOUT_MS }
+  );
+  const item = items[0];
+  if (item.list_id !== rule.ruleId) {
+    throw new Error(
+      `the exception was written to list ${String(item.list_id)} instead of the rule's own list ${
+        rule.ruleId
+      }`
+    );
+  }
+  assertScopedToFpPattern(item.entries ?? [], `the exception item on rule ${rule.ruleId}`);
+};
+
+const FP_RATE_SENTENCE = /Analysts closed (\d+) of (\d+) alerts \((\d+(?:\.\d+)?)%\)/;
+
+/**
+ * security-team#19992: the review's own false-positive sentence has to render the rate rounded.
+ * The counts are asserted alongside the rate, so a comment that dropped the sentence cannot pass
+ * by accident, and the unrounded render (57.142857142857146%) is named in the failure.
+ *
+ * Fixed in d4993a212 (`| round` added to `compose_evidence.fp_summary`), which is in this
+ * branch's base, so the assertion is a regression guard: removing that filter turns this red.
+ */
+const assertFpRateRendersRounded = (comment: string): void => {
+  const match = FP_RATE_SENTENCE.exec(comment);
+  if (!match) {
+    throw new Error(
+      `the entry proposal comment does not state the false-positive rate:\n${comment}`
+    );
+  }
+  expect(match[1]).toBe(String(FP_COUNT));
+  expect(match[2]).toBe(String(TOTAL_COUNT));
+  const rate = match[3];
+  const decimals = rate.includes('.') ? rate.split('.')[1].length : 0;
+  if (decimals > 1) {
+    throw new Error(
+      `security-team#19992: the false-positive rate renders unrounded (${rate}%, expected ${FP_RATE_ROUNDED_TO_INTEGER}% or ${FP_RATE_ROUNDED_TO_ONE_DECIMAL}%):\n${comment}`
+    );
+  }
+  expect([FP_RATE_ROUNDED_TO_INTEGER, FP_RATE_ROUNDED_TO_ONE_DECIMAL]).toContain(Number(rate));
+};
+
+const controlMarker = (rule: SeededRule): string => `alertzero-nc-${rule.runMarker}`;
+const controlIndexName = (rule: SeededRule): string =>
+  `alertzero-e2e-nc-${rule.runMarker}`.toLowerCase();
+
+/**
+ * Seeds the two events the control needs into an index of its own: the same false-positive
+ * pattern the exception excludes, and a true positive from another user on the same host. Both
+ * carry the run's marker in `process.name`, which is what the rule is pointed at below, so the
+ * alerts the engine produces for them are distinguishable from the rule's seeded alert history.
+ */
+const seedControlEvents = async (
+  esClient: EsClient,
+  index: string,
+  marker: string
+): Promise<void> => {
+  const event = (user: string) => ({
+    '@timestamp': new Date().toISOString(),
+    process: { name: marker },
+    host: { name: FP_HOST },
+    user: { name: user },
+    message: `${user} accessed files`,
+  });
+  // Keyword mappings: with dynamic text mappings `svc-backup` is analysed into two tokens and a
+  // term filter on it would match nothing, which would make the control's ground truth lie.
+  await esClient.indices.create({
+    index,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        host: { properties: { name: { type: 'keyword' } } },
+        user: { properties: { name: { type: 'keyword' } } },
+        process: { properties: { name: { type: 'keyword' } } },
+      },
+    },
+  });
+  const response = await esClient.bulk({
+    refresh: 'wait_for',
+    operations: [
+      { index: { _index: index, _id: `${marker}-tp` } },
+      event(TP_USER),
+      { index: { _index: index, _id: `${marker}-fp` } },
+      event(FP_USER),
+    ],
+  });
+  if (response.errors) {
+    throw new Error(`Seeding control events failed: ${JSON.stringify(response.items.slice(0, 3))}`);
+  }
+};
+
+/** Counts the control events the rule's query matches for one user: the control's ground truth. */
+const countControlEvents = async (
+  esClient: EsClient,
+  index: string,
+  marker: string,
+  user: string
+): Promise<number> => {
+  const response = await esClient.count({
+    index,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'process.name': marker } },
+          { term: { 'host.name': FP_HOST } },
+          { term: { 'user.name': user } },
+        ],
+      },
+    },
+  });
+  return response.count;
+};
+
+/**
+ * Points the tuned rule at the control index: same rule, same exception, a query both control
+ * events match. The rule is what has to keep alerting on the true positive, so only its own
+ * execution can answer the control.
+ */
+const pointRuleAtControlIndex = async (
+  adminApi: AlertZeroApi,
+  rule: SeededRule,
+  index: string,
+  marker: string
+): Promise<void> => {
+  ok(
+    await adminApi.public('PATCH', '/api/detection_engine/rules', {
+      body: {
+        id: rule.ruleId,
+        index: [index],
+        query: `process.name:"${marker}"`,
+        interval: '1m',
+        from: 'now-5m',
+        enabled: true,
+      },
+    }),
+    'point the tuned rule at the control index'
+  );
+};
+
+const readControlAlerts = async (
+  esClient: EsClient,
+  rule: SeededRule,
+  marker: string
+): Promise<Array<Record<string, unknown>>> => {
+  const response = await esClient.search<Record<string, unknown>>({
+    index: testData.ALERTS_INDEX,
+    size: 100,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.rule.uuid': rule.ruleId } },
+          { term: { 'process.name': marker } },
+        ],
+      },
+    },
+    _source: ['user', 'host', 'process', 'kibana.alert.rule.uuid', 'kibana.alert.rule.name'],
+  });
+  return response.hits.hits.map((hit) => hit._source ?? {});
+};
+
+const alertUserName = (alert: Record<string, unknown>): string | undefined => {
+  const user = alert.user;
+  if (user && typeof user === 'object' && 'name' in user) {
+    const name = (user as { name?: unknown }).name;
+    return typeof name === 'string' ? name : undefined;
+  }
+  return undefined;
 };
 
 apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic] }, () => {
@@ -139,29 +553,40 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     await attempt(async () => {
       if (api) await resetWorker(api, WORKER_ID);
     });
+    for (const account of serviceAccountIds) {
+      await attempt(async () => {
+        if (api) await deleteServiceAccount(api, account);
+      });
+    }
     await attempt(async () => {
-      if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
-    });
-    await attempt(async () => {
-      if (api && seededRule) {
-        // A rule with an exception cannot always be deleted in one shot; ignore the error so
-        // cleanup of the rest still runs. The rule is inert without its seeded alerts.
-        await api
-          .public(
-            'DELETE',
-            `/api/detection_engine/rules?id=${encodeURIComponent(seededRule.ruleId)}`
-          )
+      if (esClientRef && controlIndex) {
+        await esClientRef.indices
+          .delete({ index: controlIndex }, { ignore: [404] })
           .catch(() => undefined);
       }
     });
+    for (const rule of seededRules) {
+      await attempt(async () => {
+        if (api) {
+          // A rule with an exception cannot always be deleted in one shot; ignore the error so
+          // cleanup of the rest still runs. The rule is inert without its seeded alerts.
+          await api
+            .public('DELETE', `/api/detection_engine/rules?id=${encodeURIComponent(rule.ruleId)}`)
+            .catch(() => undefined);
+        }
+      });
+    }
     await attempt(async () => {
-      if (esClientRef && seededRule) {
-        await esClientRef.deleteByQuery({
-          index: testData.ALERTS_INDEX,
-          conflicts: 'proceed',
-          refresh: true,
-          query: { term: { 'labels.ad_portable_seed': seededRule.runMarker } },
-        });
+      if (esClientRef) {
+        // By rule uuid covers both the hand-written seeds and any alert the engine generated.
+        for (const rule of seededRules) {
+          await esClientRef.deleteByQuery({
+            index: testData.ALERTS_INDEX,
+            conflicts: 'proceed',
+            refresh: true,
+            query: { term: { 'kibana.alert.rule.uuid': rule.ruleId } },
+          });
+        }
       }
     });
     if (errors.length > 0) {
@@ -181,123 +606,119 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       api = adminApi;
       esClientRef = esClient;
 
-      seededRule = await seedNoisyRule(adminApi, esClient);
-      const rule = seededRule;
+      const rule = await seedNoisyRule(adminApi, esClient);
       const startedAt = new Date().toISOString();
+      const sweepExecutionId = await runTuningSweep(adminApi);
 
-      // P1 shape: install the worker's workflow by saving its settings, then enable. The
-      // immediate scheduled run is the sweep under test, executing as the service account.
-      const account = await createServiceAccount(adminApi);
-      serviceAccountId = account;
-      const beforeSave = await getWorker(adminApi, WORKER_ID);
-      await updateWorker(adminApi, WORKER_ID, {
-        settingsRevision: beforeSave.settingsRevision ?? null,
-        settings: { serviceAccountId: account },
-      });
-      const worker = await pollUntil(
-        `worker ${WORKER_ID} to have a workflow installed`,
-        async () => {
-          const candidate = await getWorker(adminApi, WORKER_ID);
-          return candidate.workflowId ? candidate : undefined;
-        },
-        { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
-      );
-      const workerWorkflowId = worker.workflowId;
-      if (!workerWorkflowId) {
-        throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
-      }
-      const knownExecutionIds = [
-        ...(await listExecutionIds(adminApi, workerWorkflowId)),
-        ...(await listExecutionIds(adminApi, TUNING_REVIEW_WORKFLOW_ID)),
-      ];
-      expect((await updateWorker(adminApi, WORKER_ID, { enabled: true })).enabled).toBe(true);
-      const sweepExecutionId = await waitForNewExecution(
-        adminApi,
-        workerWorkflowId,
-        knownExecutionIds,
-        { timeoutMs: testData.ACTION_TIMEOUT_MS }
-      );
-      const sweep = await waitForExecution(
-        adminApi,
-        'the rule tuning sweep execution to finish',
-        sweepExecutionId,
-        { timeoutMs: testData.GENERATION_TIMEOUT_MS }
-      );
-      await assertExecutionCompleted(adminApi, 'The rule tuning sweep execution', sweep);
-
-      // Manual autonomy gates the diagnosis behind a "Review rule for tuning" entry proposal on
-      // the rule's investigation. Approve it exactly as the modal does.
-      entryProposal = await pollUntil(
-        'the review-gate proposal for the seeded rule',
-        async () =>
-          (
-            await listPendingProposals(adminApi)
-          ).find(
-            (proposal) =>
-              proposal.comment.includes('Review rule for tuning') &&
-              proposal.comment.includes(rule.runMarker) &&
-              proposal.createdAt >= startedAt
-          ),
-        { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
-      ).catch((error: unknown) => explainMissingProposal(adminApi, error, sweepExecutionId));
+      const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
       await approveProposal(adminApi, entryProposal);
 
-      // The diagnosis then proposes the tuning itself: an exception (or an edit) on the rule.
-      const tuningProposal = await pollUntil(
-        'the tuning proposal for the seeded rule',
-        async () =>
-          (
-            await listPendingProposals(adminApi)
-          ).find((proposal) => {
-            if (proposal.createdAt < startedAt || !proposal.actionInput) {
-              return false;
-            }
-            const input = JSON.stringify(proposal.actionInput);
-            return (
-              input.includes(rule.ruleId) &&
-              (proposal.actionWorkflowId === testData.ADD_RULE_EXCEPTION_ACTION_ID ||
-                proposal.actionWorkflowId === testData.EDIT_RULE_ACTION_ID)
-            );
-          }),
-        { timeoutMs: testData.GENERATION_TIMEOUT_MS }
-      ).catch((error: unknown) => explainMissingProposal(adminApi, error, sweepExecutionId));
-
-      // The exception must be scoped to the observed FP pattern, not to the rule at large.
-      const entries = JSON.stringify(tuningProposal.actionInput);
-      expect(entries).toContain(FP_USER);
-
-      // Negative control: a true positive from another user must stay outside the exception.
-      expect(entries).not.toContain(TP_USER);
-
-      // Approve and verify the exception landed on the rule itself.
-      await approveProposal(adminApi, tuningProposal);
-      await pollUntil(
-        'the exception to appear on the rule',
-        async () => {
-          const after = ok(
-            await adminApi.public<{ exceptions_list?: unknown[]; revision: number }>(
-              'GET',
-              `/api/detection_engine/rules?id=${encodeURIComponent(rule.ruleId)}`
-            ),
-            'read the tuned rule'
-          );
-          const serialized = JSON.stringify(after.exceptions_list ?? []);
-          return serialized.includes(FP_USER) ? after : undefined;
-        },
-        { timeoutMs: testData.ACTION_TIMEOUT_MS }
+      const tuningProposal = await waitForTuningProposal(
+        adminApi,
+        rule,
+        startedAt,
+        sweepExecutionId
       );
+      if (tuningProposal.actionWorkflowId !== testData.ADD_RULE_EXCEPTION_ACTION_ID) {
+        throw new Error(
+          `the tuning proposed ${String(
+            tuningProposal.actionWorkflowId
+          )} instead of an exception: ${JSON.stringify(tuningProposal.actionInput)}`
+        );
+      }
+      if (actionTarget(tuningProposal.actionInput) !== rule.ruleId) {
+        throw new Error(
+          `the tuning proposal targets ${String(
+            actionTarget(tuningProposal.actionInput)
+          )} instead of the seeded rule ${rule.ruleId}`
+        );
+      }
+      assertScopedToFpPattern(
+        readEntries(tuningProposal.actionInput, 'the tuning proposal'),
+        'the tuning proposal'
+      );
+
+      await approveProposal(adminApi, tuningProposal);
+      await assertPersistedScopedException(adminApi, rule);
+      tunedRule = rule;
     }
   );
 
-  // Known gap, expected to fail until security-team#19992 lands: the fp rate in the review
-  // proposal renders rounded (57%) instead of the computed value (57.14...%). Asserts on the
-  // entry proposal created by the test above, so it costs no additional model calls.
-  apiTest.fail('renders the false-positive rate unrounded (security-team#19992)', async () => {
-    const entry = entryProposal;
-    if (!entry) {
-      throw new Error('the green tuning test must run first to create the entry proposal');
+  // security-team#19992, fixed in d4993a212: the review's rate used to render the raw float
+  // (57.142857142857146%). The test seeds and sweeps on its own, so a worker restart after a red
+  // test above does not break it, and it stops before the diagnosis: reading the entry proposal's
+  // own text costs no model call.
+  apiTest(
+    'renders the false-positive rate rounded (security-team#19992)',
+    async ({ apiClient, samlAuth, esClient }) => {
+      apiTest.setTimeout(testData.PROPOSAL_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
+      const adminApi = await getAdminApi(apiClient, samlAuth);
+      api = adminApi;
+      esClientRef = esClient;
+
+      const rule = await seedNoisyRule(adminApi, esClient);
+      const startedAt = new Date().toISOString();
+      const sweepExecutionId = await runTuningSweep(adminApi);
+      const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
+
+      assertFpRateRendersRounded(entryProposal.comment);
+
+      // Settling the review is what closes it without a diagnosis: declining marks its alerts
+      // reviewed and ends the run, so no model call and no second proposal is left behind.
+      await dismissSettledProposal(adminApi, entryProposal);
     }
-    // 12/21 = 57.142...% — the rounded render the review emits today drops the fraction.
-    expect(entry.comment).toContain('57.14');
-  });
+  );
+
+  apiTest(
+    'keeps alerting on a true positive from another user after the tuning',
+    async ({ apiClient, samlAuth, esClient }) => {
+      apiTest.setTimeout(2 * testData.ACTION_TIMEOUT_MS);
+      const adminApi = await getAdminApi(apiClient, samlAuth);
+      api = adminApi;
+      esClientRef = esClient;
+
+      const rule = tunedRule;
+      if (!rule) {
+        throw new Error(
+          'the scoped-exception test must run first: it is what applies the exception this control verifies'
+        );
+      }
+      const marker = controlMarker(rule);
+      const index = controlIndexName(rule);
+      controlIndex = index;
+
+      await seedControlEvents(esClient, index, marker);
+      for (const user of [TP_USER, FP_USER]) {
+        const found = await countControlEvents(esClient, index, marker, user);
+        if (found !== 1) {
+          throw new Error(
+            `the ${user} control event is not in ${index} (found ${found}), so "no alert" for it would prove nothing`
+          );
+        }
+      }
+
+      await pointRuleAtControlIndex(adminApi, rule, index, marker);
+      const truePositiveAlerts = await pollUntil(
+        `an alert for the ${TP_USER} true positive the exception must not cover`,
+        async () => {
+          const alerts = (await readControlAlerts(esClient, rule, marker)).filter(
+            (alert) => alertUserName(alert) === TP_USER
+          );
+          return alerts.length > 0 ? alerts : undefined;
+        },
+        { timeoutMs: testData.ACTION_TIMEOUT_MS }
+      );
+      expect(truePositiveAlerts.length).toBeGreaterThan(0);
+
+      const alerts = await readControlAlerts(esClient, rule, marker);
+      const fromFpUser = alerts.filter((alert) => alertUserName(alert) === FP_USER);
+      if (fromFpUser.length > 0) {
+        throw new Error(
+          `the exception did not exclude the ${FP_USER} false positive on ${FP_HOST}: ${JSON.stringify(
+            fromFpUser.slice(0, 3)
+          )}`
+        );
+      }
+    }
+  );
 });

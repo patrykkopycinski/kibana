@@ -57,6 +57,7 @@ interface SeededRule {
 interface ExceptionEntry {
   readonly field?: unknown;
   readonly operator?: unknown;
+  readonly type?: unknown;
   readonly value?: unknown;
   readonly values?: unknown;
 }
@@ -67,8 +68,8 @@ interface ExceptionItem {
   readonly entries?: ExceptionEntry[];
 }
 
-const INCLUSION_OPERATORS = ['is', 'is_one_of'];
-const EXCLUSION_OPERATORS = ['is_not', 'is_not_one_of', 'does_not_match'];
+const INCLUSION_OPERATORS = ['is', 'is_one_of', 'included'];
+const EXCLUSION_OPERATORS = ['is_not', 'is_not_one_of', 'does_not_match', 'excluded'];
 
 let api: AlertZeroApi | undefined;
 let esClientRef: EsClient | undefined;
@@ -97,8 +98,15 @@ const entryValues = (entry: ExceptionEntry): string[] => {
   return values;
 };
 
-const entryOperators = (entry: ExceptionEntry): string[] =>
-  typeof entry.operator === 'string' ? [entry.operator] : [];
+const entryOperators = (entry: ExceptionEntry): string[] => {
+  // A proposal's entries carry `operator: is`; the persisted item stores the platform's
+  // `type: match` + `operator: included` (and `type: match_any` for a values list), so both
+  // vocabularies are read as the same conditions.
+  if (entry.type === 'match_any') {
+    return ['is_one_of'];
+  }
+  return typeof entry.operator === 'string' ? [entry.operator] : [];
+};
 
 const readEntries = (
   input: Record<string, unknown> | undefined,

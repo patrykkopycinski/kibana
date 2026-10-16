@@ -343,18 +343,35 @@ const dismissSettledProposal = async (
 const readRuleExceptionItems = async (
   adminApi: AlertZeroApi,
   rule: SeededRule
-): Promise<ExceptionItem[]> =>
-  ok(
-    await adminApi.public<{ data?: ExceptionItem[] }>(
-      'GET',
-      `/api/exception_lists/items?list_id=${encodeURIComponent(rule.ruleId)}&namespace_type=single`
-    ),
-    'read the rule exception items'
-  ).data ?? [];
+): Promise<ExceptionItem[]> => {
+  const persisted = ok(
+    await adminApi.public<{
+      exceptions_list?: Array<{ list_id: string; type: string; namespace_type: string }>;
+    }>('GET', `/api/detection_engine/rules?id=${encodeURIComponent(rule.ruleId)}`),
+    'read the tuned rule'
+  );
+  const defaultList = (persisted.exceptions_list ?? []).find(
+    (list) => list.type === 'rule_default'
+  );
+  if (!defaultList) {
+    return [];
+  }
+  return (
+    ok(
+      await adminApi.public<{ data?: ExceptionItem[] }>(
+        'GET',
+        `/api/exception_lists/items/_find?list_id=${encodeURIComponent(
+          defaultList.list_id
+        )}&namespace_type=${encodeURIComponent(defaultList.namespace_type)}&per_page=100`
+      ),
+      'read the rule exception items'
+    ).data ?? []
+  );
+};
 
 /**
- * The exception has to be on the rule's own list (`list_id` is the rule id, i.e. rule-scoped and
- * not a shared list) and its persisted entries have to match what the proposal claimed.
+ * The exception has to be on the rule's own default list and its persisted entries have to match
+ * what the proposal claimed.
  */
 const assertPersistedScopedException = async (
   adminApi: AlertZeroApi,
@@ -371,13 +388,7 @@ const assertPersistedScopedException = async (
     { timeoutMs: testData.ACTION_TIMEOUT_MS }
   );
   const item = items[0];
-  if (item.list_id !== rule.ruleId) {
-    throw new Error(
-      `the exception was written to list ${String(item.list_id)} instead of the rule's own list ${
-        rule.ruleId
-      }`
-    );
-  }
+  // Read through the rule's own `rule_default` list, so the item is rule-scoped by construction.
   assertScopedToFpPattern(item.entries ?? [], `the exception item on rule ${rule.ruleId}`);
 };
 

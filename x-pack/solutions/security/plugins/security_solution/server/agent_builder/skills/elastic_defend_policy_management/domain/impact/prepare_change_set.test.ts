@@ -7,14 +7,8 @@
 
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
-import type { RansomwareLinuxContext } from './expand_change_set';
 import { prepareChangeSet } from './prepare_change_set';
 import type { AssessPolicyChangeParams, PolicyChangeOperation } from './policy_change_operation';
-
-const ransomwareLinuxContext: RansomwareLinuxContext = {
-  linuxRansomwareProtection: true,
-  licenseInformation: null,
-};
 
 const typedRequest = (
   changes: PolicyChangeOperation[],
@@ -28,8 +22,7 @@ describe('prepareChangeSet', () => {
   it('classifies antivirus enabled only as a side effect after normalize', () => {
     const malwareOff = prepareChangeSet(
       typedRequest([{ op: 'set_protection_enabled', protection: 'malware', enabled: false }]),
-      policyFactory(),
-      ransomwareLinuxContext
+      policyFactory()
     );
 
     expect(malwareOff.explicitChanges.map((change) => change.path)).not.toContain(
@@ -46,8 +39,7 @@ describe('prepareChangeSet', () => {
 
     const ransomwareOff = prepareChangeSet(
       typedRequest([{ op: 'set_protection_enabled', protection: 'ransomware', enabled: false }]),
-      policyFactory(),
-      ransomwareLinuxContext
+      policyFactory()
     );
     expect(ransomwareOff.sideEffects).toEqual([]);
 
@@ -59,8 +51,7 @@ describe('prepareChangeSet', () => {
           value: AntivirusRegistrationModes.disabled,
         },
       ]),
-      policyFactory(),
-      ransomwareLinuxContext
+      policyFactory()
     );
     expect(avMode.explicitChanges.map((change) => change.path)).toEqual([
       'windows.antivirus_registration.mode',

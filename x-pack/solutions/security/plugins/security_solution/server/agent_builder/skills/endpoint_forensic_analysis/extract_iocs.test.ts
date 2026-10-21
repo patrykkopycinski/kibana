@@ -107,8 +107,12 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     expect(data.shas).toEqual([
       { value: 'abc123', comment: 'SHA256 of C:\\Users\\Public\\update.dll on WKSTN-RECV01' },
     ]);
-    expect(data.ips).toBeUndefined();
-    expect(data.observed_network_destinations).toEqual(['evil.example']);
+    expect(data.ips).toEqual([
+      {
+        value: 'evil.example',
+        comment: 'Domain resolved and contacted on WKSTN-RECV01 by C:\\Users\\Public\\update.dll',
+      },
+    ]);
     expect(data.file_paths).toEqual([
       { value: 'C:\\Users\\Public\\update.dll', comment: 'Executable on WKSTN-RECV01' },
       { value: 'HKLM\\Run\\evil', comment: 'Registry key written on WKSTN-RECV01' },
@@ -152,7 +156,7 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     expect(data.ransom_note).toBeUndefined();
     expect(data.encryption_marker).toBeUndefined();
     expect(data.compromised_identities).toBeUndefined();
-    expect(data.guidance).toContain('ransom notes');
+    expect(data.guidance).toContain('ransom_note');
   });
 
   it('sorts ascending before limiting so each comment describes the earliest occurrence', async () => {
@@ -162,7 +166,7 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     expect(query.indexOf('SORT @timestamp ASC')).toBeLessThan(query.indexOf('LIMIT'));
   });
 
-  it('deduplicates observed network destinations seen more than once', async () => {
+  it('keeps the earliest row for an indicator seen more than once', async () => {
     mockEsqlQuery.mockResolvedValue({
       columns: [{ name: 'destination.ip' }, { name: 'host.name' }],
       values: [
@@ -173,8 +177,9 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
 
     const data = await getData();
 
-    expect(data.ips).toBeUndefined();
-    expect(data.observed_network_destinations).toEqual(['203.0.113.10']);
+    expect(data.ips).toEqual([
+      { value: '203.0.113.10', comment: 'Outbound destination contacted on WKSTN-RECV01' },
+    ]);
   });
 
   it('reports the query failure so missing categories are not read as "no indicators"', async () => {

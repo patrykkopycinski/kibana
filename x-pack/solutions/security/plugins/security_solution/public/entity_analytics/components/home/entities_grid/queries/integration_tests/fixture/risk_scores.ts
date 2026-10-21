@@ -17,26 +17,15 @@ const REFERENCE_SCORES: Readonly<Record<string, number>> = {
   'user:alice@okta': 80,
 };
 
-/** Group scores written beside the own ones, later in the window: the change must still read the own. */
-const RESOLUTION_SCORES: Readonly<Record<string, number>> = {
-  'host:h1': 80,
-};
-
 const RISK_ENTITY_TYPES = ['host', 'user', 'service'] as const;
 
-const toRiskDoc = (
-  entityId: string,
-  score: number,
-  now: number,
-  { scoreType, agoMs = 30 * DAY_MS + HOUR_MS }: { scoreType?: 'resolution'; agoMs?: number } = {}
-) => {
+const toRiskDoc = (entityId: string, score: number, now: number) => {
   const type = entityId.split(':')[0];
   return {
-    '@timestamp': toIsoAgo(now, agoMs),
+    '@timestamp': toIsoAgo(now, 30 * DAY_MS + HOUR_MS),
     [`${type}.risk.id_field`]: 'entity.id',
     [`${type}.risk.id_value`]: entityId,
     [`${type}.risk.calculated_score_norm`]: score,
-    ...(scoreType ? { [`${type}.risk.score_type`]: scoreType } : {}),
   };
 };
 
@@ -50,15 +39,10 @@ export const riskScoresIndex: FixtureIndex = {
           [`${type}.risk.id_field`, KEYWORD],
           [`${type}.risk.id_value`, KEYWORD],
           [`${type}.risk.calculated_score_norm`, FLOAT],
-          [`${type}.risk.score_type`, KEYWORD],
         ]
       )
     ),
   },
-  buildDocs: (now) => [
-    ...Object.entries(REFERENCE_SCORES).map(([entityId, score]) => toRiskDoc(entityId, score, now)),
-    ...Object.entries(RESOLUTION_SCORES).map(([entityId, score]) =>
-      toRiskDoc(entityId, score, now, { scoreType: 'resolution', agoMs: 30 * DAY_MS + HOUR_MS / 2 })
-    ),
-  ],
+  buildDocs: (now) =>
+    Object.entries(REFERENCE_SCORES).map(([entityId, score]) => toRiskDoc(entityId, score, now)),
 };

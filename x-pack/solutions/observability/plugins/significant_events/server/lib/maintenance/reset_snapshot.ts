@@ -26,7 +26,7 @@ export const collectResetSnapshot = async (
   kiClient: KnowledgeIndicatorClient,
   failures: SignificantEventsMaintenanceFailure[]
 ): Promise<SignificantEventsResetSnapshot> => {
-  const [indicatorSourcesResult, ownedRuleSourcesResult, featureCountResult, queryCountResult] =
+  const [indicatorStreamsResult, ownedRuleStreamsResult, featureCountResult, queryCountResult] =
     await Promise.allSettled([
       kiClient.getSourceIdsWithKnowledgeIndicators(),
       kiClient.findSourceIdsWithOwnedRules(),
@@ -34,21 +34,21 @@ export const collectResetSnapshot = async (
       kiClient.countKnowledgeIndicators(KI_TYPE_QUERY),
     ]);
 
-  const indicatorSourceIds =
-    indicatorSourcesResult.status === 'fulfilled' ? indicatorSourcesResult.value : [];
-  if (indicatorSourcesResult.status === 'rejected') {
+  const indicatorStreamNames =
+    indicatorStreamsResult.status === 'fulfilled' ? indicatorStreamsResult.value : [];
+  if (indicatorStreamsResult.status === 'rejected') {
     failures.push({
       target: 'snapshot:knowledge-indicators',
-      error: toMessage(indicatorSourcesResult.reason),
+      error: toMessage(indicatorStreamsResult.reason),
     });
   }
 
-  const ownedRuleSourceIds =
-    ownedRuleSourcesResult.status === 'fulfilled' ? ownedRuleSourcesResult.value : [];
-  if (ownedRuleSourcesResult.status === 'rejected') {
+  const ownedRuleStreamNames =
+    ownedRuleStreamsResult.status === 'fulfilled' ? ownedRuleStreamsResult.value : [];
+  if (ownedRuleStreamsResult.status === 'rejected') {
     failures.push({
       target: 'snapshot:owned-rules',
-      error: toMessage(ownedRuleSourcesResult.reason),
+      error: toMessage(ownedRuleStreamsResult.reason),
     });
   }
 
@@ -63,18 +63,18 @@ export const collectResetSnapshot = async (
     failures.push({ target: 'snapshot:queries', error: toMessage(queryCountResult.reason) });
   }
 
-  const sourceIds = [...new Set([...indicatorSourceIds, ...ownedRuleSourceIds])];
+  const streamNames = [...new Set([...indicatorStreamNames, ...ownedRuleStreamNames])];
   const ruleIds = new Set<string>();
 
   const linkedRuleIdsPromise = (async (): Promise<string[]> => {
-    if (sourceIds.length === 0) {
+    if (streamNames.length === 0) {
       return [];
     }
     try {
-      const queryLinksBySource = await kiClient.getSourceToQueryLinksMap(sourceIds, {
+      const queryLinksByStream = await kiClient.getSourceToQueryLinksMap(streamNames, {
         includeExpired: true,
       });
-      return Object.values(queryLinksBySource)
+      return Object.values(queryLinksByStream)
         .flat()
         .flatMap((link) => (link.rule_backed && link.rule_id ? [link.rule_id] : []));
     } catch (error) {
@@ -85,26 +85,26 @@ export const collectResetSnapshot = async (
 
   const limit = pLimit(OWNED_RULE_LOOKUP_CONCURRENCY);
   const ownedRuleIdsPromise = Promise.all(
-    sourceIds.map((sourceId) =>
+    streamNames.map((streamName) =>
       limit(async (): Promise<string[]> => {
         try {
-          return await kiClient.findOwnedRuleIds(sourceId);
+          return await kiClient.findOwnedRuleIds(streamName);
         } catch (error) {
-          failures.push({ target: `snapshot:owned-rules:${sourceId}`, error: toMessage(error) });
+          failures.push({ target: `snapshot:owned-rules:${streamName}`, error: toMessage(error) });
           return [];
         }
       })
     )
   );
 
-  const [linkedRuleIds, ownedRuleIdsBySource] = await Promise.all([
+  const [linkedRuleIds, ownedRuleIdsByStream] = await Promise.all([
     linkedRuleIdsPromise,
     ownedRuleIdsPromise,
   ]);
   for (const ruleId of linkedRuleIds) {
     ruleIds.add(ruleId);
   }
-  for (const ownedRuleIds of ownedRuleIdsBySource) {
+  for (const ownedRuleIds of ownedRuleIdsByStream) {
     for (const ruleId of ownedRuleIds) {
       ruleIds.add(ruleId);
     }

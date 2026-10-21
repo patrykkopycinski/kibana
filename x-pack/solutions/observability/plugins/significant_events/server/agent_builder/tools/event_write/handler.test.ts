@@ -15,9 +15,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { EVENT_CREATED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 
@@ -56,35 +54,6 @@ const makeStoredEvent = (
     ...overrides,
   } as SignificantEvent);
 
-type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
-
-/** A detection signal for one rule; pass only the fields a test asserts on. */
-const makeDetectionSignal = ({
-  ruleUuid,
-  verdict = 'confirms',
-  description = `Signal for ${ruleUuid}`,
-  changePointType = 'spike',
-  sourceId = 'logs.checkout',
-}: {
-  ruleUuid: string;
-  verdict?: DetectionSignal['verdict'];
-  description?: string;
-  changePointType?: 'spike' | 'dip';
-  sourceId?: string;
-}): DetectionSignal => ({
-  type: 'detection',
-  source_id: sourceId,
-  description,
-  verdict,
-  evidence: { esql_query: `FROM ${sourceId}`, result: 'found' },
-  metadata: {
-    detection_id: `det-${ruleUuid}`,
-    rule_uuid: ruleUuid,
-    change_point_type: changePointType,
-    p_value: 0.01,
-  },
-});
-
 type SearchClientMethods =
   | 'findLatestPaginated'
   | 'findLatestByCurrentStatePaginated'
@@ -94,27 +63,16 @@ type SearchClientMethods =
 
 /** Typed `.rule-events` read client mock; override individual methods by passing a partial mock. */
 const makeEventSearchClient = (
-  overrides: Partial<jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>>> = {},
-  emitTrigger?: TriggerEmitter
-): jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>> & RuleEventsClient => {
-  const findByEventId = overrides.findByEventId ?? jest.fn().mockResolvedValue({ hits: [] });
-  return asRuleEventsClient(
-    {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-      findByEventId,
-      findLatestByEventId: jest
-        .fn()
-        .mockImplementation(async (eventId: string) => (await findByEventId(eventId)).hits.at(-1)),
-      ...overrides,
-    },
-    {
-      getAlertEventsClient: async () => alertEventsClient,
-      emitTrigger,
-    }
-  ) as never;
-};
+  overrides: Partial<jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>>> = {}
+): jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>> & RuleEventsClient =>
+  ({
+    findLatestPaginated: jest.fn(),
+    findLatestByCurrentStatePaginated: jest.fn(),
+    findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    findLatestByEventId: jest.fn(),
+    ...overrides,
+  } as never);
 
 const makeAlertEventsClient = (
   overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
@@ -157,6 +115,7 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
@@ -177,6 +136,7 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       input: { ...baseInput },
     });
     expect(findByEventId).not.toHaveBeenCalled();
@@ -193,6 +153,7 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       input: { ...baseInput, event_id: '' },
     });
     if (result.written) {
@@ -210,6 +171,7 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345', status: 'active' },
     });
 
@@ -239,6 +201,7 @@ describe('eventsWriteHandler', () => {
 
     await eventsWriteHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
@@ -256,6 +219,7 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventSearchClient: eventClient,
+        alertEventsClient,
         input: { ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' },
       });
 
@@ -270,18 +234,30 @@ describe('eventsWriteHandler', () => {
     });
 
     it('writes when an unchanged snapshot adds a detection rule not present in its history', async () => {
-      const ruleOne: SignalEntry = makeDetectionSignal({
-        ruleUuid: 'rule-1',
-        verdict: 'confirms',
+      const ruleOne: SignalEntry = {
+        type: 'detection',
+        source_id: 'logs.checkout',
         description: 'Rule one detected an issue',
-        changePointType: 'spike',
-      });
-      const ruleTwo: SignalEntry = makeDetectionSignal({
-        ruleUuid: 'rule-2',
         verdict: 'confirms',
+        metadata: {
+          detection_id: 'det-rule-1',
+          rule_uuid: 'rule-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+      };
+      const ruleTwo: SignalEntry = {
+        type: 'detection',
+        source_id: 'logs.checkout',
         description: 'Rule two detected an issue',
-        changePointType: 'spike',
-      });
+        verdict: 'confirms',
+        metadata: {
+          detection_id: 'det-rule-2',
+          rule_uuid: 'rule-2',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+      };
       const stored = makeStoredEvent('checkout-stable', {
         signals: [ruleOne],
       });
@@ -291,6 +267,7 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventSearchClient: eventClient,
+        alertEventsClient,
         input: {
           ...baseInput,
           event_id: 'checkout-stable',
@@ -306,12 +283,18 @@ describe('eventsWriteHandler', () => {
     });
 
     it('skips when an unchanged snapshot resubmits a rule absent from the latest version', async () => {
-      const ruleOne: SignalEntry = makeDetectionSignal({
-        ruleUuid: 'rule-1',
-        verdict: 'confirms',
+      const ruleOne: SignalEntry = {
+        type: 'detection',
+        source_id: 'logs.checkout',
         description: 'Rule one detected an issue',
-        changePointType: 'spike',
-      });
+        verdict: 'confirms',
+        metadata: {
+          detection_id: 'det-rule-1',
+          rule_uuid: 'rule-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+      };
       // ruleOne is a confirms signal without an impact; the proposed 'high' stands, so match the
       // stored fixture to it and the no-op path, not an escalation write, is what's under test.
       const latest = makeStoredEvent('checkout-stable', { severity: 'high' });
@@ -326,6 +309,7 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventSearchClient: eventClient,
+        alertEventsClient,
         input: {
           ...baseInput,
           event_id: 'checkout-stable',
@@ -350,6 +334,7 @@ describe('eventsWriteHandler', () => {
       await expect(
         eventsWriteHandler({
           eventSearchClient: eventClient,
+          alertEventsClient,
           input: { ...baseInput },
         })
       ).rejects.toMatchObject({ code: 'outcome_unknown' });
@@ -363,6 +348,7 @@ describe('eventsWriteBulkHandler', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [
         { ...baseInput, event_id: 'event-1' },
         { ...baseInput, event_id: 'event-2', status: 'inactive' },
@@ -385,6 +371,7 @@ describe('eventsWriteBulkHandler', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [
         { ...baseInput, event_id: 'duplicate' },
         { ...baseInput, event_id: 'duplicate' },
@@ -404,6 +391,7 @@ describe('eventsWriteBulkHandler', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [{ ...baseInput }],
     });
 
@@ -414,10 +402,20 @@ describe('eventsWriteBulkHandler', () => {
 });
 
 describe('eventsWriteBulkHandler — dedup mode', () => {
-  const dedupInput: EventsWriteInput = {
-    ...baseInput,
-    signals: [makeDetectionSignal({ ruleUuid: 'rule-abc', description: 'High Latency' })],
-  };
+  const makeDetectionSignal = (ruleUuid = 'rule-abc'): SignalEntry => ({
+    type: 'detection',
+    source_id: 'logs.checkout',
+    description: 'High Latency',
+    verdict: 'confirms',
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      rule_name: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+  const dedupInput: EventsWriteInput = { ...baseInput, signals: [makeDetectionSignal()] };
 
   it('skips the write and returns the existing event_id when an active duplicate is found', async () => {
     const eventClient = makeEventSearchClient({
@@ -433,6 +431,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [dedupInput],
     });
 
@@ -449,6 +448,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   it('writes the first of two in-batch duplicates and flags the second', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
+      alertEventsClient,
       inputs: [dedupInput, { ...dedupInput }],
     });
 
@@ -462,6 +462,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient,
+      alertEventsClient,
       rejectUnknownEventIds: true,
       inputs: [{ ...baseInput, event_id: 'unknown-event-id' }, dedupInput],
     });
@@ -469,6 +470,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(results[0]).toEqual({
       index: 0,
       event_id: 'unknown-event-id',
+      status: 'active',
       written: false,
       reason: 'unknown_event_id',
       error: {
@@ -499,6 +501,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
     const [result] = await eventsWriteBulkHandler({
       eventSearchClient,
+      alertEventsClient,
       rejectUnknownEventIds: true,
       inputs: [{ ...baseInput, event_id: eventId }],
     });
@@ -522,6 +525,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [{ ...baseInput, event_id: eventId, status }],
     });
 
@@ -546,6 +550,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
       const results = await eventsWriteBulkHandler({
         eventSearchClient: eventClient,
+        alertEventsClient,
         inputs: [{ ...baseInput, event_id: 'checkout-changing', ...inputOverrides }],
       });
 
@@ -555,386 +560,26 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   );
 });
 
-describe('eventsWriteBulkHandler — lifecycle resolution', () => {
-  it('does not reopen a closed event from a stale confirmation of its closed episode', async () => {
-    const closed = makeStoredEvent('checkout-closed', {
-      status: 'inactive',
-      signals: [
-        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
-        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
-      ],
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient({
-        findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
-      }),
-      inputs: [
-        {
-          ...baseInput,
-          status: undefined,
-          event_id: 'checkout-closed',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({
-      written: false,
-      skipped: true,
-      reason: 'unchanged_outcome',
-      status: 'inactive',
-    });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('drops the closed episode signals when a closed event reopens', async () => {
-    const closed = makeStoredEvent('checkout-reopened', {
-      status: 'inactive',
-      signals: [
-        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
-        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
-      ],
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient({
-        findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
-      }),
-      inputs: [
-        {
-          ...baseInput,
-          status: undefined,
-          event_id: 'checkout-reopened',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-c', verdict: 'confirms' })],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({ written: true, status: 'active' });
-    const [written] = writtenDocs();
-    expect(written.status).toBe('active');
-    expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
-  });
-
-  it('does not skip a continuation that re-submits a rule from the closed episode of a reopened event', async () => {
-    const eventId = 'checkout-reopened-again';
-    const closed = makeStoredEvent(eventId, {
-      status: 'inactive',
-      severity: 'low',
-      signals: [makeDetectionSignal({ ruleUuid: 'rule-a' })],
-    });
-    const reopened = makeStoredEvent(eventId, {
-      status: 'active',
-      severity: 'high',
-      signals: [makeDetectionSignal({ ruleUuid: 'rule-c' })],
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient({
-        findByEventId: jest.fn().mockResolvedValue({ hits: [closed, reopened] }),
-      }),
-      inputs: [
-        {
-          ...baseInput,
-          status: undefined,
-          event_id: eventId,
-          severity: 'high',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-a' })],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({ written: true, status: 'active' });
-    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
-  });
-
-  describe('a continuation onto a recovering event', () => {
-    const eventId = 'checkout-recovering';
-    const recovering = () => makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
-    const clientFor = (stored: SignificantEvent) =>
-      makeEventSearchClient({ findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }) });
-
-    it('returns the event to active when a new member breaches', async () => {
-      const results = await eventsWriteBulkHandler({
-        eventSearchClient: clientFor(recovering()),
-        inputs: [
-          {
-            ...baseInput,
-            status: undefined,
-            event_id: eventId,
-            severity: 'high',
-            signals: [
-              makeDetectionSignal({
-                ruleUuid: 'rule-new-member',
-                verdict: 'confirms',
-                description: 'A new rule joined',
-                changePointType: 'spike',
-              }),
-            ],
-          },
-        ],
-      });
-
-      expect(results[0]).toMatchObject({ written: true, status: 'active', event_id: eventId });
-      expect(writtenDocs()[0].status).toBe('active');
-    });
-
-    it('keeps the event recovering when it carries healthy evidence', async () => {
-      const results = await eventsWriteBulkHandler({
-        eventSearchClient: clientFor(recovering()),
-        inputs: [
-          {
-            ...baseInput,
-            status: undefined,
-            event_id: eventId,
-            severity: 'high',
-            signals: [
-              makeDetectionSignal({
-                ruleUuid: 'rule-healthy-member',
-                verdict: 'refutes',
-                description: 'A new rule joined, healthy',
-                changePointType: 'dip',
-              }),
-            ],
-          },
-        ],
-      });
-
-      expect(results[0]).toMatchObject({ written: true, status: 'recovering' });
-      expect(writtenDocs()[0]).toMatchObject({ status: 'recovering' });
-    });
-
-    it('skips a write that adds nothing new, as it would on an active event', async () => {
-      const results = await eventsWriteBulkHandler({
-        eventSearchClient: clientFor(recovering()),
-        inputs: [{ ...baseInput, event_id: eventId, status: undefined, severity: 'high' }],
-      });
-
-      expect(results[0]).toMatchObject({
-        written: false,
-        skipped: true,
-        reason: 'unchanged_outcome',
-        status: 'recovering',
-      });
-      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-    });
-  });
-
-  it('skips, writing nothing, when the lifecycle has nothing to write', async () => {
-    const stored = makeStoredEvent('checkout-closed', { status: 'inactive' });
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      inputs: [
-        {
-          ...baseInput,
-          event_id: 'checkout-closed',
-          status: undefined,
-          signals: [
-            makeDetectionSignal({
-              ruleUuid: 'rule-1',
-              verdict: 'refutes',
-              description: 'Healthy again',
-              changePointType: 'dip',
-            }),
-          ],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({
-      written: false,
-      skipped: true,
-      reason: 'unchanged_outcome',
-      status: 'inactive',
-    });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('refuses to open a new event without a breaching member', async () => {
-    await expect(
-      eventsWriteBulkHandler({
-        eventSearchClient: makeEventSearchClient(),
-        inputs: [
-          {
-            ...baseInput,
-            status: undefined,
-            signals: [
-              makeDetectionSignal({
-                ruleUuid: 'rule-1',
-                verdict: 'refutes',
-                description: 'Healthy',
-                changePointType: 'dip',
-              }),
-            ],
-          },
-        ],
-      })
-    ).rejects.toThrow('without a breaching member');
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('sets aside a refuting continuation of an unknown event without failing the batch', async () => {
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient(),
-      inputs: [
-        {
-          ...baseInput,
-          event_id: 'missing-event',
-          status: undefined,
-          signals: [
-            makeDetectionSignal({
-              ruleUuid: 'rule-1',
-              verdict: 'refutes',
-              description: 'Healthy',
-              changePointType: 'dip',
-            }),
-          ],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({
-      written: false,
-      reason: 'unknown_event_id',
-      event_id: 'missing-event',
-    });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('writes the status the lifecycle decided, not one the item could carry', async () => {
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient(),
-      inputs: [
-        {
-          ...baseInput,
-          status: undefined,
-          signals: [
-            makeDetectionSignal({
-              ruleUuid: 'rule-1',
-              verdict: 'confirms',
-              description: 'Confirmed',
-              changePointType: 'spike',
-            }),
-          ],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({ written: true, status: 'active' });
-    expect(writtenDocs()[0].status).toBe('active');
-  });
-
-  it('writes an explicit status as given, bypassing the lifecycle', async () => {
-    const eventId = 'checkout-recovering';
-    const stored = makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      inputs: [{ ...baseInput, event_id: eventId, status: 'active', severity: 'high' }],
-    });
-
-    expect(results[0]).toMatchObject({ written: true, status: 'active' });
-  });
-
-  it('still lets an operator-style write set a recovering event to inactive', async () => {
-    const eventId = 'checkout-recovering';
-    const stored = makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      inputs: [{ ...baseInput, event_id: eventId, status: 'inactive', severity: 'high' }],
-    });
-
-    expect(results[0]).toMatchObject({ written: true, status: 'inactive' });
-  });
-
-  it('drops a write when another writer appended a version after the lineage was read', async () => {
-    const eventId = 'known-canonical-event';
-    const readVersion = makeStoredEvent(eventId);
-    const movedHead = makeStoredEvent(eventId, {
-      '@timestamp': '2099-01-01T00:00:00.000Z',
-      status: 'inactive',
-    });
-    const eventSearchClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [readVersion] }),
-      findLatestByEventId: jest.fn().mockResolvedValue(movedHead),
-    });
-
-    const [result] = await eventsWriteBulkHandler({
-      eventSearchClient,
-      rejectUnknownEventIds: true,
-      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
-    });
-
-    expect(result).toMatchObject({ written: false, error: { type: 'superseded_write' } });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('does not flag a refuting verdict as unchanged when the stored verdict was confirming', async () => {
-    const eventId = 'checkout-verdict-flip';
-    const stored = makeStoredEvent(eventId, {
-      status: 'active',
-      severity: 'high',
-      signals: [
-        makeDetectionSignal({
-          ruleUuid: 'rule-flip',
-          verdict: 'confirms',
-          description: 'Was breaching',
-          changePointType: 'spike',
-        }),
-      ],
-    });
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      inputs: [
-        {
-          ...baseInput,
-          event_id: eventId,
-          status: 'active',
-          severity: 'high',
-          signals: [
-            makeDetectionSignal({
-              ruleUuid: 'rule-flip',
-              verdict: 'refutes',
-              description: 'Now healthy',
-              changePointType: 'spike',
-            }),
-          ],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({ written: true });
-  });
-});
-
 describe('eventsWriteBulkHandler — agent-proposed severity', () => {
-  const failingSignal = (ruleUuid: string): SignalEntry =>
-    makeDetectionSignal({
-      ruleUuid,
-      description: `Found: ${ruleUuid} failing. Impact: requests blocked.`,
-    });
+  const failingSignal = (ruleUuid: string): SignalEntry => ({
+    type: 'detection',
+    source_id: 'logs.checkout',
+    description: `Found: ${ruleUuid} failing. Impact: requests blocked.`,
+    verdict: 'confirms',
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
 
   const write = (input: Partial<EventsWriteInput>) =>
     eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient({
         findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       }),
+      alertEventsClient,
       inputs: [{ ...baseInput, ...input }],
     });
 
@@ -972,10 +617,25 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     started_at: '2026-01-01T00:00:00.000Z',
     completed_at: '2026-01-01T01:00:00.000Z',
   };
+  const makeDetectionSignal = (
+    ruleUuid: string,
+    verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
+  ): Extract<SignalEntry, { type: 'detection' }> => ({
+    type: 'detection',
+    source_id: 'logs.checkout',
+    description: `Signal for ${ruleUuid}`,
+    verdict,
+    metadata: {
+      detection_id: `detection-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
   const makeInvestigatedEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
     makeStoredEvent('investigated-event', {
       severity: 'medium',
-      signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
+      signals: [makeDetectionSignal('rule-1')],
       investigations: [completedInvestigation],
       ...overrides,
     });
@@ -988,13 +648,14 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 
     const [result] = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       source: 'discovery',
       inputs: [
         {
           ...baseInput,
           event_id: stored.event_id,
           severity: 'critical',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
+          signals: [makeDetectionSignal('rule-1')],
         },
       ],
     });
@@ -1011,13 +672,14 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       source: 'discovery',
       inputs: [
         {
           ...baseInput,
           event_id: stored.event_id,
           severity: 'critical',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-2', verdict: 'inconclusive' })],
+          signals: [makeDetectionSignal('rule-2', 'inconclusive')],
         },
       ],
     });
@@ -1031,10 +693,11 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
 
-    const newConfirmedRule = makeDetectionSignal({ ruleUuid: 'rule-2' });
+    const newConfirmedRule = makeDetectionSignal('rule-2');
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       source: 'discovery',
       inputs: [
         {
@@ -1056,6 +719,7 @@ describe('eventsWriteBulkHandler — signal-less chat create', () => {
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [
         { ...baseInput, severity: 'critical', signals: [], causal_features: [], blast_radius: [] },
       ],
@@ -1066,6 +730,22 @@ describe('eventsWriteBulkHandler — signal-less chat create', () => {
 });
 
 describe('eventsWriteBulkHandler — narrative hijack guard', () => {
+  type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
+
+  const makeDetectionSignal = (ruleUuid: string): DetectionSignal => ({
+    type: 'detection',
+    source_id: 'logs.app',
+    description: `Signal for ${ruleUuid}`,
+    verdict: 'confirms',
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      rule_name: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+
   const makeCausal = (featureId: string): CausalFeature => ({
     feature_id: featureId,
     type: 'entity',
@@ -1085,7 +765,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     // A tier the evidence supports, so validation leaves it as proposed.
     severity: 'medium',
     event_id: eventId,
-    signals: [makeDetectionSignal({ ruleUuid: 'rule-eis-auth', sourceId: 'logs.app' })],
+    signals: [makeDetectionSignal('rule-eis-auth')],
     causal_features: [],
     blast_radius: [],
     ...overrides,
@@ -1100,9 +780,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     } = {}
   ): SignificantEvent =>
     makeStoredEvent(eventId, {
-      signals: ruleUuids.map((uuid) =>
-        makeDetectionSignal({ ruleUuid: uuid, sourceId: 'logs.app' })
-      ),
+      signals: ruleUuids.map((uuid) => makeDetectionSignal(uuid)),
       causal_features: topologyOverrides.causal_features ?? [],
       blast_radius: topologyOverrides.blast_radius ?? [],
     });
@@ -1121,9 +799,10 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 
     const [result] = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
+      alertEventsClient,
       inputs: [
         makeSnapshotInput(eventId, {
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-eis-auth', sourceId: 'logs.app' })], // same rule — no new rules
+          signals: [makeDetectionSignal('rule-eis-auth')], // same rule — no new rules
           title: 'Agentless CEL state registry — cleanup remove 404 not_found', // attempted hijack
           symptom_hypothesis: 'CEL filebeat registry-remove 404s.', // attempted hijack
         }),
@@ -1145,6 +824,7 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
   it('calls createAlertEvent once per written document', async () => {
     await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
+      alertEventsClient,
       inputs: [
         { ...baseInput, event_id: 'event-a' },
         { ...baseInput, event_id: 'event-b' },
@@ -1157,6 +837,7 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
   it('writes the toRuleEvent output of the in-memory document', async () => {
     await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
+      alertEventsClient,
       inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
     });
 
@@ -1180,7 +861,9 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
     });
 
     const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient({}, emitTrigger),
+      eventSearchClient: makeEventSearchClient(),
+      alertEventsClient,
+      emitTrigger,
       logger,
       inputs: [
         { ...baseInput, event_id: 'event-a' },
@@ -1205,7 +888,9 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
     const emitTrigger = jest.fn();
 
     await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient({}, emitTrigger),
+      eventSearchClient: makeEventSearchClient(),
+      alertEventsClient,
+      emitTrigger,
       inputs: [{ ...baseInput, event_id: 'event-a' }],
     });
 
@@ -1221,80 +906,9 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
     await expect(
       eventsWriteHandler({
         eventSearchClient: makeEventSearchClient(),
+        alertEventsClient,
         input: { ...baseInput, event_id: 'event-1' },
       })
     ).rejects.toThrow('rule_events_write_error: bad');
-  });
-});
-
-describe('eventsWriteBulkHandler — how a version is written', () => {
-  const eventId = 'checkout-existing';
-  const stored = () => makeStoredEvent(eventId, { status: 'active', severity: 'high' });
-  const clientWith = ({
-    head,
-    hits,
-    emitTrigger,
-  }: {
-    head?: SignificantEvent;
-    hits: SignificantEvent[];
-    emitTrigger?: TriggerEmitter;
-  }) =>
-    makeEventSearchClient(
-      {
-        findByEventId: jest.fn().mockResolvedValue({ hits }),
-        findLatestByEventId: jest.fn().mockResolvedValue(head),
-      },
-      emitTrigger
-    );
-
-  it('creates an event with no prior version through createEvent', async () => {
-    const eventSearchClient = clientWith({ hits: [] });
-    const createEvent = jest.spyOn(eventSearchClient, 'createEvent');
-    const updateEvent = jest.spyOn(eventSearchClient, 'updateEvent');
-
-    await eventsWriteBulkHandler({
-      eventSearchClient,
-      inputs: [{ ...baseInput, event_id: 'event-a' }],
-    });
-
-    expect(createEvent).toHaveBeenCalledTimes(1);
-    expect(updateEvent).not.toHaveBeenCalled();
-  });
-
-  it('continues an existing event through updateEvent with the version it read', async () => {
-    const prior = stored();
-    const eventSearchClient = clientWith({ head: prior, hits: [prior] });
-    const createEvent = jest.spyOn(eventSearchClient, 'createEvent');
-    const updateEvent = jest.spyOn(eventSearchClient, 'updateEvent');
-
-    await eventsWriteBulkHandler({
-      eventSearchClient,
-      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
-    });
-
-    expect(updateEvent).toHaveBeenCalledWith(expect.objectContaining({ prior }));
-    expect(createEvent).not.toHaveBeenCalled();
-  });
-
-  it('reports superseded_write, writing and notifying nothing, when another writer got there first', async () => {
-    const emitTrigger = jest.fn();
-    const eventSearchClient = clientWith({
-      head: { ...stored(), '@timestamp': '2099-01-01T00:00:00.000Z' },
-      hits: [stored()],
-      emitTrigger,
-    });
-
-    const [result] = await eventsWriteBulkHandler({
-      eventSearchClient,
-      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
-    });
-
-    expect(result).toMatchObject({
-      written: false,
-      reason: 'superseded',
-      error: { type: 'superseded_write', reason: expect.stringContaining('Do not retry') },
-    });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-    expect(emitTrigger).not.toHaveBeenCalled();
   });
 });

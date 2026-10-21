@@ -1,5 +1,5 @@
 {
-  "sha1": "c957999dc5eabd5279409078bdf5662132ddabe5",
+  "sha1": "660523a863cac0aaa239e983ac53b98b7241ed21",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 67,
+        "line": 62,
         "column": 5
       }
     },
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 85,
+        "line": 80,
         "column": 94
       }
     },
@@ -59,7 +59,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 119,
+        "line": 114,
         "column": 13
       }
     },
@@ -75,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 144,
+        "line": 139,
         "column": 88
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 181,
+        "line": 176,
         "column": 50
       }
     },
@@ -107,7 +107,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 226,
+        "line": 221,
         "column": 20
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 270,
+        "line": 265,
         "column": 16
       }
     },
@@ -139,7 +139,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 318,
+        "line": 313,
         "column": 47
       }
     },
@@ -155,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 360,
+        "line": 355,
         "column": 59
       }
     },
@@ -171,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 415,
+        "line": 410,
         "column": 18
       }
     },
@@ -187,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 429,
+        "line": 424,
         "column": 18
       }
     },
@@ -203,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 470,
+        "line": 465,
         "column": 24
       }
     },
@@ -219,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 534,
+        "line": 529,
         "column": 15
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 561,
+        "line": 556,
         "column": 26
       }
     },
@@ -251,7 +251,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 582,
+        "line": 577,
         "column": 16
       }
     },
@@ -267,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 629,
+        "line": 624,
         "column": 14
       }
     },
@@ -283,7 +283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 691,
+        "line": 686,
         "column": 14
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 710,
+        "line": 705,
         "column": 11
       }
     },
@@ -315,7 +315,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 733,
+        "line": 728,
         "column": 9
       }
     },
@@ -331,7 +331,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 771,
+        "line": 766,
         "column": 21
       }
     },
@@ -347,7 +347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 796,
+        "line": 791,
         "column": 24
       }
     },
@@ -363,7 +363,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 835,
+        "line": 830,
         "column": 21
       }
     },
@@ -379,7 +379,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 861,
+        "line": 856,
         "column": 72
       }
     },
@@ -395,7 +395,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 886,
+        "line": 881,
         "column": 11
       }
     },
@@ -411,7 +411,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 909,
+        "line": 904,
         "column": 11
       }
     },
@@ -427,40 +427,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 996,
+        "line": 991,
         "column": 17
-      }
-    },
-    {
-      "id": "1f74745923a4dea-2adfe4b4235e482",
-      "title": "Automated resolution integration tests Security all can enable and disable built-in rules; Security read cannot",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 1032,
-        "column": 21
-      }
-    },
-    {
-      "id": "1f74745923a4dea-f80727652f69918",
-      "title": "Automated resolution integration tests A maintainer run by a Security all user honours a built-in rule an admin disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 1073,
-        "column": 10
       }
     },
     {
@@ -475,7 +443,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 27,
+        "line": 26,
         "column": 22
       }
     },
@@ -491,7 +459,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 46,
+        "line": 45,
         "column": 52
       }
     },
@@ -507,7 +475,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 65,
+        "line": 64,
         "column": 12
       }
     },
@@ -523,7 +491,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 15
       }
     },
@@ -539,7 +507,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 109,
+        "line": 108,
         "column": 14
       }
     },
@@ -555,7 +523,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 137,
+        "line": 136,
         "column": 31
       }
     },
@@ -571,7 +539,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 188,
+        "line": 187,
         "column": 15
       }
     },
@@ -587,7 +555,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 226,
+        "line": 225,
         "column": 18
       }
     },
@@ -603,7 +571,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 265,
+        "line": 264,
         "column": 8
       }
     },
@@ -619,7 +587,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 316,
+        "line": 315,
         "column": 16
       }
     },
@@ -635,7 +603,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 334,
+        "line": 333,
         "column": 16
       }
     },
@@ -651,7 +619,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 370,
+        "line": 369,
         "column": 15
       }
     },
@@ -667,7 +635,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 416,
+        "line": 415,
         "column": 15
       }
     },
@@ -683,7 +651,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 468,
+        "line": 467,
         "column": 13
       }
     },
@@ -699,7 +667,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 497,
+        "line": 496,
         "column": 13
       }
     },
@@ -715,7 +683,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 540,
+        "line": 539,
         "column": 12
       }
     },
@@ -731,7 +699,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 557,
+        "line": 556,
         "column": 20
       }
     },
@@ -747,7 +715,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 590,
+        "line": 589,
         "column": 25
       }
     },
@@ -763,7 +731,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 608,
+        "line": 607,
         "column": 23
       }
     },
@@ -779,7 +747,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 630,
+        "line": 629,
         "column": 6
       }
     },
@@ -795,7 +763,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 662,
+        "line": 661,
         "column": 12
       }
     },
@@ -811,7 +779,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 691,
+        "line": 690,
         "column": 14
       }
     },
@@ -827,7 +795,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 701,
+        "line": 700,
         "column": 10
       }
     },
@@ -1152,8 +1120,8 @@
       }
     },
     {
-      "id": "fc8fec24ce63075-e600f4f5de93468",
-      "title": "Entity Store Status API tests reports a null nonPriority block with the dual-process flag off",
+      "id": "fc8fec24ce63075-0fd057695a50a62",
+      "title": "Entity Store Status API tests omits the nonPriority block with the dual-process flag off",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
@@ -1163,8 +1131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
-        "line": 103,
-        "column": 5
+        "line": 99,
+        "column": 54
       }
     },
     {

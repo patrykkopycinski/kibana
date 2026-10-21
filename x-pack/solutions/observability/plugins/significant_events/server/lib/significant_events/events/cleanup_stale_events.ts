@@ -9,9 +9,11 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
-import { StatusChange } from './lifecycle/lifecycle_controller';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
+import { updateSignificantEventStatus } from './update_event_status';
 
 const EVENTS_BATCH_SIZE = 1000;
 const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
@@ -50,7 +52,7 @@ const iterateActiveEventBatches = async function* ({
 
   while (true) {
     const result = await eventSearchClient.findLatestByCurrentStateBatch({
-      status: ['active', 'recovering'],
+      status: ['active'],
       ruleUuids,
       afterGroupHash,
       batchSize: EVENTS_BATCH_SIZE,
@@ -77,11 +79,15 @@ export const cleanupStaleEvents = async ({
   eventSearchClient,
   rulesClient,
   candidateRuleIds,
+  alertEventsClient,
+  emitTrigger,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
   rulesClient: IRulesManagementClient;
   candidateRuleIds?: string[];
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   logger?: Logger;
 }): Promise<CleanupStaleEventsResult> => {
   const uniqueCandidateRuleIds = candidateRuleIds
@@ -124,11 +130,13 @@ export const cleanupStaleEvents = async ({
     const results = await Promise.allSettled(
       staleEvents.map(({ event }) =>
         updateLimit(() =>
-          eventSearchClient.updateEventStatus({
+          updateSignificantEventStatus({
+            eventSearchClient,
             eventId: event.event_id,
-            change: StatusChange.ruleDeleted(),
+            status: 'inactive',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
-            expectedTimestamp: event['@timestamp'],
+            alertEventsClient,
+            emitTrigger,
           })
         )
       )
@@ -136,11 +144,6 @@ export const cleanupStaleEvents = async ({
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         closed += result.value.updated;
-        if (!result.value.updated && result.value.reason === 'superseded') {
-          logger?.debug(
-            `Stale event cleanup left event "${staleEvents[index].event.event_id}" open: a newer version exists`
-          );
-        }
         return;
       }
       failed += 1;

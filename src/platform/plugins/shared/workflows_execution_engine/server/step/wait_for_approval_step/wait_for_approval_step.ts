@@ -11,8 +11,6 @@ import {
   DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
-  HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
   HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlExternalResumeEnabled,
@@ -192,16 +190,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       workflowId: execution.workflowId,
       executionId: execution.id,
       renderTemplate: (template) =>
-        String(
-          this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template, {
-            context: {
-              hitl: {
-                [HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY]: resumeLinks.approveUrl,
-                [HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY]: resumeLinks.rejectUrl,
-              },
-            },
-          })
-        ),
+        String(this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template)),
       connectorExecutor: this.connectorExecutor,
       abortController: this.stepExecutionRuntime.abortController,
     });

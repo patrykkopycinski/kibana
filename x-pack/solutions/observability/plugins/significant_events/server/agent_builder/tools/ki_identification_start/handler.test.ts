@@ -57,7 +57,7 @@ describe('startKiIdentificationToolHandler', () => {
     });
 
     expect(result).toEqual({
-      kibanaPath: '/app/nightshift/sources',
+      kibanaPath: '/app/significant_events/knowledge_indicators?source=logs.nginx',
     });
 
     expect(managementApi.getWorkflow).toHaveBeenCalledWith('system-streams-ki-onboarding', '*');

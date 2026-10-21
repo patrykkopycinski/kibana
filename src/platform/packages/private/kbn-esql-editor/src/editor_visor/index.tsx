@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { SvgAiGradientDefs, useSvgAiGradient } from '@kbn/ui-ai-components';
 import {
   getEffectiveProjectRouting,
@@ -26,13 +25,10 @@ import { useNlGeneration } from './use_nl_generation';
 import {
   searchPlaceholder,
   nlPlaceholder,
-  nlEmptyEditorPlaceholder,
   generatingLabel,
   stopLabel,
   aiModeTooltip,
   kqlModeLabel,
-  kqlModeNoSourceTooltip,
-  kqlNoSourcePlaceholder,
   visorModeLegend,
   enterHintFilterLabel,
   enterHintGenerateLabel,
@@ -96,21 +92,16 @@ function AskAiButton({
 
 function VisorModeToggle({
   isKqlMode,
-  isKqlDisabled,
   onModeChange,
   styles,
 }: {
   isKqlMode: boolean;
-  isKqlDisabled: boolean;
   onModeChange: (mode: VisorMode) => void;
   styles: VisorStyles;
 }) {
   return (
     <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
-      <EuiToolTip
-        content={isKqlDisabled ? kqlModeNoSourceTooltip : kqlModeLabel}
-        disableScreenReaderOutput
-      >
+      <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
         <EuiButtonIcon
           iconType="magnify"
           size="xs"
@@ -120,7 +111,6 @@ function VisorModeToggle({
           aria-label={kqlModeLabel}
           aria-pressed={isKqlMode}
           isSelected={isKqlMode}
-          isDisabled={isKqlDisabled}
           onClick={() => onModeChange(VisorMode.KQL)}
           data-test-subj="esqlVisorModeKql"
           css={[styles.modeIconButton, isKqlMode && styles.modeIconButtonActive]}
@@ -138,7 +128,6 @@ function VisorModeToggle({
 function VisorLayout({
   showModeToggle,
   isKqlMode,
-  isKqlDisabled,
   onModeChange,
   styles,
   isVisible,
@@ -146,7 +135,6 @@ function VisorLayout({
 }: {
   showModeToggle: boolean;
   isKqlMode: boolean;
-  isKqlDisabled: boolean;
   onModeChange: (mode: VisorMode) => void;
   styles: VisorStyles;
   isVisible: boolean;
@@ -159,12 +147,7 @@ function VisorLayout({
       {...(!isVisible && { inert: '' })}
     >
       {showModeToggle && (
-        <VisorModeToggle
-          isKqlMode={isKqlMode}
-          isKqlDisabled={isKqlDisabled}
-          onModeChange={onModeChange}
-          styles={styles}
-        />
+        <VisorModeToggle isKqlMode={isKqlMode} onModeChange={onModeChange} styles={styles} />
       )}
       {children}
     </div>
@@ -217,15 +200,7 @@ function NlVisorActions({
   );
 }
 
-export interface QuickSearchVisorRestorableState {
-  // Unset until the user picks a mode
-  visorMode?: VisorMode;
-}
-
-const { withRestorableState, useRestorableState } =
-  createRestorableStateProvider<QuickSearchVisorRestorableState>();
-
-interface QuickSearchVisorPropsInternal {
+export interface QuickSearchVisorProps {
   // Current ESQL query
   query: string;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
@@ -242,12 +217,9 @@ interface QuickSearchVisorPropsInternal {
   disableSubmitAction?: boolean;
   // Called after a KQL filter is submitted so the parent can move focus back to the editor
   onKqlSubmitted?: () => void;
-  // Insets the visor from an outlined editor so its controls do not sit on the border
-  hasOutline?: boolean;
 }
 
-// React.memo is applied inside the withRestorableState HOC (called below)
-function QuickSearchVisorInternal({
+export function QuickSearchVisor({
   query,
   isInline,
   isVisible = true,
@@ -256,14 +228,13 @@ function QuickSearchVisorInternal({
   isDisabled = false,
   disableSubmitAction = false,
   onKqlSubmitted,
-  hasOutline = false,
-}: QuickSearchVisorPropsInternal) {
+}: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useRestorableState('visorMode', undefined);
+  const [visorMode, setVisorMode] = useState(VisorMode.KQL);
   const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
   const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
@@ -327,8 +298,15 @@ function QuickSearchVisorInternal({
         onStopGeneration();
       }
     },
-    [setVisorMode, onStopGeneration]
+    [onStopGeneration]
   );
+
+  // License and connector are known only after the first render. Start in natural language once they are.
+  useEffect(() => {
+    if (showAskAiButton) {
+      setVisorMode(VisorMode.NaturalLanguage);
+    }
+  }, [showAskAiButton]);
 
   useEffect(() => {
     const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
@@ -377,13 +355,8 @@ function QuickSearchVisorInternal({
     };
   }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
-  const hasNoSource = useMemo(() => !getIndexPatternFromESQLQuery(query), [query]);
-  // Natural language is the default once AI is available; without it there is no toggle, so KQL it is.
-  // KQL needs a source from the editor, so AI is the only usable mode while there is none.
-  const isKqlMode =
-    (!showAskAiButton || (visorMode ?? VisorMode.NaturalLanguage) === VisorMode.KQL) &&
-    !(hasNoSource && showAskAiButton);
-  const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible, hasOutline);
+  const isKqlMode = visorMode === VisorMode.KQL;
+  const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
   if (!KQLComponent) {
     return null;
@@ -394,7 +367,6 @@ function QuickSearchVisorInternal({
       <VisorLayout
         showModeToggle={showAskAiButton}
         isKqlMode
-        isKqlDisabled={hasNoSource}
         onModeChange={onVisorModeChange}
         styles={styles}
         isVisible={isVisible}
@@ -407,8 +379,7 @@ function QuickSearchVisorInternal({
             bubbleSubmitEvent={false}
             query={{ query: searchValue, language: 'kuery' }}
             disableAutoFocus={true}
-            isDisabled={hasNoSource}
-            placeholder={hasNoSource ? kqlNoSourcePlaceholder : searchPlaceholder}
+            placeholder={searchPlaceholder}
             onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
             onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
             appName="esqlEditorVisor"
@@ -433,7 +404,6 @@ function QuickSearchVisorInternal({
     <VisorLayout
       showModeToggle={showAskAiButton}
       isKqlMode={false}
-      isKqlDisabled={hasNoSource}
       onModeChange={onVisorModeChange}
       styles={styles}
       isVisible={isVisible}
@@ -442,7 +412,7 @@ function QuickSearchVisorInternal({
         <NLInput
           ref={nlInputRef}
           value={nlValue}
-          placeholder={hasNoSource ? nlEmptyEditorPlaceholder : nlPlaceholder}
+          placeholder={nlPlaceholder}
           disabled={isNlLoading}
           onChange={setNlValue}
           onSubmit={onNlSubmit}
@@ -459,6 +429,3 @@ function QuickSearchVisorInternal({
     </VisorLayout>
   );
 }
-
-export const QuickSearchVisor = withRestorableState(QuickSearchVisorInternal);
-export type QuickSearchVisorProps = ComponentPropsWithoutRef<typeof QuickSearchVisor>;

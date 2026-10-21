@@ -59,7 +59,6 @@ export interface ExecuteKIQueryGenerationAgentOptions {
   interactionId: string;
   source: NightshiftSource;
   existingQueries: ExistingQuerySummary[];
-  maxExistingQueriesForContext: number;
   signal?: AbortSignal;
   logger: Logger;
 }
@@ -71,7 +70,6 @@ export async function executeKIQueryGenerationAgent({
   interactionId,
   source,
   existingQueries,
-  maxExistingQueriesForContext,
   signal,
   logger,
 }: ExecuteKIQueryGenerationAgentOptions): Promise<{
@@ -80,8 +78,7 @@ export async function executeKIQueryGenerationAgent({
 }> {
   const userMessage = buildKIQueryGenerationUserMessage(
     { slug: source.slug, description: source.description },
-    existingQueries,
-    maxExistingQueriesForContext
+    existingQueries
   );
 
   const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
@@ -141,7 +138,6 @@ export async function executeKIQueryGenerationAgent({
     title: q.title,
     description: q.description,
     esql: q.esql,
-    category: q.category,
     severity_score: q.severity_score,
     evidence: q.evidence,
     replaces: q.replaces,

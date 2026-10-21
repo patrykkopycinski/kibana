@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  getAsCodeSearchRequestSchema,
+  asCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
@@ -84,7 +84,7 @@ export const discoverSessionWarningsSchema = z
   )
   .meta({
     description:
-      'Warnings about content omitted from the API response due to conversion or validation errors. The saved session is not modified.',
+      'Warnings generated when saved Discover session content cannot be fully represented in the API response.',
   });
 
 export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
@@ -98,32 +98,7 @@ export const discoverSessionSanitizeResponseSchema = z
   })
   .strict();
 
-export const discoverSessionSearchRequestParamsSchema = getAsCodeSearchRequestSchema({
-  tags: {
-    description:
-      'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.',
-    arrayDescription: 'Tag IDs to include.',
-  },
-  excluded_tags: {
-    description:
-      'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.',
-    arrayDescription: 'Tag IDs to exclude.',
-  },
-}).extend({
-  tag_names: z
-    .union([z.string(), z.array(z.string()).max(100)])
-    .optional()
-    .meta({
-      description:
-        'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are included. If the same name is shared by multiple tags, sessions matching any of those tags are included.',
-    }),
-  excluded_tag_names: z
-    .union([z.string(), z.array(z.string()).max(100)])
-    .optional()
-    .meta({
-      description:
-        'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are excluded. If the same name is shared by multiple tags, sessions matching any of those tags are excluded.',
-    }),
+export const discoverSessionSearchRequestParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)

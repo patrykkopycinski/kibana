@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { GraphWorkspaceSavedObject, Workspace } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
-import { createWorkspaceState, initializeWorkspace, submitSearch, workspaceChanged } from '.';
+import { submitSearch } from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource } from './datasource';
@@ -20,7 +20,7 @@ import { loadTemplates, templatesSelector } from './url_templates';
 import {
   migrateLegacyIndexPatternRef,
   savedWorkspaceToAppState,
-  reduxStateToSavedWorkspace,
+  appStateToSavedWorkspace,
   lookupIndexPatternId,
 } from '../services/persistence';
 import { updateMetaData, metaDataSelector } from './meta_data';
@@ -111,8 +111,6 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(loadFields(allFields));
       listenerApi.dispatch(updateSettings(advancedSettings));
       listenerApi.dispatch(loadTemplates(urlTemplates));
-      listenerApi.dispatch(initializeWorkspace());
-      listenerApi.dispatch(workspaceChanged(createWorkspaceState(createdWorkspace)));
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
@@ -141,13 +139,7 @@ export const registerPersistenceListeners = (
           deps,
           workspace,
           savedWorkspace: action.payload,
-          getState: () => {
-            const currentWorkspace = deps.getWorkspace();
-            if (currentWorkspace) {
-              listenerApi.dispatch(workspaceChanged(createWorkspaceState(currentWorkspace)));
-            }
-            return listenerApi.getState();
-          },
+          state,
           selectedDatasource,
         }),
         new Promise<undefined>((resolve) => {
@@ -165,13 +157,13 @@ function showModal({
   deps,
   workspace,
   savedWorkspace,
-  getState,
+  state,
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
   workspace: Workspace;
   savedWorkspace: GraphWorkspaceSavedObject;
-  getState: () => GraphState;
+  state: GraphState;
   selectedDatasource: IndexpatternDatasource;
 }): Promise<string | undefined> {
   let resolveSavedObjectId: (id?: string) => void;
@@ -187,15 +179,14 @@ function showModal({
     const canSaveData =
       deps.savePolicy === 'configAndData' ||
       (deps.savePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
-    const currentState = getState();
-    reduxStateToSavedWorkspace(
+    appStateToSavedWorkspace(
       savedWorkspace,
       {
-        workspace: currentState.workspace,
-        urlTemplates: templatesSelector(currentState),
-        advancedSettings: settingsSelector(currentState),
+        workspace,
+        urlTemplates: templatesSelector(state),
+        advancedSettings: settingsSelector(state),
         selectedIndex: selectedDatasource,
-        selectedFields: selectedFieldsSelector(currentState),
+        selectedFields: selectedFieldsSelector(state),
       },
       canSaveData
     );
@@ -217,7 +208,7 @@ function showModal({
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if (savedWorkspace.id !== metaDataSelector(currentState).savedObjectId) {
+        if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {
           deps.changeUrl(getEditPath(savedWorkspace));
         }
       }

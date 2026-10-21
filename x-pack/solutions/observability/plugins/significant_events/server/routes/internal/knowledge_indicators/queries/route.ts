@@ -24,10 +24,7 @@ import {
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { deriveQueryType } from '@kbn/streams-schema';
-import {
-  MAX_EXISTING_QUERIES_FOR_CONTEXT,
-  resolveNightshiftModelForRequest,
-} from '@kbn/nightshift-ai';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { installKIQueryGenerationAgent } from '../../../../agent_builder/agents/ki_query_generation';
@@ -332,6 +329,8 @@ const bulkDeleteQueriesRoute = createServerRoute({
           eventSearchClient: await scopedClients.getEventSearchClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
+          alertEventsClient: await scopedClients.getAlertEventsClient(),
+          emitTrigger: scopedClients.emitTrigger,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -627,12 +626,6 @@ const generateQueriesRoute = createServerRoute({
             'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
           ),
         runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
-        maxExistingQueriesForContext: z
-          .number()
-          .int()
-          .min(0)
-          .max(MAX_EXISTING_QUERIES_FOR_CONTEXT)
-          .default(MAX_EXISTING_QUERIES_FOR_CONTEXT),
       })
       .nullish(),
   }),
@@ -663,11 +656,7 @@ const generateQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const { sourceId } = params.path;
-    const {
-      connectorId,
-      runId,
-      maxExistingQueriesForContext = MAX_EXISTING_QUERIES_FOR_CONTEXT,
-    } = params.body ?? {};
+    const { connectorId, runId } = params.body ?? {};
     const resolvedRunId = runId?.trim() || uuidv4();
 
     if (!server.agentBuilder) {
@@ -692,7 +681,6 @@ const generateQueriesRoute = createServerRoute({
         source,
         connectorId,
         runId: resolvedRunId,
-        maxExistingQueriesForContext,
       },
       {
         kiClient,

@@ -27,26 +27,6 @@ describe('buildAssumableBy', () => {
     ]);
   });
 
-  it('appends platform service accounts after the project entry', () => {
-    expect(
-      buildAssumableBy({
-        organizationId: 'organization-id',
-        projectId: 'project-id',
-        projectType: 'observability',
-        platformServiceAccountIds: ['relay-service', 'sandbox-api'],
-      })
-    ).toEqual([
-      {
-        type: 'project-service-account',
-        organization_id: 'organization-id',
-        project_type: 'observability',
-        project_id: 'project-id',
-      },
-      { type: 'platform-service-account', service_account_id: 'relay-service' },
-      { type: 'platform-service-account', service_account_id: 'sandbox-api' },
-    ]);
-  });
-
   it.each<UiamProjectType>(['elasticsearch', 'observability', 'security', 'vectordb'])(
     'passes through the `%s` project type verbatim',
     (projectType) => {
@@ -56,7 +36,7 @@ describe('buildAssumableBy', () => {
         projectType,
       });
 
-      expect(entry).toMatchObject({ project_type: projectType });
+      expect(entry.project_type).toBe(projectType);
     }
   );
 });

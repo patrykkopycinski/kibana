@@ -8,7 +8,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
-import { ServiceManagedLocations } from '../service_managed_locations';
+import { SyntheticsService } from '../synthetics_service';
 import times from 'lodash/times';
 import type { MonitorFields, SyntheticsMonitorWithId } from '../../../common/runtime_types';
 import { LocationStatus } from '../../../common/runtime_types';
@@ -62,13 +62,12 @@ describe('SyntheticsMonitorClient', () => {
     encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as SyntheticsServerSetup;
 
-  const serviceManagedLocations = new ServiceManagedLocations(serverMock);
+  const syntheticsService = new SyntheticsService(serverMock);
 
-  serviceManagedLocations.addMonitors = jest.fn();
-  serviceManagedLocations.editMonitors = jest.fn();
-  serviceManagedLocations.deleteMonitors = jest.fn();
-  // the clients created below share this default; individual tests override it per instance
-  SyntheticsMonitorClient.prototype.getMaintenanceWindows = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
+  syntheticsService.editConfig = jest.fn();
+  syntheticsService.deleteConfigs = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
 
   const locations = times(3).map((n) => {
     return {
@@ -124,21 +123,21 @@ describe('SyntheticsMonitorClient', () => {
     locations[1].isServiceManaged = false;
 
     const id = 'test-id-1';
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.createPackagePolicies = jest.fn();
 
     await client.addMonitors([{ monitor, id }], privateLocations, 'test-space');
 
-    expect(serviceManagedLocations.addMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.addConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('uses supplied maintenance windows instead of fetching them again', async () => {
     const id = 'test-id-1';
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.createPackagePolicies = jest.fn();
     const maintenanceWindows: [] = [];
-    const getMaintenanceWindows = client.getMaintenanceWindows as jest.Mock;
+    const getMaintenanceWindows = syntheticsService.getMaintenanceWindows as jest.Mock;
     getMaintenanceWindows.mockClear();
 
     await client.addMonitors([{ monitor, id }], privateLocations, 'test-space', maintenanceWindows);
@@ -147,7 +146,7 @@ describe('SyntheticsMonitorClient', () => {
   });
 
   it('creates package policies only for the given private location', async () => {
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.createPackagePolicies = jest
       .fn()
       .mockResolvedValue({ created: [], failed: [] });
@@ -175,7 +174,7 @@ describe('SyntheticsMonitorClient', () => {
     locations[1].isServiceManaged = false;
 
     const id = 'test-id-1';
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({
       failedUpdates: [],
     });
@@ -192,7 +191,7 @@ describe('SyntheticsMonitorClient', () => {
       'test-space'
     );
 
-    expect(serviceManagedLocations.editMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
     expect(result.failedPolicyUpdates).toEqual([]);
   });
@@ -201,8 +200,8 @@ describe('SyntheticsMonitorClient', () => {
     locations[1].isServiceManaged = false;
 
     const id = 'test-id-1';
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
-    serviceManagedLocations.editMonitors = jest.fn();
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    syntheticsService.editConfig = jest.fn();
     client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({
       failedUpdates: [],
     });
@@ -223,8 +222,8 @@ describe('SyntheticsMonitorClient', () => {
       'test-space'
     );
 
-    expect(serviceManagedLocations.editMonitors).toHaveBeenCalledTimes(1);
-    expect(serviceManagedLocations.editMonitors).toHaveBeenCalledWith(
+    expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith(
       [
         {
           monitor,
@@ -239,9 +238,9 @@ describe('SyntheticsMonitorClient', () => {
       true,
       undefined
     );
-    expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     // only the public location that was removed from the monitor is deleted at the service
-    expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledWith([
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledWith([
       expect.objectContaining({
         spaceId: 'test-space',
         monitor: expect.objectContaining({ locations: [locations[0]] }),
@@ -253,14 +252,14 @@ describe('SyntheticsMonitorClient', () => {
   it('should delete a monitor', async () => {
     locations[1].isServiceManaged = false;
 
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.deleteMonitors = jest.fn();
-    serviceManagedLocations.deleteMonitors = jest.fn();
+    syntheticsService.deleteConfigs = jest.fn();
 
     await client.deleteMonitors([monitor as unknown as SyntheticsMonitorWithId], 'test-space');
 
-    expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledTimes(1);
-    expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledWith([
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledWith([
       {
         spaceId: 'test-space',
         monitor,
@@ -293,14 +292,14 @@ describe('SyntheticsMonitorClient', () => {
       },
     ];
 
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.createPackagePolicies = jest.fn();
-    client.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+    syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
 
     await client.addMonitors([{ monitor, id }], privateLocations, spaceId);
 
     // Verify maintenance windows were fetched for the correct space
-    expect(client.getMaintenanceWindows).toHaveBeenCalledWith(spaceId);
+    expect(syntheticsService.getMaintenanceWindows).toHaveBeenCalledWith(spaceId);
 
     // Verify package policies were created with maintenance windows
     expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledWith(
@@ -332,9 +331,9 @@ describe('SyntheticsMonitorClient', () => {
       },
     ];
 
-    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
-    client.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+    syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
 
     await client.editMonitors(
       [
@@ -349,7 +348,7 @@ describe('SyntheticsMonitorClient', () => {
     );
 
     // Verify maintenance windows were fetched for the correct space
-    expect(client.getMaintenanceWindows).toHaveBeenCalledWith(spaceId);
+    expect(syntheticsService.getMaintenanceWindows).toHaveBeenCalledWith(spaceId);
 
     // Verify monitors were edited with maintenance windows
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledWith(
@@ -367,11 +366,11 @@ describe('SyntheticsMonitorClient', () => {
   });
 
   describe('testNowConfigs', () => {
-    const testNow = (createPackagePolicies: jest.Mock, runMonitorOnce: jest.Mock) => {
-      const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    const testNow = (createPackagePolicies: jest.Mock, runOnceConfigs: jest.Mock) => {
+      const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
       client.privateLocationAPI.createPackagePolicies = createPackagePolicies;
-      serviceManagedLocations.runMonitorOnce = runMonitorOnce;
-      client.getSyntheticsParams = jest.fn().mockResolvedValue({});
+      syntheticsService.runOnceConfigs = runOnceConfigs;
+      syntheticsService.getSyntheticsParams = jest.fn().mockResolvedValue({});
       jest.spyOn(client as any, 'formatConfigWithParams').mockResolvedValue({
         formattedConfig: { ...monitor, locations: [{ ...privateLocations[0] }] },
         params: {},

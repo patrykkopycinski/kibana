@@ -12,6 +12,4 @@ export {
   toNamespaceSelector,
   isApiWildcardSelector,
   matchesApiSelector,
-  matchesAnyApiSelector,
-  type ApiReference,
 } from './api_selectors';

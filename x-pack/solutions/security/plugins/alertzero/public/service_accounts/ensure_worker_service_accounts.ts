@@ -10,9 +10,9 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
-  WORKER_SERVICE_ACCOUNT_NAMES,
+  WORKER_ROLE_DEFINITIONS,
   buildSecurityRoleUrl,
-  getWorkerRoleName,
+  type WorkerRoleDefinition,
 } from '@kbn/alertzero-common';
 import * as i18n from './translations';
 
@@ -30,23 +30,13 @@ interface ListServiceAccountsResponse {
   nextPage?: string;
 }
 
-export interface EnsureWorkerServiceAccountsOptions {
-  isServerless: boolean;
-}
-
-interface RoleResponse {
-  metadata?: { _reserved?: unknown };
-}
-
 export type WorkerServiceAccountResult =
   | { ok: true; serviceAccountId: string }
   | { ok: false; error: string };
 
 const LIST_PAGE_SIZE = 100;
 
-const hasStatus = (error: unknown, status: number) =>
-  isHttpFetchError(error) && error.response?.status === status;
-const isConflict = (error: unknown) => hasStatus(error, 409);
+const isConflict = (error: unknown) => isHttpFetchError(error) && error.response?.status === 409;
 
 const toMessage = (error: unknown): string => {
   const body = isHttpFetchError(error)
@@ -80,52 +70,37 @@ const toResult = (account: ServiceAccountEntry): WorkerServiceAccountResult =>
     ? { ok: true, serviceAccountId: account.id }
     : { ok: false, error: i18n.accountUnusable(account.name) };
 
-/** Returns the name of the worker's built-in role, or throws if this deployment lacks it. */
-type FindRole = (accountName: string) => Promise<string>;
-
-/**
- * The roles ship built in: as Elasticsearch reserved roles on stateful and as predefined roles on
- * Serverless. Each is read by name, which on Serverless also finds roles hidden from the listing.
- */
-const findBuiltInRole =
-  (http: HttpStart, isServerless: boolean): FindRole =>
-  async (accountName) => {
-    const roleName = getWorkerRoleName(accountName, { isServerless });
-    const missing = () =>
-      new Error(
-        isServerless ? i18n.predefinedRoleMissing(roleName) : i18n.reservedRoleMissing(roleName)
-      );
-    let role: RoleResponse;
-    try {
-      role = await http.get<RoleResponse>(buildSecurityRoleUrl(roleName), {
-        version: SECURITY_ROLE_API_VERSION,
-      });
-    } catch (error) {
-      throw hasStatus(error, 404) ? missing() : error;
-    }
-    if (role.metadata?._reserved !== true) throw missing();
-    return roleName;
-  };
+const ensureRole = async (http: HttpStart, { name, role }: WorkerRoleDefinition) => {
+  try {
+    await http.put(buildSecurityRoleUrl(name), {
+      version: SECURITY_ROLE_API_VERSION,
+      query: { createOnly: true },
+      body: JSON.stringify(role),
+    });
+  } catch (error) {
+    // The role already exists. It is reused as is and never overwritten.
+    if (!isConflict(error)) throw error;
+  }
+};
 
 const ensureOne = async (
   http: HttpStart,
   serviceAccounts: CoreServiceAccounts,
-  findRole: FindRole,
   accounts: ServiceAccountEntry[],
   workerId: string
 ): Promise<WorkerServiceAccountResult> => {
-  const accountName = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
-  if (!accountName) return { ok: false, error: i18n.NO_PREBUILT_ROLE };
+  const definition = WORKER_ROLE_DEFINITIONS[workerId];
+  if (!definition) return { ok: false, error: i18n.NO_PREBUILT_ROLE };
 
-  const existing = findByName(accounts, accountName);
+  const existing = findByName(accounts, definition.name);
   if (existing) return toResult(existing);
 
   try {
-    const roleName = await findRole(accountName);
+    await ensureRole(http, definition);
     const created = await serviceAccounts.create({
-      name: accountName,
-      description: i18n.accountDescription(roleName),
-      roles: [roleName],
+      name: definition.name,
+      description: i18n.accountDescription(definition.name),
+      roles: [definition.name],
     });
     return { ok: true, serviceAccountId: created.id };
   } catch (error) {
@@ -134,7 +109,7 @@ const ensureOne = async (
     // other failure, so callers always get a result for this worker.
     return listAccounts(http).then(
       (current): WorkerServiceAccountResult => {
-        const concurrent = findByName(current, accountName);
+        const concurrent = findByName(current, definition.name);
         return concurrent ? toResult(concurrent) : { ok: false, error: toMessage(error) };
       },
       (listError): WorkerServiceAccountResult => ({ ok: false, error: toMessage(listError) })
@@ -143,15 +118,13 @@ const ensureOne = async (
 };
 
 /**
- * Finds or creates each worker's service account with the current user's privileges, giving it the
- * worker's built-in role. A worker whose built-in role is missing fails on its own. Existing
- * accounts are reused, never changed.
+ * Finds or creates each worker's prebuilt role and service account with the current user's
+ * privileges. Existing roles and accounts are reused, never overwritten.
  */
 export const ensureWorkerServiceAccounts = async (
   http: HttpStart,
   serviceAccounts: CoreServiceAccounts | undefined,
-  workerIds: readonly string[],
-  { isServerless }: EnsureWorkerServiceAccountsOptions
+  workerIds: readonly string[]
 ): Promise<Map<string, WorkerServiceAccountResult>> => {
   const failAll = (error: string) =>
     new Map(
@@ -168,12 +141,11 @@ export const ensureWorkerServiceAccounts = async (
     return failAll(toMessage(error));
   }
 
-  const findRole = findBuiltInRole(http, isServerless);
   const results = await Promise.all(
     workerIds.map(
       async (workerId): Promise<[string, WorkerServiceAccountResult]> => [
         workerId,
-        await ensureOne(http, serviceAccounts, findRole, accounts, workerId),
+        await ensureOne(http, serviceAccounts, accounts, workerId),
       ]
     )
   );

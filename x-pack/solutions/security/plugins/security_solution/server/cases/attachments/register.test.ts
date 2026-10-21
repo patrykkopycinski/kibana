@@ -127,7 +127,6 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       schema: AttackAttachmentPayloadSchema,
-      workflow: { validateTargets: expect.any(Function) },
     });
   });
 

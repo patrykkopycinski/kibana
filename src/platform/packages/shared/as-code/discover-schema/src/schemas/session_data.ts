@@ -49,8 +49,7 @@ const discoverSessionTabPresentationSchema = z
         'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
     }),
     refresh_interval: refreshIntervalSchema.optional().meta({
-      description:
-        'The refresh interval of the tab. Applied only when `time_range` is set. When omitted, Discover uses the global refresh interval.',
+      description: 'The refresh interval of the tab. Applied only when `time_range` is set.',
     }),
     vis_context: visContextSchema.optional(),
     control_panels: discoverSessionApiControlPanelsSchema.optional(),
@@ -149,7 +148,7 @@ export const discoverSessionApiDataSchema = z
       )
       .meta({
         description:
-          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID, which other saved objects and links can reference.',
+          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
       }),
   })
   .strict()

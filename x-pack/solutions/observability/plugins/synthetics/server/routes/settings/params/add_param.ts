@@ -45,7 +45,7 @@ export const ParamsObjectSchema = z
       .optional()
       .describe('Specify whether the parameter should be shared across spaces.'),
   })
-  .meta({ id: 'parameterRequest', title: 'Single parameter' });
+  .meta({ id: 'parameterRequest' });
 
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams | SyntheticsParams[]
@@ -63,13 +63,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: z
-        .union([
-          ParamsObjectSchema,
-          z
-            .array(ParamsObjectSchema)
-            .max(MAX_PARAM_BULK_SIZE)
-            .meta({ title: 'Multiple parameters' }),
-        ])
+        .union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)])
         .describe(
           'The request body can contain either a single parameter object or an array of parameter objects.'
         ),

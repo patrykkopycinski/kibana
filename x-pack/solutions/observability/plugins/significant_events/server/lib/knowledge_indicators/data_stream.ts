@@ -9,7 +9,8 @@ import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { Condition } from '@kbn/streamlang';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import type { QueryFeature, QueryType, SignificantEventType } from '@kbn/significant-events-schema';
+import type { QueryType } from '@kbn/significant-events-schema';
+import type { QueryFeature } from '@kbn/significant-events-schema';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY, type KnowledgeIndicatorType } from './fields';
 
 export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
@@ -58,7 +59,6 @@ export const knowledgeIndicatorsMappings = {
       properties: {
         esql: mappings.matchOnlyText(),
         query_type: mappings.keyword(),
-        category: mappings.keyword(),
         severity_score: mappings.long(),
         rule_backed: mappings.boolean(),
         rule_id: mappings.keyword(),
@@ -93,7 +93,6 @@ export interface StoredFeature {
 export interface StoredQuery {
   esql: string;
   query_type: QueryType;
-  category?: SignificantEventType;
   rule_backed: boolean;
   rule_id: string;
   severity_score?: number;
@@ -166,7 +165,7 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  version: 4,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

@@ -107,7 +107,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Daily Report - Active Usage',
-    trigger: { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+    trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
     completions: [{ action: 'post_to_slack', targetMode: 'self', destination: '@emily.clarke' }],
     tags: ['reporting', 'leadership'],
     author: 'Emily Clarke',
@@ -121,7 +121,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Product usage by channel and customers',
-    trigger: { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+    trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
     tags: ['reporting', 'product'],
     author: 'Daniel Hughes',
     enabled: false,
@@ -274,13 +274,7 @@ run(
             tags: automation.tags,
             isEnabled: enabled,
             trigger: { rows: [automation.trigger] },
-            execution:
-              automation.trigger.kind === 'schedule'
-                ? {
-                    promptTemplate:
-                      'Review the last 24 hours of telemetry and summarize errors, latency changes and affected services.',
-                  }
-                : {},
+            execution: {},
             completions: automation.completions ?? [],
             runtime: { dailyDispatchLimit: limit },
           },

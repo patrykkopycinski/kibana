@@ -12,7 +12,7 @@ import type {
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { computeEventFacts, shouldSkipAsNoOp } from './event_facts';
-import type { EventsWriteInput, ResolvedWriteCandidate } from './types';
+import type { EventsWriteInput, SnapshotCandidate } from './types';
 
 const TS_EARLIER = '2026-07-20T07:00:00.000Z';
 const TS_NOW = '2026-07-20T08:00:00.000Z';
@@ -58,17 +58,14 @@ const makeStored = (
 
 const makeCandidate = (
   signals: SignalEntry[],
-  { status = 'active', ...overrides }: Partial<EventsWriteInput> = {},
-  stored?: SignificantEvent
-): ResolvedWriteCandidate => ({
+  overrides: Partial<EventsWriteInput> = {}
+): SnapshotCandidate => ({
   mode: 'snapshot',
   index: 0,
   eventId: 'checkout-stable',
-  status,
-  latest: stored,
-  priorDocs: stored ? [stored] : [],
   input: {
     event_id: 'checkout-stable',
+    status: 'active',
     source_ids: ['logs.checkout'],
     title: 'Checkout latency',
     symptom_hypothesis: 'Checkout requests are delayed.',
@@ -98,11 +95,9 @@ describe('shouldSkipAsNoOp', () => {
     status?: 'active' | 'inactive';
   }) =>
     shouldSkipAsNoOp({
-      candidate: makeCandidate(
-        submitted,
-        { status },
-        makeStored(stored, { severity: storedSeverity })
-      ),
+      latestEvent: makeStored(stored, { severity: storedSeverity }),
+      candidate: makeCandidate(submitted, { status }),
+      priorDocs: [],
       severity,
     });
 
@@ -133,19 +128,15 @@ describe('shouldSkipAsNoOp', () => {
     ).toBe(false);
   });
 
-  it('does not skip when a stored rule changes verdict, even if status and severity hold', () => {
+  it('never skips when there is no stored version', () => {
     expect(
-      skip({
-        stored: [makeSignal({ verdict: 'confirms' })],
-        submitted: [makeSignal({ verdict: 'refutes' })],
+      shouldSkipAsNoOp({
+        latestEvent: undefined,
+        candidate: makeCandidate([makeSignal()]),
+        priorDocs: [],
+        severity: 'high',
       })
     ).toBe(false);
-  });
-
-  it('never skips when there is no stored version', () => {
-    expect(shouldSkipAsNoOp({ candidate: makeCandidate([makeSignal()]), severity: 'high' })).toBe(
-      false
-    );
   });
 });
 
@@ -161,9 +152,13 @@ describe('computeEventFacts', () => {
     stored?: SignificantEvent;
     source?: 'discovery';
   }) => {
+    const candidate = makeCandidate(signals, candidateOverrides);
+
     return computeEventFacts({
-      candidate: makeCandidate(signals, candidateOverrides, stored),
+      candidate,
       timestamp: TS_NOW,
+      latestByEventId: new Map(stored ? [[candidate.eventId, stored]] : []),
+      priorDocsByEventId: new Map(stored ? [[candidate.eventId, [stored]]] : []),
       source,
     });
   };

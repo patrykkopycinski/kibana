@@ -18,11 +18,6 @@ import {
   validateKafkaOAuth2ClientCertificateKeySecret,
   validateKafkaOAuth2ClientId,
   validateKafkaOAuth2ClientSecretSecret,
-  validateKafkaKerberosConfigPath,
-  validateKafkaKerberosKeytab,
-  validateKafkaKerberosPassword,
-  validateKafkaKerberosRealm,
-  validateKafkaKerberosUsername,
   validateKafkaOAuth2EndpointParams,
   validateKafkaOAuth2Seconds,
   validateKafkaOAuth2TokenUrl,
@@ -584,24 +579,6 @@ describe('Output form validation', () => {
       it('should reject something that is not a url', () => {
         expect(validateKafkaOAuth2TokenUrl('idp.example.com/token')).toEqual(['Invalid URL']);
         expect(validateKafkaOAuth2TokenUrl('not a url')).toEqual(['Invalid URL']);
-      });
-    });
-
-    describe('Kerberos validators', () => {
-      it.each([
-        [validateKafkaKerberosConfigPath, 'Kerberos configuration file is required'],
-        [validateKafkaKerberosRealm, 'Realm is required'],
-        [validateKafkaKerberosKeytab, 'Keytab file is required'],
-        [validateKafkaKerberosUsername, 'Username is required'],
-        [validateKafkaKerberosPassword, 'Password is required'],
-      ])('should require a value', (validate, message) => {
-        expect(validate('')).toEqual([message]);
-        expect(validate('value')).toBeUndefined();
-      });
-
-      it('should not accept a value that is only white space, except for the password', () => {
-        expect(validateKafkaKerberosRealm('  ')).toHaveLength(1);
-        expect(validateKafkaKerberosPassword('  ')).toBeUndefined();
       });
     });
 

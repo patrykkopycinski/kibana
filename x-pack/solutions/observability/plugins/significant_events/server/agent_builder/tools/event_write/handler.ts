@@ -7,21 +7,17 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import { SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
-  createBulkWriteValidationError,
 } from '../bulk_write';
 import type { CompactBulkError } from '../bulk_write';
-import { assessMembers } from '../../../lib/significant_events/events/event_members';
-import {
-  decideLifecycle,
-  StatusChange,
-} from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
-import { mergeSignalsLatestPerRule } from './episode_context';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
@@ -33,7 +29,7 @@ import {
   applyWriteOutcomes,
   buildPendingWrite,
   computeEventFacts,
-  loadHistory,
+  fetchPriorDocsByEventId,
   shouldSkipAsNoOp,
 } from './event_facts';
 import {
@@ -44,8 +40,6 @@ import {
   type EventsWriteInput,
   type EventsWriteNoOpResult,
   type EventsWriteResult,
-  type LoadedCandidate,
-  type ResolvedWriteCandidate,
 } from './types';
 
 export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
@@ -74,13 +68,18 @@ const WRITE_CONCURRENCY = 10;
  */
 export async function eventsWriteBulkHandler({
   eventSearchClient,
+  alertEventsClient,
+  emitTrigger,
   inputs,
   source,
   rejectUnknownEventIds,
   logger,
 }: {
-  /** Reads prior versions and active events from `.rule-events`, and writes each new version. */
+  /** Reads prior versions and active events from `.rule-events`. */
   eventSearchClient: RuleEventsClient;
+  /** Writes each new version to `.rule-events`. */
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
@@ -91,210 +90,87 @@ export async function eventsWriteBulkHandler({
 
   assertValidBulkWriteSize(inputs);
 
+  const candidates = buildWriteCandidates(inputs);
   const results: BulkResults = new Array(inputs.length);
-  const candidates = markDuplicateKeys(buildWriteCandidates(inputs), results);
-  const dedupCandidates = candidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
+  const validCandidates = markDuplicateKeys(candidates, results);
 
+  const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
   const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
-  const toWrite = resolveDedupSkips(candidates, activeEvents, results);
+  const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
-  const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });
-  const decided = decideStatuses({ candidates: known.kept, timestamp });
-
-  // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate,
-  // so the no-op check and the final document agree on the same severity.
-  const eventsFacts = decided.kept.map((candidate) =>
-    computeEventFacts({ candidate, timestamp, source })
-  );
-  const changed = keepChanged({ facts: eventsFacts });
-
-  [known, decided, changed].forEach(({ skipped }) =>
-    skipped.forEach((result) => {
-      results[result.index] = result;
-    })
-  );
-  if (changed.kept.length === 0) {
-    return alignResults(results, 'Event bulk results were not aligned');
-  }
-
-  const pendingWrites = changed.kept.map((fact) => buildPendingWrite({ facts: fact, timestamp }));
-  const errors = await writeVersions({ eventSearchClient, pendingWrites, logger });
-  applyWriteOutcomes({ pendingWrites, errors, results });
-
-  return alignResults(results, 'Event bulk results were not aligned with every input');
-}
-
-/** The items a stage lets through, and the results of the ones it set aside. */
-interface Stage<T> {
-  kept: T[];
-  skipped: EventsWriteBulkResult[];
-}
-
-/** Keeps items whose event exists; with the guard on, an explicit unknown id is set aside as failed. */
-const keepKnownEvents = ({
-  candidates,
-  enabled,
-}: {
-  candidates: LoadedCandidate[];
-  enabled: boolean | undefined;
-}): Stage<LoadedCandidate> => {
-  const stage: Stage<LoadedCandidate> = { kept: [], skipped: [] };
-  candidates.forEach((candidate) => {
-    if (!enabled || candidate.mode !== 'snapshot' || candidate.latest !== undefined) {
-      stage.kept.push(candidate);
-      return;
-    }
-    stage.skipped.push({
-      index: candidate.index,
-      event_id: candidate.eventId,
-      written: false,
-      reason: 'unknown_event_id',
-      error: {
-        type: 'validation_error',
-        reason: `event_id ${JSON.stringify(
-          candidate.eventId
-        )} does not exist. Do not retry this item in the current run or reuse this id. Leave it unprocessed so the next discovery cycle routes it again from fresh search results.`,
-        status: 404,
-      },
-    });
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId({
+    eventSearchClient,
+    candidates: toWrite,
   });
-  return stage;
-};
 
-/**
- * Keeps the items that have a status to write. An item states one only when its caller owns the
- * decision (`event_create`); otherwise the lifecycle decides from the members' verdicts once this
- * write is merged. When it has nothing to write, a closed event is set aside as unchanged; a new
- * event without a breach is not an event (the tool's schema rejects it), so that throws.
- */
-const decideStatuses = ({
-  candidates,
-  timestamp,
-}: {
-  candidates: LoadedCandidate[];
-  timestamp: string;
-}): Stage<ResolvedWriteCandidate> => {
-  const stage: Stage<ResolvedWriteCandidate> = { kept: [], skipped: [] };
-  candidates.forEach((candidate) => {
-    if (candidate.input.status !== undefined) {
-      stage.kept.push({ ...candidate, status: candidate.input.status });
-      return;
-    }
-
-    const { latest, priorDocs, input } = candidate;
-    // A closed series is judged on what this write submits: only an incoming breach reopens it,
-    // never a stale confirmation from its closed episode.
-    const isLive =
-      latest !== undefined &&
-      SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === latest.status);
-    const signals =
-      input.event_id === undefined || !isLive
-        ? input.signals ?? []
-        : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
-    const decision = decideLifecycle({
-      state: { status: latest?.status },
-      change: StatusChange.assessed(assessMembers(signals)),
-    });
-    if (decision.write) {
-      stage.kept.push({ ...candidate, status: decision.status });
-      return;
-    }
-    if (latest === undefined && input.event_id !== undefined) {
-      stage.skipped.push({
+  const knownCandidates = toWrite.filter((candidate) => {
+    if (
+      rejectUnknownEventIds &&
+      candidate.mode === 'snapshot' &&
+      !latestByEventId.has(candidate.eventId)
+    ) {
+      results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
+        status: candidate.input.status,
         written: false,
         reason: 'unknown_event_id',
         error: {
           type: 'validation_error',
           reason: `event_id ${JSON.stringify(
             candidate.eventId
-          )} does not exist, so there is no event to continue. Do not retry this item in the current run.`,
+          )} does not exist. Do not retry this item in the current run or reuse this id. Leave it unprocessed so the next discovery cycle routes it again from fresh search results.`,
           status: 404,
         },
-      });
-      return;
+      };
+      return false;
     }
-    if (latest === undefined) {
-      // Invariant: the tool schema rejects this input, so only an internal caller can reach it.
-      throw createBulkWriteValidationError(
-        `events_write: item ${candidate.index} would open a new event without a breaching member.`
-      );
-    }
-
-    stage.skipped.push({
-      index: candidate.index,
-      event_id: candidate.eventId,
-      status: latest.status,
-      written: false,
-      skipped: true,
-      reason: 'unchanged_outcome',
-    });
+    return true;
   });
-  return stage;
-};
-
-/** Keeps the continuations that would change something; the rest are set aside as unchanged. */
-const keepChanged = ({
-  facts,
-}: {
-  facts: Array<ReturnType<typeof computeEventFacts>>;
-}): Stage<ReturnType<typeof computeEventFacts>> => {
-  const stage: Stage<ReturnType<typeof computeEventFacts>> = { kept: [], skipped: [] };
-  facts.forEach((fact) => {
-    const { candidate } = fact;
+  // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate
+  // here, so the no-op check below and the final document agree on the same severity.
+  const factsByCandidate = knownCandidates.map((candidate) =>
+    computeEventFacts({ candidate, timestamp, latestByEventId, priorDocsByEventId, source })
+  );
+  const remaining = factsByCandidate.filter((facts) => {
+    const { candidate } = facts;
     if (
-      candidate.mode !== 'snapshot' ||
-      !shouldSkipAsNoOp({ candidate, severity: fact.severity })
+      candidate.mode === 'snapshot' &&
+      shouldSkipAsNoOp({
+        latestEvent: latestByEventId.get(candidate.eventId),
+        candidate,
+        priorDocs: priorDocsByEventId.get(candidate.eventId) ?? [],
+        severity: facts.severity,
+      })
     ) {
-      stage.kept.push(fact);
-      return;
+      results[candidate.index] = {
+        index: candidate.index,
+        event_id: candidate.eventId,
+        status: candidate.input.status,
+        written: false,
+        skipped: true,
+        reason: 'unchanged_outcome',
+        severity: latestByEventId.get(candidate.eventId)?.severity,
+      };
+      return false;
     }
-    stage.skipped.push({
-      index: candidate.index,
-      event_id: candidate.eventId,
-      status: candidate.status,
-      written: false,
-      skipped: true,
-      reason: 'unchanged_outcome',
-      severity: candidate.latest?.severity,
-    });
+    return true;
   });
-  return stage;
-};
 
-/** Writes each document (create for a new event, guarded update otherwise); one error slot per write. */
-const writeVersions = ({
-  eventSearchClient,
-  pendingWrites,
-  logger,
-}: {
-  eventSearchClient: RuleEventsClient;
-  pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
-  logger?: Logger;
-}): Promise<Array<CompactBulkError | undefined>> => {
+  if (remaining.length === 0) {
+    return alignResults(results, 'Event bulk results were not aligned');
+  }
+
+  const pendingToWrite = remaining.map((facts) => buildPendingWrite({ facts, timestamp }));
+
+  // `createAlertEvent` waits for a refresh, so the next discovery read sees the new version.
   const writeLimit = pLimit(WRITE_CONCURRENCY);
-  return Promise.all(
-    pendingWrites.map(({ candidate, document }) =>
+  const errors = await Promise.all(
+    pendingToWrite.map(({ document }) =>
       writeLimit(async (): Promise<CompactBulkError | undefined> => {
         try {
-          if (candidate.latest === undefined) {
-            await eventSearchClient.createEvent({ event: document });
-            return undefined;
-          }
-          const written = await eventSearchClient.updateEvent({
-            event: document,
-            prior: candidate.latest,
-          });
-          return written.updated
-            ? undefined
-            : {
-                type: 'superseded_write',
-                reason: `event_id ${JSON.stringify(
-                  candidate.eventId
-                )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
-              };
+          await alertEventsClient.createAlertEvent(toRuleEvent(document));
+          return undefined;
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
           logger?.error(`Failed to write to .rule-events: ${reason}`);
@@ -303,7 +179,24 @@ const writeVersions = ({
       })
     )
   );
-};
+  applyWriteOutcomes({ pendingWrites: pendingToWrite, errors, results });
+
+  // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
+  // version -> created; a prior version with a different status (e.g. triage re-open) -> status
+  // changed. Emission is best-effort and guarded, so it never affects the returned results.
+  pendingToWrite.forEach(({ candidate, document }, responseIndex) => {
+    if (errors[responseIndex]) {
+      return;
+    }
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: document,
+      priorSignificantEvent: latestByEventId.get(candidate.eventId),
+    });
+  });
+
+  return alignResults(results, 'Event bulk results were not aligned with every input');
+}
 
 /**
  * Single-item adapter for callers that require thrown item errors (e.g. `event_create`).
@@ -313,14 +206,20 @@ const writeVersions = ({
 export async function eventsWriteHandler({
   eventSearchClient,
   input,
+  alertEventsClient,
+  emitTrigger,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
   input: EventsWriteInput;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   logger?: Logger;
 }): Promise<EventsWriteResult | EventsWriteNoOpResult> {
   const [result] = await eventsWriteBulkHandler({
     eventSearchClient,
+    alertEventsClient,
+    emitTrigger,
     inputs: [input],
     logger,
   });

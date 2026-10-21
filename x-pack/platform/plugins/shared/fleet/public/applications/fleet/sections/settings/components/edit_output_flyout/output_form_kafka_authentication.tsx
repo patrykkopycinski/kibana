@@ -36,7 +36,6 @@ import {
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
 import { OutputFormKafkaOAuth2 } from './output_form_kafka_oauth2';
-import { OutputFormKafkaKerberos } from './output_form_kafka_kerberos';
 
 const kafkaSaslOptions = [
   {
@@ -74,12 +73,6 @@ const kafkaAuthenticationsOptions = [
   },
 ];
 
-const kafkaKerberosAuthenticationOption = {
-  id: kafkaAuthType.Kerberos,
-  label: 'Kerberos',
-  'data-test-subj': 'kafkaAuthenticationKerberosRadioButton',
-};
-
 const kafkaOAuth2AuthenticationOption = {
   id: kafkaAuthType.OAuth2,
   label: 'OAuth2',
@@ -92,7 +85,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
-  const { isOAuth2Enabled, isKerberosEnabled } = useKafkaAuthMethods();
+  const { isOAuth2Enabled } = useKafkaAuthMethods();
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     kafkaAuthPassword: false,
     kafkaSslKey: false,
@@ -167,34 +160,25 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   // Authentication method that cannot be edited from this form, e.g. set through the API.
   // Saving the output keeps its authentication settings unchanged.
   const renderManagedElsewhereCallout = () => (
-    <>
-      <EuiSpacer size="m" />
-      <KbnInfoCallout
-        title={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereTitle"
-            defaultMessage="This authentication method is configured outside of this form"
-          />
-        }
-        text={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereText"
-            defaultMessage="Its authentication settings are kept as they are when you save the output. Select another method to replace them."
-          />
-        }
-        data-test-subj="settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout"
-      />
-    </>
+    <KbnInfoCallout
+      title={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereTitle"
+          defaultMessage="This authentication method is configured outside of this form"
+        />
+      }
+      text={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereText"
+          defaultMessage="Its authentication settings are kept as they are when you save the output. Select another method to replace them."
+        />
+      }
+      data-test-subj="settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout"
+    />
   );
 
   const renderAuthentication = () => {
     switch (inputs.kafkaAuthMethodInput.value) {
-      case kafkaAuthType.Kerberos:
-        return isKerberosEnabled ? (
-          <OutputFormKafkaKerberos inputs={inputs} />
-        ) : (
-          renderManagedElsewhereCallout()
-        );
       case kafkaAuthType.OAuth2:
         return isOAuth2Enabled ? (
           <OutputFormKafkaOAuth2 inputs={inputs} />
@@ -464,11 +448,11 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             name="kafkaAuthMethod"
             style={{ display: 'flex', gap: 30 }}
             data-test-subj={'settingsOutputsFlyout.kafkaAuthenticationRadioInput'}
-            options={[
-              ...kafkaAuthenticationsOptions,
-              ...(isKerberosEnabled ? [kafkaKerberosAuthenticationOption] : []),
-              ...(isOAuth2Enabled ? [kafkaOAuth2AuthenticationOption] : []),
-            ]}
+            options={
+              isOAuth2Enabled
+                ? [...kafkaAuthenticationsOptions, kafkaOAuth2AuthenticationOption]
+                : kafkaAuthenticationsOptions
+            }
             compressed
             {...inputs.kafkaAuthMethodInput.props}
           />

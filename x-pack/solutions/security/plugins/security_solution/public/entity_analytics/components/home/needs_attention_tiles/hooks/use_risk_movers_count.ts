@@ -13,7 +13,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useTileQueryInputs } from './use_tile_query_inputs';
+import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 import {
@@ -21,7 +21,7 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
-import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 export const useRiskMoversCount = ({
   spaceId,
@@ -38,9 +38,8 @@ export const useRiskMoversCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
-    entityFilterClauses,
     error: indexError,
-  } = useTileQueryInputs(spaceId, entityFilters);
+  } = useResolvedLatestEntitiesIndexName(spaceId);
 
   const isEnabled = !skip && !isIndexLoading && Boolean(resolvedIndex?.indexName);
 
@@ -51,10 +50,10 @@ export const useRiskMoversCount = ({
             spaceId,
             resolvedIndex.indexName,
             timeRange,
-            entityFilterClauses
+            buildEntityFilterClauses(entityFilters)
           )
         : null,
-    [spaceId, resolvedIndex?.indexName, timeRange, entityFilterClauses]
+    [spaceId, resolvedIndex?.indexName, timeRange, entityFilters]
   );
 
   const {
@@ -85,7 +84,7 @@ export const useRiskMoversCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      ...TILE_QUERY_CACHE_OPTIONS,
+      staleTime: 5 * 60_000,
       refetchOnWindowFocus: false,
       retry: 1,
     }
@@ -106,8 +105,6 @@ export const useRiskMoversCount = ({
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
-    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
-    isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
     error: filteredError ?? indexError,
   };

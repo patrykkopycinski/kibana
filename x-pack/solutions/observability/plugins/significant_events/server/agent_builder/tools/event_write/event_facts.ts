@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
-  type Severity,
-  type SignalEntry,
-  type SignificantEvent,
-} from '@kbn/significant-events-schema';
+import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { CompactBulkError } from '../bulk_write';
 import {
@@ -22,37 +17,16 @@ import {
   preserveStableNarrative,
 } from './episode_context';
 import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
-import type {
-  BulkResults,
-  EventsWriteInput,
-  EventsWriteResult,
-  LoadedCandidate,
-  ResolvedWriteCandidate,
-  WriteCandidate,
-} from './types';
-
-const isLiveStatus = (status: SignificantEvent['status'] | undefined): boolean =>
-  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((live) => live === status);
+import type { BulkResults, EventsWriteInput, EventsWriteResult, WriteCandidate } from './types';
 
 interface EventFacts
   extends Pick<SignificantEvent, 'status' | 'severity' | 'signals' | 'confidence'> {
-  candidate: ResolvedWriteCandidate;
+  candidate: WriteCandidate;
   rest: Omit<EventsWriteInput, 'event_id'>;
+  latestEvent: SignificantEvent | undefined;
   episodeContext: ReturnType<typeof mergeEpisodeContext>;
   frozenNarrative: ReturnType<typeof preserveStableNarrative>;
 }
-
-/**
- * For a live event, the versions of its current episode (after its last closed version), so a
- * reopened event does not inherit rule history from the episode it closed. A closed event keeps its
- * full history, since it can only be unchanged against what it already stored.
- */
-const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
-  const latest = history.at(-1);
-  if (!isLiveStatus(latest?.status)) return history;
-  const lastClosedIndex = history.map((version) => !isLiveStatus(version.status)).lastIndexOf(true);
-  return history.slice(lastClosedIndex + 1);
-};
 
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
@@ -61,48 +35,23 @@ const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
  * investigation lock.
  */
 export const shouldSkipAsNoOp = ({
+  latestEvent,
   candidate,
+  priorDocs,
   severity,
 }: {
-  candidate: ResolvedWriteCandidate;
+  latestEvent: SignificantEvent | undefined;
+  candidate: WriteCandidate;
+  priorDocs: SignificantEvent[];
   severity: Severity;
 }): boolean => {
-  const { latest, priorDocs } = candidate;
-  if (latest === undefined) return false;
+  if (latestEvent === undefined) return false;
 
-  const history = episodeHistory([...priorDocs, latest]);
-  const knownRuleUuids = extractRuleUuidsFromEvents(history);
+  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
   return (
-    latest.status === candidate.status &&
-    latest.severity === severity &&
-    !addsRule &&
-    !changesMemberVerdict(history, candidate.input.signals)
-  );
-};
-
-/**
- * True when a submitted detection signal carries a different verdict than the latest one stored
- * for its rule (across the event's versions). A member turning healthy, or breaching again, is
- * evidence the status derives from, so it must be stored even when status and severity do not move.
- */
-const changesMemberVerdict = (
-  priorDocs: SignificantEvent[],
-  submitted: SignalEntry[] | undefined
-): boolean => {
-  const stored = new Map(
-    mergeSignalsLatestPerRule(priorDocs, [], '').flatMap((signal) =>
-      signal.type === 'detection' && signal.metadata?.rule_uuid
-        ? [[signal.metadata.rule_uuid, signal.verdict] as const]
-        : []
-    )
-  );
-  return (submitted ?? []).some(
-    (signal) =>
-      signal.type === 'detection' &&
-      signal.metadata?.rule_uuid !== undefined &&
-      stored.get(signal.metadata.rule_uuid) !== signal.verdict
+    latestEvent.status === candidate.input.status && latestEvent.severity === severity && !addsRule
   );
 };
 
@@ -132,23 +81,33 @@ const decideSeverity = ({
   return proposed;
 };
 
-/** Attaches each continuation's stored lineage to its candidate, so later stages never look it up. */
-export const loadHistory = async ({
+/** Full history for remaining continuation writes (lineage merge). */
+export const fetchPriorDocsByEventId = async ({
   eventSearchClient,
   candidates,
 }: {
   eventSearchClient: RuleEventsClient;
   candidates: WriteCandidate[];
-}): Promise<LoadedCandidate[]> =>
-  Promise.all(
-    candidates.map(async (candidate): Promise<LoadedCandidate> => {
-      if (candidate.input.event_id === undefined) {
-        return { ...candidate, latest: undefined, priorDocs: [] };
-      }
-      const { hits } = await eventSearchClient.findByEventId(candidate.eventId);
-      return { ...candidate, latest: hits.at(-1), priorDocs: hits };
-    })
+}): Promise<{
+  latestByEventId: Map<string, SignificantEvent>;
+  priorDocsByEventId: Map<string, SignificantEvent[]>;
+}> => {
+  const latestByEventId = new Map<string, SignificantEvent>();
+  const priorDocsByEventId = new Map<string, SignificantEvent[]>();
+  await Promise.all(
+    candidates
+      .filter((c) => c.input.event_id !== undefined)
+      .map(async (c) => {
+        const { hits } = await eventSearchClient.findByEventId(c.eventId);
+        priorDocsByEventId.set(c.eventId, hits);
+        const latest = hits.at(-1);
+        if (latest !== undefined) {
+          latestByEventId.set(c.eventId, latest);
+        }
+      })
   );
+  return { latestByEventId, priorDocsByEventId };
+};
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
@@ -159,22 +118,24 @@ export const loadHistory = async ({
 export const computeEventFacts = ({
   candidate,
   timestamp,
+  latestByEventId,
+  priorDocsByEventId,
   source,
 }: {
-  candidate: ResolvedWriteCandidate;
+  candidate: WriteCandidate;
   timestamp: string;
+  latestByEventId: Map<string, SignificantEvent>;
+  priorDocsByEventId: Map<string, SignificantEvent[]>;
   source: EventsWriteSource | undefined;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
-  const { latest, priorDocs } = candidate;
+  const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
+  const latestEvent = latestByEventId.get(candidate.eventId);
   const isContinuation = candidate.input.event_id !== undefined;
 
-  // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
-  const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
-  const signals =
-    isContinuation && !reopens
-      ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
-      : candidate.input.signals ?? [];
+  const signals = isContinuation
+    ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
+    : candidate.input.signals ?? [];
 
   const episodeContext = isContinuation
     ? mergeEpisodeContext(priorDocs, rest, timestamp)
@@ -185,11 +146,12 @@ export const computeEventFacts = ({
         confidence: rest.confidence ?? 0,
       };
 
-  const { status } = candidate;
+  // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
+  const status = candidate.input.status;
 
   const severity = lockSeverityForCompletedInvestigation({
     source,
-    latestEvent: latest,
+    latestEvent,
     proposedSeverity: decideSeverity({ proposed: candidate.input.severity, status, signals }),
     proposedStatus: status,
     proposedSignals: candidate.input.signals,
@@ -199,14 +161,15 @@ export const computeEventFacts = ({
   const frozenNarrative = isContinuation
     ? preserveStableNarrative(
         extractRuleUuids(candidate.input.signals),
-        latest,
-        extractRuleUuidsFromEvents([...priorDocs, latest])
+        latestEvent,
+        extractRuleUuidsFromEvents([...priorDocs, latestEvent])
       )
     : undefined;
 
   return {
     candidate,
     rest,
+    latestEvent,
     signals,
     episodeContext,
     status,
@@ -227,6 +190,7 @@ export const buildPendingWrite = ({
   const {
     candidate,
     rest,
+    latestEvent,
     signals,
     episodeContext,
     status,
@@ -252,7 +216,7 @@ export const buildPendingWrite = ({
         : {}),
       '@timestamp': timestamp,
       event_id: candidate.eventId,
-      investigations: candidate.latest?.investigations,
+      investigations: latestEvent?.investigations,
       signals,
       source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
@@ -264,7 +228,7 @@ export const buildPendingWrite = ({
   };
 };
 
-/** Writes `error ? bulk_error (or superseded) : written` into `results` for each pending write, by index. */
+/** Writes `error ? bulk_error : written` into `results` for each pending write, by index. */
 export const applyWriteOutcomes = ({
   pendingWrites,
   errors,
@@ -282,7 +246,7 @@ export const applyWriteOutcomes = ({
         event_id: candidate.eventId,
         status,
         written: false,
-        reason: error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
+        reason: 'bulk_error',
         error,
       };
       return;

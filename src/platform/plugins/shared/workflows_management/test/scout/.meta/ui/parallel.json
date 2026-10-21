@@ -1,5 +1,5 @@
 {
-  "sha1": "139aa341edc0a9de97a2d184566ccb4299de3059",
+  "sha1": "719479ec218deb10e3eae59d2fe36eca48fc2594",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -385,6 +385,48 @@
       }
     },
     {
+      "id": "35e1b13303eb455-503470e3a1c5be6",
+      "title": "Service account UI with the feature flag disabled omits run_as from settings autocomplete and inserted snippets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "35e1b13303eb455-6d3fd990e830902",
+      "title": "Service account UI with the feature flag disabled keeps a typed run_as ID without resolving names or showing account suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 82,
+        "column": 20
+      }
+    },
+    {
+      "id": "35e1b13303eb455-12e39ee89151417",
+      "title": "Service account UI with the feature flag disabled shows historical raw identity without name badges or directory calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 109,
+        "column": 20
+      }
+    },
+    {
       "id": "a4934baed7bcf96-773061bd6f9afcd",
       "title": "Event autocomplete should be dynamic based on triggers manual trigger: event.* should only suggest spaceId",
       "expectedStatus": "passed",
@@ -677,14 +719,14 @@
     {
       "id": "963f12d1347a0c9-cfea30731e1cb4b",
       "title": "Workflow execution - Step scroll clicking a step in execution tree scrolls YAML editor to that step",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/execution_step_scroll.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 56
       }
     },
@@ -719,112 +761,112 @@
     {
       "id": "9e0bdca793cccc5-32208d4a04dc870",
       "title": "Workflow execution - Parallel step runs static branches concurrently and joins downstream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/parallel_step.spec.ts",
-        "line": 25,
-        "column": 56
+        "line": 29,
+        "column": 58
       }
     },
     {
       "id": "9e0bdca793cccc5-e2957eab786f150",
       "title": "Workflow execution - Parallel step fans out a foreach body once per item and joins downstream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/parallel_step.spec.ts",
-        "line": 44,
-        "column": 18
+        "line": 48,
+        "column": 20
       }
     },
     {
       "id": "20b91fe3119c6c9-4a99ff2edf7a25b",
       "title": "Workflow execution - Test runs should run unsaved workflow as test run with isTestRun: true",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 56
       }
     },
     {
       "id": "20b91fe3119c6c9-65a4054c5ce2fae",
       "title": "Workflow execution - Test runs should show the test execute modal Event tab and trigger events table",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 5
       }
     },
     {
       "id": "20b91fe3119c6c9-296812a7a4fcbda",
       "title": "Workflow execution - Test runs should run saved workflow from editor as test run with isTestRun: true",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 29
       }
     },
     {
       "id": "20b91fe3119c6c9-70c62d6d98f1350",
       "title": "Workflow execution - Test runs should not allow running a disabled workflow, then enable and run it",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 81,
+        "line": 82,
         "column": 16
       }
     },
     {
       "id": "20b91fe3119c6c9-b4376d9720aea17",
       "title": "Workflow execution - Test runs should run individual step with custom context override",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 119,
+        "line": 120,
         "column": 26
       }
     },
     {
       "id": "20b91fe3119c6c9-701cccba24f7844",
       "title": "Workflow execution - Test runs should allow providing \"event\" in manual inputs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 148,
+        "line": 149,
         "column": 26
       }
     },

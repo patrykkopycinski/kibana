@@ -14,7 +14,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useTileQueryInputs } from './use_tile_query_inputs';
+import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import {
@@ -22,7 +22,7 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
-import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -50,9 +50,8 @@ export const useEntitiesWithAnomaliesCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
-    entityFilterClauses,
     error: indexError,
-  } = useTileQueryInputs(spaceId, entityFilters);
+  } = useResolvedLatestEntitiesIndexName(spaceId);
   const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
 
   const isEnabled =
@@ -67,10 +66,10 @@ export const useEntitiesWithAnomaliesCount = ({
     return buildEntitiesWithAnomaliesCountQuery(
       resolvedIndex.indexName,
       timeRange,
-      entityFilterClauses,
+      buildEntityFilterClauses(entityFilters),
       jobIds
     );
-  }, [resolvedIndex?.indexName, timeRange, entityFilterClauses, jobIds]);
+  }, [resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
 
   const {
     data: queryResult,
@@ -97,7 +96,7 @@ export const useEntitiesWithAnomaliesCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      ...TILE_QUERY_CACHE_OPTIONS,
+      staleTime: 5 * 60_000,
       refetchOnWindowFocus: false,
       retry: 1,
     }
@@ -118,9 +117,6 @@ export const useEntitiesWithAnomaliesCount = ({
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
-    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
-    isCountPending:
-      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
   };
 };

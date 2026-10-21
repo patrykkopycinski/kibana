@@ -9,10 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type {
-  SignificantEventsMaintenanceDeletedCounts,
-  SignificantEventsMaintenanceSummary,
-} from '../../../common/maintenance/types';
+import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
 import {
   DEFAULT_MAINTENANCE_STATE,
   isMaintenanceState,
@@ -36,25 +33,12 @@ import {
  */
 export type LoadedMaintenanceState = Omit<
   SignificantEventsMaintenanceStateAttributes,
-  'disabledWorkflows' | 'disabledRules' | 'pausedSettings' | 'lastSummary'
+  'disabledWorkflows' | 'disabledRules' | 'pausedSettings'
 > & {
   disabledWorkflows: MaintenanceWorkflowTarget[];
   disabledRules: MaintenanceRuleTarget[];
   pausedSettings?: PausedFeatureSettings;
-  lastSummary?: SignificantEventsMaintenanceSummary;
 };
-
-/** Maintenance state as handed to the store for writing; the store maps it to SO attributes. */
-export type MaintenanceStateToWrite = Omit<
-  SignificantEventsMaintenanceStateAttributes,
-  'lastSummary'
-> & {
-  lastSummary?: SignificantEventsMaintenanceSummary;
-};
-
-type StoredMaintenanceSummary = NonNullable<
-  SignificantEventsMaintenanceStateAttributes['lastSummary']
->;
 
 /** A rule and the space containing its alerting saved object. */
 export interface MaintenanceRuleTarget {
@@ -74,36 +58,14 @@ export const normalizeState = (raw: string | undefined): SignificantEventsMainte
   // activity is not permanently blocked.
   raw && isMaintenanceState(raw) ? raw : DEFAULT_MAINTENANCE_STATE;
 
-/** Picks the counts reset reports, dropping the stored-only `investigations` count. */
-const toDeletedCounts = ({
-  knowledgeIndicators,
-  storedQueries,
-  rules,
-  dataStreams,
-}: SignificantEventsMaintenanceDeletedCounts): SignificantEventsMaintenanceDeletedCounts => ({
-  knowledgeIndicators,
-  storedQueries,
-  rules,
-  dataStreams,
-});
-
 /**
  * The persisted summary stores `state` as a free-form string (see the saved
  * object); narrow it back to a known state when reading.
  */
 export const normalizeSummary = (
-  raw: StoredMaintenanceSummary | SignificantEventsMaintenanceSummary | undefined
-): SignificantEventsMaintenanceSummary | undefined => {
-  if (!raw) {
-    return undefined;
-  }
-  const { deleted, ...rest } = raw;
-  return {
-    ...rest,
-    state: normalizeState(raw.state),
-    ...(deleted ? { deleted: toDeletedCounts(deleted) } : {}),
-  };
-};
+  raw: SignificantEventsMaintenanceStateAttributes['lastSummary']
+): SignificantEventsMaintenanceSummary | undefined =>
+  raw ? { ...raw, state: normalizeState(raw.state) } : undefined;
 
 /**
  * Executions are cancelled best-effort by `cancelAllActiveWorkflowExecutions`, which returns
@@ -143,29 +105,24 @@ export const buildPausedIntent = ({
 });
 
 /**
- * Maps a summary to its saved-object shape. The failure schema only allows `target` and
- * `error`, and rejects unknown keys, so the in-memory `spaceId` is dropped. Reset no longer
- * touches investigations and `deleted.investigations` is optional since model version 4, but
- * it is still written as 0: nodes on version 3 require it during a rolling upgrade. See
- * `maintenanceDeletedCountsSchemaV4`.
+ * The saved-object schema of a failure only allows `target` and `error`, and rejects unknown
+ * keys, so the in-memory `spaceId` is dropped before the summary is written.
  */
-const toStoredSummary = ({
-  deleted,
-  partialFailures,
-  ...rest
-}: SignificantEventsMaintenanceSummary): StoredMaintenanceSummary => ({
-  ...rest,
-  ...(deleted ? { deleted: { ...toDeletedCounts(deleted), investigations: 0 } } : {}),
-  partialFailures: partialFailures.map(({ target, error }) => ({ target, error })),
-});
-
-const toStoredAttributes = ({
-  lastSummary,
-  ...rest
-}: MaintenanceStateToWrite): SignificantEventsMaintenanceStateAttributes => ({
-  ...rest,
-  ...(lastSummary ? { lastSummary: toStoredSummary(lastSummary) } : {}),
-});
+const withPersistableFailures = (
+  attributes: SignificantEventsMaintenanceStateAttributes
+): SignificantEventsMaintenanceStateAttributes =>
+  attributes.lastSummary
+    ? {
+        ...attributes,
+        lastSummary: {
+          ...attributes.lastSummary,
+          partialFailures: attributes.lastSummary.partialFailures.map(({ target, error }) => ({
+            target,
+            error,
+          })),
+        },
+      }
+    : attributes;
 
 const isNotFound = (error: unknown): boolean =>
   error instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(error);
@@ -233,7 +190,10 @@ export interface IMaintenanceStateStore {
     updatedBy: string;
   }): Promise<LoadedMaintenanceState | undefined>;
   /** Overwrites a space's document. */
-  writeState(spaceId: SpaceId, attributes: MaintenanceStateToWrite): Promise<void>;
+  writeState(
+    spaceId: SpaceId,
+    attributes: SignificantEventsMaintenanceStateAttributes
+  ): Promise<void>;
   /** Removes a space's document, which reads as enabled afterwards. A missing document is fine. */
   deleteState(spaceId: SpaceId): Promise<void>;
 }
@@ -270,7 +230,6 @@ export const createMaintenanceStateStore = (
       return {
         attributes: {
           ...so.attributes,
-          lastSummary: normalizeSummary(so.attributes.lastSummary),
           disabledWorkflows: brandDisabledWorkflows(spaceId, so.attributes.disabledWorkflows),
           disabledRules: brandOwnTargets(spaceId, so.attributes.disabledRules),
           pausedSettings: normalizePausedSettings(spaceId, so.attributes.pausedSettings),
@@ -309,13 +268,13 @@ export const createMaintenanceStateStore = (
         await getSoClient(spaceId).update<SignificantEventsMaintenanceStateAttributes>(
           SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
           SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
-          toStoredAttributes(claimed),
+          claimed,
           { version: current.version }
         );
       } else {
         await getSoClient(spaceId).create<SignificantEventsMaintenanceStateAttributes>(
           SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-          toStoredAttributes(claimed),
+          claimed,
           { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: false }
         );
       }
@@ -330,11 +289,11 @@ export const createMaintenanceStateStore = (
 
   const writeState = async (
     spaceId: SpaceId,
-    attributes: MaintenanceStateToWrite
+    attributes: SignificantEventsMaintenanceStateAttributes
   ): Promise<void> => {
     await getSoClient(spaceId).create<SignificantEventsMaintenanceStateAttributes>(
       SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      toStoredAttributes(attributes),
+      withPersistableFailures(attributes),
       { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
     );
   };

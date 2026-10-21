@@ -25,7 +25,6 @@ const makeLink = (
     ruleBacked?: boolean;
     expiresAt?: string;
     severity_score?: number;
-    category?: StreamQuery['category'];
   } = {}
 ): QueryLink => ({
   query: {
@@ -34,7 +33,6 @@ const makeLink = (
     title: 'Test query',
     description: 'desc',
     esql: { query: overrides.esql ?? 'FROM logs | WHERE body.text:"error"' },
-    category: overrides.category,
     severity_score: overrides.severity_score ?? 60,
   },
   source_id: 'logs.test',
@@ -50,7 +48,6 @@ const makeGeneratedQuery = (
   title: 'New query',
   description: 'desc',
   esql: { query: 'FROM logs | WHERE body.text:"timeout"' },
-  category: 'error',
   severity_score: 50,
   features: [{ id: 'test-feature', run_id: 'test-run' }],
   ...overrides,
@@ -98,11 +95,7 @@ describe('persistQueries', () => {
     expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
       expect.objectContaining({
         index: expect.objectContaining({
-          query: expect.objectContaining({
-            id: 'generated-uuid',
-            category: 'error',
-            rule_backed: false,
-          }),
+          query: expect.objectContaining({ id: 'generated-uuid', rule_backed: false }),
         }),
       }),
     ]);
@@ -167,12 +160,7 @@ describe('persistQueries', () => {
 
   it('rewrites a stored query onto the source view when the duplicate still reads another index', async () => {
     const storedEsql = 'FROM logs.test | WHERE body.text:"error"';
-    const existing = makeLink({
-      id: 'q1',
-      esql: storedEsql,
-      ruleBacked: false,
-      category: 'security',
-    });
+    const existing = makeLink({ id: 'q1', esql: storedEsql, ruleBacked: false });
     const { kiClient } = createMocks([existing]);
 
     const duplicate = makeGeneratedQuery({
@@ -188,16 +176,12 @@ describe('persistQueries', () => {
     const rewritten = replaceFromSources(storedEsql, [VIEW_NAME]);
     expect(skippedQueries).toHaveLength(0);
     expect(persistedQueries).toEqual([
-      expect.objectContaining({ id: 'q1', category: 'security', esql: { query: rewritten } }),
+      expect.objectContaining({ id: 'q1', esql: { query: rewritten } }),
     ]);
     expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
       expect.objectContaining({
         index: expect.objectContaining({
-          query: expect.objectContaining({
-            id: 'q1',
-            category: 'security',
-            esql: { query: rewritten },
-          }),
+          query: expect.objectContaining({ id: 'q1', esql: { query: rewritten } }),
         }),
       }),
     ]);
@@ -241,7 +225,7 @@ describe('persistQueries', () => {
     expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
       expect.objectContaining({
         index: expect.objectContaining({
-          query: expect.objectContaining({ id: 'q1', category: 'error', rule_backed: false }),
+          query: expect.objectContaining({ id: 'q1', rule_backed: false }),
         }),
       }),
     ]);
@@ -265,7 +249,6 @@ describe('persistQueries', () => {
     expect(sourceIdArg).toBe('logs.test');
     expect(queriesArg).toHaveLength(1);
     expect(queriesArg[0].id).toBe('q1');
-    expect(queriesArg[0].category).toBe('error');
   });
 
   it('falls through to new query when replaces targets a nonexistent ID', async () => {

@@ -29,10 +29,8 @@ const KI_REPLAY_SCRIPT = `
   ctx._source['expires_at'] = now.plusMillis(params.ttl_millis).toString();
   // skip semantic search;
   ctx._source.remove('search_embedding');
-  // The readers take the source from the flat \`source.id\` key of \`_source\`, as the app writes it;
-  // a nested \`source: { id }\` object would read back as undefined.
-  ctx._source.remove('source');
-  ctx._source['source.id'] = params.source_id;
+  ctx._source.remove('source.id');
+  ctx._source.source = ['id': params.source_id];
   ctx._source.remove('kibana.space_ids');
   ctx._source.kibana = ['space_ids': [params.space_id]];
   def capturedView = ctx._source.remove('snapshot_source_view');

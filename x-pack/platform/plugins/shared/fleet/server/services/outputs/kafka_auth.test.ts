@@ -11,14 +11,14 @@ import {
   buildKafkaAuthData,
   buildKafkaSecrets,
   clearKafkaAuthFieldsForType,
-  getRemovedKafkaAuthSecrets,
-  keepsKafkaAuth,
+  getRemovedKafkaOAuth2Secrets,
+  keepsKafkaOAuth2,
   omitKafkaSecretsOfOtherAuthTypes,
-  omitRemovedKafkaAuthSecrets,
-  omitRemovedKafkaAuthSettings,
-  usesKafkaAuth,
-  withRemovedKafkaAuthSettings,
-  withSavedKafkaAuth,
+  omitRemovedKafkaOAuth2Secrets,
+  omitRemovedKafkaOAuth2Settings,
+  usesKafkaOAuth2,
+  withRemovedKafkaOAuth2Settings,
+  withSavedKafkaOAuth2,
 } from './kafka_auth';
 
 describe('clearKafkaAuthFieldsForType', () => {
@@ -87,7 +87,6 @@ describe('clearKafkaAuthFieldsForType', () => {
       username: null,
       password: null,
       oauth2: null,
-      kerberos: null,
       topic: 'topic',
     });
   });
@@ -229,20 +228,18 @@ describe('omitKafkaSecretsOfOtherAuthTypes', () => {
   });
 });
 
-describe('usesKafkaAuth', () => {
+describe('usesKafkaOAuth2', () => {
   it('is true for the oauth2 auth type, the oauth2 settings or the oauth2 secrets', () => {
-    expect(usesKafkaAuth('oauth2', { type: 'kafka', auth_type: 'oauth2' })).toBe(true);
-    expect(usesKafkaAuth('oauth2', { type: 'kafka', oauth2: { token_url: 'https://idp' } })).toBe(
-      true
-    );
+    expect(usesKafkaOAuth2({ type: 'kafka', auth_type: 'oauth2' })).toBe(true);
+    expect(usesKafkaOAuth2({ type: 'kafka', oauth2: { token_url: 'https://idp' } })).toBe(true);
     expect(
-      usesKafkaAuth('oauth2', { type: 'kafka', secrets: { oauth2: { client_secret: 'secret' } } })
+      usesKafkaOAuth2({ type: 'kafka', secrets: { oauth2: { client_secret: 'secret' } } })
     ).toBe(true);
   });
 
   it('is false when the oauth2 settings or secrets come with another auth type', () => {
     expect(
-      usesKafkaAuth('oauth2', {
+      usesKafkaOAuth2({
         type: 'kafka',
         auth_type: 'ssl',
         oauth2: { token_url: 'https://idp' },
@@ -252,16 +249,16 @@ describe('usesKafkaAuth', () => {
   });
 
   it('is false for any other Kafka output', () => {
-    expect(usesKafkaAuth('oauth2', { type: 'kafka', auth_type: 'ssl' })).toBe(false);
-    expect(
-      usesKafkaAuth('oauth2', { type: 'kafka', oauth2: null, secrets: { password: 'p' } })
-    ).toBe(false);
-    expect(usesKafkaAuth('oauth2', { type: 'kafka' })).toBe(false);
+    expect(usesKafkaOAuth2({ type: 'kafka', auth_type: 'ssl' })).toBe(false);
+    expect(usesKafkaOAuth2({ type: 'kafka', oauth2: null, secrets: { password: 'p' } })).toBe(
+      false
+    );
+    expect(usesKafkaOAuth2({ type: 'kafka' })).toBe(false);
   });
 
   it('is false for any other output type', () => {
-    expect(usesKafkaAuth('oauth2', { type: 'elasticsearch', auth_type: 'oauth2' })).toBe(false);
-    expect(usesKafkaAuth('oauth2', { auth_type: 'oauth2' })).toBe(false);
+    expect(usesKafkaOAuth2({ type: 'elasticsearch', auth_type: 'oauth2' })).toBe(false);
+    expect(usesKafkaOAuth2({ auth_type: 'oauth2' })).toBe(false);
   });
 });
 
@@ -415,20 +412,19 @@ describe('buildKafkaSecrets', () => {
   });
 });
 
-describe('getRemovedKafkaAuthSecrets', () => {
+describe('getRemovedKafkaOAuth2Secrets', () => {
   const saved = {
     type: 'kafka',
     secrets: { oauth2: { client_secret: { id: 'secret-id' }, client_certificate_key: null } },
   };
 
   it('returns a null for each saved secret that the update does not keep', () => {
-    expect(getRemovedKafkaAuthSecrets('oauth2', saved, undefined)).toEqual({ client_secret: null });
-    expect(getRemovedKafkaAuthSecrets('oauth2', saved, { password: 'pass' })).toEqual({
+    expect(getRemovedKafkaOAuth2Secrets(saved, undefined)).toEqual({ client_secret: null });
+    expect(getRemovedKafkaOAuth2Secrets(saved, { password: 'pass' })).toEqual({
       client_secret: null,
     });
     expect(
-      getRemovedKafkaAuthSecrets(
-        'oauth2',
+      getRemovedKafkaOAuth2Secrets(
         { type: 'kafka', secrets: { oauth2: { client_secret: { id: 'a' } } } },
         { oauth2: { client_certificate_key: 'KEY' } }
       )
@@ -437,37 +433,29 @@ describe('getRemovedKafkaAuthSecrets', () => {
 
   it('returns nothing when the update keeps every saved secret', () => {
     expect(
-      getRemovedKafkaAuthSecrets('oauth2', saved, {
-        oauth2: { client_secret: { id: 'secret-id' } },
-      })
+      getRemovedKafkaOAuth2Secrets(saved, { oauth2: { client_secret: { id: 'secret-id' } } })
     ).toBeUndefined();
     expect(
-      getRemovedKafkaAuthSecrets('oauth2', saved, { oauth2: { client_secret: 'a new secret' } })
+      getRemovedKafkaOAuth2Secrets(saved, { oauth2: { client_secret: 'a new secret' } })
     ).toBeUndefined();
   });
 
   it('returns nothing when the output has no saved OAuth2 secret, or is not a Kafka output', () => {
-    expect(getRemovedKafkaAuthSecrets('oauth2', { type: 'kafka' }, undefined)).toBeUndefined();
+    expect(getRemovedKafkaOAuth2Secrets({ type: 'kafka' }, undefined)).toBeUndefined();
     expect(
-      getRemovedKafkaAuthSecrets(
-        'oauth2',
-        { type: 'kafka', secrets: { password: { id: 'a' } } },
-        {}
-      )
+      getRemovedKafkaOAuth2Secrets({ type: 'kafka', secrets: { password: { id: 'a' } } }, {})
     ).toBeUndefined();
-    expect(
-      getRemovedKafkaAuthSecrets('oauth2', { type: 'kafka', secrets: { oauth2: {} } }, {})
-    ).toBe(undefined);
-    expect(
-      getRemovedKafkaAuthSecrets('oauth2', { ...saved, type: 'logstash' }, undefined)
-    ).toBeUndefined();
+    expect(getRemovedKafkaOAuth2Secrets({ type: 'kafka', secrets: { oauth2: {} } }, {})).toBe(
+      undefined
+    );
+    expect(getRemovedKafkaOAuth2Secrets({ ...saved, type: 'logstash' }, undefined)).toBeUndefined();
   });
 });
 
-describe('omitRemovedKafkaAuthSecrets', () => {
+describe('omitRemovedKafkaOAuth2Secrets', () => {
   it('removes the OAuth2 secrets that an update set to null', () => {
     expect(
-      omitRemovedKafkaAuthSecrets('oauth2', {
+      omitRemovedKafkaOAuth2Secrets({
         name: 'output',
         secrets: {
           password: { id: 'password-id' },
@@ -485,13 +473,13 @@ describe('omitRemovedKafkaAuthSecrets', () => {
 
   it('removes the oauth2 secrets when none is left', () => {
     expect(
-      omitRemovedKafkaAuthSecrets('oauth2', {
+      omitRemovedKafkaOAuth2Secrets({
         secrets: { password: { id: 'password-id' }, oauth2: { client_secret: null } },
       })
     ).toEqual({ secrets: { password: { id: 'password-id' } } });
     // no secrets left: the output is as if it never had any
     expect(
-      omitRemovedKafkaAuthSecrets('oauth2', {
+      omitRemovedKafkaOAuth2Secrets({
         name: 'output',
         secrets: { oauth2: { client_secret: null } },
       })
@@ -502,12 +490,12 @@ describe('omitRemovedKafkaAuthSecrets', () => {
     const withoutOAuth2 = { name: 'output', secrets: { password: { id: 'password-id' } } };
     const withoutSecrets = { name: 'output' };
 
-    expect(omitRemovedKafkaAuthSecrets('oauth2', withoutOAuth2)).toBe(withoutOAuth2);
-    expect(omitRemovedKafkaAuthSecrets('oauth2', withoutSecrets)).toBe(withoutSecrets);
+    expect(omitRemovedKafkaOAuth2Secrets(withoutOAuth2)).toBe(withoutOAuth2);
+    expect(omitRemovedKafkaOAuth2Secrets(withoutSecrets)).toBe(withoutSecrets);
   });
 });
 
-describe('withSavedKafkaAuth', () => {
+describe('withSavedKafkaOAuth2', () => {
   const saved = {
     type: 'kafka',
     auth_type: 'oauth2',
@@ -516,7 +504,7 @@ describe('withSavedKafkaAuth', () => {
   };
 
   it('keeps the saved OAuth2 settings and secrets when the update does not name an auth type', () => {
-    expect(withSavedKafkaAuth('oauth2', saved, { name: 'renamed' })).toEqual({
+    expect(withSavedKafkaOAuth2(saved, { name: 'renamed' })).toEqual({
       name: 'renamed',
       oauth2: saved.oauth2,
       secrets: saved.secrets,
@@ -524,7 +512,7 @@ describe('withSavedKafkaAuth', () => {
   });
 
   it('keeps the other secrets the update sends', () => {
-    expect(withSavedKafkaAuth('oauth2', saved, { secrets: { password: 'pass' } })).toEqual({
+    expect(withSavedKafkaOAuth2(saved, { secrets: { password: 'pass' } })).toEqual({
       oauth2: saved.oauth2,
       secrets: { password: 'pass', oauth2: saved.secrets.oauth2 },
     });
@@ -536,24 +524,24 @@ describe('withSavedKafkaAuth', () => {
       secrets: { oauth2: { client_secret: 'new secret' } },
     };
 
-    expect(withSavedKafkaAuth('oauth2', saved, update)).toEqual(update);
+    expect(withSavedKafkaOAuth2(saved, update)).toEqual(update);
   });
 
   it('leaves the update as it is when it names an auth type', () => {
     const update = { auth_type: 'ssl', name: 'renamed' };
 
-    expect(withSavedKafkaAuth('oauth2', saved, update)).toBe(update);
+    expect(withSavedKafkaOAuth2(saved, update)).toBe(update);
   });
 
   it('leaves the update as it is for an output that does not use OAuth2', () => {
     const update = { name: 'renamed' };
 
-    expect(withSavedKafkaAuth('oauth2', { type: 'kafka', auth_type: 'ssl' }, update)).toBe(update);
-    expect(withSavedKafkaAuth('oauth2', { type: 'logstash' }, update)).toBe(update);
+    expect(withSavedKafkaOAuth2({ type: 'kafka', auth_type: 'ssl' }, update)).toBe(update);
+    expect(withSavedKafkaOAuth2({ type: 'logstash' }, update)).toBe(update);
   });
 });
 
-describe('keepsKafkaAuth', () => {
+describe('keepsKafkaOAuth2', () => {
   const saved = {
     type: 'kafka',
     auth_type: 'oauth2',
@@ -561,9 +549,10 @@ describe('keepsKafkaAuth', () => {
     secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
   };
 
-  it('is true for an edit that sends back the same settings and the saved secrets', () => {
+  it('is true for an edit that does not touch the authentication', () => {
+    expect(keepsKafkaOAuth2(saved, { type: 'kafka' })).toBe(true);
     expect(
-      keepsKafkaAuth('oauth2', saved, {
+      keepsKafkaOAuth2(saved, {
         type: 'kafka',
         auth_type: 'oauth2',
         oauth2: { ...saved.oauth2 },
@@ -572,69 +561,42 @@ describe('keepsKafkaAuth', () => {
     ).toBe(true);
   });
 
-  it('is false when the update leaves out the saved secrets, which would delete them', () => {
-    expect(keepsKafkaAuth('oauth2', saved, { type: 'kafka' })).toBe(false);
-    expect(
-      keepsKafkaAuth('oauth2', saved, {
-        type: 'kafka',
-        auth_type: 'oauth2',
-        oauth2: { ...saved.oauth2 },
-      })
-    ).toBe(false);
-  });
-
-  it('is true without secrets when none are saved', () => {
-    expect(
-      keepsKafkaAuth(
-        'oauth2',
-        { type: 'kafka', auth_type: 'oauth2', oauth2: saved.oauth2 },
-        { type: 'kafka', auth_type: 'oauth2', oauth2: { ...saved.oauth2 } }
-      )
-    ).toBe(true);
-  });
-
   it('is false when a setting changes', () => {
     expect(
-      keepsKafkaAuth('oauth2', saved, { oauth2: { ...saved.oauth2, client_id: 'another-client' } })
+      keepsKafkaOAuth2(saved, { oauth2: { ...saved.oauth2, client_id: 'another-client' } })
     ).toBe(false);
     expect(
-      keepsKafkaAuth('oauth2', saved, {
-        oauth2: { client_id: 'my-client', token_url: 'https://idp' },
-      })
+      keepsKafkaOAuth2(saved, { oauth2: { client_id: 'my-client', token_url: 'https://idp' } })
     ).toBe(false);
   });
 
   it('is false when a secret is replaced, added or removed', () => {
-    expect(keepsKafkaAuth('oauth2', saved, { secrets: { oauth2: { client_secret: 'new' } } })).toBe(
-      false
-    );
+    expect(keepsKafkaOAuth2(saved, { secrets: { oauth2: { client_secret: 'new' } } })).toBe(false);
     expect(
-      keepsKafkaAuth('oauth2', saved, {
-        secrets: { oauth2: { client_secret: { id: 'another-id' } } },
-      })
+      keepsKafkaOAuth2(saved, { secrets: { oauth2: { client_secret: { id: 'another-id' } } } })
     ).toBe(false);
     expect(
-      keepsKafkaAuth('oauth2', saved, {
+      keepsKafkaOAuth2(saved, {
         secrets: { oauth2: { client_secret: { id: 'secret-id' }, client_certificate_key: 'KEY' } },
       })
     ).toBe(false);
-    expect(keepsKafkaAuth('oauth2', saved, { secrets: { oauth2: {} } })).toBe(false);
+    expect(keepsKafkaOAuth2(saved, { secrets: { oauth2: {} } })).toBe(false);
   });
 
   it('is false when the output changes of authentication or of type', () => {
-    expect(keepsKafkaAuth('oauth2', saved, { auth_type: 'ssl' })).toBe(false);
-    expect(keepsKafkaAuth('oauth2', saved, { type: 'logstash' })).toBe(false);
+    expect(keepsKafkaOAuth2(saved, { auth_type: 'ssl' })).toBe(false);
+    expect(keepsKafkaOAuth2(saved, { type: 'logstash' })).toBe(false);
   });
 
   it('is false for an output that does not use OAuth2 yet', () => {
-    expect(
-      keepsKafkaAuth('oauth2', { type: 'kafka', auth_type: 'ssl' }, { auth_type: 'oauth2' })
-    ).toBe(false);
-    expect(keepsKafkaAuth('oauth2', { type: 'kafka' }, {})).toBe(false);
+    expect(keepsKafkaOAuth2({ type: 'kafka', auth_type: 'ssl' }, { auth_type: 'oauth2' })).toBe(
+      false
+    );
+    expect(keepsKafkaOAuth2({ type: 'kafka' }, {})).toBe(false);
   });
 });
 
-describe('withRemovedKafkaAuthSettings', () => {
+describe('withRemovedKafkaOAuth2Settings', () => {
   const saved = {
     type: 'kafka',
     oauth2: {
@@ -648,7 +610,7 @@ describe('withRemovedKafkaAuthSettings', () => {
 
   it('sets to null each saved setting that is not sent, as the update merges objects', () => {
     expect(
-      withRemovedKafkaAuthSettings('oauth2', saved, {
+      withRemovedKafkaOAuth2Settings(saved, {
         client_id: 'my-client',
         token_url: 'https://idp',
         tls: { ca_file: '/ca.pem' },
@@ -665,10 +627,7 @@ describe('withRemovedKafkaAuthSettings', () => {
 
   it('sets to null a whole object that is not sent anymore', () => {
     expect(
-      withRemovedKafkaAuthSettings('oauth2', saved, {
-        client_id: 'my-client',
-        token_url: 'https://idp',
-      })
+      withRemovedKafkaOAuth2Settings(saved, { client_id: 'my-client', token_url: 'https://idp' })
     ).toEqual({
       client_id: 'my-client',
       token_url: 'https://idp',
@@ -696,14 +655,13 @@ describe('withRemovedKafkaAuthSettings', () => {
 
     // a setting is removed (the scopes) while the names are kept
     const kept = withNames(['constructor', '__proto__']);
-    const merged: any = withRemovedKafkaAuthSettings('oauth2', savedWithScopes, kept);
+    const merged: any = withRemovedKafkaOAuth2Settings(savedWithScopes, kept);
     expect(merged.scopes).toBeNull();
     expect(own(merged.endpoint_params, '__proto__')).toEqual(['__proto__ value']);
     expect(own(merged.endpoint_params, 'constructor')).toEqual(['constructor value']);
 
     // a name is removed, and another one is added
-    const changed: any = withRemovedKafkaAuthSettings(
-      'oauth2',
+    const changed: any = withRemovedKafkaOAuth2Settings(
       savedWithScopes,
       withNames(['__proto__', 'audience'])
     );
@@ -717,23 +675,23 @@ describe('withRemovedKafkaAuthSettings', () => {
   it('keeps what is sent, and does not touch an update that removes nothing', () => {
     const update = { ...saved.oauth2, scopes: ['write'] };
 
-    expect(withRemovedKafkaAuthSettings('oauth2', saved, update)).toBe(update);
+    expect(withRemovedKafkaOAuth2Settings(saved, update)).toBe(update);
   });
 
   it('does nothing for an output that has no saved OAuth2 settings', () => {
     const update = { client_id: 'my-client', token_url: 'https://idp' };
 
-    expect(withRemovedKafkaAuthSettings('oauth2', { type: 'kafka' }, update)).toBe(update);
-    expect(
-      withRemovedKafkaAuthSettings('oauth2', { type: 'logstash', oauth2: saved.oauth2 }, update)
-    ).toBe(update);
+    expect(withRemovedKafkaOAuth2Settings({ type: 'kafka' }, update)).toBe(update);
+    expect(withRemovedKafkaOAuth2Settings({ type: 'logstash', oauth2: saved.oauth2 }, update)).toBe(
+      update
+    );
   });
 });
 
-describe('omitRemovedKafkaAuthSettings', () => {
+describe('omitRemovedKafkaOAuth2Settings', () => {
   it('removes the settings that an update set to null', () => {
     expect(
-      omitRemovedKafkaAuthSettings('oauth2', {
+      omitRemovedKafkaOAuth2Settings({
         name: 'output',
         oauth2: {
           client_id: 'my-client',
@@ -754,7 +712,7 @@ describe('omitRemovedKafkaAuthSettings', () => {
 
   it('removes a nested object that had only removed settings, and keeps one that was empty', () => {
     expect(
-      omitRemovedKafkaAuthSettings('oauth2', {
+      omitRemovedKafkaOAuth2Settings({
         oauth2: { client_id: 'my-client', tls: { insecure_skip_verify: null }, claims: {} },
       })
     ).toEqual({ oauth2: { client_id: 'my-client', claims: {} } });
@@ -764,214 +722,7 @@ describe('omitRemovedKafkaAuthSettings', () => {
     const withoutOAuth2 = { name: 'output' };
     const nullOAuth2 = { name: 'output', oauth2: null };
 
-    expect(omitRemovedKafkaAuthSettings('oauth2', withoutOAuth2)).toBe(withoutOAuth2);
-    expect(omitRemovedKafkaAuthSettings('oauth2', nullOAuth2)).toBe(nullOAuth2);
-  });
-});
-
-describe('Kerberos authentication', () => {
-  const kerberos = {
-    auth_type: 'password' as const,
-    config_path: '/etc/krb5.conf',
-    username: 'kafka',
-    service_name: 'kafka',
-    realm: 'EXAMPLE.COM',
-    enable_krb5_fast: true,
-    keytab: '/etc/kafka.keytab',
-  };
-
-  describe('buildKafkaAuthData', () => {
-    it('emits the kerberos settings of the password authentication, without the keytab, credentials or sasl', () => {
-      expect(
-        buildKafkaAuthData({
-          auth_type: kafkaAuthType.Kerberos,
-          username: 'user',
-          password: 'pass',
-          sasl: { mechanism: kafkaSaslMechanism.Plain },
-          kerberos,
-        })
-      ).toEqual({
-        kerberos: {
-          enabled: true,
-          auth_type: 'password',
-          config_path: '/etc/krb5.conf',
-          username: 'kafka',
-          service_name: 'kafka',
-          realm: 'EXAMPLE.COM',
-          enable_krb5_fast: true,
-        },
-      });
-    });
-
-    it('emits the keytab, and not the username, of the keytab authentication', () => {
-      expect(
-        buildKafkaAuthData({
-          auth_type: kafkaAuthType.Kerberos,
-          kerberos: { ...kerberos, auth_type: 'keytab' },
-        })
-      ).toEqual({
-        kerberos: {
-          enabled: true,
-          auth_type: 'keytab',
-          keytab: '/etc/kafka.keytab',
-          config_path: '/etc/krb5.conf',
-          service_name: 'kafka',
-          realm: 'EXAMPLE.COM',
-          enable_krb5_fast: true,
-        },
-      });
-    });
-
-    it('emits nothing for an output with the kerberos type and no settings, e.g. one set up in the advanced YAML', () => {
-      expect(buildKafkaAuthData({ auth_type: kafkaAuthType.Kerberos })).toEqual({});
-      expect(buildKafkaAuthData({ auth_type: kafkaAuthType.Kerberos, kerberos: null })).toEqual({});
-    });
-
-    it('does not emit the kerberos settings left in an output that uses another authentication', () => {
-      expect(buildKafkaAuthData({ auth_type: kafkaAuthType.Ssl, kerberos })).toEqual({});
-    });
-  });
-
-  describe('buildKafkaSecrets', () => {
-    it('keeps the kerberos secrets where they are: the agent reads kerberos.password', () => {
-      const secrets = { kerberos: { password: { id: 'secret-id' } } };
-
-      expect(buildKafkaSecrets({ auth_type: kafkaAuthType.Kerberos, secrets })).toEqual(secrets);
-    });
-  });
-
-  describe('clearKafkaAuthFieldsForType', () => {
-    it('clears the credentials and the sasl mechanism, and keeps the kerberos settings', () => {
-      const data: any = { username: 'user', password: 'pass', sasl: {}, kerberos, oauth2: {} };
-
-      clearKafkaAuthFieldsForType(data, kafkaAuthType.Kerberos, null);
-
-      expect(data).toEqual({
-        connection_type: null,
-        username: null,
-        password: null,
-        sasl: null,
-        kerberos,
-        oauth2: null,
-      });
-    });
-
-    it('clears the kerberos settings of an output that uses another authentication', () => {
-      const data: any = { kerberos };
-
-      clearKafkaAuthFieldsForType(data, kafkaAuthType.Ssl, undefined);
-
-      expect(data.kerberos).toBeUndefined();
-    });
-  });
-
-  describe('omitKafkaSecretsOfOtherAuthTypes', () => {
-    it('keeps the kerberos secrets only for the kerberos authentication', () => {
-      const secrets = { kerberos: { password: { id: 'secret-id' } }, password: { id: 'other' } };
-
-      expect(omitKafkaSecretsOfOtherAuthTypes(secrets, kafkaAuthType.Kerberos)).toEqual({
-        kerberos: secrets.kerberos,
-        password: secrets.password,
-      });
-      expect(omitKafkaSecretsOfOtherAuthTypes(secrets, kafkaAuthType.Userpass)).toEqual({
-        password: secrets.password,
-      });
-    });
-  });
-
-  describe('usesKafkaAuth', () => {
-    it('is true for the kerberos auth type, the kerberos settings or the kerberos secrets', () => {
-      expect(usesKafkaAuth('kerberos', { type: 'kafka', auth_type: 'kerberos' })).toBe(true);
-      expect(usesKafkaAuth('kerberos', { type: 'kafka', kerberos })).toBe(true);
-      expect(
-        usesKafkaAuth('kerberos', {
-          type: 'kafka',
-          secrets: { kerberos: { password: { id: 'secret-id' } } },
-        })
-      ).toBe(true);
-    });
-
-    it('is false when the kerberos settings come with another auth type, or for other methods', () => {
-      expect(usesKafkaAuth('kerberos', { type: 'kafka', auth_type: 'ssl', kerberos })).toBe(false);
-      expect(usesKafkaAuth('kerberos', { type: 'kafka', auth_type: 'oauth2' })).toBe(false);
-      expect(usesKafkaAuth('oauth2', { type: 'kafka', auth_type: 'kerberos' })).toBe(false);
-    });
-  });
-
-  describe('updates of a saved output', () => {
-    const original = {
-      type: 'kafka',
-      auth_type: 'kerberos',
-      kerberos,
-      secrets: { kerberos: { password: { id: 'secret-id' } } },
-    };
-
-    it('keeps the saved settings and secrets when an update does not name the auth type', () => {
-      expect(withSavedKafkaAuth('kerberos', original, { name: 'renamed' })).toEqual({
-        name: 'renamed',
-        kerberos,
-        secrets: original.secrets,
-      });
-    });
-
-    it('does not add the saved settings of the other method', () => {
-      expect(withSavedKafkaAuth('oauth2', original, { name: 'renamed' })).toEqual({
-        name: 'renamed',
-      });
-    });
-
-    it('keeps the authentication when the settings and the secret references are the same', () => {
-      expect(keepsKafkaAuth('kerberos', original, { kerberos, secrets: original.secrets })).toBe(
-        true
-      );
-    });
-
-    it('does not keep the authentication when the update leaves out the saved secrets', () => {
-      expect(keepsKafkaAuth('kerberos', original, { auth_type: 'kerberos', kerberos })).toBe(false);
-    });
-
-    it('keeps an output with the kerberos type and no settings, which has no secrets to lose', () => {
-      expect(
-        keepsKafkaAuth(
-          'kerberos',
-          { type: 'kafka', auth_type: 'kerberos' },
-          { type: 'kafka', auth_type: 'kerberos' }
-        )
-      ).toBe(true);
-    });
-
-    it('does not keep the authentication when a setting or the secret changes', () => {
-      expect(
-        keepsKafkaAuth('kerberos', original, { kerberos: { ...kerberos, realm: 'OTHER.COM' } })
-      ).toBe(false);
-      expect(
-        keepsKafkaAuth('kerberos', original, {
-          secrets: { kerberos: { password: { id: 'another-secret' } } },
-        })
-      ).toBe(false);
-    });
-
-    it('removes the settings that are no longer sent, as the update merges objects', () => {
-      const { keytab, ...withoutKeytab } = kerberos;
-
-      expect(withRemovedKafkaAuthSettings('kerberos', original, withoutKeytab)).toEqual({
-        ...withoutKeytab,
-        keytab: null,
-      });
-    });
-
-    it('removes the reference of a secret that is no longer sent', () => {
-      expect(getRemovedKafkaAuthSecrets('kerberos', original, {})).toEqual({ password: null });
-      expect(getRemovedKafkaAuthSecrets('kerberos', original, original.secrets)).toBeUndefined();
-    });
-
-    it('omits the settings and secrets set to null from a saved output', () => {
-      expect(
-        omitRemovedKafkaAuthSettings('kerberos', { kerberos: { ...kerberos, keytab: null } })
-      ).toEqual({ kerberos: { ...kerberos, keytab: undefined } });
-      expect(
-        omitRemovedKafkaAuthSecrets('kerberos', { secrets: { kerberos: { password: null } } })
-      ).toEqual({});
-    });
+    expect(omitRemovedKafkaOAuth2Settings(withoutOAuth2)).toBe(withoutOAuth2);
+    expect(omitRemovedKafkaOAuth2Settings(nullOAuth2)).toBe(nullOAuth2);
   });
 });

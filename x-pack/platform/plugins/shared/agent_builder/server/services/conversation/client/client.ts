@@ -17,15 +17,14 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundFeedback,
   ConversationUpdatedTriggerEvent,
   ConversationWriteSource,
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
-  type ActivityEvent,
   type ConversationEvent,
   type CurrentUser,
-  type UserIdAndName,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
@@ -36,6 +35,7 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
   isConversationAccessControlRole,
   isPublicConversation,
   normalizeConversationAccessControl,
@@ -55,7 +55,6 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
-import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -92,20 +91,7 @@ import {
 import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
-import { agentActor } from './rounds_to_events';
-import { eventsToRounds } from './events_to_rounds';
-import {
-  type ActivityContext,
-  type ActivityEnvelope,
-  accessControlChangeEvents,
-  conversationCreatedEvent,
-  metadataUpdatedEvent,
-  metadataUpdatedEvents,
-  titleUpdatedEvents,
-} from './activity_events';
 import { conversationIndexName, createStorage } from './storage';
-
-export type { ActivityContext } from './activity_events';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
@@ -126,16 +112,11 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import { currentUserActor } from './rounds_to_events';
-import type {
-  ConversationMetadataPatchedPayload,
-  ScopedConversationEventEmitter,
-} from '../../../workflows/triggers/conversation_event_bus';
+import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
 import {
   describeConversationWrite,
   diffMetadata,
 } from '../../../workflows/triggers/describe_conversation_write';
-import { describeConversationFieldsChanged } from '../../../telemetry/describe_conversation_fields_changed';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
@@ -156,15 +137,11 @@ export interface ConversationClient {
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
     conversation: ConversationCreateRequest,
-    options: ConversationWriteOptions & { activity?: ActivityContext }
+    options: ConversationWriteOptions
   ): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
-    options: ConversationWriteOptions & {
-      access?: ConversationAccess;
-      retryOnConflict?: boolean;
-      activity?: ActivityContext;
-    }
+    options: ConversationWriteOptions & { access?: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
@@ -186,7 +163,7 @@ export interface ConversationClient {
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
-    executionId: string,
+    roundId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
@@ -196,7 +173,7 @@ export interface ConversationClient {
   updateAccessControl(
     conversationId: string,
     update: UpdateConversationAccessControlRequestBody,
-    options: ConversationWriteOptions & { activity?: ActivityContext }
+    options: ConversationWriteOptions
   ): Promise<ConversationAccessControl>;
   /**
    * Adds entries to a private conversation's ACL without removing existing entries or
@@ -208,7 +185,7 @@ export interface ConversationClient {
   addAccessControlEntries(
     conversationId: string,
     entries: ConversationAccessControlEntryInput[],
-    options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    options: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation>;
   /**
    * Removes principals from a private conversation's ACL. A no-op for public conversations,
@@ -219,17 +196,17 @@ export interface ConversationClient {
   removeAccessControlEntries(
     conversationId: string,
     principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
-    options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    options: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation>;
   applyTemplate(
     conversationId: string,
     templateId: string,
-    options: ConversationWriteOptions & { activity?: ActivityContext }
+    options: ConversationWriteOptions
   ): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    options: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
   getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
@@ -249,7 +226,6 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'agent_id',
   'user_id',
   'user_name',
-  'user_type',
   'title',
   'created_at',
   'updated_at',
@@ -287,8 +263,6 @@ interface ConversationListEsResponse {
   };
 }
 
-export type OnConversationCreated = (params: { conversationId: string; agentId: string }) => void;
-
 export const createClient = ({
   space,
   logger,
@@ -297,8 +271,6 @@ export const createClient = ({
   agentRegistry,
   conversationEvents,
   eventEmitter,
-  onConversationCreated,
-  reportFieldsChange,
 }: {
   space: string;
   logger: Logger;
@@ -307,8 +279,6 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
-  onConversationCreated?: OnConversationCreated;
-  reportFieldsChange?: ConversationFieldsChangeReporter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -320,15 +290,8 @@ export const createClient = ({
     conversationEvents,
     logger,
     eventEmitter,
-    onConversationCreated,
-    reportFieldsChange,
   });
 };
-
-/** Receives the template fields, opted in with `report_changes`, that one write changed. */
-export type ConversationFieldsChangeReporter = (
-  params: ReportConversationFieldsChangedParams
-) => void;
 
 /**
  * Thrown from inside an OCC `fields` callback to turn the write into a no-op: the stored document
@@ -352,35 +315,6 @@ const hasTerminalEventFor = (current: NormalizedConversation, executionId: strin
     (event) => isExecutionTerminalEvent(event) && event.execution_id === executionId
   );
 
-/**
- * Appends activity to the stored events, or touches nothing when there is none: a no-op write
- * must not promote a legacy document. The stored rounds are passed through so the write does not
- * re-fold them from events, which carry no round feedback.
- */
-const withActivityEvents = (
-  current: NormalizedConversation,
-  activity: ActivityEvent[]
-): Pick<ConversationUpdatableFields, 'events' | 'schema_version' | 'rounds'> =>
-  activity.length === 0
-    ? {}
-    : {
-        events: [...(current.events ?? []), ...activity],
-        schema_version: CONVERSATION_SCHEMA_VERSION,
-        rounds: current.rounds,
-      };
-
-const storedTemplateRef = (current: Pick<Conversation, 'template_id' | 'template_version'>) => ({
-  ...(current.template_id !== undefined ? { template_id: current.template_id } : {}),
-  ...(current.template_version !== undefined ? { template_version: current.template_version } : {}),
-});
-
-/** The execution a generated title belongs to: the terminal being written, else the guard's. */
-const generatedTitleExecutionId = (
-  events: ConversationEvent[],
-  skipIfTerminalExistsFor: string | undefined
-): string | undefined =>
-  skipIfTerminalExistsFor ?? events.filter(isExecutionTerminalEvent).at(-1)?.execution_id;
-
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
@@ -390,8 +324,6 @@ class ConversationClientImpl implements ConversationClient {
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
-  private readonly onConversationCreated?: OnConversationCreated;
-  private readonly reportFieldsChange?: ConversationFieldsChangeReporter;
 
   constructor({
     storage,
@@ -402,8 +334,6 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents,
     logger,
     eventEmitter,
-    onConversationCreated,
-    reportFieldsChange,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -413,8 +343,6 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
-    onConversationCreated?: OnConversationCreated;
-    reportFieldsChange?: ConversationFieldsChangeReporter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -424,49 +352,6 @@ class ConversationClientImpl implements ConversationClient {
     this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
-    this.onConversationCreated = onConversationCreated;
-    this.reportFieldsChange = reportFieldsChange;
-  }
-
-  /** The agent's `title_updated` for a title generated by a run; empty when absent or unchanged. */
-  private generatedTitleEvents({
-    current,
-    title,
-    events,
-    skipIfTerminalExistsFor,
-    createdAt,
-  }: {
-    current: NormalizedConversation;
-    title: string | undefined;
-    events: ConversationEvent[];
-    skipIfTerminalExistsFor: string | undefined;
-    createdAt: string;
-  }): ActivityEvent[] {
-    if (title === undefined) {
-      return [];
-    }
-    const executionId = generatedTitleExecutionId(events, skipIfTerminalExistsFor);
-    return titleUpdatedEvents(
-      { previous_title: current.title, title },
-      {
-        actor: agentActor(current),
-        created_at: createdAt,
-        ...(executionId !== undefined ? { execution_id: executionId } : {}),
-      }
-    );
-  }
-
-  /** The caller's attribution, else `defaultUser` (the current user unless overridden). */
-  private activityEnvelope(
-    activity: ActivityContext | undefined,
-    createdAt: string = new Date().toISOString(),
-    defaultUser: UserIdAndName = this.getUser()
-  ): ActivityEnvelope {
-    return {
-      actor: activity?.actor ?? currentUserActor(defaultUser),
-      created_at: createdAt,
-      ...(activity?.execution_id !== undefined ? { execution_id: activity.execution_id } : {}),
-    };
   }
 
   /**
@@ -510,48 +395,6 @@ class ConversationClientImpl implements ConversationClient {
     } catch (error) {
       this.logger.warn(
         `Failed to notify conversation update for conversation "${conversationId}": ${error}`
-      );
-    }
-  }
-
-  /**
-   * Notifies the metadata-patched listener with the fields that were just persisted.
-   * Best-effort: listener failures are logged and never fail the write.
-   */
-  private notifyMetadataPatched(payload: ConversationMetadataPatchedPayload): void {
-    if (!this.eventEmitter || payload.changedFields.length === 0) {
-      return;
-    }
-    try {
-      this.eventEmitter.emitMetadataPatched(payload);
-    } catch (error) {
-      this.logger.warn(
-        `Failed to notify metadata patched for conversation "${payload.conversationId}": ${error}`
-      );
-    }
-  }
-
-  /**
-   * Reports the `report_changes` template fields a successful write changed, as one event.
-   * Best-effort: the changes are described lazily inside the guard, so failures are logged and
-   * never fail the (already persisted) write.
-   */
-  private notifyFieldChanges(
-    conversationId: string,
-    describe: () => ReportConversationFieldsChangedParams | undefined
-  ): void {
-    const { reportFieldsChange } = this;
-    if (!reportFieldsChange) {
-      return;
-    }
-    try {
-      const params = describe();
-      if (params) {
-        reportFieldsChange(params);
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Failed to report field changes for conversation "${conversationId}": ${error}`
       );
     }
   }
@@ -723,54 +566,36 @@ class ConversationClientImpl implements ConversationClient {
     ];
   }
 
+  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
+  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
+    const hitsTotal = response.hits.total;
+    const total = Math.min(
+      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      MAX_RESULT_WINDOW
+    );
+
+    const results = response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
+
+      return toResponseConversationWithoutRounds({
+        document: hit,
+        user: this.getUser(),
+        resolveTemplate: getTemplate,
+      });
+    });
+
+    return { results, total };
+  }
+
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-    const conversation = await toResponseConversation({
+
+    return toResponseConversation({
       document,
       user: this.getUser(),
       resolveTemplate: getTemplate,
-    });
-    const isOwner = hasConversationOwnerAccess({ conversation, user: this.getUser() });
-    if (!isOwner) {
-      const { feedback: _feedback, ...conversationWithoutFeedback } = conversation;
-      return conversationWithoutFeedback;
-    }
-    return conversation;
-  }
-
-  async updateRoundFeedback(
-    conversationId: string,
-    executionId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
-  ): Promise<void> {
-    await this.writeConversation({
-      conversationId,
-      access: 'owner',
-      emit: false,
-      fields: (current) => {
-        const existing = current.feedback ?? {};
-        if (feedback.vote === null) {
-          if (!existing[executionId]) {
-            throw skipWrite(current);
-          }
-          const { [executionId]: _removed, ...remaining } = existing;
-          return { feedback: remaining };
-        }
-        if (!hasTerminalEventFor(current, executionId)) {
-          throw createConversationNotFoundError({ conversationId });
-        }
-        return {
-          feedback: {
-            ...existing,
-            [executionId]: {
-              vote: feedback.vote,
-              chips: feedback.chips,
-              comment: feedback.comment,
-              submitted_at: new Date().toISOString(),
-            },
-          },
-        };
-      },
     });
   }
 
@@ -827,7 +652,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async create(
     conversation: ConversationCreateRequest,
-    { source, activity }: ConversationWriteOptions & { activity?: ActivityContext }
+    { source }: ConversationWriteOptions
   ): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
@@ -882,25 +707,6 @@ class ConversationClientImpl implements ConversationClient {
         }
       : undefined;
 
-    // The chat path stamps its first `user_message` before calling `create`, so the document and
-    // its creation event take the earliest caller timestamp: the event stays first in any
-    // `created_at`-ordered view and never predates the conversation itself.
-    const callerTimestamps = (conversation.events ?? []).map((event) => event.created_at);
-    const createdAt = [now.toISOString(), ...callerTimestamps].sort()[0];
-    const createdEvent = conversationCreatedEvent(
-      {
-        agent_id: conversation.agent_id,
-        access_mode: normalizeConversationAccessControl(normalizedAccessControl).access_mode,
-        ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation_id: conversation.parent_conversation.id }
-          : {}),
-      },
-      // A sub-agent child is attributed to the parent execution that spawned it; otherwise to its
-      // owner.
-      this.activityEnvelope(activity, createdAt, conversation.user ?? this.getUser())
-    );
-
     const attributes = createRequestToEs({
       conversation: {
         ...withBoundedTitle(conversationWithoutTemplateId),
@@ -912,9 +718,8 @@ class ConversationClientImpl implements ConversationClient {
           : {}),
       },
       currentUser: this.getUser(),
-      creationDate: new Date(createdAt),
+      creationDate: now,
       space: this.space,
-      leadingEvents: [createdEvent],
     });
 
     let indexed: { _seq_no?: number; _primary_term?: number };
@@ -940,26 +745,15 @@ class ConversationClientImpl implements ConversationClient {
     this.notifyAttachmentEvents(id, conversation.events ?? []);
     const seqNo = indexed._seq_no;
     const primaryTerm = indexed._primary_term;
-    const readCreated = () =>
-      fromEs(
-        { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
-        this.getUser()
-      );
     this.notifyConversationUpdated(id, () =>
-      describeConversationWrite({ after: readCreated(), source })
-    );
-    this.notifyFieldChanges(id, () =>
-      describeConversationFieldsChanged({
-        after: readCreated(),
-        resolveTemplate: getTemplate,
+      describeConversationWrite({
+        after: fromEs(
+          { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
+          this.getUser()
+        ),
         source,
       })
     );
-    try {
-      this.onConversationCreated?.({ conversationId: id, agentId: conversation.agent_id });
-    } catch (error) {
-      this.logger.warn(`Failed to notify creation of conversation "${id}": ${error}`);
-    }
 
     return this.get(id);
   }
@@ -970,39 +764,16 @@ class ConversationClientImpl implements ConversationClient {
       access = 'owner',
       retryOnConflict = false,
       source,
-      activity,
-    }: ConversationWriteOptions & {
-      access?: ConversationAccess;
-      retryOnConflict?: boolean;
-      activity?: ActivityContext;
-    }
+    }: ConversationWriteOptions & { access?: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation> {
     const { id: conversationId, ...fields } = conversationUpdate;
-    const envelope = this.activityEnvelope(activity);
 
     const result = await this.writeConversation({
       conversationId,
       access,
       source,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
-      fields: (current) => {
-        const bounded = withBoundedTitle(fields);
-        const activityEvents: ActivityEvent[] = [
-          ...(bounded.title !== undefined
-            ? titleUpdatedEvents({ previous_title: current.title, title: bounded.title }, envelope)
-            : []),
-          ...(bounded.metadata !== undefined
-            ? metadataUpdatedEvents(
-                {
-                  changed_fields: diffMetadata(current.metadata ?? {}, bounded.metadata),
-                  ...storedTemplateRef(current),
-                },
-                envelope
-              )
-            : []),
-        ];
-        return { ...bounded, ...withActivityEvents(current, activityEvents) };
-      },
+      fields: () => withBoundedTitle(fields),
     });
 
     return result;
@@ -1018,7 +789,12 @@ class ConversationClientImpl implements ConversationClient {
     },
     { source }: ConversationWriteOptions
   ): Promise<ConversationEvent[]> {
-    const actor = currentUserActor(this.getUser());
+    const { id: userId, username } = this.getUser();
+    const actor = {
+      type: EventActorType.user,
+      id: userId ?? username,
+      ...(username ? { username } : {}),
+    };
     const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
     const materialized = materializeConversationEvents({
       events: validatedEvents,
@@ -1048,7 +824,6 @@ class ConversationClientImpl implements ConversationClient {
       workspaceId,
       skipIfTerminalExistsFor,
     } = request;
-    const createdAt = new Date().toISOString();
 
     // `fields` may run more than once on OCC retry; the last run is the one that was written.
     let writtenEvents: ConversationEvent[] = [];
@@ -1066,20 +841,9 @@ class ConversationClientImpl implements ConversationClient {
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
         writtenEvents = newEvents;
-        const appended = [
-          ...currentEvents,
-          ...newEvents,
-          ...this.generatedTitleEvents({
-            current,
-            title,
-            events,
-            skipIfTerminalExistsFor,
-            createdAt,
-          }),
-        ];
+        const appended = [...currentEvents, ...newEvents];
         return {
           events: appended,
-          rounds: eventsToRounds(appended),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1121,7 +885,6 @@ class ConversationClientImpl implements ConversationClient {
       skipIfTerminalExistsFor,
     } = request;
     const roundPrefix = `${roundId}::`;
-    const createdAt = new Date().toISOString();
 
     let writtenEvents: ConversationEvent[] = [];
 
@@ -1144,23 +907,13 @@ class ConversationClientImpl implements ConversationClient {
           event.id.startsWith(roundPrefix)
         );
         const insertAt = firstRoundIndex === -1 ? nonRoundEvents.length : firstRoundIndex;
-        // The generated title goes last, as in `appendEvents`: it carries the write time, so its
-        // position matches its `created_at` and a reconcile does not move it.
         const replaced = [
           ...nonRoundEvents.slice(0, insertAt),
           ...eventsToWrite,
           ...nonRoundEvents.slice(insertAt),
-          ...this.generatedTitleEvents({
-            current,
-            title,
-            events,
-            skipIfTerminalExistsFor,
-            createdAt,
-          }),
         ];
         return {
           events: replaced,
-          rounds: eventsToRounds(replaced),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1218,27 +971,46 @@ class ConversationClientImpl implements ConversationClient {
     });
   }
 
-  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
-  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
-    const hitsTotal = response.hits.total;
-    const total = Math.min(
-      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
-      MAX_RESULT_WINDOW
-    );
+  async updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
+      fields: (current) => {
+        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
 
-    const results = response.hits.hits.map((hit) => {
-      if (!isConversationDocument(hit)) {
-        throw createInternalError('Conversation list search returned an incomplete hit');
-      }
+        if (roundIndex === -1) {
+          throw createConversationNotFoundError({ conversationId });
+        }
 
-      return toResponseConversationWithoutRounds({
-        document: hit,
-        user: this.getUser(),
-        resolveTemplate: getTemplate,
-      });
+        const round = current.rounds[roundIndex];
+        const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+        const updatedRound =
+          feedback.vote === null
+            ? roundWithoutFeedback
+            : {
+                ...round,
+                feedback: {
+                  vote: feedback.vote,
+                  chips: feedback.chips ?? [],
+                  comment: feedback.comment ?? '',
+                  submitted_at: new Date().toISOString(),
+                  connector_id: round.model_usage?.connector_id,
+                  model: round.model_usage?.model,
+                } satisfies ConversationRoundFeedback,
+              };
+
+        return {
+          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        };
+      },
     });
-
-    return { results, total };
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -1286,22 +1058,15 @@ class ConversationClientImpl implements ConversationClient {
   async updateAccessControl(
     conversationId: string,
     update: UpdateConversationAccessControlRequestBody,
-    { source, activity }: ConversationWriteOptions & { activity?: ActivityContext }
+    { source }: ConversationWriteOptions
   ): Promise<ConversationAccessControl> {
-    const envelope = this.activityEnvelope(activity);
-
     const conversation = await this.writeConversation({
       conversationId,
       access: 'updateAccessControl',
       source,
-      fields: (current) => {
-        const previous = normalizeConversationAccessControl(current.access_control);
-        const next = this.buildAccessControlUpdate({ current, update });
-        return {
-          access_control: next,
-          ...withActivityEvents(current, accessControlChangeEvents({ previous, next }, envelope)),
-        };
-      },
+      fields: (current) => ({
+        access_control: this.buildAccessControlUpdate({ current, update }),
+      }),
     });
 
     return normalizeConversationAccessControl(conversation.access_control);
@@ -1310,14 +1075,8 @@ class ConversationClientImpl implements ConversationClient {
   async addAccessControlEntries(
     conversationId: string,
     entries: ConversationAccessControlEntryInput[],
-    {
-      access = 'converse',
-      source,
-      activity,
-    }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation> {
-    const envelope = this.activityEnvelope(activity);
-
     return this.writeConversation({
       conversationId,
       access,
@@ -1361,14 +1120,12 @@ class ConversationClientImpl implements ConversationClient {
           ownerId: current.user.id,
           addedAtById,
         });
-        const next = { access_mode: normalized.access_mode, entries: validatedEntries };
 
         return {
-          access_control: next,
-          ...withActivityEvents(
-            current,
-            accessControlChangeEvents({ previous: normalized, next }, envelope)
-          ),
+          access_control: {
+            access_mode: normalized.access_mode,
+            entries: validatedEntries,
+          },
         };
       },
     });
@@ -1377,14 +1134,8 @@ class ConversationClientImpl implements ConversationClient {
   async removeAccessControlEntries(
     conversationId: string,
     principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
-    {
-      access = 'converse',
-      source,
-      activity,
-    }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation> {
-    const envelope = this.activityEnvelope(activity);
-
     return this.writeConversation({
       conversationId,
       access,
@@ -1415,14 +1166,12 @@ class ConversationClientImpl implements ConversationClient {
           ownerId: current.user.id,
           addedAtById,
         });
-        const next = { access_mode: normalized.access_mode, entries: validatedEntries };
 
         return {
-          access_control: next,
-          ...withActivityEvents(
-            current,
-            accessControlChangeEvents({ previous: normalized, next }, envelope)
-          ),
+          access_control: {
+            access_mode: normalized.access_mode,
+            entries: validatedEntries,
+          },
         };
       },
     });
@@ -1431,7 +1180,7 @@ class ConversationClientImpl implements ConversationClient {
   async applyTemplate(
     conversationId: string,
     templateId: string,
-    { source, activity }: ConversationWriteOptions & { activity?: ActivityContext }
+    { source }: ConversationWriteOptions
   ): Promise<Conversation> {
     const template = getTemplate(templateId);
     if (!template) {
@@ -1441,7 +1190,6 @@ class ConversationClientImpl implements ConversationClient {
     validateTemplateDefaults(template);
     const newTemplateFieldNames = new Set(Object.keys(template.fields));
     const newTemplateMetadata = buildMetadataFromTemplate(template);
-    const envelope = this.activityEnvelope(activity);
 
     const result = await this.writeConversation({
       conversationId,
@@ -1464,28 +1212,10 @@ class ConversationClientImpl implements ConversationClient {
         const preservedValues = Object.fromEntries(
           Object.entries(storedMetadata).filter(([key]) => newTemplateFieldNames.has(key))
         );
-        const metadata = { ...newTemplateMetadata, ...preservedValues };
-        const changedFields = diffMetadata(storedMetadata, metadata);
-        const templateChanged =
-          current.template_id !== templateId || current.template_version !== template.version;
-        const activityEvents =
-          changedFields.length > 0 || templateChanged
-            ? [
-                metadataUpdatedEvent(
-                  {
-                    changed_fields: changedFields,
-                    template_id: templateId,
-                    template_version: template.version,
-                  },
-                  envelope
-                ),
-              ]
-            : [];
         return {
-          metadata,
+          metadata: { ...newTemplateMetadata, ...preservedValues },
           template_id: templateId,
           template_version: template.version,
-          ...withActivityEvents(current, activityEvents),
         };
       },
     });
@@ -1496,14 +1226,9 @@ class ConversationClientImpl implements ConversationClient {
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    {
-      access = 'converse',
-      source,
-      activity,
-    }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
-    const envelope = this.activityEnvelope(activity);
 
     const result = await this.writeConversation({
       conversationId,
@@ -1539,25 +1264,18 @@ class ConversationClientImpl implements ConversationClient {
         const metadata = { ...storedMetadata, ...serialized };
         changedFields = diffMetadata(storedMetadata, metadata);
 
-        return {
-          metadata,
-          ...withActivityEvents(
-            current,
-            metadataUpdatedEvents(
-              { changed_fields: changedFields, ...storedTemplateRef(current) },
-              envelope
-            )
-          ),
-        };
+        return { metadata };
       },
     });
 
-    this.notifyMetadataPatched({
-      conversationId: result.id,
-      templateId: result.template_id,
-      parentId: result.parent_conversation?.id,
-      changedFields,
-    });
+    if (changedFields.length > 0 && this.eventEmitter) {
+      this.eventEmitter.emitMetadataPatched({
+        conversationId: result.id,
+        templateId: result.template_id,
+        parentId: result.parent_conversation?.id,
+        changedFields,
+      });
+    }
 
     return { conversation: result, changedFields };
   }
@@ -1571,9 +1289,9 @@ class ConversationClientImpl implements ConversationClient {
       return originAuthor;
     }
 
-    const { id, username, type } = this.getUser();
+    const { id, username } = this.getUser();
 
-    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
+    return id === undefined ? undefined : { id, username };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -1757,14 +1475,6 @@ class ConversationClientImpl implements ConversationClient {
         const { source } = emission;
         this.notifyConversationUpdated(conversationId, () =>
           describeConversationWrite({ before: previous, after: document, source })
-        );
-        this.notifyFieldChanges(conversationId, () =>
-          describeConversationFieldsChanged({
-            after: document,
-            before: previous,
-            resolveTemplate: getTemplate,
-            source,
-          })
         );
       }
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });

@@ -34,10 +34,8 @@ const setup = ({
   withProposals?: boolean;
   withWorkflowsManagement?: boolean;
 } = {}) => {
-  const getWorkflowExecutionStatuses = jest.fn(async (ids: string[]) =>
-    ids
-      .filter((id) => statuses[id] !== undefined)
-      .map((id) => ({ id, workflowId: 'workflow-1', status: statuses[id] }))
+  const getWorkflowExecution = jest.fn(async (id: string) =>
+    statuses[id] ? { id, status: statuses[id] } : null
   );
   const countPendingByConversationIds = jest
     .fn()
@@ -46,9 +44,7 @@ const setup = ({
   const resolver = new InProgressResolver({
     getWorkflowsManagement: () =>
       withWorkflowsManagement
-        ? ({
-            getWorkflowExecutionStatuses,
-          } as unknown as WorkflowsServerPluginSetup['management'])
+        ? ({ getWorkflowExecution } as unknown as WorkflowsServerPluginSetup['management'])
         : undefined,
     getProposals: () =>
       withProposals
@@ -58,7 +54,7 @@ const setup = ({
         : undefined,
     logger,
   });
-  return { resolver, getWorkflowExecutionStatuses, countPendingByConversationIds, logger };
+  return { resolver, getWorkflowExecution, countPendingByConversationIds, logger };
 };
 
 describe('InProgressResolver', () => {
@@ -86,7 +82,7 @@ describe('InProgressResolver', () => {
   });
 
   it('is not in progress when closed, without workflow executions, or with a proposal awaiting a decision', async () => {
-    const { resolver, getWorkflowExecutionStatuses, countPendingByConversationIds } = setup({
+    const { resolver, getWorkflowExecution, countPendingByConversationIds } = setup({
       statuses: { 'exec-1': ExecutionStatus.RUNNING },
       pendingProposals: { 'awaiting-decision': 1 },
     });
@@ -100,11 +96,11 @@ describe('InProgressResolver', () => {
 
     expect(ids).toEqual(new Set());
     expect(countPendingByConversationIds).toHaveBeenCalledWith(['awaiting-decision'], SPACE_ID);
-    expect(getWorkflowExecutionStatuses).not.toHaveBeenCalled();
+    expect(getWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  it('reads each workflow execution once, in a single bulk read', async () => {
-    const { resolver, getWorkflowExecutionStatuses } = setup({
+  it('reads each workflow execution once, without its step executions', async () => {
+    const { resolver, getWorkflowExecution } = setup({
       statuses: { shared: ExecutionStatus.COMPLETED, own: ExecutionStatus.RUNNING },
     });
 
@@ -114,41 +110,36 @@ describe('InProgressResolver', () => {
     ]);
 
     expect(ids).toEqual(new Set(['b']));
-    expect(getWorkflowExecutionStatuses).toHaveBeenCalledTimes(1);
-    expect(getWorkflowExecutionStatuses).toHaveBeenCalledWith(['shared', 'own'], SPACE_ID, {
+    expect(getWorkflowExecution).toHaveBeenCalledTimes(2);
+    expect(getWorkflowExecution).toHaveBeenCalledWith('shared', SPACE_ID, {
       request,
+      omitStepExecutions: true,
     });
   });
 
   it('counts a workflow execution that cannot be read as finished', async () => {
-    const { resolver } = setup({ statuses: { readable: ExecutionStatus.RUNNING } });
+    const { resolver, getWorkflowExecution, logger } = setup();
+    getWorkflowExecution.mockImplementation(async (id: string) => {
+      if (id === 'broken') {
+        throw new Error('index unavailable');
+      }
+      return id === 'readable' ? { id, status: ExecutionStatus.RUNNING } : null;
+    });
 
     const ids = await resolver.findInProgressIds(request, SPACE_ID, [
       investigation('missing', { workflow_execution_ids: ['deleted'] }),
-      investigation('running', { workflow_execution_ids: ['deleted', 'readable'] }),
+      investigation('broken', { workflow_execution_ids: ['broken'] }),
+      investigation('running', { workflow_execution_ids: ['broken', 'readable'] }),
     ]);
 
     expect(ids).toEqual(new Set(['running']));
-  });
-
-  it('counts every workflow execution as finished when the bulk read fails', async () => {
-    const { resolver, getWorkflowExecutionStatuses, logger } = setup();
-    getWorkflowExecutionStatuses.mockRejectedValue(new Error('index unavailable'));
-
-    const ids = await resolver.findInProgressIds(request, SPACE_ID, [
-      investigation('a', { workflow_execution_ids: ['exec-1'] }),
-    ]);
-
-    expect(ids).toEqual(new Set());
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
   });
 
   it('reads as not in progress when pending proposals cannot be counted', async () => {
-    const { resolver, countPendingByConversationIds, getWorkflowExecutionStatuses, logger } = setup(
-      {
-        statuses: { 'exec-1': ExecutionStatus.RUNNING },
-      }
-    );
+    const { resolver, countPendingByConversationIds, getWorkflowExecution, logger } = setup({
+      statuses: { 'exec-1': ExecutionStatus.RUNNING },
+    });
     countPendingByConversationIds.mockRejectedValue(new Error('proposals index unavailable'));
 
     const ids = await resolver.findInProgressIds(request, SPACE_ID, [
@@ -156,7 +147,7 @@ describe('InProgressResolver', () => {
     ]);
 
     expect(ids).toEqual(new Set());
-    expect(getWorkflowExecutionStatuses).not.toHaveBeenCalled();
+    expect(getWorkflowExecution).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Could not resolve investigations in progress')
     );

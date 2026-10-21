@@ -215,7 +215,6 @@ export const runAgent = async ({
       getExecutionService: parentManager.deps.getExecutionService,
       projectRouting: parentManager.deps.projectRouting,
       interactivity,
-      workflowExecutionId: parentManager.deps.workflowExecutionId,
     }),
   });
 

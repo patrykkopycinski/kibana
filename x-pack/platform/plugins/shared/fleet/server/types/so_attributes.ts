@@ -35,12 +35,7 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { SecretReference } from '../../common/types/models/secret';
-import type {
-  KafkaAuthType,
-  KafkaCompressionType,
-  KafkaKerberosConfig,
-  KafkaOAuth2Config,
-} from '../../common/types';
+import type { KafkaAuthType, KafkaCompressionType, KafkaOAuth2Config } from '../../common/types';
 import type {
   KafkaPartitionType,
   KafkaSaslMechanism,
@@ -259,7 +254,6 @@ export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   };
   oauth2?: KafkaOAuth2Config;
-  kerberos?: KafkaKerberosConfig;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;

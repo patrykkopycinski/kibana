@@ -237,19 +237,11 @@ export class SignificantEventsPlugin
       // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
       const space = request.spaceId;
 
-      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
-      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
-        alertEventsClientPromise ??=
-          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
-        return alertEventsClientPromise;
-      };
-
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        getAlertEventsClient,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -259,6 +251,13 @@ export class SignificantEventsPlugin
 
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space);
+
+      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
+        alertEventsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
+        return alertEventsClientPromise;
+      };
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
@@ -598,7 +597,6 @@ export class SignificantEventsPlugin
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
       this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
-      this.server.agenticInvestigations = plugins.agenticInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
 

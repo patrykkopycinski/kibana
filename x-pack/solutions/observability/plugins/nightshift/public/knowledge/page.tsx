@@ -12,27 +12,16 @@ import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 import { NightshiftAppHeader, type NightshiftAppHeaderProps } from '../app/app_header';
 import { useKibana } from '../hooks/use_kibana';
+import { CortexTab } from './cortex/tab';
+import { DecisionTreesTab } from './decision_trees/tab';
 import { useKnowledgeTabsAvailability } from './hooks/use_knowledge_tabs_availability';
 import {
   getVisibleKnowledgeTabs,
-  getDefaultKnowledgeTab,
+  isAnyKnowledgeTabLoading,
   isKnowledgeTabId,
   KNOWLEDGE_TAB_LABELS,
 } from './knowledge_tabs';
-const KnowledgeIndicatorsTab = React.lazy(() =>
-  import('./knowledge_indicators/tab').then((module) => ({
-    default: module.KnowledgeIndicatorsTab,
-  }))
-);
-const CortexTab = React.lazy(() =>
-  import('./cortex/tab').then((module) => ({ default: module.CortexTab }))
-);
-const MemoryTab = React.lazy(() =>
-  import('./memory/tab').then((module) => ({ default: module.MemoryTab }))
-);
-const DecisionTreesTab = React.lazy(() =>
-  import('./decision_trees/tab').then((module) => ({ default: module.DecisionTreesTab }))
-);
+import { MemoryTab } from './memory/tab';
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
   defaultMessage: 'Nightshift',
@@ -42,8 +31,6 @@ export type KnowledgePageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onManagementClick'
   | 'managementHref'
-  | 'onSourcesClick'
-  | 'sourcesHref'
   | 'onSettingsClick'
   | 'settingsHref'
   | 'onSandboxSecretsClick'
@@ -51,13 +38,9 @@ export type KnowledgePageHeaderProps = Pick<
   | 'automationsHref'
 >;
 
-const KnowledgeLoadingSpinner = () => (
-  <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLoading" />
-);
-
 const KnowledgePageLoading = () => (
   <EuiPageTemplate.Section component="div" restrictWidth={false}>
-    <KnowledgeLoadingSpinner />
+    <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLoading" />
   </EuiPageTemplate.Section>
 );
 
@@ -79,12 +62,12 @@ export function KnowledgePage({
     tab !== undefined && isKnowledgeTabId(tab) && availability[tab].isEnabled;
 
   if (!isVisibleRequestedTab) {
-    const defaultTab = getDefaultKnowledgeTab(availability);
-    if (defaultTab === 'loading') {
+    if (isAnyKnowledgeTabLoading(availability)) {
       return <KnowledgePageLoading />;
     }
 
-    return <Redirect to={defaultTab ? `/knowledge/${defaultTab}` : '/'} />;
+    const [firstVisibleTab] = getVisibleKnowledgeTabs(availability);
+    return <Redirect to={firstVisibleTab ? `/knowledge/${firstVisibleTab}` : '/'} />;
   }
 
   const visibleTabs = getVisibleKnowledgeTabs(availability);
@@ -112,12 +95,9 @@ export function KnowledgePage({
         tabs={tabs}
       />
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
-        <React.Suspense fallback={<KnowledgeLoadingSpinner />}>
-          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
-          {tab === 'cortex' && <CortexTab />}
-          {tab === 'memory' && <MemoryTab />}
-          {tab === 'decision_trees' && <DecisionTreesTab />}
-        </React.Suspense>
+        {tab === 'cortex' && <CortexTab />}
+        {tab === 'memory' && <MemoryTab />}
+        {tab === 'decision_trees' && <DecisionTreesTab />}
       </EuiPageTemplate.Section>
     </>
   );

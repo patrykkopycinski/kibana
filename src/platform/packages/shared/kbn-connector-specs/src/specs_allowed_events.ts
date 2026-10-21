@@ -24,7 +24,5 @@ export const SPECS_ALLOWED_EVENTS = new Set<string>([
   '.datadog',
   '.github',
   '.inboundWebhook',
-  '.microsoft-teams',
-  '.servicenow_search',
   '.slack2',
 ]);

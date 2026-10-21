@@ -31,15 +31,9 @@ describe('risk tiles on Elasticsearch', () => {
   describe('risk movers', () => {
     it('counts the entities whose score rose by 10 or more since the boundary', async () => {
       // host:alias rose too, and counts as its group's main entity, host:rise.
-      // Groups are judged by their own score: host:grp-up rose as a group while its own score did
-      // not; host:grp-none has no group score, so its own rise counts; user:grp-crit rose from 50 to 95
-      // as a group. host:grp-flat does not count: only its alias rose.
       expect(
         await cluster.runTileQuery(buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '30d'))
-      ).toEqual({
-        value: 5,
-        entityIds: ['host:exact', 'host:grp-none', 'host:grp-up', 'host:rise', 'user:grp-crit'],
-      });
+      ).toEqual({ value: 2, entityIds: ['host:exact', 'host:rise'] });
     });
 
     it('keeps only the entities the filters keep', async () => {
@@ -55,19 +49,11 @@ describe('risk tiles on Elasticsearch', () => {
   describe('newly high or critical', () => {
     it('counts the entities that became High or Critical since the boundary', async () => {
       // user:alias is newly High too, and counts as its group's main entity, user:up.
-      // user:grp-crit became Critical as a group while its own level stayed Low. user:grp-still
-      // does not count: its group was High already and only its alias rose.
       expect(
         await cluster.runTileQuery(buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, '30d'))
       ).toEqual({
-        value: 5,
-        entityIds: [
-          'user:grp-crit',
-          'user:high-to-crit',
-          'user:last-low',
-          'user:new-high',
-          'user:up',
-        ],
+        value: 4,
+        entityIds: ['user:high-to-crit', 'user:last-low', 'user:new-high', 'user:up'],
       });
     });
 

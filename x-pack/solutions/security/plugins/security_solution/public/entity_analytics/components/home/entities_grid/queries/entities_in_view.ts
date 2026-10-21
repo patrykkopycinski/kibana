@@ -5,63 +5,33 @@
  * 2.0.
  */
 
-import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD } from '../common';
+import { RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { ENTITY_TYPE_FILTER, buildRowRiskScoreSteps, getEntityAlias, toList } from './esql';
-import type { EntityAggregation } from './esql';
+import { ENTITY_TYPE_FILTER, getEntityAlias } from './esql';
 
-export const buildEntityFilterConditions = ({ entityExpression }: QueryArgs): string[] =>
-  entityExpression ? [entityExpression] : [];
+// ── entities in view ─────────────────────────────────────────────────────────
 
-/** The grid's rows; on resolved rows only main entities, as their aliases count for them. */
-export const buildEntitiesInViewConditions = (args: QueryArgs): string[] => [
+/** Conditions on entity docs that make them rows of the grid (rows mode and filters). */
+export const buildEntitiesInViewConditions = ({
+  rowsMode,
+  searchExpression,
+  entityExpression,
+}: QueryArgs): string[] => [
   ENTITY_TYPE_FILTER,
-  ...(args.rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
-  ...(args.searchExpression ? [args.searchExpression] : []),
-  ...buildEntityFilterConditions(args),
+  ...(rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
+  ...(searchExpression ? [searchExpression] : []),
+  ...(entityExpression ? [entityExpression] : []),
 ];
 
+/** Entity docs that are rows of the grid for the current rows mode and filters. */
 export const buildEntitiesInViewSteps = (args: QueryArgs): string[] => [
   `FROM ${getEntityAlias(args.namespace)}`,
   ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
 ];
 
 /** Number of grid rows: every sort except group size lists exactly the entities in view. */
-export const buildEntitiesInViewCountQuery = (args: QueryArgs): string[] => [
-  ...buildEntitiesInViewSteps(args),
-  `| STATS total = COUNT(*)`,
-];
+export const buildEntitiesInViewCountQuery = (args: QueryArgs): string =>
+  [...buildEntitiesInViewSteps(args), `| STATS total = COUNT(*)`].join('\n');
 
-/** Marks rows that come from the entities in view rather than from the source index. */
+/** Marks rows that come from the entities in view rather than from the foreign index. */
 export const IN_VIEW_FIELD = '_in_view';
-
-/** An entity is in view when any of its rows is; a resolved entity, when any of its aliases is. */
-export const IN_VIEW_AGGREGATION: EntityAggregation = {
-  field: IN_VIEW_FIELD,
-  aggregation: `MAX(${IN_VIEW_FIELD})`,
-  resolvedEntity: 'MAX',
-};
-
-/** The entities side of `FROM (source), (entities)`, marked in view so entities without data stay as rows. */
-export const buildEntitiesInViewBranch = (
-  args: QueryArgs,
-  fields: readonly string[] = [],
-  conditions: readonly string[] = []
-): string[] => [
-  ...buildEntitiesInViewSteps(args),
-  ...buildRowRiskScoreSteps(args),
-  ...conditions.map((condition) => `| WHERE ${condition}`),
-  `| EVAL ${IN_VIEW_FIELD} = 1`,
-  `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...fields].join(', ')}`,
-];
-
-/** Which of these ids are in view, search included: KQL can't run after a join, so joined rows are checked here. */
-export const buildSearchedTargetsQuery = (
-  args: QueryArgs,
-  targetIds: readonly string[]
-): string[] => [
-  ...buildEntitiesInViewSteps(args),
-  `| WHERE ${ENTITY_ID_FIELD} IN (${toList(targetIds)})`,
-  `| KEEP \`entity.id\``,
-  `| LIMIT ${targetIds.length}`,
-];

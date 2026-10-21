@@ -19,7 +19,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { SCAN_TOOL_ID } from '../..';
-import { scanHostTool } from '.';
+import { formatPathForConfirmation, scanHostTool } from '.';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -85,6 +85,34 @@ async function confirmThenHandle(
   return { card, result };
 }
 
+describe('formatPathForConfirmation', () => {
+  it('escapes newline, tab, NUL and DEL as visible escapes', () => {
+    expect(formatPathForConfirmation('/tmp/a\nb')).toBe('"/tmp/a\\nb"');
+    expect(formatPathForConfirmation('/tmp/a\tb')).toBe('"/tmp/a\\tb"');
+    expect(formatPathForConfirmation('/tmp/a\u0000b')).toBe('"/tmp/a\\u{0000}b"');
+    expect(formatPathForConfirmation('/tmp/a\u007fb')).toBe('"/tmp/a\\u{007F}b"');
+  });
+
+  it('escapes bidi controls including RTLO and zero-width characters', () => {
+    expect(formatPathForConfirmation('/tmp/a\u202eb.exe')).toBe('"/tmp/a\\u{202E}b.exe"');
+    expect(formatPathForConfirmation('/tmp/a\u200bb')).toBe('"/tmp/a\\u{200B}b"');
+    expect(formatPathForConfirmation('/tmp/a\ufeffb')).toBe('"/tmp/a\\u{FEFF}b"');
+  });
+
+  it('keeps Windows backslashes as single, literal backslashes', () => {
+    expect(formatPathForConfirmation('C:\\Users\\x\\evil.exe')).toBe('"C:\\Users\\x\\evil.exe"');
+  });
+
+  it('keeps ordinary paths and padding whitespace exactly as typed inside quotes', () => {
+    expect(formatPathForConfirmation('/tmp/payload ')).toBe('"/tmp/payload "');
+    expect(formatPathForConfirmation('  /tmp/x')).toBe('"  /tmp/x"');
+  });
+
+  it('escapes a backtick so the confirmation code span cannot be broken', () => {
+    expect(formatPathForConfirmation('/tmp/a`b')).toBe('"/tmp/a\\u{0060}b"');
+  });
+});
+
 describe('scanHostTool', () => {
   // waitForActionCompletion mocks resolve on the first poll attempt, but the
   // extra promise hop through p-retry has been observed to push these tests
@@ -132,6 +160,69 @@ describe('scanHostTool', () => {
     expect(prompt?.message).toContain('my-host');
     expect(prompt?.message).toContain('agent-123');
     expect(prompt?.message).toContain('/tmp');
+  });
+
+  it('shows a padded path on the confirmation card with its leading and trailing whitespace visible', async () => {
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+    const tool = scanHostTool(service);
+    const prompt = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '/tmp/payload ' },
+      context: mockContext,
+    });
+    expect(prompt?.message).toContain('"/tmp/payload "');
+
+    const padded = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '  /tmp/x' },
+      context: mockContext,
+    });
+    expect(padded?.message).toContain('"  /tmp/x"');
+
+    // JSON.stringify would escape backslashes here; the analyst must see the real path.
+    const windows = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: 'C:\\Users\\x\\evil.exe' },
+      context: mockContext,
+    });
+    expect(windows?.message).toContain('"C:\\Users\\x\\evil.exe"');
+    expect(windows?.message).not.toContain('\\\\');
+  });
+
+  it('renders newline, RTLO and zero-width characters in the path as visible escapes on the confirmation card', async () => {
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+    const tool = scanHostTool(service);
+    const newline = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '/tmp/a\nb' },
+      context: mockContext,
+    });
+    expect(newline?.message).toContain('"/tmp/a\\nb"');
+
+    const rtlo = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '/tmp/a\u202Eb.exe' },
+      context: mockContext,
+    });
+    expect(rtlo?.message).toContain('"/tmp/a\\u{202E}b.exe"');
+    expect(rtlo?.message).not.toContain('\u202E');
+
+    const zwsp = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '/tmp/a\u200Bb' },
+      context: mockContext,
+    });
+    expect(zwsp?.message).toContain('"/tmp/a\\u{200B}b"');
   });
 
   it('returns insufficient_privileges and does not dispatch when caller lacks canWriteScanOperations', async () => {
@@ -292,15 +383,63 @@ describe('scanHostTool', () => {
     }
   );
 
-  it('rejects a whitespace-only path and trims a padded one', () => {
+  it('dispatches a newline-containing path byte-identical even though the card shows it escaped', async () => {
+    const mockAgentService = {
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-123', packages: ['endpoint'] }],
+      }),
+    };
+    const mockResponseActionsClient = {
+      scan: jest.fn().mockResolvedValue({
+        id: 'action-scan-2',
+        status: 'pending',
+        wasSuccessful: undefined,
+        hosts: { 'agent-123': { name: 'my-host' } },
+      }),
+    };
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+    mockActionCompletion({
+      id: 'action-scan-2',
+      status: 'successful',
+      wasSuccessful: true,
+      hosts: { 'agent-123': { name: 'my-host' } },
+    });
+
+    const newlinePath = '/tmp/a\nb';
+    const tool = scanHostTool(service);
+    const { card } = await confirmThenHandle(tool, { hostName: 'my-host', path: newlinePath });
+
+    // The card shows the escape; the dispatch gets the raw bytes.
+    expect(card.message).toContain('"/tmp/a\\nb"');
+    expect(card.message).not.toContain(newlinePath);
+    expect(mockResponseActionsClient.scan).toHaveBeenCalledWith(
+      expect.objectContaining({ parameters: { path: newlinePath } }),
+      expect.anything()
+    );
+  });
+
+  it('rejects a whitespace-only path, passes a padded one through unchanged, and rejects >4096 chars', () => {
     const tool = scanHostTool(service);
 
     expect(tool.schema.safeParse({ hostName: 'h', path: '   ' }).success).toBe(false);
     expect(tool.schema.safeParse({ hostName: 'h', path: '\t\n' }).success).toBe(false);
+    expect(tool.schema.safeParse({ hostName: 'h', path: '/' }).success).toBe(true);
 
-    const parsed = tool.schema.safeParse({ hostName: 'h', path: '  /tmp/x  ' });
+    const parsed = tool.schema.safeParse({ hostName: 'h', path: '/tmp/payload ' });
     expect(parsed.success).toBe(true);
-    expect(parsed.data?.path).toBe('/tmp/x');
+    expect(parsed.data?.path).toBe('/tmp/payload ');
+
+    const leading = tool.schema.safeParse({ hostName: 'h', path: '  /tmp/x  ' });
+    expect(leading.data?.path).toBe('  /tmp/x  ');
+
+    expect(tool.schema.safeParse({ hostName: 'h', path: 'a'.repeat(4096) }).success).toBe(true);
+    expect(tool.schema.safeParse({ hostName: 'h', path: 'a'.repeat(4097) }).success).toBe(false);
   });
 
   it('returns an error result when the response actions client throws', async () => {

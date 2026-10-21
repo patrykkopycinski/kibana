@@ -103,7 +103,7 @@ export const endpointForensicAnalysisSkill = defineSkillType({
     'Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, ' +
     'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
     'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
-    'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
+    'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, malware scan, or running processes (hand off to endpoint-response-actions when it is available; otherwise direct the analyst to Endpoint response actions in Security). Kill process and file retrieve are not available from chat. ' +
     'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
     'performance/resource troubleshooting, or output/integration failures — even when the question names a specific host ' +
     '(use elastic-defend-configuration-troubleshooting).',
@@ -122,7 +122,8 @@ Naming a specific host is **not** sufficient on its own — the question must al
 Do **not** load for:
 - Fleet-wide proactive hunts → threat-hunting
 - Alert triage from alert id only → alert-analysis
-- Host isolation / kill process / file retrieve → tell the analyst to use **Endpoint response actions** in Security (Fleet / Endpoint details). Do not invoke response-action tools from this skill.
+- Host isolation / malware scan / running processes → hand off to **endpoint-response-actions** (see "Cross-Skill Handoff"). Do not invoke response-action tools from this skill.
+- Kill process / suspend process / get-file / execute / upload / runscript / memory-dump → not available from chat; tell the analyst to use **Endpoint response actions** in Security (Fleet / Endpoint details).
 - Conflicting or incompatible security software, including antivirus/AV software (e.g. "does host X have conflicting antivirus", third-party AV conflicts) → elastic-defend-configuration-troubleshooting. Naming a specific host does **not** make this a forensic question — antivirus/AV conflict detection is always configuration troubleshooting, never forensic reconstruction.
 - Policy/configuration failures → elastic-defend-configuration-troubleshooting
 - Endpoint health and missed check-ins → elastic-defend-configuration-troubleshooting
@@ -131,7 +132,7 @@ Do **not** load for:
 
 ## Scope (read-only)
 
-This skill MUST NOT invoke response actions. On response-action requests, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security; then stop.
+This skill MUST NOT invoke response actions itself. On containment, isolate, release, malware scan, or running-processes requests, hand off to the \`endpoint-response-actions\` skill and stop (see "Cross-Skill Handoff"). If that skill is not available, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security; then stop. Kill process, get-file, execute, and the other response actions are not available from chat — say so and point the analyst to Endpoint response actions in Security.
 
 ## Capability Detection (Phase 0 — ALWAYS FIRST)
 
@@ -256,12 +257,35 @@ Trace outbound internal connections from source host; correlate with process cre
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
 When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`startup_items\` tables.
 
+## Cross-Skill Handoff
+
+Reconstruction and IoC extraction are the first phase of a forensic → hunt → contain flow. After presenting the
+indicators, offer the next phase once, as an explicit question; never run a later phase without the analyst's
+confirmation.
+
+**Hunt across other hosts → \`threat-hunting\`.** When the analyst asks whether other hosts are affected, or asks
+for a cross-environment sweep, hand off to the \`threat-hunting\` skill and pass the indicators
+\`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` returned, verbatim: \`shas\`, \`ips\`, \`file_paths\`,
+\`malicious_commands\`, and \`affected_hosts\` (plus any categories you added yourself), with the time window used.
+Do not run the fleet-wide hunt from this skill.
+
+**Contain → \`endpoint-response-actions\`.** When the analyst asks to isolate, release, scan, or list running
+processes on a host, hand off to the \`endpoint-response-actions\` skill with the host name(s) and, for a scan,
+the path(s) taken from \`file_paths\`. That skill owns confirmation, dispatch, and reporting.
+- Name the specific hosts and actions you recommend, then ask whether to proceed. Once the analyst agrees, the
+  confirmation card from \`endpoint-response-actions\` is the only further confirmation before dispatch — do not
+  ask again in chat.
+- \`endpoint-response-actions\` sits behind an experimental flag that is off by default. If it is not available,
+  direct the analyst to Endpoint response actions in Security instead and stop.
+- Kill process, get-file, execute, and the other response actions are not available from chat.
+
 ## Tool Selection Guardrails
 
 - **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool — and only after confirming the \`osquery.*\` tools are in your tool list (see Phase 0). When they are not registered on this deployment, use the ES|QL / Defend telemetry path instead: never call a tool that is not in your tool list.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL — and only on the ES|QL path.
 - **Always** call \`osquery.resolve_agent_ids\` before \`osquery.run_live_query\`: the dispatch tool takes \`agent_ids\`, never host names.
 - **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured indicators for downstream hunts.
+- **Never** call response-action tools from this skill; hand off to \`endpoint-response-actions\`, or to Endpoint response actions in Security when that skill is not available.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.

@@ -55,7 +55,6 @@ describe('registerSkills - endpoint response actions', () => {
     ml: undefined,
     options: { endpointAppContextService: createMockEndpointAppContext().service },
   });
-
   it('registers the endpoint-response-actions skill without throwing when the flag is enabled', async () => {
     const agentBuilder = createAllowListEnforcingAgentBuilder();
 
@@ -87,5 +86,56 @@ describe('registerSkills - endpoint response actions', () => {
     // `await` in `plugin.ts`, so the rejection is swallowed by a `.catch()`
     // that only logs — the skill goes silently missing at runtime.
     expect(isAllowedBuiltinSkill(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID)).toBe(true);
+  });
+});
+
+const DETONATE_SAMPLE_SKILL_ID = 'detonate-sample';
+
+describe('registerSkills - detonate sample', () => {
+  const buildDetonateOpts = (
+    agentBuilder: ReturnType<typeof createAllowListEnforcingAgentBuilder>,
+    detonateClient: unknown
+  ) => ({
+    agentBuilder,
+    experimentalFeatures: { ...allowedExperimentalValues },
+    getStartServices: coreMock.createSetup().getStartServices,
+    kibanaVersion: '9.0.0',
+    logger: loggerMock.create(),
+    ml: undefined,
+    options: {
+      endpointAppContextService: createMockEndpointAppContext().service,
+      detonateClient,
+    },
+  });
+
+  it('uses a skill id that is on the agent-builder built-in allow-list', () => {
+    // Same failure mode as endpoint-response-actions: `registerSkills` is
+    // fire-and-forget in `plugin.ts`, so an unlisted id throws inside a
+    // `.catch()` that only logs and the skill silently never registers.
+    expect(isAllowedBuiltinSkill(DETONATE_SAMPLE_SKILL_ID)).toBe(true);
+  });
+
+  it('registers the detonate-sample skill without throwing when the client is present', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(
+      registerSkills(
+        buildDetonateOpts(agentBuilder, {}) as Parameters<typeof registerSkills>[0]
+      )
+    ).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).toContain(DETONATE_SAMPLE_SKILL_ID);
+  });
+
+  it('does not register the detonate-sample skill when no detonate client is configured', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(
+      registerSkills(
+        buildDetonateOpts(agentBuilder, undefined) as Parameters<typeof registerSkills>[0]
+      )
+    ).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).not.toContain(DETONATE_SAMPLE_SKILL_ID);
   });
 });

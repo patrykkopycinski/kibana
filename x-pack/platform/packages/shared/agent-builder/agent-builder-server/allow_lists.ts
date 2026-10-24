@@ -298,6 +298,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
   'endpoint-response-actions',
+  'detonate-sample',
 
   // O11Y
   'observability.investigation',

@@ -82,6 +82,7 @@ describe('ensureFpTpRawEventTemplate', () => {
         name: FP_TP_RAW_EVENT_INDEX_TEMPLATE,
         index_patterns: [`${FP_TP_RAW_EVENT_INDEX_PREFIX}*`],
         priority: FP_TP_RAW_EVENT_TEMPLATE_PRIORITY,
+        composed_of: ['logs@mappings', 'ecs@mappings'],
         data_stream: {},
         template: expect.objectContaining({
           settings: { 'index.mapping.total_fields.limit': FP_TP_RAW_EVENT_TOTAL_FIELDS_LIMIT },

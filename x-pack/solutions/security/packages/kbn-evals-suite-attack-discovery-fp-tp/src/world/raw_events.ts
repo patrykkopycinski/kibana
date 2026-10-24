@@ -137,6 +137,14 @@ export const ensureFpTpRawEventTemplate = async (esClient: EsClient): Promise<vo
     name: FP_TP_RAW_EVENT_INDEX_TEMPLATE,
     index_patterns: [`${FP_TP_RAW_EVENT_INDEX_PREFIX}*`],
     priority: FP_TP_RAW_EVENT_TEMPLATE_PRIORITY,
+    // The composition supplies ECS types (host.os.type, event.action, host.ip,
+    // data_stream.*, agent.*, ecs.version, ...) for fields this template maps
+    // dynamically. Without it those fields land as text and detection rules
+    // querying logs-endpoint.events.* fail verification with
+    // "mapped as [2] incompatible types" — live incident: rule 8a1b0278
+    // (SUID/SGID) never alerted on the golden serverless env. Explicit
+    // mappings below win conflicts (higher-priority composable template).
+    composed_of: ['logs@mappings', 'ecs@mappings'],
     data_stream: {},
     template: {
       settings: rawEventIndexSettings(),

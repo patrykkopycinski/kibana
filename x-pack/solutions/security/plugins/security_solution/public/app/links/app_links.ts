@@ -16,6 +16,7 @@ import { configurationsLinks, getConfigurationsLinks } from '../../configuration
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
 import { siemReadinessLinks } from '../../siem_readiness/links';
+import { detonatePrototypeLinks } from '../../detonate_prototype/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
 import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detections/links';
@@ -49,6 +50,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   onboardingLinks,
   managementLinks,
   siemReadinessLinks,
+  detonatePrototypeLinks,
   aiValueLinks,
 ]);
 
@@ -102,6 +104,7 @@ export const getFilteredLinks = async (
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,
+    detonatePrototypeLinks,
     launchPadLinks,
     managementFilteredLinks,
   ]);

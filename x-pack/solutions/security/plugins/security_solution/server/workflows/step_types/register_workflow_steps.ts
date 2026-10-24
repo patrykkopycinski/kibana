@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { detonateSampleStepDefinition } from './detonate_prototype/detonate_sample_step';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
@@ -31,7 +32,14 @@ import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  /**
+   * Detonate prototype (experimental, off by default). Passed in rather than
+   * read here so the gate lives with the rest of the prototype's wiring in
+   * `plugin.ts`, and so removing the spike is a one-line deletion there plus
+   * the two lines below.
+   */
+  detonatePrototypeEnabled = false
 ): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
@@ -53,4 +61,8 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(getAlertEntitiesStepDefinition);
+
+  if (detonatePrototypeEnabled) {
+    workflowsExtensions.registerStepDefinition(detonateSampleStepDefinition);
+  }
 };

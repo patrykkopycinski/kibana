@@ -30,6 +30,7 @@ import { Dashboards } from './dashboards';
 import { EntityAnalytics } from './entity_analytics';
 import { SiemMigrations } from './siem_migrations';
 import { SiemReadiness } from './siem_readiness';
+import { DetonatePrototype } from './detonate_prototype';
 import { Configurations } from './configurations';
 
 /**
@@ -56,6 +57,7 @@ const subPluginClasses = {
   Configurations,
   SiemMigrations,
   SiemReadiness,
+  DetonatePrototype,
   Reports,
 };
 export { subPluginClasses };

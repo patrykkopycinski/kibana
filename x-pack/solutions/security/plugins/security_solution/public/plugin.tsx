@@ -902,6 +902,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
         siemReadiness: new subPluginClasses.SiemReadiness(),
+        detonatePrototype: new subPluginClasses.DetonatePrototype(),
         configurations: new subPluginClasses.Configurations(),
         reports: new subPluginClasses.Reports(),
       };
@@ -936,6 +937,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       entityAnalytics: subPlugins.entityAnalytics.start(),
       siemMigrations: subPlugins.siemMigrations.start(this.experimentalFeatures),
       siemReadiness: subPlugins.siemReadiness.start(),
+      detonatePrototype: subPlugins.detonatePrototype.start(),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
     };

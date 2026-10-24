@@ -401,6 +401,19 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * Detonate prototype: an end-to-end spike that submits a sample to a
+   * detonation service and shows the resulting Defend alerts across four
+   * analyst surfaces (a Detonate page, an alert action, an Agent Builder
+   * skill and a workflow step).
+   *
+   * Off by default, and inert unless
+   * `xpack.securitySolution.detonatePrototype.serviceUrl` also points at a
+   * reachable detonation service. Everything it adds is namespaced
+   * `detonate.prototype.*` so the spike can be removed in one commit.
+   */
+  detonatePrototypeEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

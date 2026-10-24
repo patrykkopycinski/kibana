@@ -48,18 +48,22 @@ const dockerArgs: string[] = [
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
+// Ports are env-overridable so two Scout stacks can run side by side in
+// sibling worktrees (e.g. while one stack is held by another session).
+// `TEST_ES_PORT` matches the env var @kbn/test-es-server already reads for the
+// ES cluster itself, so one variable moves both the bind and Kibana's client.
 const servers = {
   elasticsearch: {
     protocol: 'http',
     hostname: 'localhost',
-    port: 9220,
+    port: process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220,
     username: 'kibana_system',
     password: 'changeme',
   },
   kibana: {
     protocol: 'http',
     hostname: 'localhost',
-    port: 5620,
+    port: process.env.TEST_KIBANA_PORT ? parseInt(process.env.TEST_KIBANA_PORT, 10) : 5620,
     username: 'elastic',
     password: 'changeme',
   },

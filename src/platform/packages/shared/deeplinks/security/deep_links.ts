@@ -44,6 +44,11 @@ export enum SecurityPageName {
   dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
+  /**
+   * Detonate prototype (experimental spike, off by default). Removed together
+   * with the rest of the `detonate.prototype.*` surfaces.
+   */
+  detonatePrototype = 'detonate_prototype',
   endpoints = 'endpoints',
   endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',

@@ -217,6 +217,17 @@ export const configSchema = schema.object({
       elserInferenceId: schema.maybe(schema.string()),
     })
   ),
+  /**
+   * Detonate prototype (see `detonatePrototypeEnabled` in
+   * `common/experimental_features.ts`). The service address is operator
+   * configuration and has no default here on purpose: no deployment address
+   * belongs in this repository.
+   */
+  detonatePrototype: schema.maybe(
+    schema.object({
+      serviceUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    })
+  ),
   cdn: schema.maybe(
     schema.object({
       url: schema.maybe(schema.string()),

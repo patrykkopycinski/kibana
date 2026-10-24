@@ -79,6 +79,9 @@ export const BULK_ADD_TO_CASE_ACTION_ID = 'attach-case' as const;
 
 export const BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID = 'add-bulk-to-timeline' as const;
 
+/** Key emitted by `useDetonateAlertAction` (detonate prototype, experimental). */
+export const DETONATE_FILE_ACTION_ID = 'detonate-file-action-item' as const;
+
 export const EVENT_FILTER_ACTION_ID = 'add-event-filter-menu-item' as const;
 
 export const EXPLORE_ACTION_ID = 'explore-action' as const;

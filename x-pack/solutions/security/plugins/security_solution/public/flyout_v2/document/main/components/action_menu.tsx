@@ -47,6 +47,7 @@ export interface ActionMenuGroupsProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
+  detonateItems: EuiContextMenuPanelItemDescriptor[];
   documentWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   endpointResponseItems: EuiContextMenuPanelItemDescriptor[];
   exceptionItems: EuiContextMenuPanelItemDescriptor[];
@@ -74,6 +75,7 @@ export const getActionGroups = ({
   addToCaseItems,
   alertAssigneeItems,
   alertTagItems,
+  detonateItems,
   documentWorkflowItems,
   endpointResponseItems,
   exceptionItems,
@@ -100,6 +102,7 @@ export const getActionGroups = ({
         ...hostIsolationItems,
         ...endpointResponseItems,
         ...(osqueryAvailable ? osqueryItems : []),
+        ...detonateItems,
       ]
     : [];
   return [
@@ -149,6 +152,7 @@ export const ActionMenu = ({
   alertAssigneePanels,
   alertTagItems,
   alertTagPanels,
+  detonateItems,
   documentWorkflowItems,
   endpointResponseItems,
   exceptionItems,
@@ -173,6 +177,7 @@ export const ActionMenu = ({
       addToCaseItems,
       alertAssigneeItems,
       alertTagItems,
+      detonateItems,
       documentWorkflowItems,
       endpointResponseItems,
       exceptionItems,
@@ -208,6 +213,7 @@ export const ActionMenu = ({
     addToCaseItems,
     alertAssigneeItems,
     alertTagItems,
+    detonateItems,
     documentWorkflowItems,
     endpointResponseItems,
     exceptionItems,

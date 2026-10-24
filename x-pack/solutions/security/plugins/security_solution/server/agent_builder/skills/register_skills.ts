@@ -38,6 +38,8 @@ import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 import { createDetectionCoverageSkill } from './detection_coverage';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
+import { createDetonateSampleSkill } from './detonate_prototype';
+import type { DetonateClient } from '../../detonate_prototype';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 interface RegisterSkillsOpts {
@@ -49,6 +51,11 @@ interface RegisterSkillsOpts {
   ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
     endpointAppContextService: EndpointAppContextService;
+    /**
+     * Detonate prototype client. Present only when the experimental flag is on
+     * and the service is configured — its absence is what gates the skill.
+     */
+    detonateClient?: DetonateClient;
   };
 }
 
@@ -153,5 +160,14 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.investigateRuleSkill) {
     await agentBuilder.skills.register(createInvestigateRuleSkill());
+  }
+
+  // Detonate prototype. `detonateClient` is only built when the experimental
+  // flag is on, so its presence is the gate — no second flag check here.
+  const { detonateClient } = options;
+  if (detonateClient) {
+    await agentBuilder.skills.register(
+      createDetonateSampleSkill(options.endpointAppContextService, () => detonateClient)
+    );
   }
 };

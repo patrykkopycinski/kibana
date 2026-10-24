@@ -96,6 +96,7 @@ import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
 import type { SiemReadiness } from './siem_readiness';
+import type { DetonatePrototype } from './detonate_prototype';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
@@ -291,6 +292,7 @@ export interface SubPlugins {
   entityAnalytics: EntityAnalytics;
   siemMigrations: SiemMigrations;
   siemReadiness: SiemReadiness;
+  detonatePrototype: DetonatePrototype;
   configurations: Configurations;
 }
 
@@ -316,5 +318,6 @@ export interface StartedSubPlugins {
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
   siemReadiness: ReturnType<SiemReadiness['start']>;
+  detonatePrototype: ReturnType<DetonatePrototype['start']>;
   configurations: ReturnType<Configurations['start']>;
 }

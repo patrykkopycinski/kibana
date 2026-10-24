@@ -34,6 +34,7 @@ import { AddExceptionFlyoutWrapper } from '../../../../detections/components/ale
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
+import { useDetonateAlertAction } from '../../../../detonate_prototype/hooks/use_detonate_alert_action';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
@@ -273,6 +274,11 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
+    const { detonateActionItems } = useDetonateAlertAction({
+      hit,
+      closePopover: closePopoverHandler,
+    });
+
     const osqueryAvailableFlag = Boolean(osqueryAvailable);
     const hasItems = useMemo(
       () =>
@@ -280,6 +286,7 @@ export const TakeActionButton = memo(
           addToCaseItems: addToCaseActionItems,
           alertAssigneeItems: alertAssigneesItems,
           alertTagItems: alertTagsItems,
+          detonateItems: detonateActionItems,
           documentWorkflowItems: documentWorkflowMenuItem,
           endpointResponseItems: endpointResponseActionsConsoleItems,
           exceptionItems: exceptionActionItems,
@@ -299,6 +306,7 @@ export const TakeActionButton = memo(
         addToCaseActionItems,
         alertAssigneesItems,
         alertTagsItems,
+        detonateActionItems,
         documentWorkflowMenuItem,
         endpointResponseActionsConsoleItems,
         exceptionActionItems,
@@ -363,6 +371,7 @@ export const TakeActionButton = memo(
             alertAssigneePanels={alertAssigneesPanels}
             alertTagItems={alertTagsItems}
             alertTagPanels={alertTagsPanels}
+            detonateItems={detonateActionItems}
             documentWorkflowItems={documentWorkflowMenuItem}
             endpointResponseItems={endpointResponseActionsConsoleItems}
             exceptionItems={exceptionActionItems}

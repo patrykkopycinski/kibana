@@ -196,6 +196,8 @@ import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
+import type { DetonateClient } from './detonate_prototype';
+import { setupDetonatePrototype } from './detonate_prototype';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -233,6 +235,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private isServerless: boolean;
   private securityEventBus?: SecuritySolutionEventBus;
+
+  /**
+   * Detonate prototype client, present only when the experimental flag is on.
+   * Shared by the Agent Builder skill and the workflow step so every surface
+   * talks to the same configured service.
+   */
+  private detonateClient?: DetonateClient;
 
   /** Captured in `setup()`: rule lifecycle telemetry needs the setup contract, not the start one. */
 
@@ -344,7 +353,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
-      options: { endpointAppContextService },
+      options: { endpointAppContextService, detonateClient: this.detonateClient },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
@@ -721,6 +730,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     registerEndpointRoutes(router, this.endpointContext);
+
+    // Detonate prototype (experimental, off by default). Removing this call
+    // and the `detonate_prototype` directories removes the spike entirely.
+    this.detonateClient = setupDetonatePrototype({
+      router,
+      logger,
+      serviceUrl: config.detonatePrototype?.serviceUrl,
+      enabled: config.experimentalFeatures.detonatePrototypeEnabled,
+    });
+
     registerEndpointSuggestionsRoutes(
       router,
       plugins.kql.autocomplete.getInitializerContextConfig().create(),
@@ -884,7 +903,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions);
+      registerWorkflowSteps(
+        plugins.workflowsExtensions,
+        config.experimentalFeatures.detonatePrototypeEnabled
+      );
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }

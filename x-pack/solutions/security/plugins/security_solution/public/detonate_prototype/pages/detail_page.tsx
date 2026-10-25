@@ -40,6 +40,7 @@ import {
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonationTask } from '../hooks/use_detonate';
 import { DetonationStatusBadge } from '../components/detonation_status_badge';
+import { WorkerTimeline } from '../components/worker_timeline';
 import { DetectionAlertGroups, EndpointAlertGroups } from '../components/alert_groups';
 import * as i18n from '../translations';
 
@@ -177,6 +178,14 @@ export const DetonateDetailPage = React.memo(() => {
           data-test-subj="detonatePrototypeDetails"
         />
       </EuiPanel>
+
+      {/* Progress lives beside the details while the run is in flight. */}
+      {!complete && (
+        <>
+          <EuiSpacer size="l" />
+          <WorkerTimeline taskId={task.id} isComplete={complete} />
+        </>
+      )}
       <EuiSpacer size="l" />
 
       <EuiFlexGroup direction="column" gutterSize="l">

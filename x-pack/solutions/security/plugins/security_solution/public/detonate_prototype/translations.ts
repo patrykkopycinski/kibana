@@ -142,6 +142,11 @@ export const STATUS_FAILED = i18n.translate(
   { defaultMessage: 'Failed' }
 );
 
+export const TIMELINE_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.timelineTitle',
+  { defaultMessage: 'Detonation progress' }
+);
+
 export const PRODUCTION_ENDPOINT_ALERTS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.productionEndpointAlerts',
   { defaultMessage: 'Endpoint alerts' }

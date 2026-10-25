@@ -98,6 +98,10 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       const { body: task } = await contextManager.callKibanaApi<DetonateTask>({
         method: 'POST',
         path: DETONATE_SUBMIT_HASH_PATH,
+        // The detonate routes are versioned (`router.versioned`, version '1');
+        // a versioned route rejects a self-call without this header with
+        // "Please specify a version via elastic-api-version header" (400).
+        headers: { 'elastic-api-version': '1' },
         body: {
           sample_hash: sampleHash,
           ...(tags ? { tags } : {}),
@@ -133,6 +137,7 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       ({ body: task } = await contextManager.callKibanaApi<DetonateTask>({
         method: 'GET',
         path: `${DETONATE_TASKS_PATH}/${encodeURIComponent(state.taskId)}`,
+        headers: { 'elastic-api-version': '1' },
       }));
     } catch (error) {
       throw toApiExecutionError(error, `read detonation task ${state.taskId}`);

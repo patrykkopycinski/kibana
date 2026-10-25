@@ -20,9 +20,27 @@
  */
 const DEFAULT_LOCAL_SERVICE_URL = 'http://localhost:8787';
 
+/**
+ * EIS QA gateway. Setting `xpack.inference.elastic.url` at boot is what lets
+ * the Agent Builder surfaces (whose gate is "at least one inference
+ * connector") work in this stack — the setting is static and cannot be added
+ * to a running node. The CCM API key still needs a one-time
+ * `node scripts/eis.js` push after ES is up.
+ */
+const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+
 export const detonatePrototypeServerArgs = [
   `--xpack.securitySolution.enableExperimental=${JSON.stringify(['detonatePrototypeEnabled'])}`,
   `--xpack.securitySolution.detonatePrototype.serviceUrl=${
     process.env.DETONATE_SERVICE_URL ?? DEFAULT_LOCAL_SERVICE_URL
   }`,
+];
+
+/**
+ * ES-side args for the detonate prototype config set. Empty unless
+ * `DETONATE_EIS` is set, so the default boot is unchanged; set it when the
+ * demo/recording needs the Agent Builder skills page or chat-backed skills.
+ */
+export const detonatePrototypeEsServerArgs = [
+  ...(process.env.DETONATE_EIS ? [`xpack.inference.elastic.url=${EIS_QA_URL}`] : []),
 ];

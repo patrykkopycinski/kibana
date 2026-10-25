@@ -9,18 +9,25 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
-import { detonatePrototypeServerArgs } from '../shared';
+import { detonatePrototypeEsServerArgs, detonatePrototypeServerArgs } from '../shared';
 
 /**
  * Scout server config for the detonate prototype suite, which needs the
  * `detonatePrototypeEnabled` experimental flag and a detonation service address
  * present when Kibana boots. The tests live under `test/scout_detonate_prototype`.
  *
+ * With `DETONATE_EIS` set, ES also boots with the EIS QA inference gateway so
+ * Agent Builder's LLM gate passes (see `../shared`).
+ *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet detonate_prototype
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [...defaultConfig.esTestCluster.serverArgs, ...detonatePrototypeEsServerArgs],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...detonatePrototypeServerArgs],

@@ -116,16 +116,22 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
   const canSubmit = mode === 'hash' ? hash.trim().length > 0 : file !== undefined;
 
   const onSubmit = useCallback(async () => {
-    if (mode === 'hash') {
-      const task = await submitHash.mutateAsync({ sample_hash: hash.trim(), ...options });
-      onSubmitted(task);
-      return;
-    }
-    if (file) {
-      const task = await submitFile.mutateAsync({ file, tags: tagValues });
-      onSubmitted(task);
-    }
-  }, [mode, hash, file, options, tagValues, submitHash, submitFile, onSubmitted]);
+    // Errors are surfaced by the mutation state (the error callout below), but
+    // the discarded promise would still be an unhandled rejection — catch here
+    // so a failed submit is not also a console error.
+    const submit = async () => {
+      if (mode === 'hash') {
+        const task = await submitHash.mutateAsync({ sample_hash: hash.trim(), ...options });
+        onSubmitted(task);
+        return;
+      }
+      if (file) {
+        const task = await submitFile.mutateAsync({ file, ...options });
+        onSubmitted(task);
+      }
+    };
+    await submit().catch(() => undefined);
+  }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
 
   const onCreateTag = useCallback((label: string) => {
     const trimmed = label.trim();

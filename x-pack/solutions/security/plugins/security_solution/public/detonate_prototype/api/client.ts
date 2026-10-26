@@ -37,7 +37,10 @@ const VERSION = { version: '1' } as const;
 
 export interface SubmitFileParams {
   file: File;
+  /** Same optional fields the hash path sends; omitted ones use service defaults. */
   tags?: string[];
+  vm_os_family?: string;
+  vm_architecture?: string;
 }
 
 export const detonateApi = {
@@ -57,12 +60,19 @@ export const detonateApi = {
    * the real service expects — flattening them into form fields would work
    * against the proxy and fail against the service.
    */
-  submitFile: (http: HttpSetup, { file, tags }: SubmitFileParams, signal?: AbortSignal) => {
+  submitFile: (
+    http: HttpSetup,
+    { file, ...requestOptions }: SubmitFileParams,
+    signal?: AbortSignal
+  ) => {
     const body = new FormData();
     body.append('sample_file', file);
     body.append('sample_filename', file.name);
-    if (tags?.length) {
-      body.append('request_json', JSON.stringify({ tags }));
+    // Same optional fields the hash path sends as its JSON body, serialized
+    // into the multipart `request_json` part — one contract for both submit
+    // modes.
+    if (Object.keys(requestOptions).length > 0) {
+      body.append('request_json', JSON.stringify(requestOptions));
     }
 
     return http.post<DetonateTask>(DETONATE_SUBMIT_FILE_PATH, {

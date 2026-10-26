@@ -26,8 +26,18 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-/** Standard EICAR anti-malware test file, SHA-256. Inert, and detected by Defend. */
-const EICAR_SHA256 = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
+/**
+ * SHA-256 of the sample to detonate (standard EICAR anti-malware test file:
+ * inert, and detected by Defend). Supplied by the runner so no specific
+ * sample digest is pinned in the repository.
+ */
+const SAMPLE_SHA256 = process.env.DETONATE_SAMPLE_SHA256;
+
+if (!SAMPLE_SHA256) {
+  throw new Error(
+    'DETONATE_SAMPLE_SHA256 is not set. Export the SHA-256 digest of the sample this suite should detonate (e.g. the standard EICAR test file) before running it.'
+  );
+}
 
 /** `/app/security` + the prototype's route. */
 const DETONATE_APP = 'security/detonate_prototype';
@@ -64,7 +74,7 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
       await page.gotoApp(DETONATE_APP);
       await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-      await page.testSubj.fill(SAMPLE_HASH_INPUT, EICAR_SHA256);
+      await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
       await page.testSubj.click(SUBMIT_BUTTON);
 
       // An unreachable service otherwise surfaces only as a missing detail
@@ -102,14 +112,14 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await page.gotoApp(DETONATE_APP);
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    await page.testSubj.fill(SAMPLE_HASH_INPUT, EICAR_SHA256);
+    await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
     await page.testSubj.click(SUBMIT_BUTTON);
     await expect(page.testSubj.locator(DETAIL_PAGE)).toBeVisible();
 
     await page.testSubj.click(BACK_TO_RUNS);
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    const firstRun = page.testSubj.locator(RUNS_TABLE_LINK).first();
+    const firstRun = page.testSubj.locator(RUNS_TABLE_LINK).first(); // eslint-disable-line playwright/no-nth-methods -- any listed run proves navigation back into a run
     await expect(firstRun).toBeVisible();
     await firstRun.click();
 
@@ -121,10 +131,10 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     // the alert document, plus a tag tying the run back to that document.
     const tag = 'detonate.prototype.alert:scout-alert-id';
 
-    await page.gotoApp(DETONATE_APP, { params: { sample_hash: EICAR_SHA256, tags: tag } });
+    await page.gotoApp(DETONATE_APP, { params: { sample_hash: SAMPLE_SHA256, tags: tag } });
 
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
-    await expect(page.testSubj.locator(SAMPLE_HASH_INPUT)).toHaveValue(EICAR_SHA256);
+    await expect(page.testSubj.locator(SAMPLE_HASH_INPUT)).toHaveValue(SAMPLE_SHA256);
     await expect(page.testSubj.locator(TAGS_INPUT)).toContainText(tag);
   });
 });

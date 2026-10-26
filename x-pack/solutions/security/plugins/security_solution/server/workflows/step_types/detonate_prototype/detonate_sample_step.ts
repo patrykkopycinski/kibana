@@ -56,7 +56,7 @@ const toOutput = (task: DetonateTask, completed: boolean) => ({
   last_worker_name: task.last_worker_name,
   last_worker_status: task.last_worker_status,
   last_worker_status_details: task.last_worker_status_details,
-  sample_hash: task.sample_hash,
+  // sample_hash is deliberately not echoed (see output schema).
   sample_source: task.sample_source,
   production_endpoint_alerts_count: task.production_endpoint_alerts_count ?? 0,
   diagnostic_endpoint_alerts_count: task.diagnostic_endpoint_alerts_count ?? 0,

@@ -96,7 +96,11 @@ export const detonateSampleOutputSchema = lazySchema(() =>
     last_worker_name: z.enum(DETONATE_WORKERS),
     last_worker_status: z.enum(DETONATE_WORKER_STATUSES),
     last_worker_status_details: z.string().optional(),
-    sample_hash: z.string().optional(),
+    /**
+     * No `sample_hash` echo: the caller supplies the hash, and the step output
+     * is rendered in execution-detail tables — repeating it adds a long opaque
+     * string to that view without adding information.
+     */
     sample_source: z.enum(DETONATE_SAMPLE_SOURCES).optional(),
     production_endpoint_alerts_count: z.number().int(),
     diagnostic_endpoint_alerts_count: z.number().int(),

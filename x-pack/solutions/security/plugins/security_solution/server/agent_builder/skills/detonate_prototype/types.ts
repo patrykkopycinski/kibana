@@ -157,7 +157,9 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
       ? { last_worker_status_details: task.last_worker_status_details }
       : {}),
 
-    ...(task.sample_hash ? { sample_hash: task.sample_hash } : {}),
+    // No `sample_hash` echo: the analyst already knows the hash they asked
+    // about, task_id + filename identify the run, and a hash in a tool result
+    // tends to be repeated verbatim in the chat answer.
     ...(task.sample_filename ? { sample_filename: task.sample_filename } : {}),
     ...(task.sample_source ? { sample_source: task.sample_source } : {}),
 

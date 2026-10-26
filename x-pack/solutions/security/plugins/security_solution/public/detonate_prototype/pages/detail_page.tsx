@@ -59,9 +59,6 @@ const details = (task: DetonateTask): EuiDescriptionListProps['listItems'] => {
     { title: 'Telemetry cluster', description: task.telemetry_cluster_version },
   ];
 
-  if (task.sample_hash) {
-    items.push({ title: 'Sample hash', description: task.sample_hash });
-  }
   if (task.sample_filename) {
     items.push({ title: 'Sample filename', description: task.sample_filename });
   }

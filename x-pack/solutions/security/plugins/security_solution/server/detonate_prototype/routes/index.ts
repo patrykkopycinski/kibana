@@ -176,8 +176,15 @@ export const registerDetonatePrototypeRoutes = ({
                 body: { message: '`request_json` is not valid JSON.' },
               });
             }
-            const validation = schema.object(submitOptionsSchema).validate(options);
-            options = validation;
+            try {
+              options = schema.object(submitOptionsSchema).validate(options);
+            } catch {
+              // `validate` throws rather than returning errors, and without
+              // this branch a malformed option would surface as a 500.
+              return response.badRequest({
+                body: { message: '`request_json` contains invalid options.' },
+              });
+            }
           }
 
           const body = await readSample(sampleFile as Readable, MAX_SAMPLE_BYTES);

@@ -99,7 +99,7 @@ export const detonateApi = {
 
   listTasks: (
     http: HttpSetup,
-    query: { query_string?: string; offset?: number; size?: number },
+    query: { query_string?: string; alert_id?: string; offset?: number; size?: number },
     signal?: AbortSignal
   ) =>
     http.get<DetonateTaskSearchResponse>(DETONATE_TASKS_PATH, {
@@ -107,4 +107,11 @@ export const detonateApi = {
       query,
       signal,
     }),
+
+  /** Runs→alerts reverse index: every run started from one alert. */
+  listTasksForAlert: (http: HttpSetup, alertId: string, signal?: AbortSignal) =>
+    http.get<DetonateTaskSearchResponse>(
+      `${DETONATE_TASKS_PATH}/alert/${encodeURIComponent(alertId)}`,
+      { version: VERSION.version, signal }
+    ),
 };

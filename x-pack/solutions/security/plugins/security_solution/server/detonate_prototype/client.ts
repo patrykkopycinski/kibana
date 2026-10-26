@@ -63,6 +63,7 @@ export interface DetonateClient {
   getTaskUpdates(taskId: string): Promise<DetonateTaskUpdate[]>;
   listTasks(query?: {
     query_string?: string;
+    alert_id?: string;
     offset?: number;
     size?: number;
   }): Promise<DetonateTaskSearchResponse>;
@@ -144,6 +145,7 @@ export const createDetonateClient = ({
     listTasks: (query = {}) => {
       const params = new URLSearchParams();
       if (query.query_string) params.set('query_string', query.query_string);
+      if (query.alert_id) params.set('alert_id', query.alert_id);
       if (query.offset !== undefined) params.set('offset', String(query.offset));
       if (query.size !== undefined) params.set('size', String(query.size));
       const qs = params.toString();

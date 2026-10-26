@@ -39,6 +39,7 @@ export const DETONATE_QUERY_KEY = 'detonate_prototype' as const;
 
 export interface DetonateListQuery {
   query_string?: string;
+  alert_id?: string;
   offset?: number;
   size?: number;
 }
@@ -105,6 +106,21 @@ export const useDetonationTasks = (query: DetonateListQuery) => {
     // Keeps the table populated while the next page loads, instead of
     // flashing an empty state between pages.
     keepPreviousData: true,
+  });
+};
+
+/**
+ * Runs→alerts reverse index: every run started from one alert. The `alert:<id>`
+ * tag written by the alert action is resolved server-side, so this hook (and
+ * anything built on it) never needs to know the tag convention.
+ */
+export const useDetonationTasksForAlert = (alertId: string | undefined) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonateTaskSearchResponse>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'alert', alertId ?? ''] as const,
+    enabled: Boolean(alertId),
+    queryFn: ({ signal }) => detonateApi.listTasksForAlert(http, alertId as string, signal),
   });
 };
 

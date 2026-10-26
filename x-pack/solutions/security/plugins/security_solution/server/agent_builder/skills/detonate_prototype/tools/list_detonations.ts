@@ -38,6 +38,14 @@ const listDetonationsSchema = lazySchema(() =>
       .describe(
         'Free-text filter over past runs — a hash, a filename or a tag. Omit to list the most recent runs.'
       ),
+    alertId: z
+      .string()
+      .min(1)
+      .max(128)
+      .optional()
+      .describe(
+        'Only runs started from this alert. Use when the analyst asks "what happened with the detonation on this alert".'
+      ),
     page: z
       .number()
       .int()
@@ -71,12 +79,13 @@ export const listDetonationsTool = (
       return insufficientPrivilegesResult('canReadSecuritySolution');
     }
 
-    const { queryString, page = 0 } = params;
+    const { queryString, alertId, page = 0 } = params;
     const offset = page * LIST_DETONATIONS_PAGE_SIZE;
 
     try {
       const response = await getClient().listTasks({
         ...(queryString ? { query_string: queryString } : {}),
+        ...(alertId ? { alert_id: alertId } : {}),
         offset,
         size: LIST_DETONATIONS_PAGE_SIZE,
       });

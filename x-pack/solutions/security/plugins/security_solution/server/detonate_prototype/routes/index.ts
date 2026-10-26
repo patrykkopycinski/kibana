@@ -352,4 +352,37 @@ export const registerDetonatePrototypeRoutes = ({
         }
       }
     );
+
+  /**
+   * Runs→alerts reverse index, as its own route so the alert surface can ask
+   * "every run started from this alert" without learning the service's tag
+   * convention. Read-only, so no write-privilege guard.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: `${DETONATE_TASKS_PATH}/alert/{alertId}`,
+      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              alertId: schema.string({ minLength: 1, maxLength: 128 }),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          return response.ok({
+            body: await getClient().listTasks({ alert_id: request.params.alertId }),
+          });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
 };

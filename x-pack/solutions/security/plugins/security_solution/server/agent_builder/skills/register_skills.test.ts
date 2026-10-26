@@ -119,9 +119,7 @@ describe('registerSkills - detonate sample', () => {
     const agentBuilder = createAllowListEnforcingAgentBuilder();
 
     await expect(
-      registerSkills(
-        buildDetonateOpts(agentBuilder, {}) as Parameters<typeof registerSkills>[0]
-      )
+      registerSkills(buildDetonateOpts(agentBuilder, {}) as Parameters<typeof registerSkills>[0])
     ).resolves.toBeUndefined();
 
     expect(registeredSkillIds(agentBuilder)).toContain(DETONATE_SAMPLE_SKILL_ID);

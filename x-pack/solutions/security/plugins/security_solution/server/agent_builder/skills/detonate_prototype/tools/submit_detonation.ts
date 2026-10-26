@@ -71,6 +71,19 @@ export const submitDetonationTool = (
     'Submits a file hash for detonation in an instrumented sandbox VM with Elastic Defend installed, and returns the created task immediately. Detonation takes several minutes: poll with get_detonation until it reports complete. Use when an analyst asks what a file actually does, or wants behavioural evidence for a hash that reputation sources do not resolve.',
   schema: submitDetonationSchema,
   maxResultTokens: DETONATE_TOOL_MAX_RESULT_TOKENS,
+  // HITL gate enforced by the framework, not skill prose. `always` (not
+  // `once`): every detonation spends a VM on a live-malware run, so each call
+  // is confirmed individually rather than blanket-approved for the chat.
+  confirmation: {
+    askUser: 'always',
+    getConfirmation: ({ toolParams }) => ({
+      title: 'Submit sample for detonation?',
+      message: `This will boot a sandbox VM and run sample \`${toolParams.sampleHash}\` as live malware. The run cannot be cancelled once started.`,
+      confirm_text: 'Detonate',
+      cancel_text: 'Cancel',
+      color: 'danger',
+    }),
+  },
   handler: async (params, { request, logger }) => {
     // A detonation boots a VM and runs live malware. That is a write action in
     // every sense that matters, so it requires the write privilege even though

@@ -7,6 +7,8 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { detonateSampleStepDefinition } from './detonate_prototype/detonate_sample_step';
+import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
+import { applyDetonationVerdictStepDefinition } from './detonate_prototype/apply_detonation_verdict_step';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
@@ -64,5 +66,7 @@ export const registerWorkflowSteps = (
 
   if (detonatePrototypeEnabled) {
     workflowsExtensions.registerStepDefinition(detonateSampleStepDefinition);
+    workflowsExtensions.registerStepDefinition(detonateVerdictStepDefinition);
+    workflowsExtensions.registerStepDefinition(applyDetonationVerdictStepDefinition);
   }
 };

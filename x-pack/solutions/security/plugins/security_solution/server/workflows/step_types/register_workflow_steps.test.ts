@@ -26,6 +26,9 @@ import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
+import { detonateSampleStepDefinition } from './detonate_prototype/detonate_sample_step';
+import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
+import { applyDetonationVerdictStepDefinition } from './detonate_prototype/apply_detonation_verdict_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -91,5 +94,18 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       getAlertEntitiesStepDefinition
     );
+  });
+
+  it('registers the detonate prototype steps only when the flag is on', () => {
+    const off = createWorkflowsExtensionsMock();
+    registerWorkflowSteps(off, false);
+    expect(off.registerStepDefinition).toHaveBeenCalledTimes(20);
+
+    const on = createWorkflowsExtensionsMock();
+    registerWorkflowSteps(on, true);
+    expect(on.registerStepDefinition).toHaveBeenCalledTimes(23);
+    expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateSampleStepDefinition);
+    expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateVerdictStepDefinition);
+    expect(on.registerStepDefinition).toHaveBeenCalledWith(applyDetonationVerdictStepDefinition);
   });
 });

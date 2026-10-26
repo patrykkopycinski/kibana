@@ -56,6 +56,9 @@ const STATUS_FAILED = 'detonatePrototypeStatus-failed';
 const ENDPOINT_ALERTS_COUNT = 'detonatePrototypeProductionEndpointAlerts-count';
 const DETECTION_ALERTS_COUNT = 'detonatePrototypeProductionDetectionAlerts-count';
 
+/** `/internal/detonate_prototype/healthcheck` — the page's readiness probe. */
+const HEALTHCHECK_URL = '/internal/detonate_prototype/healthcheck';
+
 /**
  * A detonation is a VM boot, a sample run and an alert harvest. Even replayed
  * from a recording it walks the full worker state machine, so the page needs
@@ -64,6 +67,8 @@ const DETECTION_ALERTS_COUNT = 'detonatePrototypeProductionDetectionAlerts-count
 const RUN_COMPLETION_TIMEOUT_MS = 180_000;
 
 spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, () => {
+  spaceTest.setTimeout(RUN_COMPLETION_TIMEOUT_MS + 60_000);
+
   spaceTest.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPlatformEngineer();
   });
@@ -71,18 +76,23 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
   spaceTest(
     'submits a hash, runs it to completion and shows the alerts it produced',
     async ({ page }) => {
+      // Wait for a positive healthcheck signal before submitting: a down
+      // service must fail here, readably, rather than surface as a missing
+      // detail page after the click. The listener attaches before navigation
+      // because the page fires its first healthcheck on mount.
+      const healthcheck = page.waitForResponse((res) => res.url().includes(HEALTHCHECK_URL), {
+        timeout: 30_000,
+      });
       await page.gotoApp(DETONATE_APP);
+      expect(
+        (await healthcheck).status(),
+        'the detonation service must be reachable for this suite to mean anything'
+      ).toBe(200);
       await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
+      await expect(page.testSubj.locator(SERVICE_UNAVAILABLE)).toBeHidden();
 
       await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
       await page.testSubj.click(SUBMIT_BUTTON);
-
-      // An unreachable service otherwise surfaces only as a missing detail
-      // page. Name it first so the failure is readable.
-      await expect(
-        page.testSubj.locator(SERVICE_UNAVAILABLE),
-        'the detonation service must be reachable for this suite to mean anything'
-      ).toBeHidden();
       await expect(page.testSubj.locator(SUBMIT_ERROR)).toBeHidden();
 
       // Submitting navigates to the new run's detail page.
@@ -129,7 +139,7 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
   spaceTest('pre-fills the form the way the alert action does', async ({ page }) => {
     // What the "Detonate file" alert action builds: the hash it extracted from
     // the alert document, plus a tag tying the run back to that document.
-    const tag = 'detonate.prototype.alert:scout-alert-id';
+    const tag = 'alert:scout-alert-id';
 
     await page.gotoApp(DETONATE_APP, { params: { sample_hash: SAMPLE_SHA256, tags: tag } });
 

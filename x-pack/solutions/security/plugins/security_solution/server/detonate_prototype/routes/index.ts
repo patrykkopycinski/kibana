@@ -19,7 +19,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type {
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+} from '@kbn/core/server';
 import type { Readable } from 'stream';
 
 import {
@@ -30,6 +35,7 @@ import {
 } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import type { SecuritySolutionPluginRouter } from '../../types';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../client';
 import { DetonateServiceError } from '../client';
 
@@ -68,6 +74,13 @@ export interface DetonateRoutesDeps {
    * breaking Kibana's route registration at startup.
    */
   getClient: () => DetonateClient;
+  /**
+   * Submission is a write: it boots a VM and runs the sample as live malware.
+   * The route-level `securitySolution` privilege is read-level, so the write
+   * privilege is asserted in the handlers, the same check the Agent Builder
+   * tool performs.
+   */
+  endpointAppContextService: EndpointAppContextService;
 }
 
 /** Collect a streamed upload, refusing anything over the cap mid-stream. */
@@ -96,6 +109,7 @@ export const registerDetonatePrototypeRoutes = ({
   router,
   logger,
   getClient,
+  endpointAppContextService,
 }: DetonateRoutesDeps) => {
   /**
    * Shape an error for the analyst. The service's own message is passed
@@ -116,6 +130,17 @@ export const registerDetonatePrototypeRoutes = ({
       statusCode: 500,
       body: { message: 'The detonation request could not be completed.' },
     });
+  };
+
+  /**
+   * A detonation spends a VM and runs the sample as live malware — a write in
+   * every sense that matters, even though it mutates nothing in Kibana. The
+   * route-level privilege is read-level, so the write privilege is asserted
+   * here, mirroring the check the Agent Builder tool does in-process.
+   */
+  const hasWritePrivilege = async (request: KibanaRequest): Promise<boolean> => {
+    const authz = await endpointAppContextService.getEndpointAuthz(request);
+    return authz.canWriteSecuritySolution;
   };
 
   router.versioned
@@ -165,6 +190,15 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
+          if (!(await hasWritePrivilege(request))) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Submitting a sample for detonation requires the Security Solution write privilege.',
+              },
+            });
+          }
+
           const { sample_file: sampleFile, sample_filename: sampleFilename } = request.body;
 
           let options = {};
@@ -225,6 +259,15 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
+          if (!(await hasWritePrivilege(request))) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Submitting a sample for detonation requires the Security Solution write privilege.',
+              },
+            });
+          }
+
           return response.ok<DetonateTask>({ body: await getClient().submitHash(request.body) });
         } catch (error) {
           return toErrorResponse(error, response);

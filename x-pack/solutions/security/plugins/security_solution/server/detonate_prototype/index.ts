@@ -17,6 +17,7 @@
 import type { Logger } from '@kbn/core/server';
 
 import type { SecuritySolutionPluginRouter } from '../types';
+import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from './client';
 import { createDetonateClient } from './client';
 import { registerDetonatePrototypeRoutes } from './routes';
@@ -40,6 +41,8 @@ export interface DetonatePrototypeSetupDeps {
   serviceUrl?: string;
   /** The experimental flag that gates the entire prototype. */
   enabled: boolean;
+  /** Asserts the write privilege the submit routes require. */
+  endpointAppContextService: EndpointAppContextService;
 }
 
 /**
@@ -52,6 +55,7 @@ export const setupDetonatePrototype = ({
   logger,
   serviceUrl,
   enabled,
+  endpointAppContextService,
 }: DetonatePrototypeSetupDeps): DetonateClient | undefined => {
   if (!enabled) {
     return undefined;
@@ -69,7 +73,12 @@ export const setupDetonatePrototype = ({
     logger: scopedLogger,
   });
 
-  registerDetonatePrototypeRoutes({ router, logger: scopedLogger, getClient: () => client });
+  registerDetonatePrototypeRoutes({
+    router,
+    logger: scopedLogger,
+    getClient: () => client,
+    endpointAppContextService,
+  });
 
   scopedLogger.info(
     `Detonate prototype enabled; proxying to the detonation service configured at ${baseUrl}`

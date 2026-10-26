@@ -738,6 +738,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger,
       serviceUrl: config.detonatePrototype?.serviceUrl,
       enabled: config.experimentalFeatures.detonatePrototypeEnabled,
+      endpointAppContextService: this.endpointAppContextService,
     });
 
     registerEndpointSuggestionsRoutes(

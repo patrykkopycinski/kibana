@@ -22,6 +22,9 @@ describe('registerDetonatePrototypeRoutes', () => {
   let router: RouterMock;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let client: jest.Mocked<DetonateClient>;
+  let endpointAppContextService: {
+    getEndpointAuthz: jest.Mock;
+  };
 
   const createRequest = (method: 'post' | 'get', path: string, body?: unknown) =>
     httpServerMock.createKibanaRequest({ method, path, body: body as Record<string, unknown> });
@@ -49,9 +52,21 @@ describe('registerDetonatePrototypeRoutes', () => {
 
   const createContext = () => ({} as never);
 
-  beforeEach(() => {
+  const register = ({ canWrite }: { canWrite: boolean }) => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
     mockResponse = httpServerMock.createResponseFactory();
+    endpointAppContextService = {
+      getEndpointAuthz: jest.fn().mockResolvedValue({ canWriteSecuritySolution: canWrite }),
+    };
+    registerDetonatePrototypeRoutes({
+      router: router as never,
+      logger: loggerMock.create(),
+      getClient: () => client,
+      endpointAppContextService: endpointAppContextService as never,
+    });
+  };
+
+  beforeEach(() => {
     client = {
       healthcheck: jest.fn(),
       submitFile: jest.fn(),
@@ -60,10 +75,48 @@ describe('registerDetonatePrototypeRoutes', () => {
       getTaskUpdates: jest.fn(),
       listTasks: jest.fn(),
     };
-    registerDetonatePrototypeRoutes({
-      router: router as never,
-      logger: loggerMock.create(),
-      getClient: () => client,
+    register({ canWrite: true });
+  });
+
+  describe('write-privilege gate', () => {
+    const forbiddenBody = {
+      body: {
+        message:
+          'Submitting a sample for detonation requires the Security Solution write privilege.',
+      },
+    };
+
+    it('rejects a read-only analyst on the hash submit route', async () => {
+      register({ canWrite: false });
+      client.submitHash.mockResolvedValue({ id: 'task-1' } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, { sample_hash: 'a'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith(forbiddenBody);
+      expect(client.submitHash).not.toHaveBeenCalled();
+    });
+
+    it('rejects a read-only analyst on the file submit route', async () => {
+      register({ canWrite: false });
+      client.submitFile.mockResolvedValue({ id: 'task-2' } as never);
+
+      const fileRequest = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: DETONATE_SUBMIT_FILE_PATH,
+        body: {
+          sample_file: Readable.from([Buffer.from('X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR')]),
+          sample_filename: 'sample.txt',
+        },
+      }) as never;
+
+      await submitFileHandler()(createContext(), fileRequest, mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith(forbiddenBody);
+      expect(client.submitFile).not.toHaveBeenCalled();
     });
   });
 

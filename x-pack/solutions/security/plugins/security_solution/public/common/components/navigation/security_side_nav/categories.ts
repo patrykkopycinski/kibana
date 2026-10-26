@@ -39,6 +39,9 @@ export const getNavCategories = (
           ? [SecurityPageName.externalLinkAgentBuilder]
           : []),
         SecurityPageName.externalLinkWorkflows,
+        // Hidden entirely when the `detonatePrototypeEnabled` experimental
+        // flag is off: the link is dropped upstream of the nav.
+        SecurityPageName.detonatePrototype,
         ...(enableAlertsAndAttacksAlignment ? [] : [SecurityPageName.attackDiscovery]),
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,

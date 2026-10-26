@@ -268,3 +268,149 @@ export const totalDetonationAlerts = (task: DetonateTask): number =>
  */
 export const detonationWasQuiet = (task: DetonateTask): boolean =>
   isDetonationComplete(task) && !isDetonationFailed(task) && totalDetonationAlerts(task) === 0;
+
+/* -------------------------------------------------------------------------- */
+/* Verdict                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * What a finished detonation says about the sample. `malicious` and `quiet`
+ * are statements about the sample's behaviour in the sandbox; `inconclusive`
+ * means the run itself cannot support a statement (it failed, or has not
+ * finished) and must never be read as "benign".
+ */
+export const DETONATE_VERDICTS = ['malicious', 'quiet', 'inconclusive'] as const;
+export type DetonateVerdictName = (typeof DETONATE_VERDICTS)[number];
+
+/** Prefix the prototype uses on the tags it writes to alerts and runs. */
+export const DETONATE_TAG_PREFIX = 'detonate:' as const;
+
+/** Tag an alert carries once a detonation verdict has been applied to it. */
+export const detonateVerdictTag = (verdict: DetonateVerdictName): string =>
+  `${DETONATE_TAG_PREFIX}${verdict}`;
+
+/**
+ * Prefix of the tag that ties a run back to the alert it was started from
+ * (`alert:<alert_id>`). Written by the alert action; read by the verdict
+ * derivation and by run-list filters.
+ */
+export const ALERT_TAG_PREFIX = 'alert:' as const;
+
+/** The `alert:<id>` tag for one alert. */
+export const alertRunTag = (alertId: string): string => `${ALERT_TAG_PREFIX}${alertId}`;
+
+/** The alert id a run's `alert:<id>` tag points at, when it has one. */
+export const parseAlertTag = (tags: string[]): string | undefined => {
+  const alertTag = tags.find((tag) => tag.startsWith(ALERT_TAG_PREFIX));
+  const alertId = alertTag?.slice(ALERT_TAG_PREFIX.length);
+  return alertId ? alertId : undefined;
+};
+
+/**
+ * The sample the demo seeds a guaranteed-quiet run for. Its digest matches
+ * no recording, so the replay executor resolves it to the negative control —
+ * a real run that raised nothing — which makes `detonate:quiet` reproducible
+ * on camera. The simulator's contract-parity suite pins this exact value.
+ */
+export const DETONATE_QUIET_SEED_SHA256 =
+  '9e098f5b65ccb4ecfc0b3a2c790b3f6c3b41fbf561e6bd2d7782d0b8c7f2cf1e' as const;
+
+/** Prefix every detonate-written alert note carries, so it can be found. */
+export const DETONATE_NOTE_MARKER = '[detonate] ' as const;
+
+/* -------------------------------------------------------------------------- */
+/* Reputation                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/** Reputation route, proxied like the rest of the service's routes. */
+export const DETONATE_REPUTATION_PATH = `${DETONATE_PROTOTYPE_API}/reputation` as const;
+
+/**
+ * What the reputation gate says about a digest. `unknown` is honest
+ * uncertainty — it must never be read as benign, only as "no prior verdict",
+ * which is what routes the sample to a detonation.
+ */
+export const DETONATE_REPUTATION_STATUSES = ['known-malicious', 'unknown'] as const;
+export type DetonateReputationStatus = (typeof DETONATE_REPUTATION_STATUSES)[number];
+
+/** The reputation gate's answer for one digest. */
+export interface DetonateReputationResponse {
+  sha256: string;
+  status: DetonateReputationStatus;
+  source: string;
+  malware_family?: string;
+  last_seen?: string;
+}
+
+/** One detonation's conclusion, shaped for workflows, notes and tags. */
+export interface DetonateVerdict {
+  verdict: DetonateVerdictName;
+  task_id: string;
+  /** The alert this run was started from, parsed off its `alert:<id>` tag. */
+  alert_id?: string;
+  total_alerts_count: number;
+  endpoint_alert_event_codes: string[];
+  detection_rule_names: string[];
+  /**
+   * The one-line human summary. This is the body of the alert note the apply
+   * step writes, so it must stand alone without the surrounding UI.
+   */
+  evidence: string;
+  /** The tag the apply step puts on the alert — `detonate:<verdict>`. */
+  suggested_tag: string;
+}
+
+/**
+ * Derive the verdict from a task. Pure: no IO, no clock, no randomness —
+ * the same task always yields the same verdict, which is what makes the
+ * derivation unit-testable and the apply step a dumb writer.
+ */
+export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
+  const eventCodes = [
+    ...new Set(
+      [...task.production_endpoint_alert_groups, ...task.diagnostic_endpoint_alert_groups].map(
+        (group) => group.event_code
+      )
+    ),
+  ];
+  const ruleNames = [
+    ...new Set(task.production_detection_alert_groups.map((group) => group.kibana_alert_rule_name)),
+  ];
+  const total = totalDetonationAlerts(task);
+
+  let verdict: DetonateVerdictName;
+  let evidence: string;
+
+  if (isDetonationFailed(task)) {
+    verdict = 'inconclusive';
+    evidence = `Detonation failed at ${task.last_worker_name}${
+      task.last_worker_status_details
+        ? ` (${task.last_worker_status_details})`
+        : ' — the sandbox never finished, so this says nothing about the sample.'
+    }`;
+  } else if (!isDetonationComplete(task)) {
+    verdict = 'inconclusive';
+    evidence = `Detonation has not completed (last: ${task.last_worker_name}/${task.last_worker_status}).`;
+  } else if (total === 0) {
+    verdict = 'quiet';
+    evidence =
+      'Detonation completed and raised no alerts — the sample looks benign in the sandbox, ' +
+      'or nothing detected it. Suggest reviewing before closing the alert.';
+  } else {
+    verdict = 'malicious';
+    const codes = eventCodes.length > 0 ? eventCodes.join(', ') : 'none';
+    const rules = ruleNames.length > 0 ? ruleNames.join(', ') : 'none';
+    evidence = `Detonation raised ${total} alert(s): ${codes} (detection rules: ${rules}).`;
+  }
+
+  return {
+    verdict,
+    task_id: task.id,
+    ...(parseAlertTag(task.tags) ? { alert_id: parseAlertTag(task.tags) } : {}),
+    total_alerts_count: total,
+    endpoint_alert_event_codes: eventCodes,
+    detection_rule_names: ruleNames,
+    evidence,
+    suggested_tag: detonateVerdictTag(verdict),
+  };
+};

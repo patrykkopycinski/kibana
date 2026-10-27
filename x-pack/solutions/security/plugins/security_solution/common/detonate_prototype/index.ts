@@ -284,6 +284,70 @@ export const totalDetonationAlerts = (task: DetonateTask): number =>
 export const detonationWasQuiet = (task: DetonateTask): boolean =>
   isDetonationComplete(task) && !isDetonationFailed(task) && totalDetonationAlerts(task) === 0;
 
+/**
+ * Diagnostic-only event codes: behaviors the diagnostic (unblocklisted) side
+ * of the run saw that production Defend never fired on. This is the coverage
+ * gap the diagnostic telemetry exists to expose — each entry is behavior a
+ * blocklist entry suppressed or a rule missed, and the FP-validation tier's
+ * exception proposals target exactly this set.
+ *
+ * Keyed by event_code: the codes are what a rule or exception entry would
+ * target, and the same code can fire from several groups (the set, not the
+ * multiset).
+ */
+export const diagnosticOnlyEventCodes = (task: DetonateTask): string[] => {
+  const productionCodes = new Set(
+    task.production_endpoint_alert_groups.map((group) => group.event_code)
+  );
+  return [...new Set(task.diagnostic_endpoint_alert_groups.map((group) => group.event_code))]
+    .filter((code) => !productionCodes.has(code))
+    .sort();
+};
+
+/* -------------------------------------------------------------------------- */
+/* Learning tier (F7)                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * How many consecutive runs — newest first — were quiet. The proposal
+ * threshold reads this, so the derivation lives here where it is unit-tested,
+ * not in the component that renders the button.
+ */
+export const quietRunStreak = (runs: readonly DetonateTask[]): number => {
+  let streak = 0;
+  for (const run of runs) {
+    if (!detonationWasQuiet(run)) break;
+    streak += 1;
+  }
+  return streak;
+};
+
+/** The evidence bar an exception/trusted-app proposal must clear. */
+export const PROPOSAL_QUIET_STREAK_THRESHOLD = 3;
+
+/**
+ * The proposal text an analyst pastes into an exception or trusted-app
+ * request. Comment-and-link only by design: the proposal carries the evidence,
+ * never the write — creating the exception stays an analyst action in the
+ * Artifacts UI, where its authz and audit trail live.
+ */
+export const exceptionProposalComment = (
+  hash: string,
+  runs: readonly DetonateTask[],
+  appPath: string = DETONATE_PROTOTYPE_APP_PATH
+): string =>
+  [
+    `Detonate proposal: ${quietRunStreak(
+      runs
+    )} consecutive detonation(s) of this sample completed quiet (no alerts, no malicious behavior observed).`,
+    `Sample: ${hash}`,
+    `Runs (newest first): ${runs
+      .slice(0, PROPOSAL_QUIET_STREAK_THRESHOLD)
+      .map((run) => `${run.created_at} — ${run.id} (${appPath}/${run.id})`)
+      .join('; ')}`,
+    'A quiet detonation is not proof the sample is benign — treat this as evidence toward an exception or trusted-application entry, to be reviewed before anything is enforced.',
+  ].join('\n');
+
 /* -------------------------------------------------------------------------- */
 /* Verdict                                                                     */
 /* -------------------------------------------------------------------------- */

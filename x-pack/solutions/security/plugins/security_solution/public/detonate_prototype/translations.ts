@@ -190,6 +190,44 @@ export const QUIET_RUN_BODY = i18n.translate(
   }
 );
 
+export const COVERAGE_GAP_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.coverageGapTitle',
+  { defaultMessage: 'Diagnostic-only behavior (potential coverage gap)' }
+);
+
+export const COVERAGE_GAP_BODY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.coverageGapBody',
+  {
+    defaultMessage:
+      'The diagnostic run observed these behaviors that production policies did not alert on — a blocklist entry or detection rule may be suppressing or missing them.',
+  }
+);
+
+export const RUN_HISTORY_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.runHistoryTitle',
+  { defaultMessage: 'Run history for this sample' }
+);
+
+export const RUN_HISTORY_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.runHistoryEmpty',
+  { defaultMessage: 'No other completed runs for this sample.' }
+);
+
+export const PROPOSAL_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.proposalButtonLabel',
+  {
+    defaultMessage: 'Copy exception proposal comment',
+  }
+);
+
+export const PROPOSAL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.proposalTooltip',
+  {
+    defaultMessage:
+      'Copy a comment citing the quiet-run streak as evidence for an exception or trusted-application entry. Review before enforcing — a quiet run is not proof the sample is benign.',
+  }
+);
+
 export const VERDICT_MALICIOUS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.verdict.malicious',
   { defaultMessage: 'Detonate: malicious' }

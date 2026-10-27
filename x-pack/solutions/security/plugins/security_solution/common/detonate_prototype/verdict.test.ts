@@ -10,6 +10,9 @@ import {
   deriveDetonateVerdict,
   parseAlertTag,
   detonateVerdictTag,
+  diagnosticOnlyEventCodes,
+  quietRunStreak,
+  exceptionProposalComment,
 } from '.';
 import type { DetonateTask } from '.';
 
@@ -140,6 +143,99 @@ describe('alert tag helpers', () => {
   it('ignores a bare alert: prefix and non-alert tags', () => {
     expect(parseAlertTag(['alert:'])).toBeUndefined();
     expect(parseAlertTag(['detonate:quiet'])).toBeUndefined();
+  });
+});
+
+describe('diagnosticOnlyEventCodes', () => {
+  it('returns codes the diagnostic side saw that production never fired on', () => {
+    const codes = diagnosticOnlyEventCodes(
+      createTask({
+        production_endpoint_alert_groups: [{ alerts_count: 2, event_code: 'malicious_file' }],
+        diagnostic_endpoint_alert_groups: [
+          { alerts_count: 2, event_code: 'malicious_file' },
+          { alerts_count: 1, event_code: 'credential_dumping' },
+        ],
+      })
+    );
+    expect(codes).toEqual(['credential_dumping']);
+  });
+
+  it('deduplicates across groups and sorts for a stable rendering', () => {
+    const codes = diagnosticOnlyEventCodes(
+      createTask({
+        diagnostic_endpoint_alert_groups: [
+          { alerts_count: 1, event_code: 'persistence' },
+          { alerts_count: 3, event_code: 'credential_dumping' },
+          { alerts_count: 1, event_code: 'persistence' },
+        ],
+      })
+    );
+    expect(codes).toEqual(['credential_dumping', 'persistence']);
+  });
+
+  it('is empty when production covered everything the diagnostic side saw', () => {
+    expect(
+      diagnosticOnlyEventCodes(
+        createTask({
+          production_endpoint_alert_groups: [
+            { alerts_count: 1, event_code: 'malicious_file' },
+            { alerts_count: 1, event_code: 'credential_dumping' },
+          ],
+          diagnostic_endpoint_alert_groups: [{ alerts_count: 1, event_code: 'malicious_file' }],
+        })
+      )
+    ).toEqual([]);
+  });
+
+  it('is empty for a quiet run — no gap to show', () => {
+    expect(diagnosticOnlyEventCodes(createTask())).toEqual([]);
+  });
+});
+
+describe('quietRunStreak', () => {
+  const quiet = (id: string): DetonateTask => createTask({ id });
+  const malicious = (id: string): DetonateTask =>
+    createTask({
+      id,
+      production_endpoint_alerts_count: 1,
+      production_endpoint_alert_groups: [{ alerts_count: 1, event_code: 'malicious_file' }],
+    });
+
+  it('counts consecutive quiet runs from the newest', () => {
+    expect(quietRunStreak([quiet('a'), quiet('b'), malicious('c')])).toBe(2);
+  });
+
+  it('stops at the first non-quiet run — older quiets are not evidence', () => {
+    expect(quietRunStreak([quiet('a'), malicious('b'), quiet('c')])).toBe(1);
+  });
+
+  it('is zero when the newest run was not quiet', () => {
+    expect(quietRunStreak([malicious('a'), quiet('b'), quiet('c')])).toBe(0);
+  });
+});
+
+describe('exceptionProposalComment', () => {
+  const quiet = (id: string, createdAt: string): DetonateTask =>
+    createTask({ id, created_at: createdAt });
+
+  it('cites the streak, the hash, and links the runs it counts', () => {
+    const comment = exceptionProposalComment('ab'.repeat(32), [
+      quiet('run-3', '2026-01-03T00:00:00.000Z'),
+      quiet('run-2', '2026-01-02T00:00:00.000Z'),
+      quiet('run-1', '2026-01-01T00:00:00.000Z'),
+    ]);
+    expect(comment).toContain('3 consecutive detonation(s)');
+    expect(comment).toContain('ab'.repeat(32));
+    expect(comment).toContain('run-3');
+    expect(comment).toContain('/detonate_prototype/run-3');
+    expect(comment).toContain('reviewed before anything is enforced');
+  });
+
+  it('caps the cited runs at the proposal threshold', () => {
+    const runs = [1, 2, 3, 4, 5].map((n) => quiet(`run-${n}`, `2026-01-0${n}T00:00:00.000Z`));
+    const comment = exceptionProposalComment('ab'.repeat(32), runs);
+    expect(comment).toContain('run-3');
+    expect(comment).not.toContain('run-4');
   });
 });
 

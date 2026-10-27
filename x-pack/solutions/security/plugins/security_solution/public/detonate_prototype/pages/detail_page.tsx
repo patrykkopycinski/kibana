@@ -26,6 +26,8 @@ import {
   EuiPageHeader,
   EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
@@ -34,20 +36,23 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import {
   DETONATE_PROTOTYPE_APP_PATH,
   detonationWasQuiet,
+  diagnosticOnlyEventCodes,
   isDetonationComplete,
   isDetonationFailed,
 } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
-import { useDetonationTask } from '../hooks/use_detonate';
+import { useDetonationTask, useCompletedDetonationHistoryByHash } from '../hooks/use_detonate';
 import { DetonationStatusBadge } from '../components/detonation_status_badge';
 import { DetonateVerdictBadge } from '../components/verdict_badge';
 import { WorkerTimeline } from '../components/worker_timeline';
+import { RunHistory } from '../components/run_history';
 import { DetectionAlertGroups, EndpointAlertGroups } from '../components/alert_groups';
 import * as i18n from '../translations';
 
 export const DETAIL_PAGE_TEST_ID = 'detonatePrototypeDetailPage';
 export const DETAIL_FAILURE_TEST_ID = 'detonatePrototypeDetailFailure';
 export const DETAIL_QUIET_TEST_ID = 'detonatePrototypeDetailQuiet';
+export const DETAIL_COVERAGE_GAP_TEST_ID = 'detonatePrototypeDetailCoverageGap';
 
 const details = (task: DetonateTask): EuiDescriptionListProps['listItems'] => {
   const items: EuiDescriptionListProps['listItems'] = [
@@ -98,6 +103,10 @@ export const DetonateDetailPage = React.memo(() => {
   const history = useHistory();
   const { data: task, isLoading, isError, error } = useDetonationTask(taskId);
 
+  // The run history needs the hash, which the task carries — the hook is
+  // disabled until the task resolves and re-fetches once it does.
+  const historyByHash = useCompletedDetonationHistoryByHash(task?.sample_hash);
+
   const goBack = useCallback(() => history.push(DETONATE_PROTOTYPE_APP_PATH), [history]);
 
   const backButton = (
@@ -132,6 +141,10 @@ export const DetonateDetailPage = React.memo(() => {
   const failed = isDetonationFailed(task);
   const complete = isDetonationComplete(task);
   const quiet = detonationWasQuiet(task);
+  const coverageGap = complete && !failed ? diagnosticOnlyEventCodes(task) : [];
+
+  // Sibling runs only: the current run has its own page above.
+  const siblingRuns = (historyByHash.completedRuns ?? []).filter((run) => run.id !== task.id);
 
   return (
     <div data-test-subj={DETAIL_PAGE_TEST_ID}>
@@ -171,6 +184,39 @@ export const DetonateDetailPage = React.memo(() => {
         </>
       )}
 
+      {/* The gap panel only appears when there is a gap: a run production
+          covered fully needs no "potential coverage gap" hedging, and a quiet
+          run already has its own callout above. */}
+      {coverageGap.length > 0 && (
+        <>
+          <EuiPanel hasBorder data-test-subj={DETAIL_COVERAGE_GAP_TEST_ID}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>{i18n.COVERAGE_GAP_TITLE}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">{coverageGap.length}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              {i18n.COVERAGE_GAP_BODY}
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {coverageGap.map((code) => (
+                <EuiFlexItem grow={false} key={code}>
+                  <EuiBadge color="hollow">{code}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       <EuiPanel hasBorder>
         <EuiDescriptionList
           type="column"
@@ -188,6 +234,11 @@ export const DetonateDetailPage = React.memo(() => {
         </>
       )}
       <EuiSpacer size="l" />
+
+      {/* F7: sibling runs of the same sample. Rendered for every run — a
+          single-run history is honest too — but only after completion, when
+          the streak the proposal cites can actually exist. */}
+      {complete && task.sample_hash && <RunHistory runs={siblingRuns} hash={task.sample_hash} />}
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>

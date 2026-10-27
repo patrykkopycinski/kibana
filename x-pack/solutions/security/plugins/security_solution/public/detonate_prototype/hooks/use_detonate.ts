@@ -150,6 +150,31 @@ export const useCompletedDetonationByHash = (hash: string | undefined) => {
 };
 
 /**
+ * F7: every completed run for one sample hash, newest first — the run history
+ * the learning tier reads. Three quiet runs in a row is the evidence an
+ * exception/trusted-app proposal cites, so the shape is exactly "the runs that
+ * count toward that decision", pre-filtered the same way
+ * `useCompletedDetonationByHash` filters.
+ */
+export const useCompletedDetonationHistoryByHash = (hash: string | undefined) => {
+  const { http } = useKibana().services;
+
+  const query = useQuery<DetonateTaskSearchResponse>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'history-by-hash', hash ?? ''] as const,
+    enabled: Boolean(hash),
+    queryFn: ({ signal }) => detonateApi.listTasks(http, { query_string: hash }, signal),
+    staleTime: 60_000,
+  });
+
+  return useMemo(() => {
+    const completed = (query.data?.tasks ?? [])
+      .filter((t) => t.sample_hash === hash && isDetonationComplete(t) && !isDetonationFailed(t))
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return { ...query, completedRuns: completed };
+  }, [hash, query]);
+};
+
+/**
  * Submitting invalidates the list so a new run shows up without a manual
  * refresh. It deliberately does not invalidate on error: a failed submit may
  * still have reached the service, and refetching would not tell us either way.

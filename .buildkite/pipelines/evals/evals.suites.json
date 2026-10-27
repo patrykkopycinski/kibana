@@ -481,6 +481,19 @@
       ]
     },
     {
+      "id": "alertzero-detonate-summary",
+      "name": "AlertZero Detonate Summary Gate",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alertzero-detonate-summary/playwright.config.ts",
+      "tags": [
+        "security",
+        "detonate"
+      ],
+      "ciLabels": [
+        "evals:alertzero-detonate-summary"
+      ]
+    },
+    {
       "id": "security-alert-analysis-workflow",
       "name": "Alert Analysis Workflow",
       "slackChannel": "#security-generative-ai-evals",

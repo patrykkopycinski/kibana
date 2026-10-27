@@ -178,7 +178,13 @@ export const exceptionItemBaseSchema = lazySchema(() =>
     name: z.string().min(1).max(256),
     description: z.string().max(2048),
     entries: entriesArraySchema,
-    os_types: ExceptionListItemOsTypeArray.optional(),
+    // Enum values or a template expression that renders to one — a workflow
+    // that derives the OS from a step output (e.g. an endpoint blocklist
+    // artifact compiled for the OS the sample ran on) passes validation
+    // unrendered; the exceptions API still validates the rendered value.
+    os_types: z
+      .union([ExceptionListItemOsTypeArray, z.array(z.string().min(1).max(256))])
+      .optional(),
     tags: z.array(z.string().min(1).max(256)).max(50).optional(),
     // ISO 8601 datetime after which the exception no longer applies. Kept a
     // plain string so template expressions pass workflow validation; the

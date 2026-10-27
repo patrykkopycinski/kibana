@@ -113,6 +113,16 @@ describe('deriveDetonateVerdict', () => {
     expect(deriveDetonateVerdict(createTask({ tags: ['demo'] })).alert_id).toBeUndefined();
   });
 
+  it('passes the sandbox OS through when the task recorded one', () => {
+    const verdict = deriveDetonateVerdict(createTask({ vm_os_family: 'linux' }));
+
+    expect(verdict.vm_os_family).toBe('linux');
+  });
+
+  it('omits vm_os_family when the task recorded none', () => {
+    expect(deriveDetonateVerdict(createTask({})).vm_os_family).toBeUndefined();
+  });
+
   it('is pure: the same task yields the same verdict twice', () => {
     const task = createTask({
       production_endpoint_alerts_count: 1,

@@ -19,7 +19,12 @@ import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
-import { DETONATE_PROTOTYPE_NAMESPACE, DETONATE_VERDICTS } from '../../../detonate_prototype';
+import {
+  DETONATE_PROTOTYPE_NAMESPACE,
+  DETONATE_VERDICTS,
+  DETONATE_VM_OS_FAMILIES,
+} from '../../../detonate_prototype';
+import type { DetonateVmOsFamily } from '../../../detonate_prototype';
 
 export const DetonateVerdictStepId = `${DETONATE_PROTOTYPE_NAMESPACE}.detonateVerdict` as const;
 
@@ -41,6 +46,8 @@ export const detonateVerdictOutputSchema = lazySchema(() =>
     verdict: z.enum(DETONATE_VERDICTS),
     task_id: z.string(),
     alert_id: z.string().optional(),
+    /** Sandbox OS, when the run recorded one — endpoint artifacts are per-OS. */
+    vm_os_family: z.enum(DETONATE_VM_OS_FAMILIES).optional(),
     total_alerts_count: z.number().int(),
     endpoint_alert_event_codes: z.array(z.string()),
     detection_rule_names: z.array(z.string()),
@@ -53,6 +60,7 @@ export interface DetonateVerdictStepOutput {
   verdict: (typeof DETONATE_VERDICTS)[number];
   task_id: string;
   alert_id?: string;
+  vm_os_family?: DetonateVmOsFamily;
   total_alerts_count: number;
   endpoint_alert_event_codes: string[];
   detection_rule_names: string[];

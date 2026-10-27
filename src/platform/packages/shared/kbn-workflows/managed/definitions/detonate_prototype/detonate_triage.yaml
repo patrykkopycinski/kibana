@@ -86,6 +86,10 @@ steps:
         type: detonate.prototype.detonateSample
         with:
           sample_hash: "{{ inputs.sha256 }}"
+          # The sandbox OS is recorded on the task and surfaces in the verdict
+          # output — the blocklist artifact below is compiled per OS and
+          # accepts exactly one, so it must travel with the run.
+          vm_os_family: linux
           tags:
             - "alert:{{ inputs.alert_id }}"
             - "triage"
@@ -160,10 +164,11 @@ steps:
             - field: file.hash.sha256
               operator: is
               value: "{{ inputs.sha256 }}"
+          # An endpoint blocklist artifact is compiled per OS and the validator
+          # accepts exactly one os_types entry (minSize 1, maxSize 1) — the OS
+          # the sample actually ran on, from the verdict output.
           os_types:
-            - windows
-            - linux
-            - macos
+            - "{{ steps.verdict.output.vm_os_family }}"
           # Attribution: the resumed execution writes under the workflow
           # runner's identity, not the approver's, so the approver is recorded
           # on the item itself — the audit trail the Artifacts UI shows.

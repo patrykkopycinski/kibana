@@ -411,6 +411,9 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
     verdict,
     task_id: task.id,
     ...(parseAlertTag(task.tags) ? { alert_id: parseAlertTag(task.tags) } : {}),
+    // Passed through for consumers that need the sandbox OS — e.g. an
+    // endpoint blocklist artifact is compiled per OS and accepts exactly one.
+    ...(task.vm_os_family ? { vm_os_family: task.vm_os_family } : {}),
     total_alerts_count: total,
     endpoint_alert_event_codes: eventCodes,
     detection_rule_names: ruleNames,

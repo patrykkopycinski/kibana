@@ -67,4 +67,24 @@ describe('detonate triage managed workflow', () => {
       throw new Error(`blocklist step with-block failed schema: ${result.error.message}`);
     }
   });
+
+  it('derives a single sandbox OS for the blocklist artifact', () => {
+    const blocklist = steps.find(({ type }) => type === 'security.createExceptionListItem');
+    const input = blocklist?.with as { os_types: string[] };
+    // The endpoint artifact validator enforces exactly one OS per item
+    // (BasicEndpointExceptionDataSchema: minSize 1, maxSize 1) — a constraint
+    // the generic exception-list schema does not encode. Multiple OSes fail
+    // the write at run time with EndpointArtifactError, which is why the OS
+    // is templated from the verdict output instead of enumerated here.
+    expect(input.os_types).toHaveLength(1);
+    expect(input.os_types[0]).toContain('steps.verdict.output.vm_os_family');
+    // And the detonate step must actually record the OS, or the template
+    // renders empty and the write fails the same validator from below.
+    const detonate = steps.find(
+      ({ type, with: stepWith }) =>
+        type === 'detonate.prototype.detonateSample' &&
+        Boolean((stepWith as { vm_os_family?: string } | undefined)?.vm_os_family)
+    );
+    expect(detonate).toBeDefined();
+  });
 });

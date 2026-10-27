@@ -22,10 +22,7 @@ import { MemoryRouter } from 'react-router-dom';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import * as useDetonate from '../hooks/use_detonate';
 import { useToasts } from '../../common/lib/kibana';
-import {
-  DetonationNotifier,
-  useTrackDetonation,
-} from './detonation_notifier';
+import { DetonationNotifier, useTrackDetonation } from './detonation_notifier';
 
 jest.mock('../../common/lib/kibana', () => ({
   ...jest.requireActual('../../common/lib/kibana'),
@@ -114,9 +111,12 @@ describe('DetonationNotifier', () => {
   });
 
   it('stays silent while the run is still in flight', () => {
-    jest
-      .spyOn(useDetonate, 'useDetonationTask')
-      .mockReturnValue({ data: makeTask({ last_worker_name: 'detonate.workers.start_vm', last_worker_status: 'started' }) } as never);
+    jest.spyOn(useDetonate, 'useDetonationTask').mockReturnValue({
+      data: makeTask({
+        last_worker_name: 'detonate.workers.start_vm',
+        last_worker_status: 'started',
+      }),
+    } as never);
     mountTracked('task-4');
 
     expect(successToast).not.toHaveBeenCalled();

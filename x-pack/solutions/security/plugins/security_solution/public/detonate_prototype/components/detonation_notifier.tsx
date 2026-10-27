@@ -20,15 +20,26 @@
  * second opinion about when a run is done.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useNavigateTo, useToasts } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../app/types';
 import { useDetonationTask } from '../hooks/use_detonate';
-import { DETONATE_PROTOTYPE_APP_PATH } from '../../../common/detonate_prototype';
-import { isDetonationComplete, isDetonationFailed } from '../../../common/detonate_prototype';
+import {
+  DETONATE_PROTOTYPE_APP_PATH,
+  isDetonationComplete,
+  isDetonationFailed,
+} from '../../../common/detonate_prototype';
 import * as i18n from '../translations';
 
 export const DETONATION_NOTIFIER_TEST_ID = 'detonatePrototypeNotifier';
@@ -44,13 +55,7 @@ const TrackerContext = createContext<TrackerContextValue>({ track: () => undefin
 export const useTrackDetonation = () => useContext(TrackerContext).track;
 
 /** One in-flight run. Renders nothing; its job is the poll and the toast. */
-const DetonationWatcher = ({
-  taskId,
-  activeTaskId,
-}: {
-  taskId: string;
-  activeTaskId?: string;
-}) => {
+const DetonationWatcher = ({ taskId, activeTaskId }: { taskId: string; activeTaskId?: string }) => {
   const { data: task } = useDetonationTask(taskId);
   const toasts = useToasts();
   const { navigateTo } = useNavigateTo();

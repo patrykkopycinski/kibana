@@ -19,10 +19,7 @@ import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
-import {
-  isDetonationComplete,
-  isDetonationFailed,
-} from '../../../common/detonate_prototype';
+import { isDetonationComplete, isDetonationFailed } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
   DetonateTask,

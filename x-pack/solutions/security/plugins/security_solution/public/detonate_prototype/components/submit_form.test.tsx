@@ -91,17 +91,13 @@ describe('SubmitForm', () => {
     await submit();
     // Default: dedup applies — no force_fresh in the request.
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    expect(mutateAsync).toHaveBeenCalledWith(
-      expect.not.objectContaining({ force_fresh: true })
-    );
+    expect(mutateAsync).toHaveBeenCalledWith(expect.not.objectContaining({ force_fresh: true }));
 
     mutateAsync.mockClear();
     await submit();
     fireEvent.click(screen.getByTestId(SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID));
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    expect(mutateAsync).toHaveBeenCalledWith(
-      expect.objectContaining({ force_fresh: true })
-    );
+    expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ force_fresh: true }));
   });
 
   it('calls onSubmitted with the task the service answered', async () => {

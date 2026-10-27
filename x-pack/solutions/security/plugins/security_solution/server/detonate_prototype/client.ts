@@ -39,7 +39,8 @@ export interface DetonateClientOptions {
   /** Per-request ceiling. A detonation is polled, so no single call is slow. */
   requestTimeoutMs: number;
   logger: Logger;
-}/**
+}
+/**
  * Raised when the detonation service is unreachable or answers an error. The
  * `statusCode` is the service's, so routes can pass through a 404 for an
  * unknown task rather than flattening everything to a 500.
@@ -86,9 +87,7 @@ const actorHeaders = (actor?: string): Record<string, string> =>
   actor ? { 'x-detonate-actor': actor.slice(0, 128) } : {};
 
 /** Split the submit response into task + dedup marker. */
-const toSubmitOutcome = (
-  body: DetonateSubmitOutcome & DetonateTask
-): DetonateSubmitOutcome => ({
+const toSubmitOutcome = (body: DetonateSubmitOutcome & DetonateTask): DetonateSubmitOutcome => ({
   task: body,
   deduplicated: body.deduplicated === true,
 });

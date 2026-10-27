@@ -191,9 +191,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       const { DetonateServiceError: Ctor } = jest.requireActual<{
         DetonateServiceError: typeof DetonateServiceError;
       }>('../client');
-      client.submitHash.mockRejectedValue(
-        new Ctor('The detonation service answered 429.', 429)
-      );
+      client.submitHash.mockRejectedValue(new Ctor('The detonation service answered 429.', 429));
 
       await submitHashHandler()(
         createContext(),

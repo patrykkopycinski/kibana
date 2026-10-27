@@ -30,7 +30,10 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { useNavigateTo } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../app/types';
-import { DETONATE_FILE_ACTION_ID, DETONATE_VIEW_REPORT_ACTION_ID } from '../../common/constants/action_ids';
+import {
+  DETONATE_FILE_ACTION_ID,
+  DETONATE_VIEW_REPORT_ACTION_ID,
+} from '../../common/constants/action_ids';
 import { DETONATE_FILE_ACTION, DETONATE_VIEW_REPORT_ACTION } from '../translations';
 import { useCompletedDetonationByHash } from './use_detonate';
 

@@ -60,8 +60,10 @@ const mountTracked = (taskId: string) => {
   const Registrar = () => {
     const track = useTrackDetonation();
     React.useEffect(() => {
+      // taskId is closed over once per mount by mountTracked, never a
+      // changing prop, so [track] is the full reactive set.
       track(taskId);
-    }, [track, taskId]);
+    }, [track]);
     return null;
   };
   return render(

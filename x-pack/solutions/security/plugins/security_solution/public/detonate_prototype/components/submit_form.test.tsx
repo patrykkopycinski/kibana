@@ -22,6 +22,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import type { DetonateTask } from '../../../common/detonate_prototype';
+import * as kibana from '../../common/lib/kibana';
 import * as useDetonate from '../hooks/use_detonate';
 import {
   SubmitForm,
@@ -39,7 +40,7 @@ const mutateAsync = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.mocked(require('../../common/lib/kibana').useKibana).mockReturnValue({
+  jest.mocked(kibana.useKibana).mockReturnValue({
     services: { http: {} },
   } as never);
   mutateAsync.mockResolvedValue({ id: 'task-1' } as DetonateTask);

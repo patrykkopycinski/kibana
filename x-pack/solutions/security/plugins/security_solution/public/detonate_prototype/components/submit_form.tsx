@@ -32,6 +32,7 @@ import {
   EuiTabs,
   EuiTitle,
   EuiFieldText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -94,6 +95,7 @@ interface Props {
 }
 
 export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmitted }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [mode, setMode] = useState<SubmitMode>('hash');
   const [hash, setHash] = useState(initialHash ?? '');
   const [file, setFile] = useState<File | undefined>();
@@ -263,7 +265,9 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
 
       {isConfirming && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.SUBMIT_CONFIRM_TITLE}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsConfirming(false)}
           onConfirm={onConfirm}
           cancelButtonText={i18n.SUBMIT_CONFIRM_CANCEL}

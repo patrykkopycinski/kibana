@@ -161,9 +161,14 @@ steps:
             Added by the Detonate triage workflow after an approved malicious
             detonation (task {{ steps.verdict.output.task_id }}).
           entries:
+            # Endpoint blocklist entries must be `match_any` + `included` with
+            # an array value (BlocklistValidator) — the step's `is_one_of`
+            # verb maps to exactly that; plain `is` maps to `match` and the
+            # blocklist validator rejects it.
             - field: file.hash.sha256
-              operator: is
-              value: "{{ inputs.sha256 }}"
+              operator: is_one_of
+              values:
+                - "{{ inputs.sha256 }}"
           # An endpoint blocklist artifact is compiled per OS and the validator
           # accepts exactly one os_types entry (minSize 1, maxSize 1) — the OS
           # the sample actually ran on, from the verdict output.

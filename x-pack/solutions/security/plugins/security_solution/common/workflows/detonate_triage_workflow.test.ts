@@ -7,6 +7,8 @@
 
 import { DETONATE_TRIAGE_WORKFLOW } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
+import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
+import { toApiEntries } from '../detection_engine/rule_exceptions/to_api_entries';
 import { createExceptionListItemInputSchema } from './step_types/create_exception_list_item_step/create_exception_list_item_step_common';
 
 /**
@@ -66,6 +68,22 @@ describe('detonate triage managed workflow', () => {
     if (!result.success) {
       throw new Error(`blocklist step with-block failed schema: ${result.error.message}`);
     }
+  });
+
+  it('maps its entries to the match_any/included shape the blocklist validator requires', () => {
+    const blocklist = steps.find(({ type }) => type === 'security.createExceptionListItem');
+    const { entries } = blocklist?.with as { entries: ExceptionEntryInput[] };
+    // BlocklistValidator accepts only `match_any` + `included` with an array
+    // value on hash fields; the generic step schema also accepts `is`, which
+    // maps to `match` and fails the write at run time.
+    expect(toApiEntries(entries)).toStrictEqual([
+      {
+        type: 'match_any',
+        field: 'file.hash.sha256',
+        operator: 'included',
+        value: ['{{ inputs.sha256 }}'],
+      },
+    ]);
   });
 
   it('derives a single sandbox OS for the blocklist artifact', () => {

@@ -75,6 +75,10 @@ const toOutput = (task: DetonateTask, completed: boolean) => ({
   detection_rule_names: [
     ...new Set(task.production_detection_alert_groups.map((group) => group.kibana_alert_rule_name)),
   ],
+  // Absent (not empty) when the service version predates extraction —
+  // the output schema documents that downstream steps treat both as "no
+  // IOCs to hunt".
+  ...(task.extracted_iocs ? { extracted_iocs: task.extracted_iocs } : {}),
 });
 
 export const detonateSampleStepDefinition = createPollServerStepDefinition({

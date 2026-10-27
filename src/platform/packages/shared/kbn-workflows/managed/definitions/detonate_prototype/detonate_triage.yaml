@@ -109,6 +109,87 @@ steps:
           task_id: "{{ steps.verdict.output.task_id }}"
           evidence: "{{ steps.verdict.output.evidence }}"
 
+      # F3: the run's extracted IOCs (domains, IPs, hashes) are only as
+      # valuable as the question they answer next — which OTHER hosts in
+      # the fleet contacted the same infrastructure? Two hunts, one per
+      # indicator family the sim extracts: DNS answers for the domains,
+      # destination IPs for the IPs.
+      #
+      # The IN-lists splice textually (the alertzero batched-generation
+      # pattern): IOC values are lowercased domains and IPs, which cannot
+      # carry a quote, so the splice cannot break the query. The `if`
+      # guards keep an empty family from ever compiling an invalid
+      # `IN ("")` — an absent `extracted_iocs` (service predates
+      # extraction) also never fires the step.
+      #
+      # `on-failure: continue` on both: a stack without endpoint network
+      # data (the common lab case) fails the FROM clause at
+      # verification — "Unknown column [dns.question.name]" — and a
+      # missing hunt must not fail a triage run whose verdict is already
+      # on the alert.
+      #
+      # The hunts run inside the detonate branch only, after `apply`,
+      # because that is where `steps.detonate.output.extracted_iocs`
+      # exists; the known-malicious branch has no detonation to extract
+      # from (its note already says so).
+      - name: hunt_domains
+        type: elasticsearch.esql.query
+        if: "${{ steps.detonate.output.extracted_iocs != blank and steps.detonate.output.extracted_iocs.domains.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            FROM logs-endpoint.events.network-*
+              | WHERE dns.question.name IN ("{{ steps.detonate.output.extracted_iocs.domains | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      - name: hunt_ips
+        type: elasticsearch.esql.query
+        if: "${{ steps.detonate.output.extracted_iocs != blank and steps.detonate.output.extracted_iocs.ips.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            FROM logs-endpoint.events.network-*
+              | WHERE @timestamp >= NOW() - 30d
+              | WHERE destination.ip IN ("{{ steps.detonate.output.extracted_iocs.ips | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      # Both hunts land on the alert as a note: the analyst sees the
+      # fleet exposure without leaving the alert. `map: 'first'`
+      # extracts the hostname from each row (rows are
+      # [host.name, last_seen]); `uniq` because a host found by BOTH
+      # hunts (DNS and TCP to the same infrastructure) must not appear
+      # twice. Skipped or failed hunts render as empty lists — `concat`
+      # over an empty array is still an array.
+      - name: hunt_note
+        type: security.createNote
+        if: "${{ (steps.hunt_domains.output != blank and steps.hunt_domains.output.values.size > 0) or (steps.hunt_ips.output != blank and steps.hunt_ips.output.values.size > 0) }}"
+        on-failure:
+          continue: true
+        with:
+          document_id: "{{ inputs.alert_id }}"
+          text: >-
+            {%- if steps.hunt_domains.output != blank -%}
+            {%- assign domain_hosts = steps.hunt_domains.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign domain_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {%- if steps.hunt_ips.output != blank -%}
+            {%- assign ip_hosts = steps.hunt_ips.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign ip_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {%- assign hosts = domain_hosts | concat: ip_hosts | uniq | sort -%}
+            Detonate hunt: {{ hosts | join: ', ' }} also contacted the
+            infrastructure this sample used ({% if domain_hosts.size > 0 %}DNS{% endif %}{% if domain_hosts.size > 0 and ip_hosts.size > 0 %} and {% endif %}{% if ip_hosts.size > 0 %}destination IP{% endif %} matches over the last 30 days).
+
       # F6: a blocklist write is a fleet-wide enforcement action, so it never
       # rides on a sandbox verdict alone — an analyst confirms it first. The
       # gate sits after `apply` (the verdict is already on the alert either

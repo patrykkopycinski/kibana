@@ -112,6 +112,20 @@ export const detonateSampleOutputSchema = lazySchema(() =>
      */
     endpoint_alert_event_codes: z.array(z.string()),
     detection_rule_names: z.array(z.string()),
+    /**
+     * IOCs the service extracted from this run's telemetry — DNS domains,
+     * public IPs, and non-sample file hashes. Empty arrays mean the run's
+     * telemetry contained none; absent means the service version predates
+     * extraction. Downstream steps (the fleet hunt) must treat both as "no
+     * IOCs to hunt".
+     */
+    extracted_iocs: z
+      .object({
+        domains: z.array(z.string()),
+        ips: z.array(z.string()),
+        file_hashes: z.array(z.string()),
+      })
+      .optional(),
   })
 );
 

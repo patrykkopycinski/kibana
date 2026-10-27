@@ -21,6 +21,9 @@ import { createExceptionListItemInputSchema } from './step_types/create_exceptio
 
 interface WorkflowStep {
   type?: string;
+  name?: string;
+  if?: string;
+  'on-failure'?: { continue: boolean };
   steps?: WorkflowStep[];
   default?: WorkflowStep[];
   cases?: Array<{ steps?: WorkflowStep[] }>;
@@ -104,5 +107,64 @@ describe('detonate triage managed workflow', () => {
         Boolean((stepWith as { vm_os_family?: string } | undefined)?.vm_os_family)
     );
     expect(detonate).toBeDefined();
+  });
+
+  it('guards every hunt so an empty IOC family never compiles an invalid IN', () => {
+    const hunts = steps.filter(({ type }) => type === 'elasticsearch.esql.query');
+    // Two indicator families the extractor produces: domains and IPs.
+    expect(hunts).toHaveLength(2);
+
+    for (const hunt of hunts) {
+      // The `if` must key on the family being non-empty AND the whole
+      // `extracted_iocs` being present — an absent field (service
+      // predates extraction) renders `.size` as 0 in this engine, but
+      // the explicit `!= blank` keeps that from being load-bearing.
+      expect(hunt.if).toContain('steps.detonate.output.extracted_iocs != blank');
+      // A stack without endpoint network data fails the hunt at
+      // verification; the verdict is already on the alert by then, so
+      // the hunt degrades instead of failing the run.
+      expect(hunt['on-failure']).toEqual({ continue: true });
+    }
+
+    // Negative control: no hunt may template a family other than
+    // domains/ips (file_hashes would need a different field, and none
+    // exists in endpoint network data).
+    const queries = hunts.map((hunt) => (hunt.with as { query: string }).query);
+    expect(queries.some((q) => q.includes('file_hashes'))).toBe(false);
+  });
+
+  it('hunts carry a bounded LIMIT', () => {
+    const hunts = steps.filter(({ type }) => type === 'elasticsearch.esql.query');
+    for (const hunt of hunts) {
+      const query = (hunt.with as { query: string }).query;
+      expect(query).toMatch(/\| LIMIT 100\s*$/);
+    }
+  });
+
+  it('writes hunt results to the alert only when a hunt found hosts', () => {
+    const note = steps.find(({ type }) => type === 'security.createNote');
+    // Exactly one createNote lives in the detonate branch (the
+    // known-malicious branch has its own `note_known`); find the hunt one.
+    const huntNote = steps.find(
+      ({ type, with: stepWith }) =>
+        type === 'security.createNote' &&
+        String((stepWith as { text?: string } | undefined)?.text ?? '').includes('Detonate hunt')
+    );
+    expect(huntNote).toBeDefined();
+    expect(note).toBeDefined();
+
+    // The note only fires when at least one hunt returned rows.
+    expect(huntNote?.if).toContain('steps.hunt_domains.output.values.size > 0');
+    expect(huntNote?.if).toContain('steps.hunt_ips.output.values.size > 0');
+
+    // Its text never reads a hunt output unguarded — each assign is
+    // wrapped in an `!= blank` branch with an empty-array fallback, so
+    // a skipped hunt (nil output) cannot crash the render.
+    const text = (huntNote?.with as { text: string }).text;
+    expect(text).toContain("| map: 'first'");
+    expect(text).toContain('| concat:');
+    expect(text).toContain('if steps.hunt_domains.output != blank');
+    expect(text).toContain('if steps.hunt_ips.output != blank');
+    expect(text.match(/\| split: ','/g)).toHaveLength(2);
   });
 });

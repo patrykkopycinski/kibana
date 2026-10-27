@@ -1,0 +1,80 @@
+version: "1"
+name: Detonate FP validation
+description: >
+  Detonate prototype: detonate a sample hash and write the verdict back to
+  the alert it came from — tag `detonate:<verdict>` plus an evidence note.
+  Validates false positives the honest way: a quiet run is recorded as
+  quiet, the alert is never closed by the workflow, and prior runs of the
+  same hash are surfaced for the analyst. Experimental, off by default.
+enabled: true
+tags:
+  - security
+  - detonate_prototype
+triggers:
+  # API-fired only (workflow.execute / Run dialog). No alert trigger exists in
+  # the registry yet — Wave 3 adds the automated tier once one does.
+  - type: manual
+    inputs:
+      properties:
+        sha256:
+          type: string
+          minLength: 32
+          maxLength: 128
+          description: Hash of the sample to detonate, typically the alert's file.hash.sha256.
+        alert_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Elasticsearch _id of the alert to tag and annotate with the verdict.
+        case_id:
+          type: string
+          maxLength: 256
+          description: Optional case to also carry the evidence into, as a comment.
+      required:
+        - sha256
+        - alert_id
+      additionalProperties: false
+outputs:
+  - name: task_id
+    type: string
+  - name: verdict
+    type: string
+  - name: tag
+    type: string
+steps:
+  - name: detonate
+    type: detonate.prototype.detonateSample
+    with:
+      sample_hash: "{{ inputs.sha256 }}"
+      tags:
+        - "alert:{{ inputs.alert_id }}"
+      max_wait_secs: 900
+
+  - name: verdict
+    type: detonate.prototype.detonateVerdict
+    with:
+      task_id: "{{ steps.detonate.output.task_id }}"
+      alert_id: "{{ inputs.alert_id }}"
+
+  - name: apply
+    type: detonate.prototype.applyDetonationVerdict
+    with:
+      verdict: "{{ steps.verdict.output.verdict }}"
+      alert_id: "{{ inputs.alert_id }}"
+      task_id: "{{ steps.verdict.output.task_id }}"
+      evidence: "{{ steps.verdict.output.evidence }}"
+
+  # Optional: mirror the evidence into the case the alert belongs to. Failing
+  # to comment on the case must not fail the run — the alert already carries
+  # the verdict.
+  - name: case_comment
+    type: if
+    condition: "{{ inputs.case_id != blank }}"
+    steps:
+      - name: comment
+        type: detonate.prototype.caseComment
+        on-failure:
+          continue: true
+        with:
+          case_id: "{{ inputs.case_id }}"
+          comment: "Detonation verdict: {{ steps.verdict.output.verdict }} — {{ steps.verdict.output.evidence }}"

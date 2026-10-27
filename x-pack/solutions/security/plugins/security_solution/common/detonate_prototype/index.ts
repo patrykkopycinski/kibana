@@ -215,6 +215,8 @@ export interface DetonateBaseRequest {
   vm_architecture?: DetonateVmArchitecture;
   vm_disk_image?: string;
   vm_has_internet?: boolean;
+  /** Bypass dedup when the analyst explicitly asked for a fresh run. */
+  force_fresh?: boolean;
 }
 
 export interface DetonateHashRequest extends DetonateBaseRequest {

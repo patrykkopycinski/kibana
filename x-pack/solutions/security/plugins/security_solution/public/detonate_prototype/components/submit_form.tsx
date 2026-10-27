@@ -17,7 +17,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiCheckbox,
   EuiComboBox,
+  EuiConfirmModal,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,6 +53,9 @@ export const SUBMIT_HASH_INPUT_TEST_ID = 'detonatePrototypeSampleHash';
 export const SUBMIT_FILE_INPUT_TEST_ID = 'detonatePrototypeSampleFile';
 export const SUBMIT_BUTTON_TEST_ID = 'detonatePrototypeSubmitButton';
 export const SUBMIT_ERROR_TEST_ID = 'detonatePrototypeSubmitError';
+/** The modal root. EUI renders its own confirm/cancel button test subjects. */
+export const SUBMIT_CONFIRM_TEST_ID = 'detonatePrototypeSubmitConfirm';
+export const SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID = 'detonatePrototypeSubmitConfirmForceFresh';
 
 type SubmitMode = 'hash' | 'file';
 
@@ -97,6 +102,10 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
   );
   const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(UNSET);
   const [architecture, setArchitecture] = useState<DetonateVmArchitecture | typeof UNSET>(UNSET);
+  /** The button arms the run; the modal's confirm is what actually submits. */
+  const [isConfirming, setIsConfirming] = useState(false);
+  /** Checked = bypass the completed-report dedup and spend a fresh VM run. */
+  const [forceFresh, setForceFresh] = useState(false);
 
   const submitHash = useSubmitHash();
   const submitFile = useSubmitFile();
@@ -109,13 +118,14 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
       ...(tagValues.length ? { tags: tagValues } : {}),
       ...(osFamily ? { vm_os_family: osFamily } : {}),
       ...(architecture ? { vm_architecture: architecture } : {}),
+      ...(forceFresh ? { force_fresh: true } : {}),
     }),
-    [tagValues, osFamily, architecture]
+    [tagValues, osFamily, architecture, forceFresh]
   );
 
   const canSubmit = mode === 'hash' ? hash.trim().length > 0 : file !== undefined;
 
-  const onSubmit = useCallback(async () => {
+  const doSubmit = useCallback(async () => {
     // Errors are surfaced by the mutation state (the error callout below), but
     // the discarded promise would still be an unhandled rejection — catch here
     // so a failed submit is not also a console error.
@@ -132,6 +142,11 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
     };
     await submit().catch(() => undefined);
   }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
+
+  const onConfirm = useCallback(() => {
+    setIsConfirming(false);
+    void doSubmit();
+  }, [doSubmit]);
 
   const onCreateTag = useCallback((label: string) => {
     const trimmed = label.trim();
@@ -239,12 +254,37 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
           type="submit"
           isDisabled={!canSubmit}
           isLoading={active.isLoading}
-          onClick={onSubmit}
+          onClick={() => setIsConfirming(true)}
           data-test-subj={SUBMIT_BUTTON_TEST_ID}
         >
           {i18n.DETONATE_BUTTON}
         </EuiButton>
       </EuiForm>
+
+      {isConfirming && (
+        <EuiConfirmModal
+          title={i18n.SUBMIT_CONFIRM_TITLE}
+          onCancel={() => setIsConfirming(false)}
+          onConfirm={onConfirm}
+          cancelButtonText={i18n.SUBMIT_CONFIRM_CANCEL}
+          confirmButtonText={i18n.DETONATE_BUTTON}
+          buttonColor="primary"
+          defaultFocusedButton="confirm"
+          data-test-subj={SUBMIT_CONFIRM_TEST_ID}
+        >
+          <p>{i18n.SUBMIT_CONFIRM_BODY}</p>
+          <EuiCheckbox
+            id={`${SUBMIT_CONFIRM_TEST_ID}-forceFresh`}
+            data-test-subj={SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID}
+            label={i18n.SUBMIT_CONFIRM_FORCE_FRESH_LABEL}
+            checked={forceFresh}
+            onChange={(event) => setForceFresh(event.target.checked)}
+          />
+          <p>
+            <small>{i18n.SUBMIT_CONFIRM_FORCE_FRESH_HELP}</small>
+          </p>
+        </EuiConfirmModal>
+      )}
     </EuiPanel>
   );
 });

@@ -15,11 +15,14 @@
  * moment — or poll forever on a run that failed.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
-import { isDetonationComplete } from '../../../common/detonate_prototype';
+import {
+  isDetonationComplete,
+  isDetonationFailed,
+} from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
   DetonateTask,
@@ -123,6 +126,30 @@ export const useDetonationTasksForAlert = (alertId: string | undefined) => {
     enabled: Boolean(alertId),
     queryFn: ({ signal }) => detonateApi.listTasksForAlert(http, alertId as string, signal),
   });
+};
+
+/**
+ * Rung 1 of the sourcing ladder: the most recent completed run for a sample
+ * hash, if one exists. When this resolves, the alert action offers "View
+ * detonation report" instead of spending a new VM — and the analyst is one
+ * click from the answer that already exists.
+ */
+export const useCompletedDetonationByHash = (hash: string | undefined) => {
+  const { http } = useKibana().services;
+
+  const query = useQuery<DetonateTaskSearchResponse>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'by-hash', hash ?? ''] as const,
+    enabled: Boolean(hash),
+    queryFn: ({ signal }) => detonateApi.listTasks(http, { query_string: hash }, signal),
+    staleTime: 60_000,
+  });
+
+  return useMemo(() => {
+    const completed = (query.data?.tasks ?? [])
+      .filter((t) => t.sample_hash === hash && isDetonationComplete(t) && !isDetonationFailed(t))
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return { ...query, completedRun: completed[0] };
+  }, [hash, query]);
 };
 
 /**

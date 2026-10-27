@@ -215,6 +215,44 @@ export const DETONATE_FILE_ACTION = i18n.translate(
   { defaultMessage: 'Detonate file' }
 );
 
+export const DETONATE_VIEW_REPORT_ACTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertAction.viewReport',
+  { defaultMessage: 'View detonation report' }
+);
+
+export const SUBMIT_CONFIRM_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitConfirm.title',
+  { defaultMessage: 'Start a detonation?' }
+);
+
+export const SUBMIT_CONFIRM_BODY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitConfirm.body',
+  {
+    defaultMessage:
+      'The sample runs in a sandbox VM with Elastic Defend installed. Each run occupies a VM for several minutes.',
+  }
+);
+
+export const SUBMIT_CONFIRM_FORCE_FRESH_LABEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitConfirm.forceFreshLabel',
+  {
+    defaultMessage: 'Run a fresh detonation even if a completed report exists',
+  }
+);
+
+export const SUBMIT_CONFIRM_FORCE_FRESH_HELP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitConfirm.forceFreshHelp',
+  {
+    defaultMessage:
+      'Leave unchecked to reuse the existing report for the same sample instead of spending a new VM run.',
+  }
+);
+
+export const SUBMIT_CONFIRM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitConfirm.cancel',
+  { defaultMessage: 'Cancel' }
+);
+
 export const NOTIFY_COMPLETE_TITLE = (sample: string) =>
   i18n.translate('xpack.securitySolution.detonatePrototype.notify.completeTitle', {
     defaultMessage: 'Detonation complete: {sample}',

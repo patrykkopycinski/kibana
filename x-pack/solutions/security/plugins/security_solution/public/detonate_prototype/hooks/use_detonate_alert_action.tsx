@@ -8,14 +8,18 @@
 /**
  * Detonate prototype — "Detonate file" alert action.
  *
- * The action does not submit. It carries the hash the analyst is already
- * looking at over to the submission form, which is the only place a detonation
- * is started from; a second submit path here would be a second thing to keep
- * in step with the service contract.
+ * The sourcing ladder (D11), as menu items, cheapest rung first:
  *
- * The item is absent, rather than disabled, when there is no hash to carry:
- * a disabled "Detonate file" on an alert about a network connection is noise
- * in a menu analysts read under time pressure.
+ *   1. "View detonation report" — a completed run for this hash already
+ *      exists; navigating to it costs nothing.
+ *   2. "Detonate file" — carries the hash to the submission form, which is
+ *      the only place a detonation is started from. The form is where the
+ *      confirm-before-VM-spent lives; a second submit path here would be a
+ *      second thing to keep in step with the service contract.
+ *
+ * The items are absent, rather than disabled, when they cannot apply: a
+ * disabled "Detonate file" on an alert about a network connection is noise in
+ * a menu analysts read under time pressure.
  */
 
 import { useCallback, useMemo } from 'react';
@@ -26,8 +30,9 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { useNavigateTo } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../app/types';
-import { DETONATE_FILE_ACTION_ID } from '../../common/constants/action_ids';
-import { DETONATE_FILE_ACTION } from '../translations';
+import { DETONATE_FILE_ACTION_ID, DETONATE_VIEW_REPORT_ACTION_ID } from '../../common/constants/action_ids';
+import { DETONATE_FILE_ACTION, DETONATE_VIEW_REPORT_ACTION } from '../translations';
+import { useCompletedDetonationByHash } from './use_detonate';
 
 /**
  * Hash fields in the order the detonation service prefers them. SHA-256 first
@@ -93,6 +98,9 @@ export const useDetonateAlertAction = ({
   const hash = useMemo(() => getDetonatableHash(hit), [hit]);
   const documentId = hit.raw._id ?? '';
 
+  // Rung 1: a completed report for this hash already on record.
+  const { completedRun } = useCompletedDetonationByHash(isEnabled ? hash : undefined);
+
   const onClick = useCallback(() => {
     if (!hash) {
       return;
@@ -108,19 +116,37 @@ export const useDetonateAlertAction = ({
     });
   }, [closePopover, documentId, hash, navigateTo]);
 
+  const viewReport = useCallback(() => {
+    if (!completedRun) {
+      return;
+    }
+    closePopover();
+    navigateTo({
+      deepLinkId: SecurityPageName.detonatePrototype,
+      path: `/${completedRun.id}`,
+    });
+  }, [closePopover, completedRun, navigateTo]);
   const detonateActionItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
     if (!isEnabled || !hash) {
       return [];
     }
-    return [
-      {
-        'data-test-subj': DETONATE_FILE_ACTION_ID,
-        key: DETONATE_FILE_ACTION_ID,
-        name: DETONATE_FILE_ACTION,
-        onClick,
-      },
-    ];
-  }, [hash, isEnabled, onClick]);
+    const items: EuiContextMenuPanelItemDescriptor[] = [];
+    if (completedRun) {
+      items.push({
+        'data-test-subj': DETONATE_VIEW_REPORT_ACTION_ID,
+        key: DETONATE_VIEW_REPORT_ACTION_ID,
+        name: DETONATE_VIEW_REPORT_ACTION,
+        onClick: viewReport,
+      });
+    }
+    items.push({
+      'data-test-subj': DETONATE_FILE_ACTION_ID,
+      key: DETONATE_FILE_ACTION_ID,
+      name: DETONATE_FILE_ACTION,
+      onClick,
+    });
+    return items;
+  }, [completedRun, hash, isEnabled, onClick, viewReport]);
 
   return { detonateActionItems };
 };

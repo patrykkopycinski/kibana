@@ -42,7 +42,7 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
       await context.contextManager.callKibanaApi({
         method: 'POST',
         path: DETECTION_ENGINE_ALERT_TAGS_URL,
-        body: { ids: [alertId], tags: { tags_to_add: [tag] } },
+        body: { ids: [alertId], tags: { tags_to_add: [tag], tags_to_remove: [] } },
       });
 
       const { body: noteBody } = await context.contextManager.callKibanaApi<{

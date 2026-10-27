@@ -36,10 +36,13 @@ describe('applyDetonationVerdictStepDefinition', () => {
     const result = await applyDetonationVerdictStepDefinition.handler(context);
     const calls = (context.contextManager.callKibanaApi as jest.Mock).mock.calls;
 
-    expect(calls[0][0]).toEqual({
+    expect(calls[0][0]).toStrictEqual({
       method: 'POST',
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
-      body: { ids: ['alert-9'], tags: { tags_to_add: ['detonate:quiet'] } },
+      body: {
+        ids: ['alert-9'],
+        tags: { tags_to_add: ['detonate:quiet'], tags_to_remove: [] },
+      },
     });
     expect(calls[1][0]).toEqual({
       method: 'PATCH',

@@ -57,7 +57,9 @@ import type {
 const KNOWN_GOOD_MIN = 300;
 const FALSE_MALICIOUS_MAX_UPPER_BOUND = 0.01;
 const MUTATION_SLICE_SIZE = 40;
-const TASK_CONCURRENCY = 8;
+// Per-experiment example concurrency. Defaults to 8 (comfortable on a 16GB host);
+// override per host with EVAL_CONCURRENCY (e.g. 1-2 on a 2-vCPU controller).
+const TASK_CONCURRENCY = parseInt(process.env.EVAL_CONCURRENCY ?? '8', 10);
 
 const toExamples = (entries: DetonateCorpusEntry[]): DetonateSummaryExample[] =>
   entries.map((entry) => ({

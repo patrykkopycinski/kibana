@@ -8,6 +8,7 @@
  */
 
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
+import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const DETONATE_FP_VALIDATION_WORKFLOW_ID = 'system-security-detonate-fp-validation';
@@ -24,6 +25,27 @@ export const DETONATE_FP_VALIDATION_WORKFLOW = {
   version: 1,
   billable: false,
   yaml: DETONATE_FP_VALIDATION_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const DETONATE_TRIAGE_WORKFLOW_ID = 'system-security-detonate-triage';
+
+/**
+ * Detonate prototype: the automated triage tier. A reputation gate runs
+ * first — known-malicious hashes are written back without spending a VM;
+ * only `unknown` hashes detonate, and the run's verdict lands on the alert.
+ * Manual-trigger only until an alert trigger exists in the registry.
+ */
+export const DETONATE_TRIAGE_WORKFLOW = {
+  id: DETONATE_TRIAGE_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_TRIAGE_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

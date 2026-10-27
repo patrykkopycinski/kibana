@@ -8,6 +8,7 @@
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
+  DETONATE_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -137,7 +138,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('installs the detonate FP-validation workflow in the global space when the prototype flag is on', async () => {
+  it('installs the detonate workflows in the global space when the prototype flag is on', async () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
@@ -154,10 +155,13 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.install).toHaveBeenCalledWith(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+    expect(managed.install).toHaveBeenCalledWith(DETONATE_TRIAGE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
     expect(managed.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('uninstalls a previously installed detonate workflow when the prototype flag is off', async () => {
+  it('uninstalls previously installed detonate workflows when the prototype flag is off', async () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
@@ -175,7 +179,14 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       DETONATE_FP_VALIDATION_WORKFLOW_ID,
       expect.anything()
     );
+    expect(managed.install).not.toHaveBeenCalledWith(
+      DETONATE_TRIAGE_WORKFLOW_ID,
+      expect.anything()
+    );
     expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_TRIAGE_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
   });

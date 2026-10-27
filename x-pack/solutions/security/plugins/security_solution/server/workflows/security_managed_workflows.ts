@@ -6,7 +6,10 @@
  */
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { DETONATE_FP_VALIDATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  DETONATE_FP_VALIDATION_WORKFLOW_ID,
+  DETONATE_TRIAGE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
@@ -71,19 +74,25 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   }
 
   try {
-    // Prototype workflow: install/uninstall is flag-driven like threat intel,
+    // Prototype workflows: install/uninstall is flag-driven like threat intel,
     // but unconditional within the flag (no bootstrap dependency).
     if (detonatePrototypeEnabled) {
       await managedWorkflowsClient.install(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+      await managedWorkflowsClient.install(DETONATE_TRIAGE_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
     } else {
       await managedWorkflowsClient.uninstall(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
+      await managedWorkflowsClient.uninstall(DETONATE_TRIAGE_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
     }
   } catch (error) {
-    logger.warn('Failed to install or uninstall the detonate FP-validation workflow', { error });
+    logger.warn('Failed to install or uninstall the detonate prototype workflows', { error });
   }
 
   try {

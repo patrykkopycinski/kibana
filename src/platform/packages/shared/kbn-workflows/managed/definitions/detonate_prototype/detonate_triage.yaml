@@ -1,0 +1,121 @@
+version: "1"
+name: Detonate triage
+description: >
+  Detonate prototype: the automated triage tier. A reputation gate runs
+  first — a digest the service has already seen detonate is tagged straight
+  away and never spends a VM. Only `unknown` hashes are detonated, and the
+  run's verdict is written back to the alert (tag plus evidence note; the
+  alert's status is never touched by the workflow). Experimental, off by
+  default.
+enabled: true
+tags:
+  - security
+  - detonate_prototype
+triggers:
+  # API-fired only (workflow.execute / Run dialog). No alert trigger exists in
+  # the registry yet — "automated" today means one API call, with the run
+  # visible in Executions.
+  - type: manual
+    inputs:
+      properties:
+        sha256:
+          type: string
+          minLength: 32
+          maxLength: 128
+          description: Hash of the sample to triage, typically the alert's file.hash.sha256.
+        alert_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Elasticsearch _id of the alert the verdict is written back to.
+        case_id:
+          type: string
+          maxLength: 256
+          description: Optional case to carry confirmed-malicious evidence into, as a comment.
+      required:
+        - sha256
+        - alert_id
+      additionalProperties: false
+outputs:
+  - name: source
+    type: string
+  - name: verdict
+    type: string
+  - name: tag
+    type: string
+steps:
+  # The gate only answers `known-malicious` or `unknown`. `unknown` is honest
+  # uncertainty — no benign answer exists — and it is what earns a detonation.
+  - name: reputation
+    type: detonate.prototype.detonateReputation
+    with:
+      sha256: "{{ inputs.sha256 }}"
+
+  - name: reputation_gate
+    type: switch
+    expression: "{{ steps.reputation.output.status }}"
+    cases:
+      # Already-known malware: write the verdict back from reputation alone.
+      # No VM is spent re-confirming what the service has already seen, and
+      # the note says so explicitly so nobody hunts for a run that does not
+      # exist.
+      - match: known-malicious
+        steps:
+          - name: tag_known
+            type: security.setAlertTags
+            with:
+              alert_ids: "{{ inputs.alert_id }}"
+              tags_to_add:
+                - "detonate:known-malicious"
+
+          - name: note_known
+            type: security.createNote
+            with:
+              document_id: "{{ inputs.alert_id }}"
+              text: >-
+                Detonate triage: reputation gate reports this hash as
+                known-malicious{% if steps.reputation.output.malware_family != blank %} (family
+                {{ steps.reputation.output.malware_family }}){% endif %}. No new detonation was
+                run — the verdict comes from prior runs of the same sample.
+
+    # `unknown` falls through to the default: detonate, derive the verdict,
+    # write it back. This is the only path that spends a VM.
+    default:
+      - name: detonate
+        type: detonate.prototype.detonateSample
+        with:
+          sample_hash: "{{ inputs.sha256 }}"
+          tags:
+            - "alert:{{ inputs.alert_id }}"
+            - "triage"
+          max_wait_secs: 900
+
+      - name: verdict
+        type: detonate.prototype.detonateVerdict
+        with:
+          task_id: "{{ steps.detonate.output.task_id }}"
+          alert_id: "{{ inputs.alert_id }}"
+
+      - name: apply
+        type: detonate.prototype.applyDetonationVerdict
+        with:
+          verdict: "{{ steps.verdict.output.verdict }}"
+          alert_id: "{{ inputs.alert_id }}"
+          task_id: "{{ steps.verdict.output.task_id }}"
+          evidence: "{{ steps.verdict.output.evidence }}"
+
+      # A confirmed-malicious detonation is worth a case comment; a quiet or
+      # inconclusive run stays on the alert, where the analyst already is.
+      # Failing to comment on the case must not fail the run — the alert
+      # already carries the verdict.
+      - name: case_comment_on_malicious
+        type: if
+        condition: "{{ steps.verdict.output.verdict == 'malicious' and inputs.case_id != blank }}"
+        steps:
+          - name: comment
+            type: detonate.prototype.caseComment
+            on-failure:
+              continue: true
+            with:
+              case_id: "{{ inputs.case_id }}"
+              comment: "Detonation confirmed malicious — {{ steps.verdict.output.evidence }}"

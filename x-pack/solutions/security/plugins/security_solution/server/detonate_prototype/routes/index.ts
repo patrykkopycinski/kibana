@@ -150,9 +150,8 @@ export const registerDetonatePrototypeRoutes = ({
    * Anonymous-style internal calls resolve to a stable service-side default.
    */
   const actorFromRequest = (request: KibanaRequest): string | undefined => {
-    const user = request.auth.credentials as { username?: string; name?: string } | undefined;
-    const actor = user?.username ?? user?.name;
-    return typeof actor === 'string' && actor.length > 0 ? actor : undefined;
+    const username = endpointAppContextService.getCurrentUsername(request);
+    return username !== 'unknown' ? username : undefined;
   };
 
   router.versioned

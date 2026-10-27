@@ -25,6 +25,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   let client: jest.Mocked<DetonateClient>;
   let endpointAppContextService: {
     getEndpointAuthz: jest.Mock;
+    getCurrentUsername: jest.Mock;
   };
 
   const createRequest = (method: 'post' | 'get', path: string, body?: unknown, params?: unknown) =>
@@ -66,6 +67,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = {
       getEndpointAuthz: jest.fn().mockResolvedValue({ canWriteSecuritySolution: canWrite }),
+      getCurrentUsername: jest.fn().mockReturnValue('analyst-test'),
     };
     registerDetonatePrototypeRoutes({
       router: router as never,
@@ -165,7 +167,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       expect(client.submitHash).toHaveBeenCalledWith(
         { sample_hash: 'a'.repeat(64) },
-        undefined // no authenticated actor in the test request
+        'analyst-test' // the authenticated Kibana user, as the quota key
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...task, deduplicated: false } });
     });
@@ -289,7 +291,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(client.submitFile).toHaveBeenCalledWith(
         { tags: ['demo'], sample_filename: 'sample.txt' },
         expect.objectContaining({ filename: 'sample.txt' }),
-        undefined
+        'analyst-test'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...task, deduplicated: false } });
     });

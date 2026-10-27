@@ -98,13 +98,8 @@ export const submitDetonationTool = (
     try {
       // The tool has the request in scope, so the actor travels with the
       // submit and the service's quota keys on the real user.
-      const actor = (() => {
-        const user = request.auth.credentials as
-          | { username?: string; name?: string }
-          | undefined;
-        const name = user?.username ?? user?.name;
-        return typeof name === 'string' && name.length > 0 ? name : undefined;
-      })();
+      const username = endpointAppContextService.getCurrentUsername(request);
+      const actor = username !== 'unknown' ? username : undefined;
 
       const { task, deduplicated } = await getClient().submitHash(
         {

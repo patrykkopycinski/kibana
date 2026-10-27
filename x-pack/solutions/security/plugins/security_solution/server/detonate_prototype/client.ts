@@ -24,6 +24,7 @@ import type { Logger } from '@kbn/core/server';
 import type {
   DetonateFileRequest,
   DetonateHashRequest,
+  DetonateReputationResponse,
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
@@ -54,6 +55,7 @@ export class DetonateServiceError extends Error {
 
 export interface DetonateClient {
   healthcheck(): Promise<{ status: string }>;
+  reputation(sha256: string): Promise<DetonateReputationResponse>;
   submitFile(
     request: DetonateFileRequest,
     file: { filename: string; body: Buffer }
@@ -120,6 +122,9 @@ export const createDetonateClient = ({
 
   return {
     healthcheck: () => call<{ status: string }>('/healthcheck'),
+
+    reputation: (sha256) =>
+      call<DetonateReputationResponse>(`/reputation/${encodeURIComponent(sha256)}`),
 
     submitFile: (request, file) => {
       // `POST /submit-file` is multipart: a `request_json` field plus the

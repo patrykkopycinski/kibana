@@ -29,6 +29,7 @@ import type { Readable } from 'stream';
 
 import {
   DETONATE_HEALTHCHECK_PATH,
+  DETONATE_REPUTATION_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
@@ -156,6 +157,38 @@ export const registerDetonatePrototypeRoutes = ({
         return toErrorResponse(error, response);
       }
     });
+
+  // The reputation gate the workflow's first switch reads. Proxied like every
+  // other detonate route so the privilege check and service URL stay in one
+  // place; `unknown` is passed through untouched — the workflow, not the
+  // route, decides that unknown means "detonate".
+  router.versioned
+    .get({
+      access: 'internal',
+      path: `${DETONATE_REPUTATION_PATH}/{sha256}`,
+      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              sha256: schema.string({ minLength: 64, maxLength: 64 }),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          return response.ok({
+            body: await getClient().reputation(request.params.sha256),
+          });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
 
   router.versioned
     .post({

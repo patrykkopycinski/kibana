@@ -28,6 +28,7 @@ import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
 import { detonateSampleStepDefinition } from './detonate_prototype/detonate_sample_step';
 import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
+import { detonateReputationStepDefinition } from './detonate_prototype/detonate_reputation_step';
 import { applyDetonationVerdictStepDefinition } from './detonate_prototype/apply_detonation_verdict_step';
 import { caseCommentStepDefinition } from './detonate_prototype/case_comment_step';
 
@@ -104,9 +105,10 @@ describe('registerWorkflowSteps (server)', () => {
 
     const on = createWorkflowsExtensionsMock();
     registerWorkflowSteps(on, true);
-    expect(on.registerStepDefinition).toHaveBeenCalledTimes(24);
+    expect(on.registerStepDefinition).toHaveBeenCalledTimes(25);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateSampleStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateVerdictStepDefinition);
+    expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateReputationStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(applyDetonationVerdictStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(caseCommentStepDefinition);
   });

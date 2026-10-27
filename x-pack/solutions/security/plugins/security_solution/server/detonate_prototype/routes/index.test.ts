@@ -14,6 +14,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
+  DETONATE_REPUTATION_PATH,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { registerDetonatePrototypeRoutes } from '.';
@@ -26,14 +27,22 @@ describe('registerDetonatePrototypeRoutes', () => {
     getEndpointAuthz: jest.Mock;
   };
 
-  const createRequest = (method: 'post' | 'get', path: string, body?: unknown) =>
-    httpServerMock.createKibanaRequest({ method, path, body: body as Record<string, unknown> });
+  const createRequest = (method: 'post' | 'get', path: string, body?: unknown, params?: unknown) =>
+    httpServerMock.createKibanaRequest({
+      method,
+      path,
+      body: body as Record<string, unknown>,
+      ...(params ? { params: params as Record<string, unknown> } : {}),
+    });
 
   const submitHashHandler = () =>
     router.versioned.getRoute('post', DETONATE_SUBMIT_HASH_PATH).versions['1'].handler;
 
   const submitFileHandler = () =>
     router.versioned.getRoute('post', DETONATE_SUBMIT_FILE_PATH).versions['1'].handler;
+
+  const reputationHandler = () =>
+    router.versioned.getRoute('get', `${DETONATE_REPUTATION_PATH}/{sha256}`).versions['1'].handler;
 
   /**
    * The submit-hash body validator is a config-schema object (not a route
@@ -69,6 +78,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   beforeEach(() => {
     client = {
       healthcheck: jest.fn(),
+      reputation: jest.fn(),
       submitFile: jest.fn(),
       submitHash: jest.fn(),
       getTask: jest.fn(),
@@ -244,6 +254,58 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect.objectContaining({ filename: 'sample.txt' })
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+    });
+  });
+
+  describe('reputation handler', () => {
+    const known = {
+      sha256: 'a'.repeat(64),
+      status: 'known-malicious',
+      source: 'detonate-seed',
+      malware_family: 'eicar-test-file',
+    };
+
+    it('proxies the gate answer for a known-malicious digest', async () => {
+      client.reputation.mockResolvedValue(known as never);
+
+      await reputationHandler()(
+        createContext(),
+        createRequest('get', DETONATE_REPUTATION_PATH, undefined, { sha256: 'a'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(client.reputation).toHaveBeenCalledWith('a'.repeat(64));
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: known });
+    });
+
+    it('passes `unknown` through untouched — never shaped into benign', async () => {
+      const unknown = { sha256: 'b'.repeat(64), status: 'unknown', source: 'detonate-seed' };
+      client.reputation.mockResolvedValue(unknown as never);
+
+      await reputationHandler()(
+        createContext(),
+        createRequest('get', DETONATE_REPUTATION_PATH, undefined, { sha256: 'b'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: unknown });
+    });
+
+    it('shapes a service error with the service status', async () => {
+      const { DetonateServiceError: Ctor } = jest.requireActual<{
+        DetonateServiceError: typeof DetonateServiceError;
+      }>('../client');
+      client.reputation.mockRejectedValue(new Ctor('The detonation service answered 503.', 503));
+
+      await reputationHandler()(
+        createContext(),
+        createRequest('get', DETONATE_REPUTATION_PATH, undefined, { sha256: 'c'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 503 })
+      );
     });
   });
 });

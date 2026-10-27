@@ -38,6 +38,7 @@ import {
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonateHealthcheck, useDetonationTasks } from '../hooks/use_detonate';
 import { DetonationStatusBadge } from '../components/detonation_status_badge';
+import { DetonateVerdictBadge } from '../components/verdict_badge';
 import { SubmitForm } from '../components/submit_form';
 import * as i18n from '../translations';
 
@@ -120,6 +121,11 @@ export const DetonateListPage = React.memo(() => {
       name: i18n.COLUMN_PROGRESS,
       width: '140px',
       render: (task: DetonateTask) => <DetonationStatusBadge task={task} />,
+    },
+    {
+      name: i18n.COLUMN_VERDICT,
+      width: '150px',
+      render: (task: DetonateTask) => <DetonateVerdictBadge task={task} />,
     },
     {
       name: i18n.COLUMN_ALERTS,

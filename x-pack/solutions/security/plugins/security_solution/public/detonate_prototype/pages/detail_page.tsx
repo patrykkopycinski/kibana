@@ -40,6 +40,7 @@ import {
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonationTask } from '../hooks/use_detonate';
 import { DetonationStatusBadge } from '../components/detonation_status_badge';
+import { DetonateVerdictBadge } from '../components/verdict_badge';
 import { WorkerTimeline } from '../components/worker_timeline';
 import { DetectionAlertGroups, EndpointAlertGroups } from '../components/alert_groups';
 import * as i18n from '../translations';
@@ -139,7 +140,10 @@ export const DetonateDetailPage = React.memo(() => {
 
       <EuiPageHeader
         pageTitle={task.sample_filename ?? task.sample_hash ?? task.id}
-        rightSideItems={[<DetonationStatusBadge task={task} showProgress />]}
+        rightSideItems={[
+          <DetonateVerdictBadge task={task} />,
+          <DetonationStatusBadge task={task} showProgress />,
+        ]}
       />
       <EuiSpacer size="l" />
 

@@ -113,6 +113,11 @@ export const COLUMN_PROGRESS = i18n.translate(
   { defaultMessage: 'Progress' }
 );
 
+export const COLUMN_VERDICT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.columnVerdict',
+  { defaultMessage: 'Verdict' }
+);
+
 export const COLUMN_ALERTS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.columnAlerts',
   { defaultMessage: 'Alerts' }
@@ -183,6 +188,21 @@ export const QUIET_RUN_BODY = i18n.translate(
     defaultMessage:
       'The run completed successfully. A sample can be benign, or this can be a detection gap worth investigating — it is not an error.',
   }
+);
+
+export const VERDICT_MALICIOUS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.verdict.malicious',
+  { defaultMessage: 'Detonate: malicious' }
+);
+
+export const VERDICT_QUIET = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.verdict.quiet',
+  { defaultMessage: 'Detonate: quiet' }
+);
+
+export const VERDICT_INCONCLUSIVE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.verdict.inconclusive',
+  { defaultMessage: 'Detonate: inconclusive' }
 );
 
 export const SERVICE_UNAVAILABLE_TITLE = i18n.translate(

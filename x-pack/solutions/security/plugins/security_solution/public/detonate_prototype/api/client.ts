@@ -35,6 +35,11 @@ import type {
 /** Every prototype route is registered at version 1. */
 const VERSION = { version: '1' } as const;
 
+/** A submit answer: the task, plus whether it is an existing report. */
+export interface DetonateSubmitResult extends DetonateTask {
+  deduplicated?: boolean;
+}
+
 export interface SubmitFileParams {
   file: File;
   /** Same optional fields the hash path sends; omitted ones use service defaults. */
@@ -48,7 +53,7 @@ export const detonateApi = {
     http.get<{ status: string }>(DETONATE_HEALTHCHECK_PATH, { version: VERSION.version, signal }),
 
   submitHash: (http: HttpSetup, request: DetonateHashRequest, signal?: AbortSignal) =>
-    http.post<DetonateTask>(DETONATE_SUBMIT_HASH_PATH, {
+    http.post<DetonateSubmitResult>(DETONATE_SUBMIT_HASH_PATH, {
       version: VERSION.version,
       body: JSON.stringify(request),
       signal,
@@ -75,7 +80,7 @@ export const detonateApi = {
       body.append('request_json', JSON.stringify(requestOptions));
     }
 
-    return http.post<DetonateTask>(DETONATE_SUBMIT_FILE_PATH, {
+    return http.post<DetonateSubmitResult>(DETONATE_SUBMIT_FILE_PATH, {
       version: VERSION.version,
       body,
       // Let the browser set the multipart boundary; a hand-set Content-Type

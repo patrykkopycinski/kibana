@@ -214,3 +214,20 @@ export const DETONATE_FILE_ACTION = i18n.translate(
   'xpack.securitySolution.detonatePrototype.alertAction.detonateFile',
   { defaultMessage: 'Detonate file' }
 );
+
+export const NOTIFY_COMPLETE_TITLE = (sample: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.notify.completeTitle', {
+    defaultMessage: 'Detonation complete: {sample}',
+    values: { sample },
+  });
+
+export const NOTIFY_COMPLETE_TEXT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.notify.completeText',
+  { defaultMessage: 'The run finished. Open the report for alerts and verdict.' }
+);
+
+export const NOTIFY_FAILED_TITLE = (sample: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.notify.failedTitle', {
+    defaultMessage: 'Detonation failed: {sample}',
+    values: { sample },
+  });

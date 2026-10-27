@@ -27,7 +27,8 @@ import type {
   DetonateTaskUpdate,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
-import type { SubmitFileParams } from '../api/client';
+import type { DetonateSubmitResult, SubmitFileParams } from '../api/client';
+import { useTrackDetonation } from '../components/detonation_notifier';
 
 /**
  * A detonation runs for minutes, so polling faster than this only adds load.
@@ -140,19 +141,29 @@ const useInvalidateTaskList = () => {
 export const useSubmitHash = () => {
   const { http } = useKibana().services;
   const invalidate = useInvalidateTaskList();
+  const track = useTrackDetonation();
 
-  return useMutation<DetonateTask, Error, DetonateHashRequest>({
+  return useMutation<DetonateSubmitResult, Error, DetonateHashRequest>({
     mutationFn: (request) => detonateApi.submitHash(http, request),
-    onSuccess: invalidate,
+    onSuccess: (result) => {
+      invalidate();
+      // A deduplicated answer is a completed report, not a new run — nothing
+      // to track. A new run is in flight and owns a completion notification.
+      if (!result.deduplicated) track(result.id);
+    },
   });
 };
 
 export const useSubmitFile = () => {
   const { http } = useKibana().services;
   const invalidate = useInvalidateTaskList();
+  const track = useTrackDetonation();
 
-  return useMutation<DetonateTask, Error, SubmitFileParams>({
+  return useMutation<DetonateSubmitResult, Error, SubmitFileParams>({
     mutationFn: (params) => detonateApi.submitFile(http, params),
-    onSuccess: invalidate,
+    onSuccess: (result) => {
+      invalidate();
+      if (!result.deduplicated) track(result.id);
+    },
   });
 };

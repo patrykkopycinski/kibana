@@ -16,6 +16,7 @@ import { DETONATE_PROTOTYPE_APP_PATH } from '../../common/detonate_prototype';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { DetonationNotifier } from './components/detonation_notifier';
 
 const DetonateListPageLazy = lazy(() => import('./pages/list_page'));
 const DetonateDetailPageLazy = lazy(() => import('./pages/detail_page'));
@@ -28,19 +29,23 @@ const queryClient = new QueryClient();
 
 export const DetonatePrototypeRoutes = () => (
   <QueryClientProvider client={queryClient}>
-    <PluginTemplateWrapper>
-      <SecuritySolutionPageWrapper>
-        <Suspense fallback={<EuiLoadingElastic />}>
-          <Routes>
-            <Route
-              path={`${DETONATE_PROTOTYPE_APP_PATH}/:taskId`}
-              component={DetonateDetailPageLazy}
-            />
-            <Route exact path={DETONATE_PROTOTYPE_APP_PATH} component={DetonateListPageLazy} />
-          </Routes>
-        </Suspense>
-      </SecuritySolutionPageWrapper>
-    </PluginTemplateWrapper>
+    {/* Above the routes so a submitted run keeps its completion watcher while
+        the analyst moves between the list and detail pages. */}
+    <DetonationNotifier>
+      <PluginTemplateWrapper>
+        <SecuritySolutionPageWrapper>
+          <Suspense fallback={<EuiLoadingElastic />}>
+            <Routes>
+              <Route
+                path={`${DETONATE_PROTOTYPE_APP_PATH}/:taskId`}
+                component={DetonateDetailPageLazy}
+              />
+              <Route exact path={DETONATE_PROTOTYPE_APP_PATH} component={DetonateListPageLazy} />
+            </Routes>
+          </Suspense>
+        </SecuritySolutionPageWrapper>
+      </PluginTemplateWrapper>
+    </DetonationNotifier>
   </QueryClientProvider>
 );
 

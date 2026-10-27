@@ -146,8 +146,9 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
     // run is not necessarily a successful one.
     complete,
     failed,
-    // Zero alerts on a completed run is a real result — a benign sample or a
-    // detection gap — and the flag exists so the agent reports it as a finding
+    // Zero alerts on a completed run is a real result — no malicious behavior
+    // was observed, which is not proof the sample is harmless (it may be a
+    // detection gap) — and the flag exists so the agent reports it as a finding
     // rather than as "something went wrong".
     quiet: detonationWasQuiet(task),
     progress: detonationProgress(task),

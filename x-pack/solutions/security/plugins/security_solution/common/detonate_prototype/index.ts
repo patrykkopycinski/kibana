@@ -265,8 +265,9 @@ export const totalDetonationAlerts = (task: DetonateTask): number =>
 
 /**
  * Whether a detonation saw anything at all. A run that completes with zero
- * alerts is a real and meaningful result (a benign sample, or a detection
- * gap) — it is not an error, and surfaces must not present it as one.
+ * alerts is a real and meaningful result (no malicious behavior was observed —
+ * not proof the sample is benign; possibly a detection gap) — it is not an
+ * error, and surfaces must not present it as one.
  */
 export const detonationWasQuiet = (task: DetonateTask): boolean =>
   isDetonationComplete(task) && !isDetonationFailed(task) && totalDetonationAlerts(task) === 0;

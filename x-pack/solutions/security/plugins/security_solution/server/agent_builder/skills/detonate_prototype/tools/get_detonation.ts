@@ -42,7 +42,7 @@ export const getDetonationTool = (
   id: GET_DETONATION_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves a detonation task by ID: its current stage, whether it has finished or failed, and the Elastic Defend alerts the sample produced inside the sandbox. Use to poll a run submitted with submit_detonation, or to report on a past run. A finished run with zero alerts is a real finding (benign sample, or a detection gap), not an error.',
+    'Retrieves a detonation task by ID: its current stage, whether it has finished or failed, and the Elastic Defend alerts the sample produced inside the sandbox. Use to poll a run submitted with submit_detonation, or to report on a past run. A finished run with zero alerts is a real finding (no malicious behavior observed — not proof the sample is benign; it may be a detection gap), not an error.',
   schema: getDetonationSchema,
   maxResultTokens: DETONATE_TOOL_MAX_RESULT_TOKENS,
   handler: async (params, { request }) => {

@@ -40,7 +40,8 @@ is what to tell an analyst who asks how far along a run is.
 
 A quiet run is a result, not a failure. It means one of:
 
-1. The sample is benign, or did nothing in the time it was given.
+1. The sample did nothing malicious in the time it was given — though this is
+   not proof the sample is harmless (no behavior was observed ≠ safe).
 2. The sample detected the sandbox and declined to run.
 3. Elastic Defend has a gap for this behaviour.
 

@@ -59,9 +59,9 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
 
 - \`complete: true, failed: false, quiet: true\` — the run worked and produced no
   alerts. That is a **finding**, not a failure. Say the sample ran without
-  raising anything, and name the possibilities: it is benign, it detected the
-  sandbox, or there is a detection gap. Do not say the detonation "did not
-  work".
+  raising anything, and name the possibilities honestly: the sample may be
+  harmless, it may have detected the sandbox, or nothing detected it (a
+  detection gap). Do not say the detonation "did not work".
 - \`failed: true\` — the detonation itself failed. There is no verdict about the
   sample. Say what stage it failed at (\`last_worker_name\`) and give the details
   field if present.
@@ -69,8 +69,16 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
   this". Diagnostic alerts answer "did Defend observe the behaviour at all".
   When diagnostic alerts exist but production alerts do not, say so explicitly —
   that gap is the interesting part of the answer.
-- Never claim a sample is safe because a run was quiet. Say what was observed
-  and what that does and does not rule out.
+
+## Evidence rule (mandatory wording constraints)
+
+The word "malicious" may appear in a summary ONLY when the run produced hard
+evidence: production endpoint alerts (Defend prevented something) or detection
+rule hits. In every other case — zero alerts, diagnostic-only alerts, or a
+failed run — the summary must use "suspicious" or say "no malicious behavior
+was observed" and add that this is not proof the sample is benign. A summary
+must NEVER conclude or imply the sample is "benign", "safe", or "clean"; quiet
+runs are absence-of-evidence, not evidence of safety.
 
 ## False-positive check before reporting quiet
 

@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Generate the alertzero-detonate-summary corpus (P5).
  *
@@ -21,7 +28,7 @@ import { mkdirSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { DetonateCorpusEntry } from '../src/types.ts';
+import type { DetonateCorpusEntry } from '../src/types';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -118,10 +125,11 @@ const main = async () => {
   // The replay executor matches by the hashes/filenames the recordings name,
   // so submitting the real EICAR hash replays the real EICAR recording.
   const EICAR_SHA256 = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
-  const malwareSubmissions: Array<{ id: string; sample_hash?: string; sample_filename?: string }> = [
-    { id: 'eicar-linux', sample_hash: EICAR_SHA256 },
-    { id: 'eicar-reenrolled', sample_hash: EICAR_SHA256, sample_filename: 'eicar.com' },
-  ];
+  const malwareSubmissions: Array<{ id: string; sample_hash?: string; sample_filename?: string }> =
+    [
+      { id: 'eicar-linux', sample_hash: EICAR_SHA256 },
+      { id: 'eicar-reenrolled', sample_hash: EICAR_SHA256, sample_filename: 'eicar.com' },
+    ];
   for (const m of malwareSubmissions) {
     const task = await store.create({ ...m, tags: ['corpus:known-malware'] });
     const final = await runPipeline({ store, executor, taskId: task.id, stepDelayMs: 0 });

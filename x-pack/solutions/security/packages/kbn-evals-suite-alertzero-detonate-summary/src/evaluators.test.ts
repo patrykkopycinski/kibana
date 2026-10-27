@@ -36,8 +36,10 @@ describe('classifySummary', () => {
 
     it('allows "malicious" when the recording has hard evidence', () => {
       expect(
-        classifySummary('Malicious: Defend prevented the sample (malicious_file).', 'known_malicious')
-          .falseMalicious
+        classifySummary(
+          'Malicious: Defend prevented the sample (malicious_file).',
+          'known_malicious'
+        ).falseMalicious
       ).toBe(false);
     });
   });
@@ -56,10 +58,8 @@ describe('classifySummary', () => {
 
     it('does not let a hedge in another sentence excuse the conclusion', () => {
       expect(
-        classifySummary(
-          'This is not proof of anything. The sample is benign.',
-          'known_good_quiet'
-        ).falseBenign
+        classifySummary('This is not proof of anything. The sample is benign.', 'known_good_quiet')
+          .falseBenign
       ).toBe(true);
     });
   });

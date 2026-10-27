@@ -77,7 +77,8 @@ const assertLabelMatchesTask = (entry: DetonateCorpusEntry): void => {
 };
 
 export const loadDetonateCorpus = (fixturePath?: string): DetonateCorpusEntry[] => {
-  const path = fixturePath ?? join(__dirname, '..', 'evals', 'fixtures', 'detonate_summary_corpus.json');
+  const path =
+    fixturePath ?? join(__dirname, '..', 'evals', 'fixtures', 'detonate_summary_corpus.json');
   const parsed = JSON.parse(readFileSync(path, 'utf8')) as CorpusFile;
 
   if (!Array.isArray(parsed.entries) || parsed.entries.length === 0) {

@@ -93,7 +93,11 @@ function createEvaluateDetonateSummary({
     dropEvidenceRule?: boolean;
   }): Promise<DatasetRunResult[]> {
     const byId = new Map(entries.map((entry) => [entry.id, entry]));
-    const dataset = { name, description, examples: toExamples(entries) } satisfies EvaluationDataset;
+    const dataset = {
+      name,
+      description,
+      examples: toExamples(entries),
+    } satisfies EvaluationDataset;
 
     return executorClient.runExperiment(
       {
@@ -188,51 +192,53 @@ evaluate.describe(
     const evasive = corpus.filter((e) => e.label === 'evasive_no_alerts');
     const malicious = corpus.filter((e) => e.label === 'known_malicious');
 
-    evaluate('gate: conservative summaries across the full corpus', async ({
-      evaluateDetonateSummary,
-      log,
-    }, testInfo) => {
-      expect(knownGood.length).toBeGreaterThanOrEqual(KNOWN_GOOD_MIN);
+    evaluate(
+      'gate: conservative summaries across the full corpus',
+      async ({ evaluateDetonateSummary, log }, testInfo) => {
+        expect(knownGood.length).toBeGreaterThanOrEqual(KNOWN_GOOD_MIN);
 
-      const results = await evaluateDetonateSummary({
-        name: `alertzero: detonate-summary-gate-${testInfo.project.name}`,
-        description:
-          `Conservative-summary rule over recorded detonation results: ${knownGood.length} known-good, ` +
-          `${malicious.length} known-malware, ${evasive.length} evasive. Gates false-"malicious" and unhedged false-"benign".`,
-        entries: corpus,
-      });
+        const results = await evaluateDetonateSummary({
+          name: `alertzero: detonate-summary-gate-${testInfo.project.name}`,
+          description:
+            `Conservative-summary rule over recorded detonation results: ${knownGood.length} known-good, ` +
+            `${malicious.length} known-malware, ${evasive.length} evasive. Gates false-"malicious" and unhedged false-"benign".`,
+          entries: corpus,
+        });
 
-      const counts = sumGate(results);
-      const fmUpper = report(`full corpus (${testInfo.project.name})`, counts, log);
+        const counts = sumGate(results);
+        const fmUpper = report(`full corpus (${testInfo.project.name})`, counts, log);
 
-      expect(counts.gated).toBe(corpus.length);
-      expect(counts.knownGood).toBeGreaterThanOrEqual(KNOWN_GOOD_MIN);
-      expect(counts.falseMalicious).toBe(0);
-      expect(fmUpper).toBeLessThanOrEqual(FALSE_MALICIOUS_MAX_UPPER_BOUND);
-      expect(counts.falseBenign).toBe(0);
-    });
+        expect(counts.gated).toBe(corpus.length);
+        expect(counts.knownGood).toBeGreaterThanOrEqual(KNOWN_GOOD_MIN);
+        expect(counts.falseMalicious).toBe(0);
+        expect(fmUpper).toBeLessThanOrEqual(FALSE_MALICIOUS_MAX_UPPER_BOUND);
+        expect(counts.falseBenign).toBe(0);
+      }
+    );
 
-    evaluate('mutation: dropping the evidence rule turns the gate red', async ({
-      evaluateDetonateSummary,
-      log,
-    }, testInfo) => {
-      // Quiet runs are exactly the entries whose summaries the rule constrains.
-      const slice = [...evasive, ...knownGood].slice(0, MUTATION_SLICE_SIZE);
+    evaluate(
+      'mutation: dropping the evidence rule turns the gate red',
+      async ({ evaluateDetonateSummary, log }, testInfo) => {
+        // Quiet runs are exactly the entries whose summaries the rule constrains.
+        const slice = [...evasive, ...knownGood].slice(0, MUTATION_SLICE_SIZE);
 
-      const results = await evaluateDetonateSummary({
-        name: `alertzero: detonate-summary-mutation-${testInfo.project.name}`,
-        description:
-          'Mutation check: quiet recordings summarized with the evidence rule dropped from the prompt. ' +
-          'The gate must report violations here.',
-        entries: slice,
-        dropEvidenceRule: true,
-      });
+        const results = await evaluateDetonateSummary({
+          name: `alertzero: detonate-summary-mutation-${testInfo.project.name}`,
+          description:
+            'Mutation check: quiet recordings summarized with the evidence rule dropped from the prompt. ' +
+            'The gate must report violations here.',
+          entries: slice,
+          dropEvidenceRule: true,
+        });
 
-      const counts = sumGate(results);
-      report(`mutation, evidence rule dropped (${testInfo.project.name})`, counts, log);
+        const counts = sumGate(results);
+        report(`mutation, evidence rule dropped (${testInfo.project.name})`, counts, log);
 
-      expect(counts.gated).toBe(slice.length);
-      expect(counts.falseMalicious + counts.falseBenign + counts.judgeFailures).toBeGreaterThan(0);
-    });
+        expect(counts.gated).toBe(slice.length);
+        expect(counts.falseMalicious + counts.falseBenign + counts.judgeFailures).toBeGreaterThan(
+          0
+        );
+      }
+    );
   }
 );

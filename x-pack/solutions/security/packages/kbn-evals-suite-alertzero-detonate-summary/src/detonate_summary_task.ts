@@ -31,7 +31,9 @@ was observed" and add that this is not proof the sample is benign. A summary
 must NEVER conclude or imply the sample is "benign", "safe", or "clean"; quiet
 runs are absence-of-evidence, not evidence of safety.`;
 
-const renderAlertGroups = (groups: DetonateCorpusEntry['task']['production_endpoint_alert_groups']) =>
+const renderAlertGroups = (
+  groups: DetonateCorpusEntry['task']['production_endpoint_alert_groups']
+) =>
   groups.length
     ? groups
         .map(
@@ -81,9 +83,9 @@ export const renderTaskForPrompt = (entry: DetonateCorpusEntry): string => {
     `failed: ${failed}`,
     `quiet: ${quiet}`,
     '',
-    'production endpoint alerts (what a customer\'s Defend would have raised):',
+    "production endpoint alerts (what a customer's Defend would have raised):",
     renderAlertGroups(t.production_endpoint_alert_groups),
-    'diagnostic endpoint alerts (Defend\'s diagnostic stream):',
+    "diagnostic endpoint alerts (Defend's diagnostic stream):",
     renderAlertGroups(t.diagnostic_endpoint_alert_groups),
     'detection rule alerts:',
     renderDetectionGroups(t.production_detection_alert_groups),

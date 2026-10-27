@@ -72,7 +72,11 @@ export const classifySummary = (
   summary: string,
   label: DetonateCorpusLabel
 ): SummaryClassification => {
-  const result: SummaryClassification = { falseMalicious: false, falseBenign: false, offending: [] };
+  const result: SummaryClassification = {
+    falseMalicious: false,
+    falseBenign: false,
+    offending: [],
+  };
 
   for (const sentence of splitSentences(summary)) {
     if (label !== 'known_malicious' && hasUnexcusedMalicious(sentence)) {

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { exceptionEntrySchema, exceptionItemBaseSchema } from './exception_item_schemas';
+import {
+  exceptionEntrySchema,
+  exceptionItemBaseSchema,
+  InvalidExceptionListOsTypesError,
+  toExceptionListOsTypes,
+  toExceptionListOsTypesSafe,
+} from './exception_item_schemas';
 
 describe('exceptionItemBaseSchema entries', () => {
   const item = (entries: unknown[]) => ({ name: 'Item', description: '', entries });
@@ -95,5 +101,24 @@ describe('exceptionEntrySchema', () => {
     ],
   ])('rejects %s', (_, entry) => {
     expect(exceptionEntrySchema.safeParse(entry).success).toBe(false);
+  });
+});
+
+describe('toExceptionListOsTypes', () => {
+  it('passes enum values through unchanged', () => {
+    expect(toExceptionListOsTypes(['linux', 'windows'])).toEqual(['linux', 'windows']);
+  });
+
+  it('throws InvalidExceptionListOsTypesError listing the offending values', () => {
+    expect(() => toExceptionListOsTypes(['linux', 'templeos'])).toThrow(
+      InvalidExceptionListOsTypesError
+    );
+    expect(() => toExceptionListOsTypes(['linux', 'templeos'])).toThrow(/templeos/);
+  });
+
+  it('safe variant returns enum values and undefined on invalid or missing input', () => {
+    expect(toExceptionListOsTypesSafe(['macos'])).toEqual(['macos']);
+    expect(toExceptionListOsTypesSafe(['harmonyos'])).toBeUndefined();
+    expect(toExceptionListOsTypesSafe(undefined)).toBeUndefined();
   });
 });

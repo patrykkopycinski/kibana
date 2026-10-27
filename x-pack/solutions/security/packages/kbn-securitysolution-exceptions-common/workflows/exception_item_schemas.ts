@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ListType } from '@kbn/securitysolution-lists-common/api';
-import { ExceptionListItem, ExceptionListItemOsTypeArray } from '../api';
+import { ExceptionListOsType, ExceptionListItem, ExceptionListItemOsTypeArray } from '../api';
 
 /**
  * Entry operators, mirroring the operator labels of the exceptions UI. Each
@@ -173,6 +173,59 @@ export const OVERWRITE_REQUIRES_ITEM_ID_MESSAGE = i18n.translate(
   { defaultMessage: '`overwrite` requires `item_id`' }
 );
 
+const osTypesMessage = (invalid: string[]) =>
+  i18n.translate('xpack.securitySolution.workflows.steps.exceptionItem.invalidOsTypes', {
+    defaultMessage: '`os_types` contains values the exceptions API does not support: {invalid}',
+    values: { invalid: invalid.join(', ') },
+  });
+
+/**
+ * Thrown by {@link toExceptionListOsTypes} when a rendered `os_types` value is
+ * not in the API's OS enum; callers rewrap it as a step `ValidationError`
+ * (see `toCreateExceptionItemBody` in the server workflows utils).
+ */
+export class InvalidExceptionListOsTypesError extends Error {
+  constructor(invalid: string[]) {
+    super(osTypesMessage(invalid));
+    this.name = 'InvalidExceptionListOsTypesError';
+  }
+}
+
+/**
+ * Narrows rendered `os_types` values to the exceptions API's OS enum. The
+ * input schema accepts arbitrary non-empty strings so template expressions
+ * (e.g. `{{ steps.detonate.output.vm_os_family }}`) pass workflow validation
+ * unrendered; once rendered, the value must be one of the supported OSes.
+ *
+ * Throws when any rendered value is not in the enum rather than dropping it:
+ * dropping `os_types` would widen the exception item to all OSes. Callers
+ * that cannot surface the error (read-only UI) use the `safe` variant.
+ */
+export const toExceptionListOsTypes = (osTypes: ReadonlyArray<string>): ExceptionListOsType[] => {
+  const invalid = osTypes.filter((os) => !ExceptionListOsType.safeParse(os).success);
+  if (invalid.length > 0) {
+    throw new InvalidExceptionListOsTypesError(invalid);
+  }
+  return osTypes as ExceptionListOsType[];
+};
+
+/**
+ * Non-throwing variant of {@link toExceptionListOsTypes} for surfaces that
+ * render rather than send: returns `undefined` when any value is invalid, the
+ * same degradation the exception attachment card already applies to invalid
+ * entries.
+ */
+export const toExceptionListOsTypesSafe = (
+  osTypes: ReadonlyArray<string> | undefined
+): ExceptionListOsType[] | undefined => {
+  if (osTypes === undefined) return undefined;
+  try {
+    return toExceptionListOsTypes(osTypes);
+  } catch {
+    return undefined;
+  }
+};
+
 export const exceptionItemBaseSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(256),
@@ -182,6 +235,7 @@ export const exceptionItemBaseSchema = lazySchema(() =>
     // that derives the OS from a step output (e.g. an endpoint blocklist
     // artifact compiled for the OS the sample ran on) passes validation
     // unrendered; the exceptions API still validates the rendered value.
+    // Narrow with `toExceptionListOsTypes` once rendered.
     os_types: z
       .union([ExceptionListItemOsTypeArray, z.array(z.string().min(1).max(256))])
       .optional(),

@@ -361,6 +361,8 @@ export interface DetonateVerdict {
   evidence: string;
   /** The tag the apply step puts on the alert — `detonate:<verdict>`. */
   suggested_tag: string;
+  /** The sandbox OS this verdict's artifacts target, when the task recorded one. */
+  vm_os_family?: DetonateVmOsFamily;
 }
 
 /**

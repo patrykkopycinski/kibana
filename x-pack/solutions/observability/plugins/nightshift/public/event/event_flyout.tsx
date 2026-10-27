@@ -159,6 +159,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       onClose={onClose}
       size="s"
       type="push"
+      role="region"
       session="start"
       resizable
       aria-label={event.title}

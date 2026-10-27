@@ -572,6 +572,7 @@ export function InvestigationFlyout({
       size="s"
       session="inherit"
       type="push"
+      role="region"
       hasAnimation={false}
       resizable
       data-test-subj="nightshiftInvestigationFlyout"

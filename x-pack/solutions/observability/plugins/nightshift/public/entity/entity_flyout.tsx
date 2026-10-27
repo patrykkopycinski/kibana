@@ -181,6 +181,7 @@ export function EntityFlyout({
       aria-label={title}
       data-test-subj="nightshiftEntityFlyout"
       type="push"
+      role="region"
       hasAnimation={false}
       closeButtonProps={{
         'data-test-subj': 'euiFlyoutCloseButton',

@@ -38,6 +38,7 @@ export const DETONATE_TRIAGE_WORKFLOW_ID = 'system-security-detonate-triage';
  * Detonate prototype: the automated triage tier. A reputation gate runs
  * first — known-malicious hashes are written back without spending a VM;
  * only `unknown` hashes detonate, and the run's verdict lands on the alert.
+ * A malicious verdict additionally offers an approval-gated blocklist entry.
  * Manual-trigger only until an alert trigger exists in the registry.
  */
 export const DETONATE_TRIAGE_WORKFLOW = {

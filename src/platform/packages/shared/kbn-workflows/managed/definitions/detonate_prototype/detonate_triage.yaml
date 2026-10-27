@@ -5,8 +5,9 @@ description: >
   first — a digest the service has already seen detonate is tagged straight
   away and never spends a VM. Only `unknown` hashes are detonated, and the
   run's verdict is written back to the alert (tag plus evidence note; the
-  alert's status is never touched by the workflow). Experimental, off by
-  default.
+  alert's status is never touched by the workflow). A malicious verdict also
+  offers a fleet-wide blocklist entry — behind an analyst approval, never on
+  the verdict alone. Experimental, off by default.
 enabled: true
 tags:
   - security
@@ -103,6 +104,71 @@ steps:
           alert_id: "{{ inputs.alert_id }}"
           task_id: "{{ steps.verdict.output.task_id }}"
           evidence: "{{ steps.verdict.output.evidence }}"
+
+      # F6: a blocklist write is a fleet-wide enforcement action, so it never
+      # rides on a sandbox verdict alone — an analyst confirms it first. The
+      # gate sits after `apply` (the verdict is already on the alert either
+      # way) and before any blocklist write. A timeout reads as no answer and
+      # skips the blocklist: the run stays honest rather than failing loudly
+      # over a decision nobody made. The failure travels as an error on the
+      # step, adopted below before the output is evicted.
+      - name: blocklist_gate
+        type: waitForApproval
+        if: "${{ steps.verdict.output.verdict == 'malicious' }}"
+        timeout: 3600s
+        on-failure:
+          continue: true
+        with:
+          message: >-
+            Detonate triage: blocklist this hash on every endpoint?
+            {{ steps.verdict.output.evidence }}
+          approveLabel: Blocklist hash
+          rejectLabel: Skip
+
+      # `waitForApproval` output resolves to its latest execution and is not
+      # exempt from eviction, so the answer is adopted into a variable before
+      # anything reads it. Blank on timeout, which is what the guard below
+      # keys on: an unanswered gate is not a yes.
+      - name: resolve_blocklist_gate
+        type: data.set
+        if: "${{ steps.verdict.output.verdict == 'malicious' }}"
+        with:
+          blocklist_approved: '${{ steps.blocklist_gate.output.response.approved == true }}'
+          blocklist_timed_out: '${{ steps.blocklist_gate.error != blank }}'
+
+      # The write itself. `item_id` is derived from the hash so the step is
+      # idempotent: re-running triage on the same sample skips instead of
+      # stacking duplicate entries. `on-failure: continue` because a stack
+      # without the blocklist list (it is created by the Artifacts UI, not
+      # provisioned) must not fail the whole triage run — the verdict is
+      # already recorded on the alert.
+      - name: blocklist
+        type: security.createExceptionListItem
+        if: "${{ variables.blocklist_approved == true }}"
+        on-failure:
+          continue: true
+        with:
+          list_id: endpoint_blocklists
+          namespace_type: agnostic
+          item_id: "detonate-{{ inputs.sha256 }}"
+          overwrite: true
+          name: "Detonate: {{ steps.verdict.output.evidence | truncate: 200 }}"
+          description: >-
+            Added by the Detonate triage workflow after an approved malicious
+            detonation (task {{ steps.verdict.output.task_id }}).
+          entries:
+            - field: file.hash.sha256
+              operator: is
+              value: "{{ inputs.sha256 }}"
+          os_types:
+            - windows
+            - linux
+            - macos
+          # Attribution: the resumed execution writes under the workflow
+          # runner's identity, not the approver's, so the approver is recorded
+          # on the item itself — the audit trail the Artifacts UI shows.
+          comments:
+            - "Blocklisted by {{ steps.blocklist_gate.output.respondedBy }} after detonation task {{ steps.verdict.output.task_id }}."
 
       # A confirmed-malicious detonation is worth a case comment; a quiet or
       # inconclusive run stays on the alert, where the analyst already is.

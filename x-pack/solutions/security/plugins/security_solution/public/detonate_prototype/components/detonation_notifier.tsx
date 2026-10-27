@@ -20,16 +20,15 @@
  * second opinion about when a run is done.
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useKibana, useNavigateTo } from '../../common/lib/kibana';
+import { useNavigateTo, useToasts } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../app/types';
 import { useDetonationTask } from '../hooks/use_detonate';
 import { DETONATE_PROTOTYPE_APP_PATH } from '../../../common/detonate_prototype';
 import { isDetonationComplete, isDetonationFailed } from '../../../common/detonate_prototype';
-import type { DetonateTask } from '../../../common/detonate_prototype';
 import * as i18n from '../translations';
 
 export const DETONATION_NOTIFIER_TEST_ID = 'detonatePrototypeNotifier';
@@ -53,7 +52,7 @@ const DetonationWatcher = ({
   activeTaskId?: string;
 }) => {
   const { data: task } = useDetonationTask(taskId);
-  const { notifications } = useKibana().services;
+  const toasts = useToasts();
   const { navigateTo } = useNavigateTo();
   /** Toasts fire from an effect, once per run, never for the open page. */
   const notified = useRef(false);
@@ -66,7 +65,7 @@ const DetonationWatcher = ({
 
     const sample = task.sample_filename ?? task.sample_hash ?? taskId;
     if (isDetonationFailed(task)) {
-      notifications.toasts.warning({
+      toasts.addWarning({
         title: i18n.NOTIFY_FAILED_TITLE(sample),
         text: `${task.last_worker_name.replace('detonate.workers.', '')}${
           task.last_worker_status_details ? `: ${task.last_worker_status_details}` : ''
@@ -77,7 +76,7 @@ const DetonationWatcher = ({
       return;
     }
 
-    notifications.toasts.success({
+    toasts.addSuccess({
       title: i18n.NOTIFY_COMPLETE_TITLE(sample),
       text: i18n.NOTIFY_COMPLETE_TEXT,
       toastLifeTimeMs: 60_000,
@@ -89,7 +88,7 @@ const DetonationWatcher = ({
       },
       'data-test-subj': `${DETONATION_NOTIFIER_TEST_ID}-success-${taskId}`,
     });
-  }, [done, navigateTo, notifications.toasts, task, taskId]);
+  }, [done, navigateTo, task, taskId, toasts]);
 
   return null;
 };

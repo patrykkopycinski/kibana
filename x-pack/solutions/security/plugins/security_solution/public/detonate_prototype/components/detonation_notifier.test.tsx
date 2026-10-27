@@ -21,16 +21,15 @@ import { MemoryRouter } from 'react-router-dom';
 
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import * as useDetonate from '../hooks/use_detonate';
-import { useKibana } from '../../common/lib/kibana';
+import { useToasts } from '../../common/lib/kibana';
 import {
   DetonationNotifier,
   useTrackDetonation,
-  DETONATION_NOTIFIER_TEST_ID,
 } from './detonation_notifier';
 
 jest.mock('../../common/lib/kibana', () => ({
   ...jest.requireActual('../../common/lib/kibana'),
-  useKibana: jest.fn(),
+  useToasts: jest.fn(),
   useNavigateTo: () => ({ navigateTo: jest.fn() }),
 }));
 
@@ -84,8 +83,9 @@ describe('DetonationNotifier', () => {
   beforeEach(() => {
     successToast.mockClear();
     warningToast.mockClear();
-    jest.mocked(useKibana).mockReturnValue({
-      services: { notifications: { toasts: { success: successToast, warning: warningToast } } },
+    jest.mocked(useToasts).mockReturnValue({
+      addSuccess: successToast,
+      addWarning: warningToast,
     } as never);
   });
 

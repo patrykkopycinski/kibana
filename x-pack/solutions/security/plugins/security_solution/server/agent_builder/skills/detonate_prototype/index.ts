@@ -45,8 +45,11 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
    already exists, report it and stop — do not re-run a sample to reproduce an
    answer you already have, unless the analyst asks for a fresh run or the
    recorded run failed.
-2. **Submit.** Call \`submit_detonation\` with the hash. Tell the analyst the run
-   has started, how long it takes (several minutes), and give them the task ID.
+2. **Submit.** Call \`submit_detonation\` with the hash. The service dedups
+   the same way: when a completed report already exists, the answer carries
+   \`deduplicated: true\` and the task is the existing report — report it, do
+   not poll it. Tell the analyst the run has started, how long it takes
+   (several minutes), and give them the task ID.
 3. **Poll.** Call \`get_detonation\` until \`complete\` is true. Do not guess at
    completion from elapsed time; \`complete\` is the only correct signal.
 4. **Report.** Say what Elastic Defend saw, by \`event.code\` and by detection

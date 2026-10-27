@@ -39,9 +39,7 @@ export interface DetonateClientOptions {
   /** Per-request ceiling. A detonation is polled, so no single call is slow. */
   requestTimeoutMs: number;
   logger: Logger;
-}
-
-/**
+}/**
  * Raised when the detonation service is unreachable or answers an error. The
  * `statusCode` is the service's, so routes can pass through a 404 for an
  * unknown task rather than flattening everything to a 500.
@@ -58,9 +56,10 @@ export interface DetonateClient {
   reputation(sha256: string): Promise<DetonateReputationResponse>;
   submitFile(
     request: DetonateFileRequest,
-    file: { filename: string; body: Buffer }
-  ): Promise<DetonateTask>;
-  submitHash(request: DetonateHashRequest): Promise<DetonateTask>;
+    file: { filename: string; body: Buffer },
+    actor?: string
+  ): Promise<DetonateSubmitOutcome>;
+  submitHash(request: DetonateHashRequest, actor?: string): Promise<DetonateSubmitOutcome>;
   getTask(taskId: string): Promise<DetonateTask>;
   getTaskUpdates(taskId: string): Promise<DetonateTaskUpdate[]>;
   listTasks(query?: {
@@ -70,6 +69,29 @@ export interface DetonateClient {
     size?: number;
   }): Promise<DetonateTaskSearchResponse>;
 }
+
+/**
+ * What a submit answered. `deduplicated: true` means the service already had
+ * a completed report for the sample and returned it instead of spending a
+ * second VM — the caller surfaces this so the analyst is not left wondering
+ * why no new run appeared.
+ */
+export interface DetonateSubmitOutcome {
+  task: DetonateTask;
+  deduplicated: boolean;
+}
+
+/** Submit calls carry the actor so the service's quota keys on the real user. */
+const actorHeaders = (actor?: string): Record<string, string> =>
+  actor ? { 'x-detonate-actor': actor.slice(0, 128) } : {};
+
+/** Split the submit response into task + dedup marker. */
+const toSubmitOutcome = (
+  body: DetonateSubmitOutcome & DetonateTask
+): DetonateSubmitOutcome => ({
+  task: body,
+  deduplicated: body.deduplicated === true,
+});
 
 export const createDetonateClient = ({
   baseUrl,
@@ -111,7 +133,10 @@ export const createDetonateClient = ({
       throw new DetonateServiceError(
         `The detonation service answered ${response.status}.`,
         // Pass through the ones a caller can act on; collapse the rest.
-        response.status === 404 || response.status === 400 || response.status === 501
+        response.status === 404 ||
+        response.status === 400 ||
+        response.status === 429 ||
+        response.status === 501
           ? response.status
           : 502
       );
@@ -126,21 +151,25 @@ export const createDetonateClient = ({
     reputation: (sha256) =>
       call<DetonateReputationResponse>(`/reputation/${encodeURIComponent(sha256)}`),
 
-    submitFile: (request, file) => {
+    submitFile: (request, file, actor) => {
       // `POST /submit-file` is multipart: a `request_json` field plus the
       // sample itself. The field name is the service's, not a choice.
       const form = new FormData();
       form.set('request_json', JSON.stringify(request));
       form.set('sample_file', new Blob([new Uint8Array(file.body)]), file.filename);
-      return call<DetonateTask>('/submit-file', { method: 'POST', body: form });
+      return call<DetonateSubmitOutcome & DetonateTask>('/submit-file', {
+        method: 'POST',
+        headers: actorHeaders(actor),
+        body: form,
+      }).then(toSubmitOutcome);
     },
 
-    submitHash: (request) =>
-      call<DetonateTask>('/submit-hash', {
+    submitHash: (request, actor) =>
+      call<DetonateSubmitOutcome & DetonateTask>('/submit-hash', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', ...actorHeaders(actor) },
         body: JSON.stringify(request),
-      }),
+      }).then(toSubmitOutcome),
 
     getTask: (taskId) => call<DetonateTask>(`/tasks/${encodeURIComponent(taskId)}`),
 

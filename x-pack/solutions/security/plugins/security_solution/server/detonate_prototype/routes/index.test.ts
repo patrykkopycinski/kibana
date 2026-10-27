@@ -98,7 +98,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
     it('rejects a read-only analyst on the hash submit route', async () => {
       register({ canWrite: false });
-      client.submitHash.mockResolvedValue({ id: 'task-1' } as never);
+      client.submitHash.mockResolvedValue({ task: { id: 'task-1' }, deduplicated: false } as never);
 
       await submitHashHandler()(
         createContext(),
@@ -112,7 +112,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
     it('rejects a read-only analyst on the file submit route', async () => {
       register({ canWrite: false });
-      client.submitFile.mockResolvedValue({ id: 'task-2' } as never);
+      client.submitFile.mockResolvedValue({ task: { id: 'task-2' }, deduplicated: false } as never);
 
       const fileRequest = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -155,7 +155,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   describe('submit-hash handler', () => {
     it('returns the created task from the service', async () => {
       const task = { id: 'task-1' };
-      client.submitHash.mockResolvedValue(task as never);
+      client.submitHash.mockResolvedValue({ task, deduplicated: false } as never);
 
       await submitHashHandler()(
         createContext(),
@@ -163,8 +163,45 @@ describe('registerDetonatePrototypeRoutes', () => {
         mockResponse
       );
 
-      expect(client.submitHash).toHaveBeenCalledWith({ sample_hash: 'a'.repeat(64) });
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+      expect(client.submitHash).toHaveBeenCalledWith(
+        { sample_hash: 'a'.repeat(64) },
+        undefined // no authenticated actor in the test request
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...task, deduplicated: false } });
+    });
+
+    it('marks a deduplicated submit so the caller can say "existing report"', async () => {
+      const task = { id: 'task-existing' };
+      client.submitHash.mockResolvedValue({ task, deduplicated: true } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, { sample_hash: 'a'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { ...task, deduplicated: true },
+      });
+    });
+
+    it('passes a service quota rejection (429) through to the analyst', async () => {
+      const { DetonateServiceError: Ctor } = jest.requireActual<{
+        DetonateServiceError: typeof DetonateServiceError;
+      }>('../client');
+      client.submitHash.mockRejectedValue(
+        new Ctor('The detonation service answered 429.', 429)
+      );
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, { sample_hash: 'a'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 429 })
+      );
     });
 
     it('shapes a service error as a custom error with the service status', async () => {
@@ -241,7 +278,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
     it('submits valid options parsed from request_json', async () => {
       const task = { id: 'task-2' };
-      client.submitFile.mockResolvedValue(task as never);
+      client.submitFile.mockResolvedValue({ task, deduplicated: false } as never);
 
       await submitFileHandler()(
         createContext(),
@@ -251,9 +288,10 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       expect(client.submitFile).toHaveBeenCalledWith(
         { tags: ['demo'], sample_filename: 'sample.txt' },
-        expect.objectContaining({ filename: 'sample.txt' })
+        expect.objectContaining({ filename: 'sample.txt' }),
+        undefined
       );
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...task, deduplicated: false } });
     });
   });
 

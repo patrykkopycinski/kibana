@@ -50,6 +50,7 @@ const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
 /** Mirrors the service's optional submit fields. Everything is bounded. */
 const submitOptionsSchema = {
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 32 })),
+  force_fresh: schema.maybe(schema.boolean()),
   exec_wait_secs: schema.maybe(schema.number({ min: 0, max: 3600 })),
   pre_exec_commands: schema.maybe(
     schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 64 })
@@ -142,6 +143,16 @@ export const registerDetonatePrototypeRoutes = ({
   const hasWritePrivilege = async (request: KibanaRequest): Promise<boolean> => {
     const authz = await endpointAppContextService.getEndpointAuthz(request);
     return authz.canWriteSecuritySolution;
+  };
+
+  /**
+   * The authenticated Kibana user, as the detonation service's quota key.
+   * Anonymous-style internal calls resolve to a stable service-side default.
+   */
+  const actorFromRequest = (request: KibanaRequest): string | undefined => {
+    const user = request.auth.credentials as { username?: string; name?: string } | undefined;
+    const actor = user?.username ?? user?.name;
+    return typeof actor === 'string' && actor.length > 0 ? actor : undefined;
   };
 
   router.versioned
@@ -259,12 +270,15 @@ export const registerDetonatePrototypeRoutes = ({
             return response.badRequest({ body: { message: 'The sample file is empty.' } });
           }
 
-          const task = await getClient().submitFile(
+          const { task, deduplicated } = await getClient().submitFile(
             { ...options, sample_filename: sampleFilename },
-            { filename: sampleFilename, body }
+            { filename: sampleFilename, body },
+            actorFromRequest(request)
           );
 
-          return response.ok<DetonateTask>({ body: task });
+          return response.ok<DetonateTask & { deduplicated: boolean }>({
+            body: { ...task, deduplicated },
+          });
         } catch (error) {
           return toErrorResponse(error, response);
         }
@@ -301,7 +315,13 @@ export const registerDetonatePrototypeRoutes = ({
             });
           }
 
-          return response.ok<DetonateTask>({ body: await getClient().submitHash(request.body) });
+          const { task, deduplicated } = await getClient().submitHash(
+            request.body,
+            actorFromRequest(request)
+          );
+          return response.ok<DetonateTask & { deduplicated: boolean }>({
+            body: { ...task, deduplicated },
+          });
         } catch (error) {
           return toErrorResponse(error, response);
         }

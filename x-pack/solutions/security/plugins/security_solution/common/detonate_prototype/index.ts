@@ -144,6 +144,14 @@ export interface DetonateDetectionAlertsGroup {
   kibana_alert_rule_parameters_severity: DetonateDetectionSeverity;
 }
 
+/** Indicators extracted from a detonation's own telemetry — DNS questions,
+ *  non-private IPs, and file hashes other than the sample's own. */
+export interface DetonateExtractedIocs {
+  domains: string[];
+  ips: string[];
+  file_hashes: string[];
+}
+
 /* -------------------------------------------------------------------------- */
 /* DetonateTask                                                                */
 /* -------------------------------------------------------------------------- */
@@ -190,6 +198,10 @@ export interface DetonateTask {
   diagnostic_endpoint_alert_groups: DetonateEndpointAlertsGroup[];
   production_detection_alerts_count?: number;
   production_detection_alert_groups: DetonateDetectionAlertsGroup[];
+  /** IOCs extracted from this run's telemetry: DNS domains, public IPs, and
+   *  file hashes other than the sample's own. Empty arrays mean the run's
+   *  telemetry contained none — not that extraction was skipped. */
+  extracted_iocs?: DetonateExtractedIocs;
 }
 
 /** One point on the timeline, from `/tasks/{id}/updates`. */

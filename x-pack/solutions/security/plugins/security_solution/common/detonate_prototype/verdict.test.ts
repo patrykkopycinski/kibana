@@ -68,6 +68,18 @@ describe('deriveDetonateVerdict', () => {
     expect(verdict.evidence).toContain('no alerts');
   });
 
+  it('never asserts a quiet run is benign (D9/O10 conservative-summary rule)', () => {
+    const verdict = deriveDetonateVerdict(createTask({ sample_hash: DETONATE_QUIET_SEED_SHA256 }));
+    const evidence = verdict.evidence.toLowerCase();
+
+    // The rule: quiet evidence says what was observed, flags the detection-gap
+    // possibility, and never asserts the sample itself is benign. "benign" may
+    // appear only inside an explicit negation ("not proof the sample is benign").
+    expect(evidence).toContain('no malicious behavior was observed');
+    expect(evidence).toContain('not proof');
+    expect(evidence).not.toMatch(/(?<!not proof the sample is )benign/);
+  });
+
   it('derives inconclusive from a failed run — never benign', () => {
     const verdict = deriveDetonateVerdict(
       createTask({

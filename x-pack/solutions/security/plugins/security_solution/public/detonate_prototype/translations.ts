@@ -186,7 +186,7 @@ export const QUIET_RUN_BODY = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.quietRunBody',
   {
     defaultMessage:
-      'The run completed successfully. A sample can be benign, or this can be a detection gap worth investigating — it is not an error.',
+      'The run completed successfully and no malicious behavior was observed. That is not proof the sample is benign — it may be a detection gap worth investigating.',
   }
 );
 

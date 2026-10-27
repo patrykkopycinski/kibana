@@ -396,8 +396,9 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
   } else if (total === 0) {
     verdict = 'quiet';
     evidence =
-      'Detonation completed and raised no alerts — the sample looks benign in the sandbox, ' +
-      'or nothing detected it. Suggest reviewing before closing the alert.';
+      'Detonation completed and raised no alerts — no malicious behavior was observed in the ' +
+      'sandbox, which is not proof the sample is benign (nothing may have detected it). ' +
+      'Suggest reviewing before closing the alert.';
   } else {
     verdict = 'malicious';
     const codes = eventCodes.length > 0 ? eventCodes.join(', ') : 'none';

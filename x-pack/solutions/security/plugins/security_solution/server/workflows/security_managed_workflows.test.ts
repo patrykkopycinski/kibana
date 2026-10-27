@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  DETONATE_FP_VALIDATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -129,6 +132,67 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       threatIntelSupplyEnabled: true,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
+    });
+
+    expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
+  it('installs the detonate FP-validation workflow in the global space when the prototype flag is on', async () => {
+    const managed = createManagedClient();
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+      detonatePrototypeEnabled: true,
+    });
+
+    expect(managed.install).toHaveBeenCalledWith(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
+  it('uninstalls a previously installed detonate workflow when the prototype flag is off', async () => {
+    const managed = createManagedClient();
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+      detonatePrototypeEnabled: false,
+    });
+
+    expect(managed.install).not.toHaveBeenCalledWith(
+      DETONATE_FP_VALIDATION_WORKFLOW_ID,
+      expect.anything()
+    );
+    expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+  });
+
+  it('still calls ready when the detonate workflow install fails', async () => {
+    const managed = createManagedClient();
+    managed.install.mockRejectedValue(new Error('boom'));
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+      detonatePrototypeEnabled: true,
     });
 
     expect(managed.ready).toHaveBeenCalledTimes(1);

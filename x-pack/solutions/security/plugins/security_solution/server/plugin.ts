@@ -984,6 +984,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
+        detonatePrototypeEnabled: config.experimentalFeatures.detonatePrototypeEnabled,
       });
     }
 

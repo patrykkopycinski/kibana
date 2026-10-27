@@ -6,6 +6,8 @@
  */
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { DETONATE_FP_VALIDATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
 import {
@@ -31,6 +33,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   threatIntelSupplyEnabled,
   bootstrapReady,
   core,
+  detonatePrototypeEnabled = false,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
@@ -46,6 +49,12 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    */
   bootstrapReady: Promise<void>;
   core: Pick<CoreStart, 'savedObjects'>;
+  /**
+   * Installs the detonate FP-validation workflow when the prototype flag is
+   * on. When off, a previously installed copy is uninstalled, so toggling the
+   * flag cleanly adds/removes the workflow.
+   */
+  detonatePrototypeEnabled?: boolean;
 }): Promise<void> => {
   let managedWorkflowsClient: SecurityManagedWorkflowsClient;
   try {
@@ -59,6 +68,22 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient });
   } catch (error) {
     logger.warn('Failed to install the alert analysis workflow', { error });
+  }
+
+  try {
+    // Prototype workflow: install/uninstall is flag-driven like threat intel,
+    // but unconditional within the flag (no bootstrap dependency).
+    if (detonatePrototypeEnabled) {
+      await managedWorkflowsClient.install(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    } else {
+      await managedWorkflowsClient.uninstall(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    }
+  } catch (error) {
+    logger.warn('Failed to install or uninstall the detonate FP-validation workflow', { error });
   }
 
   try {

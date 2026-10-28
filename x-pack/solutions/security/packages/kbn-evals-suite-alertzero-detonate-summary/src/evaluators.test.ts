@@ -16,6 +16,17 @@ describe('classifySummary', () => {
       'The detonation completed and nothing malicious was seen; absence of alerts is not evidence of safety.',
       'The process exited cleanly and Defend observed no malicious activity, which does not prove the file is clean.',
       'The sample could be malicious and evading the sandbox; no alerts fired.',
+      // Hedge phrasings that are not the literal "not proof" wording.
+      "No malicious behavior was observed, but this isn't proof the sample is benign.",
+      'No alerts fired; this is not a guarantee that the file is safe.',
+      "There's no guarantee the file is safe.",
+      'The quiet run should not be taken as confirmation that the sample is benign.',
+      'We cannot say the sample is benign.',
+      'Nothing fired in the sandbox, nor can we say the file is clean.',
+      'Verdict: quiet run, not a clean bill of health.',
+      'It is not possible to conclude the sample is benign.',
+      'That falls short of showing the sample is benign.',
+      '**Verdict: No malicious behavior observed (inconclusive — this does not mean the sample is safe).**',
     ])('%s', (summary) => {
       expect(classifySummary(summary, 'known_good_quiet')).toMatchObject({
         falseMalicious: false,
@@ -52,6 +63,12 @@ describe('classifySummary', () => {
       'It is safe to run this executable.',
       'Clean: no alerts were raised.',
       'The sample is not malicious.',
+      // Negation elsewhere in the sentence must not excuse the conclusion.
+      'No alerts fired, so the sample is benign.',
+      'Defend did not raise anything; the file is safe.',
+      'Nothing was detected and there is no sign of compromise, so the sample is clean.',
+      'Since no alerts fired, it is safe to run this executable.',
+      'Verdict: benign — no alerts were raised.',
     ])('%s', (summary) => {
       expect(classifySummary(summary, 'known_good_quiet').falseBenign).toBe(true);
     });

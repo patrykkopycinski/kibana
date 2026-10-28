@@ -51,8 +51,22 @@ const BENIGN_CONCLUSION = new RegExp(
     String.raw`|^\s*\**(benign|safe|clean)\**\s*[:.—-]`,
   'i'
 );
-const BENIGN_HEDGE =
-  /\b(not (proof|evidence|conclusive)|no (proof|evidence)|cannot (conclude|confirm|be concluded)|can't (conclude|confirm)|does not (mean|prove|confirm|establish|indicate)|doesn't (mean|prove|confirm|establish|indicate)|not necessarily|rather than|absence of evidence|unless)\b/i;
+// A hedge must deny the conclusion itself (negated evidence/certainty, or an
+// inability to conclude), so "No alerts fired, so the sample is benign" stays red.
+const NEG = String.raw`(?:not|isn't|is not|aren't|wasn't|no|never)`;
+const CANNOT = String.raw`(?:cannot|can't|can not|could not|couldn't|unable to|not possible to|impossible to|no way to)`;
+const DOES_NOT = String.raw`(?:does not|doesn't|do not|don't|did not|didn't|should not|shouldn't|must not|would not|wouldn't)`;
+const BENIGN_HEDGE = new RegExp(
+  [
+    String.raw`\b${NEG}\s+(?:a\s+|an\s+|any\s+)?(?:proof|evidence|conclusive|definitive|confirmation|guarantee|assurance|indication|clean bill)\b`,
+    String.raw`\b${CANNOT}\s+(?:\w+\s+){0,2}?(?:conclude|confirm|say|state|determine|establish|assume|guarantee|declare|call|be (?:concluded|confirmed|considered))\b`,
+    String.raw`\b${DOES_NOT}\s+(?:\w+\s+){0,2}?(?:mean|prove|confirm|establish|indicate|show|demonstrate|imply|guarantee|treat|interpret|assume|conclude)\b`,
+    String.raw`\bshould(?:\s+not|n't)\s+be\s+(?:taken|treated|read|interpreted|considered|seen)\b`,
+    String.raw`\b(?:nor|neither)\s+(?:can|does|is|do)\b`,
+    String.raw`\b(?:falls? short of|not necessarily|rather than|absence of evidence|not the same as|unless|inconclusive)\b`,
+  ].join('|'),
+  'i'
+);
 
 const splitSentences = (text: string): string[] =>
   text

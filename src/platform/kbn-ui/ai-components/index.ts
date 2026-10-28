@@ -12,6 +12,10 @@ export { AiButtonDefault, type AiButtonDefaultProps } from './src/ai_button/ai_b
 export { AiButtonEmpty, type AiButtonEmptyProps } from './src/ai_button/ai_button_empty';
 export { AiButtonIcon, type AiButtonIconProps } from './src/ai_button/ai_button_icon';
 export { AiIcon, type AiIconProps } from './src/ai_icon/ai_icon';
+export {
+  AiResponseScreenReaderStatus,
+  type AiResponseScreenReaderStatusProps,
+} from './src/screen_reader_status/ai_response_screen_reader_status';
 
 export type { AiButtonIconType, AiButtonVariant } from './src/ai_button/types';
 

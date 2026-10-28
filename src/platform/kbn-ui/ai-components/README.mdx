@@ -42,6 +42,25 @@ import {
 <AiIcon iconType="sparkles" size="m" aria-label="AI Assistant" />;
 ```
 
+## Screen reader status
+
+`AiResponseScreenReaderStatus` announces assistant progress to screen readers. It renders two visually hidden `role="status"` live regions:
+
+- a "generating" heartbeat while `isLoading` is `true` (immediately, then after 5s, 15s, 30s, 50s, ... with the interval growing by 5s and capped at 30s; each update includes the elapsed seconds so it is always a new DOM mutation);
+- the full response (`"<assistantName> said: <message>"`) once `isLoading` goes from `true` to `false`.
+
+Mount it once per conversation, next to the visible message list, and pass only the **latest** reply. Nothing is announced for a reply that was already there when the component mounted, so opening a finished conversation stays silent. Do not make the streamed message text itself a live region: screen readers would read every chunk.
+
+```tsx
+import { AiResponseScreenReaderStatus } from '@kbn/ui-ai-components';
+
+<AiResponseScreenReaderStatus
+  isLoading={isLastReplyStreaming}
+  responseMessage={lastAssistantMessage?.content}
+  assistantName="Agent" // optional, defaults to a translated "Assistant"
+/>;
+```
+
 ## Development
 
 ```bash

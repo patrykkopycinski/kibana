@@ -41,6 +41,7 @@ export interface DataStreamApis {
   isLoadingCurrentUserConversations: boolean;
   isLoadingPrompts: boolean;
   isFetchedPrompts: boolean;
+  isStreaming: boolean;
   refetchPrompts: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
@@ -106,6 +107,7 @@ export const useDataStreamApis = ({
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
     isLoadingPrompts,
+    isStreaming,
     refetchCurrentUserConversations,
     refetchPrompts,
     setIsStreaming,

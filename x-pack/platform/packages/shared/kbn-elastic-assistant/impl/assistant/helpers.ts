@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import {
+  removeContentReferences,
+  replaceAnonymizedValuesWithOriginalValues,
+} from '@kbn/elastic-assistant-common';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import type { AIConnector } from '../connectorland/connector_selector';
@@ -109,3 +114,27 @@ export const getOptionalRequestParams = ({
 };
 
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Plain text of the latest reply, as the user sees it, for screen reader announcements.
+ * Returns undefined while the last message is not a finished assistant reply (e.g. it is
+ * the user's prompt or a reply that is still streaming), so an earlier turn is never announced.
+ */
+export const getLastReplyText = ({
+  messages,
+  replacements,
+  showAnonymizedValues,
+}: {
+  messages: ClientMessage[];
+  replacements: Replacements | null | undefined;
+  showAnonymizedValues: boolean;
+}): string | undefined => {
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage?.role !== 'assistant' || !lastMessage.content) {
+    return undefined;
+  }
+  const content = removeContentReferences(lastMessage.content).trim();
+  return showAnonymizedValues
+    ? content
+    : replaceAnonymizedValuesWithOriginalValues({ messageContent: content, replacements });
+};

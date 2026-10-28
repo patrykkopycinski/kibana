@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
@@ -17,6 +17,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
 import type { FetchCurrentUserConversations } from './api';
+import type { ClientMessage } from '../assistant_context/types';
 import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
@@ -66,6 +67,8 @@ const mockData = {
   welcome_id: fullWelcomeConversation,
   electric_sheep_id: fullSheepConversation,
 };
+
+const { useChatSend: actualUseChatSend } = all;
 
 const renderAssistant = async (extraProps = {}) => {
   const chatSendSpy = jest.spyOn(all, 'useChatSend');
@@ -365,6 +368,86 @@ describe('Assistant', () => {
 
       expect(screen.queryByTestId('addNewConnectorButton')).not.toBeInTheDocument();
       expect(screen.getByTestId('connector-selector')).toBeEnabled();
+    });
+  });
+
+  describe('screen reader announcements', () => {
+    const userMessage: ClientMessage = {
+      content: 'What happened?',
+      role: 'user',
+      timestamp: '2024-10-10T22:07:44.915Z',
+    };
+    const assistantMessage: ClientMessage = {
+      content: 'A host was isolated.{reference(abcde)}',
+      role: 'assistant',
+      timestamp: '2024-10-10T22:07:46.915Z',
+    };
+    const getAnnouncements = () => screen.getAllByRole('status').map((el) => el.textContent);
+
+    let setChatSendLoading: (isLoading: boolean) => void;
+    let chatSendSpy: jest.SpyInstance;
+
+    const mockChatSendLoading = (initialIsLoading: boolean) => {
+      chatSendSpy = jest.spyOn(all, 'useChatSend').mockImplementation((props) => {
+        const [isLoading, setIsLoading] = useState(initialIsLoading);
+        useEffect(() => {
+          setChatSendLoading = setIsLoading;
+        }, []);
+        return { ...actualUseChatSend(props), isLoading };
+      });
+    };
+
+    const mockConversationWithMessages = (messages: ClientMessage[]) => {
+      const conversation = { ...fullWelcomeConversation, messages };
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        ...defaultFetchUserConversations,
+        data: { ...mockData, welcome_id: conversation },
+      } as unknown as FetchCurrentUserConversations);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation: jest.fn().mockResolvedValue(conversation),
+      });
+    };
+
+    afterEach(() => {
+      chatSendSpy.mockRestore();
+    });
+
+    it('announces the last reply once, without content references, when loading finishes', async () => {
+      mockChatSendLoading(true);
+      mockConversationWithMessages([userMessage, assistantMessage]);
+      await renderAssistant();
+
+      const [generating, response] = getAnnouncements();
+      expect(generating).toBe('Assistant is generating a response.');
+      expect(response).toBe('');
+
+      await act(async () => {
+        setChatSendLoading(false);
+      });
+
+      expect(getAnnouncements()).toEqual(['', 'Assistant said: A host was isolated.']);
+      expect(screen.getAllByText('Assistant said: A host was isolated.')).toHaveLength(1);
+    });
+
+    it('announces nothing when a finished conversation is opened', async () => {
+      mockChatSendLoading(false);
+      mockConversationWithMessages([userMessage, assistantMessage]);
+      await renderAssistant();
+
+      expect(getAnnouncements()).toEqual(['', '']);
+    });
+
+    it('does not announce the previous reply while the last message is the user prompt', async () => {
+      mockChatSendLoading(true);
+      mockConversationWithMessages([userMessage, assistantMessage, userMessage]);
+      await renderAssistant();
+
+      await act(async () => {
+        setChatSendLoading(false);
+      });
+
+      expect(getAnnouncements()).toEqual(['', '']);
     });
   });
 

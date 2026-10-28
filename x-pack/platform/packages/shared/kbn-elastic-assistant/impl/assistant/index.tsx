@@ -23,13 +23,14 @@ import styled from '@emotion/styled';
 
 import useEvent from 'react-use/lib/useEvent';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { AiResponseScreenReaderStatus } from '@kbn/ui-ai-components';
 import { SharedConversationCallout } from './shared_conversation_callout';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
-import { getDefaultConnector } from './helpers';
+import { getDefaultConnector, getLastReplyText } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
@@ -115,6 +116,7 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchingCurrentUserConversations,
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
+    isStreaming,
     setPaginationObserver,
     refetchPrompts,
     refetchCurrentUserConversations,
@@ -303,6 +305,16 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
+
+  const lastReplyText = useMemo(
+    () =>
+      getLastReplyText({
+        messages: currentConversation?.messages ?? [],
+        replacements: currentConversation?.replacements,
+        showAnonymizedValues,
+      }),
+    [currentConversation?.messages, currentConversation?.replacements, showAnonymizedValues]
+  );
 
   const isHeaderDisabled = !isAssistantEnabled || isInitialLoad || isLoadingChatSend;
 
@@ -534,6 +546,12 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
+                  {/* keyed so switching conversations never announces the other conversation's reply */}
+                  <AiResponseScreenReaderStatus
+                    key={currentConversation?.id}
+                    isLoading={isLoadingChatSend || isStreaming}
+                    responseMessage={lastReplyText}
+                  />
                   <AssistantBody
                     allSystemPrompts={allSystemPrompts}
                     comments={comments}

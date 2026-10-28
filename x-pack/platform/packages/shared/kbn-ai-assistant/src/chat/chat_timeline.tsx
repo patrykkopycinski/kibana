@@ -9,12 +9,12 @@ import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
 import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { omit } from 'lodash';
-import type {
-  ChatActionClickPayload,
-  ChatState,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { last, omit } from 'lodash';
+import { AiResponseScreenReaderStatus } from '@kbn/ui-ai-components';
+import type { ChatActionClickPayload } from '@kbn/observability-ai-assistant-plugin/public';
 import {
+  ChatState,
+  MessageRole,
   type Feedback,
   type Message,
   type ObservabilityAIAssistantChatService,
@@ -207,46 +207,59 @@ export function ChatTimeline({
     onActionClick,
   ]);
 
+  // Only a finished natural-language answer is announced, never an intermediate function call.
+  const lastMessage = last(messages)?.message;
+  const lastReplyText =
+    lastMessage?.role === MessageRole.Assistant && !lastMessage.function_call?.name
+      ? lastMessage.content
+      : undefined;
+
   return (
-    <EuiCommentList className={euiCommentListClassName}>
-      <div className={stickyCalloutContainerClassName}>
-        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
-        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
-      </div>
-      {items.map((item, index) => {
-        return Array.isArray(item) ? (
-          <ChatConsolidatedItems
-            key={index}
-            consolidatedItem={item}
-            onActionClick={onActionClick}
-            onEditSubmit={onEdit}
-            onFeedback={onFeedback}
-            onRegenerate={onRegenerate}
-            onSendTelemetry={onSendTelemetry}
-            onStopGenerating={onStopGenerating}
-            isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
-          />
-        ) : (
-          <ChatItem
-            // use index, not id to prevent unmounting of component when message is persisted
-            key={index}
-            {...omit(item, 'message')}
-            onActionClick={(payload) => {
-              onActionClick({ message: item.message, payload });
-            }}
-            onFeedbackClick={(feedback) => onFeedback(feedback)}
-            onRegenerateClick={() => {
-              onRegenerate(item.message);
-            }}
-            onEditSubmit={(message) => {
-              onEdit(item.message, message);
-            }}
-            onSendTelemetry={onSendTelemetry}
-            onStopGeneratingClick={onStopGenerating}
-            isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
-          />
-        );
-      })}
-    </EuiCommentList>
+    <>
+      <AiResponseScreenReaderStatus
+        isLoading={chatState === ChatState.Loading}
+        responseMessage={lastReplyText}
+      />
+      <EuiCommentList className={euiCommentListClassName}>
+        <div className={stickyCalloutContainerClassName}>
+          {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
+          {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
+        </div>
+        {items.map((item, index) => {
+          return Array.isArray(item) ? (
+            <ChatConsolidatedItems
+              key={index}
+              consolidatedItem={item}
+              onActionClick={onActionClick}
+              onEditSubmit={onEdit}
+              onFeedback={onFeedback}
+              onRegenerate={onRegenerate}
+              onSendTelemetry={onSendTelemetry}
+              onStopGenerating={onStopGenerating}
+              isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+            />
+          ) : (
+            <ChatItem
+              // use index, not id to prevent unmounting of component when message is persisted
+              key={index}
+              {...omit(item, 'message')}
+              onActionClick={(payload) => {
+                onActionClick({ message: item.message, payload });
+              }}
+              onFeedbackClick={(feedback) => onFeedback(feedback)}
+              onRegenerateClick={() => {
+                onRegenerate(item.message);
+              }}
+              onEditSubmit={(message) => {
+                onEdit(item.message, message);
+              }}
+              onSendTelemetry={onSendTelemetry}
+              onStopGeneratingClick={onStopGenerating}
+              isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+            />
+          );
+        })}
+      </EuiCommentList>
+    </>
   );
 }

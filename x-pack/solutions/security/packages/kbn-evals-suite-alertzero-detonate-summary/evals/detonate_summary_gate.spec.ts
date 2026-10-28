@@ -28,7 +28,7 @@
  * A green mutation run means the suite cannot detect the regression it gates.
  */
 
-import { expect } from '@playwright/test';
+import { expect, type TestInfo } from '@playwright/test';
 import {
   selectEvaluators,
   tags,
@@ -131,13 +131,21 @@ const evaluate = base.extend<{ evaluateDetonateSummary: EvaluateDetonateSummary 
 
 // ── Gate computation ──────────────────────────────────────────────────────────
 
+interface GateViolation {
+  label: string;
+  explanation: string;
+  summary: string;
+}
+
 interface GateCounts {
   gated: number;
   knownGood: number;
   falseMalicious: number;
   falseBenign: number;
+  emptySummaries: number;
   judged: number;
   judgeFailures: number;
+  violations: GateViolation[];
 }
 
 const sumGate = (results: DatasetRunResult[]): GateCounts => {
@@ -146,22 +154,38 @@ const sumGate = (results: DatasetRunResult[]): GateCounts => {
     knownGood: 0,
     falseMalicious: 0,
     falseBenign: 0,
+    emptySummaries: 0,
     judged: 0,
     judgeFailures: 0,
+    violations: [],
   };
   for (const { evaluationRuns } of results) {
     for (const { name, result } of evaluationRuns) {
       if (name === detonateSummaryGate.name) {
         const meta = result?.metadata as DetonateGateMetadata | undefined;
-        // Empty summaries carry no metadata: count them as gate failures.
         counts.gated += 1;
+        // Empty summaries (task errors included) carry no metadata: they fail
+        // the gate, but are counted apart so an outage is not read as wording.
         if (!meta) {
           counts.falseBenign += 1;
-          continue;
+          counts.emptySummaries += 1;
+          counts.violations.push({
+            label: 'unknown',
+            explanation: result?.explanation ?? 'no gate metadata',
+            summary: '',
+          });
+        } else {
+          if (meta.label === 'known_good_quiet') counts.knownGood += 1;
+          if (meta.falseMalicious) counts.falseMalicious += 1;
+          if (meta.falseBenign) counts.falseBenign += 1;
         }
-        if (meta.label === 'known_good_quiet') counts.knownGood += 1;
-        if (meta.falseMalicious) counts.falseMalicious += 1;
-        if (meta.falseBenign) counts.falseBenign += 1;
+        if (meta && (meta.falseMalicious || meta.falseBenign)) {
+          counts.violations.push({
+            label: meta.label,
+            explanation: result?.explanation ?? '',
+            summary: meta.summary,
+          });
+        }
       } else if (name === 'DetonateSummaryJudge' && typeof result?.score === 'number') {
         counts.judged += 1;
         if (result.score < 1) counts.judgeFailures += 1;
@@ -171,6 +195,24 @@ const sumGate = (results: DatasetRunResult[]): GateCounts => {
   return counts;
 };
 
+// Violations are the only way to tell a wording regression from a classifier
+// false positive, so every one is attached to the test result.
+const recordViolations = async (
+  name: string,
+  c: GateCounts,
+  log: ToolingLog,
+  testInfo: TestInfo
+): Promise<void> => {
+  if (!c.violations.length) return;
+  await testInfo.attach(`${name}-violations.json`, {
+    body: JSON.stringify(c.violations, null, 2),
+    contentType: 'application/json',
+  });
+  for (const { label, explanation } of c.violations.slice(0, 5)) {
+    log.info(`[detonate-summary] ${name} violation (${label}): ${explanation}`);
+  }
+};
+
 const report = (name: string, c: GateCounts, log: ToolingLog): number => {
   const fmHi = upperBound95(c.falseMalicious, c.knownGood);
   const fbHi = upperBound95(c.falseBenign, c.gated);
@@ -178,6 +220,7 @@ const report = (name: string, c: GateCounts, log: ToolingLog): number => {
     `[detonate-summary] ${name}: gated=${c.gated} knownGood=${c.knownGood} ` +
       `false-malicious=${c.falseMalicious}/${c.knownGood} (95% upper ${fmHi.toFixed(4)}) ` +
       `false-benign=${c.falseBenign}/${c.gated} (95% upper ${fbHi.toFixed(4)}) ` +
+      `empty-summaries=${c.emptySummaries} ` +
       `judge-failures=${c.judgeFailures}/${c.judged}`
   );
   return fmHi;
@@ -209,6 +252,7 @@ evaluate.describe(
 
         const counts = sumGate(results);
         const fmUpper = report(`full corpus (${testInfo.project.name})`, counts, log);
+        await recordViolations('gate', counts, log, testInfo);
 
         expect(counts.gated).toBe(corpus.length);
         expect(counts.knownGood).toBeGreaterThanOrEqual(KNOWN_GOOD_MIN);
@@ -235,6 +279,7 @@ evaluate.describe(
 
         const counts = sumGate(results);
         report(`mutation, evidence rule dropped (${testInfo.project.name})`, counts, log);
+        await recordViolations('mutation', counts, log, testInfo);
 
         expect(counts.gated).toBe(slice.length);
         expect(counts.falseMalicious + counts.falseBenign + counts.judgeFailures).toBeGreaterThan(

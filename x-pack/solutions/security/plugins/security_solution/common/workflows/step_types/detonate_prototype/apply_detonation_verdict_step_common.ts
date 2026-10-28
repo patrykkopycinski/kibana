@@ -60,7 +60,7 @@ export const applyDetonationVerdictStepCommonDefinition: BaseStepDefinition<
     'xpack.securitySolution.workflows.steps.applyDetonationVerdict.description',
     {
       defaultMessage:
-        'Tags the alert `detonate:<verdict>` and adds the detonation evidence as an alert note. Never changes alert status.',
+        'Tags the alert `detonate:VERDICT` and adds the detonation evidence as an alert note. Never changes alert status.',
     }
   ),
   inputSchema: applyDetonationVerdictInputSchema,
@@ -70,7 +70,7 @@ export const applyDetonationVerdictStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.applyDetonationVerdict.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Writes exactly two things to the alert: the `detonate:<verdict>` tag and a note carrying the evidence and a link to the run. Closing the alert on a `quiet` verdict stays a human decision — the step never sets status.',
+          'Prototype step. Writes exactly two things to the alert: the `detonate:VERDICT` tag and a note carrying the evidence and a link to the run. Closing the alert on a `quiet` verdict stays a human decision — the step never sets status.',
       }
     ),
     examples: [

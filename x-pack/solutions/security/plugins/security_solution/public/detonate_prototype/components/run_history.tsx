@@ -43,7 +43,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import {
-  DETONATE_PROTOTYPE_APP_PATH,
   PROPOSAL_QUIET_STREAK_THRESHOLD,
   exceptionProposalComment,
   quietRunStreak,
@@ -95,7 +94,7 @@ export const RunHistory = React.memo<RunHistoryProps>(({ runs, hash }) => {
     () => (id: string) =>
       navigateTo({
         deepLinkId: SecurityPageName.detonatePrototype,
-        path: `${DETONATE_PROTOTYPE_APP_PATH}/${id}`,
+        path: `/${id}`,
       }),
     [navigateTo]
   );

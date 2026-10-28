@@ -88,7 +88,7 @@ const DetonationWatcher = ({ taskId, activeTaskId }: { taskId: string; activeTas
       onClick: () => {
         navigateTo({
           deepLinkId: SecurityPageName.detonatePrototype,
-          path: `${DETONATE_PROTOTYPE_APP_PATH}/${taskId}`,
+          path: `/${taskId}`,
         });
       },
       'data-test-subj': `${DETONATION_NOTIFIER_TEST_ID}-success-${taskId}`,

@@ -152,6 +152,25 @@ describe('detonate triage managed workflow', () => {
     }
   });
 
+  it('bounds every hunt to the 30-day window its note reports', () => {
+    const hunts = steps.filter(({ type }) => type === 'elasticsearch.esql.query');
+    expect(hunts.length).toBeGreaterThan(0);
+    for (const hunt of hunts) {
+      expect((hunt.with as { query: string }).query).toContain('WHERE @timestamp >= NOW() - 30d');
+    }
+  });
+
+  it('attributes the blocklist entry from a variable, not the evictable gate output', () => {
+    const resolve = steps.find(({ name }) => name === 'resolve_blocklist_gate');
+    expect((resolve?.with as Record<string, string>).blocklist_responded_by).toBe(
+      '{{ steps.blocklist_gate.output.respondedBy }}'
+    );
+    const blocklist = steps.find(({ type }) => type === 'security.createExceptionListItem');
+    const comments = (blocklist?.with as { comments: string[] }).comments;
+    expect(comments.join('\n')).toContain('{{ variables.blocklist_responded_by }}');
+    expect(comments.join('\n')).not.toContain('steps.blocklist_gate.output');
+  });
+
   it('writes hunt results to the alert only when a hunt found hosts', () => {
     const note = steps.find(({ type }) => type === 'security.createNote');
     // Exactly one createNote lives in the detonate branch (the

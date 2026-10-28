@@ -44,7 +44,7 @@ export const DETONATE_TRIAGE_WORKFLOW_ID = 'system-security-detonate-triage';
 export const DETONATE_TRIAGE_WORKFLOW = {
   id: DETONATE_TRIAGE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 6,
+  version: 7,
   billable: false,
   yaml: DETONATE_TRIAGE_YAML,
   management: {

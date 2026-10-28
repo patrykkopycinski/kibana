@@ -191,6 +191,7 @@ steps:
         with:
           query: |-
             FROM logs-endpoint.events.network-*
+              | WHERE @timestamp >= NOW() - 30d
               | WHERE dns.question.name IN ("{{ steps.detonate.output.extracted_iocs.domains | join: '", "' }}")
               | STATS last_seen = MAX(@timestamp) BY host.name
               | KEEP host.name, last_seen
@@ -433,6 +434,7 @@ steps:
         with:
           blocklist_approved: '${{ steps.blocklist_gate.output.response.approved == true }}'
           blocklist_timed_out: '${{ steps.blocklist_gate.error != blank }}'
+          blocklist_responded_by: "{{ steps.blocklist_gate.output.respondedBy }}"
 
       # The write itself. `item_id` is derived from the hash so the step is
       # idempotent: re-running triage on the same sample skips instead of
@@ -472,7 +474,7 @@ steps:
           # runner's identity, not the approver's, so the approver is recorded
           # on the item itself — the audit trail the Artifacts UI shows.
           comments:
-            - "Blocklisted by {{ steps.blocklist_gate.output.respondedBy }} after detonation task {{ steps.verdict.output.task_id }}."
+            - "Blocklisted by {{ variables.blocklist_responded_by }} after detonation task {{ steps.verdict.output.task_id }}."
 
       # A confirmed-malicious detonation is worth a case comment; a quiet or
       # inconclusive run stays on the alert, where the analyst already is.

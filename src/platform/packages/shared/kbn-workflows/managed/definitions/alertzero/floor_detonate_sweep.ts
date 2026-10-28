@@ -33,7 +33,7 @@ export const ALERTZERO_WORKER_FLOOR_DETONATE_SWEEP_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_DETONATE_SWEEP_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
     renderScheduledWorkerYaml(
       FLOOR_DETONATE_SWEEP_YAML,

@@ -85,7 +85,7 @@ export const detonateReputationStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateReputation.documentation.details',
       {
         defaultMessage:
-          'Prototype step. The gate only answers `known-malicious` or `unknown` — there is no benign answer, so a workflow must route `unknown` to a detonation rather than reading it as clean. Use it as the switch before `security.detonateSample` so already-known malware is never detonated again.',
+          'Prototype step. The gate only answers `known-malicious` or `unknown` — there is no benign answer, so a workflow must route `unknown` to a detonation rather than reading it as clean. Use it as the switch before `detonate.prototype.detonateSample` so already-known malware is never detonated again.',
       }
     ),
     examples: [
@@ -103,7 +103,7 @@ export const detonateReputationStepCommonDefinition: BaseStepDefinition<
     - match: skip
       steps:
         - name: close_alert
-          type: security.applyDetonationVerdict
+          type: detonate.prototype.applyDetonationVerdict
           with:
             verdict: "malicious"
             ...

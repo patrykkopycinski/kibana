@@ -58,6 +58,7 @@ steps:
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE file.hash.sha256 IS NOT NULL
+          | WHERE kibana.alert.workflow_status == "open"
           | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")

@@ -31,7 +31,7 @@ export const caseCommentStepDefinition = createServerStepDefinition({
         comments?: Array<{ id?: string }>;
       }>({
         method: 'POST',
-        path: `/api/cases/${caseId}/comments`,
+        path: `/api/cases/${encodeURIComponent(caseId)}/comments`,
         body: { comment, type: 'user', owner: SECURITY_SOLUTION_OWNER },
       });
 

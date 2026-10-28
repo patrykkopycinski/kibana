@@ -91,7 +91,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateVerdict.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Reads the detonation task and derives the verdict with the same rule the Detonate page uses: failed or unfinished runs are `inconclusive` (never benign), a completed run with zero alerts is `quiet`, and a run with alerts is `malicious`. Pure — the writing half is `security.applyDetonationVerdict`.',
+          'Prototype step. Reads the detonation task and derives the verdict with the same rule the Detonate page uses: failed or unfinished runs are `inconclusive` (never benign), a completed run with zero alerts is `quiet`, and a run with alerts is `malicious`. Pure — the writing half is `detonate.prototype.applyDetonationVerdict`.',
       }
     ),
     examples: [
@@ -103,7 +103,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
     task_id: "{{ steps.detonate.output.task_id }}"
 
 - name: tag_alert
-  type: security.applyDetonationVerdict
+  type: detonate.prototype.applyDetonationVerdict
   with:
     verdict: "{{ steps.verdict.output.verdict }}"
     alert_id: "{{ steps.verdict.output.alert_id }}"

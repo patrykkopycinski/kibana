@@ -67,6 +67,10 @@ describe('File Detonation sweep worker', () => {
       expect(query).not.toMatch(/workflow_tags`?\s+IN\s*\(/);
     });
 
+    it('only picks up open alerts, so a closed or acknowledged one is never re-detonated', () => {
+      expect(query).toContain('WHERE kibana.alert.workflow_status == "open"');
+    });
+
     it('dedupes by hash so one sample is detonated once per sweep', () => {
       expect(query).toContain('BY file.hash.sha256');
       expect(query).toContain('KEEP file.hash.sha256, first_alert');

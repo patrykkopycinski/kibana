@@ -353,10 +353,11 @@ export const exceptionProposalComment = (
 /* -------------------------------------------------------------------------- */
 
 /**
- * What a finished detonation says about the sample. `malicious` and `quiet`
- * are statements about the sample's behaviour in the sandbox; `inconclusive`
- * means the run itself cannot support a statement (it failed, or has not
- * finished) and must never be read as "benign".
+ * What a finished detonation says about the sample. `malicious` (production
+ * endpoint alerts or detection rule hits) and `quiet` (no alerts) are
+ * statements about the sample's behaviour in the sandbox; `inconclusive` means
+ * the run cannot support either (it failed, has not finished, or raised only
+ * diagnostic alerts) and must never be read as "benign".
  */
 export const DETONATE_VERDICTS = ['malicious', 'quiet', 'inconclusive'] as const;
 export type DetonateVerdictName = (typeof DETONATE_VERDICTS)[number];
@@ -458,6 +459,8 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
     ...new Set(task.production_detection_alert_groups.map((group) => group.kibana_alert_rule_name)),
   ];
   const total = totalDetonationAlerts(task);
+  const hardEvidence =
+    (task.production_endpoint_alerts_count ?? 0) + (task.production_detection_alerts_count ?? 0);
 
   let verdict: DetonateVerdictName;
   let evidence: string;
@@ -478,6 +481,16 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
       'Detonation completed and raised no alerts — no malicious behavior was observed in the ' +
       'sandbox, which is not proof the sample is benign (nothing may have detected it). ' +
       'Suggest reviewing before closing the alert.';
+  } else if (hardEvidence === 0) {
+    // Diagnostic alerts alone show Defend observed the behavior, not that a
+    // customer's Defend or any rule would have flagged it — not enough to
+    // close alerts as true positives or blocklist the sample.
+    verdict = 'inconclusive';
+    const codes = eventCodes.length > 0 ? eventCodes.join(', ') : 'none';
+    evidence =
+      `Detonation raised ${total} diagnostic alert(s) only: ${codes}. No production endpoint ` +
+      'alerts and no detection rule hits, so the behavior is suspicious but unconfirmed — ' +
+      'review the diagnostic events before acting on the alert.';
   } else {
     verdict = 'malicious';
     const codes = eventCodes.length > 0 ? eventCodes.join(', ') : 'none';

@@ -396,11 +396,13 @@ steps:
   # R6's threshold too. Built as a string first because the expression filters take a
   # pre-rendered predicate, matching `reject_exp` usage in alert_analysis_workflow.yaml.
   #
-  # A sandbox verdict outranks the classifier: an alert the detonation stage (3b) already tagged
-  # malicious is never proposed for closure as a false positive. The lookup re-reads the tags
-  # because they land while the batch is classified; a failed lookup leaves the floor as the only
-  # condition. A verdict that lands after this read is not seen here, but its own true-positive
-  # proposal still names the alert.
+  # A sandbox or reputation verdict outranks the classifier: an alert the detonation stage (3b)
+  # already tagged malicious or known-malicious is never proposed for closure as a false positive.
+  # Only a detonated-malicious verdict raises its own true-positive proposal; a known-malicious
+  # alert just stays open for review. The lookup re-reads the tags because they land while the
+  # batch is classified; a failed lookup leaves the floor as the only condition. A verdict that
+  # lands after this read is not seen here, but a detonation's true-positive proposal still names
+  # the alert.
   - name: find_detonate_confirmed_fp
     type: elasticsearch.search
     on-failure:
@@ -438,9 +440,10 @@ steps:
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
-        Detonation found {{ variables.detonate_confirmed_fp_count }} alert{% if variables.detonate_confirmed_fp_count != 1 %}s{% endif %}
+        Detonation or the reputation gate found {{ variables.detonate_confirmed_fp_count }} alert{% if variables.detonate_confirmed_fp_count != 1 %}s{% endif %}
         classified as false positive to be malicious. {% if variables.detonate_confirmed_fp_count == 1 %}It is{% else %}They are{% endif %} left out of the false-positive closure
-        and covered by the detonation's true-positive proposal instead.
+        and stay open: a detonated sample gets its own true-positive proposal, a known-malicious
+        one needs an analyst to close it.
 
   - name: compute_fp_candidates
     type: data.set

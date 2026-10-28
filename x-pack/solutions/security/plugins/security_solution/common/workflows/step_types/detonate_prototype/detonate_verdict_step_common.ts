@@ -91,7 +91,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateVerdict.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Reads the detonation task and derives the verdict with the same rule the Detonate page uses: failed or unfinished runs are `inconclusive` (never benign), a completed run with zero alerts is `quiet`, and a run with alerts is `malicious`. Pure — the writing half is `detonate.prototype.applyDetonationVerdict`.',
+          'Prototype step. Reads the detonation task and derives the verdict with the same rule the Detonate page uses: failed, unfinished or diagnostic-only runs are `inconclusive` (never benign), a completed run with zero alerts is `quiet`, and a run with production endpoint alerts or detection rule hits is `malicious`. Pure — the writing half is `detonate.prototype.applyDetonationVerdict`.',
       }
     ),
     examples: [

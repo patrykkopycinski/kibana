@@ -98,6 +98,39 @@ describe('deriveDetonateVerdict', () => {
     expect(verdict.evidence).toContain('vm boot failed');
   });
 
+  it('derives inconclusive, not malicious, from a run with only diagnostic alerts', () => {
+    const verdict = deriveDetonateVerdict(
+      createTask({
+        diagnostic_endpoint_alerts_count: 2,
+        diagnostic_endpoint_alert_groups: [{ alerts_count: 2, event_code: 'behavior' }],
+      })
+    );
+
+    expect(verdict.verdict).toBe('inconclusive');
+    expect(verdict.suggested_tag).toBe('detonate:inconclusive');
+    expect(verdict.total_alerts_count).toBe(2);
+    expect(verdict.endpoint_alert_event_codes).toEqual(['behavior']);
+    expect(verdict.evidence).toContain('diagnostic alert(s) only');
+    expect(verdict.evidence.toLowerCase()).not.toContain('malicious');
+  });
+
+  it('derives malicious from detection rule hits alone', () => {
+    const verdict = deriveDetonateVerdict(
+      createTask({
+        production_detection_alerts_count: 1,
+        production_detection_alert_groups: [
+          {
+            alerts_count: 1,
+            kibana_alert_rule_name: 'Suspicious Execution',
+            kibana_alert_rule_parameters_severity: 'medium',
+          },
+        ],
+      })
+    );
+
+    expect(verdict.verdict).toBe('malicious');
+  });
+
   it('derives inconclusive from an unfinished run', () => {
     const verdict = deriveDetonateVerdict(
       createTask({ last_worker_name: 'detonate.workers.stop_vm', last_worker_status: 'success' })

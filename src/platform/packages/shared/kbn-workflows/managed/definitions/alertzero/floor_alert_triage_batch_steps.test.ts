@@ -162,6 +162,12 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
     expect(fpThresholdExpr).toBe('v.confidence_score >= 0.85');
   });
 
+  it('does not promise a true-positive proposal for known-malicious alerts, which never get one', () => {
+    const message = String(stepByName('post_comment_detonate_overrides')?.with?.message);
+    expect(message).not.toContain("covered by the detonation's true-positive proposal");
+    expect(message).toContain('known-malicious one needs an analyst to close it');
+  });
+
   it('does not fail the batch when the lookup fails', () => {
     expect(lookup?.type).toBe('elasticsearch.search');
     expect(lookup?.['on-failure']?.continue).toBe(true);

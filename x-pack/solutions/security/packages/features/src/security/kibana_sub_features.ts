@@ -10,6 +10,7 @@ import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 
 import { APP_ID, EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL } from '../constants';
+import { DETONATE_API_ACTION_ALL } from '../actions';
 import type { SecurityFeatureParams } from './types';
 
 const TRANSLATIONS = Object.freeze({
@@ -856,6 +857,43 @@ export const socManagementSubFeature = (): SubFeatureConfig => ({
             read: [],
           },
           ui: ['socManagement'],
+        },
+      ],
+    },
+  ],
+});
+
+/**
+ * Detonation is narrower than Security write: it spends a sandbox VM but changes nothing in
+ * Kibana. A dedicated privilege lets an automation identity detonate without broad Security
+ * Solution write access.
+ */
+export const detonateSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate('securitySolutionPackages.features.featureRegistry.subFeatures.detonate', {
+    defaultMessage: 'Detonate',
+  }),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.detonate.description',
+    {
+      defaultMessage:
+        'Submit file samples to the detonation sandbox and read the results of past runs.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [DETONATE_API_ACTION_ALL],
+          id: 'detonate_all',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['detonateAll'],
         },
       ],
     },

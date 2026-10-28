@@ -22,6 +22,7 @@ import {
   scanActionSubFeature,
   scriptsManagementSubFeature,
   customYaraSignaturesSubFeature,
+  detonateSubFeature,
   socManagementSubFeature,
   trustedApplicationsSubFeature,
   trustedDevicesSubFeature,
@@ -54,6 +55,7 @@ describe('kibana_sub_features', () => {
       { name: 'socManagementSubFeature', factory: socManagementSubFeature },
       { name: 'hostIsolationSubFeature', factory: hostIsolationSubFeature },
       { name: 'executeActionSubFeature', factory: executeActionSubFeature },
+      { name: 'detonateSubFeature', factory: detonateSubFeature },
     ];
 
     it.each(subFeaturesWithExcludeFromBasePrivileges)(

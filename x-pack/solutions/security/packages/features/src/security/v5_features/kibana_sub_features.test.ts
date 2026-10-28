@@ -7,7 +7,10 @@
 
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { SecuritySubFeatureId } from '../../product_features_keys';
-import { getSecurityV5SubFeaturesMap } from './kibana_sub_features';
+import {
+  getSecurityV5BaseKibanaSubFeatureIds,
+  getSecurityV5SubFeaturesMap,
+} from './kibana_sub_features';
 
 /**
  * Mirrors the defaults in `security_solution/common/experimental_features.ts`,
@@ -17,9 +20,14 @@ const PRODUCTION_FLAGS = {
   trustedDevices: true,
   responseActionsScriptLibraryManagement: true,
   customYaraSignaturesEnabled: false,
+  detonatePrototypeEnabled: false,
 };
 
-const ALL_FLAGS_ENABLED = { ...PRODUCTION_FLAGS, customYaraSignaturesEnabled: true };
+const ALL_FLAGS_ENABLED = {
+  ...PRODUCTION_FLAGS,
+  customYaraSignaturesEnabled: true,
+  detonatePrototypeEnabled: true,
+};
 
 const getSubFeaturesMap = (experimentalFeatures: Record<string, boolean>) =>
   getSecurityV5SubFeaturesMap({ experimentalFeatures, savedObjects: [] });
@@ -161,8 +169,33 @@ describe('getSecurityV5SubFeaturesMap', () => {
       flag: 'customYaraSignaturesEnabled',
       subFeatureId: SecuritySubFeatureId.customYaraSignatures,
     },
+    { flag: 'detonatePrototypeEnabled', subFeatureId: SecuritySubFeatureId.detonate },
   ])('registers $subFeatureId only when `$flag` is enabled', ({ flag, subFeatureId }) => {
     expect(getSubFeaturesMap({ ...PRODUCTION_FLAGS, [flag]: true }).has(subFeatureId)).toBe(true);
     expect(getSubFeaturesMap({ ...PRODUCTION_FLAGS, [flag]: false }).has(subFeatureId)).toBe(false);
+  });
+
+  it('registers Detonate as an all-only privilege when the prototype is enabled', () => {
+    const detonate = getSubFeaturesMap(ALL_FLAGS_ENABLED).get(SecuritySubFeatureId.detonate);
+
+    expect(detonate && getDisplayedFields(detonate)).toEqual({
+      name: 'Detonate',
+      description:
+        'Submit file samples to the detonation sandbox and read the results of past runs.',
+      privileges: ['All'],
+    });
+  });
+});
+
+describe('getSecurityV5BaseKibanaSubFeatureIds', () => {
+  it('enables the Detonate sub-feature only when the prototype is enabled', () => {
+    const ids = (detonatePrototypeEnabled: boolean) =>
+      getSecurityV5BaseKibanaSubFeatureIds({
+        experimentalFeatures: { ...PRODUCTION_FLAGS, detonatePrototypeEnabled },
+        savedObjects: [],
+      });
+
+    expect(ids(true)).toEqual([SecuritySubFeatureId.detonate]);
+    expect(ids(false)).toEqual([]);
   });
 });

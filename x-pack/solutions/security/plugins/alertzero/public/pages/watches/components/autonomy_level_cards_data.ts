@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   type WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
@@ -107,6 +108,10 @@ export const workerNameForCards = (workerId: string): string => {
     case SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID:
       return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.threatHunt', {
         defaultMessage: 'Continuous threat hunt',
+      });
+    case SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID:
+      return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.fileDetonation', {
+        defaultMessage: 'File detonation',
       });
     case SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID:
       return i18n.translate(
@@ -346,6 +351,43 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposalsValue',
               '<worker> answers them automatically — reversible by <you>. Every action is recorded.'
+            ),
+          },
+        ],
+      },
+    ],
+  },
+  [SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID]: {
+    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.fileDetonation.intro', {
+      defaultMessage:
+        'File Detonation runs on a fixed Manual autonomy: it detonates on its own, and every Proposal still waits for you.',
+    }),
+    levels: [
+      {
+        level: 'manual',
+        who: i18n.translate(
+          'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.who',
+          { defaultMessage: 'Detonates on its own; every Proposal still waits for you.' }
+        ),
+        facts: [
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.detonate',
+              { defaultMessage: 'Detonate' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.detonateValue',
+              '<worker> detonates every untriaged file hash automatically'
+            ),
+          },
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.proposals',
+              { defaultMessage: 'Proposals' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.proposalsValue',
+              '<you> approve each'
             ),
           },
         ],

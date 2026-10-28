@@ -1,0 +1,131 @@
+version: "1"
+name: File Detonation sweep
+description: >
+  Detonate prototype Worker on the Floor Watch: sweeps open alerts for file
+  hashes that have not been triaged by detonation yet, opens one Investigation
+  for the sweep, and detonates each untriaged hash through the shared detonate
+  triage workflow. Every verdict lands back on the source alert as a tag plus
+  note and is journaled into the sweep's Investigation, so an analyst sees the
+  whole sweep's evidence in one place. Enforcement (blocklist, exception
+  proposals) stays behind human approval everywhere.
+enabled: false
+tags:
+  - watch
+  - watch-floor
+
+settings:
+  __WORKER_RUN_AS_LINE__:
+  # One sweep per space. The sweep only finds candidates and starts
+  # detonations, so a dropped overlapping sweep loses nothing: the hashes are
+  # still untagged and the next sweep finds them again.
+  concurrency:
+    key: detonate-sweep
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
+  # Keep manual for desk testing without waiting for the schedule.
+  - type: manual
+
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+
+steps:
+  # ---------------------------------------------------------------------------
+  # 1. Find untriaged hashes. An alert qualifies when it carries a
+  #    file.hash.sha256 and none of the detonate outcome tags — the verdict
+  #    set is closed (detonate:malicious / quiet / inconclusive from a run,
+  #    detonate:known-malicious from the reputation gate), so one MV_CONTAINS
+  #    per tag excludes every already-triaged alert. MV_CONTAINS is false on a
+  #    missing field, where NOT (tags IN (...)) would be null and drop the
+  #    untagged alerts this query exists to find. The
+  #    STATS dedupes by hash: the detonation is per-sample, not per-alert, and
+  #    one representative alert carries the verdict write-back.
+  # ---------------------------------------------------------------------------
+  - name: find_candidates
+    type: elasticsearch.esql.query
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+          | WHERE file.hash.sha256 IS NOT NULL
+          | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
+          | STATS first_alert = MIN(_id) BY file.hash.sha256
+          | KEEP file.hash.sha256, first_alert
+          | LIMIT 20
+
+  # ---------------------------------------------------------------------------
+  # 2. Open the sweep's Investigation. Every detonation verdict of this sweep
+  #    is journaled here, mirroring how a triage batch owns one conversation.
+  #    Failure is terminal for the sweep: journaling is the sweep's core value,
+  #    and detonating without a place the analyst can read the verdict spends
+  #    sandbox VMs for nothing. A sweep with no candidates opens none, so an
+  #    idle schedule does not fill the Investigations list with empty entries.
+  # ---------------------------------------------------------------------------
+  - name: create_investigation
+    type: ai.conversation.create
+    if: "${{ steps.find_candidates.output.values.size > 0 }}"
+    with:
+      template_id: investigation
+      title: "File Detonation — sweep {{ execution.id }}"
+      access_control:
+        access_mode: public
+      metadata:
+        status: open
+        severity: low
+        description: >-
+          Automated detonation sweep over open alerts with untriaged file hashes.
+
+  # ---------------------------------------------------------------------------
+  # 3. Detonate every candidate hash. Each branch is the existing detonate
+  #    triage workflow (reputation gate -> detonate -> verdict write-back),
+  #    which also journals its verdict into this sweep's Investigation.
+  #    executeAsync returns once started, so the sweep never waits for a
+  #    detonation to finish; ES|QL rows are positional, so [0] is the hash and
+  #    [1] its representative alert id. A parallel branch cannot carry an
+  #    on-failure handler; mode: settled is what keeps one failed start from
+  #    cancelling the other hashes.
+  # ---------------------------------------------------------------------------
+  - name: detonate_fan_out
+    type: parallel
+    mode: settled
+    if: "${{ steps.find_candidates.output.values.size > 0 }}"
+    foreach: "${{ steps.find_candidates.output.values }}"
+    steps:
+      - name: detonate_hash
+        type: workflow.executeAsync
+        with:
+          workflow-id: system-security-detonate-triage
+          run-as-mode: inherit
+          inputs:
+            sha256: "{{ foreach.item[0] }}"
+            alert_id: "{{ foreach.item[1] }}"
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
+  # ---------------------------------------------------------------------------
+  # 4. Report the sweep.
+  # ---------------------------------------------------------------------------
+  # No `.size` here: workflow.output renders against a context narrowed to the
+  # referenced paths, and `values.size` is not a real key of the array, so the
+  # narrowing drops it and the count reads as empty. `| size` and `values[0]`
+  # reference paths that exist.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      skip_reason: >-
+        {%- if steps.find_candidates.output.values[0] -%}none{%- else -%}no_candidates{%- endif -%}
+      candidates: "${{ steps.find_candidates.output.values | size }}"
+      investigation_conversation_id: "{{ steps.create_investigation.output.conversation_id }}"

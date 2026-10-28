@@ -26,6 +26,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { Readable } from 'stream';
+import { DETONATE_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 
 import {
   DETONATE_HEALTHCHECK_PATH,
@@ -39,6 +40,15 @@ import type { SecuritySolutionPluginRouter } from '../../types';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../client';
 import { DetonateServiceError } from '../client';
+import type { HasDetonatePrivilege } from '../authz';
+
+/**
+ * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
+ * sub-feature that automation identities hold without broad Security access.
+ */
+const DETONATE_ROUTE_SECURITY = {
+  authz: { requiredPrivileges: [{ anyRequired: ['securitySolution', DETONATE_API_ACTION_ALL] }] },
+};
 
 /**
  * A detonation sample is a malware binary. It is capped well below Kibana's
@@ -76,13 +86,14 @@ export interface DetonateRoutesDeps {
    * breaking Kibana's route registration at startup.
    */
   getClient: () => DetonateClient;
+  /** Resolves the authenticated user, as the service's quota key. */
+  endpointAppContextService: EndpointAppContextService;
   /**
    * Submission is a write: it boots a VM and runs the sample as live malware.
-   * The route-level `securitySolution` privilege is read-level, so the write
-   * privilege is asserted in the handlers, the same check the Agent Builder
-   * tool performs.
+   * The route-level privilege is read-level, so write access is asserted in the
+   * handlers, the same check the Agent Builder tool performs.
    */
-  endpointAppContextService: EndpointAppContextService;
+  hasDetonatePrivilege: HasDetonatePrivilege;
 }
 
 /** Collect a streamed upload, refusing anything over the cap mid-stream. */
@@ -112,6 +123,7 @@ export const registerDetonatePrototypeRoutes = ({
   logger,
   getClient,
   endpointAppContextService,
+  hasDetonatePrivilege,
 }: DetonateRoutesDeps) => {
   /**
    * Shape an error for the analyst. The service's own message is passed
@@ -135,17 +147,6 @@ export const registerDetonatePrototypeRoutes = ({
   };
 
   /**
-   * A detonation spends a VM and runs the sample as live malware — a write in
-   * every sense that matters, even though it mutates nothing in Kibana. The
-   * route-level privilege is read-level, so the write privilege is asserted
-   * here, mirroring the check the Agent Builder tool does in-process.
-   */
-  const hasWritePrivilege = async (request: KibanaRequest): Promise<boolean> => {
-    const authz = await endpointAppContextService.getEndpointAuthz(request);
-    return authz.canWriteSecuritySolution;
-  };
-
-  /**
    * The authenticated Kibana user, as the detonation service's quota key.
    * Anonymous-style internal calls resolve to a stable service-side default.
    */
@@ -158,7 +159,7 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: DETONATE_HEALTHCHECK_PATH,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion({ version: '1', validate: false }, async (_context, _request, response) => {
       try {
@@ -176,7 +177,7 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: `${DETONATE_REPUTATION_PATH}/{sha256}`,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {
@@ -204,7 +205,7 @@ export const registerDetonatePrototypeRoutes = ({
     .post({
       access: 'internal',
       path: DETONATE_SUBMIT_FILE_PATH,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
       options: {
         body: {
           accepts: ['multipart/form-data'],
@@ -233,11 +234,11 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          if (!(await hasWritePrivilege(request))) {
+          if (!(await hasDetonatePrivilege(request, 'write'))) {
             return response.forbidden({
               body: {
                 message:
-                  'Submitting a sample for detonation requires the Security Solution write privilege.',
+                  'Submitting a sample for detonation requires the Security Solution write privilege or the Detonate privilege.',
               },
             });
           }
@@ -288,7 +289,7 @@ export const registerDetonatePrototypeRoutes = ({
     .post({
       access: 'internal',
       path: DETONATE_SUBMIT_HASH_PATH,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {
@@ -305,11 +306,11 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          if (!(await hasWritePrivilege(request))) {
+          if (!(await hasDetonatePrivilege(request, 'write'))) {
             return response.forbidden({
               body: {
                 message:
-                  'Submitting a sample for detonation requires the Security Solution write privilege.',
+                  'Submitting a sample for detonation requires the Security Solution write privilege or the Detonate privilege.',
               },
             });
           }
@@ -331,7 +332,7 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: `${DETONATE_TASKS_PATH}/{taskId}`,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {
@@ -357,7 +358,7 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: `${DETONATE_TASKS_PATH}/{taskId}/updates`,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {
@@ -381,7 +382,7 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: DETONATE_TASKS_PATH,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {
@@ -414,7 +415,7 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: `${DETONATE_TASKS_PATH}/alert/{alertId}`,
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {

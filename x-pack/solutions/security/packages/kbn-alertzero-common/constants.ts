@@ -273,6 +273,13 @@ export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
+/**
+ * Detonate prototype sweep (experimental, behind the detonate config): finds
+ * untriaged file hashes on alerts and detonates them via the shared detonate
+ * triage workflow. Shares the Floor Watch with Alert Triage.
+ */
+export const SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID =
+  'system-security-floor-detonate-sweep' as const;
 export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
   'system-security-forensics-endpoint-analysis' as const;
 export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
@@ -285,6 +292,7 @@ export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID =
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
@@ -314,6 +322,12 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
   {
     id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
     name: 'Attack Discovery',
+    watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    watchTag: WATCH_FLOOR_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
+    name: 'File Detonation',
     watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     watchTag: WATCH_FLOOR_TAG,
   },

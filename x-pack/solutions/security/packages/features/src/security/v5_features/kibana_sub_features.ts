@@ -28,15 +28,17 @@ import {
   socManagementSubFeature,
   scriptsManagementSubFeature,
   customYaraSignaturesSubFeature,
+  detonateSubFeature,
 } from '../kibana_sub_features';
 
 /**
  * Sub-features that will always be available for Security
  * regardless of the product type.
  */
-export const getSecurityV5BaseKibanaSubFeatureIds = (
-  { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [];
+export const getSecurityV5BaseKibanaSubFeatureIds = ({
+  experimentalFeatures,
+}: SecurityFeatureParams): SecuritySubFeatureId[] =>
+  experimentalFeatures.detonatePrototypeEnabled ? [SecuritySubFeatureId.detonate] : [];
 
 /**
  * Defines all the Security Assistant subFeatures available.
@@ -68,6 +70,7 @@ export const getSecurityV5SubFeaturesMap = ({
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature()],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature()],
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
+    [SecuritySubFeatureId.detonate, detonateSubFeature()],
   ];
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
@@ -85,6 +88,10 @@ export const getSecurityV5SubFeaturesMap = ({
 
   if (!experimentalFeatures.customYaraSignaturesEnabled) {
     securitySubFeaturesMap.delete(SecuritySubFeatureId.customYaraSignatures);
+  }
+
+  if (!experimentalFeatures.detonatePrototypeEnabled) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.detonate);
   }
 
   return Object.freeze(securitySubFeaturesMap);

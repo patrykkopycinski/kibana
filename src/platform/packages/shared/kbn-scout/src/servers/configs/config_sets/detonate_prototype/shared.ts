@@ -29,11 +29,27 @@ const DEFAULT_LOCAL_SERVICE_URL = 'http://localhost:8787';
  */
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
+/**
+ * AlertZero-family boot flags, gated behind DETONATE_ALERTZERO so the default
+ * boot of this config set is unchanged. Plugin enablement (alertzero,
+ * proposals, agenticInvestigations) and the service accounts the Watch
+ * Orchestrator runs as are static settings — none can be flipped at runtime.
+ * The per-space gate (`securitySolution:enableAlertZero`) stays a runtime
+ * advanced setting set after boot.
+ */
+const alertzeroServerArgs = [
+  '--xpack.alertzero.enabled=true',
+  '--xpack.proposals.enabled=true',
+  '--xpack.agenticInvestigations.enabled=true',
+  '--xpack.security.serviceAccounts.enabled=true',
+];
+
 export const detonatePrototypeServerArgs = [
   `--xpack.securitySolution.enableExperimental=${JSON.stringify(['detonatePrototypeEnabled'])}`,
   `--xpack.securitySolution.detonatePrototype.serviceUrl=${
     process.env.DETONATE_SERVICE_URL ?? DEFAULT_LOCAL_SERVICE_URL
   }`,
+  ...(process.env.DETONATE_ALERTZERO ? alertzeroServerArgs : []),
 ];
 
 /**

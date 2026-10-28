@@ -196,7 +196,7 @@ import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
-import type { DetonateClient } from './detonate_prototype';
+import type { DetonatePrototype } from './detonate_prototype';
 import { setupDetonatePrototype } from './detonate_prototype';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -241,7 +241,7 @@ export class Plugin implements ISecuritySolutionPlugin {
    * Shared by the Agent Builder skill and the workflow step so every surface
    * talks to the same configured service.
    */
-  private detonateClient?: DetonateClient;
+  private detonatePrototype?: DetonatePrototype;
 
   /** Captured in `setup()`: rule lifecycle telemetry needs the setup contract, not the start one. */
 
@@ -353,7 +353,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
-      options: { endpointAppContextService, detonateClient: this.detonateClient },
+      options: { endpointAppContextService, detonatePrototype: this.detonatePrototype },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
@@ -733,12 +733,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Detonate prototype (experimental, off by default). Removing this call
     // and the `detonate_prototype` directories removes the spike entirely.
-    this.detonateClient = setupDetonatePrototype({
+    this.detonatePrototype = setupDetonatePrototype({
       router,
       logger,
       serviceUrl: config.detonatePrototype?.serviceUrl,
       enabled: config.experimentalFeatures.detonatePrototypeEnabled,
       endpointAppContextService: this.endpointAppContextService,
+      getSecurityStart: async () => (await core.getStartServices())[1].security,
     });
 
     registerEndpointSuggestionsRoutes(

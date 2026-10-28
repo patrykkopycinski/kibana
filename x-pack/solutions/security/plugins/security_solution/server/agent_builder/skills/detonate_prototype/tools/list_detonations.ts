@@ -10,13 +10,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import type { DetonateClient } from '../../../../detonate_prototype';
 import { LIST_DETONATIONS_TOOL_ID } from '..';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateServiceErrorResult,
   insufficientPrivilegesResult,
+  type DetonateSkillDeps,
   LIST_DETONATIONS_PAGE_SIZE,
   MAX_QUERY_STRING_LENGTH,
   summarizeDetonationTask,
@@ -63,10 +62,10 @@ const listDetonationsSchema = lazySchema(() =>
  * this hash before" without spending a VM re-running a sample that already
  * has a recorded result.
  */
-export const listDetonationsTool = (
-  endpointAppContextService: EndpointAppContextService,
-  getClient: () => DetonateClient
-): BuiltinSkillBoundedTool<typeof listDetonationsSchema> => ({
+export const listDetonationsTool = ({
+  getClient,
+  hasDetonatePrivilege,
+}: DetonateSkillDeps): BuiltinSkillBoundedTool<typeof listDetonationsSchema> => ({
   id: LIST_DETONATIONS_TOOL_ID,
   type: ToolType.builtin,
   description:
@@ -74,9 +73,8 @@ export const listDetonationsTool = (
   schema: listDetonationsSchema,
   maxResultTokens: DETONATE_TOOL_MAX_RESULT_TOKENS,
   handler: async (params, { request }) => {
-    const authz = await endpointAppContextService.getEndpointAuthz(request);
-    if (!authz.canReadSecuritySolution) {
-      return insufficientPrivilegesResult('canReadSecuritySolution');
+    if (!(await hasDetonatePrivilege(request, 'read'))) {
+      return insufficientPrivilegesResult('Security Solution read or Detonate');
     }
 
     const { queryString, alertId, page = 0 } = params;

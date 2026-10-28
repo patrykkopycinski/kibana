@@ -29,6 +29,7 @@ import {
   SUBMIT_BUTTON_TEST_ID,
   SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID,
   SUBMIT_HASH_INPUT_TEST_ID,
+  SUBMIT_READ_ONLY_TEST_ID,
 } from './submit_form';
 
 jest.mock('../../common/lib/kibana', () => ({
@@ -38,11 +39,14 @@ jest.mock('../../common/lib/kibana', () => ({
 
 const mutateAsync = jest.fn();
 
+const mockCapabilities = (security: Record<string, boolean>) =>
+  jest.mocked(kibana.useKibana).mockReturnValue({
+    services: { http: {}, application: { capabilities: { siemV5: security } } },
+  } as never);
+
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.mocked(kibana.useKibana).mockReturnValue({
-    services: { http: {} },
-  } as never);
+  mockCapabilities({ show: true, crud: true });
   mutateAsync.mockResolvedValue({ id: 'task-1' } as DetonateTask);
   jest.spyOn(useDetonate, 'useSubmitHash').mockReturnValue({
     mutateAsync,
@@ -108,5 +112,30 @@ describe('SubmitForm', () => {
     await submit();
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     await waitFor(() => expect(onSubmitted).toHaveBeenCalledWith({ id: 'task-1' }));
+  });
+
+  describe('privileges', () => {
+    const typeHash = () =>
+      fireEvent.change(screen.getByTestId(SUBMIT_HASH_INPUT_TEST_ID), {
+        target: { value: 'a'.repeat(64) },
+      });
+
+    it('disables submit and explains why for a read-only role', () => {
+      mockCapabilities({ show: true, crud: false });
+      render(<SubmitForm onSubmitted={jest.fn()} />);
+      typeHash();
+
+      expect(screen.getByTestId(SUBMIT_BUTTON_TEST_ID)).toBeDisabled();
+      expect(screen.getByTestId(SUBMIT_READ_ONLY_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('allows submit for a role holding only the Detonate sub-feature', () => {
+      mockCapabilities({ show: true, crud: false, detonateAll: true });
+      render(<SubmitForm onSubmitted={jest.fn()} />);
+      typeHash();
+
+      expect(screen.getByTestId(SUBMIT_BUTTON_TEST_ID)).toBeEnabled();
+      expect(screen.queryByTestId(SUBMIT_READ_ONLY_TEST_ID)).toBeNull();
+    });
   });
 });

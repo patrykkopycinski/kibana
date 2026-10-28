@@ -115,6 +115,72 @@ describe('floor_alert_triage_batch — compute_fp_candidates', () => {
   });
 });
 
+describe('floor_alert_triage_batch — detonation verdict outranks the classifier', () => {
+  const lookup = stepByName('find_detonate_confirmed_fp');
+  const verdicts = [
+    { alert_id: 'fp-clean', classification: 'false_positive', confidence_score: 0.95 },
+    { alert_id: 'fp-detonated', classification: 'false_positive', confidence_score: 0.95 },
+    { alert_id: 'tp', classification: 'true_positive', confidence_score: 0.95 },
+  ];
+
+  const candidatesWith = (hits: Array<{ _id: string }>): unknown => {
+    const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
+      inputs: { confidence_floor: 0.85 },
+      steps: { find_detonate_confirmed_fp: { output: { hits: { hits } } } },
+    }).trim();
+    return evalExpr(fpCandidateIdsExpr, {
+      steps: { classify_alerts: { output: { verdicts } } },
+      variables: { fp_threshold_expr: fpThresholdExpr },
+    });
+  };
+
+  it('looks up only the false-positive verdicts carrying a malicious detonate tag', () => {
+    const filter = (
+      lookup?.with?.query as { bool: { filter: Array<Record<string, Record<string, unknown>>> } }
+    ).bool.filter;
+    expect(
+      evalExpr(filter[0].terms._id as string, {
+        steps: { classify_alerts: { output: { verdicts } } },
+      })
+    ).toEqual(['fp-clean', 'fp-detonated']);
+    expect(filter[1].terms['kibana.alert.workflow_tags']).toEqual([
+      'detonate:malicious',
+      'detonate:known-malicious',
+    ]);
+  });
+
+  it('drops a detonated-malicious alert from the close candidates', () => {
+    expect(candidatesWith([{ _id: 'fp-detonated' }])).toEqual(['fp-clean']);
+  });
+
+  it('keeps the floor as the only condition when nothing was detonated or the lookup failed', () => {
+    expect(candidatesWith([])).toEqual(['fp-clean', 'fp-detonated']);
+    const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
+      inputs: { confidence_floor: 0.85 },
+      steps: { find_detonate_confirmed_fp: { error: { message: 'boom' } } },
+    }).trim();
+    expect(fpThresholdExpr).toBe('v.confidence_score >= 0.85');
+  });
+
+  it('does not fail the batch when the lookup fails', () => {
+    expect(lookup?.type).toBe('elasticsearch.search');
+    expect(lookup?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('runs the lookup after classification and before the candidates are computed', () => {
+    const names = parsed.steps.map((step) => step.name);
+    expect(names.indexOf('find_detonate_confirmed_fp')).toBeGreaterThan(
+      names.indexOf('classify_alerts')
+    );
+    expect(names.indexOf('build_fp_threshold_expr')).toBeGreaterThan(
+      names.indexOf('find_detonate_confirmed_fp')
+    );
+    expect(names.indexOf('compute_fp_candidates')).toBeGreaterThan(
+      names.indexOf('build_fp_threshold_expr')
+    );
+  });
+});
+
 // ---------------------------------------------------------------------------
 // compute_fp_entities / build_fp_entity_summary — the title suffix naming the hosts and users
 // behind the candidates, so proposals in the queue can be told apart.
@@ -1275,5 +1341,82 @@ describe('floor_alert_triage_batch — classification comment attribution', () =
   it('names neither when no call was made', () => {
     const comment = renderResults({ connector_id: '', agent_id: '' });
     expect(comment).not.toContain('Connector:');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Detonation enrichment (3b) — which hashes the batch hands to detonation, and
+// which alert takes each verdict.
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage_batch — detonation enrichment', () => {
+  const candidatesExpr = stepByName('compute_detonate_candidates')?.with?.detonate_hashes as string;
+  const branch = stepByName('detonate_hash');
+  const alertIdTemplate = (branch?.with?.inputs as Record<string, string>)?.alert_id;
+
+  const alert = (id: string, sha256?: string, tags?: string[]) => ({
+    _id: id,
+    ...(sha256 ? { file: { hash: { sha256 } } } : {}),
+    ...(tags ? { kibana: { alert: { workflow_tags: tags } } } : {}),
+  });
+
+  const candidates = (alerts: unknown[]): unknown =>
+    evalExpr(candidatesExpr, { steps: { load_alerts: { output: { alerts } } } });
+
+  it('keeps each untriaged hash once, skipping alerts with no file hash', () => {
+    expect(
+      candidates([alert('a1', 'h1'), alert('a2', 'h1'), alert('a3'), alert('a4', 'h2')])
+    ).toEqual(['h1', 'h2']);
+  });
+
+  it('skips alerts that already carry any detonate verdict tag', () => {
+    expect(
+      candidates([
+        alert('a1', 'h1', ['detonate:quiet']),
+        alert('a2', 'h2', ['detonate:known-malicious']),
+        alert('a3', 'h3', ['az:triage_pending']),
+        alert('a4', 'h4', ['detonate:malicious', 'other']),
+        alert('a5', 'h5', ['detonate:inconclusive']),
+      ])
+    ).toEqual(['h3']);
+  });
+
+  it('caps one batch at 20 hashes; the sweep picks up the rest', () => {
+    const alerts = Array.from({ length: 25 }, (_, i) => alert(`a${i}`, `h${i}`));
+    expect(candidates(alerts)).toHaveLength(20);
+  });
+
+  it('passes the first alert carrying the hash as the verdict target', () => {
+    const rendered = renderString(alertIdTemplate, {
+      foreach: { item: 'h2' },
+      steps: {
+        load_alerts: {
+          output: { alerts: [alert('a1', 'h1'), alert('a2', 'h2'), alert('a3', 'h2')] },
+        },
+      },
+    });
+    expect(rendered).toBe('a2');
+  });
+
+  it('starts the detonate triage workflow by literal id under the inherited identity', () => {
+    expect(branch?.type).toBe('workflow.executeAsync');
+    expect(branch?.with?.['workflow-id']).toBe('system-security-detonate-triage');
+    expect(branch?.with?.['run-as-mode']).toBe('inherit');
+  });
+
+  it('gates the stage on the healthcheck probe without failing the batch', () => {
+    const probe = stepByName('probe_detonate_service');
+    expect(probe?.['on-failure']?.continue).toBe(true);
+    expect(stepByName('enrich_with_detonation')?.condition).toContain(
+      'steps.probe_detonate_service.error == blank'
+    );
+  });
+
+  it('runs before classification so verdicts land while the batch is analysed', () => {
+    const names = parsed.steps.map((step) => step.name);
+    expect(names.indexOf('enrich_with_detonation')).toBeGreaterThan(
+      names.indexOf('create_investigation')
+    );
+    expect(names.indexOf('enrich_with_detonation')).toBeLessThan(names.indexOf('classify_alerts'));
   });
 });

@@ -15,3 +15,6 @@ export const SIEM_MIGRATIONS_API_ACTION_ALL = `${API_ACTION_PREFIX}siemMigration
 export const ATTACK_DISCOVERY_API_ACTION_ALL = `${API_ACTION_PREFIX}attackDiscoveryAll` as const;
 export const ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE =
   `${API_ACTION_PREFIX}updateAttackDiscoverySchedule` as const;
+
+/** Submit samples to the detonation sandbox and read its runs (prototype, experimental). */
+export const DETONATE_API_ACTION_ALL = `${API_ACTION_PREFIX}detonateAll` as const;

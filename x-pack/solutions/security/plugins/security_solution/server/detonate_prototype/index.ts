@@ -15,14 +15,18 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../types';
 import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from './client';
 import { createDetonateClient } from './client';
 import { registerDetonatePrototypeRoutes } from './routes';
+import type { HasDetonatePrivilege } from './authz';
+import { createDetonatePrivilegeChecker } from './authz';
 
 export type { DetonateClient } from './client';
+export type { DetonateAccess, HasDetonatePrivilege } from './authz';
 export { DetonateServiceError, createDetonateClient } from './client';
 
 /**
@@ -41,14 +45,22 @@ export interface DetonatePrototypeSetupDeps {
   serviceUrl?: string;
   /** The experimental flag that gates the entire prototype. */
   enabled: boolean;
-  /** Asserts the write privilege the submit routes require. */
+  /** Resolves the Security Solution privileges and the acting user. */
   endpointAppContextService: EndpointAppContextService;
+  /** Resolves the Detonate sub-feature privilege. */
+  getSecurityStart: () => Promise<SecurityPluginStart>;
+}
+
+export interface DetonatePrototype {
+  client: DetonateClient;
+  /** Shared by the routes and the Agent Builder tools, so both gate identically. */
+  hasDetonatePrivilege: HasDetonatePrivilege;
 }
 
 /**
- * Wire the prototype's routes, if it is switched on. Returns the client when
- * registered so the Agent Builder skill and workflow step can share it rather
- * than each constructing their own.
+ * Wire the prototype's routes, if it is switched on. Returns the client and the
+ * privilege check when registered so the Agent Builder skill shares them rather
+ * than constructing its own.
  */
 export const setupDetonatePrototype = ({
   router,
@@ -56,7 +68,8 @@ export const setupDetonatePrototype = ({
   serviceUrl,
   enabled,
   endpointAppContextService,
-}: DetonatePrototypeSetupDeps): DetonateClient | undefined => {
+  getSecurityStart,
+}: DetonatePrototypeSetupDeps): DetonatePrototype | undefined => {
   if (!enabled) {
     return undefined;
   }
@@ -72,17 +85,22 @@ export const setupDetonatePrototype = ({
     requestTimeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
     logger: scopedLogger,
   });
+  const hasDetonatePrivilege = createDetonatePrivilegeChecker({
+    endpointAppContextService,
+    getSecurityStart,
+  });
 
   registerDetonatePrototypeRoutes({
     router,
     logger: scopedLogger,
     getClient: () => client,
     endpointAppContextService,
+    hasDetonatePrivilege,
   });
 
   scopedLogger.info(
     `Detonate prototype enabled; proxying to the detonation service configured at ${baseUrl}`
   );
 
-  return client;
+  return { client, hasDetonatePrivilege };
 };

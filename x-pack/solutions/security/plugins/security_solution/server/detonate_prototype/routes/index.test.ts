@@ -24,9 +24,9 @@ describe('registerDetonatePrototypeRoutes', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let client: jest.Mocked<DetonateClient>;
   let endpointAppContextService: {
-    getEndpointAuthz: jest.Mock;
     getCurrentUsername: jest.Mock;
   };
+  let hasDetonatePrivilege: jest.Mock;
 
   const createRequest = (method: 'post' | 'get', path: string, body?: unknown, params?: unknown) =>
     httpServerMock.createKibanaRequest({
@@ -66,14 +66,15 @@ describe('registerDetonatePrototypeRoutes', () => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = {
-      getEndpointAuthz: jest.fn().mockResolvedValue({ canWriteSecuritySolution: canWrite }),
       getCurrentUsername: jest.fn().mockReturnValue('analyst-test'),
     };
+    hasDetonatePrivilege = jest.fn().mockResolvedValue(canWrite);
     registerDetonatePrototypeRoutes({
       router: router as never,
       logger: loggerMock.create(),
       getClient: () => client,
       endpointAppContextService: endpointAppContextService as never,
+      hasDetonatePrivilege,
     });
   };
 
@@ -94,7 +95,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     const forbiddenBody = {
       body: {
         message:
-          'Submitting a sample for detonation requires the Security Solution write privilege.',
+          'Submitting a sample for detonation requires the Security Solution write privilege or the Detonate privilege.',
       },
     };
 
@@ -110,6 +111,36 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       expect(mockResponse.forbidden).toHaveBeenCalledWith(forbiddenBody);
       expect(client.submitHash).not.toHaveBeenCalled();
+    });
+
+    it('asks for write access, not read, before submitting', async () => {
+      client.submitHash.mockResolvedValue({ task: { id: 'task-1' }, deduplicated: false } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, { sample_hash: 'a'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(hasDetonatePrivilege).toHaveBeenCalledWith(expect.anything(), 'write');
+    });
+
+    it('opens every route to either Security Solution access or the Detonate privilege', () => {
+      const securityConfigs = [
+        ...router.versioned.get.mock.calls.map(([config]) => config.security),
+        ...router.versioned.post.mock.calls.map(([config]) => config.security),
+      ];
+
+      expect(securityConfigs.length).toBeGreaterThan(0);
+      for (const security of securityConfigs) {
+        expect(security).toEqual({
+          authz: {
+            requiredPrivileges: [
+              { anyRequired: ['securitySolution', 'securitySolution-detonateAll'] },
+            ],
+          },
+        });
+      }
     });
 
     it('rejects a read-only analyst on the file submit route', async () => {

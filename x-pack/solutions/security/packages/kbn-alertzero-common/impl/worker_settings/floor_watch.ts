@@ -8,11 +8,13 @@
 import {
   ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
   ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
+  DETONATE_SWEEP_WORKER_SETTINGS_DEFAULTS,
 } from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 import { scheduleIntervalToMinutes } from '@kbn/workflows/managed/definitions/alertzero/worker_template_values';
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
 } from '../../constants';
 import { AlertTriageWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -75,4 +77,15 @@ export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   allowedAutonomyLevels: ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
   scheduleInterval: ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
+};
+
+/**
+ * File Detonation sweep. Manual-only like Continuous Threat Hunt: every
+ * enforcement action it can lead to (blocklist, exception proposal) passes a
+ * human gate already, and there is no second unattended behaviour to unlock.
+ */
+export const DETONATE_SWEEP_SETTINGS: WorkerSettingsDeclaration = {
+  workerId: SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
+  allowedAutonomyLevels: DETONATE_SWEEP_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
+  scheduleInterval: DETONATE_SWEEP_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
 };

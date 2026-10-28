@@ -291,6 +291,19 @@ export const SUBMIT_CONFIRM_CANCEL = i18n.translate(
   { defaultMessage: 'Cancel' }
 );
 
+export const SUBMIT_READ_ONLY_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submit.readOnlyTitle',
+  { defaultMessage: 'You can view detonations but not submit samples' }
+);
+
+export const SUBMIT_READ_ONLY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submit.readOnlyDescription',
+  {
+    defaultMessage:
+      'Submitting a sample requires the Security All privilege or the Detonate sub-feature privilege. Ask your administrator for access.',
+  }
+);
+
 export const NOTIFY_COMPLETE_TITLE = (sample: string) =>
   i18n.translate('xpack.securitySolution.detonatePrototype.notify.completeTitle', {
     defaultMessage: 'Detonation complete: {sample}',

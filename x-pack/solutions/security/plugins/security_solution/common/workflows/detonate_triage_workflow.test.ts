@@ -40,8 +40,19 @@ const collectSteps = (steps: WorkflowStep[] = []): WorkflowStep[] =>
   ]);
 
 describe('detonate triage managed workflow', () => {
-  const workflow = parse(DETONATE_TRIAGE_WORKFLOW.yaml) as { steps: WorkflowStep[] };
+  const workflow = parse(DETONATE_TRIAGE_WORKFLOW.yaml) as {
+    steps: WorkflowStep[];
+    settings?: { concurrency?: Record<string, unknown> };
+  };
   const steps = collectSteps(workflow.steps);
+
+  it('runs one triage per sample, so overlapping callers raise one set of proposals', () => {
+    expect(workflow.settings?.concurrency).toEqual({
+      key: 'detonate-{{ inputs.sha256 }}',
+      strategy: 'drop',
+      max: 1,
+    });
+  });
 
   it('wires exactly one approval-gated blocklist step', () => {
     const blocklistSteps = steps.filter(({ type }) => type === 'security.createExceptionListItem');
@@ -166,5 +177,149 @@ describe('detonate triage managed workflow', () => {
     expect(text).toContain('if steps.hunt_domains.output != blank');
     expect(text).toContain('if steps.hunt_ips.output != blank');
     expect(text.match(/\| split: ','/g)).toHaveLength(2);
+  });
+
+  describe('F7 proposals', () => {
+    interface ProposalWith {
+      'workflow-id': string;
+      'run-as-mode': string;
+      inputs: {
+        conversationId: string;
+        comment: string;
+        actionWorkflowId: string;
+        actionInput: Record<string, unknown>;
+        category: string;
+        impact: string;
+        confidence: string;
+        autoApprove: boolean;
+      };
+    }
+
+    const byName = (name: string) => steps.find((step) => step.name === name);
+    const proposalWith = (name: string) => byName(name)?.with as ProposalWith;
+
+    it('raises both proposals async through the AlertZero bridge as the inherited identity', () => {
+      for (const name of ['propose_exception', 'propose_close']) {
+        const step = byName(name);
+        // Async: the run must never park on an analyst decision.
+        expect(step?.type).toBe('workflow.executeAsync');
+        // The engine only delegates the Watch's service account on a literal
+        // child id paired with a literal `inherit`.
+        expect(proposalWith(name)['workflow-id']).toBe('system-create-alertzero-proposal');
+        expect(proposalWith(name)['run-as-mode']).toBe('inherit');
+        // Fail-closed: every proposal waits for an analyst.
+        expect(proposalWith(name).inputs.autoApprove).toBe(false);
+        // The verdict is already on the alert; a failed proposal must not fail the run.
+        expect(step?.['on-failure']).toEqual({ continue: true });
+        expect(proposalWith(name).inputs.conversationId).toBe('{{ inputs.conversation_id }}');
+        expect(proposalWith(name).inputs.comment.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('only a Watch-driven run, which passes an Investigation, reaches either proposal', () => {
+      // Each proposal is guarded on a step that is itself skipped without one.
+      expect(byName('run_history')?.if).toContain('inputs.conversation_id != blank');
+      expect(byName('open_hash_alerts')?.if).toContain('inputs.conversation_id != blank');
+      expect(byName('propose_exception')?.if).toContain(
+        'steps.run_history.output.proposal_eligible == true'
+      );
+      expect(byName('propose_close')?.if).toContain('variables.close_alert_count > 0');
+    });
+
+    it('keys the exception proposal on a quiet verdict and the close proposal on a malicious one', () => {
+      expect(byName('run_history')?.if).toContain("steps.verdict.output.verdict == 'quiet'");
+      expect(byName('open_hash_alerts')?.if).toContain(
+        "steps.verdict.output.verdict == 'malicious'"
+      );
+      // Negative control: neither guard admits the other verdict.
+      expect(byName('run_history')?.if).not.toContain("'malicious'");
+      expect(byName('open_hash_alerts')?.if).not.toContain("'quiet'");
+    });
+
+    it('proposes a single-hash exception on the rule that raised the alert', () => {
+      const { inputs } = proposalWith('propose_exception');
+      expect(inputs.actionWorkflowId).toBe('system-alertzero-action-add-rule-exception');
+      expect(inputs.actionInput).toEqual(
+        expect.objectContaining({
+          rule_id: '{{ variables.exception_rule_uuid }}',
+          name: expect.any(String),
+          description: expect.any(String),
+          entries: [{ field: 'file.hash.sha256', operator: 'is', value: '{{ inputs.sha256 }}' }],
+        })
+      );
+      // A stale-revision check would need the rule's revision; omitted on purpose.
+      expect(inputs.actionInput).not.toHaveProperty('expected_revision');
+      expect(byName('propose_exception')?.if).toContain('variables.exception_rule_uuid != blank');
+      expect(inputs).toEqual(
+        expect.objectContaining({ category: 'configure', impact: 'low', confidence: 'medium' })
+      );
+    });
+
+    it('proposes a true-positive close, never the false-positive action', () => {
+      const { inputs } = proposalWith('propose_close');
+      expect(inputs.actionWorkflowId).toBe('system-alertzero-action-close-alerts-tp');
+      expect(inputs.actionInput).toEqual({
+        alertIds: '${{ variables.close_alert_ids }}',
+        reason: 'true_positive',
+      });
+      expect(inputs).toEqual(
+        expect.objectContaining({ category: 'respond', impact: 'medium', confidence: 'high' })
+      );
+      // Only open alerts on this exact sample are proposed for closing.
+      const search = byName('open_hash_alerts')?.with as {
+        size: number;
+        query: {
+          bool: {
+            filter: Array<Record<string, Record<string, string>>>;
+            should: unknown[];
+            minimum_should_match: number;
+          };
+        };
+      };
+      expect(search.size).toBeLessThanOrEqual(100);
+      expect(search.query.bool.filter).toEqual([
+        { term: { 'file.hash.sha256': '{{ inputs.sha256 }}' } },
+        { term: { 'kibana.alert.workflow_status': 'open' } },
+      ]);
+      // A sibling another run already gave a verdict is that run's proposal.
+      expect(search.query.bool.minimum_should_match).toBe(1);
+      expect(search.query.bool.should).toEqual([
+        { ids: { values: ['{{ inputs.alert_id }}'] } },
+        {
+          bool: {
+            must_not: [
+              {
+                terms: {
+                  'kibana.alert.workflow_tags': [
+                    'detonate:malicious',
+                    'detonate:quiet',
+                    'detonate:inconclusive',
+                    'detonate:known-malicious',
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ]);
+    });
+
+    it('tags every sibling in the close proposal so a later sweep skips the sample', () => {
+      const tag = byName('tag_hash_siblings');
+      expect(tag?.type).toBe('security.setAlertTags');
+      expect(tag?.if).toBe(byName('propose_close')?.if);
+      expect(tag?.with).toEqual({
+        alert_ids: '${{ variables.close_alert_ids }}',
+        tags_to_add: ['detonate:malicious'],
+      });
+      expect(tag?.['on-failure']).toEqual({ continue: true });
+    });
+
+    it('raises proposals before the blocklist approval gate can hold the run', () => {
+      const gateIndex = steps.findIndex(({ type }) => type === 'waitForApproval');
+      for (const name of ['propose_exception', 'propose_close']) {
+        expect(steps.findIndex((step) => step.name === name)).toBeLessThan(gateIndex);
+      }
+    });
   });
 });

@@ -16,8 +16,7 @@
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { DetonateClient } from '../../../detonate_prototype';
+import type { DetonateSkillDeps } from './types';
 import { getDetonationTool, listDetonationsTool, submitDetonationTool } from './tools';
 import { DETONATE_PROTOTYPE_REFERENCE } from './skill_reference';
 
@@ -109,8 +108,7 @@ who decides.
   never touches a real host.`;
 
 export const createDetonateSampleSkill = (
-  endpointAppContextService: EndpointAppContextService,
-  getClient: () => DetonateClient
+  deps: DetonateSkillDeps
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> =>
   defineSkillType({
     id: ID,
@@ -127,8 +125,8 @@ export const createDetonateSampleSkill = (
       },
     ],
     getInlineTools: () => [
-      listDetonationsTool(endpointAppContextService, getClient),
-      submitDetonationTool(endpointAppContextService, getClient),
-      getDetonationTool(endpointAppContextService, getClient),
+      listDetonationsTool(deps),
+      submitDetonationTool(deps),
+      getDetonationTool(deps),
     ],
   });

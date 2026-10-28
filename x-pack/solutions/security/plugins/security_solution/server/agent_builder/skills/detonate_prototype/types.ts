@@ -16,6 +16,8 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 import type { DetonateTask } from '../../../../common/detonate_prototype';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type { DetonateClient, HasDetonatePrivilege } from '../../../detonate_prototype';
 import {
   detonationProgress,
   detonationWasQuiet,
@@ -81,6 +83,13 @@ export const detonateErrorResult = (
  * tool asserts endpoint authz itself. Without this, a role with chat access
  * but no Security Solution privilege could spend VM time through the agent.
  */
+/** What the skill's tools share. The privilege check is the same one the HTTP routes use. */
+export interface DetonateSkillDeps {
+  endpointAppContextService: EndpointAppContextService;
+  getClient: () => DetonateClient;
+  hasDetonatePrivilege: HasDetonatePrivilege;
+}
+
 export const insufficientPrivilegesResult = (privilege: string) =>
   detonateErrorResult(
     'insufficient_privileges',

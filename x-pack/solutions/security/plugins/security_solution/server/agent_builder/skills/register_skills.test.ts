@@ -94,7 +94,7 @@ const DETONATE_SAMPLE_SKILL_ID = 'detonate-sample';
 describe('registerSkills - detonate sample', () => {
   const buildDetonateOpts = (
     agentBuilder: ReturnType<typeof createAllowListEnforcingAgentBuilder>,
-    detonateClient: unknown
+    detonatePrototype: unknown
   ) => ({
     agentBuilder,
     experimentalFeatures: { ...allowedExperimentalValues },
@@ -104,7 +104,7 @@ describe('registerSkills - detonate sample', () => {
     ml: undefined,
     options: {
       endpointAppContextService: createMockEndpointAppContext().service,
-      detonateClient,
+      detonatePrototype,
     },
   });
 
@@ -115,17 +115,22 @@ describe('registerSkills - detonate sample', () => {
     expect(isAllowedBuiltinSkill(DETONATE_SAMPLE_SKILL_ID)).toBe(true);
   });
 
-  it('registers the detonate-sample skill without throwing when the client is present', async () => {
+  it('registers the detonate-sample skill without throwing when the prototype is set up', async () => {
     const agentBuilder = createAllowListEnforcingAgentBuilder();
 
     await expect(
-      registerSkills(buildDetonateOpts(agentBuilder, {}) as Parameters<typeof registerSkills>[0])
+      registerSkills(
+        buildDetonateOpts(agentBuilder, {
+          client: {},
+          hasDetonatePrivilege: jest.fn(),
+        }) as Parameters<typeof registerSkills>[0]
+      )
     ).resolves.toBeUndefined();
 
     expect(registeredSkillIds(agentBuilder)).toContain(DETONATE_SAMPLE_SKILL_ID);
   });
 
-  it('does not register the detonate-sample skill when no detonate client is configured', async () => {
+  it('does not register the detonate-sample skill when the prototype is not set up', async () => {
     const agentBuilder = createAllowListEnforcingAgentBuilder();
 
     await expect(

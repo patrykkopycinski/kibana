@@ -1,0 +1,117 @@
+version: "1"
+name: Close alerts as true positive
+description: >
+  AlertZero action: closes a set of security alerts as confirmed true
+  positives. Executed by the investigation proposal gate once an analyst
+  approves, so the close is attributed to the approving principal. Raised by
+  the File Detonation sweep when a sandbox run confirms the sample malicious.
+enabled: true
+tags:
+  # Generic tag every action workflow carries; lets the catalog discover
+  # this workflow by tag rather than a hardcoded id list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata read by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Must live
+  # under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Close alerts as true positive
+    category: respond
+    description: Closes the specified alerts with workflow_status=closed and workflow_reason=true_positive.
+    impact: medium
+    # A closed alert can be reopened by an analyst.
+    reversible: true
+    # A sandbox verdict is evidence, not a decision: closing a confirmed
+    # detection ends the analyst's look at it, so a human always confirms.
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        # Every action workflow takes a single `actionInput` object: the gate
+        # passes exactly one key.
+        actionInput:
+          type: object
+          description: >
+            Close payload. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an
+            action's parameter names.
+          properties:
+            alertIds:
+              type: array
+              items:
+                type: string
+              description: Alert _id values to close.
+            reason:
+              type: string
+              enum:
+                - true_positive
+              description: Workflow reason recorded on each alert.
+          required:
+            - alertIds
+            - reason
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: closed_count
+    type: number
+  - name: alert_ids
+    type: array
+steps:
+  # `conflicts: proceed` keeps one alert whose mapping changed mid-request
+  # from aborting the close for the whole batch; the check below catches a
+  # short close instead.
+  - name: close_alerts
+    type: kibana.SetAlertsStatus
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      status: closed
+      reason: true_positive
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            terms:
+              _id: "${{ inputs.actionInput.alertIds }}"
+
+  # The proposal gate only checks whether the execute step errored, so a
+  # partial close would otherwise read as full success.
+  - name: fail_incomplete_close
+    type: workflow.fail
+    if: "${{ steps.close_alerts.output.updated != inputs.actionInput.alertIds.size }}"
+    with:
+      message: >-
+        Closed {{ steps.close_alerts.output.updated }} of
+        {{ inputs.actionInput.alertIds.size }} requested alert(s) as true
+        positive; the rest were not updated.
+
+  # Writes the same verdict tag the triage batch writes, so an alert closed from a
+  # detonation proposal is not re-claimed by the next triage sweep and filters like
+  # one the classifier tagged. kibana.SetAlertTags rejects a tag in both lists.
+  - name: set_verdict_tag
+    type: kibana.SetAlertTags
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      ids: "${{ inputs.actionInput.alertIds }}"
+      tags:
+        tags_to_remove:
+          - "az:false_positive"
+          - "az:inconclusive"
+          - "az:triage_pending"
+        tags_to_add:
+          - "az:true_positive"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      closed_count: "${{ steps.close_alerts.output.updated }}"
+      alert_ids: "${{ inputs.actionInput.alertIds }}"

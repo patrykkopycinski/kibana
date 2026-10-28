@@ -10,7 +10,11 @@ import type { WatchAutonomyLevel, WorkerSettings } from '../schemas';
 import { buildCompleteWorkerSettingsSchema, buildDefaultWorkerSettings } from './contract';
 import { RULE_COVERAGE_SETTINGS, RULE_TUNING_SETTINGS } from './detection_watch';
 import { ENDPOINT_ANALYSIS_SETTINGS } from './forensics_watch';
-import { ALERT_TRIAGE_SETTINGS, ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
+import {
+  ALERT_TRIAGE_SETTINGS,
+  ATTACK_DISCOVERY_SETTINGS,
+  DETONATE_SWEEP_SETTINGS,
+} from './floor_watch';
 import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 import type { WorkerSettingsDeclaration } from './types';
 
@@ -18,6 +22,7 @@ import type { WorkerSettingsDeclaration } from './types';
 export const WORKER_SETTINGS_DECLARATIONS: readonly WorkerSettingsDeclaration[] = [
   ALERT_TRIAGE_SETTINGS,
   ATTACK_DISCOVERY_SETTINGS,
+  DETONATE_SWEEP_SETTINGS,
   CONTINUOUS_THREAT_HUNT_SETTINGS,
   ENDPOINT_ANALYSIS_SETTINGS,
   RULE_TUNING_SETTINGS,

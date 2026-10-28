@@ -10,8 +10,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import type { DetonateClient } from '../../../../detonate_prototype';
 import {
   DETONATE_VM_ARCHITECTURES,
   DETONATE_VM_OS_FAMILIES,
@@ -21,6 +19,7 @@ import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateServiceErrorResult,
   insufficientPrivilegesResult,
+  type DetonateSkillDeps,
   MAX_SAMPLE_HASH_LENGTH,
   MAX_TAG_LENGTH,
   MAX_TAGS,
@@ -61,10 +60,11 @@ const submitDetonationSchema = lazySchema(() =>
  * caller's Security Solution write privilege is asserted here rather than
  * relying on the HTTP route's check, which this in-process path bypasses.
  */
-export const submitDetonationTool = (
-  endpointAppContextService: EndpointAppContextService,
-  getClient: () => DetonateClient
-): BuiltinSkillBoundedTool<typeof submitDetonationSchema> => ({
+export const submitDetonationTool = ({
+  endpointAppContextService,
+  getClient,
+  hasDetonatePrivilege,
+}: DetonateSkillDeps): BuiltinSkillBoundedTool<typeof submitDetonationSchema> => ({
   id: SUBMIT_DETONATION_TOOL_ID,
   type: ToolType.builtin,
   description:
@@ -88,9 +88,8 @@ export const submitDetonationTool = (
     // A detonation boots a VM and runs live malware. That is a write action in
     // every sense that matters, so it requires the write privilege even though
     // it mutates nothing inside Kibana.
-    const authz = await endpointAppContextService.getEndpointAuthz(request);
-    if (!authz.canWriteSecuritySolution) {
-      return insufficientPrivilegesResult('canWriteSecuritySolution');
+    if (!(await hasDetonatePrivilege(request, 'write'))) {
+      return insufficientPrivilegesResult('Security Solution write or Detonate');
     }
 
     const { sampleHash, tags, vmOsFamily, vmArchitecture } = params;

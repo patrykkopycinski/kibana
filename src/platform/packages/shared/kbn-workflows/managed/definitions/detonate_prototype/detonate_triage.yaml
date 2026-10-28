@@ -12,6 +12,16 @@ enabled: true
 tags:
   - security
   - detonate_prototype
+settings:
+  # One run per sample at a time. The triage batch and the detonate sweep can
+  # both pick a fresh alert before either writes its verdict tag, and two runs
+  # on one hash spend two VMs and raise two close proposals for the same
+  # alerts. A run parked at the blocklist gate keeps the slot, so a later
+  # alert on the same hash waits for the next sweep, which finds it untagged.
+  concurrency:
+    key: "detonate-{{ inputs.sha256 }}"
+    strategy: drop
+    max: 1
 triggers:
   # API-fired only (workflow.execute / Run dialog). No alert trigger exists in
   # the registry yet — "automated" today means one API call, with the run
@@ -33,6 +43,13 @@ triggers:
           type: string
           maxLength: 256
           description: Optional case to carry confirmed-malicious evidence into, as a comment.
+        conversation_id:
+          type: string
+          maxLength: 256
+          description: >-
+            Optional Investigation conversation to journal the verdict into (an
+            AlertZero Watch Orchestrator passes its sweep's Investigation).
+            Absent on standalone runs — no journal note is written then.
       required:
         - sha256
         - alert_id
@@ -79,6 +96,22 @@ steps:
                 {{ steps.reputation.output.malware_family }}){% endif %}. No new detonation was
                 run — the verdict comes from prior runs of the same sample.
 
+          # F9 journal leg for the reputation-gated path: same contract as the
+          # detonated branch's journal step, no VM spent.
+          - name: journal_known
+            type: ai.conversation.add_user_message
+            if: "${{ inputs.conversation_id != blank }}"
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ inputs.conversation_id }}"
+              message: >-
+                File detonation verdict for alert {{ inputs.alert_id }}:
+                KNOWN-MALICIOUS (reputation gate{% if steps.reputation.output.malware_family != blank %},
+                family {{ steps.reputation.output.malware_family }}{% endif %}) — no new
+                detonation was run; the verdict comes from prior runs of the same sample
+                (hash {{ inputs.sha256 | slice: 0, 12 }}…).
+
     # `unknown` falls through to the default: detonate, derive the verdict,
     # write it back. This is the only path that spends a VM.
     default:
@@ -108,6 +141,24 @@ steps:
           alert_id: "{{ inputs.alert_id }}"
           task_id: "{{ steps.verdict.output.task_id }}"
           evidence: "{{ steps.verdict.output.evidence }}"
+
+      # F9 journal leg: when an AlertZero Watch passed its Investigation's
+      # conversation, the verdict is posted there too, so the sweep's whole
+      # evidence trail is readable in one place. Runs after `apply` — the
+      # alert write-back is the primary contract; the journal is additive and
+      # must never fail a run whose verdict already landed.
+      - name: journal_verdict
+        type: ai.conversation.add_user_message
+        if: "${{ inputs.conversation_id != blank }}"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ inputs.conversation_id }}"
+          message: >-
+            File detonation verdict for alert {{ inputs.alert_id }}:
+            {{ steps.verdict.output.verdict | upcase }} —
+            {{ steps.verdict.output.evidence }}
+            (task {{ steps.verdict.output.task_id }}, hash {{ inputs.sha256 | slice: 0, 12 }}…)
 
       # F3: the run's extracted IOCs (domains, IPs, hashes) are only as
       # valuable as the question they answer next — which OTHER hosts in
@@ -189,6 +240,168 @@ steps:
             {%- assign hosts = domain_hosts | concat: ip_hosts | uniq | sort -%}
             Detonate hunt: {{ hosts | join: ', ' }} also contacted the
             infrastructure this sample used ({% if domain_hosts.size > 0 %}DNS{% endif %}{% if domain_hosts.size > 0 and ip_hosts.size > 0 %} and {% endif %}{% if ip_hosts.size > 0 %}destination IP{% endif %} matches over the last 30 days).
+
+      # F7 proposals. Only a Watch-driven run raises them: the Watch passes its
+      # Investigation, which is where a proposal lives, and runs as the Watch's
+      # service account, which `run-as-mode: inherit` hands to the proposal
+      # bridge. A standalone run has neither, so every step below is skipped.
+      # They sit before the blocklist gate so a pending approval there (up to an
+      # hour) never delays them, and are started async so this run never parks
+      # on an analyst's decision. Each one is `on-failure: continue`: the verdict
+      # is already on the alert, and a failed proposal must not fail the run.
+      #
+      # Quiet: the sample's run history decides. Enough consecutive quiet runs
+      # earn an exception proposal on the rule that raised the alert.
+      - name: run_history
+        type: detonate.prototype.detonateRunHistory
+        if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'quiet' }}"
+        on-failure:
+          continue: true
+        with:
+          sha256: "{{ inputs.sha256 }}"
+
+      # The exception is added to the rule that raised the alert, so its
+      # saved-object id is read off the alert itself.
+      - name: source_alert
+        type: elasticsearch.search
+        if: "${{ steps.run_history.output.proposal_eligible == true }}"
+        on-failure:
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          ignore_unavailable: true
+          size: 1
+          _source:
+            - kibana.alert.rule.uuid
+            - kibana.alert.rule.name
+          query:
+            ids:
+              values:
+                - "{{ inputs.alert_id }}"
+
+      # Malicious: every alert still open on the same sample is a confirmed
+      # true positive, not just the one this run was started for. A sibling
+      # that already carries a detonate verdict was covered by its own run's
+      # proposal, so only this run's alert and untagged siblings are taken.
+      - name: open_hash_alerts
+        type: elasticsearch.search
+        if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'malicious' }}"
+        on-failure:
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          ignore_unavailable: true
+          size: 100
+          _source: false
+          query:
+            bool:
+              filter:
+                - term:
+                    file.hash.sha256: "{{ inputs.sha256 }}"
+                - term:
+                    kibana.alert.workflow_status: open
+              should:
+                - ids:
+                    values:
+                      - "{{ inputs.alert_id }}"
+                - bool:
+                    must_not:
+                      - terms:
+                          kibana.alert.workflow_tags:
+                            - "detonate:malicious"
+                            - "detonate:quiet"
+                            - "detonate:inconclusive"
+                            - "detonate:known-malicious"
+              minimum_should_match: 1
+
+      # `if` conditions take no filters, so the proposal guards and the
+      # values they need are resolved here first.
+      - name: resolve_proposals
+        type: data.set
+        with:
+          exception_rule_uuid: "{{ steps.source_alert.output.hits.hits[0]._source['kibana.alert.rule.uuid'] }}"
+          exception_rule_name: "{{ steps.source_alert.output.hits.hits[0]._source['kibana.alert.rule.name'] }}"
+          close_alert_ids: "${{ steps.open_hash_alerts.output.hits.hits | map: '_id' }}"
+          close_alert_count: "${{ steps.open_hash_alerts.output.hits.hits | size }}"
+
+      - name: propose_exception
+        type: workflow.executeAsync
+        if: "${{ steps.run_history.output.proposal_eligible == true and variables.exception_rule_uuid != blank }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ inputs.conversation_id }}"
+            title: "Add a rule exception for a quiet sample ({{ inputs.sha256 | slice: 0, 12 }}…)"
+            comment: |-
+              **Exclude this file hash from "{{ variables.exception_rule_name }}"?**
+
+              {{ steps.run_history.output.evidence_comment }}
+
+              Approving adds a `file.hash.sha256 is {{ inputs.sha256 }}` exception to the rule, so it stops alerting on this sample.
+            actionWorkflowId: system-alertzero-action-add-rule-exception
+            actionInput:
+              rule_id: "{{ variables.exception_rule_uuid }}"
+              name: "Detonate: quiet sample {{ inputs.sha256 | slice: 0, 12 }}…"
+              description: >-
+                Added after {{ steps.run_history.output.quiet_streak }} consecutive
+                quiet sandbox detonations of this sample (latest task
+                {{ steps.verdict.output.task_id }}).
+              entries:
+                - field: file.hash.sha256
+                  operator: is
+                  value: "{{ inputs.sha256 }}"
+            category: configure
+            # Removes this one hash from one rule: no other detection changes.
+            impact: low
+            # Absence of behaviour in a sandbox is weaker evidence than its
+            # presence, whatever the streak.
+            confidence: medium
+            autoApprove: false
+
+      # The verdict is per sample, so the siblings in the close proposal get
+      # the tag too. Otherwise the next sweep finds them untagged, detonates
+      # the same hash again and proposes closing them a second time.
+      - name: tag_hash_siblings
+        type: security.setAlertTags
+        if: "${{ variables.close_alert_count > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          alert_ids: "${{ variables.close_alert_ids }}"
+          tags_to_add:
+            - "detonate:malicious"
+
+      - name: propose_close
+        type: workflow.executeAsync
+        if: "${{ variables.close_alert_count > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ inputs.conversation_id }}"
+            title: "Close {{ variables.close_alert_count }} alert{% if variables.close_alert_count != 1 %}s{% endif %} as true positive: detonation confirmed malicious"
+            comment: |-
+              **Close {{ variables.close_alert_count }} open alert{% if variables.close_alert_count != 1 %}s{% endif %} on this sample as true positive?**
+
+              A sandbox detonation confirmed the sample malicious: {{ steps.verdict.output.evidence }}
+
+              Sample: {{ inputs.sha256 }}
+              Detonation task: {{ steps.verdict.output.task_id }}
+
+              Closing records the verdict; containment (blocklist, isolation) is a separate decision.
+            actionWorkflowId: system-alertzero-action-close-alerts-tp
+            actionInput:
+              alertIds: "${{ variables.close_alert_ids }}"
+              reason: true_positive
+            category: respond
+            impact: medium
+            confidence: high
+            autoApprove: false
 
       # F6: a blocklist write is a fleet-wide enforcement action, so it never
       # rides on a sandbox verdict alone — an analyst confirms it first. The

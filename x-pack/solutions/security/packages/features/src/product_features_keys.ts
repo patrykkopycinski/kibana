@@ -259,6 +259,7 @@ export enum SecuritySubFeatureId {
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
   scanAction = 'scanActionSubFeature',
+  detonate = 'detonateSubFeature',
 }
 
 /** Sub-features IDs for Cases */

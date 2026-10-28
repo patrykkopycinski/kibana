@@ -56,6 +56,13 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     scheduleInterval: '24h',
     triggerTypes: ['scheduled'],
   },
+  // Sweeps hourly by default; the schedule is a Watch setting (default 1h) and manual
+  // stays alongside it so a sweep can be kicked on demand.
+  'system-security-floor-detonate-sweep': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    triggerTypes: ['scheduled', 'manual'],
+  },
   // Sweeps on a fixed 1m cadence that is not a setting, so it has `every` without
   // `scheduleInterval`. Manual stays alongside it so a sweep can be kicked on demand.
   'system-security-forensics-endpoint-analysis': {

@@ -35,7 +35,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import {
   DETONATE_VM_ARCHITECTURES,
@@ -47,6 +47,7 @@ import type {
   DetonateVmOsFamily,
 } from '../../../common/detonate_prototype';
 import { useSubmitFile, useSubmitHash } from '../hooks/use_detonate';
+import { useCanSubmitDetonation } from '../hooks/use_can_submit_detonation';
 import * as i18n from '../translations';
 
 export const SUBMIT_FORM_TEST_ID = 'detonatePrototypeSubmitForm';
@@ -54,6 +55,7 @@ export const SUBMIT_HASH_INPUT_TEST_ID = 'detonatePrototypeSampleHash';
 export const SUBMIT_FILE_INPUT_TEST_ID = 'detonatePrototypeSampleFile';
 export const SUBMIT_BUTTON_TEST_ID = 'detonatePrototypeSubmitButton';
 export const SUBMIT_ERROR_TEST_ID = 'detonatePrototypeSubmitError';
+export const SUBMIT_READ_ONLY_TEST_ID = 'detonatePrototypeSubmitReadOnly';
 /** The modal root. EUI renders its own confirm/cancel button test subjects. */
 export const SUBMIT_CONFIRM_TEST_ID = 'detonatePrototypeSubmitConfirm';
 export const SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID = 'detonatePrototypeSubmitConfirmForceFresh';
@@ -125,7 +127,9 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
     [tagValues, osFamily, architecture, forceFresh]
   );
 
-  const canSubmit = mode === 'hash' ? hash.trim().length > 0 : file !== undefined;
+  const hasSubmitPrivilege = useCanSubmitDetonation();
+  const hasSample = mode === 'hash' ? hash.trim().length > 0 : file !== undefined;
+  const canSubmit = hasSubmitPrivilege && hasSample;
 
   const doSubmit = useCallback(async () => {
     // Errors are surfaced by the mutation state (the error callout below), but
@@ -247,6 +251,18 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
               title={errorMessage(active.error)}
               data-test-subj={SUBMIT_ERROR_TEST_ID}
             />
+          </>
+        )}
+
+        {!hasSubmitPrivilege && (
+          <>
+            <EuiSpacer size="m" />
+            <KbnInfoCallout
+              title={i18n.SUBMIT_READ_ONLY_TITLE}
+              data-test-subj={SUBMIT_READ_ONLY_TEST_ID}
+            >
+              {i18n.SUBMIT_READ_ONLY_DESCRIPTION}
+            </KbnInfoCallout>
           </>
         )}
 

@@ -31,13 +31,7 @@ import { expect } from '@kbn/scout-security/ui';
  * inert, and detected by Defend). Supplied by the runner so no specific
  * sample digest is pinned in the repository.
  */
-const SAMPLE_SHA256 = process.env.DETONATE_SAMPLE_SHA256;
-
-if (!SAMPLE_SHA256) {
-  throw new Error(
-    'DETONATE_SAMPLE_SHA256 is not set. Export the SHA-256 digest of the sample this suite should detonate (e.g. the standard EICAR test file) before running it.'
-  );
-}
+const SAMPLE_SHA256 = process.env.DETONATE_SAMPLE_SHA256 ?? '';
 
 /** `/app/security` + the prototype's route. */
 const DETONATE_APP = 'security/detonate_prototype';
@@ -67,6 +61,12 @@ const HEALTHCHECK_URL = '/internal/detonate_prototype/healthcheck';
 const RUN_COMPLETION_TIMEOUT_MS = 180_000;
 
 spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, () => {
+  // Skipped, not thrown at import: a throw breaks test discovery for every
+  // spec loaded alongside this one.
+  spaceTest.skip(
+    !SAMPLE_SHA256,
+    'DETONATE_SAMPLE_SHA256 is not set. Export the SHA-256 digest of the sample this suite should detonate (e.g. the standard EICAR test file) to run it.'
+  );
   spaceTest.setTimeout(RUN_COMPLETION_TIMEOUT_MS + 60_000);
 
   spaceTest.beforeEach(async ({ browserAuth }) => {

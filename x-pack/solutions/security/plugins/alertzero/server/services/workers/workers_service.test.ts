@@ -14,6 +14,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
@@ -39,18 +40,23 @@ const FORENSICS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
-const WORKERS_WITHOUT_FORENSIC_SKILL = SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== FORENSICS);
+const DETONATE_SWEEP = SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID;
+const WORKERS_WITHOUT_GATING_SKILLS = SYSTEM_SECURITY_WORKER_IDS.filter(
+  (id) => id !== FORENSICS && id !== DETONATE_SWEEP
+);
+const GATING_SKILL_IDS = ['endpoint-forensic-analysis', 'detonate-sample'];
 
-const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
+const agentBuilderWithSkills = (registered: readonly string[]): AgentBuilderPluginStart =>
   ({
     skills: {
       getRegistry: jest.fn(async () => ({
-        has: jest.fn(
-          async (skillId: string) => present && skillId === 'endpoint-forensic-analysis'
-        ),
+        has: jest.fn(async (skillId: string) => registered.includes(skillId)),
       })),
     },
   } as unknown as AgentBuilderPluginStart);
+
+const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
+  agentBuilderWithSkills(present ? GATING_SKILL_IDS : []);
 
 interface PersistentWorkerDocument {
   id: string;
@@ -198,8 +204,8 @@ describe('WorkersService', () => {
   it('lists every registered Worker with default settings before install', async () => {
     const response = await createPersistentHarness().createService().list(request, SPACE);
 
-    // Endpoint analysis stays hidden until its skill is registered.
-    expect(response.workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
+    // Endpoint analysis and File Detonation stay hidden until their skills are registered.
+    expect(response.workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_GATING_SKILLS]);
     expect(
       response.workers.every(
         ({ enabled, settingsRevision, workflowId }) =>
@@ -657,7 +663,7 @@ describe('WorkersService', () => {
     const { workers } = await service.list(request, SPACE);
     const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
 
-    expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
+    expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_GATING_SKILLS]);
     expect(ruleTuning).toMatchObject({
       state: 'unavailable',
       stateReason: 'Worker settings could not be read from durable storage',
@@ -1171,7 +1177,7 @@ describe('WorkersService', () => {
       const { workers } = await service.list(request, SPACE);
 
       expect(workers.map(({ blockingReasons }) => blockingReasons)).toEqual(
-        WORKERS_WITHOUT_FORENSIC_SKILL.map(() => ['no_model'])
+        WORKERS_WITHOUT_GATING_SKILLS.map(() => ['no_model'])
       );
       expect((await service.get(TRIAGE, request, SPACE))?.blockingReasons).toEqual(['no_model']);
     });
@@ -1321,7 +1327,7 @@ describe('WorkersService', () => {
 
       const { workers } = await service.list(request, SPACE);
 
-      expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
+      expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_GATING_SKILLS]);
       expect(await service.get(FORENSICS, request, SPACE)).toBeUndefined();
       expect(
         await service.update(
@@ -1338,6 +1344,33 @@ describe('WorkersService', () => {
         outcome: 'not-found',
       });
       expect(harness.documents.has(`${FORENSICS}-${SPACE}`)).toBe(false);
+    });
+  });
+
+  describe('File Detonation skill gate', () => {
+    it('hides File Detonation when the detonate prototype is off, independently of endpoint analysis', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService(agentBuilderWithSkills(['endpoint-forensic-analysis']));
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.map(({ id }) => id)).toEqual(
+        SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== DETONATE_SWEEP)
+      );
+      expect(await service.get(DETONATE_SWEEP, request, SPACE)).toBeUndefined();
+      expect(await service.update(DETONATE_SWEEP, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'not-found',
+      });
+      expect(harness.documents.has(`${DETONATE_SWEEP}-${SPACE}`)).toBe(false);
+    });
+
+    it('lists File Detonation when the detonate-sample skill is registered', async () => {
+      const { workers } = await createPersistentHarness()
+        .createService(agentBuilderWithSkills(['detonate-sample']))
+        .list(request, SPACE);
+
+      expect(workers.map(({ id }) => id)).toContain(DETONATE_SWEEP);
+      expect(workers.map(({ id }) => id)).not.toContain(FORENSICS);
     });
   });
 

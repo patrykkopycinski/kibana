@@ -11,6 +11,7 @@ import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
   isWorkerEnableBlocked,
+  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   touchesWorkerSettings,
@@ -46,6 +47,8 @@ import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
  */
 const WORKER_IDS_BY_REQUIRED_SKILL: Readonly<Record<string, readonly string[]>> = {
   'endpoint-forensic-analysis': [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID],
+  // Registered only when the detonate prototype is enabled.
+  'detonate-sample': [SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID],
 };
 
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {

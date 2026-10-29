@@ -88,9 +88,12 @@ export interface AiResponseScreenReaderStatusProps {
 /**
  * Visually hidden live regions that announce assistant progress to screen readers:
  * a periodic "still generating" heartbeat while `isLoading` is true, then the full
- * response once loading ends. Mount it once per conversation, next to (not around)
- * the visible message list, and keep it mounted when the user switches conversations (do not
- * remount it with a `key`: a freshly inserted live region may be skipped by screen readers).
+ * response once loading ends. Mount it next to (not around) the visible message list, and keep
+ * it mounted when the user switches conversations or the host remounts the list (do not remount
+ * it with a `key`: a freshly inserted live region may be skipped by screen readers). While it
+ * stays mounted, `responseMessage` must be undefined whenever the host is not showing a reply
+ * from the current turn, e.g. after a switch, an abort, or a failure: a turn that ends without
+ * text leaves the component waiting for one, and any later text would be announced.
  * The streamed text itself must not be a live region,
  * otherwise screen readers read every chunk.
  */

@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/ai-assistant-connector-selector-action'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/ui-callout'
+  - '@kbn/ui-ai-components'
 tags:
   - shared-browser
   - package

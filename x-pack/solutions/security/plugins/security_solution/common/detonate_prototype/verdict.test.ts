@@ -13,6 +13,7 @@ import {
   diagnosticOnlyEventCodes,
   quietRunStreak,
   exceptionProposalComment,
+  runHistoryIncluding,
 } from '.';
 import type { DetonateTask } from '.';
 
@@ -244,6 +245,43 @@ describe('quietRunStreak', () => {
 
   it('is zero when the newest run was not quiet', () => {
     expect(quietRunStreak([malicious('a'), quiet('b'), quiet('c')])).toBe(0);
+  });
+});
+
+describe('runHistoryIncluding', () => {
+  const quiet = (id: string, createdAt: string): DetonateTask =>
+    createTask({ id, created_at: createdAt });
+
+  it('counts the viewed run toward the streak', () => {
+    const current = quiet('run-3', '2026-01-03T00:00:00.000Z');
+    const runs = runHistoryIncluding(current, [
+      quiet('run-2', '2026-01-02T00:00:00.000Z'),
+      quiet('run-1', '2026-01-01T00:00:00.000Z'),
+    ]);
+    expect(runs.map(({ id }) => id)).toEqual(['run-3', 'run-2', 'run-1']);
+    expect(quietRunStreak(runs)).toBe(3);
+  });
+
+  it('does not double-count a viewed run the history already holds', () => {
+    const current = quiet('run-2', '2026-01-02T00:00:00.000Z');
+    const runs = runHistoryIncluding(current, [
+      quiet('run-3', '2026-01-03T00:00:00.000Z'),
+      current,
+      quiet('run-1', '2026-01-01T00:00:00.000Z'),
+    ]);
+    expect(runs.map(({ id }) => id)).toEqual(['run-3', 'run-2', 'run-1']);
+  });
+
+  it('leaves out a viewed run that failed or is still running', () => {
+    const history = [quiet('run-1', '2026-01-01T00:00:00.000Z')];
+    const failed = createTask({ id: 'run-2', last_worker_status: 'failure' });
+    const running = createTask({
+      id: 'run-3',
+      last_worker_name: 'detonate.workers.start_vm',
+      last_worker_status: 'started',
+    });
+    expect(runHistoryIncluding(failed, history).map(({ id }) => id)).toEqual(['run-1']);
+    expect(runHistoryIncluding(running, history).map(({ id }) => id)).toEqual(['run-1']);
   });
 });
 

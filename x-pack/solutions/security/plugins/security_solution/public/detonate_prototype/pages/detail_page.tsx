@@ -39,6 +39,7 @@ import {
   diagnosticOnlyEventCodes,
   isDetonationComplete,
   isDetonationFailed,
+  runHistoryIncluding,
 } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonationTask, useCompletedDetonationHistoryByHash } from '../hooks/use_detonate';
@@ -143,8 +144,9 @@ export const DetonateDetailPage = React.memo(() => {
   const quiet = detonationWasQuiet(task);
   const coverageGap = complete && !failed ? diagnosticOnlyEventCodes(task) : [];
 
-  // Sibling runs only: the current run has its own page above.
-  const siblingRuns = (historyByHash.completedRuns ?? []).filter((run) => run.id !== task.id);
+  // The viewed run counts toward the streak: three quiets in a row includes
+  // the one on screen.
+  const historyRuns = runHistoryIncluding(task, historyByHash.completedRuns ?? []);
 
   return (
     <div data-test-subj={DETAIL_PAGE_TEST_ID}>
@@ -235,10 +237,11 @@ export const DetonateDetailPage = React.memo(() => {
       )}
       <EuiSpacer size="l" />
 
-      {/* F7: sibling runs of the same sample. Rendered for every run — a
-          single-run history is honest too — but only after completion, when
-          the streak the proposal cites can actually exist. */}
-      {complete && task.sample_hash && <RunHistory runs={siblingRuns} hash={task.sample_hash} />}
+      {/* F7: every completed run of the same sample, this one included.
+          Rendered for every run — a single-run history is honest too — but
+          only after completion, when the streak the proposal cites can
+          actually exist. */}
+      {complete && task.sample_hash && <RunHistory runs={historyRuns} hash={task.sample_hash} />}
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>

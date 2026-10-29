@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0; the "GNU Affero General Public License v3.0 only"; or
- * the "Server Side Public License v 1.0", where applicable, as an AGPL-3.0
- * Section 7 exception allows you to convey this work in combination with
- * Elastic Library Terms and your own licensed work, under either the Elastic
- * License 2.0 or the GNU Affero General Public License v3.0 only.
- */
-
 /**
  * Detonate prototype — run history for one sample hash.
  *

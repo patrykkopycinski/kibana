@@ -322,6 +322,23 @@ export const quietRunStreak = (runs: readonly DetonateTask[]): number => {
   return streak;
 };
 
+/**
+ * The runs a streak counts when one run is being viewed: its completed
+ * siblings plus the viewed run itself, newest first. The viewed run is merged
+ * in rather than trusted to be in `history`, which can predate its completion.
+ */
+export const runHistoryIncluding = (
+  current: DetonateTask,
+  history: readonly DetonateTask[]
+): DetonateTask[] => {
+  const siblings = history.filter((run) => run.id !== current.id);
+  const counted =
+    isDetonationComplete(current) && !isDetonationFailed(current)
+      ? [current, ...siblings]
+      : siblings;
+  return counted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+};
+
 /** The evidence bar an exception/trusted-app proposal must clear. */
 export const PROPOSAL_QUIET_STREAK_THRESHOLD = 3;
 

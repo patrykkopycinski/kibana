@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import type { EsClient } from '@kbn/scout-security';
 import {
-  ALERTS_GIST_URL_ENV,
   ALERTS_INDEX,
+  BACKTEST_SEED_SCRIPT_SHA256,
+  BACKTEST_SEED_SCRIPT_URL,
   COVERAGE_KI_INDEX,
   COVERAGE_KI_TYPE,
   EVAL_RUN_MARKER_PREFIX,
@@ -19,6 +26,7 @@ import {
   RULE_TUNING_WORKER_ID,
   SCALE_TIERS,
   TOKEN_USAGE_DATA_STREAM,
+  type BacktestScenario,
   type ScaleTier,
 } from '../../common/constants';
 import { ok, pollUntil } from '../../../scout_alertzero_e2e/common/kbn';
@@ -532,64 +540,108 @@ export const seedCoverageGaps = async (
   };
 };
 
-export interface SeededGistAlerts {
-  readonly source: 'gist';
-  readonly count: number;
+export interface SeededBacktestScenarios {
+  readonly runMarker: string;
+  readonly scenarios: BacktestScenario[];
+  readonly cleanup: () => Promise<void>;
 }
 
+export interface BacktestSeedTarget {
+  readonly kibanaUrl: string;
+  readonly elasticsearchUrl: string;
+  /** `user:password`, the script's `ES_CREDS`. */
+  readonly credentials: string;
+}
+
+const execFileAsync = promisify(execFile);
+
+const runSeedScript = async (
+  scriptPath: string,
+  target: BacktestSeedTarget,
+  stateDir: string,
+  args: string[]
+): Promise<string> => {
+  const { stdout } = await execFileAsync('bash', [scriptPath, ...args], {
+    timeout: 5 * 60_000,
+    maxBuffer: 8 * 1024 * 1024,
+    env: {
+      ...process.env,
+      KB_HOST: target.kibanaUrl,
+      ES_HOST: target.elasticsearchUrl,
+      ES_CREDS: target.credentials,
+      CURL_HOME: stateDir,
+      SPACE: EVAL_SPACE_ID,
+      STATE_FILE: path.join(stateDir, `${args[1]}-${args[2]}.json`),
+    },
+  }).catch((error: { stdout?: string; stderr?: string; message: string }) => {
+    throw new Error(
+      `seed script "${args.join(' ')}" failed: ${error.message}\nstdout: ${error.stdout ?? ''}\nstderr: ${
+        error.stderr ?? ''
+      }`
+    );
+  });
+  return stdout;
+};
+
 /**
- * Seeds the alerts the eval measures against from the `#19901` gist. The gist is the one
- * out-of-repo input this eval has, so it is named by URL in `ALERTZERO_EVAL_ALERTS_GIST_URL`
- * rather than pinned in source. Returns `undefined` when no URL is set, which lets the caller fall
- * back to the in-repo AD2 scenario seeder; a URL that is set but unusable throws.
+ * Seeds the tuning data `#19901` prescribes by running its own script (`seed <scenario> <name>`),
+ * one rule per scenario. The script creates a live rule, 12 closed false-positive alerts stamped with
+ * the rule's current revision, and the source events, which is exactly what the tuning sweep
+ * harvests. The script is fetched from a pinned gist revision and rejected on a digest mismatch.
+ * Needs `bash`, `curl` and `jq` on the machine running the test; a missing one fails with a name.
  */
-export const seedAlertDocsFromGist = async (
-  esClient: EsClient,
-  { runMarker }: { runMarker: string }
-): Promise<SeededGistAlerts | undefined> => {
-  const url = process.env[ALERTS_GIST_URL_ENV]?.trim();
-  if (!url) {
-    return undefined;
+export const seedBacktestScenarios = async (
+  target: BacktestSeedTarget,
+  { scenarios, runMarker }: { scenarios: BacktestScenario[]; runMarker: string }
+): Promise<SeededBacktestScenarios> => {
+  for (const tool of ['bash', 'curl', 'jq']) {
+    await execFileAsync(tool, ['--version']).catch(() => {
+      throw new Error(`the #19901 seed script needs "${tool}" on the PATH of the test runner`);
+    });
   }
 
-  const response = await fetch(url, { redirect: 'follow' });
+  const response = await fetch(BACKTEST_SEED_SCRIPT_URL, { redirect: 'follow' });
   if (!response.ok) {
-    throw new Error(`Fetching ${ALERTS_GIST_URL_ENV} (${url}) failed: ${response.status}`);
+    throw new Error(`Fetching the #19901 seed script failed: ${response.status}`);
   }
-  const text = await response.text();
-  const documents: Array<Record<string, unknown>> = (() => {
-    try {
-      const payload = JSON.parse(text) as unknown;
-      if (Array.isArray(payload)) {
-        return payload as Array<Record<string, unknown>>;
-      }
-      const alerts = (payload as { alerts?: unknown }).alerts;
-      if (Array.isArray(alerts)) {
-        return alerts as Array<Record<string, unknown>>;
-      }
-      return [];
-    } catch {
-      throw new Error(
-        `${ALERTS_GIST_URL_ENV} (${url}) is not a JSON alert payload (first bytes: ${text
-          .slice(0, 24)
-          .replace(/\s+/g, ' ')}). #19901's gist is a bash seed script, not alert documents; ` +
-          `point the env at a raw JSON array of alert docs (or { "alerts": [...] }) or unset it.`
+  const script = await response.text();
+  const digest = createHash('sha256').update(script).digest('hex');
+  if (digest !== BACKTEST_SEED_SCRIPT_SHA256) {
+    throw new Error(
+      `the #19901 seed script digest is ${digest}, expected ${BACKTEST_SEED_SCRIPT_SHA256}; refusing to run it`
+    );
+  }
+
+  const dir = await mkdtemp(path.join(tmpdir(), 'alertzero-eval-seed-'));
+  const scriptPath = path.join(dir, 'seed-tuning-backtests.sh');
+  await writeFile(scriptPath, script, { mode: 0o700 });
+  if (target.elasticsearchUrl.startsWith('https:') || target.kibanaUrl.startsWith('https:')) {
+    // A local Scout stack serves a self-signed CA; the script's plain `curl -s` would reject it.
+    await writeFile(path.join(dir, '.curlrc'), 'insecure\n');
+  }
+
+  const seeded: BacktestScenario[] = [];
+  const cleanup = async () => {
+    for (const scenario of seeded) {
+      await runSeedScript(scriptPath, target, dir, ['clean', scenario, `${runMarker}-${scenario}`]).catch(
+        () => undefined
       );
     }
-  })();
-  if (documents.length === 0) {
-    throw new Error(`${ALERTS_GIST_URL_ENV} (${url}) carried no alerts`);
+    await rm(dir, { recursive: true, force: true });
+  };
+
+  try {
+    for (const scenario of scenarios) {
+      // Pushed before the run: a half-created scenario must still be cleaned.
+      seeded.push(scenario);
+      await runSeedScript(scriptPath, target, dir, ['seed', scenario, `${runMarker}-${scenario}`]);
+    }
+  } catch (error) {
+    await cleanup();
+    throw error;
   }
 
-  await bulk(
-    esClient,
-    ALERTS_INDEX,
-    documents.map((document) => ({
-      document: { ...document, tags: [...((document.tags as string[]) ?? []), runMarker] },
-    }))
-  );
-
-  return { source: 'gist', count: documents.length };
+  return { runMarker, scenarios, cleanup };
 };
 
 /* ---------------------------------------------------------------------------------------------

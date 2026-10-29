@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
-        "line": 68,
+        "line": 72,
         "column": 17
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
-        "line": 84,
+        "line": 91,
         "column": 78
       }
     },
@@ -42,13 +42,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
-        "line": 130,
+        "line": 142,
         "column": 19
       }
     },
     {
       "id": "b44e7e308061386-efe65c98fc1bea8",
-      "title": "AlertZero eval - token usage per worker sweep seeds alerts from the #19901 gist",
+      "title": "AlertZero eval - token usage per worker sweep measures the rule tuning sweep on the #19901 backtest scenarios",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_eval/api/tests/token_usage_scale.spec.ts",
-        "line": 190,
+        "line": 194,
         "column": 21
       }
     }

@@ -13,11 +13,12 @@ import {
   makeRunMarker,
   MAX_GAPS_PER_SWEEP,
   MAX_RULES_PER_SWEEP,
+  parseBacktestScenarios,
   parseScaleTiers,
   RULE_COVERAGE_SWEEP_WORKFLOW_ID,
   RULE_CREATION_PLUGIN_ID,
   RULE_TUNING_PLUGIN_ID,
-  ALERTS_GIST_URL_ENV,
+  BACKTEST_SCENARIOS_ENV,
   RULE_TUNING_SWEEP_WORKFLOW_ID,
   REVIEW_TIMEOUT_MS,
   SCALE_TIERS,
@@ -32,7 +33,7 @@ import {
   getAssignedEndpoints,
   isEisEndpointId,
   runSweep,
-  seedAlertDocsFromGist,
+  seedBacktestScenarios,
   seedCoverageGaps,
   seedTuningNoise,
   setModelTier,
@@ -190,36 +191,46 @@ apiTest.describe(
       }
     );
 
-    apiTest('seeds alerts from the #19901 gist', async ({ apiClient, samlAuth, esClient }) => {
-      // The only gist #19901 names is a bash seed script, not JSON alert docs. The env names a
-      // URL that must serve a JSON array of alert documents (or { "alerts": [...] }); the tuning
-      // sweep's measured noise comes from the in-repo seeder, so this test only proves the gist
-      // input when one is configured and is skipped (not failed) when it is not.
-      const url = process.env.ALERTS_GIST_URL_ENV?.trim();
-      if (!url) {
-        apiTest.skip(true, 'ALERTZERO_EVAL_ALERTS_GIST_URL is not set; #19901 names no JSON gist');
-        return;
-      }
-      const api = await getAdminApi(apiClient, samlAuth);
-      const runMarker = makeRunMarker('gist');
-      const seeded = await seedAlertDocsFromGist(esClient, { runMarker });
-      if (!seeded) {
-        throw new Error(`${ALERTS_GIST_URL_ENV} was set but the seeder returned nothing`);
-      }
+    apiTest(
+      'measures the rule tuning sweep on the #19901 backtest scenarios',
+      async ({ apiClient, samlAuth, esClient, config }, testInfo) => {
+        // #19901's seeder is a bash script, so it is run as written (pinned revision, digest
+        // checked) once per scenario; each scenario is one live rule with 12 closed false
+        // positives, so the sweep reviews exactly one rule per scenario.
+        testInfo.setTimeout(SWEEP_TIMEOUT_MS + REVIEW_TIMEOUT_MS + 5 * 60_000);
+        const scenarios = parseBacktestScenarios(process.env[BACKTEST_SCENARIOS_ENV]);
+        const api = await getAdminApi(apiClient, samlAuth);
+        const seed = await seedBacktestScenarios(
+          {
+            kibanaUrl: config.hosts.kibana,
+            elasticsearchUrl: config.hosts.elasticsearch,
+            credentials: `${config.auth.username}:${config.auth.password}`,
+          },
+          { scenarios, runMarker: makeRunMarker('backtest') }
+        );
+        try {
+          const sweep = await runSweep(api, {
+            workflowId: RULE_TUNING_SWEEP_WORKFLOW_ID,
+            tier: 'large',
+            timeoutMs: SWEEP_TIMEOUT_MS,
+          });
+          const requested = Number(sweep.outputs.reviews_requested ?? 0);
+          const rows = await collectTokenUsageSettled(esClient, { since: sweep.startedAt });
 
-      await api.public('POST', '/api/detection_engine/index');
-      const indexed = await esClient.count({
-        index: ALERTS_INDEX,
-        query: { term: { tags: runMarker } },
-      });
-      expect(indexed.count).toBe(seeded.count);
+          await attachArtifact(
+            testInfo,
+            'alertzero-eval-token-usage-tuning-backtest.json',
+            { scenarios, ...buildArtifact('large', [sweep], rows) }
+          );
 
-      await esClient.deleteByQuery({
-        index: ALERTS_INDEX,
-        conflicts: 'proceed',
-        refresh: true,
-        query: { term: { tags: runMarker } },
-      });
-    });
+          const diagnosis = requested === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
+          expect(requested, `reviews_requested=${requested}\n${diagnosis}`).toBe(scenarios.length);
+          assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
+          expect(rows.length).toBeGreaterThan(0);
+        } finally {
+          await seed.cleanup();
+        }
+      }
+    );
   }
 );

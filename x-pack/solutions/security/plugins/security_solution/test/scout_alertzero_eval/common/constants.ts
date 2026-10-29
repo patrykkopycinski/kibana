@@ -98,8 +98,61 @@ export const parseScaleTiers = (raw: string | undefined): ScaleTier[] => {
   return tiers;
 };
 
-/** The `#19901` gist seeder writes whatever it was pointed at; the eval only needs the URL. */
-export const ALERTS_GIST_URL_ENV = 'ALERTZERO_EVAL_ALERTS_GIST_URL';
+/**
+ * #19901's seeder is Hannah's bash script (a single-file gist), not a JSON alert corpus, so the eval
+ * runs the script itself: `seed <scenario> <rule name>` creates a real rule, 12 closed false-positive
+ * alerts and the source events for that scenario. The raw URL is pinned to a revision and verified
+ * against a digest, so a later edit to the gist can never change what a measured run seeded.
+ */
+export const BACKTEST_SEED_SCRIPT_URL =
+  'https://gist.githubusercontent.com/hannahbrooks/f8c00154b0d454ee8821adc607070574/raw/b6ffd285f0971c269e9f2c8f10d17586fe25166d/seed-tuning-backtests.sh';
+export const BACKTEST_SEED_SCRIPT_SHA256 =
+  'a965954d1c33c35cc810f70d12eb9eeed325126cd236bcfaedaa9acaa32b4dce';
+
+/** Comma-separated script scenarios the backtest-seeded tuning test seeds; one rule per scenario. */
+export const BACKTEST_SCENARIOS_ENV = 'ALERTZERO_EVAL_BACKTEST_SCENARIOS';
+export const BACKTEST_SCENARIOS = [
+  'exception',
+  'risk_score',
+  'threshold',
+  'threshold_query',
+  'schedule',
+  'data_view',
+  'timestamp_override',
+  'alert_suppression',
+  'eql',
+  'esql',
+  'new_terms',
+  'threat_match',
+] as const;
+export type BacktestScenario = (typeof BACKTEST_SCENARIOS)[number];
+export const DEFAULT_BACKTEST_SCENARIOS: BacktestScenario[] = [
+  'exception',
+  'risk_score',
+  'threshold',
+  'schedule',
+];
+
+export const parseBacktestScenarios = (raw: string | undefined): BacktestScenario[] => {
+  const requested = (raw ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  if (requested.length === 0) {
+    return DEFAULT_BACKTEST_SCENARIOS;
+  }
+  const valid = requested.filter((value): value is BacktestScenario =>
+    (BACKTEST_SCENARIOS as readonly string[]).includes(value)
+  );
+  if (valid.length !== requested.length || valid.length > MAX_RULES_PER_SWEEP) {
+    throw new Error(
+      `${BACKTEST_SCENARIOS_ENV} must be at most ${MAX_RULES_PER_SWEEP} of ${BACKTEST_SCENARIOS.join(
+        ','
+      )}; got "${raw}"`
+    );
+  }
+  return valid;
+};
 
 /**
  * Sweeps run real models over every seeded row, so the budget is per sweep rather than per test.

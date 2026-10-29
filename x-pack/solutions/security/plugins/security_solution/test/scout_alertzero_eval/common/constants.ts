@@ -23,6 +23,22 @@ export const COVERAGE_KI_TYPE = 'security.coverage';
 export const RULE_TUNING_WORKER_ID = 'system-security-detection-rule-tuning';
 export const RULE_COVERAGE_WORKER_ID = 'system-security-detection-rule-coverage';
 
+/**
+ * Built-in identity each Worker runs as. Inlined from `@kbn/alertzero-common` (`worker_roles.ts`,
+ * #296898) for the same esbuild reason as the ids above, and kept in step with it: since #296898 the
+ * role is an Elasticsearch RESERVED role named like the account, and AlertZero never PUTs it.
+ */
+export const WORKER_SERVICE_ACCOUNT_NAMES: Readonly<Record<string, string>> = {
+  [RULE_TUNING_WORKER_ID]: 'alertzero_rule_tuning',
+  [RULE_COVERAGE_WORKER_ID]: 'alertzero_rule_coverage',
+};
+export const SECURITY_ROLE_API_VERSION = '2023-10-31';
+export const buildSecurityRoleUrl = (roleName: string) =>
+  `/api/security/role/${encodeURIComponent(roleName)}`;
+/** Stateful ships the role under the account's name; Serverless prefixes it with `_`. */
+export const getWorkerRoleName = (name: string, { isServerless }: { isServerless: boolean }) =>
+  isServerless ? `_${name}` : name;
+
 /** Global sweeps: manual-only triggers, so the eval starts each one by hand. */
 export const RULE_TUNING_SWEEP_WORKFLOW_ID = 'system-security-detection-rule-tuning';
 export const RULE_COVERAGE_SWEEP_WORKFLOW_ID = 'system-security-detection-rule-coverage';

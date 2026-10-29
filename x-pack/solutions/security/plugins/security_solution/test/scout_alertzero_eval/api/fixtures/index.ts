@@ -16,6 +16,7 @@ import type { AlertZeroApi } from '../../../scout_alertzero_e2e/common/kbn';
 export * from '../../../scout_alertzero_e2e/api/fixtures';
 export * from '../../common/constants';
 export * from './eval';
+export * from './worker_identity';
 
 /** Authenticates once per worker as the admin user and exposes the cookie-bearing API helper. */
 export const getAdminApi = async (

@@ -37,6 +37,7 @@ import {
   seedCoverageGaps,
   seedTuningNoise,
   setModelTier,
+  type SweepHandle,
   tags,
 } from '../fixtures';
 
@@ -101,10 +102,11 @@ apiTest.describe(
             tier,
             runMarker: makeRunMarker(`tuning-${tier}`),
           });
+          let sweep: SweepHandle | undefined;
           try {
             expect(SCALE_TIERS[tier].rules).toBeLessThanOrEqual(MAX_RULES_PER_SWEEP);
 
-            const sweep = await runSweep(api, {
+            sweep = await runSweep(api, {
               workflowId: RULE_TUNING_SWEEP_WORKFLOW_ID,
               tier,
               timeoutMs: SWEEP_TIMEOUT_MS,
@@ -133,6 +135,8 @@ apiTest.describe(
             assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
             expect(rows.length).toBeGreaterThan(0);
           } finally {
+            // Released only after the token rows are read: the reviews resume as the bound account.
+            await sweep?.release();
             await seed.cleanup();
           }
         }
@@ -149,14 +153,15 @@ apiTest.describe(
             tier,
             runMarker: makeRunMarker(`coverage-${tier}`),
           });
+          let sweep: SweepHandle | undefined;
           try {
-            const sweep = await runSweep(api, {
+            sweep = await runSweep(api, {
               workflowId: RULE_COVERAGE_SWEEP_WORKFLOW_ID,
               tier,
               timeoutMs: SWEEP_TIMEOUT_MS,
             });
 
-            const started = Number(sweep.outputs.started ?? 0);
+            const started = Number(sweep.outputs.started ?? sweep.outputs.reviews_requested ?? 0);
 
             // `started` is the count the worker's own `start_reviews` foreach dispatched, which is
             // the number of reviews the sweep fanned out to — the child-executions route reports the
@@ -164,6 +169,9 @@ apiTest.describe(
             // dispatched 50 and returned 1 child), so it is not the assertion to make here. Asserted
             // before the token read so a missing token index cannot mask the sweep's own numbers.
             const diagnosis = started === 0 ? await describeSweepDiagnosis(api, sweep.executionId) : '';
+            // Explicit zero check first: a sweep that fanned out nothing measured nothing, and must
+            // never read as a pass (measured: smoke-1d5fadef7fa14e26, no coverage reviews ran).
+            expect(started, `reviews requested=${started}, expected > 0\n${diagnosis}`).toBeGreaterThan(0);
             expect(started, `started=${started}\n${diagnosis}`).toBe(SCALE_TIERS[tier].gaps);
             expect(started).toBeLessThanOrEqual(MAX_GAPS_PER_SWEEP);
 
@@ -178,13 +186,8 @@ apiTest.describe(
             assertRowsAreAttributable(rows, { expectedPluginIds: EXPECTED_PLUGIN_IDS });
             expect(rows.length).toBeGreaterThan(0);
             expect(rows.some((row) => row.featureId === COVERAGE_PLUGIN_ID)).toBe(true);
-
-            await attachArtifact(
-              testInfo,
-              `alertzero-eval-token-usage-coverage-${tier}.json`,
-              buildArtifact(tier, [sweep], rows)
-            );
           } finally {
+            await sweep?.release();
             await seed.cleanup();
           }
         }
@@ -208,8 +211,9 @@ apiTest.describe(
           },
           { scenarios, runMarker: makeRunMarker('backtest') }
         );
+        let sweep: SweepHandle | undefined;
         try {
-          const sweep = await runSweep(api, {
+          sweep = await runSweep(api, {
             workflowId: RULE_TUNING_SWEEP_WORKFLOW_ID,
             tier: 'large',
             timeoutMs: SWEEP_TIMEOUT_MS,
@@ -228,6 +232,7 @@ apiTest.describe(
           assertRowsAreAttributable(rows, { expectedPluginIds: [RULE_TUNING_PLUGIN_ID] });
           expect(rows.length).toBeGreaterThan(0);
         } finally {
+          await sweep?.release();
           await seed.cleanup();
         }
       }

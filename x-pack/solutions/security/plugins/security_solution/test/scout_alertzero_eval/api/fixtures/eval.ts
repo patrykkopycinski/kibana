@@ -32,7 +32,6 @@ import {
 import { ok, pollUntil } from '../../../scout_alertzero_e2e/common/kbn';
 import type { AlertZeroApi } from '../../../scout_alertzero_e2e/common/kbn';
 import {
-  createServiceAccount,
   deleteServiceAccount,
   describeExecution,
   getWorker,
@@ -43,6 +42,7 @@ import {
   waitForNewExecution,
 } from '../../../scout_alertzero_e2e/api/fixtures/alertzero';
 import type { WorkflowExecution } from '../../../scout_alertzero_e2e/api/fixtures/alertzero';
+import { assertWorkflowRunsAs, ensureWorkerAccount } from './worker_identity';
 
 const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
 const RULES_URL = '/api/detection_engine/rules';
@@ -159,6 +159,16 @@ export const getAssignedEndpoints = async (
  * Sweeps
  * ------------------------------------------------------------------------------------------ */
 
+/**
+ * A settled sweep that still holds its Worker bound. A sweep's `start_reviews` foreach starts child
+ * reviews and returns; each review resumes as the Worker's service account, so unbinding at sweep
+ * end makes every later resume fail with "No service account is bound to workload" and the rows
+ * never arrive. The caller releases after it has read the token rows.
+ */
+export interface SweepHandle extends SweepRun {
+  readonly release: () => Promise<void>;
+}
+
 export interface SweepRun {
   readonly executionId: string;
   readonly workflowId: string;
@@ -218,10 +228,24 @@ export const runSweep = async (
     timeoutMs: number;
     settledStatuses?: readonly string[];
   }
-): Promise<SweepRun> => {
+): Promise<SweepHandle> => {
   const workerId = sweepWorkerId(workflowId);
   const settings = sweepSettings(workflowId, tier);
-  const serviceAccountId = await createServiceAccount(api);
+  // The Worker's built-in account (reserved role since #296898), the one the UI binds; not a
+  // throwaway superuser account.
+  const account = await ensureWorkerAccount(api, workerId);
+  const serviceAccountId = account.id;
+
+  const release = async () => {
+    const current = await getWorker(api, workerId).catch(() => undefined);
+    if (current?.enabled) {
+      await updateWorker(api, workerId, { enabled: false }).catch(() => undefined);
+    }
+    await resetWorker(api, workerId).catch(() => undefined);
+    if (account.created) {
+      await deleteServiceAccount(api, serviceAccountId).catch(() => undefined);
+    }
+  };
 
   // The workflow is installed BY the settings save (`WorkersService.persistWorker` ->
   // `installRegisteredWorkerForRequest`), so a fresh worker legitimately carries no `workflowId`
@@ -257,6 +281,14 @@ export const runSweep = async (
     if (!enabled.enabled) {
       throw new Error(`enabling worker ${workerId} did not stick`);
     }
+    if (enabled.settings.serviceAccountId !== serviceAccountId) {
+      throw new Error(
+        `Worker ${workerId} did not keep service account ${serviceAccountId}: ${String(
+          enabled.settings.serviceAccountId
+        )}`
+      );
+    }
+    await assertWorkflowRunsAs(api, { workflowId: workerWorkflowId, serviceAccountId });
 
     const workflowExecutionId = await waitForNewExecution(
       api,
@@ -295,16 +327,13 @@ export const runSweep = async (
       startedAt: settled.startedAt ?? started,
       finishedAt: raw.finishedAt ?? new Date().toISOString(),
       outputs: raw.context?.output ?? raw.output ?? {},
+      release,
     };
-  } finally {
-    // Always disable the worker and unbind the account, even on failure: an enabled worker keeps
-    // re-running on its schedule into the next test's measurement window.
-    const current = await getWorker(api, workerId).catch(() => undefined);
-    if (current?.enabled) {
-      await updateWorker(api, workerId, { enabled: false }).catch(() => undefined);
-    }
-    await resetWorker(api, workerId).catch(() => undefined);
-    await deleteServiceAccount(api, serviceAccountId).catch(() => undefined);
+  } catch (error) {
+    // Failure path releases here; the success path hands `release` to the caller. Either way the
+    // worker never stays enabled into the next test's measurement window.
+    await release();
+    throw error;
   }
 };
 

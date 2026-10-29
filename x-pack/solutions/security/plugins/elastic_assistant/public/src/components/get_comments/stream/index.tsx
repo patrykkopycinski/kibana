@@ -69,13 +69,20 @@ export const StreamComment = ({
     reader,
     isError,
   });
+  // `isLoading` is on from the moment the stream is read, before the first chunk, so the
+  // parent never sees a gap between sending and streaming
   useEffect(() => {
-    setIsStreaming(isStreaming);
-  }, [isStreaming, setIsStreaming]);
+    setIsStreaming(isLoading);
+  }, [isLoading, setIsStreaming]);
   const stopStream = useCallback(() => {
     setComplete({ complete: true, didAbort: true });
     abortStream();
   }, [abortStream, setComplete]);
+
+  const setIsStreamingOnUnmount = useRef(setIsStreaming);
+  useEffect(() => {
+    setIsStreamingOnUnmount.current = setIsStreaming;
+  }, [setIsStreaming]);
 
   const currentState = useRef({
     isStreaming,
@@ -92,6 +99,8 @@ export const StreamComment = ({
       if (currentState.current.isStreaming) {
         currentState.current.stopStream();
       }
+      // a comment that is gone can no longer report that its stream ended
+      setIsStreamingOnUnmount.current(false);
     },
     // store values in currentState to detect true unmount
     []

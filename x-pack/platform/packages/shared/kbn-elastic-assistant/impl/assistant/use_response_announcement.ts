@@ -1,0 +1,79 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useEffect, useState } from 'react';
+import type { ClientMessage } from '../assistant_context/types';
+
+interface Props {
+  conversationId: string | undefined;
+  isLoadingChatSend: boolean;
+  /** True while the streaming reply is being received. It outlives a conversation switch. */
+  isStreaming: boolean;
+  lastMessage: ClientMessage | undefined;
+}
+
+/**
+ * Decides when the screen reader status treats the assistant as generating, and whether the
+ * latest reply belongs to a turn the user started in the conversation they are looking at.
+ *
+ * - A turn starts when sending or regenerating starts loading.
+ * - It is dropped when the user switches conversation or starts a new chat, so a stale
+ *   streaming flag or another conversation's last reply is never announced. Creating the
+ *   conversation for a first message changes the id from '' while sending is loading, and the
+ *   first conversation loads from undefined; neither is a switch.
+ * - It counts as generating from send until the stream ends, including the moments after the
+ *   send request returned and before the reply reports it is streaming, so the heartbeat does not
+ *   restart mid-turn.
+ * - A stopped stream ends the turn without a reply, so nothing is announced. Errors reported by
+ *   the server are stored as the reply and are announced once the conversation is refetched.
+ *   If reading the stream itself fails and the server stored no reply, the thread shows
+ *   "Failed to load response" and no reply text exists to read, so nothing is announced.
+ */
+export const useResponseAnnouncement = ({
+  conversationId,
+  isLoadingChatSend,
+  isStreaming,
+  lastMessage,
+}: Props): { isGenerating: boolean; isTurnActive: boolean } => {
+  const [isTurnActive, setIsTurnActive] = useState(false);
+  const [hasStreamStarted, setHasStreamStarted] = useState(false);
+  const [previousConversationId, setPreviousConversationId] = useState(conversationId);
+
+  // derived during render, not in an effect, so no render sees the new conversation with the old turn
+  if (previousConversationId !== conversationId) {
+    setPreviousConversationId(conversationId);
+    const isInitialLoadOrFirstMessage =
+      previousConversationId === undefined || (previousConversationId === '' && isLoadingChatSend);
+    if (!isInitialLoadOrFirstMessage) {
+      setIsTurnActive(false);
+      setHasStreamStarted(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isLoadingChatSend) {
+      setIsTurnActive(true);
+      setHasStreamStarted(false);
+    }
+  }, [isLoadingChatSend]);
+
+  useEffect(() => {
+    if (isTurnActive && isStreaming) {
+      setHasStreamStarted(true);
+    }
+  }, [isTurnActive, isStreaming]);
+
+  const isReplyAwaitingStream =
+    lastMessage?.role === 'assistant' && !lastMessage.content && lastMessage.reader != null;
+
+  return {
+    isTurnActive,
+    isGenerating:
+      isLoadingChatSend ||
+      (isTurnActive && (isStreaming || (isReplyAwaitingStream && !hasStreamStarted))),
+  };
+};

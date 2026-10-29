@@ -119,6 +119,54 @@ describe('use chat send', () => {
       expect(messages[messages.length - 1].content).toEqual(robotMessage.response);
     });
   });
+  it('handleRegenerateResponse reports loading until the new response is stored', async () => {
+    let resolveSend: (value: unknown) => void = () => {};
+    sendMessage.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveSend = resolve;
+      })
+    );
+    const { result } = renderHook(
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(result.current.isLoading).toBe(false);
+
+    act(() => {
+      result.current.handleRegenerateResponse();
+    });
+    await waitFor(() => expect(sendMessage).toHaveBeenCalled());
+    expect(result.current.isLoading).toBe(true);
+
+    await act(async () => {
+      resolveSend(robotMessage);
+    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
+
+  it('handleRegenerateResponse stops reporting loading when sending fails', async () => {
+    sendMessage.mockRejectedValueOnce(new Error('send failed'));
+    const { result } = renderHook(
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await act(async () => {
+      try {
+        await result.current.handleRegenerateResponse();
+      } catch (e) {
+        expect(e).toEqual(new Error('send failed'));
+      }
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
   it('sends telemetry events for both user and assistant', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(() => useChatSend(testProps), {

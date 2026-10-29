@@ -29,6 +29,7 @@ import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
 import { useChatSend } from './chat_send/use_chat_send';
+import { useResponseAnnouncement } from './use_response_announcement';
 import { ChatSend } from './chat_send';
 import { getDefaultConnector, getLastReplyText } from './helpers';
 
@@ -316,6 +317,13 @@ const AssistantComponent: React.FC<Props> = ({
     [currentConversation?.messages, currentConversation?.replacements, showAnonymizedValues]
   );
 
+  const { isGenerating, isTurnActive } = useResponseAnnouncement({
+    conversationId: currentConversation?.id,
+    isLoadingChatSend,
+    isStreaming,
+    lastMessage: currentConversation?.messages[currentConversation.messages.length - 1],
+  });
+
   const isHeaderDisabled = !isAssistantEnabled || isInitialLoad || isLoadingChatSend;
 
   useEffect(() => {
@@ -546,11 +554,9 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  {/* keyed so switching conversations never announces the other conversation's reply */}
                   <AiResponseScreenReaderStatus
-                    key={currentConversation?.id}
-                    isLoading={isLoadingChatSend || isStreaming}
-                    responseMessage={lastReplyText}
+                    isLoading={isGenerating}
+                    responseMessage={isTurnActive ? lastReplyText : undefined}
                   />
                   <AssistantBody
                     allSystemPrompts={allSystemPrompts}

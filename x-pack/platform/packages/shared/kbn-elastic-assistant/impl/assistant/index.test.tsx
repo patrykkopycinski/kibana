@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComponentProps } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -16,11 +17,12 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
+import type { ClientMessage, GetAssistantMessages } from '../assistant_context/types';
 import type { FetchCurrentUserConversations } from './api';
-import type { ClientMessage } from '../assistant_context/types';
 import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
+import * as sendMessageModule from './use_send_message';
 import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { welcomeConvo } from '../mock/conversation';
@@ -70,10 +72,13 @@ const mockData = {
 
 const { useChatSend: actualUseChatSend } = all;
 
-const renderAssistant = async (extraProps = {}) => {
+const renderAssistant = async (
+  extraProps = {},
+  providerContext?: ComponentProps<typeof TestProviders>['providerContext']
+) => {
   const chatSendSpy = jest.spyOn(all, 'useChatSend');
   const assistant = render(
-    <TestProviders>
+    <TestProviders providerContext={providerContext}>
       <Assistant
         lastConversation={{ id: 'welcome_id' }}
         chatHistoryVisible={true}
@@ -386,9 +391,11 @@ describe('Assistant', () => {
 
     let setChatSendLoading: (isLoading: boolean) => void;
     let chatSendSpy: jest.SpyInstance;
+    let chatSendProps: Parameters<typeof actualUseChatSend>[0];
 
     const mockChatSendLoading = (initialIsLoading: boolean) => {
       chatSendSpy = jest.spyOn(all, 'useChatSend').mockImplementation((props) => {
+        chatSendProps = props;
         const [isLoading, setIsLoading] = useState(initialIsLoading);
         useEffect(() => {
           setChatSendLoading = setIsLoading;
@@ -410,7 +417,7 @@ describe('Assistant', () => {
     };
 
     afterEach(() => {
-      chatSendSpy.mockRestore();
+      chatSendSpy?.mockRestore();
     });
 
     it('announces the last reply once, without content references, when loading finishes', async () => {
@@ -448,6 +455,323 @@ describe('Assistant', () => {
       });
 
       expect(getAnnouncements()).toEqual(['', '']);
+    });
+
+    describe('with streamed replies', () => {
+      const otherReply: ClientMessage = {
+        content: 'Another conversation reply.',
+        role: 'assistant',
+        timestamp: '2024-10-10T22:07:46.915Z',
+      };
+      const streamingReply: ClientMessage = {
+        role: 'assistant',
+        reader: {} as ReadableStreamDefaultReader<Uint8Array>,
+        timestamp: '2024-10-10T22:07:46.915Z',
+      };
+
+      type CommentArgs = Parameters<GetAssistantMessages>[0];
+      let commentArgs: CommentArgs;
+      let streamingConversationId: string | undefined;
+      let setFakeStreaming: (isStreaming: boolean) => void;
+
+      // Mirrors how StreamComment reports its stream: it reports on mount and every change, and
+      // like the shipped component before the fix it does not reset the flag when it unmounts.
+      const FakeStreamComment = ({
+        initialStreaming,
+        setIsStreaming,
+      }: {
+        initialStreaming: boolean;
+        setIsStreaming: (isStreaming: boolean) => void;
+      }) => {
+        const [streaming, setStreaming] = useState(initialStreaming);
+        useEffect(() => {
+          setFakeStreaming = setStreaming;
+        }, []);
+        useEffect(() => {
+          setIsStreaming(streaming);
+        }, [streaming, setIsStreaming]);
+        return null;
+      };
+
+      const fakeGetComments: GetAssistantMessages = (args) => {
+        commentArgs = args;
+        const { currentConversation, setIsStreaming } = args;
+        // like the shipped getComments: an empty conversation renders no stream comment
+        if (!currentConversation?.messages.length) {
+          return [];
+        }
+        return [
+          {
+            username: 'Assistant',
+            children: (
+              <FakeStreamComment
+                key={currentConversation.id}
+                initialStreaming={streamingConversationId === currentConversation.id}
+                setIsStreaming={setIsStreaming}
+              />
+            ),
+          },
+        ];
+      };
+
+      const renderWithFakeComments = (extraProps = {}) =>
+        renderAssistant(extraProps, { getComments: fakeGetComments });
+
+      const mockConversations = (welcomeMessages: ClientMessage[]) => {
+        const welcome = { ...fullWelcomeConversation, messages: welcomeMessages };
+        const sheep = { ...fullSheepConversation, messages: [userMessage, otherReply] };
+        jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+          ...defaultFetchUserConversations,
+          data: { welcome_id: welcome, electric_sheep_id: sheep },
+        } as unknown as FetchCurrentUserConversations);
+        (useConversation as jest.Mock).mockReturnValue({
+          ...mockUseConversation,
+          getConversation: jest.fn(async (id: string) => (id === sheep.id ? sheep : welcome)),
+        });
+      };
+
+      beforeEach(() => {
+        streamingConversationId = undefined;
+      });
+
+      it('keeps announcing that the reply is being generated between sending and the first chunk', async () => {
+        mockChatSendLoading(true);
+        mockConversationWithMessages([userMessage, streamingReply]);
+        await renderWithFakeComments();
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        // the send request returned, the stream has not reported that it started yet
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        expect(getAnnouncements()).toEqual(['Assistant is generating a response.', '']);
+      });
+
+      it('announces the stored reply that only arrives after streaming ended', async () => {
+        const finalReply: ClientMessage = { ...assistantMessage, content: 'Final stored reply.' };
+        let isReplyStored = false;
+        const pending = { ...fullWelcomeConversation, messages: [userMessage, streamingReply] };
+        const stored = { ...fullWelcomeConversation, messages: [userMessage, finalReply] };
+        mockChatSendLoading(true);
+        jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+          ...defaultFetchUserConversations,
+          data: { ...mockData, welcome_id: pending },
+        } as unknown as FetchCurrentUserConversations);
+        (useConversation as jest.Mock).mockReturnValue({
+          ...mockUseConversation,
+          getConversation: jest.fn(async () => (isReplyStored ? stored : pending)),
+        });
+        streamingConversationId = 'welcome_id';
+        await renderWithFakeComments();
+
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        expect(getAnnouncements()).toEqual(['Assistant is generating a response.', '']);
+
+        // the stream ends first, the stored reply is refetched afterwards
+        await act(async () => {
+          setFakeStreaming(false);
+        });
+        expect(getAnnouncements()[1]).toBe('');
+
+        isReplyStored = true;
+        await act(async () => {
+          await commentArgs.refetchCurrentConversation({ isStreamRefetch: true });
+        });
+
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: Final stored reply.']);
+      });
+
+      it('announces nothing when the user opens another conversation while a reply is streaming', async () => {
+        mockChatSendLoading(true);
+        mockConversations([userMessage, streamingReply]);
+        streamingConversationId = 'welcome_id';
+        await renderWithFakeComments();
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        await act(async () => {
+          fireEvent.click((await screen.findAllByText(mockData.electric_sheep_id.title))[0]);
+        });
+
+        // the other conversation's last reply must not be read out
+        await waitFor(() => expect(getAnnouncements()).toEqual(['', '']));
+        expect(screen.queryByText(/Another conversation reply/)).not.toBeInTheDocument();
+      });
+
+      it('stops announcing that a reply is being generated after New chat is chosen mid-stream', async () => {
+        mockChatSendLoading(true);
+        mockConversations([userMessage, streamingReply]);
+        streamingConversationId = 'welcome_id';
+        await renderWithFakeComments();
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('newChatFromOverlay'));
+        });
+
+        await waitFor(() => expect(getAnnouncements()).toEqual(['', '']));
+      });
+
+      it('announces the reply to the first message of a new chat once its conversation is created', async () => {
+        mockChatSendLoading(false);
+        mockConversations([userMessage, assistantMessage]);
+        await renderWithFakeComments();
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('newChatFromOverlay'));
+        });
+
+        // sending starts, then the conversation gets its id and the reply is stored
+        await act(async () => {
+          setChatSendLoading(true);
+        });
+        await act(async () => {
+          chatSendProps.setCurrentConversation({
+            ...fullWelcomeConversation,
+            apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+            id: 'created_id',
+            messages: [userMessage, assistantMessage],
+          });
+        });
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: A host was isolated.']);
+      });
+
+      it('announces a regenerated reply and reports loading while it is generated', async () => {
+        let resolveSend: (value: unknown) => void = () => {};
+        const sendMessage = jest.fn(
+          () =>
+            new Promise((resolve) => {
+              resolveSend = resolve;
+            })
+        );
+        const removeLastMessage = jest.fn().mockResolvedValue([userMessage]);
+        const sendSpy = jest
+          .spyOn(sendMessageModule, 'useSendMessage')
+          .mockReturnValue({ sendMessage, abortStream: jest.fn() } as unknown as ReturnType<
+            typeof sendMessageModule.useSendMessage
+          >);
+        mockConversationWithMessages([userMessage, assistantMessage]);
+        (useConversation as jest.Mock).mockReturnValue({
+          ...mockUseConversation,
+          getConversation: jest.fn().mockResolvedValue({
+            ...fullWelcomeConversation,
+            messages: [userMessage, assistantMessage],
+          }),
+          removeLastMessage,
+        });
+        await renderWithFakeComments();
+        expect(getAnnouncements()).toEqual(['', '']);
+
+        await act(async () => {
+          commentArgs.regenerateMessage('welcome_id');
+        });
+        expect(getAnnouncements()).toEqual(['Assistant is generating a response.', '']);
+
+        await act(async () => {
+          resolveSend({ response: 'A regenerated reply.', isStream: false, isError: false });
+        });
+
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: A regenerated reply.']);
+        sendSpy.mockRestore();
+      });
+
+      describe('anonymized values', () => {
+        const anonymizedReply: ClientMessage = {
+          content: 'Host anon-1 was isolated.',
+          role: 'assistant',
+          timestamp: '2024-10-10T22:07:46.915Z',
+        };
+        let showAnonymizedValues: boolean;
+
+        const mockShowAnonymizedValues = (value: boolean) => {
+          showAnonymizedValues = value;
+          const previousImplementation = jest.mocked(useLocalStorage).getMockImplementation();
+          jest
+            .mocked(useLocalStorage)
+            .mockImplementation(((key: string, initialValue: unknown) =>
+              key.includes(SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY)
+                ? [showAnonymizedValues, persistToLocalStorage]
+                : previousImplementation?.(key, initialValue)) as typeof useLocalStorage);
+        };
+
+        const mockConversationWithReplacements = () => {
+          const conversation = {
+            ...fullWelcomeConversation,
+            messages: [userMessage, anonymizedReply],
+            replacements: { 'anon-1': 'host-original' },
+          };
+          jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+            ...defaultFetchUserConversations,
+            data: { ...mockData, welcome_id: conversation },
+          } as unknown as FetchCurrentUserConversations);
+          (useConversation as jest.Mock).mockReturnValue({
+            ...mockUseConversation,
+            getConversation: jest.fn().mockResolvedValue(conversation),
+          });
+        };
+
+        it('announces the original values when anonymized values are hidden', async () => {
+          mockChatSendLoading(true);
+          mockConversationWithReplacements();
+          mockShowAnonymizedValues(false);
+          await renderAssistant();
+          await act(async () => {
+            setChatSendLoading(false);
+          });
+
+          expect(getAnnouncements()[1]).toBe('Assistant said: Host host-original was isolated.');
+        });
+
+        it('announces the anonymized values when they are shown', async () => {
+          mockChatSendLoading(true);
+          mockConversationWithReplacements();
+          mockShowAnonymizedValues(true);
+          await renderAssistant();
+          await act(async () => {
+            setChatSendLoading(false);
+          });
+
+          expect(getAnnouncements()[1]).toBe('Assistant said: Host anon-1 was isolated.');
+        });
+
+        it('does not announce again when anonymized values are toggled after the announcement', async () => {
+          mockChatSendLoading(true);
+          mockConversationWithReplacements();
+          mockShowAnonymizedValues(false);
+          const { container, rerender } = await renderAssistant();
+          await act(async () => {
+            setChatSendLoading(false);
+          });
+          const announcementBefore = getAnnouncements()[1];
+          expect(announcementBefore).toBe('Assistant said: Host host-original was isolated.');
+          expect(container).toBeInTheDocument();
+
+          mockShowAnonymizedValues(true);
+          await act(async () => {
+            rerender(
+              <TestProviders>
+                <Assistant
+                  lastConversation={{ id: 'welcome_id' }}
+                  chatHistoryVisible={true}
+                  setChatHistoryVisible={jest.fn()}
+                />
+              </TestProviders>
+            );
+          });
+
+          expect(getAnnouncements()[1]).toBe(announcementBefore);
+        });
+      });
     });
   });
 

@@ -214,26 +214,32 @@ export const useChatSend = ({
       );
       return;
     }
-    // remove last message from the local state immediately
-    setCurrentConversation({
-      ...currentConversation,
-      messages: currentConversation.messages.slice(0, -1),
-    });
-    const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
+    // regenerating is a full turn: expose it as loading, like sending a message
+    setIsLoadingChatSend(true);
+    try {
+      // remove last message from the local state immediately
+      setCurrentConversation({
+        ...currentConversation,
+        messages: currentConversation.messages.slice(0, -1),
+      });
+      const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
 
-    const rawResponse = await sendMessage({
-      apiConfig: currentConversation.apiConfig,
-      http,
-      // do not send any new messages, the previous conversation is already stored
-      conversationId: currentConversation.id,
-      replacements: currentConversation.replacements,
-    });
+      const rawResponse = await sendMessage({
+        apiConfig: currentConversation.apiConfig,
+        http,
+        // do not send any new messages, the previous conversation is already stored
+        conversationId: currentConversation.id,
+        replacements: currentConversation.replacements,
+      });
 
-    const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
-    setCurrentConversation({
-      ...currentConversation,
-      messages: [...updatedMessages, responseMessage],
-    });
+      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+      setCurrentConversation({
+        ...currentConversation,
+        messages: [...updatedMessages, responseMessage],
+      });
+    } finally {
+      setIsLoadingChatSend(false);
+    }
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
   const onChatCleared = useCallback(async () => {

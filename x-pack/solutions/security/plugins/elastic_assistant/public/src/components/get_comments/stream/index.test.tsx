@@ -233,4 +233,55 @@ describe('StreamComment', () => {
 
     expect(screen.getByTestId('message-error')).toBeInTheDocument();
   });
+
+  describe('streaming state reported to the conversation', () => {
+    const partialTransform = jest.fn(() => ({
+      content: 'partial',
+      role: 'assistant' as const,
+      timestamp: '',
+    }));
+
+    it('reports that the reply is loading as soon as its stream is being read', () => {
+      (useStream as jest.Mock).mockReturnValue({
+        error: null,
+        isLoading: true,
+        isStreaming: false,
+        pendingMessage: '',
+        setComplete: mockSetComplete,
+      });
+      render(
+        <StreamComment
+          {...testProps}
+          reader={mockReader}
+          content={undefined}
+          transformMessage={partialTransform}
+        />
+      );
+
+      expect(testProps.setIsStreaming).toHaveBeenLastCalledWith(true);
+    });
+
+    it('stops reporting a stream when the comment unmounts mid-stream', () => {
+      (useStream as jest.Mock).mockReturnValue({
+        error: null,
+        isLoading: true,
+        isStreaming: true,
+        pendingMessage: 'partial',
+        setComplete: mockSetComplete,
+      });
+      const { unmount } = render(
+        <StreamComment
+          {...testProps}
+          reader={mockReader}
+          content={undefined}
+          transformMessage={partialTransform}
+        />
+      );
+      expect(testProps.setIsStreaming).toHaveBeenLastCalledWith(true);
+
+      unmount();
+
+      expect(testProps.setIsStreaming).toHaveBeenLastCalledWith(false);
+    });
+  });
 });

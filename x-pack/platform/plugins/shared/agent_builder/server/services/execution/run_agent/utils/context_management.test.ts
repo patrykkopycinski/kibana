@@ -306,6 +306,25 @@ describe('contextManagement', () => {
       ]);
     });
 
+    it('uses injected substitution thresholds instead of the shared defaults', async () => {
+      selectCandidatesMock.mockResolvedValue([{ round_id: 'a', tool_call_id: 'old' }]);
+      const { contextManagement } = createContextManagementNodes(
+        deps(
+          {
+            previousRound: { terminatedAt: '2000-01-01T00:00:00.000Z', connectorId: 'c' },
+            substitutionThresholds: { roundStartCold: 500, roundStartHot: 2_000, intraRound: 500 },
+          },
+          historyWithCall()
+        )
+      );
+
+      await contextManagement(baseState());
+
+      expect(selectCandidatesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ thresholdTokens: 500 })
+      );
+    });
+
     it('skips history calls the summary already covers', async () => {
       const { contextManagement } = createContextManagementNodes(deps({}, historyWithCall()));
 

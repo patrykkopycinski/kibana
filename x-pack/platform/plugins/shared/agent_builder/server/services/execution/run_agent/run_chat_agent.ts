@@ -49,7 +49,7 @@ import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
-import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
+import { resolveTokenBudgetProfile } from './token_budget_profile';
 import { legacyEligibleRoundIds } from './utils/compaction_coverage';
 import { historyView, translateLegacySummary } from './utils/context_coverage';
 import type { PreviousRoundInfo } from './utils/context_management';
@@ -227,7 +227,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
   toolManager.setEventEmitter(eventEmitter);
-  toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
+  const tokenBudget = resolveTokenBudgetProfile({ agentId, configurationOverrides });
+  toolManager.setMaxToolResultTokens(tokenBudget.maxToolResultTokens);
 
   const processedConversation = await prepareConversation({
     nextInput,
@@ -452,6 +453,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         analyticsService: context.analyticsService,
         agentId,
         executionId,
+        substitutionThresholds: tokenBudget.substitution,
       },
       cycleHooks,
     });

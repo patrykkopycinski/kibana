@@ -376,6 +376,37 @@ describe('runDefaultAgentMode', () => {
       );
     });
 
+    it.each([
+      ['alertzero-thin-agent', ['detection-coverage', 'find-security-rules'], 8_000, 500],
+      ['alertzero-thin-agent', ['detection-rule-edit', 'find-security-rules'], 8_000, 500],
+      ['alertzero-thin-agent', ['investigate-rule'], 8_000, 500],
+      // negative controls: the shared defaults stay for other skills and other agents
+      ['alertzero-thin-agent', ['endpoint-forensic-analysis'], 20_000, 1_000],
+      ['alertzero-thin-agent', undefined, 20_000, 1_000],
+      ['some-other-agent', ['detection-coverage'], 20_000, 1_000],
+      [undefined, ['detection-coverage'], 20_000, 1_000],
+    ])(
+      'agent %s with skill_ids %j gets tool cap %i and intra-round substitution threshold %i',
+      async (agentId, skillIds, expectedCap, expectedIntra) => {
+        const context = createAgentHandlerContextMock();
+        await setupBase(context);
+
+        await runDefaultAgentMode(
+          {
+            nextInput: { message: 'hello' },
+            agentConfiguration: { tools: [] } as any,
+            agentId,
+            configurationOverrides: skillIds ? { skill_ids: skillIds } : undefined,
+          },
+          context
+        );
+
+        expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(expectedCap);
+        const { contextManagement } = createAgentGraphMock.mock.calls[0][0];
+        expect(contextManagement.substitutionThresholds.intraRound).toBe(expectedIntra);
+      }
+    );
+
     it('passes an empty list to selectSkills when no plugin skill ids match the override', async () => {
       const context = createAgentHandlerContextMock();
       await setupBase(context);

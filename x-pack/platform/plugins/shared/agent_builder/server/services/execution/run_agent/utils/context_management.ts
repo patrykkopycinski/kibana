@@ -56,6 +56,12 @@ export interface ContextManagementDeps extends VisibleContextDeps {
   analyticsService?: AgentBuilderAnalytics;
   agentId?: string;
   executionId?: string;
+  /** Per-result substitution thresholds; defaults to the shared `SUBST_*` constants. */
+  substitutionThresholds?: {
+    roundStartCold: number;
+    roundStartHot: number;
+    intraRound: number;
+  };
 }
 
 /**
@@ -68,6 +74,11 @@ export interface ContextManagementDeps extends VisibleContextDeps {
  *   tokens to the window-relative thresholds; compaction wins over substitution.
  */
 export const createContextManagementNodes = (deps: ContextManagementDeps) => {
+  const substThresholds = deps.substitutionThresholds ?? {
+    roundStartCold: SUBST_ROUND_START_THRESHOLD_COLD,
+    roundStartHot: SUBST_ROUND_START_THRESHOLD_HOT,
+    intraRound: SUBST_INTRA_ROUND_THRESHOLD,
+  };
   const budget = computeContextBudget(deps.connector);
   const compactionThreshold = INTRA_ROUND_COMPACTION_FRACTION * budget.totalBudget;
   const substitutionThreshold = Math.min(
@@ -182,9 +193,7 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
       return substitute(state, visibleToolCalls(state, 'history'), {
         trigger: 'round_start',
         threshold_tokens:
-          cacheState === 'cold'
-            ? SUBST_ROUND_START_THRESHOLD_COLD
-            : SUBST_ROUND_START_THRESHOLD_HOT,
+          cacheState === 'cold' ? substThresholds.roundStartCold : substThresholds.roundStartHot,
       });
     }
 
@@ -212,7 +221,7 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
       );
       return substitute(state, visibleToolCalls(state, 'current'), {
         trigger: 'intra_round',
-        threshold_tokens: SUBST_INTRA_ROUND_THRESHOLD,
+        threshold_tokens: substThresholds.intraRound,
       });
     }
     return {};

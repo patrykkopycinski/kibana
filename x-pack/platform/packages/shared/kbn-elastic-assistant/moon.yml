@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/inference-connectors'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/ui-ai-components'
 tags:
   - shared-browser
   - package

@@ -42,6 +42,9 @@ const RUNS_TABLE_LINK = 'detonatePrototypeRunsTable-link';
 const SAMPLE_HASH_INPUT = 'detonatePrototypeSampleHash';
 const TAGS_INPUT = 'detonatePrototypeTags';
 const SUBMIT_BUTTON = 'detonatePrototypeSubmitButton';
+// The submit button only opens a confirmation modal; this EUI test subject
+// on the modal's confirm button is what actually starts the run.
+const CONFIRM_BUTTON = 'confirmModalConfirmButton';
 const SUBMIT_ERROR = 'detonatePrototypeSubmitError';
 const DETAIL_PAGE = 'detonatePrototypeDetailPage';
 const BACK_TO_RUNS = 'detonatePrototypeBackToRuns';
@@ -93,6 +96,7 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
 
       await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
       await page.testSubj.click(SUBMIT_BUTTON);
+      await page.testSubj.click(CONFIRM_BUTTON);
       await expect(page.testSubj.locator(SUBMIT_ERROR)).toBeHidden();
 
       // Submitting navigates to the new run's detail page.
@@ -124,6 +128,7 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
 
     await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
     await page.testSubj.click(SUBMIT_BUTTON);
+    await page.testSubj.click(CONFIRM_BUTTON);
     await expect(page.testSubj.locator(DETAIL_PAGE)).toBeVisible();
 
     await page.testSubj.click(BACK_TO_RUNS);

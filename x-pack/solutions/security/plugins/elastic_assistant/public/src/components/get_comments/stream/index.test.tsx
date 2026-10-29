@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useResponseAnnouncement } from '@kbn/elastic-assistant/impl/assistant/use_response_announcement';
 
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
@@ -282,6 +283,55 @@ describe('StreamComment', () => {
       unmount();
 
       expect(testProps.setIsStreaming).toHaveBeenLastCalledWith(false);
+    });
+  });
+
+  describe('generating status of the conversation', () => {
+    // wires the real StreamComment to the real announcement hook, the way the assistant does
+    const Conversation = ({ isSending }: { isSending: boolean }) => {
+      const [isStreaming, setIsStreaming] = useState(false);
+      const { isGenerating } = useResponseAnnouncement({
+        conversationId: 'conversation',
+        createdConversationId: undefined,
+        isLoadingChatSend: isSending,
+        isStreaming,
+        lastMessage: undefined,
+        newChatCount: 0,
+      });
+      return (
+        <>
+          <div data-test-subj="generating">{isGenerating ? 'generating' : 'idle'}</div>
+          <StreamComment
+            {...testProps}
+            setIsStreaming={setIsStreaming}
+            reader={mockReader}
+            content={undefined}
+            transformMessage={() => ({ content: 'partial', role: 'assistant', timestamp: '' })}
+          />
+        </>
+      );
+    };
+    const mockStream = (isLoading: boolean) =>
+      (useStream as jest.Mock).mockReturnValue({
+        error: null,
+        isLoading,
+        isStreaming: false,
+        pendingMessage: 'partial',
+        setComplete: mockSetComplete,
+      });
+
+    it('keeps reporting generating from the send until the reply stream has ended', () => {
+      mockStream(true);
+      const { rerender } = render(<Conversation isSending />);
+      expect(screen.getByTestId('generating')).toHaveTextContent('generating');
+
+      // the send request returned: only the stream's own loading state keeps it generating
+      rerender(<Conversation isSending={false} />);
+      expect(screen.getByTestId('generating')).toHaveTextContent('generating');
+
+      mockStream(false);
+      rerender(<Conversation isSending={false} />);
+      expect(screen.getByTestId('generating')).toHaveTextContent('idle');
     });
   });
 });

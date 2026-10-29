@@ -675,6 +675,83 @@ describe('Assistant', () => {
         expect(screen.queryByText(/Another conversation reply/)).not.toBeInTheDocument();
       });
 
+      describe('when a new chat is opened while another new chat is sending its first message', () => {
+        // both chats are unsaved and share the id '', so the id alone cannot tell them apart
+        const sendFirstMessageThenOpenAnotherNewChat = async () => {
+          mockChatSendLoading(false);
+          mockConversations([userMessage, assistantMessage]);
+          await renderWithFakeComments();
+          await act(async () => {
+            fireEvent.click(screen.getByTestId('newChatFromOverlay'));
+          });
+          await act(async () => {
+            setChatSendLoading(true);
+          });
+          expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+          await act(async () => {
+            fireEvent.click(screen.getByTestId('newChatFromOverlay'));
+          });
+        };
+
+        it('stops announcing that a reply is being generated in the new chat', async () => {
+          await sendFirstMessageThenOpenAnotherNewChat();
+
+          await waitFor(() => expect(getAnnouncements()).toEqual(['', '']));
+        });
+
+        it('does not announce the abandoned chat when its send finishes and brings it back', async () => {
+          await sendFirstMessageThenOpenAnotherNewChat();
+
+          // the abandoned send creates its conversation and puts it back on screen
+          await act(async () => {
+            setCreatedConversationId('created_id');
+            chatSendProps.setCurrentConversation({
+              ...fullWelcomeConversation,
+              apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+              id: 'created_id',
+              messages: [userMessage],
+            });
+          });
+          await act(async () => {
+            chatSendProps.setCurrentConversation({
+              ...fullWelcomeConversation,
+              apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+              id: 'created_id',
+              messages: [userMessage, assistantMessage],
+            });
+            setChatSendLoading(false);
+          });
+
+          expect(getAnnouncements()).toEqual(['', '']);
+        });
+
+        it('announces the reply to a message sent afterwards in the new chat', async () => {
+          await sendFirstMessageThenOpenAnotherNewChat();
+          await act(async () => {
+            setChatSendLoading(false);
+          });
+
+          await act(async () => {
+            setChatSendLoading(true);
+          });
+          await act(async () => {
+            setCreatedConversationId('second_id');
+            chatSendProps.setCurrentConversation({
+              ...fullWelcomeConversation,
+              apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+              id: 'second_id',
+              messages: [userMessage, assistantMessage],
+            });
+          });
+          await act(async () => {
+            setChatSendLoading(false);
+          });
+
+          expect(getAnnouncements()).toEqual(['', 'Assistant said: A host was isolated.']);
+        });
+      });
+
       it('announces nothing when another conversation is opened while the reply is being refetched after its stream', async () => {
         jest.useFakeTimers();
         const pending = { ...fullWelcomeConversation, messages: [userMessage, streamingReply] };

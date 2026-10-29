@@ -59,6 +59,8 @@ interface UseCurrentConversation {
     cTitle?: string;
   }) => Promise<void>;
   isConversationOwner: boolean;
+  /** Counts the new chats opened, so one unsaved new chat can be told apart from another. */
+  newChatCount: number;
   refetchCurrentConversation: (options?: {
     cId?: string;
     isStreamRefetch?: boolean;
@@ -87,6 +89,7 @@ export const useCurrentConversation = ({
 }: Props): UseCurrentConversation => {
   const { deleteConversation, getConversation, setApiConfig } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
+  const [newChatCount, setNewChatCount] = useState(0);
 
   const currentSystemPrompt = useMemo(
     () =>
@@ -192,6 +195,7 @@ export const useCurrentConversation = ({
         id: '',
         title: cTitle ?? '',
       });
+      setNewChatCount((count) => count + 1);
       return setCurrentConversation({
         ...(apiConfig
           ? {
@@ -331,6 +335,7 @@ export const useCurrentConversation = ({
     handleOnConversationDeleted,
     handleOnConversationSelected,
     isConversationOwner,
+    newChatCount,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,

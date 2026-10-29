@@ -149,6 +149,7 @@ const AssistantComponent: React.FC<Props> = ({
     handleOnConversationDeleted,
     handleOnConversationSelected,
     isConversationOwner,
+    newChatCount,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,
@@ -324,6 +325,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoadingChatSend,
     isStreaming,
     lastMessage: currentConversation?.messages[currentConversation.messages.length - 1],
+    newChatCount,
   });
 
   const isHeaderDisabled = !isAssistantEnabled || isInitialLoad || isLoadingChatSend;

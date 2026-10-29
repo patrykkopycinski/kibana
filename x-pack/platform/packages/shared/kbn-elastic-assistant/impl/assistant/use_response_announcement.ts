@@ -16,6 +16,8 @@ interface Props {
   /** True while the streaming reply is being received. It outlives a conversation switch. */
   isStreaming: boolean;
   lastMessage: ClientMessage | undefined;
+  /** Counts the new chats opened so far. An unsaved new chat has the id '', like the one it replaces. */
+  newChatCount: number;
 }
 
 /**
@@ -24,9 +26,13 @@ interface Props {
  *
  * - A turn starts when sending or regenerating starts loading.
  * - It is dropped when the user switches conversation or starts a new chat, so a stale
- *   streaming flag or another conversation's last reply is never announced. The conversation
- *   a send creates for a new chat's first message changes the id from '' to the created id, and
- *   the first conversation loads from undefined; neither is a switch.
+ *   streaming flag or another conversation's last reply is never announced. A new chat opened
+ *   while another unsaved new chat is sending keeps the id '', so it is told apart by the count
+ *   of new chats. The conversation a send creates for a new chat's first message changes the id
+ *   from '' to the created id, and the first conversation loads from undefined; neither is a
+ *   switch.
+ * - A send that finishes after the user left its chat can bring that chat back on screen. The
+ *   turn stays dropped: the user chose to leave, so nothing is announced for it.
  * - It counts as generating from send until the stream ends, including the moments after the
  *   send request returned and before the reply reports it is streaming, so the heartbeat does not
  *   restart mid-turn.
@@ -41,10 +47,12 @@ export const useResponseAnnouncement = ({
   isLoadingChatSend,
   isStreaming,
   lastMessage,
+  newChatCount,
 }: Props): { isGenerating: boolean; isTurnActive: boolean } => {
   const [isTurnActive, setIsTurnActive] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState(conversationId);
+  const [previousNewChatCount, setPreviousNewChatCount] = useState(newChatCount);
   const [wasLoadingChatSend, setWasLoadingChatSend] = useState(false);
 
   // derived during render, not in an effect, so no render sees the new conversation with the old turn
@@ -62,6 +70,13 @@ export const useResponseAnnouncement = ({
       setIsTurnActive(false);
       setHasStreamStarted(false);
     }
+  }
+
+  // a new chat replaces the one on screen even though both are unsaved and share the id ''
+  if (previousNewChatCount !== newChatCount) {
+    setPreviousNewChatCount(newChatCount);
+    setIsTurnActive(false);
+    setHasStreamStarted(false);
   }
 
   // also derived during render: the turn is active in the very render that starts sending, so the

@@ -31,7 +31,7 @@ import { useDataStreamApis } from './use_data_stream_apis';
 import { useChatSend } from './chat_send/use_chat_send';
 import { useResponseAnnouncement } from './use_response_announcement';
 import { ChatSend } from './chat_send';
-import { getDefaultConnector, getLastReplyText } from './helpers';
+import { getDefaultConnector } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
@@ -309,23 +309,15 @@ const AssistantComponent: React.FC<Props> = ({
     setCurrentConversation,
   });
 
-  const lastReplyText = useMemo(
-    () =>
-      getLastReplyText({
-        messages: currentConversation?.messages ?? [],
-        replacements: currentConversation?.replacements,
-        showAnonymizedValues,
-      }),
-    [currentConversation?.messages, currentConversation?.replacements, showAnonymizedValues]
-  );
-
-  const { isGenerating, isTurnActive } = useResponseAnnouncement({
+  const { isGenerating, responseMessage } = useResponseAnnouncement({
     conversationId: currentConversation?.id,
     createdConversationId,
     isLoadingChatSend,
     isStreaming,
-    lastMessage: currentConversation?.messages[currentConversation.messages.length - 1],
+    messages: currentConversation?.messages,
     newChatCount,
+    replacements: currentConversation?.replacements,
+    showAnonymizedValues,
   });
 
   const isHeaderDisabled = !isAssistantEnabled || isInitialLoad || isLoadingChatSend;
@@ -560,7 +552,7 @@ const AssistantComponent: React.FC<Props> = ({
                 >
                   <AiResponseScreenReaderStatus
                     isLoading={isGenerating}
-                    responseMessage={isTurnActive ? lastReplyText : undefined}
+                    responseMessage={responseMessage}
                   />
                   <AssistantBody
                     allSystemPrompts={allSystemPrompts}

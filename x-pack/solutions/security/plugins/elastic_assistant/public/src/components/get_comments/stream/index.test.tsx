@@ -295,8 +295,10 @@ describe('StreamComment', () => {
         createdConversationId: undefined,
         isLoadingChatSend: isSending,
         isStreaming,
-        lastMessage: undefined,
+        messages: undefined,
         newChatCount: 0,
+        replacements: undefined,
+        showAnonymizedValues: false,
       });
       return (
         <>

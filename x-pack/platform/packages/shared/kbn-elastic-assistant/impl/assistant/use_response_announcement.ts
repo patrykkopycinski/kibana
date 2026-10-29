@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../assistant_context/types';
+import { getLastReplyText } from './helpers';
 
 interface Props {
   conversationId: string | undefined;
@@ -15,14 +17,18 @@ interface Props {
   isLoadingChatSend: boolean;
   /** True while the streaming reply is being received. It outlives a conversation switch. */
   isStreaming: boolean;
-  lastMessage: ClientMessage | undefined;
+  /** The messages of the conversation on screen. */
+  messages: ClientMessage[] | undefined;
   /** Counts the new chats opened so far. An unsaved new chat has the id '', like the one it replaces. */
   newChatCount: number;
+  replacements: Replacements | null | undefined;
+  showAnonymizedValues: boolean;
 }
 
 /**
- * Decides when the screen reader status treats the assistant as generating, and whether the
- * latest reply belongs to a turn the user started in the conversation they are looking at.
+ * Decides when the screen reader status treats the assistant as generating, and which reply, if
+ * any, it announces: the latest one, only while it belongs to a turn the user started in the
+ * conversation they are looking at.
  *
  * - A turn starts when sending or regenerating starts loading.
  * - It is dropped when the user switches conversation or starts a new chat, so a stale
@@ -46,9 +52,11 @@ export const useResponseAnnouncement = ({
   createdConversationId,
   isLoadingChatSend,
   isStreaming,
-  lastMessage,
+  messages,
   newChatCount,
-}: Props): { isGenerating: boolean; isTurnActive: boolean } => {
+  replacements,
+  showAnonymizedValues,
+}: Props): { isGenerating: boolean; responseMessage: string | undefined } => {
   const [isTurnActive, setIsTurnActive] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState(conversationId);
@@ -93,11 +101,18 @@ export const useResponseAnnouncement = ({
     }
   }, [isTurnActive, isStreaming]);
 
+  const lastMessage = messages?.[messages.length - 1];
   const isReplyAwaitingStream =
     lastMessage?.role === 'assistant' && !lastMessage.content && lastMessage.reader != null;
 
+  const lastReplyText = useMemo(
+    () => getLastReplyText({ messages: messages ?? [], replacements, showAnonymizedValues }),
+    [messages, replacements, showAnonymizedValues]
+  );
+
   return {
-    isTurnActive,
+    // gated by the turn like isGenerating: another conversation's last reply is never announced
+    responseMessage: isTurnActive ? lastReplyText : undefined,
     // every term is gated by the turn: a send that is still in flight when the user switches
     // conversation belongs to the conversation they left
     isGenerating:

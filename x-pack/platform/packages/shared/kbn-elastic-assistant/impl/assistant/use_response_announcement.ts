@@ -42,6 +42,7 @@ export const useResponseAnnouncement = ({
   const [isTurnActive, setIsTurnActive] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState(conversationId);
+  const [wasLoadingChatSend, setWasLoadingChatSend] = useState(false);
 
   // derived during render, not in an effect, so no render sees the new conversation with the old turn
   if (previousConversationId !== conversationId) {
@@ -54,12 +55,15 @@ export const useResponseAnnouncement = ({
     }
   }
 
-  useEffect(() => {
+  // also derived during render: the turn is active in the very render that starts sending, so the
+  // generating status begins with the send and the heartbeat is not delayed by an effect
+  if (wasLoadingChatSend !== isLoadingChatSend) {
+    setWasLoadingChatSend(isLoadingChatSend);
     if (isLoadingChatSend) {
       setIsTurnActive(true);
       setHasStreamStarted(false);
     }
-  }, [isLoadingChatSend]);
+  }
 
   useEffect(() => {
     if (isTurnActive && isStreaming) {
@@ -72,8 +76,10 @@ export const useResponseAnnouncement = ({
 
   return {
     isTurnActive,
+    // every term is gated by the turn: a send that is still in flight when the user switches
+    // conversation belongs to the conversation they left
     isGenerating:
-      isLoadingChatSend ||
-      (isTurnActive && (isStreaming || (isReplyAwaitingStream && !hasStreamStarted))),
+      isTurnActive &&
+      (isLoadingChatSend || isStreaming || (isReplyAwaitingStream && !hasStreamStarted)),
   };
 };

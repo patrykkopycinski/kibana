@@ -646,6 +646,111 @@ describe('Assistant', () => {
         expect(getAnnouncements()).toEqual(['', 'Assistant said: A host was isolated.']);
       });
 
+      it('announces nothing when the user opens another conversation while a send is still in flight', async () => {
+        mockChatSendLoading(true);
+        mockConversations([userMessage, assistantMessage]);
+        await renderWithFakeComments();
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        // sending is still loading when the other conversation is opened
+        await act(async () => {
+          fireEvent.click((await screen.findAllByText(mockData.electric_sheep_id.title))[0]);
+        });
+        await waitFor(() => expect(getAnnouncements()).toEqual(['', '']));
+
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        expect(getAnnouncements()).toEqual(['', '']);
+      });
+
+      describe('streamed regenerate', () => {
+        let resolveSends: Array<(value: unknown) => void>;
+        let sendSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+          resolveSends = [];
+          const sendMessage = jest.fn(
+            () =>
+              new Promise((resolve) => {
+                resolveSends.push(resolve);
+              })
+          );
+          sendSpy = jest.spyOn(sendMessageModule, 'useSendMessage').mockReturnValue({
+            sendMessage,
+            abortStream: jest.fn(),
+          } as unknown as ReturnType<typeof sendMessageModule.useSendMessage>);
+          mockConversationWithMessages([userMessage, assistantMessage]);
+          (useConversation as jest.Mock).mockReturnValue({
+            ...mockUseConversation,
+            getConversation: jest.fn().mockResolvedValue({
+              ...fullWelcomeConversation,
+              messages: [userMessage, assistantMessage],
+            }),
+            removeLastMessage: jest.fn().mockResolvedValue([userMessage]),
+          });
+        });
+
+        afterEach(() => {
+          sendSpy.mockRestore();
+          jest.useRealTimers();
+        });
+
+        const regenerateWithStream = async () => {
+          await act(async () => {
+            commentArgs.regenerateMessage('welcome_id');
+          });
+          await act(async () => {
+            resolveSends[resolveSends.length - 1]({
+              response: {} as ReadableStreamDefaultReader<Uint8Array>,
+              isStream: true,
+              isError: false,
+            });
+          });
+        };
+
+        it('stops the generating status when a stream ends before it produced any text', async () => {
+          jest.useFakeTimers();
+          await renderWithFakeComments();
+
+          await regenerateWithStream();
+          await act(async () => {
+            setFakeStreaming(true);
+          });
+          expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+          // the stream ends without a chunk, the message keeps its reader and has no content
+          await act(async () => {
+            setFakeStreaming(false);
+          });
+          expect(getAnnouncements()).toEqual(['', '']);
+
+          await act(async () => {
+            jest.advanceTimersByTime(60_000);
+          });
+          expect(getAnnouncements()).toEqual(['', '']);
+        });
+
+        it('does not restart the generating status between the send and the first chunk of a second turn', async () => {
+          await renderWithFakeComments();
+
+          // first turn: the reply streams and then ends
+          await regenerateWithStream();
+          await act(async () => {
+            setFakeStreaming(true);
+          });
+          await act(async () => {
+            setFakeStreaming(false);
+          });
+          expect(getAnnouncements()).toEqual(['', '']);
+
+          // second turn: the send returns before its stream reports that it started
+          await regenerateWithStream();
+
+          expect(getAnnouncements()).toEqual(['Assistant is generating a response.', '']);
+        });
+      });
+
       it('announces a regenerated reply and reports loading while it is generated', async () => {
         let resolveSend: (value: unknown) => void = () => {};
         const sendMessage = jest.fn(

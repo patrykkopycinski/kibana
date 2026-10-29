@@ -17,6 +17,8 @@ import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
  * Per-run knobs that bound how much tool output stays in the prompt.
  */
 export interface TokenBudgetProfile {
+  /** Max agent cycles before the run is forced to answer. */
+  cycleLimit: number;
   /** Cap on one tool call's result, in tokens. */
   maxToolResultTokens: number;
   /** Filestore-entry size above which a result is replaced by a pointer. */
@@ -27,7 +29,11 @@ export interface TokenBudgetProfile {
   };
 }
 
+/** Max number of agent cycles allowed before forcing an answer (the default for every agent). */
+export const DEFAULT_CYCLE_LIMIT = 30;
+
 export const DEFAULT_TOKEN_BUDGET_PROFILE: TokenBudgetProfile = {
+  cycleLimit: DEFAULT_CYCLE_LIMIT,
   maxToolResultTokens: DEFAULT_MAX_TOOL_RESULT_TOKENS,
   substitution: {
     roundStartCold: SUBST_ROUND_START_THRESHOLD_COLD,
@@ -54,7 +60,16 @@ export const ALERTZERO_SUBST_ROUND_START_THRESHOLD_COLD = 500;
 export const ALERTZERO_SUBST_ROUND_START_THRESHOLD_HOT = 2_000;
 export const ALERTZERO_SUBST_INTRA_ROUND_THRESHOLD = 500;
 
+/**
+ * Per-run cycle budget for the AlertZero detection workflows. Every extra cycle re-sends the whole
+ * accumulated prompt (median 20.6K-36.3K tokens, see above), so a runaway search loop costs
+ * quadratically. 20 leaves headroom over the three-search coverage procedure plus verdict; lower it
+ * only after the cycle histogram of the measurement runs shows the p95.
+ */
+export const ALERTZERO_CYCLE_LIMIT = 20;
+
 export const ALERTZERO_LEAN_TOKEN_BUDGET_PROFILE: TokenBudgetProfile = {
+  cycleLimit: ALERTZERO_CYCLE_LIMIT,
   maxToolResultTokens: ALERTZERO_MAX_TOOL_RESULT_TOKENS,
   substitution: {
     roundStartCold: ALERTZERO_SUBST_ROUND_START_THRESHOLD_COLD,

@@ -94,11 +94,6 @@ export type RunChatAgentFn = (
   context: AgentHandlerContext
 ) => Promise<RunAgentResponse>;
 
-/*
- * Max number of agent cycles allowed before forcing an answer.
- */
-const CYCLE_LIMIT = 30;
-
 /**
  * Create the handler function for the default agentBuilder agent.
  */
@@ -387,7 +382,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       }
     );
 
-    const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
+    const graphRecursionLimit = getRecursionLimit(tokenBudget.cycleLimit);
 
     // Tool-specific summarization of history tool results; substitution marks are layered on top
     // when the context is rendered.
@@ -464,7 +459,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       createInitializerCommand({
         pendingTurn,
         roundId,
-        cycleLimit: CYCLE_LIMIT,
+        cycleLimit: tokenBudget.cycleLimit,
         toolManager,
         promptManager,
         eventEmitter,

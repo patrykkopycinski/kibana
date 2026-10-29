@@ -17,6 +17,8 @@ describe('resolveTokenBudgetProfile', () => {
   it('the lean profile is strictly tighter than the default on every knob', () => {
     const lean = ALERTZERO_LEAN_TOKEN_BUDGET_PROFILE;
     const base = DEFAULT_TOKEN_BUDGET_PROFILE;
+    expect(lean.cycleLimit).toBeLessThan(base.cycleLimit);
+    expect(base.cycleLimit).toBe(30);
     expect(lean.maxToolResultTokens).toBeLessThan(base.maxToolResultTokens);
     expect(lean.substitution.roundStartCold).toBeLessThan(base.substitution.roundStartCold);
     expect(lean.substitution.roundStartHot).toBeLessThan(base.substitution.roundStartHot);

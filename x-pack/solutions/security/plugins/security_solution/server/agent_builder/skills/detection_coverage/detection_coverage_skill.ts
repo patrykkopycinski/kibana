@@ -32,13 +32,9 @@ const DETECTION_COVERAGE_CONTENT = `# Detection Coverage Check
 
 ## Use This Skill
 
-A problem arrives: a behavior is not covered, a hunt found something undetected, or a workflow reports a gap. Creating a rule is a second operation, and often the wrong one. This skill is the first operation: it decides which action actually closes the problem. Creation is only one of four answers.
+A behavior is not covered, a hunt found something undetected, or a workflow reports a gap, and the caller gives no rule logic. Creating a rule is often the wrong first move. This skill decides which of four actions closes the gap: is the behavior already covered, and if not, what is the cheapest way to cover it? Enabling or installing an existing rule is far cheaper than writing a new one. When the needed data source does not exist, say so and stop.
 
-Use this skill when the user or a workflow wants coverage to exist and gives no rule logic. Examples: "I want a rule that covers X" with no query given, "we need to detect X", "we have no coverage for X, what do I do?", or a hunt report that names an uncovered behavior.
-
-The intent is to make coverage, not to ask about it. A question about existing coverage ("do we have a rule for X?", "do we detect X?", "which tactics am I missing?") is a reporting intent and belongs to another skill (see Boundaries). If the user first asks such a question and then wants the gap closed, this skill enters on that second message.
-
-The skill answers one question: is this behavior already covered, and if not, what is the cheapest way to cover it? Enabling or installing an existing rule is far cheaper than writing a new one. And sometimes no rule action is right at all: when the needed data source does not exist, say so and stop.
+The intent is to make coverage, not to ask about it. Questions about existing coverage belong to another skill (see Boundaries); if the user asks one and then wants the gap closed, this skill enters on that second message.
 
 ## Intent Gate
 
@@ -69,10 +65,6 @@ Automated callers, such as a workflow step, always run the full check. There is 
 - Writing or editing the rule itself -> \`detection-rule-edit\`.
 - Tuning a noisy rule -> \`investigate-rule\`.
 
-## Role
-
-This skill decides. It never acts. It has no search tools of its own and no mutation tools. Other skills and the user perform the actions.
-
 ## How to Search
 
 Load the sibling skills and follow their search instructions. Do it in this order and stop at the first exact match.
@@ -87,19 +79,19 @@ Call \`load_skill\` with \`find-security-rules\`. Follow that skill's instructio
 
 Keep the technique id at the level the user gave you. A filter on a sub-technique such as \`T1059.001\` does not return a rule mapped to \`T1059\`, so search the parent technique unless the user named the sub-technique.
 
-Judge each returned rule with the Match Rubric. The filter matches only names, index patterns, and MITRE fields, but every result carries its \`description\` and \`query\`: read both before you judge. A rule whose distinctive behavior appears only in its query (\`process.args:*-enc*\` for encoded-command execution, \`network.protocol:smb\` for SMB lateral movement) is still an exact match once you read that query. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
+Judge each returned rule with the Match Rubric, reading its \`description\` and \`query\` (see Grounding). An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
 
-No exact match in step 1 means you must run step 2. Empty installed-rule searches say nothing about the prebuilt catalog, so never return a verdict after step 1 alone.
+No exact match means you must run step 2: empty installed-rule searches say nothing about the prebuilt catalog.
 
 ### Step 2: installable prebuilt rules
 
 Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\` and follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name.
 
-A search is a gap check, not a browse. Never judge a gap from the first page of a large result: when \`total\` is larger than the number of rules returned, search again with a narrower filter. Name only a rule that a \`security.find_prebuilt_rules\` result in this conversation returned.
+Never judge a gap from the first page of a large result: when \`total\` is larger than the number of rules returned, search again with a narrower filter.
 
 An exact match means \`prebuilt_available\`, with one guard first: if the single-word probe from step 1 never ran, run it now against installed rules. An installed exact match always beats installing a copy of it. Only when that probe also finds no exact match, return \`prebuilt_available\`. Stop. Otherwise return \`no_coverage\`.
 
-A close installed rule from step 1 never changes the verdict: installing an exact prebuilt rule is cheaper than widening a custom one or authoring a new one. Name that close rule in the explanation with either verdict, so the analyst can choose to widen it instead.
+A close installed rule from step 1 never changes the verdict (installing an exact prebuilt rule is cheaper than widening a custom one). Name it in the explanation so the analyst can choose to widen it instead.
 
 ### Precedence
 
@@ -138,7 +130,7 @@ Open every answer with the verdict line, exactly this shape and nothing before i
 
 **\`<verdict>\`** — <one sentence in plain words>
 
-Write the verdict token literally, spelled as in the table, inside backticks. Write exactly one: a second token makes the answer unusable for anyone acting on it. Callers, including automated ones, read that first line to decide what happens next, so an answer that only *describes* the situation without naming its verdict cannot be acted on.
+Write the verdict token literally, spelled as in the table, inside backticks. Write exactly one: a second token makes the answer unusable for anyone acting on it. Callers, including automated ones, read that first line to decide what happens next.
 
 Then the rule, then the route. Then execute the route:
 

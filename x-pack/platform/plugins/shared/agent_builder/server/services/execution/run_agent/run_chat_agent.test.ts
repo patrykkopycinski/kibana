@@ -377,17 +377,17 @@ describe('runDefaultAgentMode', () => {
     });
 
     it.each([
-      ['alertzero-thin-agent', ['detection-coverage', 'find-security-rules'], 8_000, 500],
-      ['alertzero-thin-agent', ['detection-rule-edit', 'find-security-rules'], 8_000, 500],
-      ['alertzero-thin-agent', ['investigate-rule'], 8_000, 500],
+      ['alertzero-thin-agent', ['detection-coverage', 'find-security-rules'], 8_000, 500, 20],
+      ['alertzero-thin-agent', ['detection-rule-edit', 'find-security-rules'], 8_000, 500, 20],
+      ['alertzero-thin-agent', ['investigate-rule'], 8_000, 500, 20],
       // negative controls: the shared defaults stay for other skills and other agents
-      ['alertzero-thin-agent', ['endpoint-forensic-analysis'], 20_000, 1_000],
-      ['alertzero-thin-agent', undefined, 20_000, 1_000],
-      ['some-other-agent', ['detection-coverage'], 20_000, 1_000],
-      [undefined, ['detection-coverage'], 20_000, 1_000],
+      ['alertzero-thin-agent', ['endpoint-forensic-analysis'], 20_000, 1_000, 30],
+      ['alertzero-thin-agent', undefined, 20_000, 1_000, 30],
+      ['some-other-agent', ['detection-coverage'], 20_000, 1_000, 30],
+      [undefined, ['detection-coverage'], 20_000, 1_000, 30],
     ])(
-      'agent %s with skill_ids %j gets tool cap %i and intra-round substitution threshold %i',
-      async (agentId, skillIds, expectedCap, expectedIntra) => {
+      'agent %s with skill_ids %j gets tool cap %i, intra-round substitution %i, cycle limit %i',
+      async (agentId, skillIds, expectedCap, expectedIntra, expectedCycles) => {
         const context = createAgentHandlerContextMock();
         await setupBase(context);
 
@@ -404,6 +404,8 @@ describe('runDefaultAgentMode', () => {
         expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(expectedCap);
         const { contextManagement } = createAgentGraphMock.mock.calls[0][0];
         expect(contextManagement.substitutionThresholds.intraRound).toBe(expectedIntra);
+        const command = createAgentGraphMock.mock.results[0].value.streamEvents.mock.calls[0][0];
+        expect(command.update).toMatchObject({ cycleLimit: expectedCycles });
       }
     );
 

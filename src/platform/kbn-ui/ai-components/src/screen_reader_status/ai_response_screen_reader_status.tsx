@@ -76,8 +76,9 @@ export interface AiResponseScreenReaderStatusProps {
   /** Whether the assistant is currently generating the latest response. */
   isLoading: boolean;
   /**
-   * Text of the latest assistant response. Announced in full once, when `isLoading`
-   * transitions from `true` to `false`. Do not pass messages from earlier turns.
+   * Text of the latest assistant response. Announced in full once per turn: the first
+   * non-empty value seen after `isLoading` has been `true` and then `false` is latched, and
+   * later changes are ignored until the next turn. Do not pass messages from earlier turns.
    */
   responseMessage?: string;
   /** Name used in the announcements, e.g. "Agent". Defaults to a translated "Assistant". */
@@ -88,7 +89,9 @@ export interface AiResponseScreenReaderStatusProps {
  * Visually hidden live regions that announce assistant progress to screen readers:
  * a periodic "still generating" heartbeat while `isLoading` is true, then the full
  * response once loading ends. Mount it once per conversation, next to (not around)
- * the visible message list. The streamed text itself must not be a live region,
+ * the visible message list, and keep it mounted when the user switches conversations (do not
+ * remount it with a `key`: a freshly inserted live region may be skipped by screen readers).
+ * The streamed text itself must not be a live region,
  * otherwise screen readers read every chunk.
  */
 export const AiResponseScreenReaderStatus = ({
@@ -98,17 +101,21 @@ export const AiResponseScreenReaderStatus = ({
 }: AiResponseScreenReaderStatusProps) => {
   const announcement = useGeneratingAnnouncements(isLoading, assistantName);
 
-  const wasLoading = useRef(false);
-  const [shouldAnnounceResponse, setShouldAnnounceResponse] = useState(false);
+  // `awaitingResponse` is armed when a turn starts loading and disarmed as soon as the reply
+  // text is latched, so later changes to `responseMessage` (e.g. toggling how anonymized
+  // values are displayed) are not announced again until the next turn.
+  const awaitingResponse = useRef(false);
+  const [announcedMessage, setAnnouncedMessage] = useState('');
 
   useEffect(() => {
     if (isLoading) {
-      wasLoading.current = true;
-      setShouldAnnounceResponse(false);
-    } else if (wasLoading.current) {
-      setShouldAnnounceResponse(true);
+      awaitingResponse.current = true;
+      setAnnouncedMessage('');
+    } else if (awaitingResponse.current && responseMessage) {
+      awaitingResponse.current = false;
+      setAnnouncedMessage(responseMessage);
     }
-  }, [isLoading]);
+  }, [isLoading, responseMessage]);
 
   return (
     <div
@@ -122,10 +129,10 @@ export const AiResponseScreenReaderStatus = ({
       </div>
       {/* Response region: transitions from empty to message text when loading completes */}
       <div role="status" aria-live="polite" aria-atomic="true">
-        {shouldAnnounceResponse && responseMessage
+        {announcedMessage
           ? i18n.translate('kbnUI.aiComponents.screenReaderStatus.assistantResponse', {
               defaultMessage: '{assistantName} said: {message}',
-              values: { assistantName, message: responseMessage },
+              values: { assistantName, message: announcedMessage },
             })
           : ''}
       </div>

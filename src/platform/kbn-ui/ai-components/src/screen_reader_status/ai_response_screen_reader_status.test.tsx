@@ -35,6 +35,24 @@ describe('AiResponseScreenReaderStatus', () => {
       expect(responseRegion()).toHaveTextContent('Assistant said: Hello there');
     });
 
+    it('does not announce again when the text changes after it was announced', () => {
+      const { rerender } = render(<AiResponseScreenReaderStatus isLoading responseMessage="" />);
+      rerender(<AiResponseScreenReaderStatus isLoading={false} responseMessage="Original" />);
+      expect(responseRegion()).toHaveTextContent('Assistant said: Original');
+
+      rerender(<AiResponseScreenReaderStatus isLoading={false} responseMessage="Changed" />);
+      expect(responseRegion()).toHaveTextContent('Assistant said: Original');
+      expect(responseRegion()).not.toHaveTextContent('Changed');
+    });
+
+    it('announces the next turn after a previous one was latched', () => {
+      const { rerender } = render(<AiResponseScreenReaderStatus isLoading responseMessage="" />);
+      rerender(<AiResponseScreenReaderStatus isLoading={false} responseMessage="One" />);
+      rerender(<AiResponseScreenReaderStatus isLoading responseMessage="One" />);
+      rerender(<AiResponseScreenReaderStatus isLoading={false} responseMessage="Two" />);
+      expect(responseRegion()).toHaveTextContent('Assistant said: Two');
+    });
+
     it('announces nothing when loading ends without a response message', () => {
       const { rerender } = render(<AiResponseScreenReaderStatus isLoading />);
 

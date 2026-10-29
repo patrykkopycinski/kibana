@@ -68,7 +68,6 @@ export const useResponseAnnouncement = ({
         conversationId === createdConversationId);
     if (!isInitialLoadOrFirstMessage) {
       setIsTurnActive(false);
-      setHasStreamStarted(false);
     }
   }
 
@@ -76,7 +75,6 @@ export const useResponseAnnouncement = ({
   if (previousNewChatCount !== newChatCount) {
     setPreviousNewChatCount(newChatCount);
     setIsTurnActive(false);
-    setHasStreamStarted(false);
   }
 
   // also derived during render: the turn is active in the very render that starts sending, so the

@@ -675,6 +675,65 @@ describe('Assistant', () => {
         expect(screen.queryByText(/Another conversation reply/)).not.toBeInTheDocument();
       });
 
+      it('announces the reply to the first message of a new chat when the default connector only arrives while it is sending', async () => {
+        jest.mocked(useLoadConnectors).mockReturnValue({
+          isFetched: true,
+          isFetchedAfterMount: true,
+          data: [],
+        } as unknown as UseLoadConnectorsResult);
+        mockChatSendLoading(false);
+        mockConversations([userMessage, assistantMessage]);
+        await renderWithFakeComments();
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('newChatFromOverlay'));
+        });
+        // the new chat got its connector from the user, so it can send while it is still unsaved
+        const chatApiConfig = { connectorId: '123', actionTypeId: '.gen-ai' };
+        await act(async () => {
+          chatSendProps.setCurrentConversation({
+            ...fullWelcomeConversation,
+            id: '',
+            apiConfig: chatApiConfig,
+          });
+        });
+        await act(async () => {
+          setChatSendLoading(true);
+        });
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        // the default connector arrives mid-send. The new chat already has a connector, so it is
+        // not replaced by a blank one
+        jest.mocked(useLoadConnectors).mockReturnValue({
+          isFetched: true,
+          isFetchedAfterMount: true,
+          data: [{ id: 'hi', name: 'OpenAI connector', actionTypeId: '.gen-ai' }],
+        } as unknown as UseLoadConnectorsResult);
+        await act(async () => {
+          chatSendProps.setCurrentConversation({
+            ...fullWelcomeConversation,
+            id: '',
+            apiConfig: chatApiConfig,
+            messages: [userMessage],
+          });
+        });
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        await act(async () => {
+          setCreatedConversationId('created_id');
+          chatSendProps.setCurrentConversation({
+            ...fullWelcomeConversation,
+            id: 'created_id',
+            apiConfig: chatApiConfig,
+            messages: [userMessage, assistantMessage],
+          });
+        });
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: A host was isolated.']);
+      });
+
       describe('when a new chat is opened while another new chat is sending its first message', () => {
         // both chats are unsaved and share the id '', so the id alone cannot tell them apart
         const sendFirstMessageThenOpenAnotherNewChat = async () => {

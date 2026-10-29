@@ -110,6 +110,9 @@ describe('detonate triage managed workflow', () => {
     // is templated from the verdict output instead of enumerated here.
     expect(input.os_types).toHaveLength(1);
     expect(input.os_types[0]).toContain('steps.verdict.output.vm_os_family');
+    // A deduplicated submit can return an earlier run without a recorded OS;
+    // the template must still render a value instead of an empty string.
+    expect(input.os_types[0]).toMatch(/\| default: '(linux|windows|macos)'/);
     // And the detonate step must actually record the OS, or the template
     // renders empty and the write fails the same validator from below.
     const detonate = steps.find(

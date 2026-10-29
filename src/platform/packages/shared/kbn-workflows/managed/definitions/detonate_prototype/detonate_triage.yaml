@@ -467,9 +467,11 @@ steps:
                 - "{{ inputs.sha256 }}"
           # An endpoint blocklist artifact is compiled per OS and the validator
           # accepts exactly one os_types entry (minSize 1, maxSize 1) — the OS
-          # the sample actually ran on, from the verdict output.
+          # the sample actually ran on, from the verdict output. A deduplicated
+          # submit returns an earlier run that may not have recorded its OS;
+          # fall back to the OS the detonate step requested.
           os_types:
-            - "{{ steps.verdict.output.vm_os_family }}"
+            - "{{ steps.verdict.output.vm_os_family | default: 'linux' }}"
           # Attribution: the resumed execution writes under the workflow
           # runner's identity, not the approver's, so the approver is recorded
           # on the item itself — the audit trail the Artifacts UI shows.

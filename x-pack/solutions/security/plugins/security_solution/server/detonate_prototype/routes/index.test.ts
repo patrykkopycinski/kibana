@@ -15,6 +15,7 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_REPUTATION_PATH,
+  DETONATE_TASKS_PATH,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { registerDetonatePrototypeRoutes } from '.';
@@ -25,6 +26,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   let client: jest.Mocked<DetonateClient>;
   let endpointAppContextService: {
     getCurrentUsername: jest.Mock;
+    getActiveSpaceId: jest.Mock;
   };
   let hasDetonatePrivilege: jest.Mock;
 
@@ -41,6 +43,20 @@ describe('registerDetonatePrototypeRoutes', () => {
 
   const submitFileHandler = () =>
     router.versioned.getRoute('post', DETONATE_SUBMIT_FILE_PATH).versions['1'].handler;
+
+  const getTaskHandler = () =>
+    router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/{taskId}`).versions['1'].handler;
+
+  const taskUpdatesHandler = () =>
+    router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/{taskId}/updates`).versions['1']
+      .handler;
+
+  const listTasksHandler = () =>
+    router.versioned.getRoute('get', DETONATE_TASKS_PATH).versions['1'].handler;
+
+  const alertTasksHandler = () =>
+    router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/alert/{alertId}`).versions['1']
+      .handler;
 
   const reputationHandler = () =>
     router.versioned.getRoute('get', `${DETONATE_REPUTATION_PATH}/{sha256}`).versions['1'].handler;
@@ -67,6 +83,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = {
       getCurrentUsername: jest.fn().mockReturnValue('analyst-test'),
+      getActiveSpaceId: jest.fn().mockReturnValue('default'),
     };
     hasDetonatePrivilege = jest.fn().mockResolvedValue(canWrite);
     registerDetonatePrototypeRoutes({
@@ -197,14 +214,14 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
 
       expect(client.submitHash).toHaveBeenCalledWith(
-        { sample_hash: 'a'.repeat(64) },
+        { sample_hash: 'a'.repeat(64), tags: ['space:default'] },
         'analyst-test' // the authenticated Kibana user, as the quota key
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...task, deduplicated: false } });
     });
 
     it('marks a deduplicated submit so the caller can say "existing report"', async () => {
-      const task = { id: 'task-existing' };
+      const task = { id: 'task-existing', tags: ['space:default'] };
       client.submitHash.mockResolvedValue({ task, deduplicated: true } as never);
 
       await submitHashHandler()(
@@ -318,11 +335,154 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
 
       expect(client.submitFile).toHaveBeenCalledWith(
-        { tags: ['demo'], sample_filename: 'sample.txt' },
+        { tags: ['demo', 'space:default'], sample_filename: 'sample.txt' },
         expect.objectContaining({ filename: 'sample.txt' }),
         'analyst-test'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...task, deduplicated: false } });
+    });
+  });
+
+  describe('space scoping', () => {
+    const { DetonateServiceError: Ctor } = jest.requireActual<{
+      DetonateServiceError: typeof DetonateServiceError;
+    }>('../client');
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+    });
+
+    it('tags a submit with the active space and drops a caller-supplied space tag', async () => {
+      client.submitHash.mockResolvedValue({
+        task: { id: 'task-1', tags: ['space:team-a'] },
+        deduplicated: false,
+      } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+          sample_hash: 'a'.repeat(64),
+          tags: ['demo', 'space:team-b'],
+        }),
+        mockResponse
+      );
+
+      expect(client.submitHash).toHaveBeenCalledWith(
+        { sample_hash: 'a'.repeat(64), tags: ['demo', 'space:team-a'] },
+        'analyst-test'
+      );
+    });
+
+    it('resubmits fresh when the deduplicated report belongs to another space', async () => {
+      const fresh = { id: 'task-fresh', tags: ['space:team-a'] };
+      client.submitHash
+        .mockResolvedValueOnce({
+          task: { id: 'task-foreign', tags: ['space:team-b'] },
+          deduplicated: true,
+        } as never)
+        .mockResolvedValueOnce({ task: fresh, deduplicated: false } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, { sample_hash: 'a'.repeat(64) }),
+        mockResponse
+      );
+
+      expect(client.submitHash).toHaveBeenLastCalledWith(
+        { sample_hash: 'a'.repeat(64), tags: ['space:team-a'], force_fresh: true },
+        'analyst-test'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { ...fresh, deduplicated: false } });
+    });
+
+    it('answers 404 for a run from another space', async () => {
+      client.getTask.mockResolvedValue({ id: 'task-foreign', tags: ['space:team-b'] } as never);
+
+      await getTaskHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/task-foreign`, undefined, {
+          taskId: 'task-foreign',
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+    });
+
+    it('answers 404 for the timeline of an untagged run without reading it', async () => {
+      client.getTask.mockResolvedValue({ id: 'task-legacy', tags: [] } as never);
+
+      await taskUpdatesHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/task-legacy/updates`, undefined, {
+          taskId: 'task-legacy',
+        }),
+        mockResponse
+      );
+
+      expect(client.getTaskUpdates).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+    });
+
+    it('returns a run from the active space', async () => {
+      const task = { id: 'task-1', tags: ['space:team-a'] };
+      client.getTask.mockResolvedValue(task as never);
+
+      await getTaskHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/task-1`, undefined, { taskId: 'task-1' }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+    });
+
+    it('filters the run list to the active space', async () => {
+      client.listTasks.mockResolvedValue({ total: 0, offset: 0, size: 20, tasks: [] } as never);
+
+      await listTasksHandler()(
+        createContext(),
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: DETONATE_TASKS_PATH,
+          query: { query_string: 'abc' },
+        }),
+        mockResponse
+      );
+
+      expect(client.listTasks).toHaveBeenCalledWith({ query_string: 'abc', tag: 'space:team-a' });
+    });
+
+    it('filters the runs of one alert to the active space', async () => {
+      client.listTasks.mockResolvedValue({ total: 0, offset: 0, size: 20, tasks: [] } as never);
+
+      await alertTasksHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/alert/alert-1`, undefined, {
+          alertId: 'alert-1',
+        }),
+        mockResponse
+      );
+
+      expect(client.listTasks).toHaveBeenCalledWith({ alert_id: 'alert-1', tag: 'space:team-a' });
+    });
+
+    it('keeps the service status when the run itself is missing', async () => {
+      client.getTask.mockRejectedValue(new Ctor('The detonation service answered 404.', 404));
+
+      await getTaskHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/gone`, undefined, { taskId: 'gone' }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
     });
   });
 

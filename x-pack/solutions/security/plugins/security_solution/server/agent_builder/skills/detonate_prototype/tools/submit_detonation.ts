@@ -15,6 +15,7 @@ import {
   DETONATE_VM_OS_FAMILIES,
 } from '../../../../../common/detonate_prototype';
 import { SUBMIT_DETONATION_TOOL_ID } from '..';
+import { submitInSpace } from '../../../../detonate_prototype/space_scope';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateServiceErrorResult,
@@ -100,14 +101,16 @@ export const submitDetonationTool = ({
       const username = endpointAppContextService.getCurrentUsername(request);
       const actor = username !== 'unknown' ? username : undefined;
 
-      const { task, deduplicated } = await getClient().submitHash(
+      const client = getClient();
+      const { task, deduplicated } = await submitInSpace(
+        (scoped) => client.submitHash(scoped, actor),
         {
           sample_hash: sampleHash,
           ...(tags ? { tags } : {}),
           ...(vmOsFamily ? { vm_os_family: vmOsFamily } : {}),
           ...(vmArchitecture ? { vm_architecture: vmArchitecture } : {}),
         },
-        actor
+        endpointAppContextService.getActiveSpaceId(request)
       );
 
       logger.info(`Submitted detonation ${task.id} for sample ${sampleHash}`);

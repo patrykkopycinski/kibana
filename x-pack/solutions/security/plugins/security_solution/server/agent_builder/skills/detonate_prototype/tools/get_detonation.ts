@@ -11,6 +11,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 import { GET_DETONATION_TOOL_ID } from '..';
+import { getTaskInSpace } from '../../../../detonate_prototype/space_scope';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateServiceErrorResult,
@@ -35,6 +36,7 @@ const getDetonationSchema = lazySchema(() =>
  * derived from the shared completion predicate, never from elapsed time.
  */
 export const getDetonationTool = ({
+  endpointAppContextService,
   getClient,
   hasDetonatePrivilege,
 }: DetonateSkillDeps): BuiltinSkillBoundedTool<typeof getDetonationSchema> => ({
@@ -52,7 +54,11 @@ export const getDetonationTool = ({
     const { taskId } = params;
 
     try {
-      const task = await getClient().getTask(taskId);
+      const task = await getTaskInSpace(
+        getClient(),
+        taskId,
+        endpointAppContextService.getActiveSpaceId(request)
+      );
 
       return {
         results: [

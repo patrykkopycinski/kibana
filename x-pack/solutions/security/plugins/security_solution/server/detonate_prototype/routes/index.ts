@@ -34,13 +34,15 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
+  spaceRunTag,
 } from '../../../common/detonate_prototype';
-import type { DetonateTask } from '../../../common/detonate_prototype';
+import type { DetonateFileRequest, DetonateTask } from '../../../common/detonate_prototype';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../client';
 import { DetonateServiceError } from '../client';
 import type { HasDetonatePrivilege } from '../authz';
+import { getTaskInSpace, submitInSpace } from '../space_scope';
 
 /**
  * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
@@ -154,6 +156,10 @@ export const registerDetonatePrototypeRoutes = ({
     const username = endpointAppContextService.getCurrentUsername(request);
     return username !== 'unknown' ? username : undefined;
   };
+
+  /** Runs are tagged with the space they were submitted from, and read back only from it. */
+  const spaceIdFromRequest = (request: KibanaRequest): string =>
+    endpointAppContextService.getActiveSpaceId(request);
 
   router.versioned
     .get({
@@ -270,10 +276,12 @@ export const registerDetonatePrototypeRoutes = ({
             return response.badRequest({ body: { message: 'The sample file is empty.' } });
           }
 
-          const { task, deduplicated } = await getClient().submitFile(
+          const client = getClient();
+          const actor = actorFromRequest(request);
+          const { task, deduplicated } = await submitInSpace<DetonateFileRequest>(
+            (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }, actor),
             { ...options, sample_filename: sampleFilename },
-            { filename: sampleFilename, body },
-            actorFromRequest(request)
+            spaceIdFromRequest(request)
           );
 
           return response.ok<DetonateTask & { deduplicated: boolean }>({
@@ -315,9 +323,12 @@ export const registerDetonatePrototypeRoutes = ({
             });
           }
 
-          const { task, deduplicated } = await getClient().submitHash(
+          const client = getClient();
+          const actor = actorFromRequest(request);
+          const { task, deduplicated } = await submitInSpace(
+            (scoped) => client.submitHash(scoped, actor),
             request.body,
-            actorFromRequest(request)
+            spaceIdFromRequest(request)
           );
           return response.ok<DetonateTask & { deduplicated: boolean }>({
             body: { ...task, deduplicated },
@@ -346,7 +357,11 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           return response.ok<DetonateTask>({
-            body: await getClient().getTask(request.params.taskId),
+            body: await getTaskInSpace(
+              getClient(),
+              request.params.taskId,
+              spaceIdFromRequest(request)
+            ),
           });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -371,7 +386,9 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          return response.ok({ body: await getClient().getTaskUpdates(request.params.taskId) });
+          const client = getClient();
+          await getTaskInSpace(client, request.params.taskId, spaceIdFromRequest(request));
+          return response.ok({ body: await client.getTaskUpdates(request.params.taskId) });
         } catch (error) {
           return toErrorResponse(error, response);
         }
@@ -399,7 +416,12 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          return response.ok({ body: await getClient().listTasks(request.query) });
+          return response.ok({
+            body: await getClient().listTasks({
+              ...request.query,
+              tag: spaceRunTag(spaceIdFromRequest(request)),
+            }),
+          });
         } catch (error) {
           return toErrorResponse(error, response);
         }
@@ -431,7 +453,10 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           return response.ok({
-            body: await getClient().listTasks({ alert_id: request.params.alertId }),
+            body: await getClient().listTasks({
+              alert_id: request.params.alertId,
+              tag: spaceRunTag(spaceIdFromRequest(request)),
+            }),
           });
         } catch (error) {
           return toErrorResponse(error, response);

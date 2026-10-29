@@ -66,6 +66,8 @@ export interface DetonateClient {
   listTasks(query?: {
     query_string?: string;
     alert_id?: string;
+    /** Exact match against one of the run's tags, unlike the substring `query_string`. */
+    tag?: string;
     offset?: number;
     size?: number;
   }): Promise<DetonateTaskSearchResponse>;
@@ -179,6 +181,7 @@ export const createDetonateClient = ({
       const params = new URLSearchParams();
       if (query.query_string) params.set('query_string', query.query_string);
       if (query.alert_id) params.set('alert_id', query.alert_id);
+      if (query.tag) params.set('tag', query.tag);
       if (query.offset !== undefined) params.set('offset', String(query.offset));
       if (query.size !== undefined) params.set('size', String(query.size));
       const qs = params.toString();

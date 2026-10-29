@@ -387,6 +387,20 @@ export const parseAlertTag = (tags: string[]): string | undefined => {
 };
 
 /**
+ * Prefix of the tag that records the Kibana space a run was submitted from
+ * (`space:<space_id>`). The detonation service has no notion of spaces, so
+ * Kibana writes this tag on submit and filters on it on every read.
+ */
+export const SPACE_TAG_PREFIX = 'space:' as const;
+
+/** The `space:<id>` tag for one space. */
+export const spaceRunTag = (spaceId: string): string => `${SPACE_TAG_PREFIX}${spaceId}`;
+
+/** Whether a run is visible from `spaceId`. A run without a space tag is visible from none. */
+export const runBelongsToSpace = (tags: string[], spaceId: string): boolean =>
+  tags.includes(spaceRunTag(spaceId));
+
+/**
  * The sample the demo seeds a guaranteed-quiet run for. Its digest matches
  * no recording, so the replay executor resolves it to the negative control —
  * a real run that raised nothing — which makes `detonate:quiet` reproducible

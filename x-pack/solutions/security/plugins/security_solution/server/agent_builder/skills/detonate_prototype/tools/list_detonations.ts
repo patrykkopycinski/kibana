@@ -10,6 +10,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
+import { spaceRunTag } from '../../../../../common/detonate_prototype';
 import { LIST_DETONATIONS_TOOL_ID } from '..';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
@@ -63,6 +64,7 @@ const listDetonationsSchema = lazySchema(() =>
  * has a recorded result.
  */
 export const listDetonationsTool = ({
+  endpointAppContextService,
   getClient,
   hasDetonatePrivilege,
 }: DetonateSkillDeps): BuiltinSkillBoundedTool<typeof listDetonationsSchema> => ({
@@ -84,6 +86,7 @@ export const listDetonationsTool = ({
       const response = await getClient().listTasks({
         ...(queryString ? { query_string: queryString } : {}),
         ...(alertId ? { alert_id: alertId } : {}),
+        tag: spaceRunTag(endpointAppContextService.getActiveSpaceId(request)),
         offset,
         size: LIST_DETONATIONS_PAGE_SIZE,
       });

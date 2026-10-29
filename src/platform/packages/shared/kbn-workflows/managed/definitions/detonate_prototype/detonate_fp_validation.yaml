@@ -18,8 +18,8 @@ triggers:
       properties:
         sha256:
           type: string
-          minLength: 32
-          maxLength: 128
+          minLength: 64
+          maxLength: 64
           description: Hash of the sample to detonate, typically the alert's file.hash.sha256.
         alert_id:
           type: string

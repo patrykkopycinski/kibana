@@ -30,8 +30,7 @@ export const detonateRunHistoryInputSchema = lazySchema(() =>
   z.object({
     sha256: z
       .string()
-      .min(32)
-      .max(64)
+      .length(64)
       .describe('sha256 of the sample whose completed detonations to summarize.'),
   })
 );

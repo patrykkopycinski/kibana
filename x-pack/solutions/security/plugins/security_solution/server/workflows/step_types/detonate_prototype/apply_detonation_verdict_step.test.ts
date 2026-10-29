@@ -41,7 +41,10 @@ describe('applyDetonationVerdictStepDefinition', () => {
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
       body: {
         ids: ['alert-9'],
-        tags: { tags_to_add: ['detonate:quiet'], tags_to_remove: [] },
+        tags: {
+          tags_to_add: ['detonate:quiet'],
+          tags_to_remove: ['detonate:malicious', 'detonate:inconclusive'],
+        },
       },
     });
     expect(calls[1][0]).toEqual({

@@ -21,6 +21,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   DETONATE_NOTE_MARKER,
   DETONATE_PROTOTYPE_APP_PATH,
+  DETONATE_VERDICTS,
   detonateVerdictTag,
 } from '../../../../common/detonate_prototype';
 import type { DetonateVerdictName } from '../../../../common/detonate_prototype';
@@ -34,6 +35,9 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
     const { verdict, alert_id: alertId, task_id: taskId, evidence } = context.input;
 
     const tag = detonateVerdictTag(verdict as DetonateVerdictName);
+    // A re-run can reach a different verdict; drop the stale one so the alert
+    // never carries two contradicting outcomes.
+    const staleTags = DETONATE_VERDICTS.map(detonateVerdictTag).filter((t) => t !== tag);
     const note = `${DETONATE_NOTE_MARKER}${evidence} (run: ${DETONATE_PROTOTYPE_APP_PATH}/${taskId})`;
 
     try {
@@ -42,7 +46,7 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
       await context.contextManager.callKibanaApi({
         method: 'POST',
         path: DETECTION_ENGINE_ALERT_TAGS_URL,
-        body: { ids: [alertId], tags: { tags_to_add: [tag], tags_to_remove: [] } },
+        body: { ids: [alertId], tags: { tags_to_add: [tag], tags_to_remove: staleTags } },
       });
 
       const { body: noteBody } = await context.contextManager.callKibanaApi<{

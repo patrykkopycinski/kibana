@@ -365,4 +365,12 @@ describe.each([
       expect(guard.trim()).toMatch(/^\$\{\{.*\}\}$/s);
     }
   });
+
+  it('accepts exactly a sha256 on the manual trigger, matching the reputation route', () => {
+    const { triggers } = parse(definition.yaml) as {
+      triggers: Array<{ type: string; inputs?: { properties: Record<string, object> } }>;
+    };
+    const manual = triggers.find(({ type }) => type === 'manual');
+    expect(manual?.inputs?.properties.sha256).toMatchObject({ minLength: 64, maxLength: 64 });
+  });
 });

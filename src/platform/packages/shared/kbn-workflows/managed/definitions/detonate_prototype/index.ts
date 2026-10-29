@@ -22,7 +22,7 @@ export const DETONATE_FP_VALIDATION_WORKFLOW_ID = 'system-security-detonate-fp-v
 export const DETONATE_FP_VALIDATION_WORKFLOW = {
   id: DETONATE_FP_VALIDATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: DETONATE_FP_VALIDATION_YAML,
   management: {
@@ -44,7 +44,7 @@ export const DETONATE_TRIAGE_WORKFLOW_ID = 'system-security-detonate-triage';
 export const DETONATE_TRIAGE_WORKFLOW = {
   id: DETONATE_TRIAGE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 9,
+  version: 10,
   billable: false,
   yaml: DETONATE_TRIAGE_YAML,
   management: {

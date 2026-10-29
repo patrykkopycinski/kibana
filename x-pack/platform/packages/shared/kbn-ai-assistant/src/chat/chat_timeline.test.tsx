@@ -83,7 +83,7 @@ describe('ChatTimeline screen reader announcements', () => {
     },
   };
 
-  type DynamicProps = Pick<ChatTimelineProps, 'messages' | 'chatState'>;
+  type DynamicProps = Pick<ChatTimelineProps, 'messages' | 'chatState' | 'conversationId'>;
 
   const timeline = (props: DynamicProps) => (
     <I18nProvider>
@@ -143,5 +143,125 @@ describe('ChatTimeline screen reader announcements', () => {
     update({ messages: [userMessage, functionCallMessage], chatState: ChatState.Ready });
 
     expect(getAnnouncements()).toEqual(['', '']);
+  });
+
+  describe('when a turn does not end cleanly', () => {
+    const partialMessage: Message = {
+      '@timestamp': '2025-01-01T00:00:01.000Z',
+      message: { role: MessageRole.Assistant, content: 'The checkout serv' },
+    };
+    const tokenLimitMessage: Message = {
+      '@timestamp': '2025-01-01T00:00:02.000Z',
+      message: {
+        role: MessageRole.Assistant,
+        content: 'The conversation has exceeded the token limit.',
+      },
+    };
+
+    it('does not read out the partial reply after an error', () => {
+      const { update } = renderTimeline({
+        messages: [userMessage, partialMessage],
+        chatState: ChatState.Loading,
+      });
+
+      update({ messages: [userMessage, partialMessage], chatState: ChatState.Error });
+
+      expect(getAnnouncements()).toEqual(['', '']);
+    });
+
+    it('does not read out the partial reply after the user stops the response', () => {
+      const { update } = renderTimeline({
+        messages: [userMessage, partialMessage],
+        chatState: ChatState.Loading,
+      });
+
+      update({ messages: [userMessage, partialMessage], chatState: ChatState.Aborted });
+
+      expect(getAnnouncements()).toEqual(['', '']);
+    });
+
+    it('reads out the token limit explanation that replaces the reply', () => {
+      const { update } = renderTimeline({
+        messages: [userMessage, partialMessage],
+        chatState: ChatState.Loading,
+      });
+
+      update({
+        messages: [userMessage, partialMessage, tokenLimitMessage],
+        chatState: ChatState.Error,
+      });
+
+      expect(getAnnouncements()).toEqual([
+        '',
+        'Assistant said: The conversation has exceeded the token limit.',
+      ]);
+    });
+
+    it('reads out the token limit explanation when the error comes before any reply text', () => {
+      const { update } = renderTimeline({ messages: [userMessage], chatState: ChatState.Loading });
+
+      update({ messages: [userMessage, tokenLimitMessage], chatState: ChatState.Error });
+
+      expect(getAnnouncements()[1]).toBe(
+        'Assistant said: The conversation has exceeded the token limit.'
+      );
+    });
+  });
+
+  describe('when the user changes conversation', () => {
+    const otherReply: Message = {
+      '@timestamp': '2025-01-01T00:00:05.000Z',
+      message: { role: MessageRole.Assistant, content: 'Another conversation reply.' },
+    };
+
+    it('does not read out the other conversation after switching mid-reply', () => {
+      const { update } = renderTimeline({
+        conversationId: 'first',
+        messages: [userMessage, assistantMessage],
+        chatState: ChatState.Loading,
+      });
+
+      // switching aborts the stream and shows the other conversation in the same update
+      update({
+        conversationId: 'second',
+        messages: [userMessage, otherReply],
+        chatState: ChatState.Ready,
+      });
+
+      expect(getAnnouncements()).toEqual(['', '']);
+    });
+
+    it('does not read out the other conversation after starting a new chat mid-reply', () => {
+      const { update } = renderTimeline({
+        conversationId: 'first',
+        messages: [userMessage, assistantMessage],
+        chatState: ChatState.Loading,
+      });
+
+      update({ conversationId: undefined, messages: [], chatState: ChatState.Ready });
+
+      expect(getAnnouncements()).toEqual(['', '']);
+    });
+
+    it('still reads out the reply of a new conversation that gets its id while sending', () => {
+      const { update } = renderTimeline({
+        conversationId: undefined,
+        messages: [userMessage],
+        chatState: ChatState.Loading,
+      });
+
+      update({
+        conversationId: 'created',
+        messages: [userMessage, assistantMessage],
+        chatState: ChatState.Loading,
+      });
+      update({
+        conversationId: 'created',
+        messages: [userMessage, assistantMessage],
+        chatState: ChatState.Ready,
+      });
+
+      expect(getAnnouncements()[1]).toBe('Assistant said: The checkout service is slow.');
+    });
   });
 });

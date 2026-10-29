@@ -21,6 +21,7 @@ import {
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatItem } from './chat_item';
+import { useAnnounceableReply } from './use_announceable_reply';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
@@ -213,12 +214,13 @@ export function ChatTimeline({
     lastMessage?.role === MessageRole.Assistant && !lastMessage.function_call?.name
       ? lastMessage.content
       : undefined;
+  const announceableReplyText = useAnnounceableReply({ chatState, conversationId, lastReplyText });
 
   return (
     <>
       <AiResponseScreenReaderStatus
         isLoading={chatState === ChatState.Loading}
-        responseMessage={lastReplyText}
+        responseMessage={announceableReplyText}
       />
       <EuiCommentList className={euiCommentListClassName}>
         <div className={stickyCalloutContainerClassName}>

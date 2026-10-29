@@ -295,6 +295,7 @@ const AssistantComponent: React.FC<Props> = ({
     handleOnChatCleared,
     handleChatSend,
     handleRegenerateResponse,
+    createdConversationId,
     isLoading: isLoadingChatSend,
     setUserPrompt,
     userPrompt,
@@ -319,6 +320,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { isGenerating, isTurnActive } = useResponseAnnouncement({
     conversationId: currentConversation?.id,
+    createdConversationId,
     isLoadingChatSend,
     isStreaming,
     lastMessage: currentConversation?.messages[currentConversation.messages.length - 1],

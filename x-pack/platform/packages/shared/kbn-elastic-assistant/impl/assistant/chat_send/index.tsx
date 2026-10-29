@@ -13,7 +13,8 @@ import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 import { useAutosizeTextArea } from './use_autosize_textarea';
 
-export interface Props extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCleared'> {
+export interface Props
+  extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCleared' | 'createdConversationId'> {
   isDisabled: boolean;
   shouldRefocusPrompt: boolean;
   userPrompt: string | null;

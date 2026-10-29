@@ -39,6 +39,8 @@ export interface UseChatSend {
   handleRegenerateResponse: () => void;
   handleChatSend: (promptText: string) => Promise<void>;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
+  /** Id of the conversation created by the send in progress, if it created one. */
+  createdConversationId: string | undefined;
   isLoading: boolean;
   userPrompt: string | null;
 }
@@ -72,6 +74,8 @@ export const useChatSend = ({
 
   // Local loading state that persists until the entire message flow is complete
   const [isLoadingChatSend, setIsLoadingChatSend] = useState(false);
+  // scoped to one send: cleared when a send starts, set when that send creates its conversation
+  const [createdConversationId, setCreatedConversationId] = useState<string>();
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -89,6 +93,7 @@ export const useChatSend = ({
       }
 
       setIsLoadingChatSend(true);
+      setCreatedConversationId(undefined);
 
       try {
         const apiConfig = currentConversation.apiConfig;
@@ -97,6 +102,7 @@ export const useChatSend = ({
           // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
           newConvo = await createConversation(currentConversation);
           if (newConvo?.id) {
+            setCreatedConversationId(newConvo.id);
             setLastConversation({
               id: newConvo.id,
             });
@@ -278,6 +284,7 @@ export const useChatSend = ({
     handleChatSend,
     abortStream,
     handleRegenerateResponse,
+    createdConversationId,
     isLoading: isLoadingChatSend,
     userPrompt,
     setUserPrompt,

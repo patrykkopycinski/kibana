@@ -10,6 +10,8 @@ import type { ClientMessage } from '../assistant_context/types';
 
 interface Props {
   conversationId: string | undefined;
+  /** The conversation the send in progress created for a new chat's first message. */
+  createdConversationId: string | undefined;
   isLoadingChatSend: boolean;
   /** True while the streaming reply is being received. It outlives a conversation switch. */
   isStreaming: boolean;
@@ -22,9 +24,9 @@ interface Props {
  *
  * - A turn starts when sending or regenerating starts loading.
  * - It is dropped when the user switches conversation or starts a new chat, so a stale
- *   streaming flag or another conversation's last reply is never announced. Creating the
- *   conversation for a first message changes the id from '' while sending is loading, and the
- *   first conversation loads from undefined; neither is a switch.
+ *   streaming flag or another conversation's last reply is never announced. The conversation
+ *   a send creates for a new chat's first message changes the id from '' to the created id, and
+ *   the first conversation loads from undefined; neither is a switch.
  * - It counts as generating from send until the stream ends, including the moments after the
  *   send request returned and before the reply reports it is streaming, so the heartbeat does not
  *   restart mid-turn.
@@ -35,6 +37,7 @@ interface Props {
  */
 export const useResponseAnnouncement = ({
   conversationId,
+  createdConversationId,
   isLoadingChatSend,
   isStreaming,
   lastMessage,
@@ -47,8 +50,14 @@ export const useResponseAnnouncement = ({
   // derived during render, not in an effect, so no render sees the new conversation with the old turn
   if (previousConversationId !== conversationId) {
     setPreviousConversationId(conversationId);
+    // only the id the send itself created is exempt: opening any other conversation from a new
+    // chat is a switch, even while its first message is still sending. A send clears the created
+    // id when it starts, so an id left from an earlier send cannot exempt a later switch.
     const isInitialLoadOrFirstMessage =
-      previousConversationId === undefined || (previousConversationId === '' && isLoadingChatSend);
+      previousConversationId === undefined ||
+      (previousConversationId === '' &&
+        conversationId !== undefined &&
+        conversationId === createdConversationId);
     if (!isInitialLoadOrFirstMessage) {
       setIsTurnActive(false);
       setHasStreamStarted(false);

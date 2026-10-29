@@ -390,6 +390,7 @@ describe('Assistant', () => {
     const getAnnouncements = () => screen.getAllByRole('status').map((el) => el.textContent);
 
     let setChatSendLoading: (isLoading: boolean) => void;
+    let setCreatedConversationId: (id: string | undefined) => void;
     let chatSendSpy: jest.SpyInstance;
     let chatSendProps: Parameters<typeof actualUseChatSend>[0];
 
@@ -397,10 +398,12 @@ describe('Assistant', () => {
       chatSendSpy = jest.spyOn(all, 'useChatSend').mockImplementation((props) => {
         chatSendProps = props;
         const [isLoading, setIsLoading] = useState(initialIsLoading);
+        const [createdConversationId, setCreatedId] = useState<string>();
         useEffect(() => {
           setChatSendLoading = setIsLoading;
+          setCreatedConversationId = setCreatedId;
         }, []);
-        return { ...actualUseChatSend(props), isLoading };
+        return { ...actualUseChatSend(props), isLoading, createdConversationId };
       });
     };
 
@@ -627,11 +630,12 @@ describe('Assistant', () => {
           fireEvent.click(screen.getByTestId('newChatFromOverlay'));
         });
 
-        // sending starts, then the conversation gets its id and the reply is stored
+        // sending starts, then the conversation is created and gets its id and the reply is stored
         await act(async () => {
           setChatSendLoading(true);
         });
         await act(async () => {
+          setCreatedConversationId('created_id');
           chatSendProps.setCurrentConversation({
             ...fullWelcomeConversation,
             apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
@@ -644,6 +648,76 @@ describe('Assistant', () => {
         });
 
         expect(getAnnouncements()).toEqual(['', 'Assistant said: A host was isolated.']);
+      });
+
+      it('announces nothing when another conversation is opened from a new chat while its first message is sending', async () => {
+        mockChatSendLoading(false);
+        mockConversations([userMessage, assistantMessage]);
+        await renderWithFakeComments();
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('newChatFromOverlay'));
+        });
+        await act(async () => {
+          setChatSendLoading(true);
+        });
+        expect(getAnnouncements()[0]).toBe('Assistant is generating a response.');
+
+        // the first message has not created its conversation yet when another one is opened
+        await act(async () => {
+          fireEvent.click((await screen.findAllByText(mockData.electric_sheep_id.title))[0]);
+        });
+        await waitFor(() => expect(getAnnouncements()).toEqual(['', '']));
+
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        expect(getAnnouncements()).toEqual(['', '']);
+        expect(screen.queryByText(/Another conversation reply/)).not.toBeInTheDocument();
+      });
+
+      it('announces nothing when another conversation is opened while the reply is being refetched after its stream', async () => {
+        jest.useFakeTimers();
+        const pending = { ...fullWelcomeConversation, messages: [userMessage, streamingReply] };
+        const stored = { ...fullWelcomeConversation, messages: [userMessage, assistantMessage] };
+        const sheep = { ...fullSheepConversation, messages: [userMessage, otherReply] };
+        let isReplyStored = false;
+        mockChatSendLoading(true);
+        jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+          ...defaultFetchUserConversations,
+          data: { welcome_id: pending, electric_sheep_id: sheep },
+        } as unknown as FetchCurrentUserConversations);
+        (useConversation as jest.Mock).mockReturnValue({
+          ...mockUseConversation,
+          getConversation: jest.fn(async (id: string) =>
+            id === sheep.id ? sheep : isReplyStored ? stored : pending
+          ),
+        });
+        streamingConversationId = 'welcome_id';
+        await renderWithFakeComments();
+        await act(async () => {
+          setChatSendLoading(false);
+        });
+        await act(async () => {
+          setFakeStreaming(false);
+        });
+
+        // the stream ended and the refetch is waiting for the stored reply
+        let refetch: unknown;
+        await act(async () => {
+          refetch = commentArgs.refetchCurrentConversation({ isStreamRefetch: true });
+        });
+        await act(async () => {
+          fireEvent.click((await screen.findAllByText(mockData.electric_sheep_id.title))[0]);
+        });
+        await waitFor(() => expect(getAnnouncements()).toEqual(['', '']));
+
+        isReplyStored = true;
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(2000);
+          await refetch;
+        });
+        expect(getAnnouncements()).toEqual(['', '']);
+        jest.useRealTimers();
       });
 
       it('announces nothing when the user opens another conversation while a send is still in flight', async () => {

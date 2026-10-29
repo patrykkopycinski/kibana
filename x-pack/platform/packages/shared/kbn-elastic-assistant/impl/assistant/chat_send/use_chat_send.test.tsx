@@ -224,4 +224,34 @@ describe('use chat send', () => {
     expect(getConversationMock).toHaveBeenCalledTimes(4);
     expect(getConversationMock).toHaveBeenLastCalledWith('convo-id');
   });
+
+  it('exposes the id of the conversation a send created and clears it when the next send starts', async () => {
+    const createConversation = jest.fn().mockResolvedValue({ ...welcomeConvo, id: 'created-id' });
+    (useConversation as jest.Mock).mockReturnValue({
+      removeLastMessage,
+      clearConversation,
+      createConversation,
+      getConversation: jest.fn().mockResolvedValue({ ...welcomeConvo, id: 'created-id' }),
+    });
+    const { result, rerender } = renderHook(
+      ({ id }: { id: string }) =>
+        useChatSend({ ...testProps, currentConversation: { ...emptyWelcomeConvo, id } }),
+      { wrapper: TestProviders, initialProps: { id: '' } }
+    );
+    expect(result.current.createdConversationId).toBeUndefined();
+
+    await act(async () => {
+      await result.current.handleChatSend('first message');
+    });
+    expect(createConversation).toHaveBeenCalledTimes(1);
+    expect(result.current.createdConversationId).toBe('created-id');
+
+    // a later send in an existing conversation does not create one
+    rerender({ id: 'created-id' });
+    await act(async () => {
+      await result.current.handleChatSend('second message');
+    });
+    expect(createConversation).toHaveBeenCalledTimes(1);
+    expect(result.current.createdConversationId).toBeUndefined();
+  });
 });

@@ -108,7 +108,11 @@ describe('rule-tuning coverage characterization', () => {
     expect(seeder).toMatch(/'kibana\.alert\.workflow_status': 'closed'/);
     expect(seeder).toMatch(/'kibana\.alert\.workflow_reason': 'false_positive'/);
     expect(seeder).not.toMatch(/'kibana\.alert\.workflow_status': 'open'/);
-    expect(seeder).not.toMatch(/true.?positive/i);
+    // The only true-positive text allowed is the opt-in TP cohort (#19982 P3b), which is
+    // off by default: the FP-only path (and #290665 comparability) must not change.
+    // Exactly the 3 opt-in sites: the cohort doc comment, its inline comment, and the literal.
+    expect(seeder.match(/true.?positive/gi)?.length ?? 0).toBe(3);
+    expect(seeder).toMatch(/tpCohort\?: SeedTpCohort/);
   });
 
   it('characterizes the harvest as reading only closed false positives', () => {

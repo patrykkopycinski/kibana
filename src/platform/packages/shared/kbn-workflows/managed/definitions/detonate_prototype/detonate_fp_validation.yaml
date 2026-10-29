@@ -69,7 +69,7 @@ steps:
   # the verdict.
   - name: case_comment
     type: if
-    condition: "{{ inputs.case_id != blank }}"
+    condition: "${{ inputs.case_id != blank }}"
     steps:
       - name: comment
         type: detonate.prototype.caseComment

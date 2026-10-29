@@ -486,7 +486,7 @@ steps:
       # already carries the verdict.
       - name: case_comment_on_malicious
         type: if
-        condition: "{{ steps.verdict.output.verdict == 'malicious' and inputs.case_id != blank }}"
+        condition: "${{ steps.verdict.output.verdict == 'malicious' and inputs.case_id != blank }}"
         steps:
           - name: comment
             type: detonate.prototype.caseComment

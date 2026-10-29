@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DETONATE_TRIAGE_WORKFLOW } from '@kbn/workflows/managed';
+import { DETONATE_FP_VALIDATION_WORKFLOW, DETONATE_TRIAGE_WORKFLOW } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
 import { toApiEntries } from '../detection_engine/rule_exceptions/to_api_entries';
@@ -23,6 +23,7 @@ interface WorkflowStep {
   type?: string;
   name?: string;
   if?: string;
+  condition?: string;
   'on-failure'?: { continue: boolean };
   steps?: WorkflowStep[];
   default?: WorkflowStep[];
@@ -343,5 +344,25 @@ describe('detonate triage managed workflow', () => {
         expect(steps.findIndex((step) => step.name === name)).toBeLessThan(gateIndex);
       }
     });
+  });
+});
+
+describe.each([
+  ['detonate triage', DETONATE_TRIAGE_WORKFLOW],
+  ['detonate fp validation', DETONATE_FP_VALIDATION_WORKFLOW],
+])('%s managed workflow conditions', (_label, definition) => {
+  const workflowSteps = collectSteps((parse(definition.yaml) as { steps: WorkflowStep[] }).steps);
+
+  it('writes every if/condition as a typed ${{ }} expression', () => {
+    // A plain `{{ }}` renders to the string "true"/"false", which the engine
+    // hands to KQL, and KQL evaluates a bare `true` as false: the branch
+    // could never run.
+    const guards = workflowSteps.flatMap(({ if: stepIf, condition }) =>
+      [stepIf, condition].filter((value): value is string => typeof value === 'string')
+    );
+    expect(guards.length).toBeGreaterThan(0);
+    for (const guard of guards) {
+      expect(guard.trim()).toMatch(/^\$\{\{.*\}\}$/s);
+    }
   });
 });

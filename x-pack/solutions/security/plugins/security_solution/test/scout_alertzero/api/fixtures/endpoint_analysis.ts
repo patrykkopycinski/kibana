@@ -212,6 +212,65 @@ export const readSeedIdentifiers = async (
   runMarker: string,
   indices: readonly string[]
 ): Promise<SeedIdentifiers> => {
+  // SCRATCH DIAGNOSTIC (t_c73c46ba A5): never merge.
+  const diag = async (name: string, fn: () => Promise<unknown>) => {
+    try {
+      // eslint-disable-next-line no-console
+      console.log(`AZDIAG ${name} ${JSON.stringify(await fn())}`);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(`AZDIAG ${name} ERROR ${(error as Error).message}`);
+    }
+  };
+  for (const index of indices) {
+    await diag(`mapping ${index}`, async () => {
+      const mapping = await esClient.indices.getMapping({ index, ignore_unavailable: true });
+      return Object.fromEntries(
+        Object.entries(mapping).map(([backing, value]) => {
+          const m = value.mappings as {
+            dynamic?: unknown;
+            properties?: Record<string, unknown>;
+          };
+          return [
+            backing,
+            { dynamic: m.dynamic, labels: m.properties?.labels, tags: m.properties?.tags },
+          ];
+        })
+      );
+    });
+    await diag(`count ${index}`, async () => {
+      const count = (query: object) =>
+        esClient
+          .count({ index, ignore_unavailable: true, query })
+          .then((r) => r.count)
+          .catch((e: Error) => `ERR ${e.message}`);
+      const runtime = await esClient
+        .search({
+          index,
+          ignore_unavailable: true,
+          size: 0,
+          track_total_hits: true,
+          runtime_mappings: {
+            az_seed: {
+              type: 'keyword',
+              script: {
+                source:
+                  "def l = params._source.labels; if (l instanceof Map && l.ad_portable_seed != null) { emit(l.ad_portable_seed.toString()); }",
+              },
+            },
+          },
+          query: { term: { az_seed: runMarker } },
+        })
+        .then((r) => (r.hits.total as { value: number }).value)
+        .catch((e: Error) => `ERR ${e.message}`);
+      return {
+        labelTerm: await count({ term: { 'labels.ad_portable_seed': runMarker } }),
+        tagsTerm: await count({ term: { tags: runMarker } }),
+        runtimeSourceTerm: runtime,
+        all: await count({ match_all: {} }),
+      };
+    });
+  }
   const response = await esClient.search({
     index: [...indices],
     size: 1000,

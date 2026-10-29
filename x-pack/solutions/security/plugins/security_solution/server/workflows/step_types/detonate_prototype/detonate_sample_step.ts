@@ -15,6 +15,8 @@
  * the workflow engine's request scoping is preserved.
  */
 
+import { isIP } from 'node:net';
+
 import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 
@@ -25,7 +27,7 @@ import {
   isDetonationFailed,
   totalDetonationAlerts,
 } from '../../../../common/detonate_prototype';
-import type { DetonateTask } from '../../../../common/detonate_prototype';
+import type { DetonateExtractedIocs, DetonateTask } from '../../../../common/detonate_prototype';
 import { detonateSampleStepCommonDefinition } from '../../../../common/workflows/step_types/detonate_prototype/detonate_sample_step_common';
 import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
@@ -47,6 +49,36 @@ const detonateStateSchema = lazySchema(() =>
     deadlineAt: z.string(),
   })
 );
+
+/** Each family is spliced into an ES|QL `IN (...)`; keep that query bounded. */
+const MAX_IOCS_PER_FAMILY = 100;
+
+/** Hostname labels only: no quotes, backslashes, whitespace or control characters. */
+const DOMAIN_PATTERN =
+  /^(?=.{1,253}$)[a-z0-9_](?:[a-z0-9_-]{0,62})(?:\.[a-z0-9_](?:[a-z0-9_-]{0,62}))*\.?$/;
+const FILE_HASH_PATTERN = /^[a-f0-9]{32,128}$/;
+
+const keepValid = (values: string[], normalize: (value: string) => string | undefined) =>
+  [...new Set(values.flatMap((value) => normalize(value) ?? []))].slice(0, MAX_IOCS_PER_FAMILY);
+
+/**
+ * Later steps splice these IOCs into queries, so a value that is not a valid
+ * domain, IP or hex digest is dropped rather than escaped: it cannot be hunted.
+ */
+const sanitizeIocs = (iocs: DetonateExtractedIocs): DetonateExtractedIocs => ({
+  domains: keepValid(iocs.domains, (value) => {
+    const domain = value.trim().toLowerCase();
+    return DOMAIN_PATTERN.test(domain) ? domain : undefined;
+  }),
+  ips: keepValid(iocs.ips, (value) => {
+    const ip = value.trim().toLowerCase();
+    return isIP(ip) === 0 ? undefined : ip;
+  }),
+  file_hashes: keepValid(iocs.file_hashes, (value) => {
+    const hash = value.trim().toLowerCase();
+    return FILE_HASH_PATTERN.test(hash) ? hash : undefined;
+  }),
+});
 
 /** Shape the task into the step's output contract. */
 const toOutput = (task: DetonateTask, completed: boolean) => ({
@@ -78,7 +110,7 @@ const toOutput = (task: DetonateTask, completed: boolean) => ({
   // Absent (not empty) when the service version predates extraction —
   // the output schema documents that downstream steps treat both as "no
   // IOCs to hunt".
-  ...(task.extracted_iocs ? { extracted_iocs: task.extracted_iocs } : {}),
+  ...(task.extracted_iocs ? { extracted_iocs: sanitizeIocs(task.extracted_iocs) } : {}),
 });
 
 export const detonateSampleStepDefinition = createPollServerStepDefinition({

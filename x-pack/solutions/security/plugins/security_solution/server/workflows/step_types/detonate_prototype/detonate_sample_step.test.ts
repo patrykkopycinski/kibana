@@ -190,6 +190,66 @@ describe('detonateSampleStepDefinition', () => {
       });
     });
 
+    it('passes through only syntactically valid IOCs, normalized and de-duplicated', async () => {
+      const task = createTaskFixture({
+        extracted_iocs: {
+          domains: [
+            'Evil.Example.com',
+            'evil.example.com',
+            'x") OR TRUE | WHERE ("',
+            'a b.com',
+            '',
+          ],
+          ips: ['203.0.113.7', '2001:DB8::1', '203.0.113.7"', '999.1.1.1'],
+          file_hashes: ['A'.repeat(64), 'zz'.repeat(32), 'b'.repeat(31)],
+        },
+      });
+      const context = pollContext({
+        taskId: 'task-1',
+        submittedAt: new Date().toISOString(),
+        deadlineAt: new Date(Date.now() + 60_000).toISOString(),
+      });
+      (context.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        body: task,
+      });
+
+      const result = (await detonateSampleStepDefinition.poll(context)) as {
+        output: Record<string, unknown>;
+      };
+
+      expect(result.output.extracted_iocs).toEqual({
+        domains: ['evil.example.com'],
+        ips: ['203.0.113.7', '2001:db8::1'],
+        file_hashes: ['a'.repeat(64)],
+      });
+    });
+
+    it('caps each IOC family so the hunt query stays bounded', async () => {
+      const task = createTaskFixture({
+        extracted_iocs: {
+          domains: Array.from({ length: 150 }, (_, i) => `host${i}.example.com`),
+          ips: [],
+          file_hashes: [],
+        },
+      });
+      const context = pollContext({
+        taskId: 'task-1',
+        submittedAt: new Date().toISOString(),
+        deadlineAt: new Date(Date.now() + 60_000).toISOString(),
+      });
+      (context.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        body: task,
+      });
+
+      const result = (await detonateSampleStepDefinition.poll(context)) as {
+        output: { extracted_iocs: { domains: string[] } };
+      };
+
+      expect(result.output.extracted_iocs.domains).toHaveLength(100);
+    });
+
     it('returns failed: true for a failed run instead of throwing', async () => {
       const task = createTaskFixture({
         last_worker_name: 'detonate.workers.start_vm',

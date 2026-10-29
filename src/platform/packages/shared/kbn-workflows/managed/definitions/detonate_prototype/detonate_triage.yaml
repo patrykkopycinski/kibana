@@ -167,8 +167,10 @@ steps:
       # destination IPs for the IPs.
       #
       # The IN-lists splice textually (the alertzero batched-generation
-      # pattern): IOC values are lowercased domains and IPs, which cannot
-      # carry a quote, so the splice cannot break the query. The `if`
+      # pattern). That is safe only because the detonate step validates
+      # every IOC before it reaches this workflow: domains must match a
+      # hostname pattern and IPs must parse, so no value carries a quote
+      # or backslash, and each family is capped at 100 entries. The `if`
       # guards keep an empty family from ever compiling an invalid
       # `IN ("")` — an absent `extracted_iocs` (service predates
       # extraction) also never fires the step.

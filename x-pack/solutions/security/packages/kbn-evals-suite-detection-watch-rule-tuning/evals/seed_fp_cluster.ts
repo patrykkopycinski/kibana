@@ -470,10 +470,23 @@ const baseAlert = (
   'kibana.alert.reason': `eval-seed fp cluster ${seq}`,
 });
 
+/**
+ * Opt-in TP cohort (#19982 P3b). When set, the seeder also indexes labelled TRUE POSITIVE
+ * alerts on the same rule uuid, tagged `az-eval:tp` plus the case id, so the backtest grader
+ * can measure TP retention without a model. Default off: the FP-only behaviour of the
+ * existing fixtures (and #290665 comparability) is unchanged for callers that omit it.
+ */
+export interface SeedTpCohort {
+  caseId: string;
+  tpCount: number;
+  process: string;
+}
+
 export const seedRuleAndFpAlerts = async (
   { fetch, esClient, log }: SeedContext,
   fixture: SeedFixtureSpec,
-  uniqueRuleId: string
+  uniqueRuleId: string,
+  tpCohort?: SeedTpCohort
 ): Promise<{ seededUuid: string; ruleId: string }> => {
   // The rule name and description are read by the agent: the harvest KEEPs
   // `kibana.alert.rule.name` and the worker interpolates it straight into the diagnose
@@ -565,10 +578,25 @@ export const seedRuleAndFpAlerts = async (
     source: { ip: e.ip },
     process: { name: e.process },
   }));
+  // Opt-in TP cohort: closed-as-true-positive alerts on the same rule uuid, each labelled
+  // `az-eval:tp` + case id. Their hosts/users are kept distinct from the FP cluster by the
+  // caller's variant builder, so an FP-targeting change is measured against them honestly.
+  const tpDocs =
+    tpCohort && tpCohort.tpCount > 0
+      ? Array.from({ length: tpCohort.tpCount }, (_, i) => ({
+          ...baseAlert(seededUuid, ruleName, ruleId, ruleRevision, entities.length + i, undefined),
+          'kibana.alert.workflow_reason': 'true_positive',
+          host: { name: `eval-tp-${opaqueToken}-${i}` },
+          user: { name: `eval-tp-user-${i}` },
+          process: { name: tpCohort.process },
+          'az-eval:tp': true,
+          'az-eval:case': tpCohort.caseId,
+        }))
+      : [];
   const bulkResp = await esClient.bulk({
     index: ALERTS_INDEX,
     refresh: 'wait_for',
-    operations: docs.flatMap((d) => [{ index: {} }, d]),
+    operations: [...docs, ...tpDocs].flatMap((d) => [{ index: {} }, d]),
   });
   const failed = bulkResp.items?.filter((i) => i.index?.error) ?? [];
   if (bulkResp.errors || failed.length > 0) {

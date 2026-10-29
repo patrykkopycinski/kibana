@@ -28,8 +28,10 @@ interface Props {
  * the partial text aloud would be more noise than help.
  *
  * A turn is dropped when the user switches conversation or starts a new chat, so another
- * conversation's last reply is never read out. A conversation that only gets its id while its
- * first message is being answered is not a switch.
+ * conversation's last reply is never read out. A new chat that gets its id, whether while its
+ * first message is being answered or after the reply finished, is not a switch. This is safe
+ * because opening a stored conversation remounts the chat, which resets this state, so an id
+ * appearing on an idle chat never carries a turn over.
  */
 export const useAnnounceableReply = ({
   chatState,
@@ -51,7 +53,9 @@ export const useAnnounceableReply = ({
   if (previous.chatState !== chatState || previous.conversationId !== conversationId) {
     setPrevious({ chatState, conversationId });
 
-    const isCreatingConversation = previous.conversationId === undefined && isLoading;
+    // a new chat only gets its id once the stored conversation has been fetched, which is
+    // usually after the reply finished
+    const isCreatingConversation = previous.conversationId === undefined;
     const hasSwitched = previous.conversationId !== conversationId && !isCreatingConversation;
     const hasStarted = isLoading && previous.chatState !== ChatState.Loading;
     const hasEnded = !isLoading && previous.chatState === ChatState.Loading;

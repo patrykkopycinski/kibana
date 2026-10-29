@@ -285,5 +285,77 @@ describe('ChatTimeline screen reader announcements', () => {
 
       expect(getAnnouncements()[1]).toBe('Assistant said: The checkout service is slow.');
     });
+
+    describe('when the new conversation gets its id after the reply finished', () => {
+      // the id comes from the request that loads the stored conversation, which normally
+      // resolves after the chat state is already Ready
+      const startFirstMessage = () =>
+        renderTimeline({
+          conversationId: undefined,
+          messages: [userMessage],
+          chatState: ChatState.Loading,
+        });
+
+      it('reads out the reply', () => {
+        const { update } = startFirstMessage();
+        update({
+          conversationId: undefined,
+          messages: [userMessage, assistantMessage],
+          chatState: ChatState.Ready,
+        });
+        update({
+          conversationId: 'created',
+          messages: [userMessage, assistantMessage],
+          chatState: ChatState.Ready,
+        });
+
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: The checkout service is slow.']);
+      });
+
+      it('reads out the reply when the id arrives in the same update that finishes it', () => {
+        const { update } = startFirstMessage();
+        update({
+          conversationId: 'created',
+          messages: [userMessage, assistantMessage],
+          chatState: ChatState.Ready,
+        });
+
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: The checkout service is slow.']);
+      });
+
+      it('does not read the reply out twice when the stored messages replace the streamed ones', () => {
+        const { update } = startFirstMessage();
+        update({
+          conversationId: undefined,
+          messages: [userMessage, assistantMessage],
+          chatState: ChatState.Ready,
+        });
+        update({
+          conversationId: 'created',
+          messages: [{ ...userMessage }, { ...assistantMessage }],
+          chatState: ChatState.Ready,
+        });
+
+        expect(screen.getAllByText('Assistant said: The checkout service is slow.')).toHaveLength(
+          1
+        );
+        expect(getAnnouncements()).toEqual(['', 'Assistant said: The checkout service is slow.']);
+      });
+
+      it('does not announce a reply when a stored conversation only gets its id while idle', () => {
+        const { update } = renderTimeline({
+          conversationId: undefined,
+          messages: [],
+          chatState: ChatState.Ready,
+        });
+        update({
+          conversationId: 'stored',
+          messages: [userMessage, assistantMessage],
+          chatState: ChatState.Ready,
+        });
+
+        expect(getAnnouncements()).toEqual(['', '']);
+      });
+    });
   });
 });

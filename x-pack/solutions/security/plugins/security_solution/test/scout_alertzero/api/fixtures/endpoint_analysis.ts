@@ -228,7 +228,7 @@ export const readSeedIdentifiers = async (
         },
       },
     },
-    query: { term: { seed_marker: runMarker } },
+    query: { term: { 'labels.ad_portable_seed': runMarker } },
   });
   const hostNames = new Set<string>();
   const destinationHosts = new Set<string>();

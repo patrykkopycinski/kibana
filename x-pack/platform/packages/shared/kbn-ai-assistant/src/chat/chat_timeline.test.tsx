@@ -231,6 +231,28 @@ describe('ChatTimeline screen reader announcements', () => {
       expect(getAnnouncements()).toEqual(['', '']);
     });
 
+    it('does not read out the other conversation when a reply loads there and then finishes', () => {
+      const { update } = renderTimeline({
+        conversationId: 'first',
+        messages: [userMessage, assistantMessage],
+        chatState: ChatState.Loading,
+      });
+
+      // the other conversation is opened while a turn is loading, and loading carries on
+      update({
+        conversationId: 'second',
+        messages: [userMessage, otherReply],
+        chatState: ChatState.Loading,
+      });
+      update({
+        conversationId: 'second',
+        messages: [userMessage, otherReply],
+        chatState: ChatState.Ready,
+      });
+
+      expect(getAnnouncements()).toEqual(['', '']);
+    });
+
     it('does not read out the other conversation after starting a new chat mid-reply', () => {
       const { update } = renderTimeline({
         conversationId: 'first',

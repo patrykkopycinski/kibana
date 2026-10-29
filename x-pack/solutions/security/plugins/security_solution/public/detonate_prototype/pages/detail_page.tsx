@@ -48,6 +48,7 @@ import { DetonateVerdictBadge } from '../components/verdict_badge';
 import { WorkerTimeline } from '../components/worker_timeline';
 import { RunHistory } from '../components/run_history';
 import { DetectionAlertGroups, EndpointAlertGroups } from '../components/alert_groups';
+import { DETONATE_ICONS } from '../icons';
 import * as i18n from '../translations';
 
 export const DETAIL_PAGE_TEST_ID = 'detonatePrototypeDetailPage';
@@ -112,7 +113,7 @@ export const DetonateDetailPage = React.memo(() => {
 
   const backButton = (
     <EuiButtonEmpty
-      iconType="arrowLeft"
+      iconType={DETONATE_ICONS.back}
       onClick={goBack}
       data-test-subj="detonatePrototypeBackToRuns"
     >

@@ -42,6 +42,7 @@ import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useNavigateTo } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../app/types';
 import { DetonateVerdictBadge } from './verdict_badge';
+import { DETONATE_ICONS } from '../icons';
 import * as i18n from '../translations';
 
 export const RUN_HISTORY_TEST_ID = 'detonatePrototypeRunHistory';
@@ -116,7 +117,7 @@ export const RunHistory = React.memo<RunHistoryProps>(({ runs, hash }) => {
               {(copy) => (
                 <EuiToolTip content={i18n.PROPOSAL_TOOLTIP}>
                   <EuiButtonIcon
-                    iconType="copyClipboard"
+                    iconType={DETONATE_ICONS.copy}
                     aria-label={i18n.PROPOSAL_BUTTON_LABEL}
                     onClick={copy}
                     data-test-subj={`${RUN_HISTORY_TEST_ID}-copyProposal`}

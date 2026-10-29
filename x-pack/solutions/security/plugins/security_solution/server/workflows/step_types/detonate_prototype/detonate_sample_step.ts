@@ -124,6 +124,7 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       vm_os_family: vmOsFamily,
       vm_architecture: vmArchitecture,
       exec_wait_secs: execWaitSecs,
+      force_fresh: forceFresh,
       // zod `.default()` does not run here: the engine renders `input` from the
       // `with` block and never calls `inputSchema.parse()` (same reason the
       // sibling `setAlertTags` handler defaults its arrays by destructuring).
@@ -144,6 +145,7 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
           ...(vmOsFamily ? { vm_os_family: vmOsFamily } : {}),
           ...(vmArchitecture ? { vm_architecture: vmArchitecture } : {}),
           ...(execWaitSecs !== undefined ? { exec_wait_secs: execWaitSecs } : {}),
+          ...(forceFresh === true ? { force_fresh: true } : {}),
         },
       });
 

@@ -30,6 +30,13 @@ triggers:
           type: string
           maxLength: 256
           description: Optional case to also carry the evidence into, as a comment.
+        force_fresh:
+          type: boolean
+          description: >-
+            Detonate again even when the service holds a reusable run of this
+            hash. Validating a false positive usually means re-running a sample
+            whose stored run is in question, so set it unless the stored run is
+            trusted. Spends a VM.
       required:
         - sha256
         - alert_id
@@ -46,6 +53,7 @@ steps:
     type: detonate.prototype.detonateSample
     with:
       sample_hash: "{{ inputs.sha256 }}"
+      force_fresh: "${{ inputs.force_fresh == true }}"
       tags:
         - "alert:{{ inputs.alert_id }}"
       max_wait_secs: 900

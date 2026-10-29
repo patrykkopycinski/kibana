@@ -373,4 +373,21 @@ describe.each([
     const manual = triggers.find(({ type }) => type === 'manual');
     expect(manual?.inputs?.properties.sha256).toMatchObject({ minLength: 64, maxLength: 64 });
   });
+
+  it('reuses stored runs unless the caller opts into force_fresh', () => {
+    const { triggers } = parse(definition.yaml) as {
+      triggers: Array<{
+        type: string;
+        inputs?: { properties: Record<string, object>; required?: string[] };
+      }>;
+    };
+    const manual = triggers.find(({ type }) => type === 'manual');
+    expect(manual?.inputs?.properties.force_fresh).toMatchObject({ type: 'boolean' });
+    expect(manual?.inputs?.required).not.toContain('force_fresh');
+    // `== true` renders an omitted input as a typed false, so dedup stays the default.
+    const detonate = workflowSteps.find(({ type }) => type === 'detonate.prototype.detonateSample');
+    expect((detonate?.with as { force_fresh?: string } | undefined)?.force_fresh).toBe(
+      '${{ inputs.force_fresh == true }}'
+    );
+  });
 });

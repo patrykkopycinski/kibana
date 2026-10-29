@@ -79,6 +79,27 @@ describe('detonateSampleStepDefinition', () => {
       });
     });
 
+    it.each([
+      ['true', true, { force_fresh: true }],
+      ['false', false, {}],
+      ['omitted', undefined, {}],
+    ])('forwards force_fresh only when true (input %s)', async (_label, forceFresh, extra) => {
+      const mockContext = createMockContext({
+        sample_hash: 'a'.repeat(64),
+        ...(forceFresh === undefined ? {} : { force_fresh: forceFresh }),
+      });
+      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        body: createTaskFixture({ id: 'task-42' }),
+      });
+
+      await detonateSampleStepDefinition.start!(mockContext);
+
+      expect(mockContext.contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: { sample_hash: 'a'.repeat(64), ...extra } })
+      );
+    });
+
     it('seeds state with taskId and a deadline 900s out when max_wait_secs is omitted', async () => {
       const mockContext = createMockContext({ sample_hash: 'a'.repeat(64) });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({

@@ -50,6 +50,12 @@ triggers:
             Optional Investigation conversation to journal the verdict into (an
             AlertZero Watch Orchestrator passes its sweep's Investigation).
             Absent on standalone runs — no journal note is written then.
+        force_fresh:
+          type: boolean
+          description: >-
+            Detonate again even when the service holds a reusable run of this
+            hash — after a sandbox-profile change, or when a stored run was
+            quiet or inconclusive. Spends a VM; leave unset for routine triage.
       required:
         - sha256
         - alert_id
@@ -123,6 +129,8 @@ steps:
           # output — the blocklist artifact below is compiled per OS and
           # accepts exactly one, so it must travel with the run.
           vm_os_family: linux
+          # `== true` keeps an omitted input a real `false`, not an empty value.
+          force_fresh: "${{ inputs.force_fresh == true }}"
           tags:
             - "alert:{{ inputs.alert_id }}"
             - "triage"

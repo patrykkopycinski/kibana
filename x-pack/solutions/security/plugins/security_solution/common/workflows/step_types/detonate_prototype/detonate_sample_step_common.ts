@@ -67,6 +67,12 @@ export const detonateSampleInputSchema = lazySchema(() =>
       .max(3600)
       .optional()
       .describe('How long the sample is left running inside the VM before the VM is torn down.'),
+    force_fresh: z
+      .boolean()
+      .optional()
+      .describe(
+        'Run a new detonation even when a stored run of this sample can be reused. Spends a VM; leave unset for routine triage.'
+      ),
     /**
      * A detonation boots a VM, runs the sample, waits, tears the VM down and
      * summarises telemetry — minutes, not seconds. The ceiling is the author's

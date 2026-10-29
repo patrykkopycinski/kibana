@@ -60,7 +60,7 @@ export const resolveScopedModel = async ({
   request,
   uiSettingsClient,
   logger,
-  chatModelOptions = {},
+  chatModelOptions,
 }: {
   inference: InferenceServerStart | undefined;
   /** Optional plugin: absent deployments fall back to the connector chain below. */
@@ -70,8 +70,11 @@ export const resolveScopedModel = async ({
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
-  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
-  chatModelOptions?: ChatModelOptions;
+  /**
+   * Passed to the chat model. Required so a caller cannot forget the telemetry metadata that
+   * attributes its token usage to a feature.
+   */
+  chatModelOptions: ChatModelOptions;
 }): Promise<ResolveScopedModelOutcome> => {
   if (!inference) {
     return {

@@ -51,6 +51,7 @@ describe('resolveScopedModel', () => {
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
+      chatModelOptions: {},
     });
     expect(result).toEqual({
       ok: false,
@@ -94,6 +95,7 @@ describe('resolveScopedModel', () => {
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
+      chatModelOptions: {},
     });
 
     expect(result.ok).toBe(true);
@@ -110,6 +112,7 @@ describe('resolveScopedModel', () => {
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
+      chatModelOptions: {},
     });
 
     expect(result.ok).toBe(true);
@@ -123,6 +126,7 @@ describe('resolveScopedModel', () => {
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
+      chatModelOptions: {},
     });
 
     expect(result).toEqual({ ok: false, reason: 'no_connector', message: expect.any(String) });
@@ -142,6 +146,7 @@ describe('resolveScopedModel', () => {
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
+      chatModelOptions: {},
     });
 
     expect(result.ok).toBe(true);
@@ -168,6 +173,7 @@ describe('resolveScopedModel', () => {
         request: mockRequest,
         uiSettingsClient: mockUiSettingsClient as never,
         logger,
+        chatModelOptions: {},
       });
 
       expect(result.ok).toBe(true);
@@ -183,6 +189,7 @@ describe('resolveScopedModel', () => {
         request: mockRequest,
         uiSettingsClient: mockUiSettingsClient as never,
         logger,
+        chatModelOptions: {},
       });
 
       expect(result.ok).toBe(true);
@@ -202,6 +209,7 @@ describe('resolveScopedModel', () => {
         request: mockRequest,
         uiSettingsClient: mockUiSettingsClient as never,
         logger,
+        chatModelOptions: {},
       });
 
       expect(result).toEqual({ ok: false, reason: 'no_connector', message: expect.any(String) });

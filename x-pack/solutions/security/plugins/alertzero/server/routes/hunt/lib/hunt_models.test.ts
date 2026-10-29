@@ -14,6 +14,7 @@ import {
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/alertzero-common';
+import { HUNT_MODEL_TIER_FEATURE_IDS } from '../../../services/watches/hunt/common/hunt_model_tiers';
 import { mostSevereFailure, resolveHuntModels } from './hunt_models';
 import { resolveScopedModel } from './scoped_model';
 
@@ -79,6 +80,26 @@ describe('resolveHuntModels', () => {
       });
     }
   });
+
+  it.each(['efficient', 'balanced', 'frontier'] as const)(
+    'forwards telemetry metadata under the alertzero parent for the %s tier',
+    async (tier) => {
+      await resolve([tier]);
+
+      expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+      expect(resolveScopedModelMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureId: HUNT_MODEL_TIER_FEATURE_IDS[tier],
+          chatModelOptions: {
+            telemetryMetadata: {
+              pluginId: 'alertzero_hunt_sweep',
+              aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+            },
+          },
+        })
+      );
+    }
+  );
 
   it('leaves the other tiers intact when one has no usable connector', async () => {
     resolveScopedModelMock.mockImplementation(async ({ featureId }) =>

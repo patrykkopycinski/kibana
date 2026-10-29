@@ -539,5 +539,83 @@ describe('inferenceAdapter', () => {
         `"Error calling connector: something went wrong"`
       );
     });
+
+    describe('EIS cache control and session id', () => {
+      const mockConnectorProvider = (provider?: string) =>
+        executorMock.getConnector.mockImplementation(() => ({
+          type: InferenceConnectorType.Inference,
+          name: 'inference connector',
+          connectorId: '.id',
+          config: { provider },
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        }));
+
+      const invokeBody = () => executorMock.invoke.mock.calls[0]?.[0].subActionParams?.body;
+
+      beforeEach(() => {
+        executorMock.invoke.mockImplementation(async () => ({
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(
+            of(createOpenAIChunk({ delta: { content: '' } })),
+            logger
+          ),
+        }));
+      });
+
+      it('forwards cache_control and session_id for an Elastic (EIS) connector', () => {
+        mockConnectorProvider('elastic');
+
+        inferenceAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'Hello' }],
+            cacheControl: { type: 'ephemeral', ttl: '5m' },
+            sessionId: 'session-abc',
+          })
+          .subscribe(noop);
+
+        expect(invokeBody()).toEqual(
+          expect.objectContaining({
+            cache_control: { type: 'ephemeral', ttl: '5m' },
+            session_id: 'session-abc',
+          })
+        );
+      });
+
+      ['amazonbedrock', 'openai', 'googlevertexai', undefined].forEach((provider) => {
+        it(`omits both fields for provider ${provider}, which rejects unknown body fields`, () => {
+          mockConnectorProvider(provider);
+
+          inferenceAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+              cacheControl: { type: 'ephemeral' },
+              sessionId: 'session-abc',
+            })
+            .subscribe(noop);
+
+          expect(invokeBody()).not.toHaveProperty('cache_control');
+          expect(invokeBody()).not.toHaveProperty('session_id');
+        });
+      });
+
+      it('omits both fields when the caller supplies neither', () => {
+        mockConnectorProvider('elastic');
+
+        inferenceAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'Hello' }],
+          })
+          .subscribe(noop);
+
+        expect(invokeBody()).not.toHaveProperty('cache_control');
+        expect(invokeBody()).not.toHaveProperty('session_id');
+      });
+    });
   });
 });

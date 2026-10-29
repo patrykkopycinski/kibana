@@ -196,6 +196,20 @@ export const UnifiedChatCompleteParamsSchema = lazySchema(() =>
            * [Learn more](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids).
            */
           user: z.string().optional(),
+          /**
+           * EIS prompt-cache directive. Only valid for Elastic-managed endpoints.
+           */
+          cache_control: z
+            .object({
+              type: z.literal('ephemeral'),
+              ttl: z.enum(['5m', '1h']).optional(),
+            })
+            .strict()
+            .optional(),
+          /**
+           * EIS session identifier used to scope prompt caching across calls.
+           */
+          session_id: z.string().optional(),
         })
         .strict(),
       // abort signal from client

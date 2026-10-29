@@ -32,6 +32,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
     timeout,
+    cacheControl,
+    sessionId,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -48,6 +50,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       temperature,
       reasoning,
       modelName,
+      cacheControl,
+      sessionId,
     });
 
     return defer(() => {

@@ -6,15 +6,16 @@
  */
 
 import { wrapWithSimulatedFunctionCalling } from '../../simulated_function_calling';
-import type { OpenAIRequest } from '../openai/types';
+import { InferenceEndpointProvider } from '@kbn/inference-common';
+import type { InferenceEndpointRequest } from '../inference_endpoint/types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
-import { getModelId } from './utils';
+import { getModelId, getProvider } from './utils';
 
-export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
+export const createRequest = (options: CreateOpenAIRequestOptions): InferenceEndpointRequest => {
   const {
     system,
     messages,
@@ -24,12 +25,25 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     temperature = 0,
     modelName,
     reasoning,
+    cacheControl,
+    sessionId,
   } = applyProviderTransforms(options);
 
   // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
   const model = modelName ?? getModelId(options.connector) ?? options.connector.config?.inferenceId;
 
-  let request: OpenAIRequest;
+  // Prompt caching is an EIS feature: other providers reject unknown body fields.
+  const eisFields: Pick<InferenceEndpointRequest, 'cache_control' | 'session_id'> = {};
+  if (getProvider(options.connector) === InferenceEndpointProvider.Elastic) {
+    if (cacheControl !== undefined) {
+      eisFields.cache_control = cacheControl;
+    }
+    if (sessionId !== undefined) {
+      eisFields.session_id = sessionId;
+    }
+  }
+
+  let request: InferenceEndpointRequest;
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -44,6 +58,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     });
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
+      ...eisFields,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
@@ -59,6 +74,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
 
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
+      ...eisFields,
       model: modelName,
       messages: messagesToOpenAI({ system, messages }),
       ...(hasTools

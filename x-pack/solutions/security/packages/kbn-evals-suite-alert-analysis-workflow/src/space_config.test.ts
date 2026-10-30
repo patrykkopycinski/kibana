@@ -19,6 +19,7 @@ describe('configureAlertAnalysisWorkflow', () => {
       log,
       connectorId: 'connector-1',
       agentId: 'agent-1',
+      usePrompt: false,
     });
 
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -29,6 +30,7 @@ describe('configureAlertAnalysisWorkflow', () => {
         connectorId: 'connector-1',
         agentId: 'agent-1',
         createConversation: true,
+        usePrompt: false,
         autoCloseEnabled: false,
       })
     );

@@ -35,6 +35,7 @@ const internalToolKinds = {
   describeApi: 'data_access',
   describeApiType: 'data_access',
   executeApi: 'data_access',
+  executeDynamicTool: 'data_access',
 } as const satisfies Record<keyof typeof internalTools, InternalToolKind>;
 
 const internalToolKindById = new Map<string, InternalToolKind>(

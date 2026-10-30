@@ -48,6 +48,7 @@ export interface ExecutionPeek {
   eventCount: number;
   lastHeartbeat?: string;
   conversationId?: string;
+  agentId?: string;
   owner?: UserIdAndName;
 }
 
@@ -115,6 +116,9 @@ export interface AgentExecutionClient {
     executionId: string,
     since?: number
   ): Promise<{ events: ChatEvent[]; status: ExecutionStatus; error?: SerializedExecutionError }>;
+
+  /** Delete an execution document. Resolves silently when it does not exist. */
+  delete(executionId: string): Promise<void>;
 
   /** Search executions by metadata and/or status filters. */
   find(options: FindExecutionsOptions): Promise<AgentExecution[]>;
@@ -270,6 +274,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
           'event_count',
           'last_heartbeat',
           'agent_params.conversationId',
+          'agent_id',
           'owner',
         ] as string[],
       });
@@ -277,7 +282,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       if (!source) {
         return undefined;
       }
-      const { agent_params: agentParams, owner } = source;
+      const { agent_params: agentParams, agent_id: agentId, owner } = source;
       const conversationId =
         agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
@@ -286,11 +291,23 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
         ...(conversationId ? { conversationId } : {}),
+        ...(agentId ? { agentId } : {}),
         ...(owner ? { owner } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
         return undefined;
+      }
+      throw err;
+    }
+  }
+
+  async delete(executionId: string): Promise<void> {
+    try {
+      await this.esClient.delete({ index: agentExecutionIndexName, id: executionId });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return;
       }
       throw err;
     }

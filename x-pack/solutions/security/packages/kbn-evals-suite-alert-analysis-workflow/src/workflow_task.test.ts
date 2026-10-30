@@ -406,6 +406,67 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
     ).toBe(false);
   });
 
+  describe('when polling the execution throws', () => {
+    const runningWithConversation = {
+      status: 'running',
+      traceId: 'trace-1',
+      stepExecutions: [
+        {
+          stepId: 'runAgent_step',
+          stepType: 'ai.agent',
+          output: { conversation_id: 'conv-leak' },
+        },
+      ],
+    };
+
+    const failingFetch = ({ cleanupReadWorks }: { cleanupReadWorks: boolean }) => {
+      let gets = 0;
+      return jest.fn(async (path: string, options?: { method?: string }) => {
+        if (options?.method === 'DELETE') {
+          return { success: true };
+        }
+        if (path.endsWith('/run')) {
+          return { workflowExecutionId: 'exec-1' };
+        }
+        gets += 1;
+        // 1st poll succeeds with a stored conversation, the 2nd poll fails, and the cleanup
+        // read (3rd GET) either succeeds or fails.
+        if (gets === 1 || (gets === 3 && cleanupReadWorks)) {
+          return runningWithConversation;
+        }
+        throw new Error('poll failed');
+      }) as unknown as HttpHandler;
+    };
+
+    const deletedPaths = (fetch: HttpHandler) =>
+      (fetch as unknown as jest.Mock).mock.calls
+        .filter(([, options]) => options?.method === 'DELETE')
+        .map(([path]) => path);
+
+    it.each([[true], [false]])(
+      'deletes the stored conversation and rethrows the original error (cleanup read works: %s)',
+      async (cleanupReadWorks) => {
+        const fetch = failingFetch({ cleanupReadWorks });
+
+        await expect(run(fetch, undefined)).rejects.toThrow('poll failed');
+
+        expect(deletedPaths(fetch)).toEqual(['/api/agent_builder/conversations/conv-leak']);
+      }
+    );
+
+    it('still rethrows the original error when the cleanup delete also fails', async () => {
+      const base = failingFetch({ cleanupReadWorks: true }) as unknown as jest.Mock;
+      const fetch = jest.fn(async (path: string, options?: { method?: string }) => {
+        if (options?.method === 'DELETE') {
+          throw new Error('delete failed');
+        }
+        return base(path, options);
+      }) as unknown as HttpHandler;
+
+      await expect(run(fetch, undefined)).rejects.toThrow('poll failed');
+    });
+  });
+
   it('negative control: N/A when the trace client is unreachable', async () => {
     const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), undefined);
 

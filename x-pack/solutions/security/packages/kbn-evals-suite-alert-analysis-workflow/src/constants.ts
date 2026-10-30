@@ -59,7 +59,7 @@ export const AGENT_BUILDER_CONVERSATIONS_ROUTE = '/api/agent_builder/conversatio
  * a real failure.
  *
  * Storing the conversation (`createConversation: true`) widens the agent's toolset (`sleep`,
- * `send_message_to_agent`, `run_subagent`), so trajectory numbers from before that change are not
+ * `send_message_to_agent`), so trajectory numbers from before that change are not
  * directly comparable.
  */
 export const HARNESS_TOOL_IDS: readonly string[] = [

@@ -155,6 +155,68 @@ export const readVerdicts = (stepExecutions: WorkflowStepExecutionDto[]): Map<st
   return byId;
 };
 
+/**
+ * Best-effort delete of the conversations a run stored. A failure is logged and never thrown, so
+ * cleanup can't fail an example. Returns the ids that could not be deleted.
+ */
+export const deleteConversations = async ({
+  fetch,
+  log,
+  conversationIds,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  conversationIds: string[];
+}): Promise<string[]> => {
+  const failed: string[] = [];
+  for (const id of conversationIds) {
+    try {
+      await fetch(`${AGENT_BUILDER_CONVERSATIONS_ROUTE}/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        version: AGENT_BUILDER_API_VERSION,
+        headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+      });
+    } catch (error) {
+      failed.push(id);
+      log.warning(
+        `Could not delete agent conversation ${id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+  return failed;
+};
+
+/** Deletes conversations of the last readable execution. Never throws. */
+const cleanUpAfterFailure = async ({
+  fetchExecution,
+  lastSeen,
+  fetch,
+  log,
+}: {
+  fetchExecution: () => Promise<WorkflowExecutionDto>;
+  lastSeen?: WorkflowExecutionDto;
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<void> => {
+  try {
+    const latest = await fetchExecution().catch(() => lastSeen);
+    const conversationIds = extractAgentConversationIds(latest?.stepExecutions ?? []).map(
+      ({ conversationId }) => conversationId
+    );
+    if (conversationIds.length > 0) {
+      await deleteConversations({ fetch, log, conversationIds });
+    }
+  } catch (cleanupError) {
+    log.warning(
+      `Conversation cleanup after a workflow failure failed: ${
+        cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+      }`
+    );
+  }
+};
+
 /** Triggers the workflow for `alertIds` through the `alert` trigger and polls until it finishes. */
 const startAndWait = async ({
   fetch,
@@ -195,23 +257,34 @@ const startAndWait = async ({
   const deadline = Date.now() + maxWaitMs;
   let execution: WorkflowExecutionDto | undefined;
 
-  while (Date.now() < deadline) {
-    execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
+  const fetchExecution = () =>
+    fetch(`/api/workflows/executions/${workflowExecutionId}`, {
       method: 'GET',
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       query: { includeOutput: true },
-    })) as WorkflowExecutionDto;
+    }) as Promise<WorkflowExecutionDto>;
 
-    if (isTerminal(execution.status)) {
-      break;
+  try {
+    while (Date.now() < deadline) {
+      execution = await fetchExecution();
+
+      if (isTerminal(execution.status)) {
+        break;
+      }
+
+      await sleep(pollIntervalMs);
     }
 
-    await sleep(pollIntervalMs);
-  }
-
-  if (!execution) {
-    throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+    if (!execution) {
+      throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+    }
+  } catch (error) {
+    // The caller never sees the execution, so conversations the agent step already stored would
+    // leak. Read them back best-effort and delete them; the original error is rethrown unchanged.
+    // A step that stores its conversation after this point is not covered.
+    await cleanUpAfterFailure({ fetchExecution, lastSeen: execution, fetch, log });
+    throw error;
   }
 
   if (!isTerminal(execution.status)) {
@@ -221,39 +294,6 @@ const startAndWait = async ({
   }
 
   return { workflowExecutionId, execution };
-};
-
-/**
- * Best-effort delete of the conversations a run stored. A failure is logged and never thrown, so
- * cleanup can't fail an example. Returns the ids that could not be deleted.
- */
-export const deleteConversations = async ({
-  fetch,
-  log,
-  conversationIds,
-}: {
-  fetch: HttpHandler;
-  log: ToolingLog;
-  conversationIds: string[];
-}): Promise<string[]> => {
-  const failed: string[] = [];
-  for (const id of conversationIds) {
-    try {
-      await fetch(`${AGENT_BUILDER_CONVERSATIONS_ROUTE}/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        version: AGENT_BUILDER_API_VERSION,
-        headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      });
-    } catch (error) {
-      failed.push(id);
-      log.warning(
-        `Could not delete agent conversation ${id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-  }
-  return failed;
 };
 
 const readAgentToolCalls = async ({

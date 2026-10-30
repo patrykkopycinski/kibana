@@ -37,7 +37,7 @@ const createLatencyEvaluator = (
       return {
         score: null,
         label: 'unavailable',
-        explanation: `${describe}: unavailable: status=${executionStatus ?? 'unknown'}`,
+        explanation: `${describe}: run not completed (status=${executionStatus ?? 'unknown'})`,
       };
     }
     const score = timing ? secondsBetween(...span(timing)) : null;

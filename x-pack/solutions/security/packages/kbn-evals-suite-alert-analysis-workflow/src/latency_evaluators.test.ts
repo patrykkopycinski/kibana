@@ -103,7 +103,7 @@ describe('latency of runs that did not complete', () => {
 
       expect(result.score).toBeNull();
       expect(result.label).toBe('unavailable');
-      expect(result.explanation).toContain('status=failed');
+      expect(result.explanation).toMatch(/: run not completed \(status=failed\)$/);
     }
   );
 
@@ -125,7 +125,7 @@ describe('latency of runs that did not complete', () => {
     } as never);
 
     expect(result.score).toBeNull();
-    expect(result.explanation).toContain('status=unknown');
+    expect(result.explanation).toBe('workflow execution: run not completed (status=unknown)');
   });
 
   it('still scores a completed run with the same timing', async () => {

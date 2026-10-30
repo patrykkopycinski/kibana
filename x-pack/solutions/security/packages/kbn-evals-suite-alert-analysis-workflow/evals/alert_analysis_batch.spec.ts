@@ -19,7 +19,9 @@
  * minutes per model. On a PR, add the `evals:security-alert-analysis-workflow-batch` label.
  *
  * Evaluators: BatchCoverage, BatchAccuracy, HardShapeAccuracy, MaliciousNotClosed,
- * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`).
+ * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`), plus WorkflowLatencySeconds,
+ * ClassificationStepLatencySeconds (engine timestamps, `latency_evaluators.ts`) and the trace-based
+ * Latency (null when the trace is not found).
  */
 
 import { randomUUID } from 'crypto';
@@ -33,6 +35,7 @@ import { configureAlertAnalysisWorkflow, ensureAlertsIndex } from '../src/space_
 import { buildBatchDocs, planBatch } from '../src/batch_dataset';
 import { BATCH_RULES } from '../src/batch_rules';
 import { batchEvaluators, type BatchExpected, type BatchOutput } from '../src/batch_evaluators';
+import { latencyEvaluators } from '../src/latency_evaluators';
 import { ALERTS_INDEX } from '../src/constants';
 
 /** A typical sweep, one full model call (50), and two model calls (100), over both rules. */
@@ -79,7 +82,7 @@ evaluate.describe(
 
     evaluate(
       'classifies a batch of alerts from one rule with the expected verdicts using a prompt',
-      async ({ executorClient, esClient, fetch, log, connector }) => {
+      async ({ executorClient, evaluators, esClient, fetch, log, connector }) => {
         await configureAlertAnalysisWorkflow({
           fetch,
           log,
@@ -150,7 +153,7 @@ evaluate.describe(
               }
 
               try {
-                const { verdicts, executionStatus } = await runAlertAnalysisBatch({
+                const { verdicts, executionStatus, traceId, timing } = await runAlertAnalysisBatch({
                   fetch,
                   log,
                   alertIds: docs.map(({ id }) => id),
@@ -161,6 +164,8 @@ evaluate.describe(
                     classification: verdicts[id]?.classification,
                   })),
                   executionStatus,
+                  traceId,
+                  timing,
                 };
               } finally {
                 await esClient
@@ -177,7 +182,12 @@ evaluate.describe(
               }
             },
           },
-          selectEvaluators(batchEvaluators)
+          selectEvaluators([
+            ...batchEvaluators,
+            ...latencyEvaluators,
+            // Scores null when the execution's trace is not in TRACING_ES_URL (or the local ES).
+            evaluators.traceBasedEvaluators.latency,
+          ])
         );
       }
     );

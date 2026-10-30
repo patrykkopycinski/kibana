@@ -7,7 +7,7 @@
 
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { readVerdict, readVerdicts } from './workflow_task';
+import { readTiming, readVerdict, readVerdicts } from './workflow_task';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -197,5 +197,47 @@ describe('readVerdicts', () => {
     ];
 
     expect([...readVerdicts(steps).keys()]).toEqual(['a1', 'b2']);
+  });
+});
+
+describe('readTiming', () => {
+  it('spans the classification records and ignores other steps', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '2026-10-30T10:05:00.000Z',
+      stepExecutions: [
+        step({
+          stepId: 'enrich',
+          stepType: 'elasticsearch.search',
+          startedAt: '2026-10-30T10:00:01.000Z',
+          finishedAt: '2026-10-30T10:00:05.000Z',
+        }),
+        step({ startedAt: '2026-10-30T10:01:00.000Z', finishedAt: '2026-10-30T10:02:00.000Z' }),
+        step({
+          stepType: 'ai.prompt',
+          startedAt: '2026-10-30T10:02:00.000Z',
+          finishedAt: '2026-10-30T10:03:30.000Z',
+        }),
+      ],
+    });
+
+    expect(timing).toEqual({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '2026-10-30T10:05:00.000Z',
+      classificationStartedAt: '2026-10-30T10:01:00.000Z',
+      classificationFinishedAt: '2026-10-30T10:03:30.000Z',
+    });
+  });
+
+  it('leaves fields undefined when the engine reported none', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '',
+      stepExecutions: [step({ startedAt: undefined, finishedAt: undefined })],
+    });
+
+    expect(timing.finishedAt).toBeUndefined();
+    expect(timing.classificationStartedAt).toBeUndefined();
+    expect(timing.classificationFinishedAt).toBeUndefined();
   });
 });

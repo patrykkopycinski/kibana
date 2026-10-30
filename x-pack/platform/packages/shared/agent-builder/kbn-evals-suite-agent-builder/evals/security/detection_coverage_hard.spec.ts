@@ -9,15 +9,13 @@ import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
-import {
-  COVERAGE_GAP_CASES,
-  seedHardCoverageFixtures,
-} from './detection_coverage_hard_fixtures';
+import { COVERAGE_GAP_CASES, seedHardCoverageFixtures } from './detection_coverage_hard_fixtures';
 
 /**
  * Discriminating Rule Coverage dataset (#19982, P3a). 64 gaps across the four verdicts,
- * with hard-negative traps tagged on the case. Scored by `evaluateDataset`, so every
- * example exports a score. Verdict accuracy only; P3b graders come later.
+ * with hard-negative traps tagged on the case. Scored by `evaluateDataset`; the
+ * deterministic `VerdictMatch` / `VerdictMatchCollapsed` evaluators read `metadata.expectedVerdict`
+ * (`output.expected` only feeds the LLM correctness judge). P3b graders come later.
  *
  * The routing (`expectedSkill`) matches the existing `detection-coverage` routing suite.
  */
@@ -72,6 +70,7 @@ evaluate.describe(
               query_intent: 'Hard Coverage Gap',
               expectedSkill: 'detection-coverage',
               caseId: c.id,
+              expectedVerdict: c.expectedVerdict,
               attackTechnique: c.attackTechnique,
               traps: c.traps.join(',') || 'none',
             },

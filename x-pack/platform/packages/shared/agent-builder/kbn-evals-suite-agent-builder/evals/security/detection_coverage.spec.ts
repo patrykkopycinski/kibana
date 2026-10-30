@@ -12,6 +12,8 @@ import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import type { Verdict } from '../../src/verdict_evaluators';
+import { verdictsMentioned } from '../../src/verdict_evaluators';
 import { COVERAGE_RULE_NAMES, seedDetectionCoverageFixtures } from './detection_coverage_fixtures';
 
 /**
@@ -77,16 +79,6 @@ const COVERAGE_SKILL_IDS = [
   'recommend-prebuilt-rules',
 ];
 
-/** Every verdict the skill may return; asserting "exactly one" needs the whole set. */
-const ALL_VERDICTS = [
-  'covered_enabled',
-  'covered_disabled',
-  'prebuilt_available',
-  'no_coverage',
-] as const;
-
-type Verdict = (typeof ALL_VERDICTS)[number];
-
 interface ToolCallStep {
   type?: string;
   tool_id?: string;
@@ -96,16 +88,6 @@ interface ToolCallStep {
 
 const toolCalls = (steps: ToolCallStep[], toolId: string): ToolCallStep[] =>
   steps.filter((step) => step?.type === 'tool_call' && step.tool_id === toolId);
-
-/**
- * The verdict the answer actually commits to.
- *
- * The skill is told to lead with one verdict token. Mentioning several would make the
- * recommendation ambiguous for a human and unusable for the workflow, so a multi-verdict
- * answer is a failure, not a pass with noise.
- */
-const verdictsMentioned = (answer: string): Verdict[] =>
-  ALL_VERDICTS.filter((verdict) => answer.includes(verdict));
 
 /**
  * Fail with the actual cause when a verdict is missing.

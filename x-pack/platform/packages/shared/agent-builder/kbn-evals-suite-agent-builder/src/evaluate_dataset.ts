@@ -40,6 +40,10 @@ import {
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import { extractSearchRetrievedDocs } from './ir_extractor';
+import {
+  createVerdictMatchCollapsedEvaluator,
+  createVerdictMatchEvaluator,
+} from './verdict_evaluators';
 
 interface DatasetExample extends Example {
   input: {
@@ -293,6 +297,10 @@ function configureExperiment({
     // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
     // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
     createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
+    // Verdict accuracy for the detection-coverage datasets. Opt-in via `metadata.expectedVerdict`;
+    // report `score: null` (not 1) when it is absent so other datasets are not credited a pass.
+    createVerdictMatchEvaluator(),
+    createVerdictMatchCollapsedEvaluator(),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...irEvaluators,

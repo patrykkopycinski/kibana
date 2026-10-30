@@ -202,6 +202,24 @@ describe('createEvaluateExternalDataset', () => {
   });
 });
 
+describe('verdict evaluators wiring', () => {
+  it('registers VerdictMatch and VerdictMatchCollapsed with runExperiment', async () => {
+    const { dependencies, runExperiment } = createTestSetup();
+
+    await createEvaluateDataset(dependencies)({
+      dataset: {
+        name: 'test-dataset',
+        description: 'dataset for verdict evaluator wiring',
+        examples: [{ input: { question: 'gap' }, output: {}, metadata: {} }],
+      },
+    });
+
+    const [, selectedEvaluators] = runExperiment.mock.calls[0];
+    const names = selectedEvaluators.map((it) => it.name);
+    expect(names).toEqual(expect.arrayContaining(['VerdictMatch', 'VerdictMatchCollapsed']));
+  });
+});
+
 describe('ExpectedSkillInvocation evaluator', () => {
   const loadedSkill = 'automatic-migration-rules-summarize';
   const notLoadedSkill = 'automatic-migration-rules-start-migration';

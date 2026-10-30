@@ -111,6 +111,7 @@ describe('buildSeedDocs', () => {
   const matrix = buildTuningVariantMatrix();
   const caseOf = (baseId: string, v: number) =>
     matrix.find((m) => m.baseId === baseId && m.variant === v) as TuningVariantSpec;
+  type Doc = Record<string, unknown>;
   const windowMs = (fixtureId: string) =>
     fixtureId.startsWith('fp-schedule-') ? 24 * 3600 * 1000 : 10 * 60 * 1000;
   const stamp = (d: Record<string, unknown>) => Date.parse(d['@timestamp'] as string);
@@ -121,22 +122,23 @@ describe('buildSeedDocs', () => {
     expect(fp).toHaveLength(ENTITY_PROFILES['fp-host-exception'].length);
   });
 
-  it('v0/v1/v2 of one base rule differ in counts, hosts, users and timestamps', () => {
+  const distinct = (docs: Array<Record<string, unknown>>, key: 'host' | 'user') =>
+    new Set(docs.map((d) => (d[key] as { name: string }).name)).size;
+  const stamps = (docs: Array<Record<string, unknown>>) => docs.map(stamp);
+  const baseIds = [...new Set(matrix.map((m) => m.baseId))];
+
+  it('v0/v1/v2 of an exception base differ in counts, hosts, users and timestamps', () => {
     const [v0, v1, v2] = [0, 1, 2].map((v) =>
       build('fp-host-exception', caseOf('fp-host-exception', v))
     );
     expect([v0.fp.length, v1.fp.length, v2.fp.length]).toEqual([6, 8, 10]);
     expect([v0.tp.length, v1.tp.length, v2.tp.length]).toEqual([3, 4, 4]);
 
-    const distinct = (docs: Array<Record<string, unknown>>, key: 'host' | 'user') =>
-      new Set(docs.map((d) => (d[key] as { name: string }).name)).size;
     expect(distinct(v1.fp, 'host')).toBe(4);
     expect(distinct(v1.fp, 'user')).toBe(2);
     expect(distinct(v2.fp, 'host')).toBe(1);
     expect(distinct(v2.fp, 'user')).toBe(1);
-    expect(distinct(v1.fp, 'host')).not.toBe(distinct(v2.fp, 'host'));
 
-    const stamps = (docs: Array<Record<string, unknown>>) => docs.map(stamp);
     expect(stamps(v0.fp)).not.toEqual(stamps(v1.fp).slice(0, 6));
     expect(Math.min(...stamps(v1.fp))).toBeLessThan(Math.min(...stamps(v0.fp)));
     // v2 ("single") spreads over the window; v0 is a burst.
@@ -144,6 +146,54 @@ describe('buildSeedDocs', () => {
       Math.max(...stamps(v0.fp)) - Math.min(...stamps(v0.fp))
     );
   });
+
+  it.each(baseIds)('%s: v0, v1 and v2 are pairwise distinguishable', (baseId) => {
+    const built = [0, 1, 2].map((v) => build(baseId, caseOf(baseId, v)));
+    const signature = ({ fp, tp }: { fp: Doc[]; tp: Doc[] }) =>
+      JSON.stringify([
+        fp.length,
+        tp.length,
+        distinct(fp, 'host'),
+        distinct(fp, 'user'),
+        // Relative ages: absolute stamps are anchored to NOW and would only differ by shape.
+        stamps(fp).map((t) => NOW - t),
+      ]);
+    const signatures = built.map(signature);
+    expect(new Set(signatures).size).toBe(3);
+  });
+
+  it.each(baseIds.filter((id) => id.startsWith('fp-threshold-')))(
+    '%s: FP burst sizes grow across variants and every host stays above the threshold of 3',
+    (baseId) => {
+      const counts = [0, 1, 2].map((v) => build(baseId, caseOf(baseId, v)).fp.length);
+      expect(counts[0]).toBeLessThan(counts[1]);
+      expect(counts[1]).toBeLessThan(counts[2]);
+      [0, 1, 2].forEach((v) => {
+        const { fp } = build(baseId, caseOf(baseId, v));
+        const perHost = new Map<string, number>();
+        fp.forEach((d) => {
+          const name = (d.host as { name: string }).name;
+          perHost.set(name, (perHost.get(name) ?? 0) + 1);
+        });
+        expect(Math.min(...perHost.values())).toBeGreaterThan(3);
+        // The worker screens rules on fp_count >= 50% of all alerts; variants must clear it.
+        expect(fp.length * 100).toBeGreaterThanOrEqual(
+          (fp.length + caseOf(baseId, v).tpCount) * 50
+        );
+      });
+    }
+  );
+
+  // P0-1: collapsing entities on a non-exception base would make an exception the tightest fix.
+  it.each(matrix.filter((m) => m.expected !== 'exception').map((m) => [m.caseId, m] as const))(
+    "%s: seeded FP entity diversity is at least the base profile's",
+    (_caseId, spec) => {
+      const profile = ENTITY_PROFILES[spec.baseId];
+      const { fp } = build(spec.baseId, spec);
+      expect(distinct(fp, 'host')).toBeGreaterThanOrEqual(new Set(profile.map((e) => e.host)).size);
+      expect(distinct(fp, 'user')).toBeGreaterThanOrEqual(new Set(profile.map((e) => e.user)).size);
+    }
+  );
 
   it.each(matrix.map((m) => [m.caseId, m] as const))(
     '%s: timestamps stay inside the rule window and FP outnumber TP',
@@ -158,19 +208,42 @@ describe('buildSeedDocs', () => {
     }
   );
 
-  it('never writes the answer key (case id, fixture id, az-eval markers) into ES docs', () => {
-    for (const spec of matrix) {
-      const { fp, tp } = build(spec.baseId, spec);
-      const json = JSON.stringify([...fp, ...tp]);
+  it('never writes the answer key (case id, fixture id, tp/fp markers) into ES docs', () => {
+    const LABEL_WORDS = /\btp\b|true.?pos|false.?pos|fp.cluster|\bfp\b/i;
+    const allIds = [...matrix.map((m) => m.caseId), ...baseIds];
+    const jsonOf = (docs: Doc[]) =>
+      JSON.stringify(docs).replace(/"kibana\.alert\.workflow_reason":"[a-z_]+",?/g, '');
+    const cases: Array<[string, string]> = [
+      ...matrix.map((spec): [string, string] => {
+        const { fp, tp } = build(spec.baseId, spec);
+        return [spec.caseId, jsonOf([...fp, ...tp])];
+      }),
+      // The default (non-variant) path must not carry a marker either.
+      ...baseIds.map((id): [string, string] => [`${id} (base path)`, jsonOf(build(id).fp)]),
+    ];
+    expect(cases.length).toBe(40);
+    for (const [label, json] of cases) {
+      expect({ label, hit: LABEL_WORDS.exec(json)?.[0] }).toEqual({ label, hit: undefined });
       expect(json).not.toContain('az-eval');
-      expect(json).not.toContain(spec.caseId);
+      for (const id of allIds)
+        expect({ label, leaks: json.includes(id) }).toEqual({ label, leaks: false });
     }
+  });
+
+  it('names TP and FP entities from one scheme, so a host name does not reveal the label', () => {
+    const spec = caseOf('fp-host-exception', 1);
+    const { fp, tp } = build('fp-host-exception', spec);
+    const names = [...fp, ...tp].flatMap((d) => [
+      (d.host as { name: string }).name,
+      (d.user as { name: string }).name,
+    ]);
+    names.forEach((n) => expect(n).toMatch(/^eval-[0-9a-f]+-[hu]\d+$/));
   });
 
   it('seeds every field the base query references; TP docs satisfy the base query itself', () => {
     // Every variant base rule must have a replayable base query, or this test is vacuous for it.
-    const baseIds = [...new Set(matrix.map((m) => m.baseId))];
-    baseIds.forEach((fixtureId) => {
+    const replayBaseIds = [...new Set(matrix.map((m) => m.baseId))];
+    replayBaseIds.forEach((fixtureId) => {
       const query = FIXTURE_QUERIES[fixtureId];
       const clauses = parseSimpleQuery(query);
       expect({ fixtureId, replayable: clauses !== null }).toEqual({ fixtureId, replayable: true });
@@ -197,6 +270,26 @@ describe('buildSeedDocs', () => {
         )
       );
     });
+  });
+});
+
+describe('seedRuleAndFpAlerts rule uuid', () => {
+  it('throws, cleans up and indexes nothing when the create response has no id', async () => {
+    const { ctx, fetch, bulk } = setup({ id: undefined });
+    const deleteByQuery = jest.fn(async () => ({}));
+    const withDelete = {
+      ...ctx,
+      esClient: { bulk, deleteByQuery },
+    } as unknown as typeof ctx;
+
+    await expect(seedRuleAndFpAlerts(withDelete, fixture, 'unique-noid')).rejects.toThrow(
+      /returned no id/
+    );
+    expect(bulk).not.toHaveBeenCalled();
+    expect(deleteByQuery).toHaveBeenCalledTimes(1);
+    const deletes = fetch.mock.calls.filter(([, options]) => options?.method === 'DELETE');
+    // One stale-rule delete before the create, one cleanup delete after the failure.
+    expect(deletes).toHaveLength(2);
   });
 });
 

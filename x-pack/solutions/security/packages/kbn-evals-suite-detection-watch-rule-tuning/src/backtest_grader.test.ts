@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { backtestProposal, matchesEntry, parseSimpleQuery, type AlertDoc } from './backtest_grader';
+import {
+  backtestProposal,
+  matchesEntry,
+  matchesQuery,
+  parseSimpleQuery,
+  type AlertDoc,
+} from './backtest_grader';
 import type { RuleTuningProposal } from './workflow_task';
 
 const tp = (host: string, proc = 'mimikatz'): AlertDoc => ({
@@ -39,7 +45,34 @@ describe('parseSimpleQuery', () => {
   it('returns null outside the dialect so callers fail closed', () => {
     expect(parseSimpleQuery('process.name:ja*')).toBeNull();
     expect(parseSimpleQuery('not process.name:java')).toBeNull();
+    expect(parseSimpleQuery('process.name:java or host.name:a')).toBeNull();
+    expect(parseSimpleQuery('process.name:java and not')).toBeNull();
     expect(parseSimpleQuery('')).toBeNull();
+  });
+
+  it('strips matching surrounding quotes from values', () => {
+    expect(parseSimpleQuery('process.name:"java" and user.name:\'svc\'')).toEqual([
+      { field: 'process.name', values: ['java'] },
+      { field: 'user.name', values: ['svc'] },
+    ]);
+    expect(parseSimpleQuery('process.name:("ssh" or "curl")')).toEqual([
+      { field: 'process.name', values: ['ssh', 'curl'] },
+    ]);
+    // Mismatched quotes are not a quoted value: stay literal (and so never match).
+    expect(parseSimpleQuery('process.name:"java')).toEqual([
+      { field: 'process.name', values: ['"java'] },
+    ]);
+  });
+
+  it('supports `and not field:value` and replays it as a negation', () => {
+    const query = 'process.name:java and not user.name:svc_jenkins';
+    expect(parseSimpleQuery(query)).toEqual([
+      { field: 'process.name', values: ['java'] },
+      { field: 'user.name', values: ['svc_jenkins'], negated: true },
+    ]);
+    expect(matchesQuery(fp('h1', 'svc_jenkins'), query)).toBe(false);
+    expect(matchesQuery(fp('h1', 'someone_else'), query)).toBe(true);
+    expect(matchesQuery(fp('h1', 'svc_jenkins'), 'process.name:"java"')).toBe(true);
   });
 });
 

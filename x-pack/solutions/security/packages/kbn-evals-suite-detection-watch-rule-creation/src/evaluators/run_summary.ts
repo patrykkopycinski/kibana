@@ -11,14 +11,19 @@ import { computeScoreStats, type ScoreStats } from '../score_stats';
 
 export type ScoreSink = Map<string, Array<number | null>>;
 
+/** Per-evaluator count of results labelled `unsupported` (a null score the evaluator could not measure). */
+export type UnsupportedSink = Map<string, number>;
+
 /**
  * Wraps each evaluator so every observed score is recorded, keyed by evaluator
  * name. The wrapper is transparent: same inputs, same outputs, same N/A
- * semantics — it only observes.
+ * semantics — it only observes. With `unsupportedSink`, results labelled `unsupported`
+ * are also counted, so a measurement gap is distinguishable from a no-rule skip.
  */
 export const withScoreCollection = (
   evaluators: RuleEvaluator[],
-  sink: ScoreSink
+  sink: ScoreSink,
+  unsupportedSink?: UnsupportedSink
 ): RuleEvaluator[] =>
   evaluators.map((evaluator) => ({
     ...evaluator,
@@ -27,6 +32,9 @@ export const withScoreCollection = (
       const bucket = sink.get(evaluator.name) ?? [];
       bucket.push(result.score ?? null);
       sink.set(evaluator.name, bucket);
+      if (unsupportedSink && result.label === 'unsupported') {
+        unsupportedSink.set(evaluator.name, (unsupportedSink.get(evaluator.name) ?? 0) + 1);
+      }
       return result;
     },
   })) as RuleEvaluator[];
@@ -45,13 +53,17 @@ export interface EvaluatorSummaryRow {
  *     discriminated nothing this run (fine for a smoke check, useless for
  *     model comparison, and it should not be averaged into an overall score).
  *   - N/A > 0: measurement gaps, each one a place the run measured nothing.
+ *   - unsupported > 0: the evaluator could not measure the case (e.g. a query outside the
+ *     benign-replay dialect). Counted apart from `N/A×`, which also includes no-rule skips.
  */
 export const logRunSummary = ({
   sink,
+  unsupportedSink,
   datasetName,
   log,
 }: {
   sink: ScoreSink;
+  unsupportedSink?: UnsupportedSink;
   datasetName: string;
   log: ToolingLog;
 }): EvaluatorSummaryRow[] => {
@@ -63,6 +75,7 @@ export const logRunSummary = ({
     const flags = [
       stats.saturated ? 'SATURATED(no signal)' : '',
       stats.naCount > 0 ? `N/A×${stats.naCount}` : '',
+      (unsupportedSink?.get(name) ?? 0) > 0 ? `unsupported×${unsupportedSink?.get(name)}` : '',
       stats.n === 0 ? 'UNMEASURED' : '',
     ]
       .filter(Boolean)

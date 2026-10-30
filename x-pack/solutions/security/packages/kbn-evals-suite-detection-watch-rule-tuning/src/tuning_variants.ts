@@ -19,14 +19,20 @@ const fnv1a = (input: string): number =>
  * × 3 variants = 30 cases. Variants change only the data, never the expected
  * decision. Case id = `<base>-v<n>`.
  *
- *   | variant | TP | FP | spread                                  | timestamps                  |
- *   | v0      | 3  | 6  | original fixture values                  | original                    |
- *   | v1      | 4  | 8  | FP cluster across 4 hosts / 2 users      | shifted -2d, same window    |
- *   | v2      | 4  | 10 | FP cluster on 1 host / 1 user            | spread over the full window |
+ *   | variant | TP | FP (threshold bases) | spread (exception bases only)  | timestamps                  |
+ *   | v0      | 3  | 6  (12)              | the fixture's own structure    | original                    |
+ *   | v1      | 4  | 8  (16)              | FP cluster across 4 hosts/2 users | shifted -2d, same window |
+ *   | v2      | 4  | 10 (20)              | FP cluster on 1 host / 1 user  | spread over the full window |
  *
- * Entity names for v1/v2 are generated from (case id, variant index) so they are
- * stable across runs. The FP signature field value that the golden exception or
- * query targets stays fixed per base rule.
+ * Only `exception` bases are reshaped: collapsing a query/schedule/risk_score/threshold
+ * fixture onto one host or user would make an exception the tightest fix and flip the
+ * golden label. Those bases keep their profile's entity diversity and vary counts and
+ * timestamps only. Threshold bases burst well above the rule's threshold (12/16/20 events
+ * over 3 hosts, each host far past the count of 3).
+ *
+ * Every seeded entity (FP and TP alike) is named `eval-<hash>-h<n>` / `eval-<hash>-u<n>`,
+ * derived from the case id so names are stable across runs but say nothing about the
+ * label. FP and TP indexes live in disjoint buckets (TP starts at `TP_ENTITY_INDEX_OFFSET`).
  */
 
 export const TUNING_VARIANT_COUNT = 3;
@@ -68,6 +74,12 @@ export interface TuningVariantSpec {
   timeShiftMs: number;
 }
 
+/** FP burst size per variant for threshold bases: every host stays above the rule's threshold. */
+const THRESHOLD_FP_COUNTS: Record<number, number> = { 0: 12, 1: 16, 2: 20 };
+
+/** TP entity indexes start here so they can never collide with an FP bucket or profile index. */
+export const TP_ENTITY_INDEX_OFFSET = 16;
+
 const VARIANT_SHAPE: Record<number, Omit<TuningVariantSpec, 'caseId' | 'baseId' | 'expected'>> = {
   0: { variant: 0, tpCount: 3, fpCount: 6, spread: 'original', timeShiftMs: 0 },
   1: { variant: 1, tpCount: 4, fpCount: 8, spread: 'multi', timeShiftMs: -2 * 24 * 3600 * 1000 },
@@ -82,29 +94,42 @@ export const buildTuningVariantMatrix = (): TuningVariantSpec[] =>
   TUNING_BASE_RULES.flatMap((base) =>
     [0, 1, 2].map((v) => ({
       ...VARIANT_SHAPE[v],
+      ...(base.expected === 'threshold' && { fpCount: THRESHOLD_FP_COUNTS[v] }),
       caseId: `${base.id}-v${v}`,
       baseId: base.id,
       expected: base.expected,
     }))
   );
 
+/** Opaque, label-free entity name: `kind` is `h` (host) or `u` (user). */
+export const entityName = (spec: TuningVariantSpec, kind: 'h' | 'u', index: number): string =>
+  `eval-${stableHash(spec.caseId).toString(16).slice(0, 6)}-${kind}${index}`;
+
+/** Only `exception` bases may have their FP cluster collapsed or fanned out (see header). */
+export const reshapesEntities = (spec: TuningVariantSpec): boolean =>
+  spec.expected === 'exception' && spec.spread !== 'original';
+
 /**
- * Host name for one FP slot. v0 keeps the original fixture host; `single` collapses every
- * slot onto one generated host; `multi` fans out over 4 generated hosts. Deterministic in
- * (case id, variant index, slot).
+ * Entity index for one FP slot. `profileIndex` is the position of the profile row's entity among
+ * the profile's distinct entities of that kind, so a non-reshaped case keeps exactly the
+ * profile's host/user diversity. A reshaped case uses 4 host / 2 user buckets (`multi`) or 1
+ * (`single`). Deterministic in (case id, variant, slot).
  */
-export const fpHostFor = (spec: TuningVariantSpec, slot: number, original: string): string => {
-  if (spec.spread === 'original') return original;
-  const bucket = spec.spread === 'single' ? 0 : slot % 4;
-  return `eval-${stableHash(`${spec.caseId}:${spec.variant}`).toString(16).slice(0, 6)}-h${bucket}`;
+const fpEntityIndex = (
+  spec: TuningVariantSpec,
+  kind: 'h' | 'u',
+  slot: number,
+  profileIndex: number
+): number => {
+  if (!reshapesEntities(spec)) return profileIndex;
+  return spec.spread === 'single' ? 0 : slot % (kind === 'h' ? 4 : 2);
 };
 
-/** Generated user name: `multi` spreads over 2 users, `single` uses 1, `original` keeps the fixture user. */
-export const fpUserFor = (spec: TuningVariantSpec, slot: number, original: string): string => {
-  if (spec.spread === 'original') return original;
-  const bucket = spec.spread === 'single' ? 0 : slot % 2;
-  return `eval-user-${stableHash(spec.caseId).toString(16).slice(0, 4)}-${bucket}`;
-};
+export const fpHostFor = (spec: TuningVariantSpec, slot: number, profileIndex: number): string =>
+  entityName(spec, 'h', fpEntityIndex(spec, 'h', slot, profileIndex));
+
+export const fpUserFor = (spec: TuningVariantSpec, slot: number, profileIndex: number): string =>
+  entityName(spec, 'u', fpEntityIndex(spec, 'u', slot, profileIndex));
 
 export interface SeededTpAlert extends AlertDoc {
   'az-eval:tp': true;
@@ -112,15 +137,17 @@ export interface SeededTpAlert extends AlertDoc {
 }
 
 /**
- * Labelled TRUE POSITIVE alerts for one case. Each carries the deterministic tag
- * `az-eval:tp` plus the case id so the grader finds them without a model. TP docs use
- * a host distinct from the FP cluster so an FP-targeting exception cannot suppress them
- * by accident (the TPSuppressedByTuning gate then measures a real decision).
+ * Labelled TRUE POSITIVE alerts for one case. Each carries the in-memory tag `az-eval:tp`
+ * plus the case id so the grader finds them without a model; the seeder never writes those
+ * tags to ES. TP entities are named like FP ones (see `entityName`) but in a disjoint index
+ * bucket, so an FP-targeting exception cannot suppress them by accident (the
+ * TPSuppressedByTuning gate then measures a real decision) and the name does not reveal the
+ * label.
  */
 export const buildTpCohort = (spec: TuningVariantSpec, tpProcess: string): SeededTpAlert[] =>
   Array.from({ length: spec.tpCount }, (_, i) => ({
-    'host.name': `eval-tp-${stableHash(spec.caseId).toString(16).slice(0, 6)}-${i}`,
-    'user.name': `eval-tp-user-${i}`,
+    'host.name': entityName(spec, 'h', TP_ENTITY_INDEX_OFFSET + i),
+    'user.name': entityName(spec, 'u', TP_ENTITY_INDEX_OFFSET + i),
     'process.name': tpProcess,
     'az-eval:tp': true,
     'az-eval:case': spec.caseId,

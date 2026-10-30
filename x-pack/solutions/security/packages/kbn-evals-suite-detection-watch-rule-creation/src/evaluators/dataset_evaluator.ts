@@ -23,7 +23,12 @@ import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_cl
 import { BENIGN_FP_GATE, generateBenignCorpus, replayBenignFpRate } from '../benign_replay';
 import { createToolRoutingEvaluator } from './tool_routing';
 import { createTrajectoryEvaluators } from './trajectory';
-import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
+import {
+  logRunSummary,
+  withScoreCollection,
+  type ScoreSink,
+  type UnsupportedSink,
+} from './run_summary';
 import {
   extractMitreTechniques,
   hasRequiredFields,
@@ -253,7 +258,8 @@ const pct = (n: number): string => `${(n * 100).toFixed(1)}%`;
  *
  * KNOWN GAP: every golden dataset drafts `language: 'esql'`, so this evaluator is UNMEASURED
  * (all `unsupported`) for today's drafts. Do not read an absent BenignReplayFpRate score as a
- * pass: the run summary's `unsupported` count is the only signal of that coverage hole.
+ * pass: the run summary's `unsupported×n` flag (counted apart from `N/A×n`, which also
+ * includes no-rule skips) is the signal of that coverage hole.
  */
 export const createBenignReplayFpRateEvaluator = (): RuleEvaluator =>
   skipNoRule({
@@ -395,15 +401,16 @@ export const createEvaluateDataset =
 
     // Observe every score so the run can state its own resolution limits.
     const sink: ScoreSink = new Map();
+    const unsupportedSink: UnsupportedSink = new Map();
     await executorClient.runExperiment(
       {
         name: dataset.name,
         datasets: [dataset],
         task: async ({ input }) => ruleCreationClient.run({ input }),
       },
-      withScoreCollection(allEvaluators, sink)
+      withScoreCollection(allEvaluators, sink, unsupportedSink)
     );
 
     log.info(`Evaluation complete: "${dataset.name}"`);
-    logRunSummary({ sink, datasetName: dataset.name, log });
+    logRunSummary({ sink, unsupportedSink, datasetName: dataset.name, log });
   };

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import type { ChangeType } from './constants';
 import { selectFixtures } from './fixture_selection';
 import { buildTuningVariantMatrix, type TuningVariantSpec } from './tuning_variants';
+import { NoProposalError, type RuleTuningVerdict } from './workflow_task';
 
 /** Opt-in switch for the 30-case variant matrix. Anything but `1` leaves the run unchanged. */
 export const VARIANT_MATRIX_ENV = 'AZ_TUNING_VARIANTS';
@@ -61,3 +63,25 @@ export const buildVariantExamples = (
       },
     };
   });
+
+/**
+ * Variant-matrix runs execute under one `runExperiment`, whose executor aborts the whole
+ * experiment on the first thrown task. A review that produced no diagnose proposal is a model
+ * failure for THAT case, so it becomes a `failed` verdict (the gate scores it `no_proposal`, 0)
+ * with the reason in `error`. Only `NoProposalError` is converted: seeding, harvest and
+ * transport failures are infrastructure faults and still abort loudly.
+ */
+export const runVariantWorkflow = async (
+  run: () => Promise<RuleTuningVerdict>
+): Promise<RuleTuningVerdict & { error?: string }> => {
+  try {
+    return await run();
+  } catch (err) {
+    if (!(err instanceof NoProposalError)) throw err;
+    return {
+      executionId: 'no-proposal',
+      executionStatus: ExecutionStatus.FAILED,
+      error: err.message,
+    };
+  }
+};

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import { TUNING_BASE_RULES, buildTuningVariantMatrix } from './tuning_variants';
 import {
   VARIANT_MATRIX_ENV,
   baseFixtureFor,
   buildVariantExamples,
   isVariantMatrixEnabled,
+  runVariantWorkflow,
   selectVariantCases,
 } from './variant_matrix_run';
+import { NoProposalError } from './workflow_task';
 
 const fixtures = TUNING_BASE_RULES.map(({ id }) => ({
   id,
@@ -52,6 +55,30 @@ describe('baseFixtureFor', () => {
   it('throws on matrix/spec drift instead of skipping the case', () => {
     const [spec] = buildTuningVariantMatrix();
     expect(() => baseFixtureFor(spec, [])).toThrow(/no base tuning fixture/);
+  });
+});
+
+describe('runVariantWorkflow', () => {
+  const verdict = { executionId: 'exec-1', executionStatus: ExecutionStatus.COMPLETED };
+
+  it('passes a normal verdict through untouched', async () => {
+    await expect(runVariantWorkflow(async () => verdict)).resolves.toBe(verdict);
+  });
+
+  it('turns a no-proposal review into a failed verdict carrying the reason', async () => {
+    const result = await runVariantWorkflow(async () => {
+      throw new NoProposalError('Review execution r1 produced no diagnose proposal');
+    });
+    expect(result.executionStatus).toBe(ExecutionStatus.FAILED);
+    expect(result.error).toMatch(/no diagnose proposal/);
+  });
+
+  it('still throws for any other failure (seeding, harvest, transport)', async () => {
+    await expect(
+      runVariantWorkflow(async () => {
+        throw new Error('es unavailable');
+      })
+    ).rejects.toThrow('es unavailable');
   });
 });
 

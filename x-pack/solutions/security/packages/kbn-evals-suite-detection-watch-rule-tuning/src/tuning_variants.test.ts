@@ -11,6 +11,7 @@ import {
   buildTuningVariantMatrix,
   fpHostFor,
   fpUserFor,
+  reshapesEntities,
 } from './tuning_variants';
 
 describe('buildTuningVariantMatrix', () => {
@@ -35,9 +36,25 @@ describe('buildTuningVariantMatrix', () => {
       // Strictly more FP than TP: the worker screens rules on fp_count >= 50% of alerts.
       expect(spec.fpCount).toBeGreaterThan(spec.tpCount);
     }
-    expect(matrix.filter((m) => m.variant === 0).map((m) => [m.tpCount, m.fpCount])).toEqual(
-      Array(10).fill([3, 6])
+    expect(
+      matrix
+        .filter((m) => m.variant === 0)
+        .map((m) => [m.baseId, m.tpCount, m.fpCount])
+        .sort()
+    ).toEqual(
+      TUNING_BASE_RULES.map(({ id, expected }) => [id, 3, expected === 'threshold' ? 12 : 6]).sort()
     );
+  });
+
+  it('varies the burst size per variant for threshold bases, all above the threshold of 3 per host', () => {
+    for (const base of TUNING_BASE_RULES.filter((b) => b.expected === 'threshold')) {
+      const counts = [0, 1, 2].map(
+        (v) => matrix.find((m) => m.baseId === base.id && m.variant === v)?.fpCount
+      );
+      expect(counts).toEqual([12, 16, 20]);
+      // 3 hosts in each threshold profile: the smallest per-host share must beat threshold 3.
+      expect(Math.floor((counts[0] as number) / 3)).toBeGreaterThan(3);
+    }
   });
 
   it('keeps the expected decision identical across the three variants of one base rule', () => {
@@ -56,48 +73,55 @@ describe('buildTuningVariantMatrix', () => {
 });
 
 describe('entity generation', () => {
-  const spec = (caseId: string, spread: 'original' | 'multi' | 'single') => ({
+  const spec = (
+    caseId: string,
+    spread: 'original' | 'multi' | 'single',
+    expected: 'exception' | 'query' = 'exception'
+  ) => ({
     caseId,
     baseId: caseId.replace(/-v\d$/, ''),
     variant: 1,
-    expected: 'exception' as const,
+    expected,
     tpCount: 4,
     fpCount: 8,
     spread,
     timeShiftMs: 0,
   });
+  const distinct = (fn: (slot: number) => string, n: number) =>
+    new Set(Array.from({ length: n }, (_, i) => fn(i))).size;
 
-  it('keeps the original host and user for v0', () => {
-    expect(fpHostFor(spec('x-v0', 'original'), 3, 'build-agent-01')).toBe('build-agent-01');
-    expect(fpUserFor(spec('x-v0', 'original'), 3, 'svc_jenkins')).toBe('svc_jenkins');
+  it('keeps the profile structure for v0: one name per distinct profile entity', () => {
+    const s = spec('x-v0', 'original');
+    expect(fpHostFor(s, 0, 0)).toBe(fpHostFor(s, 5, 0));
+    expect(fpHostFor(s, 0, 0)).not.toBe(fpHostFor(s, 0, 1));
+    expect(fpUserFor(s, 0, 2)).not.toBe(fpUserFor(s, 0, 1));
   });
 
-  it('spreads v1 over 4 hosts and 2 users', () => {
-    const hosts = new Set(
-      Array.from({ length: 8 }, (_, i) => fpHostFor(spec('x-v1', 'multi'), i, 'o'))
-    );
-    const users = new Set(
-      Array.from({ length: 8 }, (_, i) => fpUserFor(spec('x-v1', 'multi'), i, 'o'))
-    );
-    expect(hosts.size).toBe(4);
-    expect(users.size).toBe(2);
+  it('spreads v1 of an exception base over 4 hosts and 2 users', () => {
+    const s = spec('x-v1', 'multi');
+    expect(distinct((i) => fpHostFor(s, i, 0), 8)).toBe(4);
+    expect(distinct((i) => fpUserFor(s, i, 0), 8)).toBe(2);
   });
 
-  it('concentrates v2 on 1 host and 1 user', () => {
-    const hosts = new Set(
-      Array.from({ length: 10 }, (_, i) => fpHostFor(spec('x-v2', 'single'), i, 'o'))
-    );
-    const users = new Set(
-      Array.from({ length: 10 }, (_, i) => fpUserFor(spec('x-v2', 'single'), i, 'o'))
-    );
-    expect(hosts.size).toBe(1);
-    expect(users.size).toBe(1);
+  it('concentrates v2 of an exception base on 1 host and 1 user', () => {
+    const s = spec('x-v2', 'single');
+    expect(distinct((i) => fpHostFor(s, i, i), 10)).toBe(1);
+    expect(distinct((i) => fpUserFor(s, i, i), 10)).toBe(1);
   });
+
+  it.each(['multi', 'single'] as const)(
+    'does NOT reshape a non-exception base on %s: the profile index decides',
+    (spread) => {
+      const s = spec('x-v1', spread, 'query');
+      expect(reshapesEntities(s)).toBe(false);
+      expect(distinct((i) => fpHostFor(s, i, i % 5), 10)).toBe(5);
+      expect(distinct((i) => fpUserFor(s, i, i % 5), 10)).toBe(5);
+    }
+  );
 
   it('is deterministic for a given case id and variant', () => {
-    const a = fpHostFor(spec('x-v1', 'multi'), 2, 'o');
-    const b = fpHostFor(spec('x-v1', 'multi'), 2, 'o');
-    expect(a).toBe(b);
+    const s = spec('x-v1', 'multi');
+    expect(fpHostFor(s, 2, 0)).toBe(fpHostFor(s, 2, 0));
   });
 });
 
@@ -113,10 +137,20 @@ describe('buildTpCohort', () => {
     }
   });
 
-  it('gives TP alerts hosts distinct from the FP cluster', () => {
-    const [spec] = buildTuningVariantMatrix();
-    const tpHosts = new Set(buildTpCohort(spec, 'mimikatz').map((t) => t['host.name']));
-    expect(tpHosts.size).toBe(spec.tpCount);
-    expect([...tpHosts].some((h) => String(h).startsWith('eval-tp-'))).toBe(true);
-  });
+  it.each(buildTuningVariantMatrix().map((m) => [m.caseId, m] as const))(
+    '%s: TP entities use the FP naming scheme in a disjoint index bucket',
+    (_caseId, spec) => {
+      const tps = buildTpCohort(spec, 'mimikatz');
+      const tpHosts = new Set(tps.map((t) => String(t['host.name'])));
+      const tpUsers = new Set(tps.map((t) => String(t['user.name'])));
+      expect(tpHosts.size).toBe(spec.tpCount);
+      const fpHosts = new Set(Array.from({ length: 24 }, (_, i) => fpHostFor(spec, i, i % 5)));
+      const fpUsers = new Set(Array.from({ length: 24 }, (_, i) => fpUserFor(spec, i, i % 5)));
+      for (const name of [...tpHosts, ...tpUsers, ...fpHosts, ...fpUsers]) {
+        expect(name).toMatch(/^eval-[0-9a-f]{1,6}-[hu]\d+$/);
+      }
+      expect([...tpHosts].filter((h) => fpHosts.has(h))).toEqual([]);
+      expect([...tpUsers].filter((u) => fpUsers.has(u))).toEqual([]);
+    }
+  );
 });

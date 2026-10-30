@@ -10,9 +10,12 @@ import { backtestProposal, type BacktestAlerts, type BacktestResult } from './ba
 import type { RuleTuningVerdict } from './workflow_task';
 
 /**
- * A run with no usable proposal (workflow failed/timed out, or the diagnose output carries no
- * change_type) is a failure, not an N/A: only a valid proposal on a branch that does not
- * suppress by alert content is legitimately `not_modeled`.
+ * A run with no usable proposal is a failure, not an N/A: only a valid proposal on a branch
+ * that does not suppress by alert content is legitimately `not_modeled`. In production the
+ * "no change_type" case arrives as `executionStatus: 'failed'`: `readProposalOrThrow` throws
+ * `NoProposalError` when the diagnose output has no change_type and the variant-matrix task
+ * (`runVariantWorkflow`) converts it into a failed verdict. The `!change_type` check is a
+ * backstop for verdicts built any other way.
  */
 const noProposalOf = (output: unknown): boolean => {
   const verdict = output as VariantVerdict;
@@ -22,6 +25,8 @@ const noProposalOf = (output: unknown): boolean => {
 /** The review verdict plus the alerts the task seeded, which is what the backtest replays over. */
 export interface VariantVerdict extends RuleTuningVerdict {
   seededAlerts?: BacktestAlerts;
+  /** Why the run has no proposal (set by `runVariantWorkflow`); surfaced in the explanation. */
+  error?: string;
 }
 
 const backtestOf = (output: unknown): BacktestResult => {
@@ -43,7 +48,9 @@ export const tpSuppressedByTuning: Evaluator = {
       return {
         score: 0,
         label: 'no_proposal',
-        explanation: 'workflow produced no usable proposal (not completed or no change_type)',
+        explanation: `workflow produced no usable proposal (not completed or no change_type)${
+          (output as VariantVerdict).error ? `: ${(output as VariantVerdict).error}` : ''
+        }`,
       };
     }
     const result = backtestOf(output);

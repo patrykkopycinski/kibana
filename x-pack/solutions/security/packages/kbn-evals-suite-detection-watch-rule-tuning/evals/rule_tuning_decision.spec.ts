@@ -67,6 +67,7 @@ import {
   baseFixtureFor,
   buildVariantExamples,
   isVariantMatrixEnabled,
+  runVariantWorkflow,
   selectVariantCases,
 } from '../src/variant_matrix_run';
 import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
@@ -781,7 +782,9 @@ if (isVariantMatrixEnabled(process.env[VARIANT_MATRIX_ENV])) {
                 );
 
                 try {
-                  const verdict = await runRuleTuningWorkflow({ fetch, log });
+                  const verdict = await runVariantWorkflow(() =>
+                    runRuleTuningWorkflow({ fetch, log })
+                  );
                   return { ...verdict, seededAlerts: alerts };
                 } finally {
                   await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);

@@ -719,6 +719,18 @@ const assertSoleReviewChild = async ({
 };
 
 /**
+ * The review reached the end without a diagnose proposal. A distinct class so a caller that
+ * wants to score "no proposal" as a failed case can catch exactly this and nothing else
+ * (seeding, harvest and transport errors must stay loud).
+ */
+export class NoProposalError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NoProposalError';
+  }
+}
+
+/**
  * The diagnose proposal the review is holding, or a loud failure that names which of the
  * two indistinguishable causes (agent step timeout vs. a rule that failed the diagnose gate)
  * actually happened. Either way there is nothing to approve or reject, so no arm can run.
@@ -726,7 +738,7 @@ const assertSoleReviewChild = async ({
 const readProposalOrThrow = (review: WorkflowExecutionDto): RuleTuningProposal => {
   const proposal = readDiagnoseStructuredOutput(review.stepExecutions);
   if (!proposal?.change_type) {
-    throw new Error(
+    throw new NoProposalError(
       `Review execution ${review.id} (status: ${review.status}) produced no diagnose ` +
         `proposal — ${explainMissingProposal(review.stepExecutions ?? [])}`
     );

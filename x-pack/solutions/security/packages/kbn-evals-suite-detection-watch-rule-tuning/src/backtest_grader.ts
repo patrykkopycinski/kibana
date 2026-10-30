@@ -52,31 +52,40 @@ export interface BacktestResult {
 interface QueryClause {
   field: string;
   values: string[] | '*';
+  /** `and not field:value`: the clause matches when the positive form does not. */
+  negated?: boolean;
 }
 
 const CLAUSE_RE = /^\s*([A-Za-z0-9_.@-]+)\s*:\s*(\*|\([^)]*\)|[^\s()]+)\s*$/;
 
+/** KQL quotes a literal value; the replay compares raw strings, so drop one matching pair. */
+const unquote = (value: string): string =>
+  value.length >= 2 && /^(["'])[^"']*\1$/.test(value) ? value.slice(1, -1) : value;
+
 /**
- * Parses `clause and clause ...`. Returns null for anything outside the dialect
- * (or, not, parentheses around groups, ranges) so the caller can fail closed.
+ * Parses `clause and clause and not clause ...`. Returns null for anything outside the dialect
+ * (bare or, leading not, parentheses around groups, ranges) so the caller can fail closed.
  */
 export const parseSimpleQuery = (query: string): QueryClause[] | null => {
   const parts = query.split(/\s+and\s+/i);
   const clauses: QueryClause[] = [];
-  for (const part of parts) {
+  for (const [index, rawPart] of parts.entries()) {
+    // Only `and not ...` is supported: a leading `not` is outside the dialect.
+    const negated = index > 0 && /^\s*not\s+/i.test(rawPart);
+    const part = negated ? rawPart.replace(/^\s*not\s+/i, '') : rawPart;
     const m = CLAUSE_RE.exec(part);
     if (!m) return null;
     const [, field, rawValue] = m;
     if (rawValue === '*') {
-      clauses.push({ field, values: '*' });
+      clauses.push({ field, values: '*', ...(negated && { negated }) });
     } else {
       const inner = rawValue.startsWith('(') ? rawValue.slice(1, -1) : rawValue;
       const values = inner
         .split(/\s+or\s+/i)
-        .map((v) => v.trim())
+        .map((v) => unquote(v.trim()))
         .filter((v) => v.length > 0);
       if (values.length === 0 || values.some((v) => /[*()]/.test(v))) return null;
-      clauses.push({ field, values });
+      clauses.push({ field, values, ...(negated && { negated }) });
     }
   }
   return clauses.length > 0 ? clauses : null;
@@ -93,8 +102,11 @@ const fieldValue = (doc: AlertDoc, field: string): unknown => {
 
 const matchesClause = (doc: AlertDoc, clause: QueryClause): boolean => {
   const value = fieldValue(doc, clause.field);
-  if (clause.values === '*') return value !== undefined && value !== null;
-  return typeof value === 'string' && clause.values.includes(value);
+  const positive =
+    clause.values === '*'
+      ? value !== undefined && value !== null
+      : typeof value === 'string' && clause.values.includes(value);
+  return clause.negated ? !positive : positive;
 };
 
 /** True when the doc matches every clause of the restricted query. */

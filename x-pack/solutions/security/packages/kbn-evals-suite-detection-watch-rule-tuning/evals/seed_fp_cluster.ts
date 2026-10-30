@@ -477,7 +477,9 @@ const baseAlert = (
   // NOTE: `signal.*` fields are read-only field aliases in the alerts index mapping;
   // writing them fails every bulk item with document_parsing_exception. Write the
   // concrete backing fields instead.
-  'kibana.alert.reason': `eval-seed fp cluster ${seq}`,
+  // Neutral on purpose: the agent can read this field, and a "fp cluster" marker would
+  // label every seeded doc (TP cohort included) as a false positive.
+  'kibana.alert.reason': `${ruleName} matched event ${seq}`,
 });
 
 /** The seeded FP profile's first process. The variant TP cohort reuses it so a proposal keyed
@@ -542,10 +544,9 @@ const setPath = (doc: Doc, path: string, value: unknown): void => {
  * docs. A query outside the replay dialect contributes nothing.
  */
 const baseQueryFields = (fixtureId: string): Array<[string, string]> =>
-  (parseSimpleQuery(FIXTURE_QUERIES[fixtureId] ?? '') ?? []).map(({ field, values }) => [
-    field,
-    values === '*' ? `eval-${field}` : values[0],
-  ]);
+  (parseSimpleQuery(FIXTURE_QUERIES[fixtureId] ?? '') ?? [])
+    .filter(({ negated }) => !negated)
+    .map(({ field, values }) => [field, values === '*' ? `eval-${field}` : values[0]]);
 
 const withBaseQueryFields = (doc: Doc, fixtureId: string): Doc => {
   baseQueryFields(fixtureId).forEach(([field, value]) => setPath(doc, field, value));
@@ -567,9 +568,11 @@ interface BuildSeedDocsParams {
  * Pure doc builder behind `seedRuleAndFpAlerts`. Without `variant` it reproduces the legacy
  * FP-only cluster exactly (#290665 comparability). With one it applies the whole spec:
  * FP count (profile entities cycled), host/user spread, shifted timestamps kept inside the
- * rule window, and a TP cohort from `buildTpCohort`. Threshold fixtures keep their per-host
- * grouping (host.name IS the rule's group key) and never shrink below the profile, because
- * their label depends on each host firing just above the threshold.
+ * rule window, and a TP cohort from `buildTpCohort`. Only `exception` bases are reshaped
+ * across hosts/users; every other base keeps its profile's entity diversity (see
+ * `tuning_variants.ts`). Threshold fixtures keep their per-host grouping (host.name IS the
+ * rule's group key): bursts cycle evenly over the profile's hosts, and the matrix sizes them
+ * (12/16/20) so every host fires above the rule's threshold of 3.
  *
  * The answer key never reaches ES: no case id, no fixture id, no `az-eval:*` marker.
  */
@@ -607,16 +610,23 @@ export const buildSeedDocs = ({
     };
   }
 
+  // Threshold rules group by host.name, so each host must keep firing above the threshold:
+  // slots cycle over the profile's distinct HOSTS (even burst per host) rather than its rows.
   const keepsHostStructure = fixtureId.startsWith('fp-threshold-');
-  const fpCount = keepsHostStructure ? Math.max(variant.fpCount, entities.length) : variant.fpCount;
+  const distinctHosts = [...new Set(entities.map((e) => e.host))];
+  const distinctUsers = [...new Set(entities.map((e) => e.user))];
+  const hostRows = distinctHosts.map(
+    (h) => entities.find((e) => e.host === h) as (typeof entities)[0]
+  );
+  const { fpCount } = variant;
   const fp = Array.from({ length: fpCount }, (_, i) => {
-    const e = entities[i % entities.length];
+    const e = keepsHostStructure ? hostRows[i % hostRows.length] : entities[i % entities.length];
     const age = variantAlertAgeMs(fixtureId, variant, i, fpCount);
     return withBaseQueryFields(
       {
         ...baseAlert(ruleUuid, ruleName, ruleId, ruleRevision, i, new Date(now - age)),
-        host: { name: keepsHostStructure ? e.host : fpHostFor(variant, i, e.host) },
-        user: { name: keepsHostStructure ? e.user : fpUserFor(variant, i, e.user) },
+        host: { name: fpHostFor(variant, i, distinctHosts.indexOf(e.host)) },
+        user: { name: fpUserFor(variant, i, distinctUsers.indexOf(e.user)) },
         source: { ip: e.ip },
         process: { name: e.process },
       },
@@ -704,7 +714,16 @@ export const seedRuleAndFpAlerts = async (
   log.info(
     `created rule ${rule?.id ?? ruleId} (uuid key ${uniqueRuleId}) for fixture ${fixture.id}`
   );
-  const seededUuid: string = rule?.id ?? uniqueRuleId;
+  // The alerts must carry the rule's REAL uuid: falling back to the case-derived key would
+  // write a case id into `kibana.alert.rule.uuid` and index docs no harvest can join to a rule.
+  // The rule was just created, so remove it before failing.
+  if (!rule?.id) {
+    await cleanupSeededArtifacts({ fetch, esClient }, uniqueRuleId, ruleId);
+    throw new Error(
+      `rule create for fixture ${fixture.id} returned no id; refusing to seed alerts under a derived uuid`
+    );
+  }
+  const seededUuid: string = rule.id;
   // The harvest dedupes alerts BY `kibana.alert.rule.revision`; the field on every
   // seeded doc must match the rule's real revision from this create response (0 on
   // a fresh create). Fallback to 0 keeps the seeder usable if the API ever omits

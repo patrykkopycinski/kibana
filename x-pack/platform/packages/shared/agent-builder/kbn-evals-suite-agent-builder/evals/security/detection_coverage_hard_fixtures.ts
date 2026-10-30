@@ -189,7 +189,38 @@ export const deriveVerdictFromSeed = (
 const DETECTION_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_API_VERSION = '2023-10-31';
 
-const buildHardRuleBody = (rule: HardSeedRule): Record<string, unknown> => ({
+const SUBTECHNIQUE_ID_REGEX = /^((?:AML\.)?T\d{4})\.(\d{3})$/i;
+
+/**
+ * Real Elastic rules store the parent id in `technique[].id` and the dotted id in
+ * `technique[].subtechnique[].id`. `security.find_rules` routes a dotted `mitreTechnique` to
+ * `threat.technique.subtechnique.id`, so a dotted id seeded into `technique[].id` is unfindable.
+ */
+export const buildHardRuleTechnique = (techniqueId: string): Record<string, unknown> => {
+  const match = SUBTECHNIQUE_ID_REGEX.exec(techniqueId);
+  if (!match) {
+    return {
+      id: techniqueId,
+      name: techniqueId,
+      reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
+    };
+  }
+  const [, parentId, subNumber] = match;
+  return {
+    id: parentId,
+    name: parentId,
+    reference: `https://attack.mitre.org/techniques/${parentId}/`,
+    subtechnique: [
+      {
+        id: techniqueId,
+        name: techniqueId,
+        reference: `https://attack.mitre.org/techniques/${parentId}/${subNumber}/`,
+      },
+    ],
+  };
+};
+
+export const buildHardRuleBody = (rule: HardSeedRule): Record<string, unknown> => ({
   name: rule.name,
   description: rule.description,
   query: rule.query,
@@ -215,13 +246,7 @@ const buildHardRuleBody = (rule: HardSeedRule): Record<string, unknown> => ({
         name: 'Execution',
         reference: 'https://attack.mitre.org/tactics/TA0002/',
       },
-      technique: [
-        {
-          id: rule.technique,
-          name: rule.technique,
-          reference: `https://attack.mitre.org/techniques/${rule.technique}/`,
-        },
-      ],
+      technique: [buildHardRuleTechnique(rule.technique)],
     },
   ],
 });

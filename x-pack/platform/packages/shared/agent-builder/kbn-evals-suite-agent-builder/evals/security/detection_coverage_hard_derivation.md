@@ -2,6 +2,8 @@
 
 Generated from `detection_coverage_hard_fixtures.ts` (`deriveVerdictFromSeed`). Columns: case, ATT&CK, expected verdict, derived from seed, exact seed rule, traps.
 
+Seed shape: rules carry real MITRE structure. A dotted ID (`T1218.011`) is seeded as `threat[0].technique[0].id = T1218` with `technique[0].subtechnique[0].id = T1218.011`; a parent ID has no `subtechnique`. This matches how `security.find_rules` routes `mitreTechnique` (dotted → `threat.technique.subtechnique.id`, otherwise `threat.technique.id`). The earlier shape wrote the dotted ID into `technique[].id`, which made those rules unfindable by `mitreTechnique` and invalidated the P3a run at pin 2551a3aa7392f.
+
 Limits: `prebuilt_available` vs `no_coverage` is not decidable from the seed (needs the live installable catalog), so those rows derive as `needs_catalog`. Confirm them in the live run.
 
 | case | technique | expected | derived | exact seed rule | traps |

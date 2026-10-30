@@ -104,8 +104,29 @@ export const matchesQuery = (doc: AlertDoc, query: string): boolean | null => {
   return clauses.every((c) => matchesClause(doc, c));
 };
 
-/** One exception entry against one doc. Unknown operators never match (fail closed). */
-export const matchesEntry = (doc: AlertDoc, entry: ExceptionEntry): boolean => {
+/**
+ * Glob → anchored regex, per the review workflow's documented semantics (`*` = any sequence,
+ * `?` = one char). Everything else is escaped. Case-sensitive: the workflow documents no
+ * case folding, and exception `matches` runs against keyword fields.
+ */
+const globToRegExp = (glob: string): RegExp =>
+  new RegExp(
+    `^${[...glob]
+      .map((ch) => {
+        if (ch === '*') return '.*';
+        if (ch === '?') return '.';
+        return ch.replace(/[.*+?^${}()|[\]\\\/-]/g, '\\$&');
+      })
+      .join('')}$`,
+    's'
+  );
+
+/**
+ * One exception entry against one doc. `null` = the entry cannot be evaluated (operator outside
+ * the workflow's vocabulary, or a glob operator without a value): the caller must fail closed,
+ * because treating it as "does not match" would score a TP-suppressing entry as safe.
+ */
+export const matchesEntry = (doc: AlertDoc, entry: ExceptionEntry): boolean | null => {
   const value = fieldValue(doc, entry.field);
   const str = typeof value === 'string' ? value : undefined;
   switch (entry.operator) {
@@ -117,12 +138,18 @@ export const matchesEntry = (doc: AlertDoc, entry: ExceptionEntry): boolean => {
       return str !== undefined && (entry.values ?? []).includes(str);
     case 'is_not_one_of':
       return str === undefined || !(entry.values ?? []).includes(str);
+    case 'matches':
+      if (typeof entry.value !== 'string') return null;
+      return str !== undefined && globToRegExp(entry.value).test(str);
+    case 'does_not_match':
+      if (typeof entry.value !== 'string') return null;
+      return str === undefined || !globToRegExp(entry.value).test(str);
     case 'exists':
       return value !== undefined && value !== null;
     case 'does_not_exist':
       return value === undefined || value === null;
     default:
-      return false;
+      return null;
   }
 };
 
@@ -131,7 +158,9 @@ export const suppressesDoc = (proposal: RuleTuningProposal, doc: AlertDoc): bool
   if (proposal.change_type === 'exception') {
     const entries = proposal.exception_entries ?? [];
     if (entries.length === 0) return null;
-    return entries.every((e) => matchesEntry(doc, e));
+    const results = entries.map((e) => matchesEntry(doc, e));
+    if (results.some((r) => r === null)) return null;
+    return results.every((r) => r === true);
   }
   if (proposal.change_type === 'query') {
     if (!proposal.proposed_query) return null;

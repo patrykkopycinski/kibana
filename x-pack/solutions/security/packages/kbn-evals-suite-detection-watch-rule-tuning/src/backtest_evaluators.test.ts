@@ -62,6 +62,25 @@ describe('tpSuppressedByTuning', () => {
     expect(result.label).toBe('unparseable');
   });
 
+  it('scores 0 / no_proposal when the workflow did not complete', async () => {
+    const result = await run(
+      tpSuppressedByTuning,
+      verdict({
+        executionStatus: 'failed' as never,
+        change_type: 'exception',
+        exception_entries: [{ field: 'host.name', operator: 'is', value: 'fp-1' }],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('no_proposal');
+  });
+
+  it('scores 0 / no_proposal when a completed run carries no change_type', async () => {
+    const result = await run(tpSuppressedByTuning, verdict({}));
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('no_proposal');
+  });
+
   it.each(['risk_score', 'threshold', 'schedule', 'manual'] as const)(
     'scores %s N/A, never a free pass',
     async (changeType) => {
@@ -83,6 +102,14 @@ describe('fpSuppressedShare', () => {
     );
     expect(result.score).toBe(0.5);
     expect(result.label).toBe('1/2');
+  });
+
+  it('is N/A (no_proposal) when the workflow failed or produced no change_type', async () => {
+    const failed = await run(fpSuppressedShare, verdict({ executionStatus: 'failed' as never }));
+    expect(failed.score).toBeNull();
+    expect(failed.label).toBe('no_proposal');
+    const noType = await run(fpSuppressedShare, verdict({}));
+    expect(noType.label).toBe('no_proposal');
   });
 
   it('is N/A when the branch is not modelled', async () => {

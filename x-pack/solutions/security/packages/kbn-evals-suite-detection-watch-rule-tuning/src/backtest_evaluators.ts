@@ -9,6 +9,16 @@ import type { Evaluator } from '@kbn/evals';
 import { backtestProposal, type BacktestAlerts, type BacktestResult } from './backtest_grader';
 import type { RuleTuningVerdict } from './workflow_task';
 
+/**
+ * A run with no usable proposal (workflow failed/timed out, or the diagnose output carries no
+ * change_type) is a failure, not an N/A: only a valid proposal on a branch that does not
+ * suppress by alert content is legitimately `not_modeled`.
+ */
+const noProposalOf = (output: unknown): boolean => {
+  const verdict = output as VariantVerdict;
+  return verdict.executionStatus !== 'completed' || !verdict.change_type;
+};
+
 /** The review verdict plus the alerts the task seeded, which is what the backtest replays over. */
 export interface VariantVerdict extends RuleTuningVerdict {
   seededAlerts?: BacktestAlerts;
@@ -29,6 +39,13 @@ export const tpSuppressedByTuning: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output }) => {
+    if (noProposalOf(output)) {
+      return {
+        score: 0,
+        label: 'no_proposal',
+        explanation: 'workflow produced no usable proposal (not completed or no change_type)',
+      };
+    }
     const result = backtestOf(output);
     const { verdict, explanation, tpSuppressed, tpTotal } = result;
     if (verdict === 'not_modeled') {
@@ -52,6 +69,13 @@ export const fpSuppressedShare: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output }) => {
+    if (noProposalOf(output)) {
+      return {
+        score: null,
+        label: 'no_proposal',
+        explanation: 'FP suppression not measurable (no usable proposal)',
+      };
+    }
     const { verdict, fpSuppressedShare: share, fpSuppressed, fpTotal } = backtestOf(output);
     if (verdict === 'not_modeled' || verdict === 'unparseable' || share === null) {
       return {

@@ -32,6 +32,8 @@ describe('buildTuningVariantMatrix', () => {
     for (const spec of matrix) {
       expect(spec.tpCount).toBeGreaterThanOrEqual(3);
       expect(spec.fpCount).toBeGreaterThanOrEqual(spec.tpCount * 2);
+      // Strictly more FP than TP: the worker screens rules on fp_count >= 50% of alerts.
+      expect(spec.fpCount).toBeGreaterThan(spec.tpCount);
     }
     expect(matrix.filter((m) => m.variant === 0).map((m) => [m.tpCount, m.fpCount])).toEqual(
       Array(10).fill([3, 6])

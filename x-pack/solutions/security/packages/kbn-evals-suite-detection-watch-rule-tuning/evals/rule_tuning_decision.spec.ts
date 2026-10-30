@@ -69,7 +69,71 @@ import {
   isVariantMatrixEnabled,
   selectVariantCases,
 } from '../src/variant_matrix_run';
-import { seedRuleAndFpAlerts, cleanupSeededArtifacts, primaryProcessFor } from './seed_fp_cluster';
+import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
+
+/**
+ * Setup probe shared by the base and the variant-matrix `beforeAll`s. A trace cluster that
+ * never received Agent Builder spans silently degrades every trace-based evaluator to N/A,
+ * and N/A is not a failure — the suite would still report a pass. Drive one real fixture
+ * through the workflow here and assert that the resulting review trace exposes TOOL spans,
+ * using the SAME join clauses the Tool Routing evaluator scores with (a probe that proved
+ * reachability on a different key would arm the evaluators dishonestly), then read the
+ * model back off the probe's chat spans so the score docs' task_model cannot disagree with
+ * the trace. Costs one fixture run (~233s measured) per describe block.
+ */
+const runTraceAttributionProbe = async ({
+  fetch,
+  log,
+  esClient,
+  traceEsClient,
+  connector,
+  probeFixture,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  esClient: EsClient;
+  traceEsClient: TraceEsClient;
+  connector: ConnectorLike;
+  probeFixture: (typeof TUNING_FIXTURES)[number];
+}): Promise<void> => {
+  // The alerts index has to carry the unified-alerts mapping before the seed
+  // writes: a bulk into a missing alias makes ES create a plain, dynamically
+  // mapped index, and the worker's harvest then dies with `Unknown column
+  // [kibana.alert.workflow_tags]` while still reporting a completed sweep.
+  await ensureAlertsIndexReady({ fetch, esClient, log });
+
+  const { seededUuid, ruleId } = await seedRuleAndFpAlerts(
+    { fetch, esClient, log },
+    probeFixture,
+    `probe-${probeFixture.id}-${Date.now()}`
+  );
+
+  let probe: RuleTuningVerdict;
+  try {
+    probe = await runRuleTuningWorkflow({ fetch, log });
+  } finally {
+    await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
+  }
+
+  if (!probe.traceId) {
+    throw new Error(
+      'Review execution carried no traceId — trace-based evaluators (Tool Routing) would ' +
+        'silently score N/A and the suite would report a false pass. This stack is not ' +
+        'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
+    );
+  }
+  await assertToolSpansReachable({ traceEsClient, probe, log });
+  log.info(`trace reachability verified (${probe.traceId}) — trace-based evaluators armed`);
+
+  // The graded skill is a property of the stack, not of the run: read the
+  // catalog once so a Tool Routing N/A is attributable (missing skill vs.
+  // missing call) instead of being re-diagnosed by hand every baseline.
+  await assertInvestigateRuleCatalogState({ fetch, log });
+
+  // The pin in src/evaluate.ts decides which connector the workflow's
+  // ai.agent step resolves.
+  await assertWorkflowModelMatches({ traceEsClient, probe, connector, log });
+};
 
 /** Experiment/dataset name. Also the label on every per-evaluator summary line. */
 const DATASET_NAME = 'security: rule-tuning-workflow-decision';
@@ -398,13 +462,7 @@ evaluate.describe(
   () => {
     const createdRuleIds = new Set<string>();
 
-    // Setup probe. A trace cluster that never received Agent Builder spans silently degrades
-    // every trace-based evaluator to N/A, and N/A is not a failure — the suite would still
-    // report a pass. Drive one real fixture through the workflow here and assert that the
-    // resulting review trace exposes TOOL spans, using the SAME join clauses the Tool Routing
-    // evaluator scores with (a probe that proved reachability on a different key would arm the
-    // evaluators dishonestly). Costs one fixture run (~233s measured) per repetition; that is
-    // cheap next to an 8h run that N/A-s every trace evaluator and calls it green.
+    // Setup probe: see runTraceAttributionProbe.
     evaluate.beforeAll(
       async ({
         fetch,
@@ -419,46 +477,14 @@ evaluate.describe(
         traceEsClient: TraceEsClient;
         connector: ConnectorLike;
       }) => {
-        const probeFixture = TUNING_FIXTURES[0];
-
-        // The alerts index has to carry the unified-alerts mapping before the seed
-        // writes: a bulk into a missing alias makes ES create a plain, dynamically
-        // mapped index, and the worker's harvest then dies with `Unknown column
-        // [kibana.alert.workflow_tags]` while still reporting a completed sweep.
-        await ensureAlertsIndexReady({ fetch, esClient, log });
-
-        const { seededUuid, ruleId } = await seedRuleAndFpAlerts(
-          { fetch, esClient, log },
-          probeFixture,
-          `probe-${probeFixture.id}-${Date.now()}`
-        );
-
-        let probe: RuleTuningVerdict;
-        try {
-          probe = await runRuleTuningWorkflow({ fetch, log });
-        } finally {
-          await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
-        }
-
-        if (!probe.traceId) {
-          throw new Error(
-            'Review execution carried no traceId — trace-based evaluators (Tool Routing) would ' +
-              'silently score N/A and the suite would report a false pass. This stack is not ' +
-              'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
-          );
-        }
-        await assertToolSpansReachable({ traceEsClient, probe, log });
-        log.info(`trace reachability verified (${probe.traceId}) — trace-based evaluators armed`);
-
-        // The graded skill is a property of the stack, not of the run: read the
-        // catalog once so a Tool Routing N/A is attributable (missing skill vs.
-        // missing call) instead of being re-diagnosed by hand every baseline.
-        await assertInvestigateRuleCatalogState({ fetch, log });
-
-        // The pin in src/evaluate.ts decides which connector the workflow's
-        // ai.agent step resolves; this reads the model back off the probe's own
-        // chat spans, so the score docs' task_model cannot disagree with the trace.
-        await assertWorkflowModelMatches({ traceEsClient, probe, connector, log });
+        await runTraceAttributionProbe({
+          fetch,
+          log,
+          esClient,
+          traceEsClient,
+          connector,
+          probeFixture: TUNING_FIXTURES[0],
+        });
       }
     );
 
@@ -672,23 +698,36 @@ if (isVariantMatrixEnabled(process.env[VARIANT_MATRIX_ENV])) {
     'Rule Tuning Workflow — variant matrix',
     { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
     () => {
+      // Same attribution probe as the base block: without it the variant run's Tool Routing
+      // and task_model attribution would be unchecked, and a trace-less stack would pass.
       evaluate.beforeAll(
         async ({
           fetch,
           log,
           esClient,
+          traceEsClient,
+          connector,
         }: {
           fetch: HttpHandler;
           log: ToolingLog;
           esClient: EsClient;
+          traceEsClient: TraceEsClient;
+          connector: ConnectorLike;
         }) => {
-          await ensureAlertsIndexReady({ fetch, esClient, log });
+          await runTraceAttributionProbe({
+            fetch,
+            log,
+            esClient,
+            traceEsClient,
+            connector,
+            probeFixture: TUNING_FIXTURES[0],
+          });
         }
       );
 
       evaluate(
         'proposes the golden tuning path for each variant and keeps seeded TPs',
-        async ({ executorClient, evaluators, fetch, log, esClient }) => {
+        async ({ executorClient, evaluators, fetch, log, esClient, traceEsClient }) => {
           const cases = selectVariantCases(process.env.EVAL_EXAMPLES);
           const examples = buildVariantExamples(cases, TUNING_FIXTURES);
 
@@ -702,6 +741,7 @@ if (isVariantMatrixEnabled(process.env[VARIANT_MATRIX_ENV])) {
             changeTypeAccuracyUncontested,
             changeTypeAccuracyDefensible,
             validProposal,
+            createToolRoutingEvaluator({ traceEsClient, log, fetch }),
             tpSuppressedByTuning,
             fpSuppressedShare,
             tuningQualityJudge,
@@ -737,11 +777,7 @@ if (isVariantMatrixEnabled(process.env[VARIANT_MATRIX_ENV])) {
                   { fetch, esClient, log },
                   fixture,
                   uniqueRuleId,
-                  {
-                    caseId: spec.caseId,
-                    tpCount: spec.tpCount,
-                    process: primaryProcessFor(fixture.id),
-                  }
+                  spec
                 );
 
                 try {

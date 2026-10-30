@@ -22,7 +22,7 @@ const fnv1a = (input: string): number =>
  *   | variant | TP | FP | spread                                  | timestamps                  |
  *   | v0      | 3  | 6  | original fixture values                  | original                    |
  *   | v1      | 4  | 8  | FP cluster across 4 hosts / 2 users      | shifted -2d, same window    |
- *   | v2      | 5  | 10 | FP cluster on 1 host / 1 user            | spread over the full window |
+ *   | v2      | 4  | 10 | FP cluster on 1 host / 1 user            | spread over the full window |
  *
  * Entity names for v1/v2 are generated from (case id, variant index) so they are
  * stable across runs. The FP signature field value that the golden exception or
@@ -71,7 +71,7 @@ export interface TuningVariantSpec {
 const VARIANT_SHAPE: Record<number, Omit<TuningVariantSpec, 'caseId' | 'baseId' | 'expected'>> = {
   0: { variant: 0, tpCount: 3, fpCount: 6, spread: 'original', timeShiftMs: 0 },
   1: { variant: 1, tpCount: 4, fpCount: 8, spread: 'multi', timeShiftMs: -2 * 24 * 3600 * 1000 },
-  2: { variant: 2, tpCount: 5, fpCount: 10, spread: 'single', timeShiftMs: 0 },
+  2: { variant: 2, tpCount: 4, fpCount: 10, spread: 'single', timeShiftMs: 0 },
 };
 
 /** Deterministic 32-bit hash of a string, used to derive per-case entity names. */

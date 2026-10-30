@@ -110,9 +110,9 @@ describe('rule-tuning coverage characterization', () => {
     expect(seeder).not.toMatch(/'kibana\.alert\.workflow_status': 'open'/);
     // The only true-positive text allowed is the opt-in TP cohort (#19982 P3b), which is
     // off by default: the FP-only path (and #290665 comparability) must not change.
-    // Exactly the 3 opt-in sites: the cohort doc comment, its inline comment, and the literal.
-    expect(seeder.match(/true.?positive/gi)?.length ?? 0).toBe(3);
-    expect(seeder).toMatch(/tpCohort\?: SeedTpCohort/);
+    // Exactly the 2 opt-in sites: the cohort comment and the literal.
+    expect(seeder.match(/true.?positive/gi)?.length ?? 0).toBe(2);
+    expect(seeder).toMatch(/variant\?: TuningVariantSpec/);
   });
 
   it('characterizes the harvest as reading only closed false positives', () => {
@@ -308,7 +308,7 @@ describe('rule-tuning coverage characterization', () => {
     // five offsets (20/16/12/8/4) < 24. The pre-fix (25 - i * 5)h put the
     // oldest alert at now-25h, OUTSIDE the lookback and invisible to the
     // diagnosis the fixture exists to exercise.
-    expect(seeder).toMatch(/\(20 - i \* 4\) \* 60 \* 60 \* 1000/);
+    expect(seeder).toMatch(/\(20 - i \* 4\) \* HOUR_MS/);
 
     // (c) The offhours-batch schedule fixture seeds five DISTINCT user.name
     // values: a shared user would make user:<svc> the tightest single

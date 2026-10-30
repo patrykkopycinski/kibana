@@ -15,6 +15,13 @@ import { createHash, randomUUID } from 'crypto';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ALERTS_INDEX } from '../src/constants';
+import { parseSimpleQuery } from '../src/backtest_grader';
+import {
+  buildTpCohort,
+  fpHostFor,
+  fpUserFor,
+  type TuningVariantSpec,
+} from '../src/tuning_variants';
 
 /**
  * Re-exported for the specs that clean up seeded alerts. The literal lives in
@@ -50,7 +57,7 @@ interface SeedContext {
 }
 
 /** Entity matrix per fixture: what the diagnose step should "see". */
-const ENTITY_PROFILES: Record<
+export const ENTITY_PROFILES: Record<
   string,
   Array<{ host: string; user: string; ip: string; process: string }>
 > = {
@@ -368,7 +375,7 @@ const ENTITY_PROFILES: Record<
 };
 
 /** Query text per fixture: only the over-broad fixture is meant to be narrowed. */
-const FIXTURE_QUERIES: Record<string, string> = {
+export const FIXTURE_QUERIES: Record<string, string> = {
   'fp-host-exception': 'process.name:java and host.os.type:linux',
   'fp-overbroad-query': 'process.name:*',
   'fp-volume-suppression': 'process.name:nmap',
@@ -473,22 +480,8 @@ const baseAlert = (
   'kibana.alert.reason': `eval-seed fp cluster ${seq}`,
 });
 
-/**
- * Opt-in TP cohort (#19982 P3b). When set, the seeder also indexes labelled TRUE POSITIVE
- * alerts on the same rule uuid, tagged `az-eval:tp` plus the case id, so the backtest grader
- * can measure TP retention without a model. Default off: the FP-only behaviour of the
- * existing fixtures (and #290665 comparability) is unchanged for callers that omit it.
- */
-export interface SeedTpCohort {
-  caseId: string;
-  tpCount: number;
-  process: string;
-}
-
-/**
- * The seeded FP profile's first process. The variant TP cohort reuses it so a proposal keyed
- * only on the process is measured against TPs it would also catch.
- */
+/** The seeded FP profile's first process. The variant TP cohort reuses it so a proposal keyed
+ * only on the process is measured against TPs it would also catch. */
 export const primaryProcessFor = (fixtureId: string): string => {
   const process = ENTITY_PROFILES[fixtureId]?.[0]?.process;
   if (!process) {
@@ -503,11 +496,156 @@ export interface SeededAlerts {
   fp: Array<Record<string, unknown>>;
 }
 
+const HOUR_MS = 60 * 60 * 1000;
+/** Rule `from` window per fixture; must mirror the `from` sent in the create payload. */
+const ruleWindowMs = (fixtureId: string): number =>
+  fixtureId.startsWith('fp-schedule-') ? 24 * HOUR_MS : 10 * 60 * 1000;
+/** Share of the rule window variant timestamps may use, so run latency cannot push them out. */
+const WINDOW_USABLE_SHARE = 0.8;
+
+/**
+ * Age (ms before `now`) of FP slot `slot` of `count` in a variant. Always in
+ * `[0, WINDOW_USABLE_SHARE * window]`: `timeShiftMs` is clamped to half the usable window
+ * (a -2d shift cannot fit a 10m rule window), `single` spreads over the whole usable window
+ * and schedule fixtures spread oldest-first like the legacy cluster.
+ */
+export const variantAlertAgeMs = (
+  fixtureId: string,
+  spec: TuningVariantSpec,
+  slot: number,
+  count: number
+): number => {
+  const usable = ruleWindowMs(fixtureId) * WINDOW_USABLE_SHARE;
+  const shift = Math.min(Math.max(-spec.timeShiftMs, 0), usable / 2);
+  const fraction = count > 1 ? slot / (count - 1) : 0;
+  const isSchedule = fixtureId.startsWith('fp-schedule-');
+  const spread = isSchedule || spec.spread === 'single' ? usable * (1 - fraction) : slot * 1000;
+  return Math.min(spread + shift, usable);
+};
+
+type Doc = Record<string, unknown>;
+
+const setPath = (doc: Doc, path: string, value: unknown): void => {
+  const keys = path.split('.');
+  const last = keys.pop() as string;
+  const parent = keys.reduce<Doc>((acc, key) => {
+    const next = acc[key];
+    if (next === null || typeof next !== 'object') acc[key] = {};
+    return acc[key] as Doc;
+  }, doc);
+  if (!(last in parent)) parent[last] = value;
+};
+
+/**
+ * Values for every field the rule's base query references, so a proposed query that keeps
+ * the base clause (`process.name:java and host.os.type:linux`) still matches the replayed
+ * docs. A query outside the replay dialect contributes nothing.
+ */
+const baseQueryFields = (fixtureId: string): Array<[string, string]> =>
+  (parseSimpleQuery(FIXTURE_QUERIES[fixtureId] ?? '') ?? []).map(({ field, values }) => [
+    field,
+    values === '*' ? `eval-${field}` : values[0],
+  ]);
+
+const withBaseQueryFields = (doc: Doc, fixtureId: string): Doc => {
+  baseQueryFields(fixtureId).forEach(([field, value]) => setPath(doc, field, value));
+  return doc;
+};
+
+interface BuildSeedDocsParams {
+  fixtureId: string;
+  ruleUuid: string;
+  ruleName: string;
+  ruleId: string;
+  ruleRevision: number;
+  /** Opt-in (#19982 P3b): shapes the FP cluster per variant and adds a labelled TP cohort. */
+  variant?: TuningVariantSpec;
+  now?: number;
+}
+
+/**
+ * Pure doc builder behind `seedRuleAndFpAlerts`. Without `variant` it reproduces the legacy
+ * FP-only cluster exactly (#290665 comparability). With one it applies the whole spec:
+ * FP count (profile entities cycled), host/user spread, shifted timestamps kept inside the
+ * rule window, and a TP cohort from `buildTpCohort`. Threshold fixtures keep their per-host
+ * grouping (host.name IS the rule's group key) and never shrink below the profile, because
+ * their label depends on each host firing just above the threshold.
+ *
+ * The answer key never reaches ES: no case id, no fixture id, no `az-eval:*` marker.
+ */
+export const buildSeedDocs = ({
+  fixtureId,
+  ruleUuid,
+  ruleName,
+  ruleId,
+  ruleRevision,
+  variant,
+  now = Date.now(),
+}: BuildSeedDocsParams): { fp: Doc[]; tp: Doc[] } => {
+  const entities = ENTITY_PROFILES[fixtureId] ?? [];
+  if (entities.length === 0) {
+    throw new Error(`No entity profile for fixture ${fixtureId}`);
+  }
+
+  if (!variant) {
+    // Schedule fixtures spread their alerts across the rule's wide (now-24h)
+    // lookback: the only visible defect is that the window sweeps in routine
+    // activity from many hours ago, which the timestamps must actually show.
+    // Spread strictly INSIDE the lookback: the oldest alert lands at now-20h.
+    const isSchedule = fixtureId.startsWith('fp-schedule-');
+    const alertTime = (i: number): Date | undefined =>
+      isSchedule ? new Date(now - (20 - i * 4) * HOUR_MS) : undefined;
+    return {
+      fp: entities.map((e, i) => ({
+        ...baseAlert(ruleUuid, ruleName, ruleId, ruleRevision, i, alertTime(i)),
+        host: { name: e.host },
+        user: { name: e.user },
+        source: { ip: e.ip },
+        process: { name: e.process },
+      })),
+      tp: [],
+    };
+  }
+
+  const keepsHostStructure = fixtureId.startsWith('fp-threshold-');
+  const fpCount = keepsHostStructure ? Math.max(variant.fpCount, entities.length) : variant.fpCount;
+  const fp = Array.from({ length: fpCount }, (_, i) => {
+    const e = entities[i % entities.length];
+    const age = variantAlertAgeMs(fixtureId, variant, i, fpCount);
+    return withBaseQueryFields(
+      {
+        ...baseAlert(ruleUuid, ruleName, ruleId, ruleRevision, i, new Date(now - age)),
+        host: { name: keepsHostStructure ? e.host : fpHostFor(variant, i, e.host) },
+        user: { name: keepsHostStructure ? e.user : fpUserFor(variant, i, e.user) },
+        source: { ip: e.ip },
+        process: { name: e.process },
+      },
+      fixtureId
+    );
+  });
+
+  // Closed-as-true-positive alerts on the same rule uuid. Hosts/users are distinct from the
+  // FP cluster, so an FP-targeting change is measured against them honestly.
+  const tp = buildTpCohort(variant, primaryProcessFor(fixtureId)).map((t, i) =>
+    withBaseQueryFields(
+      {
+        ...baseAlert(ruleUuid, ruleName, ruleId, ruleRevision, fpCount + i, new Date(now)),
+        'kibana.alert.workflow_reason': 'true_positive',
+        host: { name: t['host.name'] },
+        user: { name: t['user.name'] },
+        process: { name: t['process.name'] },
+      },
+      fixtureId
+    )
+  );
+  return { fp, tp };
+};
+
 export const seedRuleAndFpAlerts = async (
   { fetch, esClient, log }: SeedContext,
   fixture: SeedFixtureSpec,
   uniqueRuleId: string,
-  tpCohort?: SeedTpCohort
+  variant?: TuningVariantSpec
 ): Promise<{ seededUuid: string; ruleId: string; alerts: SeededAlerts }> => {
   // The rule name and description are read by the agent: the harvest KEEPs
   // `kibana.alert.rule.name` and the worker interpolates it straight into the diagnose
@@ -575,64 +713,43 @@ export const seedRuleAndFpAlerts = async (
   // real revision and silently orphans the whole cluster again.
   const ruleRevision = rule?.revision ?? 0;
 
-  // 2. Index the closed-FP alert cluster against the rule's real uuid.
-  const entities = ENTITY_PROFILES[fixture.id] ?? [];
-  if (entities.length === 0) {
-    throw new Error(`No entity profile for fixture ${fixture.id}`);
-  }
-  // Schedule fixtures spread their alerts across the rule's wide (now-24h)
-  // lookback: the only visible defect is that the window sweeps in routine
-  // activity from many hours ago, which the timestamps must actually show.
-  // Timestamps are oldest-first so the cluster reads as routine recurrence,
-  // not a burst.
-  const isSchedule = fixture.id.startsWith('fp-schedule-');
-  // Spread strictly INSIDE the now-24h lookback: the oldest alert lands at
-  // now-20h, so the whole cluster is visible to the model as routine activity
-  // the over-wide window sweeps in. ((length - i) * 5h with 5 entities put the
-  // oldest at now-25h — outside the window and invisible to the diagnosis.
-  const alertTime = (i: number): Date | undefined =>
-    isSchedule ? new Date(Date.now() - (20 - i * 4) * 60 * 60 * 1000) : undefined;
-  const docs = entities.map((e, i) => ({
-    ...baseAlert(seededUuid, ruleName, ruleId, ruleRevision, i, alertTime(i)),
-    host: { name: e.host },
-    user: { name: e.user },
-    source: { ip: e.ip },
-    process: { name: e.process },
-  }));
-  // Opt-in TP cohort: closed-as-true-positive alerts on the same rule uuid, each labelled
-  // `az-eval:tp` + case id. Their hosts/users are kept distinct from the FP cluster by the
-  // caller's variant builder, so an FP-targeting change is measured against them honestly.
-  const tpDocs =
-    tpCohort && tpCohort.tpCount > 0
-      ? Array.from({ length: tpCohort.tpCount }, (_, i) => ({
-          ...baseAlert(seededUuid, ruleName, ruleId, ruleRevision, entities.length + i, undefined),
-          'kibana.alert.workflow_reason': 'true_positive',
-          host: { name: `eval-tp-${opaqueToken}-${i}` },
-          user: { name: `eval-tp-user-${i}` },
-          process: { name: tpCohort.process },
-          'az-eval:tp': true,
-          'az-eval:case': tpCohort.caseId,
-        }))
-      : [];
-  const bulkResp = await esClient.bulk({
-    index: ALERTS_INDEX,
-    refresh: 'wait_for',
-    // The review tags alerts by document id, so _id must equal kibana.alert.uuid.
-    operations: [...docs, ...tpDocs].flatMap((d) => [
-      { index: { _id: d['kibana.alert.uuid'] } },
-      d,
-    ]),
-  });
-  const failed = bulkResp.items?.filter((i) => i.index?.error) ?? [];
-  if (bulkResp.errors || failed.length > 0) {
-    throw new Error(
-      `bulk indexing failed for rule ${seededUuid}: ${JSON.stringify(
-        failed[0]?.index?.error
-      )?.slice(0, 500)}`
+  // 2. Index the closed-FP alert cluster (plus the opt-in TP cohort) against the rule's real
+  // uuid. A failure past this point would leak the rule just created, because callers only
+  // start their cleanup `try` after this function returns.
+  try {
+    const { fp: docs, tp: tpDocs } = buildSeedDocs({
+      fixtureId: fixture.id,
+      ruleUuid: seededUuid,
+      ruleName,
+      ruleId,
+      ruleRevision,
+      variant,
+    });
+    const bulkResp = await esClient.bulk({
+      index: ALERTS_INDEX,
+      refresh: 'wait_for',
+      // The review tags alerts by document id, so _id must equal kibana.alert.uuid.
+      operations: [...docs, ...tpDocs].flatMap((d) => [
+        { index: { _id: d['kibana.alert.uuid'] as string } },
+        d,
+      ]),
+    });
+    const failed = bulkResp.items?.filter((i) => i.index?.error) ?? [];
+    if (bulkResp.errors || failed.length > 0) {
+      throw new Error(
+        `bulk indexing failed for rule ${seededUuid}: ${JSON.stringify(
+          failed[0]?.index?.error
+        )?.slice(0, 500)}`
+      );
+    }
+    log.info(
+      `indexed ${docs.length} closed-FP + ${tpDocs.length} TP alerts for rule uuid ${seededUuid}`
     );
+    return { seededUuid, ruleId, alerts: { tp: tpDocs, fp: docs } };
+  } catch (err) {
+    await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
+    throw err;
   }
-  log.info(`indexed ${docs.length} closed-FP alerts for rule uuid ${seededUuid}`);
-  return { seededUuid, ruleId, alerts: { tp: tpDocs, fp: docs } };
 };
 
 export const cleanupSeededArtifacts = async (

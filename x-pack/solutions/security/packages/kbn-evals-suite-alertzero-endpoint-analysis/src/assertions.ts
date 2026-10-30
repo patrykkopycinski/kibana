@@ -56,8 +56,8 @@ interface AgentStepOutput {
 /**
  * Proves the `ai.agent` step really invoked a model. Production runs `forensic_analysis` with
  * `create-conversation: false`, so the step emits no `conversation_id` (its trace join id is
- * `metadata.trace_conversation_id`). It always emits `metadata.usage` accumulated from the model rounds, which stays at zero/absent when the
- * agent was skipped, short-circuited or faked.
+ * `metadata.trace_conversation_id`). It always emits `metadata.usage` accumulated from the model
+ * rounds, which stays at zero/absent when the agent was skipped, short-circuited or faked.
  */
 const assertAgentActuallyRan = (output: AgentStepOutput | undefined) => {
   const usage = output?.metadata?.usage;

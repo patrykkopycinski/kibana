@@ -10,10 +10,7 @@ import { evaluate, tags, getToolCallSteps } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/http_api/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  extractAgentConversationIds,
-  readAgentToolCallsFromTraces,
-} from '@kbn/security-evals-workflow-traces';
+import { readAgentToolCallsForSteps } from '../src/agent_trace_conversation_ids';
 import {
   AlertZeroRuntime,
   deleteDataStreamQuietly,
@@ -170,18 +167,9 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             `Missing real ${stepId}`
           );
         }
-        // The journal `workflow.execute` steps also output a `conversation_id` (the
-        // investigation's), which no agent span carries, so only `ai.agent` steps count.
-        const conversationIds = extractAgentConversationIds(child.stepExecutions)
-          .filter((entry) => entry.stepType === 'ai.agent')
-          .map((entry) => entry.conversationId);
-        assert(
-          conversationIds.length > 0,
-          'No ai.agent step reported a trace conversation id (output.conversation_id or output.metadata.trace_conversation_id); the trace check cannot run'
-        );
-        const calls = await readAgentToolCallsFromTraces({
+        const calls = await readAgentToolCallsForSteps({
+          stepExecutions: child.stepExecutions,
           traceEsClient,
-          conversationIds,
           log,
           includeFailures: true,
         });

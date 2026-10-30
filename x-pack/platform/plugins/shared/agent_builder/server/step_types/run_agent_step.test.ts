@@ -362,6 +362,31 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output).not.toHaveProperty('conversation_id');
     });
 
+    it('reports the generated id for a fresh ephemeral run with no input conversationId', async () => {
+      // The real execution service resolves a placeholder conversation with a generated uuid for a
+      // request that names none, and returns its id even when storeConversation is false.
+      const execution = {
+        executeAgent: jest.fn().mockImplementation(async ({ params }) => ({
+          executionId: 'exec-1',
+          conversationId: params.conversationId ?? 'generated-uuid',
+          events$: of(roundComplete),
+        })),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'Summarize' }, config: { ephemeral: true } })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ conversationId: undefined, storeConversation: false }),
+        })
+      );
+      expect(res.output?.metadata?.trace_conversation_id).toBe('generated-uuid');
+      expect(res.output).not.toHaveProperty('conversation_id');
+    });
+
     it('omits the trace id when the execution reports no conversation id', async () => {
       const execution = createExecutionMock(of(roundComplete));
       const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
@@ -1750,7 +1775,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         { source: 'workflow' }
       );
       expect(res.output?.conversation_id).toBe('c-template');
-      expect(res.output?.metadata?.trace_conversation_id).toBe('c-template');
+      expect(res.output?.metadata).not.toHaveProperty('trace_conversation_id');
     });
   });
 });

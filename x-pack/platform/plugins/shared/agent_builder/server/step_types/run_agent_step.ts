@@ -418,8 +418,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               ...(outputConversationId && { conversation_id: outputConversationId }),
               metadata: {
                 usage: { ...usage, ...templateResult.usage },
-                // No agent span is opened here, so the stored conversation is the only id available.
-                ...(outputConversationId && { trace_conversation_id: outputConversationId }),
               },
             },
           };

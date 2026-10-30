@@ -295,22 +295,23 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
     );
   });
 
-  it.each([[['attachments.add']], [['attachments.read', 'write_todos']]])(
-    'ignores runtime-injected harness tools %j: trajectory scores 1',
-    async (ids) => {
-      const client = traceClient({
-        columns: [{ name: 'tool_id' }],
-        values: ids.map((id) => [id]),
-      });
+  it.each([
+    [['attachments.add']],
+    [['attachments.read', 'write_todos']],
+    [['load_skill', 'search_relevant_skills', 'set_conversation_metadata']],
+  ])('ignores runtime-injected harness tools %j: trajectory scores 1', async (ids) => {
+    const client = traceClient({
+      columns: [{ name: 'tool_id' }],
+      values: ids.map((id) => [id]),
+    });
 
-      const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), client);
+    const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), client);
 
-      expect(verdict.toolCallIds).toEqual(ids);
-      expect(await evaluateTrajectory(verdict)).toEqual(
-        expect.objectContaining({ score: 1, label: 'match' })
-      );
-    }
-  );
+    expect(verdict.toolCallIds).toEqual(ids);
+    expect(await evaluateTrajectory(verdict)).toEqual(
+      expect.objectContaining({ score: 1, label: 'match' })
+    );
+  });
 
   it('still fails trajectory when a domain tool is called alongside a harness tool', async () => {
     const client = traceClient({

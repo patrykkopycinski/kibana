@@ -42,12 +42,11 @@ export const CLASSIFICATIONS = ['true_positive', 'false_positive', 'inconclusive
 export type Classification = (typeof CLASSIFICATIONS)[number];
 
 /**
- * Tool ids the agent-builder runtime injects into every agent run regardless of the
- * workflow's `tools: []` override (`createVersionedAttachmentTools` in agent_builder's
- * `select_tools.ts`). They mirror the internal ids in `@kbn/agent-builder-common`
- * (`attachmentTools.*`, `internalTools.writeTodos`) and are inlined to keep this package free
- * of a runtime dependency on agent-builder. They are not domain tool use, so the zero-tool
- * trajectory guardrail must not count them.
+ * Agent-builder scaffolding tools the runtime injects regardless of the workflow's `tools: []`
+ * override (see `select_tools.ts` and `register_internal_tools.ts` in agent_builder). Inlined
+ * from `@kbn/agent-builder-common` to avoid a runtime dependency on it. They are not domain tool
+ * use, so the zero-tool trajectory guardrail ignores them. Tools that read data or act for the
+ * user (`read_file`, `bash`, `execute_api`, ...) stay out on purpose: calling one is a real failure.
  */
 export const HARNESS_TOOL_IDS: readonly string[] = [
   'attachments.read',
@@ -56,4 +55,7 @@ export const HARNESS_TOOL_IDS: readonly string[] = [
   'attachments.list',
   'attachments.diff',
   'write_todos',
+  'load_skill',
+  'search_relevant_skills',
+  'set_conversation_metadata',
 ];

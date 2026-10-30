@@ -19,9 +19,8 @@
  * minutes per model. On a PR, add the `evals:security-alert-analysis-workflow-batch` label.
  *
  * Evaluators: BatchCoverage, BatchAccuracy, HardShapeAccuracy, MaliciousNotClosed,
- * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`), plus WorkflowLatencySeconds,
- * ClassificationStepLatencySeconds (engine timestamps, `latency_evaluators.ts`) and the trace-based
- * Latency (null when the trace is not found).
+ * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`), plus WorkflowLatencySeconds and
+ * ClassificationStepLatencySeconds (engine timestamps, `latency_evaluators.ts`).
  */
 
 import { randomUUID } from 'crypto';
@@ -82,7 +81,7 @@ evaluate.describe(
 
     evaluate(
       'classifies a batch of alerts from one rule with the expected verdicts using a prompt',
-      async ({ executorClient, evaluators, esClient, fetch, log, connector }) => {
+      async ({ executorClient, esClient, fetch, log, connector }) => {
         await configureAlertAnalysisWorkflow({
           fetch,
           log,
@@ -182,12 +181,7 @@ evaluate.describe(
               }
             },
           },
-          selectEvaluators([
-            ...batchEvaluators,
-            ...latencyEvaluators,
-            // Scores null when the execution's trace is not in TRACING_ES_URL (or the local ES).
-            evaluators.traceBasedEvaluators.latency,
-          ])
+          selectEvaluators([...batchEvaluators, ...latencyEvaluators])
         );
       }
     );

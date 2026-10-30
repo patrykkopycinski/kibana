@@ -37,8 +37,7 @@
  *   - RationaleQuality (LLM): the rationale is grounded in the alert's observable evidence and
  *     names the decision gate / confidence tier it applied.
  *   - WorkflowLatencySeconds, ClassificationStepLatencySeconds (CODE): from the workflow engine's
- *     own timestamps, so they need no tracing. The trace-based Latency also runs; it reads the
- *     workflow's trace from TRACING_ES_URL (or the local ES) and scores null if none is found.
+ *     own timestamps, so they need no tracing.
  *
  * Token metrics stay omitted: whether the workflow's `ai.agent` conversation emits joinable OTel
  * spans is verified during the runtime gate.
@@ -154,8 +153,6 @@ evaluate.describe(
             ...(method === 'agent' ? [createAlertAnalysisTrajectoryEvaluator()] : []),
             evaluators.criteria(RATIONALE_CRITERIA),
             ...latencyEvaluators,
-            // Scores null when the execution's trace is not in TRACING_ES_URL (or the local ES).
-            evaluators.traceBasedEvaluators.latency,
           ]);
 
           await executorClient.runExperiment(

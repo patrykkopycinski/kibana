@@ -112,15 +112,29 @@ describe('BenignNotEscalated', () => {
     );
   });
 
-  it('keeps the plain explanation when nothing was escalated', async () => {
+  it('keeps the plain explanation when nothing was escalated or dropped', async () => {
     const { output, expected } = build([
       ['false_positive', 'false_positive', 'benign-a'],
-      ['false_positive', undefined, 'benign-b'],
+      ['false_positive', 'false_positive', 'benign-b'],
     ]);
 
     const result = await run('BenignNotEscalated', output, expected);
 
     expect(result.score).toBe(1);
     expect(result.explanation).toBe('0/2 false positives marked true_positive');
+  });
+
+  it('reports a missing verdict apart from an escalated one, without scoring it as escalated', async () => {
+    const { output, expected } = build([
+      ['false_positive', undefined, 'benign-a'],
+      ['false_positive', 'true_positive', 'benign-b'],
+    ]);
+
+    const result = await run('BenignNotEscalated', output, expected);
+
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toBe(
+      '1/2 false positives marked true_positive: benign-b#1; no verdict: benign-a#0'
+    );
   });
 });

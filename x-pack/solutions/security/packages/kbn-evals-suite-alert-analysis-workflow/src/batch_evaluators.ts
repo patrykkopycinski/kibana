@@ -123,16 +123,17 @@ const METRICS: Record<string, (output: BatchOutput, expected: BatchExpected) => 
 
   // Benign alerts escalated as true_positive: analyst noise, not a missed attack.
   BenignNotEscalated: (output, expected) => {
-    const { total, offending } = partitionByVerdict(
+    const { total, offending, missing } = partitionByVerdict(
       output,
       expected,
       'false_positive',
       'true_positive'
     );
     const escalated = offending.length ? `: ${nameAlerts(offending, expected.shapes)}` : '';
+    const dropped = missing.length ? `; no verdict: ${nameAlerts(missing, expected.shapes)}` : '';
     return {
       score: total === 0 ? null : 1 - offending.length / total,
-      explanation: `${offending.length}/${total} false positives marked true_positive${escalated}`,
+      explanation: `${offending.length}/${total} false positives marked true_positive${escalated}${dropped}`,
     };
   },
 

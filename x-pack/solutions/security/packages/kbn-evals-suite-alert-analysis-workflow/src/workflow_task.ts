@@ -121,6 +121,9 @@ const latest = (timestamps: string[]): string | undefined =>
  * The classification step is a span, not a sum of its records: each step yields several records
  * and a batch makes several model calls, so adding record durations would double count. For one
  * alert the span is the model call; for a batch it also includes the gaps between calls.
+ *
+ * If any record has started but not finished (the poll gave up mid-call), the end is unknown:
+ * report none rather than the latest finish of the earlier calls, which would understate it.
  */
 export const readTiming = ({
   startedAt,
@@ -128,15 +131,16 @@ export const readTiming = ({
   stepExecutions,
 }: Pick<WorkflowExecutionDto, 'startedAt' | 'finishedAt' | 'stepExecutions'>): WorkflowTiming => {
   const steps = stepExecutions.filter(isClassificationStep);
+  const stillRunning = steps.some((step) => step.startedAt && !step.finishedAt);
   return {
     startedAt: startedAt || undefined,
     finishedAt: finishedAt || undefined,
     classificationStartedAt: earliest(
       steps.flatMap((step) => (step.startedAt ? [step.startedAt] : []))
     ),
-    classificationFinishedAt: latest(
-      steps.flatMap((step) => (step.finishedAt ? [step.finishedAt] : []))
-    ),
+    classificationFinishedAt: stillRunning
+      ? undefined
+      : latest(steps.flatMap((step) => (step.finishedAt ? [step.finishedAt] : []))),
   };
 };
 

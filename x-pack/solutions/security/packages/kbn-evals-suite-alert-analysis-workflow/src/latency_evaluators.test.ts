@@ -5,15 +5,27 @@
  * 2.0.
  */
 
+import { selectEvaluators } from '@kbn/evals';
 import {
   classificationStepLatencySeconds,
+  latencyEvaluators,
   secondsBetween,
   workflowLatencySeconds,
 } from './latency_evaluators';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowTiming } from './workflow_task';
 
-const run = (evaluator: typeof workflowLatencySeconds, timing?: WorkflowTiming) =>
-  evaluator.evaluate({ output: { timing }, expected: {}, input: {}, metadata: {} } as never);
+const run = (
+  evaluator: typeof workflowLatencySeconds,
+  timing?: WorkflowTiming,
+  executionStatus: string = ExecutionStatus.COMPLETED
+) =>
+  evaluator.evaluate({
+    output: { timing, executionStatus },
+    expected: {},
+    input: {},
+    metadata: {},
+  } as never);
 
 describe('secondsBetween', () => {
   it('returns the gap in seconds', () => {
@@ -73,5 +85,80 @@ describe('ClassificationStepLatencySeconds', () => {
     });
 
     expect(result.score).toBeNull();
+  });
+});
+
+describe('latency of runs that did not complete', () => {
+  const timing: WorkflowTiming = {
+    startedAt: '2026-10-30T10:00:00.000Z',
+    finishedAt: '2026-10-30T10:00:02.000Z',
+    classificationStartedAt: '2026-10-30T10:00:00.500Z',
+    classificationFinishedAt: '2026-10-30T10:00:01.500Z',
+  };
+
+  it.each([workflowLatencySeconds, classificationStepLatencySeconds])(
+    'scores null and names the status for a failed run ($name)',
+    async (evaluator) => {
+      const result = await run(evaluator, timing, ExecutionStatus.FAILED);
+
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('unavailable');
+      expect(result.explanation).toContain('status=failed');
+    }
+  );
+
+  it.each([
+    ExecutionStatus.CANCELLED,
+    ExecutionStatus.TIMED_OUT,
+    ExecutionStatus.RUNNING,
+    ExecutionStatus.SKIPPED,
+  ])('scores null for status %s', async (status) => {
+    expect((await run(workflowLatencySeconds, timing, status)).score).toBeNull();
+  });
+
+  it('scores null when the output carries no status', async () => {
+    const result = await workflowLatencySeconds.evaluate({
+      output: { timing },
+      expected: {},
+      input: {},
+      metadata: {},
+    } as never);
+
+    expect(result.score).toBeNull();
+    expect(result.explanation).toContain('status=unknown');
+  });
+
+  it('still scores a completed run with the same timing', async () => {
+    expect((await run(workflowLatencySeconds, timing)).score).toBe(2);
+    expect((await run(classificationStepLatencySeconds, timing)).score).toBe(1);
+  });
+});
+
+describe('SELECTED_EVALUATORS filtering', () => {
+  const original = process.env.SELECTED_EVALUATORS;
+
+  afterEach(() => {
+    if (original === undefined) {
+      delete process.env.SELECTED_EVALUATORS;
+    } else {
+      process.env.SELECTED_EVALUATORS = original;
+    }
+  });
+
+  it('keeps only the named latency evaluator', () => {
+    process.env.SELECTED_EVALUATORS = 'WorkflowLatencySeconds';
+
+    expect(selectEvaluators(latencyEvaluators).map((e) => e.name)).toEqual([
+      'WorkflowLatencySeconds',
+    ]);
+  });
+
+  it('keeps both latency evaluators when no filter is set', () => {
+    delete process.env.SELECTED_EVALUATORS;
+
+    expect(selectEvaluators(latencyEvaluators).map((e) => e.name)).toEqual([
+      'WorkflowLatencySeconds',
+      'ClassificationStepLatencySeconds',
+    ]);
   });
 });

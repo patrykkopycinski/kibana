@@ -6,6 +6,7 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowTiming } from './workflow_task';
 
 /** Seconds between two ISO timestamps, or null when either is missing, unparsable or reversed. */
@@ -26,7 +27,19 @@ const createLatencyEvaluator = (
   kind: 'CODE',
   direction: 'minimize',
   evaluate: async ({ output }) => {
-    const timing = (output as { timing?: WorkflowTiming } | undefined)?.timing;
+    const { timing, executionStatus } = (output ?? {}) as {
+      timing?: WorkflowTiming;
+      executionStatus?: string;
+    };
+    // A run that failed, was cancelled or never finished stops early and would look fast on a
+    // minimize score, so only completed runs are measured.
+    if (executionStatus !== ExecutionStatus.COMPLETED) {
+      return {
+        score: null,
+        label: 'unavailable',
+        explanation: `${describe}: unavailable: status=${executionStatus ?? 'unknown'}`,
+      };
+    }
     const score = timing ? secondsBetween(...span(timing)) : null;
     // A missing timestamp is "not measured", never 0 seconds, which would read as the fastest run.
     return score === null
@@ -35,7 +48,10 @@ const createLatencyEvaluator = (
   },
 });
 
-/** Wall-clock time of the whole workflow execution, from the engine's own timestamps. */
+/**
+ * Engine execution time, from the engine's own timestamps (excludes Task Manager queueing before
+ * the execution starts).
+ */
 export const workflowLatencySeconds = createLatencyEvaluator(
   'WorkflowLatencySeconds',
   'workflow execution',

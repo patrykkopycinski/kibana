@@ -129,6 +129,28 @@ describe('extractAgentConversationIds', () => {
 });
 
 describe('extractAgentConversationIds trace_conversation_id fallback', () => {
+  const includeTraceIds = { includeTraceIds: true };
+
+  it('ignores metadata.trace_conversation_id by default and when the option is false', () => {
+    const steps = [
+      step({
+        stepId: 'trace_only',
+        stepType: 'ai.agent',
+        output: { message: 'ok', metadata: { trace_conversation_id: 'trace-only' } },
+      }),
+      step({
+        stepId: 'stored',
+        stepType: 'ai.agent',
+        output: { conversation_id: 'conv-1', metadata: { trace_conversation_id: 'trace-1' } },
+      }),
+    ];
+    const expected = [{ stepId: 'stored', conversationId: 'conv-1', stepType: 'ai.agent' }];
+
+    expect(extractAgentConversationIds(steps)).toEqual(expected);
+    expect(extractAgentConversationIds(steps, { includeTraceIds: false })).toEqual(expected);
+    expect(extractFirstAgentConversationId(steps)).toBe('conv-1');
+  });
+
   it('reads metadata.trace_conversation_id when the step stored no conversation', () => {
     const steps = [
       step({ stepType: 'step_level_timeout', output: undefined }),
@@ -139,7 +161,7 @@ describe('extractAgentConversationIds trace_conversation_id fallback', () => {
       }),
     ];
 
-    expect(extractAgentConversationIds(steps)).toEqual([
+    expect(extractAgentConversationIds(steps, includeTraceIds)).toEqual([
       { stepId: 'endpoint_analysis', conversationId: 'trace-only', stepType: 'ai.agent' },
     ]);
   });
@@ -163,10 +185,9 @@ describe('extractAgentConversationIds trace_conversation_id fallback', () => {
       }),
     ];
 
-    expect(extractAgentConversationIds(steps).map((r) => r.conversationId)).toEqual([
-      'conv-1',
-      'trace-2',
-    ]);
+    expect(
+      extractAgentConversationIds(steps, includeTraceIds).map((r) => r.conversationId)
+    ).toEqual(['conv-1', 'trace-2']);
   });
 
   it('falls back when conversation_id is empty and ignores a non-string trace id', () => {
@@ -184,7 +205,7 @@ describe('extractAgentConversationIds trace_conversation_id fallback', () => {
       step({ stepId: 'c', stepType: 'ai.agent', output: { metadata: null } }),
     ];
 
-    expect(extractAgentConversationIds(steps)).toEqual([
+    expect(extractAgentConversationIds(steps, includeTraceIds)).toEqual([
       { stepId: 'a', conversationId: 'trace-a', stepType: 'ai.agent' },
     ]);
   });

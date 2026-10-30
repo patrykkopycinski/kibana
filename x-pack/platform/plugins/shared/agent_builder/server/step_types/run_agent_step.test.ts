@@ -340,6 +340,53 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output?.conversation_id).toBe('c-1');
       expect(res.output?.metadata?.trace_conversation_id).toBe('c-1');
     });
+
+    it('reports the trace id and no conversation_id for an ephemeral run', async () => {
+      const execution = {
+        executeAgent: jest.fn().mockResolvedValue({
+          executionId: 'exec-1',
+          conversationId: 'c-loaded',
+          events$: of(roundComplete),
+        }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: { message: 'Summarize', conversation_id: 'c-loaded' },
+          config: { ephemeral: true },
+        })
+      );
+
+      expect(res.output?.metadata?.trace_conversation_id).toBe('c-loaded');
+      expect(res.output).not.toHaveProperty('conversation_id');
+    });
+
+    it('omits the trace id when the execution reports no conversation id', async () => {
+      const execution = createExecutionMock(of(roundComplete));
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'stateless' } }));
+
+      expect(res.output?.metadata).not.toHaveProperty('trace_conversation_id');
+      expect(res.output?.metadata?.usage).toBeDefined();
+    });
+
+    it('keeps only usage in metadata when the step fails', async () => {
+      const execution = {
+        executeAgent: jest.fn().mockResolvedValue({
+          executionId: 'exec-1',
+          conversationId: 'trace-uuid',
+          events$: throwError(() => new Error('boom')),
+        }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hello' } }));
+
+      expect(res.error?.message).toBe('boom');
+      expect(Object.keys(res.output?.metadata ?? {})).toEqual(['usage']);
+    });
   });
 
   it('propagates execution service errors (e.g., missing connector)', async () => {
@@ -1641,6 +1688,24 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       );
 
       expect(res.error?.message).toContain('does not match the output schema');
+    });
+
+    it('reports no trace_conversation_id when the template run stores no conversation', async () => {
+      const { inference } = createInference({ content: 'plain answer' });
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution: createExecutionMock(of()), inference },
+      } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: templateInput,
+          config: { 'connector-id': 'daybreak', 'create-conversation': false },
+        })
+      );
+
+      expect(res.output?.message).toBe('plain answer');
+      expect(res.output).not.toHaveProperty('conversation_id');
+      expect(res.output?.metadata).not.toHaveProperty('trace_conversation_id');
     });
 
     it('stores a conversation when create-conversation is set', async () => {

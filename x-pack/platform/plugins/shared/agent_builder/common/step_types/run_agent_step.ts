@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -201,42 +201,53 @@ export const InputSchema = z.object({
 /**
  * Output schema for the run agent step.
  */
-export const OutputSchema = z.object({
-  message: z
-    .string()
-    .describe(
-      'The text response from the agent. When schema is provided, contains a string version of the structured output'
-    ),
-  structured_output: z
-    .any()
-    .optional()
-    .describe('The structured output from the agent. Only here when schema was provided'),
-  conversation_id: z
-    .string()
-    .optional()
-    .describe(
-      'Conversation ID associated with this step execution. Present when the step created or updated a conversation.'
-    ),
-  metadata: z
-    .object({
-      usage: z.object({
-        connectorId: z
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    message: z
+      .string()
+      .describe(
+        'The text response from the agent. When schema is provided, contains a string version of the structured output'
+      ),
+    structured_output: z
+      .any()
+      .optional()
+      .describe('The structured output from the agent. Only here when schema was provided'),
+    conversation_id: z
+      .string()
+      .optional()
+      .describe(
+        'Conversation ID associated with this step execution. Present when the step created or updated a conversation.'
+      ),
+    metadata: z
+      .object({
+        usage: z.object({
+          connectorId: z
+            .string()
+            .max(512)
+            .optional()
+            .describe('Id of the LLM connector used for this step, when reported by the model.'),
+          inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
+          outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
+          cachedTokens: z
+            .number()
+            .optional()
+            .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
+          totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
+        }),
+        trace_conversation_id: z
           .string()
-          .max(512)
+          .max(256)
           .optional()
-          .describe('Id of the LLM connector used for this step, when reported by the model.'),
-        inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
-        outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
-        cachedTokens: z
-          .number()
-          .optional()
-          .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
-        totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
-      }),
-    })
-    .describe('Step execution metadata, including token usage across all LLM rounds.')
-    .optional(),
-});
+          .describe(
+            'Id the agent run reports as `gen_ai.conversation.id` on its traces, for trace correlation. The span attribute may carry a hashed form of this id unless real ids are enabled. Present even when no conversation was stored, so it does not refer to a stored conversation: use `conversation_id` to load one.'
+          ),
+      })
+      .describe(
+        'Step execution metadata, including token usage across all LLM rounds and the trace correlation id.'
+      )
+      .optional(),
+  })
+);
 
 /**
  * Validation message shown when `aggregate-by` is set without a `plugin-id`. The parent

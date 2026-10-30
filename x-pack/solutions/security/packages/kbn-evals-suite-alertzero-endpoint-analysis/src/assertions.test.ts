@@ -84,8 +84,10 @@ const containedFindings = () => ({
   recommendedActions: [isolateAction(expected.endpointId)],
 });
 // Production `forensic_analysis` runs with `create-conversation: false`: the real ai.agent step
-// output is {metadata:{usage}, structured_output, message} and never carries a conversation_id.
+// output is {metadata:{usage, trace_conversation_id}, structured_output, message} and never carries
+// a conversation_id.
 const agentUsage = (overrides: Record<string, unknown> = {}) => ({
+  trace_conversation_id: 'az-trace-conversation',
   usage: {
     connectorId: 'az-connector',
     inputTokens: 1032367,

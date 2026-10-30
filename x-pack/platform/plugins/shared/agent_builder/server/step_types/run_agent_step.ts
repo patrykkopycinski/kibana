@@ -416,7 +416,11 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               message: templateResult.message,
               structured_output: templateResult.structuredOutput,
               ...(outputConversationId && { conversation_id: outputConversationId }),
-              metadata: { usage: { ...usage, ...templateResult.usage } },
+              metadata: {
+                usage: { ...usage, ...templateResult.usage },
+                // No agent span is opened here, so the stored conversation is the only id available.
+                ...(outputConversationId && { trace_conversation_id: outputConversationId }),
+              },
             },
           };
         }
@@ -430,48 +434,49 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: effectiveAgentId,
         });
 
-        const { events$ } = await executionService.executeAgent({
-          mode: AgentExecutionMode.conversation,
-          request,
-          abortSignal: context.abortSignal,
-          metadata,
-          interactive: createNonInteractiveConfig(
-            approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
-          ),
-          params: {
-            agentId: effectiveAgentId,
-            connectorId: effectiveConnectorId,
-            conversationId,
-            ...(authorName ? { author: { full_name: authorName } } : {}),
-            autoCreateConversationWithId: createConversation,
-            storeConversation,
-            accessControl,
-            structuredOutput: !!schema,
-            outputSchema: schema,
-            configurationOverrides,
-            nextInput: {
-              message,
-              attachments,
+        const { events$, conversationId: executionConversationId } =
+          await executionService.executeAgent({
+            mode: AgentExecutionMode.conversation,
+            request,
+            abortSignal: context.abortSignal,
+            metadata,
+            interactive: createNonInteractiveConfig(
+              approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
+            ),
+            params: {
+              agentId: effectiveAgentId,
+              connectorId: effectiveConnectorId,
+              conversationId,
+              ...(authorName ? { author: { full_name: authorName } } : {}),
+              autoCreateConversationWithId: createConversation,
+              storeConversation,
+              accessControl,
+              structuredOutput: !!schema,
+              outputSchema: schema,
+              configurationOverrides,
+              nextInput: {
+                message,
+                attachments,
+              },
+              ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+              ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+              // The single source of the workflow run: the execution reports it on its round events
+              // and sends it to EIS as `interactionId`, with or without a `plugin-id`.
+              workflowExecutionId: context.contextManager.getContext().execution.id,
+              ...(pluginId
+                ? {
+                    telemetryMetadata: {
+                      pluginId,
+                      aggregateBy,
+                      productSolution,
+                      productFeature,
+                    },
+                  }
+                : {}),
             },
-            ...(maxContentLength !== undefined ? { maxContentLength } : {}),
-            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
-            // The single source of the workflow run: the execution reports it on its round events
-            // and sends it to EIS as `interactionId`, with or without a `plugin-id`.
-            workflowExecutionId: context.contextManager.getContext().execution.id,
-            ...(pluginId
-              ? {
-                  telemetryMetadata: {
-                    pluginId,
-                    aggregateBy,
-                    productSolution,
-                    productFeature,
-                  },
-                }
-              : {}),
-          },
-          // workflows already run as scheduled tasks
-          useTaskManager: false,
-        });
+            // workflows already run as scheduled tasks
+            useTaskManager: false,
+          });
 
         const events = await firstValueFrom(
           events$.pipe(
@@ -522,7 +527,12 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
-            metadata: { usage },
+            metadata: {
+              usage,
+              // The id the run's agent spans carry as `gen_ai.conversation.id`. It is also set for
+              // runs that store nothing, where `conversation_id` stays absent.
+              ...(executionConversationId && { trace_conversation_id: executionConversationId }),
+            },
           },
         };
       } catch (error) {

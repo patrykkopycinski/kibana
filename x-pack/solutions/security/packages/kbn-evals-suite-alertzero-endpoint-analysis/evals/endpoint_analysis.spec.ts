@@ -10,10 +10,7 @@ import { evaluate, tags, getToolCallSteps } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/http_api/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  extractAgentConversationIds,
-  readAgentToolCallsFromTraces,
-} from '@kbn/security-evals-workflow-traces';
+import { readAgentToolCallsForSteps } from '../src/agent_trace_conversation_ids';
 import {
   AlertZeroRuntime,
   deleteDataStreamQuietly,
@@ -183,33 +180,24 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             `Missing real ${stepId}`
           );
         }
-        // Production runs this agent with `create-conversation: false`: no conversation id
-        // exists to join agent spans on, so the trace check applies only when one is emitted.
-        // The journal `workflow.execute` steps also output a `conversation_id` (the
-        // investigation's), which no agent span carries, so only `ai.agent` steps count.
-        const conversationIds = extractAgentConversationIds(child.stepExecutions)
-          .filter((entry) => entry.stepType === 'ai.agent')
-          .map((entry) => entry.conversationId);
-        if (conversationIds.length > 0) {
-          const calls = await readAgentToolCallsFromTraces({
-            traceEsClient,
-            conversationIds,
-            log,
-            includeFailures: true,
-          });
-          assert(
-            !calls.unavailable &&
-              calls.toolCallIds.some((toolId) => toolId.startsWith('security.endpoint_forensic.')),
-            'No endpoint analysis agent tool trace'
-          );
-          assert.deepEqual(
-            (calls.failedToolCallIds ?? []).filter((toolId) =>
-              toolId.startsWith('security.endpoint_forensic.')
-            ),
-            [],
-            'Endpoint forensic tool calls failed'
-          );
-        }
+        const calls = await readAgentToolCallsForSteps({
+          stepExecutions: child.stepExecutions,
+          traceEsClient,
+          log,
+          includeFailures: true,
+        });
+        assert(
+          !calls.unavailable &&
+            calls.toolCallIds.some((toolId) => toolId.startsWith('security.endpoint_forensic.')),
+          'No endpoint analysis agent tool trace'
+        );
+        assert.deepEqual(
+          (calls.failedToolCallIds ?? []).filter((toolId) =>
+            toolId.startsWith('security.endpoint_forensic.')
+          ),
+          [],
+          'Endpoint forensic tool calls failed'
+        );
         // The route returns ListAttachmentsResponse (`results`), not `{ attachments }`.
         const attachments = await fetch<ListAttachmentsResponse>(
           `/api/agent_builder/conversations/${encodeURIComponent(

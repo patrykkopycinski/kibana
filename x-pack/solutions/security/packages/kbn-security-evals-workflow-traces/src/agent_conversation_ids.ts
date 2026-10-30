@@ -12,19 +12,47 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
  *
  * The agent invocation opens its own root trace, so the workflow's `traceId`
  * matches no agent spans. Agent tool spans are instead joined via
- * `step.output.conversation_id` ↔ `attributes.gen_ai.conversation.id`.
+ * `step.output.conversation_id` (or, for a run that stored no conversation,
+ * `step.output.metadata.trace_conversation_id`, see `includeTraceIds`)
+ * ↔ `attributes.gen_ai.conversation.id`.
  */
 export interface AgentConversationId {
   /** Stable step id from the workflow definition (e.g. `draft_creation`). */
   stepId: string;
-  /** Conversation id persisted on the step's output by the `ai.agent` connector. */
+  /**
+   * Id the agent's spans carry as `gen_ai.conversation.id`. For a run that stored no
+   * conversation this is not a stored conversation, so it must not be loaded as one.
+   */
   conversationId: string;
   /** Optional step type when present (`ai.agent`, …). */
   stepType?: string;
 }
 
+export interface ExtractAgentConversationIdsOptions {
+  /**
+   * Also accept `output.metadata.trace_conversation_id` when the step stored no conversation.
+   * Such an id only joins traces; callers that load or delete conversations must leave this off.
+   */
+  includeTraceIds?: boolean;
+}
+
+const readConversationId = (output: unknown, includeTraceIds: boolean): string | undefined => {
+  const { conversation_id: conversationId, metadata } = (output ?? {}) as {
+    conversation_id?: unknown;
+    metadata?: { trace_conversation_id?: unknown } | null;
+  };
+  const candidates = includeTraceIds
+    ? [conversationId, metadata?.trace_conversation_id]
+    : [conversationId];
+  return candidates.find(
+    (candidate): candidate is string => typeof candidate === 'string' && candidate.length > 0
+  );
+};
+
 /**
- * Collects every non-empty `conversation_id` from workflow step executions.
+ * Collects every non-empty `conversation_id` from workflow step executions. With
+ * `includeTraceIds`, a step without one falls back to `output.metadata.trace_conversation_id`,
+ * which an `ai.agent` step reports even when it stores no conversation.
  *
  * A workflow may contain multiple `ai.agent` steps, each with its own
  * conversation id, so all of them are returned. Selection keys off the output
@@ -33,19 +61,15 @@ export interface AgentConversationId {
  * in first-seen order so a retried step yields one join key.
  */
 export function extractAgentConversationIds(
-  steps: ReadonlyArray<Pick<WorkflowStepExecutionDto, 'stepId' | 'stepType' | 'output'>>
+  steps: ReadonlyArray<Pick<WorkflowStepExecutionDto, 'stepId' | 'stepType' | 'output'>>,
+  { includeTraceIds = false }: ExtractAgentConversationIdsOptions = {}
 ): AgentConversationId[] {
   const seen = new Set<string>();
   const result: AgentConversationId[] = [];
 
   for (const step of steps) {
-    const conversationId = (step.output as { conversation_id?: unknown } | undefined)
-      ?.conversation_id;
-    if (
-      typeof conversationId === 'string' &&
-      conversationId.length > 0 &&
-      !seen.has(conversationId)
-    ) {
+    const conversationId = readConversationId(step.output, includeTraceIds);
+    if (conversationId !== undefined && !seen.has(conversationId)) {
       seen.add(conversationId);
       result.push({
         stepId: step.stepId,

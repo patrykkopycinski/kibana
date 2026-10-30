@@ -128,6 +128,89 @@ describe('extractAgentConversationIds', () => {
   });
 });
 
+describe('extractAgentConversationIds trace_conversation_id fallback', () => {
+  const includeTraceIds = { includeTraceIds: true };
+
+  it('ignores metadata.trace_conversation_id by default and when the option is false', () => {
+    const steps = [
+      step({
+        stepId: 'trace_only',
+        stepType: 'ai.agent',
+        output: { message: 'ok', metadata: { trace_conversation_id: 'trace-only' } },
+      }),
+      step({
+        stepId: 'stored',
+        stepType: 'ai.agent',
+        output: { conversation_id: 'conv-1', metadata: { trace_conversation_id: 'trace-1' } },
+      }),
+    ];
+    const expected = [{ stepId: 'stored', conversationId: 'conv-1', stepType: 'ai.agent' }];
+
+    expect(extractAgentConversationIds(steps)).toEqual(expected);
+    expect(extractAgentConversationIds(steps, { includeTraceIds: false })).toEqual(expected);
+    expect(extractFirstAgentConversationId(steps)).toBe('conv-1');
+  });
+
+  it('reads metadata.trace_conversation_id when the step stored no conversation', () => {
+    const steps = [
+      step({ stepType: 'step_level_timeout', output: undefined }),
+      step({
+        stepId: 'endpoint_analysis',
+        stepType: 'ai.agent',
+        output: { message: 'ok', metadata: { trace_conversation_id: 'trace-only' } },
+      }),
+    ];
+
+    expect(extractAgentConversationIds(steps, includeTraceIds)).toEqual([
+      { stepId: 'endpoint_analysis', conversationId: 'trace-only', stepType: 'ai.agent' },
+    ]);
+  });
+
+  it('prefers conversation_id over the trace id and dedupes when they are equal', () => {
+    const steps = [
+      step({
+        stepId: 'stored_agent',
+        stepType: 'ai.agent',
+        output: { conversation_id: 'conv-1', metadata: { trace_conversation_id: 'conv-1' } },
+      }),
+      step({
+        stepId: 'retry_agent',
+        stepType: 'ai.agent',
+        output: { metadata: { trace_conversation_id: 'conv-1' } },
+      }),
+      step({
+        stepId: 'second_agent',
+        stepType: 'ai.agent',
+        output: { metadata: { trace_conversation_id: 'trace-2' } },
+      }),
+    ];
+
+    expect(
+      extractAgentConversationIds(steps, includeTraceIds).map((r) => r.conversationId)
+    ).toEqual(['conv-1', 'trace-2']);
+  });
+
+  it('falls back when conversation_id is empty and ignores a non-string trace id', () => {
+    const steps = [
+      step({
+        stepId: 'a',
+        stepType: 'ai.agent',
+        output: { conversation_id: '', metadata: { trace_conversation_id: 'trace-a' } },
+      }),
+      step({
+        stepId: 'b',
+        stepType: 'ai.agent',
+        output: { metadata: { trace_conversation_id: 7 } },
+      }),
+      step({ stepId: 'c', stepType: 'ai.agent', output: { metadata: null } }),
+    ];
+
+    expect(extractAgentConversationIds(steps, includeTraceIds)).toEqual([
+      { stepId: 'a', conversationId: 'trace-a', stepType: 'ai.agent' },
+    ]);
+  });
+});
+
 describe('extractFirstAgentConversationId', () => {
   it('returns only the first conversation id (single-agent convenience)', () => {
     const steps = [

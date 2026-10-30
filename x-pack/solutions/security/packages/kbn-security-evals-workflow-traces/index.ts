@@ -15,4 +15,5 @@ export {
   extractAgentConversationIds,
   extractFirstAgentConversationId,
   type AgentConversationId,
+  type ExtractAgentConversationIdsOptions,
 } from './src/agent_conversation_ids';

@@ -240,7 +240,10 @@ export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecuti
 export interface ExecuteAgentResult {
   /** The unique execution ID. */
   executionId: string;
-  /** The conversation the run writes to, resolved before the run was dispatched. */
+  /**
+   * The id the run executes under (also the trace `gen_ai.conversation.id`). Not persisted
+   * when the conversation is not stored.
+   */
   conversationId?: string;
   /**
    * Observable of events for this execution.

@@ -29,6 +29,10 @@ describe('matchesBenignQuery', () => {
     expect(matchesBenignQuery(doc, 'user.name:*')).toBe(true);
     expect(matchesBenignQuery(doc, 'process.name:sshd')).toBe(false);
   });
+  it('returns null for a field outside the corpus schema, never a 0% "no match"', () => {
+    expect(matchesBenignQuery(doc, 'process.command_line:mimikatz')).toBeNull();
+    expect(matchesBenignQuery(doc, 'process.name:sshd and file.path:x')).toBeNull();
+  });
   it('returns null for an unsupported query', () => {
     expect(matchesBenignQuery(doc, 'process.name:ng*')).toBeNull();
   });
@@ -66,6 +70,13 @@ describe('replayBenignFpRate', () => {
       'process.name': i < 10 ? 'hot' : 'cold',
     }));
     expect(replayBenignFpRate('process.name:hot', big).passesGate).toBe(true);
+  });
+
+  it('FAIL closed (unsupported) on a field the corpus does not carry', () => {
+    const r = replayBenignFpRate('process.command_line:mimikatz', corpus);
+    expect(r.unsupported).toBe(true);
+    expect(r.fpRate).toBeNull();
+    expect(r.passesGate).toBe(false);
   });
 
   it('FAIL closed on an unsupported query', () => {

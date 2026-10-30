@@ -9,7 +9,7 @@ import type { EsClient } from '@kbn/scout';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { draftRuleSchema } from '../types';
-import { BENIGN_BUDGET, generateBenignCorpus } from '../benign_replay';
+import { BENIGN_BUDGET, generateBenignCorpus, replayBenignFpRate } from '../benign_replay';
 import {
   benignCaseKey,
   createBenignReplayFpRateEvaluator,
@@ -286,18 +286,32 @@ describe('createBenignReplayFpRateEvaluator', () => {
     expect(result.metadata).toMatchObject({ fpRate: 1, matched: BENIGN_BUDGET });
   });
 
-  it('scores 0 just above the 5% gate and 1 at it, on the case corpus', async () => {
+  it('scores 1 at exactly 10/200 (5%) and 0 at 11/200 on a hand-built corpus', () => {
+    const corpusWith = (hot: number) =>
+      Array.from({ length: BENIGN_BUDGET }, (_, i) => ({
+        'process.name': i < hot ? 'hot' : 'cold',
+      }));
+    const at = replayBenignFpRate('process.name:hot', corpusWith(10));
+    expect([at.matched, at.passesGate]).toEqual([10, true]);
+    const above = replayBenignFpRate('process.name:hot', corpusWith(11));
+    expect([above.matched, above.passesGate]).toEqual([11, false]);
+  });
+
+  it('scores 0 for the most common process on the real case corpus (over the gate)', async () => {
     const input = makeArgs(makeRule()).input;
     const corpus = generateBenignCorpus(benignCaseKey(input));
     const counts = new Map<string, number>();
     corpus.forEach((d) => counts.set(d['process.name'], (counts.get(d['process.name']) ?? 0) + 1));
-    const ok = [...counts].find(([, n]) => n <= BENIGN_BUDGET * 0.05);
-    const over = [...counts].find(([, n]) => n > BENIGN_BUDGET * 0.05);
-    if (ok) {
-      expect((await evaluator.evaluate(args(`process.name:${ok[0]}`))).score).toBe(1);
-    }
-    expect(over).toBeDefined();
-    expect((await evaluator.evaluate(args(`process.name:${over![0]}`))).score).toBe(0);
+    const [top] = [...counts].sort((a, b) => b[1] - a[1]);
+    expect(top[1]).toBeGreaterThan(BENIGN_BUDGET * 0.05);
+    expect((await evaluator.evaluate(args(`process.name:${top[0]}`))).score).toBe(0);
+  });
+
+  it('is UNMEASURED (unsupported) for a field outside the benign corpus schema', async () => {
+    const result = await evaluator.evaluate(args('process.command_line:mimikatz'));
+    expect(result.label).toBe('unsupported');
+    expect(result.score).toBeNull();
+    expect(result.explanation).toContain('UNMEASURED');
   });
 
   it('reports an unsupported query explicitly instead of passing it', async () => {

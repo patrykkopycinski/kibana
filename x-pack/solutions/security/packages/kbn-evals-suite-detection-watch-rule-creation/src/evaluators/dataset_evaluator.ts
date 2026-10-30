@@ -246,10 +246,14 @@ const pct = (n: number): string => `${(n * 100).toFixed(1)}%`;
 
 /**
  * Replays the drafted rule's query over the case's benign corpus (#19982 P3b). Score 1 when the
- * FP rate is within BENIGN_FP_GATE, 0 above it. A query outside the replay dialect (every ES|QL
- * `FROM ... | WHERE ...` pipeline today) cannot be measured: it scores null with label
- * `unsupported` so the run summary counts it as a measurement gap instead of either passing it
- * or reporting a 0 that reads as a model failure.
+ * FP rate is within BENIGN_FP_GATE, 0 above it. A query outside the replay dialect or touching a
+ * field outside the 5-field corpus cannot be measured: it scores null with label `unsupported`
+ * so the run summary counts it as a measurement gap instead of either passing it or reporting a
+ * 0 that reads as a model failure.
+ *
+ * KNOWN GAP: every golden dataset drafts `language: 'esql'`, so this evaluator is UNMEASURED
+ * (all `unsupported`) for today's drafts. Do not read an absent BenignReplayFpRate score as a
+ * pass: the run summary's `unsupported` count is the only signal of that coverage hole.
  */
 export const createBenignReplayFpRateEvaluator = (): RuleEvaluator =>
   skipNoRule({
@@ -264,7 +268,9 @@ export const createBenignReplayFpRateEvaluator = (): RuleEvaluator =>
         return {
           score: null,
           label: 'unsupported',
-          explanation: 'Query is outside the benign-replay dialect; FP rate not measured',
+          explanation:
+            'UNMEASURED: query is outside the benign-replay dialect (ES|QL or a field outside the ' +
+            'benign corpus); FP rate not computed',
           metadata: { unsupported: true, replayed: replay.replayed },
         };
       }

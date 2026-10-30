@@ -295,6 +295,53 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.output?.conversation_id).toBeUndefined();
   });
 
+  describe('trace_conversation_id', () => {
+    const roundComplete = {
+      type: ChatEventType.roundComplete,
+      data: { round: { id: 'r-1', response: { message: 'ok' } } },
+    };
+
+    it('reports the execution conversation id without a conversation_id when nothing is stored', async () => {
+      const execution = {
+        executeAgent: jest.fn().mockResolvedValue({
+          executionId: 'exec-1',
+          conversationId: 'trace-uuid',
+          events$: of(roundComplete),
+        }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'stateless' } }));
+
+      expect(res.output?.metadata?.trace_conversation_id).toBe('trace-uuid');
+      expect(res.output).not.toHaveProperty('conversation_id');
+    });
+
+    it('equals conversation_id when the conversation is stored', async () => {
+      const execution = {
+        executeAgent: jest.fn().mockResolvedValue({
+          executionId: 'exec-1',
+          conversationId: 'c-1',
+          events$: of(
+            {
+              type: ChatEventType.conversationCreated,
+              data: { conversation_id: 'c-1', title: 't' },
+            },
+            roundComplete
+          ),
+        }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'hello' }, config: { 'create-conversation': true } })
+      );
+
+      expect(res.output?.conversation_id).toBe('c-1');
+      expect(res.output?.metadata?.trace_conversation_id).toBe('c-1');
+    });
+  });
+
   it('propagates execution service errors (e.g., missing connector)', async () => {
     const execError = new Error('No LLM connector configured');
     const events$ = throwError(() => execError);
@@ -1638,6 +1685,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         { source: 'workflow' }
       );
       expect(res.output?.conversation_id).toBe('c-template');
+      expect(res.output?.metadata?.trace_conversation_id).toBe('c-template');
     });
   });
 });

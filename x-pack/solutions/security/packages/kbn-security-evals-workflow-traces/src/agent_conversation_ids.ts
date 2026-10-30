@@ -12,19 +12,35 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
  *
  * The agent invocation opens its own root trace, so the workflow's `traceId`
  * matches no agent spans. Agent tool spans are instead joined via
- * `step.output.conversation_id` ↔ `attributes.gen_ai.conversation.id`.
+ * `step.output.conversation_id` (or, for a run that stored no conversation,
+ * `step.output.metadata.trace_conversation_id`) ↔ `attributes.gen_ai.conversation.id`.
  */
 export interface AgentConversationId {
   /** Stable step id from the workflow definition (e.g. `draft_creation`). */
   stepId: string;
-  /** Conversation id persisted on the step's output by the `ai.agent` connector. */
+  /**
+   * Id the agent's spans carry as `gen_ai.conversation.id`. For a run that stored no
+   * conversation this is not a stored conversation, so it must not be loaded as one.
+   */
   conversationId: string;
   /** Optional step type when present (`ai.agent`, …). */
   stepType?: string;
 }
 
+const readTraceConversationId = (output: unknown): string | undefined => {
+  const { conversation_id: conversationId, metadata } = (output ?? {}) as {
+    conversation_id?: unknown;
+    metadata?: { trace_conversation_id?: unknown } | null;
+  };
+  return [conversationId, metadata?.trace_conversation_id].find(
+    (candidate): candidate is string => typeof candidate === 'string' && candidate.length > 0
+  );
+};
+
 /**
- * Collects every non-empty `conversation_id` from workflow step executions.
+ * Collects every non-empty trace join id from workflow step executions: the step's
+ * `output.conversation_id`, else `output.metadata.trace_conversation_id`, which an
+ * `ai.agent` step with `create-conversation: false` reports instead.
  *
  * A workflow may contain multiple `ai.agent` steps, each with its own
  * conversation id, so all of them are returned. Selection keys off the output
@@ -39,13 +55,8 @@ export function extractAgentConversationIds(
   const result: AgentConversationId[] = [];
 
   for (const step of steps) {
-    const conversationId = (step.output as { conversation_id?: unknown } | undefined)
-      ?.conversation_id;
-    if (
-      typeof conversationId === 'string' &&
-      conversationId.length > 0 &&
-      !seen.has(conversationId)
-    ) {
+    const conversationId = readTraceConversationId(step.output);
+    if (conversationId !== undefined && !seen.has(conversationId)) {
       seen.add(conversationId);
       result.push({
         stepId: step.stepId,

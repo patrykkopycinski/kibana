@@ -239,7 +239,7 @@ export const OutputSchema = lazySchema(() =>
           .max(256)
           .optional()
           .describe(
-            'Id the agent run reports as `gen_ai.conversation.id` on its traces, for trace correlation. The span attribute may carry a hashed form of this id unless real ids are enabled. Present even when no conversation was stored, so it does not refer to a stored conversation: use `conversation_id` to load one.'
+            'Id the agent run reports as `gen_ai.conversation.id` on its traces, for trace correlation. Set only for agent runs: a prompt-template run opens no agent span, so it never carries this field. The span attribute may carry a hashed form of this id unless real ids are enabled. Present even when no conversation was stored, so it does not refer to a stored conversation: use `conversation_id` to load one.'
           ),
       })
       .describe(

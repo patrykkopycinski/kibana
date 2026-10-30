@@ -485,12 +485,30 @@ export interface SeedTpCohort {
   process: string;
 }
 
+/**
+ * The seeded FP profile's first process. The variant TP cohort reuses it so a proposal keyed
+ * only on the process is measured against TPs it would also catch.
+ */
+export const primaryProcessFor = (fixtureId: string): string => {
+  const process = ENTITY_PROFILES[fixtureId]?.[0]?.process;
+  if (!process) {
+    throw new Error(`No entity profile for fixture ${fixtureId}`);
+  }
+  return process;
+};
+
+/** The docs this call indexed, split by label, so a grader can replay a proposal over them. */
+export interface SeededAlerts {
+  tp: Array<Record<string, unknown>>;
+  fp: Array<Record<string, unknown>>;
+}
+
 export const seedRuleAndFpAlerts = async (
   { fetch, esClient, log }: SeedContext,
   fixture: SeedFixtureSpec,
   uniqueRuleId: string,
   tpCohort?: SeedTpCohort
-): Promise<{ seededUuid: string; ruleId: string }> => {
+): Promise<{ seededUuid: string; ruleId: string; alerts: SeededAlerts }> => {
   // The rule name and description are read by the agent: the harvest KEEPs
   // `kibana.alert.rule.name` and the worker interpolates it straight into the diagnose
   // prompt, and the agent can fetch the rule (description included) through its tools.
@@ -600,7 +618,10 @@ export const seedRuleAndFpAlerts = async (
     index: ALERTS_INDEX,
     refresh: 'wait_for',
     // The review tags alerts by document id, so _id must equal kibana.alert.uuid.
-    operations: [...docs, ...tpDocs].flatMap((d) => [{ index: { _id: d['kibana.alert.uuid'] } }, d]),
+    operations: [...docs, ...tpDocs].flatMap((d) => [
+      { index: { _id: d['kibana.alert.uuid'] } },
+      d,
+    ]),
   });
   const failed = bulkResp.items?.filter((i) => i.index?.error) ?? [];
   if (bulkResp.errors || failed.length > 0) {
@@ -611,7 +632,7 @@ export const seedRuleAndFpAlerts = async (
     );
   }
   log.info(`indexed ${docs.length} closed-FP alerts for rule uuid ${seededUuid}`);
-  return { seededUuid, ruleId };
+  return { seededUuid, ruleId, alerts: { tp: tpDocs, fp: docs } };
 };
 
 export const cleanupSeededArtifacts = async (

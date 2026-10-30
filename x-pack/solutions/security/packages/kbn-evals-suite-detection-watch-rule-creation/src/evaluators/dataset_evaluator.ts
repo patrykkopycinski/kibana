@@ -20,6 +20,7 @@ import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_client';
+import { BENIGN_FP_GATE, generateBenignCorpus, replayBenignFpRate } from '../benign_replay';
 import { createToolRoutingEvaluator } from './tool_routing';
 import { createTrajectoryEvaluators } from './trajectory';
 import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
@@ -234,6 +235,50 @@ export const createQueryExecutabilityEvaluator = (esClient: EsClient): RuleEvalu
     },
   });
 
+/**
+ * Example inputs carry no id, so the benign corpus is seeded from the input that defines the
+ * case. Same input, same corpus; a different gap gets a different corpus.
+ */
+export const benignCaseKey = (input: RuleCreationExample['input']): string =>
+  `${input.technique}|${input.gap_description}`;
+
+const pct = (n: number): string => `${(n * 100).toFixed(1)}%`;
+
+/**
+ * Replays the drafted rule's query over the case's benign corpus (#19982 P3b). Score 1 when the
+ * FP rate is within BENIGN_FP_GATE, 0 above it. A query outside the replay dialect (every ES|QL
+ * `FROM ... | WHERE ...` pipeline today) cannot be measured: it scores null with label
+ * `unsupported` so the run summary counts it as a measurement gap instead of either passing it
+ * or reporting a 0 that reads as a model failure.
+ */
+export const createBenignReplayFpRateEvaluator = (): RuleEvaluator =>
+  skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
+    name: 'BenignReplayFpRate',
+    kind: 'CODE',
+    evaluate: async ({ input, output }) => {
+      const { query } = output.rule ?? {};
+      if (!query) return { score: 0, label: 'fail', explanation: 'No query to replay' };
+      const replay = replayBenignFpRate(query, generateBenignCorpus(benignCaseKey(input)));
+      if (replay.unsupported || replay.fpRate === null) {
+        return {
+          score: null,
+          label: 'unsupported',
+          explanation: 'Query is outside the benign-replay dialect; FP rate not measured',
+          metadata: { unsupported: true, replayed: replay.replayed },
+        };
+      }
+      return {
+        score: replay.passesGate ? 1 : 0,
+        label: replay.passesGate ? 'pass' : 'fail',
+        explanation: `FP rate ${pct(replay.fpRate)} (${replay.matched}/${
+          replay.replayed
+        }) vs gate ${pct(BENIGN_FP_GATE)}`,
+        metadata: { fpRate: replay.fpRate, matched: replay.matched, replayed: replay.replayed },
+      };
+    },
+  });
+
 // ---------------------------------------------------------------------------
 // LLM evaluators
 // ---------------------------------------------------------------------------
@@ -332,6 +377,7 @@ export const createEvaluateDataset =
       createIntervalFormatEvaluator(),
       createLookbackGapEvaluator(),
       createQueryExecutabilityEvaluator(esClient),
+      createBenignReplayFpRateEvaluator(),
       createToolRoutingEvaluator({ traceEsClient, log }),
       ...createTrajectoryEvaluators({ traceEsClient, log }),
       createGapAddressedEvaluator(evaluators, judgeProvenance),

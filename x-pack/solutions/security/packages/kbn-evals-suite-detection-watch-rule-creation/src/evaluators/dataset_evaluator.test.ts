@@ -9,7 +9,10 @@ import type { EsClient } from '@kbn/scout';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { draftRuleSchema } from '../types';
+import { BENIGN_BUDGET, generateBenignCorpus } from '../benign_replay';
 import {
+  benignCaseKey,
+  createBenignReplayFpRateEvaluator,
   createFieldCoverageEvaluator,
   createIntervalFormatEvaluator,
   createLookbackGapEvaluator,
@@ -257,5 +260,62 @@ describe('createQueryExecutabilityEvaluator', () => {
     const result = await evaluator.evaluate(makeArgs(makeRule()));
     expect(result.score).toBe(1);
     expect(result.metadata).toMatchObject({ rowCount: 0 });
+  });
+});
+
+describe('createBenignReplayFpRateEvaluator', () => {
+  const evaluator = createBenignReplayFpRateEvaluator();
+  const args = (query: string) => makeArgs(makeRule({ query }));
+
+  it('returns N/A when no rule', async () => {
+    expect((await evaluator.evaluate(noRule)).label).toBe('N/A');
+  });
+
+  it('scores 1 when the query matches no benign doc', async () => {
+    const result = await evaluator.evaluate(args('process.name:mimikatz'));
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('pass');
+    expect(result.explanation).toContain('FP rate 0.0%');
+  });
+
+  it('scores 0 and reports the rate when the query is over-broad', async () => {
+    const result = await evaluator.evaluate(args('process.name:*'));
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('fail');
+    expect(result.explanation).toContain('100.0%');
+    expect(result.metadata).toMatchObject({ fpRate: 1, matched: BENIGN_BUDGET });
+  });
+
+  it('scores 0 just above the 5% gate and 1 at it, on the case corpus', async () => {
+    const input = makeArgs(makeRule()).input;
+    const corpus = generateBenignCorpus(benignCaseKey(input));
+    const counts = new Map<string, number>();
+    corpus.forEach((d) => counts.set(d['process.name'], (counts.get(d['process.name']) ?? 0) + 1));
+    const ok = [...counts].find(([, n]) => n <= BENIGN_BUDGET * 0.05);
+    const over = [...counts].find(([, n]) => n > BENIGN_BUDGET * 0.05);
+    if (ok) {
+      expect((await evaluator.evaluate(args(`process.name:${ok[0]}`))).score).toBe(1);
+    }
+    expect(over).toBeDefined();
+    expect((await evaluator.evaluate(args(`process.name:${over![0]}`))).score).toBe(0);
+  });
+
+  it('reports an unsupported query explicitly instead of passing it', async () => {
+    const result = await evaluator.evaluate(
+      args('FROM logs-endpoint.events.process-* | WHERE process.name == "su"')
+    );
+    expect(result.label).toBe('unsupported');
+    expect(result.score).toBeNull();
+    expect(result.metadata).toMatchObject({ unsupported: true });
+  });
+
+  it('scores 0 when the rule carries no query', async () => {
+    const result = await evaluator.evaluate(makeArgs(makeRule({ query: '' })));
+    expect(result.score).toBe(0);
+  });
+
+  it('seeds the corpus from the case input, so different gaps replay different corpora', () => {
+    const a = makeArgs(makeRule()).input;
+    expect(benignCaseKey(a)).not.toBe(benignCaseKey({ ...a, gap_description: 'other gap' }));
   });
 });

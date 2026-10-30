@@ -61,10 +61,19 @@ import { assertInvestigateRuleCatalogState } from '../src/agent_builder_catalog'
 import { ensureAlertsIndexReady } from '../src/alerts_index';
 import { selectFixtures } from '../src/fixture_selection';
 import { assertWorkflowModelMatches, type ConnectorLike } from '../src/model_attribution';
-import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
+import { fpSuppressedShare, tpSuppressedByTuning } from '../src/backtest_evaluators';
+import {
+  VARIANT_MATRIX_ENV,
+  baseFixtureFor,
+  buildVariantExamples,
+  isVariantMatrixEnabled,
+  selectVariantCases,
+} from '../src/variant_matrix_run';
+import { seedRuleAndFpAlerts, cleanupSeededArtifacts, primaryProcessFor } from './seed_fp_cluster';
 
 /** Experiment/dataset name. Also the label on every per-evaluator summary line. */
 const DATASET_NAME = 'security: rule-tuning-workflow-decision';
+const VARIANT_DATASET_NAME = 'security: rule-tuning-workflow-decision-variants';
 
 const SUMMARY_CRITERIA = [
   'The summary references the specific alert entities or rule behavior that drove the false positives, ' +
@@ -655,3 +664,100 @@ evaluate.describe(
     });
   }
 );
+
+// Registered only when AZ_TUNING_VARIANTS=1, so a default run discovers exactly the tests above.
+// The title is unique: `--grep "Rule Tuning Workflow — variant matrix"` selects only this block.
+if (isVariantMatrixEnabled(process.env[VARIANT_MATRIX_ENV])) {
+  evaluate.describe(
+    'Rule Tuning Workflow — variant matrix',
+    { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
+    () => {
+      evaluate.beforeAll(
+        async ({
+          fetch,
+          log,
+          esClient,
+        }: {
+          fetch: HttpHandler;
+          log: ToolingLog;
+          esClient: EsClient;
+        }) => {
+          await ensureAlertsIndexReady({ fetch, esClient, log });
+        }
+      );
+
+      evaluate(
+        'proposes the golden tuning path for each variant and keeps seeded TPs',
+        async ({ executorClient, evaluators, fetch, log, esClient }) => {
+          const cases = selectVariantCases(process.env.EVAL_EXAMPLES);
+          const examples = buildVariantExamples(cases, TUNING_FIXTURES);
+
+          const tuningQualityJudge = {
+            ...evaluators.criteria(SUMMARY_CRITERIA),
+            name: 'TuningQuality',
+          };
+
+          const selectedEvaluators = selectEvaluators([
+            changeTypeAccuracy,
+            changeTypeAccuracyUncontested,
+            changeTypeAccuracyDefensible,
+            validProposal,
+            tpSuppressedByTuning,
+            fpSuppressedShare,
+            tuningQualityJudge,
+          ]);
+
+          const scoreSink: ScoreSink = new Map();
+
+          await executorClient.runExperiment(
+            {
+              // Same max:1 strategy:drop concurrency group as the base block.
+              concurrency: 1,
+              datasets: [
+                {
+                  name: VARIANT_DATASET_NAME,
+                  description:
+                    `Runs the tuning workflows against ${cases.length} variant cases, each ` +
+                    'seeded with a labelled TP cohort, and backtests the proposal over the ' +
+                    'seeded alerts.',
+                  examples,
+                } satisfies EvaluationDataset,
+              ],
+              task: async ({ metadata }: { metadata: (typeof examples)[number]['metadata'] }) => {
+                const spec = cases.find((c) => c.caseId === metadata.caseId);
+                if (!spec) {
+                  throw new Error(`No variant case found for ${metadata.caseId}`);
+                }
+                const fixture = baseFixtureFor(spec, TUNING_FIXTURES);
+                const uniqueRuleId = `${spec.caseId}-${Date.now()}-${Math.floor(
+                  Math.random() * 1e9
+                )}`;
+
+                const { seededUuid, ruleId, alerts } = await seedRuleAndFpAlerts(
+                  { fetch, esClient, log },
+                  fixture,
+                  uniqueRuleId,
+                  {
+                    caseId: spec.caseId,
+                    tpCount: spec.tpCount,
+                    process: primaryProcessFor(fixture.id),
+                  }
+                );
+
+                try {
+                  const verdict = await runRuleTuningWorkflow({ fetch, log });
+                  return { ...verdict, seededAlerts: alerts };
+                } finally {
+                  await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
+                }
+              },
+            },
+            withScoreCollection(selectedEvaluators, scoreSink)
+          );
+
+          logRunSummary({ sink: scoreSink, datasetName: VARIANT_DATASET_NAME, log });
+        }
+      );
+    }
+  );
+}

@@ -229,7 +229,10 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
   });
 
   const mockFetch = (agentOutput: Record<string, unknown>) =>
-    jest.fn(async (path: string) => {
+    jest.fn(async (path: string, options?: { method?: string }) => {
+      if (options?.method === 'DELETE') {
+        return { success: true };
+      }
       if (path.endsWith('/run')) {
         return { workflowExecutionId: 'exec-1' };
       }
@@ -299,6 +302,8 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
     [['attachments.add']],
     [['attachments.read', 'write_todos']],
     [['load_skill', 'search_relevant_skills', 'set_conversation_metadata']],
+    [['sleep']],
+    [['describe_api', 'describe_api_type']],
   ])('ignores runtime-injected harness tools %j: trajectory scores 1', async (ids) => {
     const client = traceClient({
       columns: [{ name: 'tool_id' }],
@@ -326,6 +331,81 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
     );
   });
 
+  it('reports excluded harness calls in metadata without changing the score', async () => {
+    const client = traceClient({
+      columns: [{ name: 'tool_id' }],
+      values: [['load_skill'], ['sleep']],
+    });
+
+    const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), client);
+    const result = await evaluateTrajectory(verdict);
+
+    expect(result).toEqual(expect.objectContaining({ score: 1, label: 'match' }));
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ harnessToolCalls: ['load_skill', 'sleep'] })
+    );
+  });
+
+  it('returns the stored conversation ids and deletes each exactly once', async () => {
+    const client = traceClient({
+      columns: [{ name: 'tool_id' }],
+      values: [['platform.core.search']],
+    });
+    const fetch = mockFetch(verdictOutput({ conversation_id: 'conv-1' }));
+
+    const verdict = await run(fetch, client);
+
+    expect(verdict.conversationIds).toEqual(['conv-1']);
+    expect(verdict.undeletedConversationIds).toEqual([]);
+    const deletes = (fetch as unknown as jest.Mock).mock.calls.filter(
+      ([, options]) => options?.method === 'DELETE'
+    );
+    expect(deletes.map(([path]) => path)).toEqual(['/api/agent_builder/conversations/conv-1']);
+  });
+
+  it('swallows a conversation delete failure and reports the id as undeleted', async () => {
+    const client = traceClient({
+      columns: [{ name: 'tool_id' }],
+      values: [['security.get_alerts']],
+    });
+    const fetch = jest.fn(async (path: string, options?: { method?: string }) => {
+      if (options?.method === 'DELETE') {
+        throw new Error('boom');
+      }
+      if (path.endsWith('/run')) {
+        return { workflowExecutionId: 'exec-1' };
+      }
+      return {
+        status: 'completed',
+        traceId: 'trace-1',
+        stepExecutions: [
+          {
+            stepId: 'runAgent_step',
+            stepType: 'ai.agent',
+            output: verdictOutput({ conversation_id: 'conv-1' }),
+          },
+        ],
+      };
+    }) as unknown as HttpHandler;
+
+    const verdict = await run(fetch, client);
+
+    expect(verdict.classification).toBe('true_positive');
+    expect(verdict.toolCallIds).toEqual(['security.get_alerts']);
+    expect(verdict.undeletedConversationIds).toEqual(['conv-1']);
+  });
+
+  it('does not delete anything when the agent step stored no conversation', async () => {
+    const fetch = mockFetch(verdictOutput());
+
+    const verdict = await run(fetch, undefined);
+
+    expect(verdict.conversationIds).toEqual([]);
+    expect(
+      (fetch as unknown as jest.Mock).mock.calls.some(([, options]) => options?.method === 'DELETE')
+    ).toBe(false);
+  });
+
   it('negative control: N/A when the trace client is unreachable', async () => {
     const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), undefined);
 
@@ -335,7 +415,7 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
     );
   });
 
-  it('the agent step output carries no conversation id when no conversation was created (the createConversation:false failure mode)', async () => {
+  it('N/A when the agent step output has no conversation_id', async () => {
     const client = traceClient({ columns: [{ name: 'tool_id' }], values: [] });
 
     const verdict = await run(mockFetch(verdictOutput()), client);

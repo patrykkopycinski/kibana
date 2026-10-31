@@ -12,7 +12,7 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import { COVERAGE_GAP_CASES, seedHardCoverageFixtures } from './detection_coverage_hard_fixtures';
 
 /**
- * Discriminating Rule Coverage dataset (#19982, P3a). 64 gaps across the four verdicts,
+ * Discriminating Rule Coverage dataset (#19982). 64 gaps across the four verdicts,
  * with hard-negative traps tagged on the case. Scored by `evaluateDataset`; the
  * deterministic `VerdictMatch` / `VerdictMatchCollapsed` evaluators read `metadata.expectedVerdict`
  * (`output.expected` only feeds the LLM correctness judge). P3b graders come later.

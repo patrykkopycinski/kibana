@@ -1,0 +1,262 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`detection_coverage_hard fixtures: MITRE seed shape keeps the derived verdict per case unchanged 1`] = `
+Object {
+  "G01": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G02": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G03": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G04": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G05": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G06": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G07": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G08": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G09": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G10": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G11": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G12": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G13": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G14": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G15": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "G16": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G17": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G18": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G19": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G20": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G21": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G22": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G23": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G24": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G25": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G26": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G27": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G28": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G29": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G30": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+  "G31": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G32": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G33": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G34": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G35": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G36": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G37": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G38": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G39": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G40": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G41": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G42": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G43": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G44": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G45": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "G46": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G47": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G48": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G49": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G50": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G51": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G52": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G53": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G54": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G55": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G56": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G57": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G58": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G59": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "G60": Array [
+    "no_coverage",
+    "needs_catalog",
+  ],
+  "S1-KUBECTL-PROD": Array [
+    "prebuilt_available",
+    "needs_catalog",
+  ],
+  "S1-OFFICE": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "S1-POWERSHELL": Array [
+    "covered_enabled",
+    "covered_enabled",
+  ],
+  "S1-SMB": Array [
+    "covered_disabled",
+    "covered_disabled",
+  ],
+}
+`;

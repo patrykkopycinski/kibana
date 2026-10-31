@@ -4,7 +4,7 @@ Generated from `detection_coverage_hard_fixtures.ts` (`deriveVerdictFromSeed`). 
 
 Seed shape: rules carry real MITRE structure. A dotted ID (`T1218.011`) is seeded as `threat[0].technique[0].id = T1218` with `technique[0].subtechnique[0].id = T1218.011`; a parent ID has no `subtechnique`. This matches how `security.find_rules` routes `mitreTechnique` (dotted → `threat.technique.subtechnique.id`, otherwise `threat.technique.id`). An earlier shape wrote the dotted ID into `technique[].id`, which made those rules unfindable by `mitreTechnique`. Each rule's tactic is the technique's own first tactic, and technique/subtechnique names are the real MITRE names (from a local lookup table checked against the repo MITRE data).
 
-Seed set: 67 rules (33 exact, 19 near-miss, 15 decoy). Names are descriptive titles with no case id and no kind marker; exact descriptions are paraphrased rather than copied from the gap, and queries are plain ECS/KQL without `threat.*` markers. Decoy names echo a distinctive gap word but describe unrelated network-only behaviour under T1499.
+Seed set: 67 rules (33 exact, 19 near-miss, 15 decoy). Names are descriptive titles with no case id and no kind marker; exact descriptions are paraphrased rather than copied from the gap, and queries are plain ECS/KQL without `threat.*` markers. Near-miss descriptions use the same assertive register as exact rules (no hedges or contrast clauses). Decoy names echo a distinctive gap word but describe unrelated behaviour under a diversified technique pool (discovery, collection, C2, credential access) — no single technique id or event.category value covers 8 or more of the 15 decoys.
 
 Limits: `prebuilt_available` vs `no_coverage` is not decidable from the seed (needs the live installable catalog), so those rows derive as `needs_catalog`. Confirm them in the live run.
 
@@ -52,9 +52,9 @@ Limits: `prebuilt_available` vs `no_coverage` is not decidable from the seed (ne
 | G36 | T1537 | prebuilt_available | needs_catalog | none | - |
 | G37 | T1619 | prebuilt_available | needs_catalog | none | decoy_name |
 | G38 | T1098.001 | prebuilt_available | needs_catalog | none | - |
-| G39 | T1586 | prebuilt_available | needs_catalog | none | near_miss |
+| G39 | T1053.003 | prebuilt_available | needs_catalog | none | near_miss |
 | G40 | T1611 | prebuilt_available | needs_catalog | none | - |
-| G41 | T1608.001 | prebuilt_available | needs_catalog | none | decoy_name |
+| G41 | T1567.002 | prebuilt_available | needs_catalog | none | decoy_name |
 | G42 | T1529 | prebuilt_available | needs_catalog | none | - |
 | G43 | T1600 | prebuilt_available | needs_catalog | none | near_miss |
 | G44 | T1606.002 | prebuilt_available | needs_catalog | none | - |
@@ -67,10 +67,9 @@ Limits: `prebuilt_available` vs `no_coverage` is not decidable from the seed (ne
 | G51 | T1542.003 | no_coverage | needs_catalog | none | near_miss |
 | G52 | T1200 | no_coverage | needs_catalog | none | decoy_name |
 | G53 | T1080 | no_coverage | needs_catalog | none | - |
-| G54 | T1659 | no_coverage | needs_catalog | none | near_miss, disabled_or_partial |
-| G55 | T1582 | no_coverage | needs_catalog | none | - |
-| G56 | T1633.001 | no_coverage | needs_catalog | none | decoy_name |
+| G54 | T1659 | no_coverage | needs_catalog | none | near_miss, disabled_or_partial || G55 | T1582 | no_coverage | needs_catalog | none | - |
+| G56 | T1497.001 | no_coverage | needs_catalog | none | decoy_name |
 | G57 | T1652 | no_coverage | needs_catalog | none | - |
-| G58 | T1685 | no_coverage | needs_catalog | none | near_miss |
-| G59 | T1520 | no_coverage | needs_catalog | none | disabled_or_partial, decoy_name |
-| G60 | T1695 | no_coverage | needs_catalog | none | near_miss, duplicate_create_trap |
+| G58 | T1574.002 | no_coverage | needs_catalog | none | near_miss |
+| G59 | T1562.008 | no_coverage | needs_catalog | none | disabled_or_partial, decoy_name |
+| G60 | T1195.002 | no_coverage | needs_catalog | none | near_miss, duplicate_create_trap |

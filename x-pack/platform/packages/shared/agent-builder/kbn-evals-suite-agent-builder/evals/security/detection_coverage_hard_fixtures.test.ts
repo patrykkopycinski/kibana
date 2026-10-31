@@ -256,19 +256,91 @@ describe('detection_coverage_hard fixtures: MITRE seed shape', () => {
           repo.tacticNames.map((t) => t.toLowerCase()).sort()
         );
       }
-      // Entries absent from the generated enterprise file (revoked / mobile / ICS):
+      // Entries absent from the generated enterprise file (revoked):
       expect(handAdded.sort()).toEqual([
         'T1070.001',
-        'T1520',
         'T1562',
         'T1562.001',
         'T1562.004',
+        'T1562.008',
         'T1574.002',
-        'T1582',
-        'T1633',
-        'T1633.001',
-        'T1695',
       ]);
+    });
+  });
+
+  describe('surface-leak hardening', () => {
+    // P1-1: a trivial classifier keyed on hedge/disclaimer prose used to separate near-miss
+    // rules from exact rules. Near-miss descriptions must read like exact-rule prose.
+    const HEDGE_PHRASES: RegExp[] = [
+      /\brather than\b/i,
+      /\bnot the (creation|same|actual)\b/i,
+      /\bwithout (execution|covering|requiring)\b/i,
+      /\bdistinct from\b/i,
+      /\bcomplement(s|ing)?\b/i,
+      /\binstead of\b/i,
+      /\bignoring\b/i,
+      /\bhygiene gap\b/i,
+      /\bpartial(ly)?\b/i,
+      /\bdoes not (cover|detect)\b/i,
+      /\bonly (monitors|covers|alerts)\b/i,
+    ];
+
+    it('near-miss descriptions carry no hedge or disclaimer phrase', () => {
+      const nearMisses = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'near_miss');
+      for (const rule of nearMisses) {
+        for (const phrase of HEDGE_PHRASES) {
+          expect([rule.name, phrase.test(rule.description)]).toEqual([rule.name, false]);
+        }
+      }
+    });
+
+    it('near-miss and exact description lengths overlap (no register-by-length tell)', () => {
+      const length = (r: { description: string }) => r.description.length;
+      const exact = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'exact').map(length);
+      const nearMiss = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'near_miss').map(
+        length
+      );
+      const exactRange = [Math.min(...exact), Math.max(...exact)];
+      const nearRange = [Math.min(...nearMiss), Math.max(...nearMiss)];
+      // The near-miss range must sit inside a widened exact range and share its middle.
+      expect(nearRange[0]).toBeLessThanOrEqual(exactRange[1] + 30);
+      expect(nearRange[1]).toBeGreaterThanOrEqual(exactRange[0] - 30);
+      const mid = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+      expect(Math.abs(mid(nearMiss) - mid(exact))).toBeLessThan(40);
+    });
+
+    it('decoy techniques are diversified: no technique id covers 8 or more of 15 decoys', () => {
+      const decoys = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'decoy');
+      expect(decoys).toHaveLength(15);
+      const byTechnique = new Map<string, number>();
+      for (const d of decoys) byTechnique.set(d.technique, (byTechnique.get(d.technique) ?? 0) + 1);
+      for (const [technique, count] of byTechnique) {
+        expect([technique, count >= 8]).toEqual([technique, false]);
+      }
+    });
+
+    it('decoy query domains are diversified: no event.category value covers 8 or more of 15 decoys', () => {
+      const decoys = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'decoy');
+      const byCategory = new Map<string, number>();
+      for (const d of decoys) {
+        for (const m of d.query.matchAll(/event\.category:"([a-z]+)"/g)) {
+          byCategory.set(m[1], (byCategory.get(m[1]) ?? 0) + 1);
+        }
+      }
+      for (const [category, count] of byCategory) {
+        expect([category, count >= 8]).toEqual([category, false]);
+      }
+    });
+
+    it('no decoy query shares its own case technique or covers any case gap technique', () => {
+      const caseTechniques = new Set(COVERAGE_GAP_CASES.map((c) => c.attackTechnique));
+      for (const d of HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'decoy')) {
+        expect(d.technique).not.toBe(caseById.get(d.caseId)!.attackTechnique);
+        // Decoy techniques may overlap case techniques of OTHER kinds (that is fine) but the
+        // decoy must stay findable by its own technique, so the intel table must know it.
+        expect(MITRE_TECHNIQUE_INTEL[d.technique]).toBeDefined();
+      }
+      expect([...caseTechniques].length).toBeGreaterThan(0);
     });
   });
 

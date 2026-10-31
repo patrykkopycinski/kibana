@@ -52,9 +52,10 @@ export interface EvaluatorSummaryRow {
  *   - SATURATED: every score identical and at an extreme — the evaluator
  *     discriminated nothing this run (fine for a smoke check, useless for
  *     model comparison, and it should not be averaged into an overall score).
- *   - N/A > 0: measurement gaps, each one a place the run measured nothing.
+ *   - N/A > 0: null scores that are NOT `unsupported` (e.g. no-rule skips), each one a place
+ *     the run measured nothing.
  *   - unsupported > 0: the evaluator could not measure the case (e.g. a query outside the
- *     benign-replay dialect). Counted apart from `N/A×`, which also includes no-rule skips.
+ *     benign-replay dialect). Disjoint from `N/A×`: `N/A× + unsupported×` = all null scores.
  */
 export const logRunSummary = ({
   sink,
@@ -72,10 +73,14 @@ export const logRunSummary = ({
     const stats = computeScoreStats(scores);
     rows.push({ name, stats });
     const ci = stats.n > 1 ? `±${stats.ci95.toFixed(3)}` : stats.n === 1 ? '±0.000(n=1)' : 'n/a';
+    // Every unsupported result is also a null score, so it is already inside `stats.naCount`;
+    // subtract it so the two flags are disjoint and sum to the total of null scores.
+    const unsupported = unsupportedSink?.get(name) ?? 0;
+    const naOnly = Math.max(0, stats.naCount - unsupported);
     const flags = [
       stats.saturated ? 'SATURATED(no signal)' : '',
-      stats.naCount > 0 ? `N/A×${stats.naCount}` : '',
-      (unsupportedSink?.get(name) ?? 0) > 0 ? `unsupported×${unsupportedSink?.get(name)}` : '',
+      naOnly > 0 ? `N/A×${naOnly}` : '',
+      unsupported > 0 ? `unsupported×${unsupported}` : '',
       stats.n === 0 ? 'UNMEASURED' : '',
     ]
       .filter(Boolean)

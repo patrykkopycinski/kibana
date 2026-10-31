@@ -50,18 +50,62 @@ describe('parseSimpleQuery', () => {
     expect(parseSimpleQuery('')).toBeNull();
   });
 
-  it('strips matching surrounding quotes from values', () => {
-    expect(parseSimpleQuery('process.name:"java" and user.name:\'svc\'')).toEqual([
+  it('strips matching surrounding double quotes from values', () => {
+    expect(parseSimpleQuery('process.name:"java" and user.name:svc')).toEqual([
       { field: 'process.name', values: ['java'] },
       { field: 'user.name', values: ['svc'] },
     ]);
     expect(parseSimpleQuery('process.name:("ssh" or "curl")')).toEqual([
       { field: 'process.name', values: ['ssh', 'curl'] },
     ]);
-    // Mismatched quotes are not a quoted value: stay literal (and so never match).
-    expect(parseSimpleQuery('process.name:"java')).toEqual([
-      { field: 'process.name', values: ['"java'] },
+  });
+
+  it('keeps single quotes as part of the literal (KQL only quotes with double quotes)', () => {
+    expect(parseSimpleQuery("user.name:'svc'")).toEqual([
+      { field: 'user.name', values: ["'svc'"] },
     ]);
+    expect(matchesQuery({ 'user.name': 'svc' }, "user.name:'svc'")).toBe(false);
+    expect(matchesQuery({ 'user.name': "'svc'" }, "user.name:'svc'")).toBe(true);
+  });
+
+  it('fails closed (null) on an unbalanced quote instead of matching half a literal', () => {
+    expect(parseSimpleQuery('process.name:"java')).toBeNull();
+    expect(parseSimpleQuery('process.name:("a or b)')).toBeNull();
+    expect(parseSimpleQuery('process.name:("a" or b")')).toBeNull();
+  });
+
+  describe('quoted values containing " or "', () => {
+    it('process.name:("a or b") is ONE literal value `a or b`', () => {
+      expect(parseSimpleQuery('process.name:("a or b")')).toEqual([
+        { field: 'process.name', values: ['a or b'] },
+      ]);
+      expect(matchesQuery({ 'process.name': 'a or b' }, 'process.name:("a or b")')).toBe(true);
+      expect(matchesQuery({ 'process.name': 'a' }, 'process.name:("a or b")')).toBe(false);
+      expect(matchesQuery({ 'process.name': 'b' }, 'process.name:("a or b")')).toBe(false);
+    });
+
+    it('the negated form removes only docs whose value is the literal `a or b`', () => {
+      const query = 'host.name:h1 and not process.name:("a or b")';
+      expect(parseSimpleQuery(query)).toEqual([
+        { field: 'host.name', values: ['h1'] },
+        { field: 'process.name', values: ['a or b'], negated: true },
+      ]);
+      // Before the fix the half-quoted tokens matched nothing, so the negation kept every doc.
+      expect(matchesQuery({ 'host.name': 'h1', 'process.name': 'a or b' }, query)).toBe(false);
+      expect(matchesQuery({ 'host.name': 'h1', 'process.name': 'a' }, query)).toBe(true);
+    });
+
+    it('mixes quoted-with-or and plain values in one list', () => {
+      expect(parseSimpleQuery('process.name:("a or b" or c)')).toEqual([
+        { field: 'process.name', values: ['a or b', 'c'] },
+      ]);
+    });
+
+    it('process.name:("a" or "b") still parses as two values', () => {
+      expect(parseSimpleQuery('process.name:("a" or "b")')).toEqual([
+        { field: 'process.name', values: ['a', 'b'] },
+      ]);
+    });
   });
 
   it('supports `and not field:value` and replays it as a negation', () => {

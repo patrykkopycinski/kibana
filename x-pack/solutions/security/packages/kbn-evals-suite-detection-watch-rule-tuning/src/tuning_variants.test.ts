@@ -134,7 +134,9 @@ describe('buildTpCohort', () => {
       expect(tp['az-eval:tp']).toBe(true);
       expect(tp['az-eval:case']).toBe(specV0.caseId);
       expect(tp['process.name']).toBe('mimikatz');
+      expect(tp['source.ip']).toMatch(/^10\.250\.\d+\.\d+$/);
     }
+    expect(new Set(tps.map((t) => t['source.ip'])).size).toBe(tps.length);
   });
 
   it.each(buildTuningVariantMatrix().map((m) => [m.caseId, m] as const))(

@@ -230,6 +230,39 @@ describe('buildSeedDocs', () => {
     }
   });
 
+  // A field present on only one cohort (`and not source.ip:*`) separates TP from FP by structure
+  // alone, so the backtest would score a no-diagnosis proposal perfectly.
+  const flatKeys = (value: unknown, prefix = ''): string[] =>
+    value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? Object.entries(value as Doc).flatMap(([k, v]) => flatKeys(v, prefix ? `${prefix}.${k}` : k))
+      : [prefix];
+  const keySet = (doc: Doc) => [...new Set(flatKeys(doc))].sort();
+
+  it.each(matrix.map((m) => [m.caseId, m] as const))(
+    '%s: TP and FP docs carry the same flattened field keys (workflow_reason differs in value only)',
+    (_caseId, spec) => {
+      const { fp, tp } = build(spec.baseId, spec);
+      const fpKeys = keySet(fp[0]);
+      expect(fpKeys).toContain('source.ip');
+      [...fp, ...tp].forEach((doc) => expect(keySet(doc)).toEqual(fpKeys));
+    }
+  );
+
+  it.each(matrix.map((m) => [m.caseId, m] as const))(
+    '%s: TP source.ip is present and disjoint from every FP profile address',
+    (_caseId, spec) => {
+      const { fp, tp } = build(spec.baseId, spec);
+      const fpIps = new Set(fp.map((d) => (d.source as { ip: string }).ip));
+      const profileIps = new Set(ENTITY_PROFILES[spec.baseId].map((e) => e.ip));
+      tp.forEach((doc) => {
+        const { ip } = doc.source as { ip: string };
+        expect(ip).toMatch(/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+        expect(fpIps.has(ip)).toBe(false);
+        expect(profileIps.has(ip)).toBe(false);
+      });
+    }
+  );
+
   it('names TP and FP entities from one scheme, so a host name does not reveal the label', () => {
     const spec = caseOf('fp-host-exception', 1);
     const { fp, tp } = build('fp-host-exception', spec);

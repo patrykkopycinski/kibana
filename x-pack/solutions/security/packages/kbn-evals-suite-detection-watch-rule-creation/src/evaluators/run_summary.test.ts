@@ -52,10 +52,37 @@ const run = async (unsupportedSink?: UnsupportedSink) => {
 };
 
 describe('run summary unsupported flag', () => {
-  it('prints unsupported×n separately from N/A×n', async () => {
+  it('prints unsupported×n disjoint from N/A×n (2 unsupported + 3 N/A, not N/A×5)', async () => {
     const out = await run(new Map());
-    expect(out).toContain('N/A×5');
+    expect(out).toContain('N/A×3');
+    expect(out).not.toContain('N/A×5');
     expect(out).toContain('unsupported×2');
+  });
+
+  it('omits N/A when every null score is unsupported', async () => {
+    const sink: ScoreSink = new Map();
+    const unsupportedSink: UnsupportedSink = new Map();
+    const [evaluator] = withScoreCollection(
+      [
+        evaluatorReturning('E', [
+          { score: null, label: 'unsupported' },
+          { score: 1, label: 'pass' },
+        ]),
+      ],
+      sink,
+      unsupportedSink
+    );
+    await evaluator.evaluate({} as never);
+    await evaluator.evaluate({} as never);
+    const lines: string[] = [];
+    logRunSummary({
+      sink,
+      unsupportedSink,
+      datasetName: 'ds',
+      log: { info: (l: string) => lines.push(l) } as unknown as ToolingLog,
+    });
+    expect(lines.join('\n')).toContain('unsupported×1');
+    expect(lines.join('\n')).not.toContain('N/A×');
   });
 
   it('prints no unsupported flag when nothing is unsupported or no sink is given', async () => {

@@ -643,6 +643,7 @@ export const buildSeedDocs = ({
         'kibana.alert.workflow_reason': 'true_positive',
         host: { name: t['host.name'] },
         user: { name: t['user.name'] },
+        source: { ip: t['source.ip'] },
         process: { name: t['process.name'] },
       },
       fixtureId

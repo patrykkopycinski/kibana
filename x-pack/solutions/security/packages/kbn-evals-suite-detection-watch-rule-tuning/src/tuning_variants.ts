@@ -131,6 +131,20 @@ export const fpHostFor = (spec: TuningVariantSpec, slot: number, profileIndex: n
 export const fpUserFor = (spec: TuningVariantSpec, slot: number, profileIndex: number): string =>
   entityName(spec, 'u', fpEntityIndex(spec, 'u', slot, profileIndex));
 
+/**
+ * Second octet of every TP source IP. The FP entity profiles use 10.<=80.x.x, so the ranges are
+ * disjoint (exception/query entries on an FP address cannot catch a TP by accident), yet TPs
+ * stay in the same private 10/8 space: an external-vs-internal split would hand a model a free
+ * `source.ip` glob that separates the cohorts without any diagnosis.
+ */
+export const TP_SOURCE_IP_SECOND_OCTET = 250;
+
+/** TP source IP: case-derived third octet, slot-derived fourth, so it is stable and opaque. */
+const tpSourceIp = (spec: TuningVariantSpec, slot: number): string =>
+  `10.${TP_SOURCE_IP_SECOND_OCTET}.${stableHash(spec.caseId) % 256}.${
+    TP_ENTITY_INDEX_OFFSET + slot
+  }`;
+
 export interface SeededTpAlert extends AlertDoc {
   'az-eval:tp': true;
   'az-eval:case': string;
@@ -148,6 +162,7 @@ export const buildTpCohort = (spec: TuningVariantSpec, tpProcess: string): Seede
   Array.from({ length: spec.tpCount }, (_, i) => ({
     'host.name': entityName(spec, 'h', TP_ENTITY_INDEX_OFFSET + i),
     'user.name': entityName(spec, 'u', TP_ENTITY_INDEX_OFFSET + i),
+    'source.ip': tpSourceIp(spec, i),
     'process.name': tpProcess,
     'az-eval:tp': true,
     'az-eval:case': spec.caseId,

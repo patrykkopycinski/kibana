@@ -56,11 +56,29 @@ interface QueryClause {
   negated?: boolean;
 }
 
-const CLAUSE_RE = /^\s*([A-Za-z0-9_.@-]+)\s*:\s*(\*|\([^)]*\)|[^\s()]+)\s*$/;
+const CLAUSE_RE = /^\s*([A-Za-z0-9_.@-]+)\s*:\s*(\*|\([^)]*\)|"[^"]*"|[^\s()]+)\s*$/;
 
-/** KQL quotes a literal value; the replay compares raw strings, so drop one matching pair. */
+/** KQL quotes a literal with double quotes only (`'svc'` keeps its apostrophes); drop one pair. */
 const unquote = (value: string): string =>
-  value.length >= 2 && /^(["'])[^"']*\1$/.test(value) ? value.slice(1, -1) : value;
+  value.length >= 2 && /^"[^"]*"$/.test(value) ? value.slice(1, -1) : value;
+
+const VALUE_PIECE = '"[^"]*"|[^\\s"]+';
+const VALUE_LIST_RE = new RegExp(
+  `^\\s*(?:${VALUE_PIECE})(?:\\s+or\\s+(?:${VALUE_PIECE}))*\\s*$`,
+  'i'
+);
+
+/**
+ * Splits `a or "b or c" or d` into literal values, treating a double-quoted string as one value
+ * even when it contains ` or `. Returns null for a list with an unbalanced quote or a value glued
+ * to a quote, so the caller fails closed instead of comparing against half a literal.
+ */
+const parseValueList = (inner: string): string[] | null => {
+  if (!VALUE_LIST_RE.test(inner)) return null;
+  const tokens = inner.match(new RegExp(VALUE_PIECE, 'g')) ?? [];
+  // Tokens alternate value, `or`, value ...: the `or` separators sit at odd positions.
+  return tokens.filter((_, i) => i % 2 === 0).map(unquote);
+};
 
 /**
  * Parses `clause and clause and not clause ...`. Returns null for anything outside the dialect
@@ -80,11 +98,10 @@ export const parseSimpleQuery = (query: string): QueryClause[] | null => {
       clauses.push({ field, values: '*', ...(negated && { negated }) });
     } else {
       const inner = rawValue.startsWith('(') ? rawValue.slice(1, -1) : rawValue;
-      const values = inner
-        .split(/\s+or\s+/i)
-        .map((v) => unquote(v.trim()))
-        .filter((v) => v.length > 0);
-      if (values.length === 0 || values.some((v) => /[*()]/.test(v))) return null;
+      const values = parseValueList(inner);
+      if (!values || values.length === 0 || values.some((v) => v.length === 0 || /[*()]/.test(v))) {
+        return null;
+      }
       clauses.push({ field, values, ...(negated && { negated }) });
     }
   }

@@ -258,8 +258,8 @@ const pct = (n: number): string => `${(n * 100).toFixed(1)}%`;
  *
  * KNOWN GAP: every golden dataset drafts `language: 'esql'`, so this evaluator is UNMEASURED
  * (all `unsupported`) for today's drafts. Do not read an absent BenignReplayFpRate score as a
- * pass: the run summary's `unsupported×n` flag (counted apart from `N/A×n`, which also
- * includes no-rule skips) is the signal of that coverage hole.
+ * pass: the run summary's `unsupported×n` flag (disjoint from `N/A×n`, which counts the other
+ * null scores such as no-rule skips) is the signal of that coverage hole.
  */
 export const createBenignReplayFpRateEvaluator = (): RuleEvaluator =>
   skipNoRule({

@@ -249,7 +249,7 @@ describe('buildSeedDocs', () => {
   );
 
   it.each(matrix.map((m) => [m.caseId, m] as const))(
-    '%s: TP source.ip is present and disjoint from every FP profile address',
+    '%s: TP source.ip is present and never equals an FP address of the case',
     (_caseId, spec) => {
       const { fp, tp } = build(spec.baseId, spec);
       const fpIps = new Set(fp.map((d) => (d.source as { ip: string }).ip));
@@ -262,6 +262,44 @@ describe('buildSeedDocs', () => {
       });
     }
   );
+
+  // A single wildcard glob must not separate the cohorts: any `source.ip does_not_match`
+  // entry that would suppress the whole FP cluster necessarily suppresses at least one TP
+  // (and symmetrically for the TPs). Candidate globs are derived from every seeded address.
+  it.each([
+    ...matrix.map((m) => [m.caseId, m] as const),
+    ...baseIds.map((id) => [`${id} (base path)`, undefined] as const),
+  ])('%s: no single wildcard IP glob separates TP from FP', (caseId, spec) => {
+    const baseId = spec?.baseId ?? caseId.split(' ')[0];
+    const { fp, tp } = build(baseId, spec);
+    const fpIps = fp.map((d) => (d.source as { ip: string }).ip);
+    const tpIps = tp.map((d) => (d.source as { ip: string }).ip);
+    if (tpIps.length === 0) return; // base path seeds no TPs; nothing to interleave
+    const globMatches = (glob: string, ip: string): boolean => {
+      const parts = glob.split('.');
+      const ipParts = ip.split('.');
+      return parts.every((p, i) => p === '*' || p === ipParts[i]);
+    };
+    const candidates = new Set<string>(['10.*']);
+    for (const ip of [...fpIps, ...tpIps]) {
+      const [a, b, c] = ip.split('.');
+      candidates.add(`${a}.${b}.*`);
+      candidates.add(`${a}.${b}.${c}.*`);
+      candidates.add(ip);
+    }
+    const offending: string[] = [];
+    for (const glob of candidates) {
+      const fpHit = fpIps.filter((ip) => globMatches(glob, ip)).length;
+      const tpHit = tpIps.filter((ip) => globMatches(glob, ip)).length;
+      // A glob that would suppress the whole FP cohort must also suppress a TP,
+      // and vice versa — otherwise one entry separates the cohorts with no diagnosis.
+      if (fpHit === fpIps.length && tpHit === 0)
+        offending.push(`glob ${glob} suppresses all FP but no TP`);
+      if (tpHit === tpIps.length && fpHit === 0)
+        offending.push(`glob ${glob} suppresses all TP but no FP`);
+    }
+    expect(offending).toEqual([]);
+  });
 
   it('names TP and FP entities from one scheme, so a host name does not reveal the label', () => {
     const spec = caseOf('fp-host-exception', 1);

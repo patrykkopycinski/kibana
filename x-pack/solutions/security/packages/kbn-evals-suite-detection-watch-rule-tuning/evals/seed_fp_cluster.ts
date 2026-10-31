@@ -84,8 +84,8 @@ export const ENTITY_PROFILES: Record<
     { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
     { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
     { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
-    { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
-    { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
+    { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.8', process: 'nmap' },
+    { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.8', process: 'nmap' },
   ],
   // Real detections, uniformly low value → downgrade risk score/severity.
   'fp-low-value-risk': [
@@ -294,8 +294,8 @@ export const ENTITY_PROFILES: Record<
     { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.1', process: 'named' },
     { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.1', process: 'named' },
     { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.1', process: 'named' },
-    { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.1', process: 'named' },
-    { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.1', process: 'named' },
+    { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.2', process: 'named' },
+    { host: 'nt-dns-01', user: 'svc_dns', ip: '10.70.0.2', process: 'named' },
   ],
   'fp-manual-newterms-proxy': [
     { host: 'nt-proxy-02', user: 'svc_proxy', ip: '10.70.1.2', process: 'squid' },
@@ -635,8 +635,20 @@ export const buildSeedDocs = ({
   });
 
   // Closed-as-true-positive alerts on the same rule uuid. Hosts/users are distinct from the
-  // FP cluster, so an FP-targeting change is measured against them honestly.
-  const tp = buildTpCohort(variant, primaryProcessFor(fixtureId)).map((t, i) =>
+  // FP cluster, so an FP-targeting change is measured against them honestly. TP source IPs
+  // interleave with the FP addresses (same second octets, same low third-octet band), so no
+  // single IP glob separates the cohorts — the brute-force test enforces it.
+  const fpIpOctets = entities.reduce(
+    (acc, e) => {
+      const parts = e.ip.split('.');
+      acc.second.push(Number(parts[1]));
+      acc.third.push(Number(parts[2]));
+      acc.fourth.push(Number(parts[3]));
+      return acc;
+    },
+    { second: [] as number[], third: [] as number[], fourth: [] as number[] }
+  );
+  const tp = buildTpCohort(variant, primaryProcessFor(fixtureId), fpIpOctets).map((t, i) =>
     withBaseQueryFields(
       {
         ...baseAlert(ruleUuid, ruleName, ruleId, ruleRevision, fpCount + i, new Date(now)),

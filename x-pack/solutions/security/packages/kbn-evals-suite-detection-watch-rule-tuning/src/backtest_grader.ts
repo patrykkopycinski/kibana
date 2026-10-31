@@ -24,6 +24,10 @@ import type { ExceptionEntry, RuleTuningProposal } from './workflow_task';
  * The TP-suppression verdict logic (`scoreTPSuppressedByTuning` semantics) is
  * taken from #296980 (kbn-security-evals-chain-safety/src/evaluators.ts, commit
  * 4c8fdc09dbf1); only the pure predicate is ported here, not the workflow gate.
+ *
+ * A quoted literal containing " and " (e.g. `process.name:"x and y"`) fails
+ * closed to null: the query is split on ` and ` before value parsing. Deliberate
+ * and conservative.
  */
 
 export type AlertDoc = Record<string, unknown>;

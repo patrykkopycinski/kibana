@@ -128,13 +128,16 @@ describe('entity generation', () => {
 describe('buildTpCohort', () => {
   it('labels each TP alert with the az-eval:tp tag and its case id', () => {
     const [specV0] = buildTuningVariantMatrix();
-    const tps = buildTpCohort(specV0, 'mimikatz');
+    const tps = buildTpCohort(specV0, 'mimikatz', { second: [0], third: [4], fourth: [11, 15] });
     expect(tps).toHaveLength(specV0.tpCount);
     for (const tp of tps) {
       expect(tp['az-eval:tp']).toBe(true);
       expect(tp['az-eval:case']).toBe(specV0.caseId);
       expect(tp['process.name']).toBe('mimikatz');
-      expect(tp['source.ip']).toMatch(/^10\.250\.\d+\.\d+$/);
+      // The TP /24 is one of the FP /24s passed in — never a TP-only subnet.
+      expect(
+        (['10.0.4', '10.1.0'] as const).includes(tp['source.ip'].split('.').slice(0, 3).join('.'))
+      ).toBe(true);
     }
     expect(new Set(tps.map((t) => t['source.ip'])).size).toBe(tps.length);
   });
@@ -142,7 +145,11 @@ describe('buildTpCohort', () => {
   it.each(buildTuningVariantMatrix().map((m) => [m.caseId, m] as const))(
     '%s: TP entities use the FP naming scheme in a disjoint index bucket',
     (_caseId, spec) => {
-      const tps = buildTpCohort(spec, 'mimikatz');
+      const tps = buildTpCohort(spec, 'mimikatz', {
+        second: [0, 1],
+        third: [0, 4],
+        fourth: [5, 10, 11],
+      });
       const tpHosts = new Set(tps.map((t) => String(t['host.name'])));
       const tpUsers = new Set(tps.map((t) => String(t['user.name'])));
       expect(tpHosts.size).toBe(spec.tpCount);

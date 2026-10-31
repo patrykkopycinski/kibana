@@ -132,18 +132,42 @@ export const fpUserFor = (spec: TuningVariantSpec, slot: number, profileIndex: n
   entityName(spec, 'u', fpEntityIndex(spec, 'u', slot, profileIndex));
 
 /**
- * Second octet of every TP source IP. The FP entity profiles use 10.<=80.x.x, so the ranges are
- * disjoint (exception/query entries on an FP address cannot catch a TP by accident), yet TPs
- * stay in the same private 10/8 space: an external-vs-internal split would hand a model a free
- * `source.ip` glob that separates the cohorts without any diagnosis.
+ * TP source IPs are drawn from the same value space as the case's FP addresses:
+ * the second octet from the second octets that case's FP profiles use, the
+ * third from the FP third octets (every profile uses one second octet, so any
+ * such pair is a real FP /24), and the fourth from a TP-only band so a TP
+ * never shares an address with an FP. When the case's FP /24 holds exactly one
+ * distinct FP address, the TPs cluster at neighbouring fourth octets inside
+ * that same /24: the exact FP address is then a candidate glob too, and a TP
+ * on a different /24 would make that exact glob separate the cohorts. No
+ * single wildcard glob (`10.*`, `10.<a>.*`, `10.<a>.<b>.*`, exact) can
+ * therefore separate the cohorts — enforced by the brute-force test in
+ * seed_fp_cluster.test.ts.
  */
-export const TP_SOURCE_IP_SECOND_OCTET = 250;
+const sortedUnique = (ns: readonly number[]): number[] => [...new Set(ns)].sort((a, b) => a - b);
 
-/** TP source IP: case-derived third octet, slot-derived fourth, so it is stable and opaque. */
-const tpSourceIp = (spec: TuningVariantSpec, slot: number): string =>
-  `10.${TP_SOURCE_IP_SECOND_OCTET}.${stableHash(spec.caseId) % 256}.${
-    TP_ENTITY_INDEX_OFFSET + slot
-  }`;
+/** TP source IP: case-derived octets, slot-derived fourth, stable and opaque. */
+export const tpSourceIp = (
+  spec: TuningVariantSpec,
+  slot: number,
+  fpSecondOctets: readonly number[],
+  fpThirdOctets: readonly number[],
+  fpFourthOctets: readonly number[]
+): string => {
+  const seconds = sortedUnique(fpSecondOctets);
+  const thirds = sortedUnique(fpThirdOctets);
+  const fourths = sortedUnique(fpFourthOctets);
+  if (seconds.length === 0 || thirds.length === 0) {
+    throw new Error(`No FP source.ip octets for case ${spec.caseId}`);
+  }
+  const hash = stableHash(spec.caseId);
+  const second = seconds[(hash + slot) % seconds.length];
+  const third = thirds[Math.floor(hash / 256) % thirds.length];
+  if (fourths.length === 1) {
+    return `10.${second}.${third}.${200 + slot}`;
+  }
+  return `10.${second}.${third}.${TP_ENTITY_INDEX_OFFSET + slot}`;
+};
 
 export interface SeededTpAlert extends AlertDoc {
   'az-eval:tp': true;
@@ -158,11 +182,21 @@ export interface SeededTpAlert extends AlertDoc {
  * TPSuppressedByTuning gate then measures a real decision) and the name does not reveal the
  * label.
  */
-export const buildTpCohort = (spec: TuningVariantSpec, tpProcess: string): SeededTpAlert[] =>
+export const buildTpCohort = (
+  spec: TuningVariantSpec,
+  tpProcess: string,
+  fpSourceIpOctets: { second: number[]; third: number[]; fourth: number[] }
+): SeededTpAlert[] =>
   Array.from({ length: spec.tpCount }, (_, i) => ({
     'host.name': entityName(spec, 'h', TP_ENTITY_INDEX_OFFSET + i),
     'user.name': entityName(spec, 'u', TP_ENTITY_INDEX_OFFSET + i),
-    'source.ip': tpSourceIp(spec, i),
+    'source.ip': tpSourceIp(
+      spec,
+      i,
+      fpSourceIpOctets.second,
+      fpSourceIpOctets.third,
+      fpSourceIpOctets.fourth
+    ),
     'process.name': tpProcess,
     'az-eval:tp': true,
     'az-eval:case': spec.caseId,

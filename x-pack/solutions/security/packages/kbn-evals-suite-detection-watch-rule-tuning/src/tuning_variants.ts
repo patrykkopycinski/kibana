@@ -135,39 +135,180 @@ export const fpUserFor = (spec: TuningVariantSpec, slot: number, profileIndex: n
  * TP source IPs are drawn from the same value space as the case's FP addresses:
  * the second octet from the second octets that case's FP profiles use, the
  * third from the FP third octets (every profile uses one second octet, so any
- * such pair is a real FP /24), and the fourth from a TP-only band so a TP
- * never shares an address with an FP. When the case's FP /24 holds exactly one
- * distinct FP address, the TPs cluster at neighbouring fourth octets inside
- * that same /24: the exact FP address is then a candidate glob too, and a TP
- * on a different /24 would make that exact glob separate the cohorts. No
- * single wildcard glob (`10.*`, `10.<a>.*`, `10.<a>.<b>.*`, exact) can
- * therefore separate the cohorts — enforced by the brute-force test in
- * seed_fp_cluster.test.ts.
+ * such pair is a real FP /24). The fourth octet is picked by a deterministic
+ * constructive search so that no single glob in the grader's grammar (`*` and
+ * `?` in any position — see globToRegExp in backtest_grader.ts) matches every
+ * FP address of the case while missing every TP, or vice versa; the search
+ * also requires the TP fourths to cover every digit length the case's FP
+ * fourths use, which is what kills `X?`/`X*` digit-shape separators. Enforced
+ * by the exhaustive brute-force test in seed_fp_cluster.test.ts.
  */
 const sortedUnique = (ns: readonly number[]): number[] => [...new Set(ns)].sort((a, b) => a - b);
 
-/** TP source IP: case-derived octets, slot-derived fourth, stable and opaque. */
+/** Glob forms over one octet in the grader grammar: exact, `*`, `?`, one substituted `?`, `?`+value, value+`?`/`*` prefixes. */
+export const octetForms = (values: readonly string[]): string[] => {
+  const forms = new Set(['*', '?']);
+  for (const v of values) {
+    forms.add(v);
+    for (let i = 0; i < v.length; i++) {
+      forms.add(`${v.slice(0, i)}?${v.slice(i + 1)}`);
+      forms.add(`?${v.slice(i)}`);
+    }
+    for (let i = 1; i <= v.length; i++) {
+      forms.add(`${v.slice(0, i)}?`);
+      forms.add(`${v.slice(0, i)}*`);
+    }
+  }
+  return [...forms];
+};
+
+export const formMatches = (form: string, value: string): boolean =>
+  new RegExp(
+    `^${[...form]
+      .map((ch) =>
+        ch === '*' ? '.*' : ch === '?' ? '.' : ch.replace(/[.*+?^${}()|[\]\\/-]/g, '\\$&')
+      )
+      .join('')}$`
+  ).test(value);
+
+const range = (lo: number, hi: number): number[] =>
+  Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
+
+/**
+ * `true` when a single glob (grader grammar, any position) covers every FP address of the
+ * case and no TP, or vice versa. Exhaustive over composed globs: per-octet-position forms
+ * are combined as set intersections with empty-set pruning, so every candidate glob shape
+ * reachable from the seeded addresses is covered without enumerating the full cross product.
+ */
+export const globSeparates = (fpIps: readonly string[], tpIps: readonly string[]): boolean => {
+  const ips = [...fpIps, ...tpIps];
+  const fpHits = new Set(range(0, fpIps.length - 1));
+  const tpHits = new Set(range(fpIps.length, ips.length - 1));
+  const positions = [0, 1, 2, 3].map((p) => [...new Set(ips.map((ip) => ip.split('.')[p]))]);
+  const hitsFor = (form: string, position: number): Set<number> => {
+    const hits = new Set<number>();
+    ips.forEach((ip, i) => {
+      if (formMatches(form, ip.split('.')[position])) hits.add(i);
+    });
+    return hits;
+  };
+  // Compose positions 0..2 first, pruning empty intersections.
+  let prefixes = new Set(
+    octetForms(positions[0])
+      .map((form) => hitsFor(form, 0))
+      .filter((s) => s.size > 0)
+      .map((s) => new Set([...s]))
+  );
+  for (const p of [1, 2]) {
+    const next = new Set<Set<number>>();
+    for (const pre of prefixes) {
+      for (const form of octetForms(positions[p])) {
+        const combined = new Set([...pre].filter((i) => formMatches(form, ips[i].split('.')[p])));
+        if (combined.size > 0) next.add(new Set(combined));
+      }
+    }
+    prefixes = next;
+  }
+  const equals = (a: Set<number>, b: Set<number>): boolean =>
+    a.size === b.size && [...a].every((v) => b.has(v));
+  for (const pre of prefixes) {
+    for (const form of octetForms(positions[3])) {
+      const combined = new Set([...pre].filter((i) => formMatches(form, ips[i].split('.')[3])));
+      if (equals(combined, fpHits) || equals(combined, tpHits)) return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Fourth octets for the TP cohort, or null if no pick satisfies the invariant. The
+ * octets 0-2 cannot discriminate (TPs draw them from the FP value sets), so the
+ * search runs over the fourth octet only. Seed: one pick per FP digit length
+ * (sharing an FP first digit where possible) plus small fillers; then a
+ * systematic one-slot-at-a-time value scan.
+ */
+const tpFourthOctets = (
+  fpIps: readonly string[],
+  caseId: string,
+  tpCount: number
+): number[] | null => {
+  const fpFourths = fpIps.map((ip) => Number(ip.split('.')[3]));
+  const fpStr = fpFourths.map(String);
+  const fpSet = new Set(fpFourths);
+  const hash = stableHash(caseId);
+  const seed: number[] = [];
+  for (const len of [...new Set(fpStr.map((s) => s.length))]) {
+    const firstDigits = new Set(fpStr.filter((s) => s.length === len).map((s) => s[0]));
+    let candidates = range(1, 255).filter(
+      (n) => String(n).length === len && !fpSet.has(n) && firstDigits.has(String(n)[0])
+    );
+    if (candidates.length === 0) {
+      candidates = range(1, 255).filter((n) => String(n).length === len && !fpSet.has(n));
+    }
+    seed.push(candidates[hash % candidates.length]);
+  }
+  let fill = 0;
+  while (seed.length < tpCount) {
+    const candidate = (fill++ % 255) + 1;
+    if (!fpSet.has(candidate) && !seed.includes(candidate)) seed.push(candidate);
+  }
+  const seconds = sortedUnique(fpIps.map((ip) => Number(ip.split('.')[1])));
+  const thirds = sortedUnique(fpIps.map((ip) => Number(ip.split('.')[2])));
+  const tpOf = (picks: readonly number[]): string[] => {
+    const third = thirds[Math.floor(hash / 256) % thirds.length];
+    return picks.map((f, slot) => `10.${seconds[(hash + slot) % seconds.length]}.${third}.${f}`);
+  };
+  const acceptable = (picks: readonly number[]): boolean => {
+    if (picks.some((p) => fpSet.has(p))) return false;
+    const lengths = [...new Set(fpStr.map((s) => s.length))];
+    if (!lengths.every((l) => picks.some((p) => String(p).length === l))) return false;
+    const tp = tpOf(picks);
+    if (new Set(tp).size !== tpCount || tp.some((ip) => fpIps.includes(ip))) return false;
+    return !globSeparates(fpIps, tp);
+  };
+  if (acceptable(seed)) return seed;
+  for (let slot = 0; slot < tpCount; slot++) {
+    for (const value of range(1, 255).filter((n) => !fpSet.has(n))) {
+      const next = seed.slice();
+      next[slot] = value;
+      if (new Set(next).size === tpCount && acceptable(next)) return next;
+    }
+  }
+  return null;
+};
+
+/** Memoized per case: the invariant depends only on (fpIps, caseId, tpCount). */
+const fourthCache = new Map<string, number[] | null>();
+
+/** TP source IP: octets 0-2 drawn from the case's FP octet sets, search-picked fourth. */
 export const tpSourceIp = (
   spec: TuningVariantSpec,
   slot: number,
-  fpSecondOctets: readonly number[],
-  fpThirdOctets: readonly number[],
-  fpFourthOctets: readonly number[]
+  fpIps: readonly string[]
 ): string => {
-  const seconds = sortedUnique(fpSecondOctets);
-  const thirds = sortedUnique(fpThirdOctets);
-  const fourths = sortedUnique(fpFourthOctets);
+  const seconds = sortedUnique(fpIpOctets(fpIps, 1));
+  const thirds = sortedUnique(fpIpOctets(fpIps, 2));
   if (seconds.length === 0 || thirds.length === 0) {
     throw new Error(`No FP source.ip octets for case ${spec.caseId}`);
+  }
+  const key = `${spec.caseId}:${spec.tpCount}:${fpIps.join(',')}`;
+  if (!fourthCache.has(key)) {
+    fourthCache.set(key, tpFourthOctets(fpIps, spec.caseId, spec.tpCount));
+  }
+  const fourths = fourthCache.get(key);
+  if (!fourths) {
+    throw new Error(
+      `No TP fourth-octet allocation satisfies the glob invariant for ${spec.caseId}`
+    );
   }
   const hash = stableHash(spec.caseId);
   const second = seconds[(hash + slot) % seconds.length];
   const third = thirds[Math.floor(hash / 256) % thirds.length];
-  if (fourths.length === 1) {
-    return `10.${second}.${third}.${200 + slot}`;
-  }
-  return `10.${second}.${third}.${TP_ENTITY_INDEX_OFFSET + slot}`;
+  return `10.${second}.${third}.${fourths[slot]}`;
 };
+
+const fpIpOctets = (fpIps: readonly string[], position: number): number[] =>
+  fpIps.map((ip) => Number(ip.split('.')[position]));
 
 export interface SeededTpAlert extends AlertDoc {
   'az-eval:tp': true;
@@ -185,18 +326,12 @@ export interface SeededTpAlert extends AlertDoc {
 export const buildTpCohort = (
   spec: TuningVariantSpec,
   tpProcess: string,
-  fpSourceIpOctets: { second: number[]; third: number[]; fourth: number[] }
+  fpIps: readonly string[]
 ): SeededTpAlert[] =>
   Array.from({ length: spec.tpCount }, (_, i) => ({
     'host.name': entityName(spec, 'h', TP_ENTITY_INDEX_OFFSET + i),
     'user.name': entityName(spec, 'u', TP_ENTITY_INDEX_OFFSET + i),
-    'source.ip': tpSourceIp(
-      spec,
-      i,
-      fpSourceIpOctets.second,
-      fpSourceIpOctets.third,
-      fpSourceIpOctets.fourth
-    ),
+    'source.ip': tpSourceIp(spec, i, fpIps),
     'process.name': tpProcess,
     'az-eval:tp': true,
     'az-eval:case': spec.caseId,

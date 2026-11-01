@@ -636,19 +636,11 @@ export const buildSeedDocs = ({
 
   // Closed-as-true-positive alerts on the same rule uuid. Hosts/users are distinct from the
   // FP cluster, so an FP-targeting change is measured against them honestly. TP source IPs
-  // interleave with the FP addresses (same second octets, same low third-octet band), so no
-  // single IP glob separates the cohorts — the brute-force test enforces it.
-  const fpIpOctets = entities.reduce(
-    (acc, e) => {
-      const parts = e.ip.split('.');
-      acc.second.push(Number(parts[1]));
-      acc.third.push(Number(parts[2]));
-      acc.fourth.push(Number(parts[3]));
-      return acc;
-    },
-    { second: [] as number[], third: [] as number[], fourth: [] as number[] }
-  );
-  const tp = buildTpCohort(variant, primaryProcessFor(fixtureId), fpIpOctets).map((t, i) =>
+  // interleave with the FP addresses (same second/third octet pools, search-picked fourths),
+  // so no single glob in the grader's grammar separates the cohorts — the brute-force test
+  // enforces it.
+  const fpIps = entities.map((e) => e.ip);
+  const tp = buildTpCohort(variant, primaryProcessFor(fixtureId), fpIps).map((t, i) =>
     withBaseQueryFields(
       {
         ...baseAlert(ruleUuid, ruleName, ruleId, ruleRevision, fpCount + i, new Date(now)),

@@ -12,7 +12,7 @@ import {
   seedRuleAndFpAlerts,
 } from '../evals/seed_fp_cluster';
 import { matchesQuery, parseSimpleQuery } from './backtest_grader';
-import { buildTuningVariantMatrix, type TuningVariantSpec } from './tuning_variants';
+import { buildTuningVariantMatrix, globSeparates, type TuningVariantSpec } from './tuning_variants';
 import { ALERTS_INDEX } from './constants';
 
 /**
@@ -263,43 +263,34 @@ describe('buildSeedDocs', () => {
     }
   );
 
-  // A single wildcard glob must not separate the cohorts: any `source.ip does_not_match`
-  // entry that would suppress the whole FP cluster necessarily suppresses at least one TP
-  // (and symmetrically for the TPs). Candidate globs are derived from every seeded address.
+  // A single glob in the GRADER's grammar (`*` = any sequence, `?` = one char, any position —
+  // see globToRegExp) must not separate the cohorts: any `source.ip does_not_match` entry
+  // that would suppress the whole FP cluster necessarily suppresses at least one TP (and
+  // symmetrically for the TPs). Candidate globs are composed from per-octet-position forms
+  // (see octetForms in tuning_variants.ts); the exhaustive composed check is globSeparates,
+  // shared with the allocator so the test proves the same predicate the search enforces.
   it.each([
     ...matrix.map((m) => [m.caseId, m] as const),
     ...baseIds.map((id) => [`${id} (base path)`, undefined] as const),
-  ])('%s: no single wildcard IP glob separates TP from FP', (caseId, spec) => {
+  ])('%s: no single glob in the grader grammar separates TP from FP', (caseId, spec) => {
     const baseId = spec?.baseId ?? caseId.split(' ')[0];
     const { fp, tp } = build(baseId, spec);
     const fpIps = fp.map((d) => (d.source as { ip: string }).ip);
     const tpIps = tp.map((d) => (d.source as { ip: string }).ip);
     if (tpIps.length === 0) return; // base path seeds no TPs; nothing to interleave
-    const globMatches = (glob: string, ip: string): boolean => {
-      const parts = glob.split('.');
-      const ipParts = ip.split('.');
-      return parts.every((p, i) => p === '*' || p === ipParts[i]);
-    };
-    const candidates = new Set<string>(['10.*']);
-    for (const ip of [...fpIps, ...tpIps]) {
-      const [a, b, c] = ip.split('.');
-      candidates.add(`${a}.${b}.*`);
-      candidates.add(`${a}.${b}.${c}.*`);
-      candidates.add(ip);
-    }
-    const offending: string[] = [];
-    for (const glob of candidates) {
-      const fpHit = fpIps.filter((ip) => globMatches(glob, ip)).length;
-      const tpHit = tpIps.filter((ip) => globMatches(glob, ip)).length;
-      // A glob that would suppress the whole FP cohort must also suppress a TP,
-      // and vice versa — otherwise one entry separates the cohorts with no diagnosis.
-      if (fpHit === fpIps.length && tpHit === 0)
-        offending.push(`glob ${glob} suppresses all FP but no TP`);
-      if (tpHit === tpIps.length && fpHit === 0)
-        offending.push(`glob ${glob} suppresses all TP but no FP`);
-    }
-    expect(offending).toEqual([]);
+    expect(globSeparates(fpIps, tpIps)).toBe(false);
   });
+
+  it.each(matrix.map((m) => [m.caseId, m] as const))(
+    '%s: TP fourth octets cover every digit length the case FP fourths use',
+    (_caseId, spec) => {
+      const { fp, tp } = build(spec.baseId, spec);
+      const lens = (ips: string[]) => new Set(ips.map((ip) => ip.split('.')[3].length));
+      const fpLens = lens(fp.map((d) => (d.source as { ip: string }).ip));
+      const tpLens = lens(tp.map((d) => (d.source as { ip: string }).ip));
+      for (const l of fpLens) expect(tpLens.has(l)).toBe(true);
+    }
+  );
 
   it('names TP and FP entities from one scheme, so a host name does not reveal the label', () => {
     const spec = caseOf('fp-host-exception', 1);

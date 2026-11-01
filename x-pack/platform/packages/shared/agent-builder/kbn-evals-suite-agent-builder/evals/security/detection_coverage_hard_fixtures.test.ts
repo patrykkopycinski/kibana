@@ -294,19 +294,64 @@ describe('detection_coverage_hard fixtures: MITRE seed shape', () => {
       }
     });
 
-    it('near-miss and exact description lengths overlap (no register-by-length tell)', () => {
-      const length = (r: { description: string }) => r.description.length;
-      const exact = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'exact').map(length);
-      const nearMiss = HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'near_miss').map(
-        length
+    it('near-miss and exact description distributions overlap: median gap < 15 and IQR overlap', () => {
+      const lens = (kind: string) =>
+        HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === kind).map((r) => r.description.length);
+      const stats = (xs: number[]) => {
+        const s = [...xs].sort((a, b) => a - b);
+        const q = (p: number) => s[Math.min(s.length - 1, Math.round(p * (s.length - 1)))];
+        return { q1: q(0.25), med: q(0.5), q3: q(0.75) };
+      };
+      const exact = stats(lens('exact'));
+      for (const kind of ['near_miss', 'decoy']) {
+        const other = stats(lens(kind));
+        expect([kind, Math.abs(other.med - exact.med) < 15]).toEqual([kind, true]);
+        // Interquartile ranges must overlap, not just the min/max envelopes.
+        expect([kind, other.q1 <= exact.q3 && exact.q1 <= other.q3]).toEqual([kind, true]);
+      }
+      const byVerb = (kind: string) =>
+        new Set(
+          HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === kind).map(
+            (r) => /^[A-Z][a-z]+/.exec(r.description)?.[0]
+          )
+        );
+      // No leading verb may be exclusive to one kind (a trivial separator).
+      const allVerbs = new Set(
+        HARD_COVERAGE_FIXTURE_RULES.map((r) => /^[A-Z][a-z]+/.exec(r.description)?.[0])
       );
-      const exactRange = [Math.min(...exact), Math.max(...exact)];
-      const nearRange = [Math.min(...nearMiss), Math.max(...nearMiss)];
-      // The near-miss range must sit inside a widened exact range and share its middle.
-      expect(nearRange[0]).toBeLessThanOrEqual(exactRange[1] + 30);
-      expect(nearRange[1]).toBeGreaterThanOrEqual(exactRange[0] - 30);
-      const mid = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
-      expect(Math.abs(mid(nearMiss) - mid(exact))).toBeLessThan(40);
+      for (const verb of allVerbs) {
+        const kindsUsing = (['exact', 'near_miss', 'decoy'] as const).filter((k) =>
+          byVerb(k).has(verb)
+        );
+        expect([verb, kindsUsing.length >= 2]).toEqual([verb, true]);
+      }
+    });
+
+    it('no decoy query references the distinctive entities of its own case gap behaviour', () => {
+      // Pairs pinned from the review: a decoy firing on its own gap's events makes
+      // covered_enabled a defensible answer instead of the expected verdict.
+      const forbidden: Readonly<Record<string, RegExp>> = {
+        G02: /rundll32|user.?writable|user.?profile/i,
+        G06: /net\.exe|sc\.exe|\bstop\b/i,
+        G10: /fodhelper\.exe|ms-settings/i,
+        G13: /wevtutil|clear.?log/i,
+        G20: /appdata|program files|teamviewer\.exe|anydesk\.exe/i,
+        G26: /response_text|tunnell?ing|txt/i,
+        G30: /users\\\\|system32/i,
+        G33: /169\.254\.169\.254|metadata/i,
+        G37: /listbucket|storage\.objects\.list|unrecognised/i,
+        G41: /paste/i,
+        G45: /push\/notify|approval|prompts.*flood/i,
+        G50: /dcshadow|replication/i,
+        G52: /implant|unexpected.*device/i,
+        G56: /vmware|virtualbox|hypervisor.*check/i,
+        G59: /disable.*log|stop.*trail/i,
+      };
+      for (const rule of HARD_COVERAGE_FIXTURE_RULES.filter((r) => r.kind === 'decoy')) {
+        const pattern = forbidden[rule.caseId];
+        expect(pattern).toBeDefined();
+        expect([rule.name, pattern!.test(rule.query)]).toEqual([rule.name, false]);
+      }
     });
 
     it('decoy techniques are diversified: no technique id covers 8 or more of 15 decoys', () => {

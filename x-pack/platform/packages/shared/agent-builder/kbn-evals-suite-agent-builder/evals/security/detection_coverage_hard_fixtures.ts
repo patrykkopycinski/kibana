@@ -666,7 +666,6 @@ export const MITRE_TECHNIQUE_INTEL: Readonly<Record<string, TechniqueIntel>> = {
   // Decoy-only techniques below: diversified per P2-3 so no surface signal separates decoys.
   'T1056.002': { name: 'GUI Input Capture', tactics: ['TA0009', 'TA0006'] },
   T1018: { name: 'Remote System Discovery', tactics: ['TA0007'] },
-  'T1036.005': { name: 'Match Legitimate Resource Name or Location', tactics: ['TA0005'] },
   T1046: { name: 'Network Service Discovery', tactics: ['TA0007'] },
   'T1070.004': { name: 'File Deletion', tactics: ['TA0005'] },
   'T1071.001': { name: 'Web Protocols', tactics: ['TA0011'] },
@@ -774,15 +773,13 @@ const EXACT_SEED: Readonly<Record<string, SeedContent>> = {
   },
   G09: {
     name: 'Privileged Cloud Console Sign-In from Unapproved Country',
-    description:
-      'Alerts when an admin signs into the cloud console from an unapproved country.',
+    description: 'Alerts when an admin signs into the cloud console from an unapproved country.',
     query:
       'event.dataset:("aws.cloudtrail" or "gcloud.audit") and event.action:"ConsoleLogin" and user.name:(*admin* or *root*) and not source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not source.geo.country_iso_code:(US or PL)',
   },
   G10: {
     name: 'UAC Bypass via Fodhelper Registry Key Manipulation',
-    description:
-      'Detects writes under ms-settings followed by fodhelper.exe execution.',
+    description: 'Detects writes under ms-settings followed by fodhelper.exe execution.',
     query:
       'registry.path:"HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command\\*" and process.name:"fodhelper.exe"',
   },
@@ -795,8 +792,7 @@ const EXACT_SEED: Readonly<Record<string, SeedContent>> = {
   },
   G12: {
     name: 'WMI Event Subscription Persistence Registered on the Host',
-    description:
-      'Identifies creation of permanent WMI event consumers used to survive reboots.',
+    description: 'Identifies creation of permanent WMI event consumers used to survive reboots.',
     query:
       'event.category:"process" and process.command_line:(*__EventFilter* or *CommandLineEventConsumer* or *__FilterToConsumerBinding*)',
   },
@@ -1340,7 +1336,7 @@ export async function seedHardCoverageFixtures({
 }): Promise<{ cleanup: () => Promise<void> }> {
   const headers = { 'elastic-api-version': DETECTION_API_VERSION };
   const deleteHardRules = async () => {
-    const { data } = await kbnClient.request({
+    const { data } = await kbnClient.request<{ data?: Array<{ id: string; name: string }> }>({
       path: `${DETECTION_RULES_URL}/_find?per_page=10000`,
       method: 'GET',
       headers,

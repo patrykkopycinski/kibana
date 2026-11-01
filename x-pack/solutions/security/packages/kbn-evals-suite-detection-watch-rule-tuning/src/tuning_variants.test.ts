@@ -136,7 +136,7 @@ describe('buildTpCohort', () => {
       expect(tp['process.name']).toBe('mimikatz');
       // The TP /24 is one of the FP /24s passed in — never a TP-only subnet.
       expect(
-        (['10.0.4', '10.1.0'] as const).includes(tp['source.ip'].split('.').slice(0, 3).join('.'))
+        ['10.0.4', '10.1.0'].includes(String(tp['source.ip']).split('.').slice(0, 3).join('.'))
       ).toBe(true);
     }
     expect(new Set(tps.map((t) => t['source.ip'])).size).toBe(tps.length);

@@ -414,7 +414,7 @@ describe('detection_coverage_hard fixtures: MITRE seed shape', () => {
     });
 
     it('splits AML-prefixed dotted ids the same way the find_rules regex routes them', () => {
-      const technique = buildHardRuleTechnique('AML.T0051.000') as SeededTechnique;
+      const technique = buildHardRuleTechnique('AML.T0051.000') as unknown as SeededTechnique;
       expect(technique.id).toBe('AML.T0051');
       expect(technique.subtechnique?.map((s) => s.id)).toEqual(['AML.T0051.000']);
     });

@@ -696,228 +696,231 @@ interface SeedContent {
 
 const EXACT_SEED: Readonly<Record<string, SeedContent>> = {
   'S1-POWERSHELL': {
-    name: 'Obfuscated PowerShell Interpreter Invocation',
+    name: 'Obfuscated PowerShell Interpreter Launched from the Command Line',
     description:
-      'Identifies powershell.exe started with base64-encoded command-line arguments, a common way to hide malicious scripts at invocation time.',
-    query: 'process.name:"powershell.exe" and process.command_line:(*-encodedcommand* or *-enc *)',
+      'Identifies powershell.exe started with base64-encoded command-line arguments that hide malicious script content at invocation time.',
+    query:
+      'process.name:"powershell.exe" and process.command_line:(*-encodedcommand* or *-enc *) and not user.name:(*svc-* or *health*)',
   },
   'S1-SMB': {
-    name: 'Remote File Operations on Administrative Shares',
+    name: 'Remote File Operations on Hidden Windows Administrative Shares',
     description:
-      'Detects writes and executions performed against C$ or ADMIN$ shares from another host on the network.',
+      'Detects file writes and executions against hidden C$ or ADMIN$ administrative shares by a session that originated from another host on the network.',
     query:
       'event.category:"file" and file.path:(*"\\\\C$\\\\"* or *"\\\\ADMIN$\\\\"*) and process.name:"System" and process.command_line:*net*',
   },
   'S1-OFFICE': {
-    name: 'Office Application Spawning Command Shell',
+    name: 'Office Application Spawning a Command Shell Child Process',
     description:
-      'Flags WINWORD.EXE, EXCEL.EXE or POWERPNT.EXE creating a cmd.exe child, a classic macro-dropchain pattern.',
+      'Flags WINWORD.EXE, EXCEL.EXE or POWERPNT.EXE creating a cmd.exe child, a classic macro-dropchain pattern, not the document-compatibility scanner.',
     query:
-      'event.category:"process" and process.parent.name:(WINWORD.EXE or EXCEL.EXE or POWERPNT.EXE) and process.name:"cmd.exe"',
+      'event.category:"process" and process.parent.name:(WINWORD.EXE or EXCEL.EXE or POWERPNT.EXE) and process.name:(cmd.exe or *powershell*)',
   },
   G01: {
-    name: 'Credential Dumping Tool Accessing LSASS',
+    name: 'Credential Dumping Tool Opening a Handle to LSASS',
     description:
-      'Alerts when a process other than known system binaries opens a handle to the Local Security Authority Subsystem Service memory.',
+      'Alerts when a process other than known system binaries opens a handle to LSASS process memory for credential extraction.',
     query:
       'process.name:(*psexec* or *procdump* or *rundll32*) and process.code_signature.trusted:false and process.command_line:*lsass*',
   },
   G02: {
     name: 'DLL Execution by Rundll32 from User Profile',
     description:
-      'Detects rundll32.exe loading a dynamic-link library located under a user-writable directory rather than a system path.',
+      'Detects rundll32.exe loading a dynamic-link library from a user-writable directory rather than an approved system path.',
     query:
-      'process.name:"rundll32.exe" and dll.path:(*\\Users\\* or *\\AppData\\*) and not dll.path:(*\\System32\\* or *\\SysWOW64\\*)',
+      'process.name:"rundll32.exe" and dll.path:(*\\Users\\* or *\\AppData\\*) and not dll.path:(*\\System32\\* or *\\SysWOW64\\* or *\\WinSxS\\*)',
   },
   G03: {
-    name: 'WMI Remote Process Creation',
+    name: 'WMI Remote Process Creation from an External Host',
     description:
-      'Identifies processes started through WMI from a machine other than the endpoint raising the event.',
+      'Identifies processes started through WMI from a machine other than the endpoint raising the event, a remote-execution path.',
     query:
       'event.category:"process" and process.name:"WmiPrvSE.exe" and process.parent.name:"WmiPrvSE.exe" and user.id:S-1-5-*-500 and host.os.type:windows',
   },
   G04: {
-    name: 'Non-Browser Process Reading Browser Credential Database',
+    name: 'Non-Browser Process Reading the Browser Credential Database',
     description:
       'Alerts when an executable outside the browser family reads the login-data stores kept by Chrome, Edge or Firefox.',
     query:
-      'event.category:"file" and file.name:("Login Data" or "logins.json" or "key4.db") and not process.name:(chrome.exe or msedge.exe or firefox.exe)',
+      'event.category:"file" and file.name:(Login*Data or logins.json or key4.db or *passwords*) and not process.name:(chrome*.exe or msedge.exe or firefox.exe)',
   },
   G05: {
-    name: 'Volume Shadow Copy Removal via VSSAdmin',
+    name: 'Volume Shadow Copy Removal by the VSSAdmin Utility',
     description:
-      'Detects use of vssadmin.exe delete shadows, which destroys restore points before ransomware deployment.',
-    query: 'process.name:"vssadmin.exe" and process.command_line:(*delete* and *shadows*)',
+      'Detects vssadmin.exe delete shadows use, which destroys all volume restore points ahead of ransomware deployment on the host.',
+    query:
+      'process.name:"vssadmin.exe" and process.command_line:(*delete* and *shadows*) and not user.name:("backup-svc" or *vault*)',
   },
   G06: {
     name: 'Security Agent Service Termination by Command Line',
     description:
-      'Flags net stop or sc stop commands aimed at the endpoint protection service from an interactive shell.',
+      'Flags net stop or sc stop commands aimed at the endpoint protection service from an interactive shell, which is not the maintenance account pattern.',
     query:
       'process.name:(net.exe or sc.exe) and process.command_line:(*stop* and (*MsMpEng* or *Sense* or *SepMasterService*))',
   },
   G07: {
-    name: 'Scheduled Task Creation over Remote Management Channel',
+    name: 'Scheduled Task Creation over a Remote Management Channel',
     description:
-      'Identifies schtasks.exe runs that register a task against a different host name than the one reporting the event.',
+      'Identifies schtasks.exe runs that register a scheduled task against a different host name than the one reporting the event, a remote-creation signal.',
     query:
       'process.name:"schtasks.exe" and process.command_line:(*create* and */s *) and not process.command_line:*%COMPUTERNAME%*',
   },
   G08: {
-    name: 'Interactive Local Account Creation',
+    name: 'Interactive Local Account Creation Outside the Change Window',
     description:
-      'Detects new local users added by net.exe or useradd outside of the approved change window for the asset.',
+      'Detects new local user accounts added by net.exe or useradd, interactive or scripted, outside the approved change window.',
     query:
       'process.name:(net.exe or useradd) and process.command_line:(*user* and *add*) and not user.name:(*ansible* or *puppet*)',
   },
   G09: {
     name: 'Privileged Cloud Console Sign-In from Unapproved Country',
     description:
-      'Alerts when an administrative principal signs into the cloud console from a country outside the approved operating regions.',
+      'Alerts when an admin signs into the cloud console from an unapproved country.',
     query:
       'event.dataset:("aws.cloudtrail" or "gcloud.audit") and event.action:"ConsoleLogin" and user.name:(*admin* or *root*) and not source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not source.geo.country_iso_code:(US or PL)',
   },
   G10: {
     name: 'UAC Bypass via Fodhelper Registry Key Manipulation',
     description:
-      'Detects writes under HKCU\\Software\\Classes\\ms-settings followed by fodhelper.exe execution, a known integrity-level bypass.',
+      'Detects writes under ms-settings followed by fodhelper.exe execution.',
     query:
       'registry.path:"HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command\\*" and process.name:"fodhelper.exe"',
   },
   G11: {
-    name: 'Office Macro Launching Script Interpreter',
+    name: 'Office Macro Launching Script Interpreter Child',
     description:
-      'Flags macro-enabled documents whose process tree leads to wscript.exe, cscript.exe or mshta.exe.',
+      'Flags macro-enabled documents whose process tree leads to wscript.exe, cscript.exe or mshta.exe, the classic macro-to-script chain.',
     query:
-      'process.parent.name:(WINWORD.EXE or EXCEL.EXE) and process.name:(wscript.exe or cscript.exe or mshta.exe)',
+      'process.parent.name:(WINWORD.EXE or EXCEL.EXE) and process.name:(wscript.exe or cscript*.exe or mshta.exe)',
   },
   G12: {
-    name: 'WMI Event Subscription Persistence Registered',
+    name: 'WMI Event Subscription Persistence Registered on the Host',
     description:
-      'Identifies creation of permanent WMI consumers (CommandLineEventConsumer bindings) used to survive reboots.',
+      'Identifies creation of permanent WMI event consumers used to survive reboots.',
     query:
       'event.category:"process" and process.command_line:(*__EventFilter* or *CommandLineEventConsumer* or *__FilterToConsumerBinding*)',
   },
   G13: {
-    name: 'Windows Event Log Cleared by Utility',
+    name: 'Windows Event Log Cleared',
     description:
-      'Detects wevtutil.exe or Clear-EventLog invocations that wipe one or more event channels on a Windows host.',
-    query: 'process.name:"wevtutil.exe" and process.command_line:(*clear-log* or *cl *)',
+      'Detects wevtutil.exe or Clear-EventLog invocations that wipe one or more event channels, which destroys forensic evidence, on a managed Windows host.',
+    query:
+      'process.name:"wevtutil.exe" and process.command_line:(*clear-log* or *cl *) and not process.parent.name:(*setup* or *installer*)',
   },
   G14: {
-    name: 'Autorun Value Written Under HKCU Run Key',
+    name: 'Autorun Value Written Under a Run Key',
     description:
-      'Alerts on registry additions to the per-user Run key, which execute payloads at each interactive logon.',
+      'Alerts on registry value additions to the per-user Run key, which execute stored payloads at each interactive user logon.',
     query:
       'event.category:"registry" and registry.path:"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\*" and event.action:"creation"',
   },
   G15: {
     name: 'BITS Transfer Job for Remote Payload Retrieval',
     description:
-      'Detects bitsadmin.exe jobs that download content from a remote URI, a trusted-binary download primitive used for staging.',
+      'Detects bitsadmin.exe jobs that download content from a remote URI, a trusted staging primitive, excluding the update service account.',
     query:
-      'process.name:"bitsadmin.exe" and process.command_line:(*transfer* and (http://* or https://*))',
+      'process.name:"bitsadmin.exe" and process.command_line:(*transfer* and (http://* or https://*)) and not user.name:("patch-svc" or *svc-*)',
   },
   G16: {
-    name: 'Suspended SVCHost Hollowing Pattern',
+    name: 'SVCHost Hollowing by Image Replacement',
     description:
-      'Identifies svchost.exe children created in a suspended state and later resumed with a modified image, typical of hollowing.',
+      'Identifies svchost.exe child processes created in a suspended state, later resumed from a modified in-memory image.',
     query:
-      'event.category:"process" and event.action:"start" and process.parent.name:(cmd.exe or powershell.exe) and process.name:"svchost.exe" and process.code_signature.trusted:false',
+      'event.category:"process" and event.action:"start" and process.parent.name:(cmd.exe or powershell*.exe) and process.name:(svchost.exe or *svchost*) and process.code_signature.trusted:false',
   },
   G17: {
-    name: 'Executable Run from Downloads Folder of Mail Archive Origin',
+    name: 'Executable Run from Downloads of Mail Origin',
     description:
-      'Flags processes whose image path sits in the Downloads directory and whose parent was the mail client or an archive utility.',
+      'Flags processes launched from the Downloads directory whose parent was the mail client, an archive utility, or a browser download flow.',
     query:
-      'process.executable:(*\\Downloads\\*.exe) and process.parent.name:(outlook.exe or 7zFM.exe or winrar.exe)',
+      'process.executable:(*\\Downloads\\*.exe) and process.parent.name:(outlook.exe or 7zFM.exe or winrar.exe) and not process.name:(*updater* or *uninstall* or *crashpad*)',
   },
   G18: {
-    name: 'Inbound RDP Logon from Rare External Network',
+    name: 'Inbound RDP Logon from a Rare External Network',
     description:
-      'Detects successful Remote Desktop authentications sourced from networks or addresses never seen connecting to the host before.',
+      'Detects Remote Desktop authentications sourced from networks or addresses never seen connecting to the host before.',
     query:
       'event.category:"network" and network.protocol:"rdp" and event.action:"logon" and event.outcome:"success" and not source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)',
   },
   G19: {
-    name: 'Distributed Password Guessing Against Identity Provider',
+    name: 'Password Guessing Against Identity Provider',
     description:
-      'Alerts on many failed authentications for distinct usernames originating from one source against the cloud identity platform.',
+      'Alerts on many failed authentications for distinct usernames from one source against the cloud identity platform.',
     query:
       'event.dataset:"identity.authentication" and event.action:"logon" and event.outcome:"failure" and user.name:* and not source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not user.name:(svc-* or *scan*)',
   },
   G20: {
-    name: 'Consumer Remote Administration Utility in User Profile',
+    name: 'Consumer Remote Administration Utility in a User Profile',
     description:
-      'Detects known remote-support binaries executing from per-user directories rather than Program Files locations.',
+      'Detects known remote-support binaries executing from per-user directories rather than Program Files installation locations.',
     query:
-      'process.executable:(*\\AppData\\* or *\\Users\\*) and process.name:(teamviewer.exe or anydesk.exe or vnc.exe or gotohttp.exe)',
+      'process.executable:(*\\AppData\\* or *\\Users\\*) and process.name:(teamviewer.exe or anydesk.exe or *vnc*.exe or gotohttp.exe) and not host.name:(*kiosk* or *lab*)',
   },
   G21: {
-    name: 'Service Installed by Unprivileged Account on Domain Controller',
+    name: 'Service Installed by an Unprivileged Account on a DC',
     description:
-      'Flags service creation events on domain controllers where the requesting account lacks administrative group membership.',
+      'Flags service creation events on domain controllers where the requesting account lacks administrative group membership in the domain.',
     query:
       'winlog.channel:"Security" and event.code:"7045" and winlog.event_data.SubjectUserName:* and not user.group:"Domain Admins" and host.name:(dc-* or *-dc*)',
   },
   G22: {
     name: 'Group Policy Object Edited Outside Maintenance Window',
     description:
-      'Detects GPO edit operations performed outside the scheduled change window, sourced from consoles other than the management host.',
+      'Detects GPO edits performed outside the scheduled change window by consoles other than the approved management workstation.',
     query:
-      'event.dataset:"ad.audit" and event.action:"group-policy-modify" and not source.host:("dc-mgmt-01" or "dc-mgmt-02")',
+      'event.dataset:"ad.audit" and event.action:(group-policy-modify or *gpo*) and not source.host:("dc-mgmt-*" or *change-window*)',
   },
   G23: {
-    name: 'Fileless Reflective Module Injection Marker',
+    name: 'Reflective Module Injection Without Backing Image',
     description:
-      'Identifies allocation of executable memory followed by a thread start with no backing image, consistent with reflective loading.',
+      'Identifies allocation of executable private memory followed by a remote thread start with no backing image present on disk.',
     query:
       'event.category:"process" and process.name:(rundll32.exe or regsvr32.exe) and process.code_signature.trusted:true and process.args:*dll* and not dll.path:*',
   },
   G24: {
-    name: 'Signed Binary Loading DLL from Temp Directory',
+    name: 'Signed Binary Loading a DLL from the Temp Directory',
     description:
       'Detects trusted applications loading libraries out of temporary folders, indicating side-loading of a planted module.',
     query:
       'event.category:"process" and process.code_signature.trusted:true and dll.path:(*\\Temp\\* or *\\tmp\\*) and not process.name:(installer*.exe or setup*.exe)',
   },
   G25: {
-    name: 'Unknown Process Installing Keyboard Hook',
+    name: 'Unknown Process Installing Low-Level Keyboard Hook',
     description:
-      'Alerts when a process without a code-signing chain registers a low-level keyboard hook via SetWindowsHookEx.',
+      'Alerts when a process, without a code-signing chain, registers a low-level keyboard hook via the SetWindowsHookEx API, which captures keystrokes.',
     query:
       'event.category:"process" and process.name:(*.exe) and process.code_signature.trusted:false and winlog.event_data.TargetCommandLine:*SetWindowsHookEx* and not process.name:(explorer.exe or teams.exe)',
   },
   G26: {
-    name: 'Encrypted DNS Payload Pattern in TXT Records',
+    name: 'Encrypted DNS Payload Pattern in TXT',
     description:
       'Detects unusually long TXT record answers concentrated on a single resolver domain, a signature of DNS-based covert channels.',
     query:
       'event.category:"network" and network.protocol:"dns" and dns.type:TXT and dns.response_text:* and network.community_id:* and network.bytes > 300',
   },
   G27: {
-    name: 'Command Execution via Forfiles Utility',
+    name: 'Indirect Command Execution via Forfiles',
     description:
-      'Flags forfiles.exe invocations carrying a /c command line, which shells out through cmd.exe and bypasses parent filtering.',
+      'Flags forfiles.exe use with a /c command line, which shells out through cmd.exe and bypasses parent filtering.',
     query: 'process.name:"forfiles.exe" and process.command_line:(*/c * and *cmd.exe*)',
   },
   G28: {
     name: 'High-Volume File Reads on User Home Share',
     description:
-      'Detects a single process reading thousands of files under SMB home directories in a short window, consistent with staging.',
+      'Detects one process reading thousands of files under SMB home directories in a short window, consistent with bulk staging.',
     query:
       'event.category:"file" and event.action:(open or read) and file.path:*\\\\homes\\\\* and process.name:(robocopy.exe or 7z.exe or rar.exe or tar)',
   },
   G29: {
-    name: 'Local Firewall Disabled from Shell',
+    name: 'Local Firewall Disabled from an Interactive Shell Session',
     description:
-      'Alerts on netsh advfirewall set-allprofiles state off executed from an interactive command shell.',
+      'Alerts on netsh advfirewall set-allprofiles state off executed from an interactive shell, disabling the local host firewall entirely.',
     query: 'process.name:"netsh.exe" and process.command_line:(*advfirewall* and *off*)',
   },
   G30: {
     name: 'Masqueraded System Binary Launched from User Directory',
     description:
-      'Detects executables named after operating-system binaries but launched from user-writable paths.',
+      'Detects executables named after system binaries launching from user-writable paths outside System32, a name-mimicry pattern.',
     query:
       'event.category:"process" and process.name:(svchost.exe or lsass.exe or csrss.exe) and process.executable:(*\\Users\\*) and not process.executable:(*\\System32\\* or *\\SysWOW64\\*)',
   },
@@ -925,133 +928,133 @@ const EXACT_SEED: Readonly<Record<string, SeedContent>> = {
 
 const NEAR_MISS_SEED: Readonly<Record<string, SeedContent>> = {
   'S1-OFFICE': {
-    name: 'Command Shell Launched from Explorer',
+    name: 'Command Shell Launched from the Windows Explorer Shell',
     description:
-      'Identifies cmd.exe started from the Windows shell by a user, the standard console launch pattern.',
+      'Identifies cmd.exe launched from the interactive Windows shell of a logged-on user on a corporate workstation or server.',
     query: 'process.parent.name:"explorer.exe" and process.name:(cmd.exe or *.scr or *console*)',
   },
   'S1-KUBECTL-PROD': {
-    name: 'Kubernetes Object Listing by Cluster Operators',
+    name: 'Kubernetes Object Listing Commands Run by Cluster Operators',
     description:
-      'Detects read-only kubectl get and describe commands against cluster resources issued by operator accounts.',
+      'Detects read-only kubectl get and describe commands issued against cluster resources by routine platform operator accounts.',
     query:
-      'event.dataset:"kubernetes.audit" and event.action:(get or list) and user.username:(*ops* or *sre*) and object:*',
+      'event.dataset:"kubernetes.audit" and event.action:(get or list) and user.username:("platform-ops" or *sre*) and object:*',
   },
   G04: {
-    name: 'Browser History Database Access by Forensic Tooling',
+    name: 'Browser History Database Access by Forensic Tooling Suite',
     description:
-      'Alerts on reads of Chrome and Firefox browsing history files performed by the standard forensic agent suite.',
+      'Alerts on reads of Chrome and Firefox browsing history files, performed by the standard forensic collection agent suite.',
     query:
-      'event.category:"file" and file.name:("History" or "places.sqlite") and process.name:(*forensic* or kape.exe)',
+      'event.category:"file" and file.name:("History" or "places.sqlite" or *cookies*) and process.name:(*forensic* or kape.exe) and not user.name:(*incident*)',
   },
   G08: {
-    name: 'Privileged Group Membership Change',
+    name: 'Privileged Local Group Membership Change Event',
     description:
-      'Identifies additions of existing user accounts into local administrator groups on member servers and workstations.',
+      'Identifies additions of existing domain user accounts into local administrator groups on member servers and workstations.',
     query:
       'winlog.channel:"Security" and event.code:"4732" and group.name:(Administrators or *Admins or *operators)',
   },
   G11: {
     name: 'Macro-Enabled Attachment Saved from Mail Stream',
     description:
-      'Flags macro-enabled .docm and .xlsm attachments written by the mail client into the user profile directory.',
+      'Flags macro-enabled .docm and .xlsm attachments written by the desktop mail client into the local user profile directory.',
     query:
       'event.category:"file" and process.name:(outlook.exe or thunderbird.exe or *mail*) and file.extension:(docm or xlsm or *macro*)',
   },
   G14: {
-    name: 'System-Wide Autorun Service Key Modification',
+    name: 'System-Wide Windows Autorun Service Key Modification Under HKLM',
     description:
-      'Detects changes to the machine-level Run services key under HKLM, a system-wide autorun location.',
+      'Detects changes to the machine-level Run services key under HKLM, the system-wide autorun location for third-party services.',
     query:
-      'event.category:"registry" and registry.path:(HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunServices\\* or *RunServicesOnce\\*)',
+      'event.category:"registry" and registry.path:(HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunServices\\* or *RunServicesOnce\\*) and not process.name:"trusted-installer.exe"',
   },
   G18: {
-    name: 'Outbound Remote Desktop Client Launch',
+    name: 'Outbound Remote Desktop Client Launch by User',
     description:
-      'Flags users starting the RDP client (mstsc.exe) on managed endpoints for outbound session initiation.',
+      'Flags users starting the outbound RDP client (mstsc.exe) on managed endpoints for interactive session initiation to remote hosts.',
     query:
       'event.category:"process" and process.name:(mstsc.exe or *rdp*) and user.domain:(CORP or *local)',
   },
   G23: {
-    name: 'Unsigned DLL Loaded into Trusted Process',
+    name: 'Unsigned DLL Loaded into a Trusted Process',
     description:
-      'Detects file-backed loading of unsigned dynamic-link libraries into signed processes across the fleet.',
+      'Detects file-backed loading of unsigned dynamic-link libraries into signed production processes across the managed fleet.',
     query:
       'event.category:"process" and process.name:(*signed* or *.exe) and process.code_signature.trusted:true and dll.code_signature.trusted:false and dll.path:(*.dll or *.ocx)',
   },
   G29: {
-    name: 'New Permissive Firewall Rule Created',
+    name: 'New Permissive Inbound Firewall Rule Created Locally by Admin',
     description:
-      'Alerts on netsh advfirewall rule additions that allow all inbound traffic on Windows endpoints and servers.',
+      'Alerts on netsh advfirewall rule additions that allow all inbound traffic on managed Windows endpoints and member servers.',
     query: 'process.name:"netsh.exe" and process.command_line:(*rule* and *add* and *any*)',
   },
   G31: {
-    name: 'Automated Scanner Fingerprint Against Web Tier',
+    name: 'Automated Scanner Fingerprint Against the Public Web Tier',
     description:
-      'Alerts on known automated scanner user agents probing the public-facing web tier for exposed endpoints.',
+      'Alerts on known automated scanner user agents, probing the public-facing web tier for exposed management endpoints.',
     query:
       'event.category:"network" and user_agent.original:(sqlmap or nikto or nmap-engine or masscan/1* or zgrab) and destination.port:(80 or 443)',
   },
   G35: {
-    name: 'Docker Socket Mounted Inside Container',
+    name: 'Docker Host Socket Volume Mounted Inside a Running Container',
     description:
-      'Flags containers that mount the host docker.sock volume at runtime, exposing the container engine socket.',
+      'Flags containers that mount the host docker.sock volume at runtime, exposing the underlying container engine control socket.',
     query:
       'event.dataset:"container.runtime" and event.action:"start" and container.mounts:(/var/run/*.sock or *docker.sock*)',
   },
   G39: {
-    name: 'Cron Definition Managed by Package Manager',
+    name: 'Cron Definition Files Managed by the Package Manager',
     description:
       'Detects cron definition files installed or removed by the system package manager during software changes on Linux servers.',
     query:
-      'event.category:"file" and file.path:(/etc/cron.d/* or /etc/cron.daily/*) and process.name:(dpkg or rpm or yum or apt)',
+      'event.category:"file" and file.path:(/etc/cron.d/* or /etc/cron.daily/* or /var/spool/cron/*) and process.name:(dpkg or rpm or yum or apt)',
   },
   G43: {
-    name: 'Insecure SNMP Community String Configured',
+    name: 'Insecure Default SNMP Community String Configured on Network Device',
     description:
-      'Alerts on devices configured with the default public SNMP community string on the management network.',
+      'Alerts on network devices still configured with the default public SNMP community string on the management segment.',
     query:
-      'event.dataset:"network.config" and event.action:"snmp-config" and snmp.community:(public or default* or *read*)',
+      'event.dataset:"network.config" and event.action:(snmp-config or *community*) and snmp.community:("public" or "default" or *read* or *private*)',
   },
   G46: {
-    name: 'User-Initiated Encrypted Archive Creation',
+    name: 'User-Initiated Encrypted Archive Creation at Desktop',
     description:
-      'Flags password-protected archives created interactively by the desktop archive utility on macOS workstations.',
+      'Flags password-protected archives created interactively by the standard desktop archive utility on managed macOS workstations.',
     query:
       'process.parent.name:"Finder" and process.name:(*Archive* or *zip*) and file.extension:(zip or 7z) and file.encrypted:true',
   },
   G49: {
     name: 'Partner Tunnel with Expired Device Certificate',
     description:
-      'Alerts on third-party VPN sessions negotiated with device certificates past their validity window on partner tunnels.',
+      'Alerts on third-party VPN sessions negotiated with expired device certificates on the corporate partner tunnel estate.',
     query:
-      'event.dataset:"vpn.session" and user.group:(partner-* or *contractor*) and tls.client.not_after < now',
+      'event.dataset:"vpn.session" and user.group:(partner-* or "contractors" or *vendor*) and tls.client.not_after < now and not network.name:(*mgmt* or *backup*)',
   },
   G51: {
     name: 'Bootloader Configuration Edited by Admin Toolkit',
     description:
-      'Detects GRUB bootloader configuration changes made by approved administration tooling on servers in the estate.',
+      'Detects GRUB bootloader configuration changes made by approved administration tooling on production servers in the estate, outside reboots.',
     query:
       'event.category:"file" and file.path:(/boot/grub/* or /etc/default/grub or *grub.cfg*) and process.parent.name:(sudo or su or *shell)',
   },
   G54: {
     name: 'MDM Profile Rapidly Installed and Removed',
     description:
-      'Identifies management profiles installed and deleted within minutes of each other on enrolled mobile devices.',
+      'Identifies device management profiles installed and deleted, within minutes of each other, on enrolled mobile handsets.',
     query:
-      'event.dataset:"ios.audit" and event.action:(profile-* or *mdm*) and mdm.enrolled:true and event.duration < 5m',
+      'event.dataset:"ios.audit" and event.action:(profile-* or *mdm* or "install") and mdm.enrolled:true and event.duration < 5m and not host.name:(*kiosk* or *stage*)',
   },
   G58: {
     name: 'Print Driver Package Update from Vendor Portal',
     description:
-      'Identifies driver packages pulled from the vendor update site into the local driver store on print servers.',
+      'Identifies driver packages pulled from the hardware vendor update site into the local driver store on managed print servers.',
     query:
-      'process.name:(pnputil.exe or PrintBrm.exe) and file.path:(*spool* or *DriverStore*) and source.domain:(*hp.com* or *xerox.com* or *sharp* )',
+      'process.name:(pnputil.exe or PrintBrm.exe) and file.path:(*spool* or *DriverStore*) and source.domain:(*hp.com* or *xerox.com* or *sharp*)',
   },
   G60: {
-    name: 'Registry Host Pulling Unsigned Base Image',
+    name: 'Container Registry Host Pulling an Unsigned Base Image',
     description:
-      'Flags pulls of untagged base images from the corporate registry by cluster nodes outside the CI pool.',
+      'Flags pulls of untagged base images from the corporate container registry by nodes outside the approved CI build pool.',
     query:
       'event.dataset:"container.runtime" and event.action:"pull" and container.image.registry:(registry.corp.io or *.corp.*) and not container.image.tag:* and not host.labels:"ci-runner"',
   },
@@ -1073,7 +1076,7 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G02: {
     name: 'DLL Dependency Enumeration by Setup Binary',
     description:
-      'Flags setup and installer binaries enumerating the DLL exports of system libraries during software installation.',
+      'Flags setup and installer binaries enumerating the DLL exports of system libraries during routine software installation.',
     query:
       'event.category:"process" and process.name:(setup*.exe or install*.exe) and process.code_signature.trusted:true and event.action:"load"',
     technique: 'T1083',
@@ -1081,7 +1084,7 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G06: {
     name: 'Endpoint Protection Process Enumeration by Fleet Inventory',
     description:
-      'Flags inventory scans listing the endpoint security agent processes and services across the fleet estate.',
+      'Flags routine inventory scans listing the endpoint security agent processes and installed services across the fleet estate.',
     query:
       'event.category:"process" and process.name:(tasklist.exe or ps) and process.command_line:(*MsMpEng* or *Sense*)',
     technique: 'T1518.001',
@@ -1096,8 +1099,9 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G13: {
     name: 'Event Log Archive File Staged in Temp Directory',
     description:
-      'Flags Windows event log archive files written into temporary folders by local collection tooling.',
-    query: 'event.category:"file" and file.extension:evtx and file.path:(*\\Temp\\* or */tmp/*)',
+      'Flags Windows event log archive files, written into temporary working folders, by the local log collection tooling on endpoints.',
+    query:
+      'event.category:"file" and file.extension:evtx and file.path:(*\\Temp\\* or */tmp/* or *\\tmp\\*) and not process.name:(*archiver* or *collector*)',
     technique: 'T1074.001',
   },
   G20: {
@@ -1111,15 +1115,15 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G26: {
     name: 'DNS Zone Transfer Request to Authoritative NS',
     description:
-      'Alerts on AXFR zone transfer requests received by internal authoritative name servers from client subnets.',
+      'Alerts on AXFR full-zone transfer requests sent by ordinary client subnets to internal authoritative name servers.',
     query:
-      'event.category:"network" and network.protocol:"dns" and dns.header_flags:QR and source.ip:(10.0.0.0/8 or 172.16.0.0/12) and destination.port:53',
+      'event.category:"network" and network.protocol:"dns" and dns.question.type:"AXFR" and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and destination.port:53 and not dns.question.name:(*arpa or *internal*)',
     technique: 'T1071.004',
   },
   G30: {
     name: 'Masqueraded Binary Name in Process Inventory',
     description:
-      'Detects inventory reports of processes whose image name mimics system binaries on unmanaged hosts.',
+      'Detects scheduled inventory reports of processes whose image name, mimicking system binaries, appear on unmanaged endpoint hosts.',
     query:
       'event.category:"process" and process.name:(taskhostw.exe or conhost.exe or dpi.exe) and not host.labels:"managed"',
     technique: 'T1036',
@@ -1127,7 +1131,7 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G33: {
     name: 'Metadata Gateway Error Responses from Startup Scripts',
     description:
-      'Alerts on elevated rates of 4xx error responses returned by the configuration API gateway to boot-time scripts.',
+      'Alerts on elevated rates of 4xx error responses returned by the configuration API gateway to boot-time scripts at scale.',
     query:
       'event.category:"network" and destination.domain:(api.*.internal or conf-gateway.*) and http.response.status_code:[400 TO 499] and source.process.name:(cloud-init or startup-script)',
     technique: 'T1046',
@@ -1143,9 +1147,9 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G41: {
     name: 'Script Host Interpreter Started by Build Agent',
     description:
-      'Alerts on wscript.exe or cscript.exe processes whose parent is a build tool or package manager binary.',
+      'Alerts on wscript.exe or cscript.exe interpreter processes whose parent is a build tool or package manager binary.',
     query:
-      'event.category:"process" and process.name:(wscript.exe or cscript.exe) and process.parent.name:(node.exe or msbuild.exe or npm.exe)',
+      'event.category:"process" and process.name:(wscript.exe or cscript.exe or *script*.exe) and process.parent.name:(node.exe or msbuild.exe or npm.exe)',
     technique: 'T1059',
   },
   G45: {
@@ -1159,7 +1163,7 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G50: {
     name: 'Domain Controller Replication Tool Run on Member Server',
     description:
-      'Detects repadmin.exe executed interactively on member servers and hosts that are not domain controllers.',
+      'Detects repadmin.exe executed interactively on member servers and other managed hosts that are not domain controllers.',
     query:
       'event.category:"process" and process.name:"repadmin.exe" and not host.type:"domain_controller"',
     technique: 'T1018',
@@ -1167,15 +1171,15 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G52: {
     name: 'USB Tethered Adapter Broadcast Traffic',
     description:
-      'Alerts on ARP broadcast storms sourced from USB network adapter interfaces on access switches in the branch network.',
+      'Alerts on ARP broadcast storms sourced from virtual tunnel adapter interfaces on access switches in the branch network.',
     query:
-      'event.category:"network" and network.name:"USB*" and event.action:"arp-broadcast" and network.packets > 1000',
+      'event.category:"network" and network.name:(*IPsec* or *utun*) and event.action:"arp-broadcast" and network.packets > 1000',
     technique: 'T1557.002',
   },
   G56: {
     name: 'Hypervisor Vendor License Server Contact',
     description:
-      'Identifies license-management daemons on virtualization hosts contacting the vendor licensing portal.',
+      'Identifies license-management daemons on virtualization hosts periodically contacting the vendor licensing portal.',
     query:
       'event.category:"network" and process.name:(vmadpd or vpxa) and destination.domain:(licenses.* or *licensing*) and destination.port:443',
     technique: 'T1018',
@@ -1183,7 +1187,7 @@ const DECOY_SEED: Readonly<Record<string, DecoySeed>> = {
   G59: {
     name: 'Cloud Audit Log Shipper Ingest Failure',
     description:
-      'Detects failed sessions from log collectors to the SIEM ingest port, indicating delivery problems.',
+      'Detects failed sessions from downstream log collectors to the SIEM ingest port, indicating persistent, overnight log delivery problems.',
     query:
       'destination.port:9243 and event.outcome:"failure" and process.name:(*filebeat* or *auditbeat*)',
     technique: 'T1070.004',

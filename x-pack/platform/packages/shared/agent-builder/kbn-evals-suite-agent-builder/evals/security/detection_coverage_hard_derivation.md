@@ -10,39 +10,39 @@ Limits: `prebuilt_available` vs `no_coverage` is not decidable from the seed (ne
 
 | case | technique | expected | derived | exact seed rule | traps |
 |---|---|---|---|---|---|
-| S1-POWERSHELL | T1059.001 | covered_enabled | covered_enabled | az-hard-Obfuscated PowerShell Interpreter Invocation (enabled=true) | duplicate_create_trap |
-| S1-SMB | T1021.002 | covered_disabled | covered_disabled | az-hard-Remote File Operations on Administrative Shares (enabled=false) | disabled_or_partial |
-| S1-OFFICE | T1059.003 | covered_enabled | covered_enabled | az-hard-Office Application Spawning Command Shell (enabled=true) | near_miss |
+| S1-POWERSHELL | T1059.001 | covered_enabled | covered_enabled | az-hard-Obfuscated PowerShell Interpreter Launched from the Command Line (enabled=true) | duplicate_create_trap |
+| S1-SMB | T1021.002 | covered_disabled | covered_disabled | az-hard-Remote File Operations on Hidden Windows Administrative Shares (enabled=false) | disabled_or_partial |
+| S1-OFFICE | T1059.003 | covered_enabled | covered_enabled | az-hard-Office Application Spawning a Command Shell Child Process (enabled=true) | near_miss |
 | S1-KUBECTL-PROD | T1609 | prebuilt_available | needs_catalog | none | near_miss, disabled_or_partial |
-| G01 | T1003.001 | covered_enabled | covered_enabled | az-hard-Credential Dumping Tool Accessing LSASS (enabled=true) | duplicate_create_trap |
+| G01 | T1003.001 | covered_enabled | covered_enabled | az-hard-Credential Dumping Tool Opening a Handle to LSASS (enabled=true) | duplicate_create_trap |
 | G02 | T1218.011 | covered_enabled | covered_enabled | az-hard-DLL Execution by Rundll32 from User Profile (enabled=true) | decoy_name |
-| G03 | T1047 | covered_enabled | covered_enabled | az-hard-WMI Remote Process Creation (enabled=true) | duplicate_create_trap |
-| G04 | T1555.003 | covered_enabled | covered_enabled | az-hard-Non-Browser Process Reading Browser Credential Database (enabled=true) | near_miss |
-| G05 | T1490 | covered_enabled | covered_enabled | az-hard-Volume Shadow Copy Removal via VSSAdmin (enabled=true) | duplicate_create_trap |
+| G03 | T1047 | covered_enabled | covered_enabled | az-hard-WMI Remote Process Creation from an External Host (enabled=true) | duplicate_create_trap |
+| G04 | T1555.003 | covered_enabled | covered_enabled | az-hard-Non-Browser Process Reading the Browser Credential Database (enabled=true) | near_miss |
+| G05 | T1490 | covered_enabled | covered_enabled | az-hard-Volume Shadow Copy Removal by the VSSAdmin Utility (enabled=true) | duplicate_create_trap |
 | G06 | T1562.001 | covered_enabled | covered_enabled | az-hard-Security Agent Service Termination by Command Line (enabled=true) | decoy_name |
-| G07 | T1053.005 | covered_enabled | covered_enabled | az-hard-Scheduled Task Creation over Remote Management Channel (enabled=true) | duplicate_create_trap |
-| G08 | T1136.001 | covered_enabled | covered_enabled | az-hard-Interactive Local Account Creation (enabled=true) | near_miss |
+| G07 | T1053.005 | covered_enabled | covered_enabled | az-hard-Scheduled Task Creation over a Remote Management Channel (enabled=true) | duplicate_create_trap |
+| G08 | T1136.001 | covered_enabled | covered_enabled | az-hard-Interactive Local Account Creation Outside the Change Window (enabled=true) | near_miss |
 | G09 | T1078.004 | covered_enabled | covered_enabled | az-hard-Privileged Cloud Console Sign-In from Unapproved Country (enabled=true) | duplicate_create_trap |
 | G10 | T1548.002 | covered_enabled | covered_enabled | az-hard-UAC Bypass via Fodhelper Registry Key Manipulation (enabled=true) | decoy_name |
-| G11 | T1566.001 | covered_enabled | covered_enabled | az-hard-Office Macro Launching Script Interpreter (enabled=true) | near_miss |
-| G12 | T1546.003 | covered_enabled | covered_enabled | az-hard-WMI Event Subscription Persistence Registered (enabled=true) | duplicate_create_trap |
-| G13 | T1070.001 | covered_enabled | covered_enabled | az-hard-Windows Event Log Cleared by Utility (enabled=true) | decoy_name |
-| G14 | T1112 | covered_enabled | covered_enabled | az-hard-Autorun Value Written Under HKCU Run Key (enabled=true) | near_miss |
+| G11 | T1566.001 | covered_enabled | covered_enabled | az-hard-Office Macro Launching Script Interpreter Child (enabled=true) | near_miss |
+| G12 | T1546.003 | covered_enabled | covered_enabled | az-hard-WMI Event Subscription Persistence Registered on the Host (enabled=true) | duplicate_create_trap |
+| G13 | T1070.001 | covered_enabled | covered_enabled | az-hard-Windows Event Log Cleared (enabled=true) | decoy_name |
+| G14 | T1112 | covered_enabled | covered_enabled | az-hard-Autorun Value Written Under a Run Key (enabled=true) | near_miss |
 | G15 | T1197 | covered_enabled | covered_enabled | az-hard-BITS Transfer Job for Remote Payload Retrieval (enabled=true) | duplicate_create_trap |
-| G16 | T1055.012 | covered_disabled | covered_disabled | az-hard-Suspended SVCHost Hollowing Pattern (enabled=false) | disabled_or_partial |
-| G17 | T1204.002 | covered_disabled | covered_disabled | az-hard-Executable Run from Downloads Folder of Mail Archive Origin (enabled=false) | disabled_or_partial |
-| G18 | T1021.001 | covered_disabled | covered_disabled | az-hard-Inbound RDP Logon from Rare External Network (enabled=false) | disabled_or_partial, near_miss |
-| G19 | T1110.003 | covered_disabled | covered_disabled | az-hard-Distributed Password Guessing Against Identity Provider (enabled=false) | disabled_or_partial |
-| G20 | T1219 | covered_disabled | covered_disabled | az-hard-Consumer Remote Administration Utility in User Profile (enabled=false) | decoy_name, disabled_or_partial |
-| G21 | T1569.002 | covered_disabled | covered_disabled | az-hard-Service Installed by Unprivileged Account on Domain Controller (enabled=false) | disabled_or_partial |
+| G16 | T1055.012 | covered_disabled | covered_disabled | az-hard-SVCHost Hollowing by Image Replacement (enabled=false) | disabled_or_partial |
+| G17 | T1204.002 | covered_disabled | covered_disabled | az-hard-Executable Run from Downloads of Mail Origin (enabled=false) | disabled_or_partial |
+| G18 | T1021.001 | covered_disabled | covered_disabled | az-hard-Inbound RDP Logon from a Rare External Network (enabled=false) | disabled_or_partial, near_miss |
+| G19 | T1110.003 | covered_disabled | covered_disabled | az-hard-Password Guessing Against Identity Provider (enabled=false) | disabled_or_partial |
+| G20 | T1219 | covered_disabled | covered_disabled | az-hard-Consumer Remote Administration Utility in a User Profile (enabled=false) | decoy_name, disabled_or_partial |
+| G21 | T1569.002 | covered_disabled | covered_disabled | az-hard-Service Installed by an Unprivileged Account on a DC (enabled=false) | disabled_or_partial |
 | G22 | T1484.001 | covered_disabled | covered_disabled | az-hard-Group Policy Object Edited Outside Maintenance Window (enabled=false) | disabled_or_partial |
-| G23 | T1620 | covered_disabled | covered_disabled | az-hard-Fileless Reflective Module Injection Marker (enabled=false) | near_miss, disabled_or_partial |
-| G24 | T1574.002 | covered_disabled | covered_disabled | az-hard-Signed Binary Loading DLL from Temp Directory (enabled=false) | disabled_or_partial |
-| G25 | T1056.001 | covered_disabled | covered_disabled | az-hard-Unknown Process Installing Keyboard Hook (enabled=false) | disabled_or_partial |
-| G26 | T1572 | covered_disabled | covered_disabled | az-hard-Encrypted DNS Payload Pattern in TXT Records (enabled=false) | decoy_name, disabled_or_partial |
-| G27 | T1202 | covered_disabled | covered_disabled | az-hard-Command Execution via Forfiles Utility (enabled=false) | disabled_or_partial |
+| G23 | T1620 | covered_disabled | covered_disabled | az-hard-Reflective Module Injection Without Backing Image (enabled=false) | near_miss, disabled_or_partial |
+| G24 | T1574.002 | covered_disabled | covered_disabled | az-hard-Signed Binary Loading a DLL from the Temp Directory (enabled=false) | disabled_or_partial |
+| G25 | T1056.001 | covered_disabled | covered_disabled | az-hard-Unknown Process Installing Low-Level Keyboard Hook (enabled=false) | disabled_or_partial |
+| G26 | T1572 | covered_disabled | covered_disabled | az-hard-Encrypted DNS Payload Pattern in TXT (enabled=false) | decoy_name, disabled_or_partial |
+| G27 | T1202 | covered_disabled | covered_disabled | az-hard-Indirect Command Execution via Forfiles (enabled=false) | disabled_or_partial |
 | G28 | T1039 | covered_disabled | covered_disabled | az-hard-High-Volume File Reads on User Home Share (enabled=false) | disabled_or_partial |
-| G29 | T1562.004 | covered_disabled | covered_disabled | az-hard-Local Firewall Disabled from Shell (enabled=false) | disabled_or_partial, near_miss |
+| G29 | T1562.004 | covered_disabled | covered_disabled | az-hard-Local Firewall Disabled from an Interactive Shell Session (enabled=false) | disabled_or_partial, near_miss |
 | G30 | T1036.005 | covered_disabled | covered_disabled | az-hard-Masqueraded System Binary Launched from User Directory (enabled=false) | decoy_name, disabled_or_partial |
 | G31 | T1190 | prebuilt_available | needs_catalog | none | near_miss |
 | G32 | T1195.002 | prebuilt_available | needs_catalog | none | - |

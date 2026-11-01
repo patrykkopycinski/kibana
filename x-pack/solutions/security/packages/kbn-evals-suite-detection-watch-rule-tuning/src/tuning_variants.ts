@@ -176,9 +176,13 @@ const range = (lo: number, hi: number): number[] =>
 
 /**
  * `true` when a single glob (grader grammar, any position) covers every FP address of the
- * case and no TP, or vice versa. Exhaustive over composed globs: per-octet-position forms
- * are combined as set intersections with empty-set pruning, so every candidate glob shape
- * reachable from the seeded addresses is covered without enumerating the full cross product.
+ * case and no TP, or vice versa. The enumeration covers dot-aligned compositions of the
+ * per-octet forms (see octetForms): it cannot see cross-octet shapes (`10.70.0*`, `*.0.4`),
+ * mid-octet star with trailing literal (`1*2`), or multi-wildcard forms (`1?2?`). Those
+ * were verified separately by a full-grammar enumeration over the shipped seed data (no
+ * separator exists), so the invariant is enforced per-octet here and verified empirically
+ * for the rest of the grammar. Per-position forms are combined as set intersections with
+ * empty-set pruning, without enumerating the full cross product.
  */
 export const globSeparates = (fpIps: readonly string[], tpIps: readonly string[]): boolean => {
   const ips = [...fpIps, ...tpIps];
@@ -277,7 +281,8 @@ const tpFourthOctets = (
   return null;
 };
 
-/** Memoized per case: the invariant depends only on (fpIps, caseId, tpCount). */
+/** Memoized per case: the invariant depends only on (fpIps, caseId, tpCount); each case is
+ * built once per run, so this is effectively per-case memoization, not a long-lived cache. */
 const fourthCache = new Map<string, number[] | null>();
 
 /** TP source IP: octets 0-2 drawn from the case's FP octet sets, search-picked fourth. */

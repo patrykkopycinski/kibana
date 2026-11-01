@@ -266,13 +266,14 @@ describe('buildSeedDocs', () => {
   // A single glob in the GRADER's grammar (`*` = any sequence, `?` = one char, any position —
   // see globToRegExp) must not separate the cohorts: any `source.ip does_not_match` entry
   // that would suppress the whole FP cluster necessarily suppresses at least one TP (and
-  // symmetrically for the TPs). Candidate globs are composed from per-octet-position forms
-  // (see octetForms in tuning_variants.ts); the exhaustive composed check is globSeparates,
-  // shared with the allocator so the test proves the same predicate the search enforces.
+  // symmetrically for the TPs). This test enumerates dot-aligned compositions of
+  // per-octet-position forms (see octetForms in tuning_variants.ts) via globSeparates,
+  // shared with the allocator so it proves the same predicate the search enforces;
+  // non-dot-aligned shapes were verified empirically against the shipped seed data.
   it.each([
     ...matrix.map((m) => [m.caseId, m] as const),
     ...baseIds.map((id) => [`${id} (base path)`, undefined] as const),
-  ])('%s: no single glob in the grader grammar separates TP from FP', (caseId, spec) => {
+  ])('%s: no dot-aligned per-octet-form glob separates TP from FP', (caseId, spec) => {
     const baseId = spec?.baseId ?? caseId.split(' ')[0];
     const { fp, tp } = build(baseId, spec);
     const fpIps = fp.map((d) => (d.source as { ip: string }).ip);

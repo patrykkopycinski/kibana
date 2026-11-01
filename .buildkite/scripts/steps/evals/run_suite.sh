@@ -680,18 +680,101 @@ if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
   EVAL_RUN_ARGS+=(${EVAL_SPEC_FILE_LIST[@]+"${EVAL_SPEC_FILE_LIST[@]}"})
 fi
 
+# A silent hang (e.g. an interactive prompt waiting on a TTY that CI does not have) otherwise burns
+# the whole step timeout. Only progress output counts as liveness, never wall time and never raw
+# log growth: the Scout-started Kibana server writes its logs into the same stream (`proc [kibana]`
+# lines, a status heartbeat every ~10s), so a hung eval CLI still grows the log. Measured basis: in
+# passing runs the largest gap between progress lines was ~21s, so the 15 minute default leaves a
+# wide margin. EVAL_NO_OUTPUT_TIMEOUT_MINUTES=0 disables it; EVAL_NO_OUTPUT_TIMEOUT_SECONDS
+# overrides the minutes value (used for testing).
+# Usage: run_with_no_output_watchdog <log file> <command...>
+# Streams the command's combined output to stdout and <log file>; returns the command's exit code,
+# or 124 if it was killed for producing no output.
+#
+# Server-log noise: Scout's `proc [<name>]` prefix and ToolingLog's `│` indent, optionally preceded
+# by ANSI SGR colour codes and whitespace.
+readonly EVAL_NOISE_LINE_REGEX=$'^(\e\\[[0-9;]*m|[[:space:]])*(proc \\[|│)'
+run_with_no_output_watchdog() {
+  local log_file="$1"
+  shift
+  local timeout_s="${EVAL_NO_OUTPUT_TIMEOUT_SECONDS:-$((${EVAL_NO_OUTPUT_TIMEOUT_MINUTES:-15} * 60))}"
+  local poll_s=5
+  if ((timeout_s < 30)); then poll_s=1; fi
+
+  # `<&0` keeps stdin attached: bash would otherwise point a background job's stdin at /dev/null.
+  (
+    set +e
+    "$@" 2>&1 | tee "$log_file"
+    exit "${PIPESTATUS[0]}"
+  ) <&0 &
+  local runner_pid=$!
+
+  local rc=0
+  if ((timeout_s > 0)); then
+    local last_count=-1 count last_change=$SECONDS
+    while kill -0 "$runner_pid" 2>/dev/null; do
+      sleep "$poll_s"
+      count="$(grep -a -c -v -E "$EVAL_NOISE_LINE_REGEX" "$log_file" 2>/dev/null || true)"
+      if [[ "$count" != "$last_count" ]]; then
+        last_count="$count"
+        last_change=$SECONDS
+      elif ((SECONDS - last_change >= timeout_s)) && kill -0 "$runner_pid" 2>/dev/null; then
+        echo "--- ❌ No eval output for $((timeout_s / 60)) minutes (${timeout_s}s); killing the eval process tree"
+        echo "Last progress output:"
+        { grep -a -v -E "$EVAL_NOISE_LINE_REGEX" "$log_file" || true; } | tail -n 40
+        kill_process_tree "$runner_pid"
+        rc=124
+        break
+      fi
+    done
+  fi
+
+  local wait_rc=0
+  wait "$runner_pid" 2>/dev/null || wait_rc=$?
+  if ((rc == 0)); then rc=$wait_rc; fi
+  return "$rc"
+}
+
+# Kills a process and all its descendants (node CLI -> Playwright -> workers, tee). The list is
+# collected first because killing a parent reparents its children and hides them from `pgrep -P`.
+kill_process_tree() {
+  local pids=() pid
+  collect_descendants() {
+    local child
+    for child in $(pgrep -P "$1" 2>/dev/null || true); do
+      collect_descendants "$child"
+      pids+=("$child")
+    done
+  }
+  collect_descendants "$1"
+  pids+=("$1")
+  kill -TERM "${pids[@]}" 2>/dev/null || true
+  sleep 5
+  for pid in "${pids[@]}"; do
+    kill -KILL "$pid" 2>/dev/null || true
+  done
+}
+
 run_eval_suite() {
   if [[ -n "${EVAL_PROJECT:-}" ]]; then
     KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"
     export KBN_EVALS_RUN_LOG
-    set +e
-    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" 2>&1 | tee "$KBN_EVALS_RUN_LOG"
-    local eval_exit="${PIPESTATUS[0]}"
-    set -e
+    local eval_exit=0
+    run_with_no_output_watchdog "$KBN_EVALS_RUN_LOG" \
+      node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" ${EVAL_RUN_ARGS[@]+"${EVAL_RUN_ARGS[@]}"} || eval_exit=$?
     return "${eval_exit}"
   fi
 
-  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
+  # Local runs keep the terminal attached (piping through tee would make stdout a non-TTY).
+  if [[ -z "${BUILDKITE:-}" ]]; then
+    node scripts/evals run --suite "$EVAL_SUITE_ID" ${EVAL_RUN_ARGS[@]+"${EVAL_RUN_ARGS[@]}"}
+    return
+  fi
+
+  local eval_exit=0
+  run_with_no_output_watchdog "$(mktemp -t kbn-evals-run.XXXXXX.log)" \
+    node scripts/evals run --suite "$EVAL_SUITE_ID" ${EVAL_RUN_ARGS[@]+"${EVAL_RUN_ARGS[@]}"} || eval_exit=$?
+  return "${eval_exit}"
 }
 
 run_eval_suite

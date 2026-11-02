@@ -170,6 +170,7 @@ export const registerGenerateRoute = (
                 end,
                 esql_query: workflowConfig.esql_query,
                 filter,
+                ground_truth_gate_enabled: workflowConfig.ground_truth_gate_enabled,
                 start,
                 validation_workflow_id: workflowConfig.validation_workflow_id,
               })}`

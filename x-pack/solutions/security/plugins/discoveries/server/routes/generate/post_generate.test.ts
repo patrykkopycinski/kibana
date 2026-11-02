@@ -608,6 +608,51 @@ describe('registerGenerateRoute', () => {
       expect(debugCall).toBeDefined();
     });
 
+    it('includes ground_truth_gate_enabled in the logged workflow configuration', async () => {
+      mockRequest.body = {
+        alerts_index_pattern: '.alerts-security.alerts-default',
+        api_config: {
+          action_type_id: '.gen-ai',
+          connector_id: 'test-connector',
+        },
+        type: 'attack_discovery',
+        workflow_config: { ground_truth_gate_enabled: true },
+      };
+
+      const mockResponse = {
+        badRequest: jest.fn(),
+        customError: jest.fn(),
+        ok: jest.fn((obj) => obj),
+      };
+      const mockContext = {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      };
+
+      let versionHandler: Function | undefined;
+      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
+        addVersion: jest.fn((config, handler) => {
+          versionHandler = handler;
+        }),
+      });
+
+      registerGenerateRoute(mockRouter, mockLogger, {
+        analytics: mockAnalytics,
+        getEventLogIndex: mockGetEventLogIndex,
+        getEventLogger: mockGetEventLogger,
+        getStartServices: mockGetStartServices,
+      });
+
+      const handler = getVersionHandler(versionHandler);
+      await handler(mockContext, mockRequest, mockResponse);
+
+      const logged = (mockLogger.debug as jest.Mock).mock.calls
+        .map(([arg]) => (typeof arg === 'function' ? arg() : String(arg)))
+        .find((message: string) => message.includes('Workflow configuration'));
+      expect(logged).toContain('"ground_truth_gate_enabled":true');
+    });
+
     it('uses default workflow_config when not provided', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',

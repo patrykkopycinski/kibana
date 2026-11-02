@@ -204,6 +204,8 @@ export const runAttackDiscovery = async ({
           workflow_runs: result.workflowRuns,
           started_at: result.startedAt,
           token_usage_tracking_enabled: result.tokenUsageTrackingEnabled,
+          report_run_id: result.reportRunId,
+          report_run_status: result.reportRunStatus,
           latency_ms: result.latencyMs,
         },
       };

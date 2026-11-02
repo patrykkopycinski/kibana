@@ -16,19 +16,24 @@
  *      validation workflow run reaches a terminal status; any tracked run that
  *      ends failed/cancelled ends the poll as a failure
  *   4. read `validated_discoveries` from the generation pipeline data
+ *   5. wait for the report workflow run (scheduled in the background after generation, so it is
+ *      not in the tracking response) to reach a terminal status, so token usage written by its
+ *      long LLM call is complete before the evaluator reads it
  *
  * Unlike {@link AttackDiscoveryGenerateApiClient}, this runs the managed
  * alert-retrieval / gate / generation / validation workflows, so it can set
  * `workflow_config` (e.g. `ground_truth_gate_enabled`).
  *
- * The tracking response has no report workflow run id: the report is scheduled
- * in the background after generation and is not part of `workflowRuns`.
+ * The report run is found by listing the report workflow's executions started at or after the
+ * generate request; none appearing within the grace period means the report was skipped.
  */
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
+import { ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 const INTERNAL_API_VERSION = '1';
 const WORKFLOWS_API_VERSION = '2023-10-31';
@@ -43,7 +48,14 @@ const DEFAULT_START = 'now-24h';
 const DEFAULT_END = 'now';
 
 const DEFAULT_POLL_INTERVAL_MS = 5000;
-const DEFAULT_POLL_MAX_WAIT_MS = 1500_000;
+// Time budget under the 30-min Playwright timeout: poll 20 min + report wait 3 min
+// + evaluator settle 5 min = 28 min.
+const DEFAULT_POLL_MAX_WAIT_MS = 1200_000;
+const DEFAULT_REPORT_GRACE_MS = 60_000;
+const DEFAULT_REPORT_MAX_WAIT_MS = 180_000;
+const REPORT_LIST_PAGE_SIZE = 10;
+
+const TERMINAL_RUN_STATUSES: ReadonlySet<string> = new Set(TerminalExecutionStatuses);
 
 const RUN_SUCCESS_STATUSES = new Set(['completed']);
 const RUN_FAILURE_STATUSES = new Set(['failed', 'cancelled']);
@@ -79,6 +91,14 @@ export interface WorkflowApiResult {
   readonly startedAt: string;
   /** Whether `genAiSettings:tokenUsageTracking` was on after setup; false also when unknown. */
   readonly tokenUsageTrackingEnabled: boolean;
+  /** Most recent report workflow run started after `startedAt`, if one appeared. */
+  readonly reportRunId?: string;
+  /**
+   * Final report run status when terminal; `none` (no run within the grace period, e.g. the
+   * report is skipped), `timed_out` (still running at the cap) or `unavailable` (list failed).
+   * Absent when the pipeline did not succeed, since no report is scheduled then.
+   */
+  readonly reportRunStatus?: string;
   readonly latencyMs: number;
   readonly error?: string;
 }
@@ -86,6 +106,8 @@ export interface WorkflowApiResult {
 export interface WorkflowApiClientTiming {
   readonly pollIntervalMs?: number;
   readonly pollMaxWaitMs?: number;
+  readonly reportGraceMs?: number;
+  readonly reportMaxWaitMs?: number;
 }
 
 interface TrackedWorkflow {
@@ -158,6 +180,8 @@ const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
 export class AttackDiscoveryWorkflowApiClient {
   private readonly pollIntervalMs: number;
   private readonly pollMaxWaitMs: number;
+  private readonly reportGraceMs: number;
+  private readonly reportMaxWaitMs: number;
   private workflowsSettingEnabled = false;
 
   constructor(
@@ -167,6 +191,8 @@ export class AttackDiscoveryWorkflowApiClient {
   ) {
     this.pollIntervalMs = timing.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS;
     this.pollMaxWaitMs = timing.pollMaxWaitMs ?? DEFAULT_POLL_MAX_WAIT_MS;
+    this.reportGraceMs = timing.reportGraceMs ?? DEFAULT_REPORT_GRACE_MS;
+    this.reportMaxWaitMs = timing.reportMaxWaitMs ?? DEFAULT_REPORT_MAX_WAIT_MS;
   }
 
   async generate(opts: WorkflowApiOptions): Promise<WorkflowApiResult> {
@@ -226,6 +252,8 @@ export class AttackDiscoveryWorkflowApiClient {
     }
 
     const outcome = await this.pollUntilDone(executionUuid);
+    const report =
+      outcome.status === 'succeeded' ? await this.waitForReportRun(startedAt) : undefined;
 
     return {
       discoveries: outcome.discoveries,
@@ -234,6 +262,8 @@ export class AttackDiscoveryWorkflowApiClient {
       workflowRuns: outcome.workflowRuns,
       startedAt,
       tokenUsageTrackingEnabled,
+      ...(report?.runId ? { reportRunId: report.runId } : {}),
+      ...(report ? { reportRunStatus: report.status } : {}),
       latencyMs: Date.now() - t0,
       error: outcome.error,
     };
@@ -323,6 +353,52 @@ export class AttackDiscoveryWorkflowApiClient {
       }
       // 404 until the execution is in the event log; 429/5xx are transient.
       return {};
+    }
+  }
+
+  /** Never throws; a failed or empty list must not fail the run. */
+  private async waitForReportRun(startedAt: string): Promise<{ runId?: string; status: string }> {
+    const start = Date.now();
+    const graceDeadline = start + this.reportGraceMs;
+    const deadline = start + this.reportMaxWaitMs;
+    const query = new URLSearchParams({
+      startedAfter: startedAt,
+      sortField: 'createdAt',
+      sortOrder: 'desc',
+      size: String(REPORT_LIST_PAGE_SIZE),
+      omitStepRuns: 'true',
+    });
+    const path = `/api/workflows/workflow/${encodeURIComponent(
+      ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID
+    )}/executions?${query.toString()}`;
+
+    let latest: { id?: string; status?: string } | undefined;
+    while (true) {
+      try {
+        const list = await this.fetch<{ results?: Array<{ id?: string; status?: string }> }>(path, {
+          method: 'GET',
+          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        });
+        const runs = list?.results ?? [];
+        latest = runs[0] ?? latest;
+        if (runs.length > 0 && runs.every((run) => TERMINAL_RUN_STATUSES.has(run.status ?? ''))) {
+          return { runId: runs[0].id, status: runs[0].status ?? 'unknown' };
+        }
+      } catch (e) {
+        if (PERMANENT_HTTP_STATUSES.has(statusOf(e) ?? 0)) {
+          this.log.warning(`could not list report workflow runs: ${describeError(e)}`);
+          return { status: 'unavailable' };
+        }
+        // 404 or a transient failure: treat as no terminal run yet.
+      }
+
+      const now = Date.now();
+      if (!latest && now >= graceDeadline) return { status: 'none' };
+      if (now >= deadline) {
+        this.log.warning('report workflow run did not reach a terminal status before the cap');
+        return { runId: latest?.id, status: latest ? 'timed_out' : 'none' };
+      }
+      await sleep(this.pollIntervalMs);
     }
   }
 

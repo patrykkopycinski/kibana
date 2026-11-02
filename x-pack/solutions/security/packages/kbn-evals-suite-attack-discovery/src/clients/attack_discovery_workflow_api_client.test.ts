@@ -39,7 +39,12 @@ const createFetch = (responders: Record<string, Responder>) => {
   return { fetch: fetch as unknown as HttpHandler, calls };
 };
 
-const FAST = { pollIntervalMs: 1, pollMaxWaitMs: 200 };
+const FAST = {
+  pollIntervalMs: 1,
+  pollMaxWaitMs: 200,
+  reportGraceMs: 10,
+  reportMaxWaitMs: 100,
+};
 
 const settingsOk = { '/internal/kibana/settings': () => ({ settings: {} }) };
 
@@ -301,6 +306,20 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
       ).toHaveLength(0);
     });
 
+    it('reports enabled without writing when the setting is a read-only override that is on', async () => {
+      const { result, calls } = await runWith(() => ({
+        settings: { [TRACKING]: { userValue: true, isOverridden: true } },
+      }));
+
+      expect(result.tokenUsageTrackingEnabled).toBe(true);
+      expect(
+        calls.filter((c) => c.method === 'POST' && c.path === '/internal/kibana/settings')
+      ).toHaveLength(1); // only the workflows setting write
+      expect(
+        calls.filter((c) => c.method === 'POST' && TRACKING in ((c.body?.changes as object) ?? {}))
+      ).toHaveLength(0);
+    });
+
     it('sets the setting when it is off and re-reads it', async () => {
       let tracking = false;
       const { result, calls } = await runWith((call) => {
@@ -344,6 +363,101 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
       const { result } = await runWith((call) => (call.method === 'POST' ? {} : httpError(500)));
 
       expect(result.tokenUsageTrackingEnabled).toBe(false);
+    });
+  });
+
+  describe('report workflow run wait', () => {
+    const REPORT_LIST = '/api/workflows/workflow/system-attack-discovery-skill-report/executions';
+
+    const succeededPipeline = (extra: Record<string, Responder>) =>
+      createFetch({
+        ...settingsOk,
+        '/internal/attack_discovery/_generate': () => ({ execution_uuid: 'exec-1' }),
+        '/executions/exec-1/tracking': () => ({
+          generation: { workflow_id: 'wf-gen', workflow_run_id: 'run-gen' },
+          validation: { workflow_id: 'wf-v', workflow_run_id: 'run-v' },
+        }),
+        '/api/workflows/executions/run-': () => ({ status: 'completed' }),
+        '/internal/attack_discovery/workflow/wf-gen/execution/exec-1': () => ({
+          validated_discoveries: [],
+        }),
+        ...extra,
+      });
+
+    it('waits until the report run is terminal, listing runs started at or after startedAt', async () => {
+      let listCalls = 0;
+      const { fetch, calls } = succeededPipeline({
+        [REPORT_LIST]: () => {
+          listCalls += 1;
+          return {
+            results: [{ id: 'report-1', status: listCalls < 3 ? 'running' : 'completed' }],
+          };
+        },
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(listCalls).toBe(3);
+      expect(result.reportRunId).toBe('report-1');
+      expect(result.reportRunStatus).toBe('completed');
+      const listCall = calls.find((c) => c.path.startsWith(REPORT_LIST));
+      expect(listCall?.path).toContain(`startedAfter=${encodeURIComponent(result.startedAt)}`);
+    });
+
+    it('proceeds with status none when no report run appears within the grace period', async () => {
+      let listCalls = 0;
+      const { fetch } = succeededPipeline({
+        [REPORT_LIST]: () => {
+          listCalls += 1;
+          return { results: [] };
+        },
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(listCalls).toBeGreaterThan(1);
+      expect(result.status).toBe('succeeded');
+      expect(result.reportRunStatus).toBe('none');
+      expect(result.reportRunId).toBeUndefined();
+    });
+
+    it('stops at the cap with status timed_out when the report run never becomes terminal', async () => {
+      const { fetch } = succeededPipeline({
+        [REPORT_LIST]: () => ({ results: [{ id: 'report-1', status: 'running' }] }),
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(result.status).toBe('succeeded');
+      expect(result.reportRunId).toBe('report-1');
+      expect(result.reportRunStatus).toBe('timed_out');
+    });
+
+    it('skips the wait without throwing on a permanent list error', async () => {
+      const { fetch } = succeededPipeline({ [REPORT_LIST]: () => httpError(403) });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(result.status).toBe('succeeded');
+      expect(result.reportRunStatus).toBe('unavailable');
+    });
+
+    it('does not wait for a report when generation failed', async () => {
+      const { fetch, calls } = createFetch({
+        ...settingsOk,
+        '/internal/attack_discovery/_generate': () => ({ execution_uuid: 'exec-1' }),
+        '/executions/exec-1/tracking': () => httpError(403),
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(result.status).toBe('failed');
+      expect(calls.some((c) => c.path.includes(REPORT_LIST))).toBe(false);
     });
   });
 

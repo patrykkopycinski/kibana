@@ -223,6 +223,7 @@ interface SearchRequest {
         range?: Record<string, { gte?: string; lte?: string }>;
         term?: Record<string, string>;
       }>;
+      must_not?: Array<{ term?: Record<string, string> }>;
     };
   };
 }
@@ -276,6 +277,9 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
       const filters = request.query?.bool?.filter ?? [];
       const range = filters.find((f) => f.range)?.range?.['@timestamp'] ?? {};
       const connector = filters.find((f) => f.term)?.term?.['inference.connector_id'];
+      const excludedFeatureIds = (request.query?.bool?.must_not ?? []).flatMap((clause) =>
+        clause.term?.['inference.feature_id'] ? [clause.term['inference.feature_id']] : []
+      );
       const now = options.clock?.t ?? 0;
       const visible = source
         .map((entry) => ('doc' in entry ? entry : { doc: entry as TokenUsageDoc }))
@@ -285,6 +289,7 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
           const at = Date.parse(d['@timestamp']);
           if (range.gte !== undefined && at < Date.parse(range.gte)) return false;
           if (range.lte !== undefined && at > Date.parse(range.lte)) return false;
+          if (excludedFeatureIds.includes(d.inference?.feature_id ?? '')) return false;
           return connector === undefined || d.inference?.connector_id === connector;
         });
       const maxMs = visible.length
@@ -447,7 +452,97 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
     expect(results[0].result.metadata?.usage_window_end).toBe(windowEnd);
   });
 
+  describe('eval judge calls', () => {
+    afterEach(() => {
+      delete process.env.KBN_EVALS_TELEMETRY_PLUGIN_ID;
+    });
+
+    const judgeDoc = (featureId: string) =>
+      doc({ atSec: 5, prompt: 99_999, featureId, parentFeatureId: 'kbn_evals_parent' });
+
+    it('excludes docs tagged with the evals telemetry plugin id from both queries', async () => {
+      const { esClient, search } = createEs([taggedGate(1), judgeDoc('kbn_evals')]);
+
+      const results = await run(build(esClient), workflowOutput());
+
+      const byName = Object.fromEntries(results.map((r) => [r.name, r.result]));
+      expect(byName['AttackDiscoveryTokens:gate'].score).toBe(800);
+      expect(byName['AttackDiscoveryTokens:untagged'].score).toBe(0);
+      expect(byName['AttackDiscoveryTokens:untagged'].metadata?.total_hits).toBe(1);
+      const requests = (search.mock.calls as unknown as Array<[SearchRequest]>).map(
+        ([request]) => request
+      );
+      expect(requests.length).toBeGreaterThan(1);
+      for (const request of requests) {
+        expect(request.query?.bool?.must_not).toEqual([
+          { term: { 'inference.feature_id': 'kbn_evals' } },
+        ]);
+      }
+    });
+
+    it('honours KBN_EVALS_TELEMETRY_PLUGIN_ID, trimmed', async () => {
+      process.env.KBN_EVALS_TELEMETRY_PLUGIN_ID = '  my_evals  ';
+      const { esClient } = createEs([taggedGate(1), judgeDoc('my_evals'), judgeDoc('kbn_evals')]);
+
+      const results = await run(build(esClient), workflowOutput());
+
+      const untagged = results.find((r) => r.name === 'AttackDiscoveryTokens:untagged')!.result;
+      expect(untagged.score).toBe(99_999);
+    });
+
+    it('falls back to kbn_evals when the env var is blank', async () => {
+      process.env.KBN_EVALS_TELEMETRY_PLUGIN_ID = '   ';
+      const { esClient } = createEs([taggedGate(1), judgeDoc('kbn_evals')]);
+
+      const results = await run(build(esClient), workflowOutput());
+
+      expect(results[3].result.score).toBe(0);
+    });
+  });
+
+  describe('report run status', () => {
+    it('surfaces the report run id and status from the task output in metadata', async () => {
+      const { esClient } = createEs([taggedGate(1)]);
+
+      const results = await run(
+        build(esClient),
+        workflowOutput({ report_run_id: 'report-1', report_run_status: 'completed' })
+      );
+
+      expect(results[0].result.metadata).toMatchObject({
+        report_run_id: 'report-1',
+        report_run_status: 'completed',
+      });
+    });
+  });
+
   describe('settling', () => {
+    it('counts a usage doc that arrives more than 60s after the previous one with the default settle', async () => {
+      const clockKit = createClock();
+      const { esClient } = createEs(
+        [
+          { doc: taggedGate(1), arrivesAtMs: 0 },
+          {
+            doc: doc({ atSec: 95, prompt: 700, featureId: ATTACK_DISCOVERY_REPORT_FEATURE_ID }),
+            arrivesAtMs: 90_000,
+          },
+        ],
+        { clock: clockKit.clock }
+      );
+      const evaluators = createAttackDiscoveryTokenUsageEvaluators({
+        esClient,
+        log,
+        now: clockKit.now,
+        sleep: clockKit.sleep,
+      });
+
+      const results = await run(evaluators, workflowOutput());
+
+      const report = results.find((r) => r.name === 'AttackDiscoveryTokens:report')!.result;
+      expect(report.score).toBe(700);
+      expect(report.metadata).toMatchObject({ settled: true });
+    });
+
     it('waits for a quiet period with no new usage docs before reading', async () => {
       const clockKit = createClock();
       const { esClient } = createEs(
@@ -524,21 +619,6 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
         expect(result.score).toBeNull();
         expect(result.label).toBe('unavailable');
         expect(result.explanation).toMatch(/no token usage docs/i);
-      }
-    });
-
-    it('reports unavailable when the token usage index does not exist', async () => {
-      const missing = Object.assign(new Error('index_not_found_exception'), {
-        meta: { statusCode: 404 },
-      });
-      const { esClient } = createEs(missing);
-
-      const results = await run(build(esClient), workflowOutput());
-
-      for (const { result } of results) {
-        expect(result.score).toBeNull();
-        expect(result.label).toBe('unavailable');
-        expect(result.explanation).toMatch(/index/i);
       }
     });
 

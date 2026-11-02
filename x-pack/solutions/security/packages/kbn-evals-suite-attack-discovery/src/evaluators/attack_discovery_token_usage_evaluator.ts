@@ -22,11 +22,20 @@ export const ATTACK_DISCOVERY_PARENT_FEATURE_ID = 'attack_discovery';
 
 const TOKEN_USAGE_TRACKING_SETTING = 'genAiSettings:tokenUsageTracking';
 
+// Fallback after the client has waited for the report run: 2 min quiet, 5 min cap (the cap is part
+// of the 30-min Playwright budget documented in the workflow API client).
 const DEFAULT_SETTLE: SettleOptions = {
-  quietMs: 60_000,
-  maxWaitMs: 600_000,
+  quietMs: 120_000,
+  maxWaitMs: 300_000,
   pollIntervalMs: 10_000,
 };
+
+/**
+ * Feature id the evals harness tags its own judge/evaluator inference calls with. Same logic as
+ * `getTelemetryPluginId` in `@kbn/evals` (not exported): env override, trimmed, default `kbn_evals`.
+ */
+const getEvalsFeatureId = (): string =>
+  process.env.KBN_EVALS_TELEMETRY_PLUGIN_ID?.trim() || 'kbn_evals';
 
 const GENERATION_UNTAGGED_NOTE =
   'generation calls are untagged on this build and are counted in `untagged`';
@@ -151,6 +160,8 @@ interface RunWindow {
   startedAt: string;
   connectorId?: string;
   trackingEnabled?: boolean;
+  reportRunId?: string;
+  reportRunStatus?: string;
 }
 
 const readRunWindow = (
@@ -158,7 +169,13 @@ const readRunWindow = (
   connectorId: string | undefined
 ): RunWindow | undefined => {
   const raw = output?.raw as
-    | { started_at?: unknown; workflow_runs?: unknown; token_usage_tracking_enabled?: unknown }
+    | {
+        started_at?: unknown;
+        workflow_runs?: unknown;
+        token_usage_tracking_enabled?: unknown;
+        report_run_id?: unknown;
+        report_run_status?: unknown;
+      }
     | undefined;
   if (typeof raw?.started_at !== 'string' || raw.workflow_runs === undefined) return undefined;
   return {
@@ -168,12 +185,9 @@ const readRunWindow = (
       typeof raw.token_usage_tracking_enabled === 'boolean'
         ? raw.token_usage_tracking_enabled
         : undefined,
+    reportRunId: typeof raw.report_run_id === 'string' ? raw.report_run_id : undefined,
+    reportRunStatus: typeof raw.report_run_status === 'string' ? raw.report_run_status : undefined,
   };
-};
-
-const isIndexMissing = (e: unknown): boolean => {
-  const err = e as { meta?: { statusCode?: number }; message?: string };
-  return err?.meta?.statusCode === 404 || /index_not_found/.test(err?.message ?? '');
 };
 
 const totalOf = (total: number | { value?: number } | undefined, fallback: number): number =>
@@ -205,7 +219,7 @@ const defaultSleep = (ms: number): Promise<void> =>
  * the window is the newest doc seen, `usage_window_end` in the metadata. Concurrent runs on the
  * same connector are still counted together.
  *
- * A run with tracking off, a missing index or no docs is `unavailable`, never 0. Until the
+ * A run with tracking off or no docs (a missing index included, via `ignore_unavailable`) is `unavailable`, never 0. Until the
  * generation step is tagged with `ATTACK_DISCOVERY_GENERATION_FEATURE_ID`, its calls land in
  * `untagged` and both phases carry a note saying so. Only populated for `workflowApi` outputs.
  */
@@ -224,14 +238,20 @@ export const createAttackDiscoveryTokenUsageEvaluators = ({
 }): Array<Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput>> => {
   const lookups = new WeakMap<AttackDiscoveryTaskOutput, Promise<UsageLookup>>();
 
-  const baseFilter = (window: RunWindow, upperBound?: string) => [
-    {
-      range: {
-        '@timestamp': { gte: window.startedAt, ...(upperBound ? { lte: upperBound } : {}) },
-      },
+  const baseQuery = (window: RunWindow, upperBound?: string) => ({
+    bool: {
+      filter: [
+        {
+          range: {
+            '@timestamp': { gte: window.startedAt, ...(upperBound ? { lte: upperBound } : {}) },
+          },
+        },
+        ...(window.connectorId ? [{ term: { 'inference.connector_id': window.connectorId } }] : []),
+      ],
+      // The evals' own judge calls share the connector and the time window.
+      must_not: [{ term: { 'inference.feature_id': getEvalsFeatureId() } }],
     },
-    ...(window.connectorId ? [{ term: { 'inference.connector_id': window.connectorId } }] : []),
-  ];
+  });
 
   /** Waits until no new usage docs arrive for `quietMs`; returns the newest doc's timestamp. */
   const settleUsage = async (
@@ -248,7 +268,7 @@ export const createAttackDiscoveryTokenUsageEvaluators = ({
         ignore_unavailable: true,
         size: 0,
         track_total_hits: true,
-        query: { bool: { filter: baseFilter(window) } },
+        query: baseQuery(window),
         aggs: { last_doc: { max: { field: '@timestamp' } } },
       });
       const count = totalOf(response.hits.total as number | { value?: number }, 0);
@@ -294,7 +314,7 @@ export const createAttackDiscoveryTokenUsageEvaluators = ({
         track_total_hits: true,
         sort: [{ '@timestamp': 'asc' }],
         _source: ['@timestamp', 'token_usage', 'inference'],
-        query: { bool: { filter: baseFilter(window, usageWindowEnd) } },
+        query: baseQuery(window, usageWindowEnd),
       });
       const docs = response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : []));
       const totalHits = totalOf(response.hits.total as number | { value?: number }, docs.length);
@@ -320,9 +340,6 @@ export const createAttackDiscoveryTokenUsageEvaluators = ({
         settled,
       };
     } catch (e) {
-      if (isIndexMissing(e)) {
-        return { kind: 'unavailable', reason: `token usage index ${TOKEN_USAGE_INDEX} not found` };
-      }
       const reason = e instanceof Error ? e.message : String(e);
       log.warning(`token usage lookup failed: ${reason}`);
       return { kind: 'unavailable', reason };
@@ -374,6 +391,8 @@ export const createAttackDiscoveryTokenUsageEvaluators = ({
           truncated: result.truncated,
           usage_window_end: result.usageWindowEnd,
           settled: result.settled,
+          ...(window.reportRunId ? { report_run_id: window.reportRunId } : {}),
+          ...(window.reportRunStatus ? { report_run_status: window.reportRunStatus } : {}),
           ...(generationUntagged ? { note: GENERATION_UNTAGGED_NOTE } : {}),
         },
       };

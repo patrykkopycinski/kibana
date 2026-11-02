@@ -158,6 +158,8 @@ describe('runAttackDiscovery workflowApi mode', () => {
       workflowRuns: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
       startedAt: '2026-01-01T00:00:00.000Z',
       tokenUsageTrackingEnabled: true,
+      reportRunId: 'report-1',
+      reportRunStatus: 'completed',
       latencyMs: 42,
     }));
 
@@ -187,6 +189,8 @@ describe('runAttackDiscovery workflowApi mode', () => {
       workflow_runs: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
       started_at: '2026-01-01T00:00:00.000Z',
       token_usage_tracking_enabled: true,
+      report_run_id: 'report-1',
+      report_run_status: 'completed',
       latency_ms: 42,
     });
   });

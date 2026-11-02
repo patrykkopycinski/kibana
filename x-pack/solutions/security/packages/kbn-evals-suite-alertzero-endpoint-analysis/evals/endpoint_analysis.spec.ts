@@ -20,11 +20,12 @@ import {
   runAllCleanups,
   seedAlertZeroEndpoint,
 } from '../src/runtime';
-import { assertActionSafety } from '../src/action_safety';
 import { reportActionSafety } from '../src/report_action_safety';
 import { reportAnalysisRunMetrics } from '../src/report_run_metrics';
+import { reportBenignVerdict, reportContainmentProposed } from '../src/report_verdict_checks';
 import {
   assertAnalysisExecution,
+  assertBenignAnalysis,
   assertEndpointForensicToolCall,
   assertPersistedAttachments,
   assertPersistedProposal,
@@ -136,14 +137,26 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         const analysisAgent = child.stepExecutions.find(
           (step) => step.stepId === 'forensic_analysis' && step.stepType === 'ai.agent'
         );
+        const maliciousOutput = (
+          analysisAgent?.output as { structured_output?: unknown } | undefined
+        )?.structured_output;
         await reportActionSafety({
           executorClient,
           log,
           caseName: 'L2/L3 malicious fixture',
-          structuredOutput: (analysisAgent?.output as { structured_output?: unknown } | undefined)
-            ?.structured_output,
+          structuredOutput: maliciousOutput,
           context: { endpointIds: [fixture.endpointId], conclusive: fixture.conclusive },
         });
+        // Same gate as the hard assertion in assertAnalysisExecution: conclusive fixtures only.
+        if (fixture.conclusive === true) {
+          await reportContainmentProposed({
+            executorClient,
+            log,
+            caseName: 'L2/L3 malicious fixture',
+            structuredOutput: maliciousOutput,
+            context: { endpointIds: [fixture.endpointId] },
+          });
+        }
         await reportAnalysisRunMetrics({
           executorClient,
           log,
@@ -255,6 +268,12 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
           structuredOutput: agentOutput?.structured_output,
           context: { endpointIds: [fixture.endpointId], conclusive: false },
         });
+        await reportBenignVerdict({
+          executorClient,
+          log,
+          caseName: 'L2b benign fixture',
+          structuredOutput: agentOutput?.structured_output,
+        });
         await reportAnalysisRunMetrics({
           executorClient,
           log,
@@ -268,10 +287,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             'No malicious IoC is reported.',
           ]),
         });
-        assertActionSafety(agentOutput?.structured_output, {
-          endpointIds: [fixture.endpointId],
-          conclusive: false,
-        });
+        assertBenignAnalysis(agentOutput?.structured_output, [fixture.endpointId]);
       } finally {
         await runAllCleanups([
           () => runtime.cancelAll(),

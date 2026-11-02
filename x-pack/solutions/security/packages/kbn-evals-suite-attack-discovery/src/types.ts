@@ -12,7 +12,8 @@ export type AttackDiscoveryInputMode =
   | 'bundledAlerts'
   | 'searchAlerts'
   | 'graphState'
-  | 'generateApi';
+  | 'generateApi'
+  | 'workflowApi';
 
 export interface AnonymizedAlert {
   pageContent: string;
@@ -59,11 +60,25 @@ export interface AttackDiscoveryGenerateApiInput extends Record<string, unknown>
   end?: string;
 }
 
+export interface AttackDiscoveryWorkflowApiInput extends Record<string, unknown> {
+  mode: 'workflowApi';
+  connectorId: string;
+  actionTypeId?: string;
+  modelId?: string;
+  alertsIndexPattern?: string;
+  size?: number;
+  start?: string;
+  end?: string;
+  /** Snake_case `workflow_config` passed to the route, e.g. `ground_truth_gate_enabled`. */
+  workflowConfig?: Record<string, unknown>;
+}
+
 export type AttackDiscoveryTaskInput =
   | AttackDiscoveryBundledAlertsInput
   | AttackDiscoverySearchAlertsInput
   | AttackDiscoveryGraphStateInput
-  | AttackDiscoveryGenerateApiInput;
+  | AttackDiscoveryGenerateApiInput
+  | AttackDiscoveryWorkflowApiInput;
 
 export interface AttackDiscoveryTaskExpectedOutput {
   attackDiscoveries: AttackDiscovery[];

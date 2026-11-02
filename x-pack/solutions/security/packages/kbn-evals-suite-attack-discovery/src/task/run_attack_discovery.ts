@@ -21,6 +21,7 @@ import Path from 'path';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
+import type { AttackDiscoveryWorkflowApiClient } from '../clients/attack_discovery_workflow_api_client';
 import type {
   AttackDiscoveryTaskInput,
   AttackDiscoveryTaskOutput,
@@ -131,12 +132,14 @@ export const runAttackDiscovery = async ({
   inferenceClient,
   attackDiscoveryClient,
   generateApiClient,
+  workflowApiClient,
   input,
   log,
 }: {
   inferenceClient: BoundInferenceClient;
   attackDiscoveryClient: AttackDiscoveryClient;
   generateApiClient?: AttackDiscoveryGenerateApiClient;
+  workflowApiClient?: AttackDiscoveryWorkflowApiClient;
   input: AttackDiscoveryTaskInput;
   log: ToolingLog;
 }): Promise<AttackDiscoveryTaskOutput> => {
@@ -168,6 +171,37 @@ export const runAttackDiscovery = async ({
           execution_uuid: result.executionUuid,
           status: result.status,
           alerts_context_count: result.alertsContextCount,
+          latency_ms: result.latencyMs,
+        },
+      };
+    }
+
+    if (input.mode === 'workflowApi') {
+      if (!workflowApiClient) {
+        throw new Error(
+          'workflowApi mode requires an AttackDiscoveryWorkflowApiClient — pass workflowApiClient in the task config'
+        );
+      }
+
+      const result = await workflowApiClient.generate({
+        connectorId: input.connectorId,
+        actionTypeId: input.actionTypeId,
+        modelId: input.modelId,
+        alertsIndexPattern: input.alertsIndexPattern,
+        size: input.size,
+        start: input.start,
+        end: input.end,
+        workflowConfig: input.workflowConfig,
+      });
+
+      return {
+        insights: result.discoveries.length > 0 ? result.discoveries : null,
+        errors: result.error ? [result.error] : undefined,
+        traceId: getCurrentTraceId() ?? undefined,
+        raw: {
+          execution_uuid: result.executionUuid,
+          status: result.status,
+          workflow_runs: result.workflowRuns,
           latency_ms: result.latencyMs,
         },
       };

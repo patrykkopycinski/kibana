@@ -60,5 +60,38 @@ evaluate.describe(
         });
       }
     );
+
+    evaluate(
+      'workflow API (GCS 95-alert snapshot)',
+      async ({ evaluateDataset, connector, esClient, log }) => {
+        await restoreAlertsSnapshot({ esClient, log, config: CHRYSALIS_95_SNAPSHOT });
+        const { count } = await esClient.count({ index: '.alerts-security.alerts-default' });
+        log.info(`[attack-discovery] corpus ready: ${count} alerts (reference: 95)`);
+
+        await evaluateDataset({
+          dataset: {
+            name: 'Attack Discovery Chrysalis kill-chains (workflow API)',
+            description:
+              'Deduped 95-alert Attack Discovery corpus restored from the shared GCS snapshot ' +
+              '(security-ai-datasets/attack-discovery/oh-my-malware-95-deduped) and evaluated ' +
+              'through the managed Attack Discovery workflows (alert retrieval, gate, generation, ' +
+              'validation), with per-phase token usage reported.',
+            examples: [
+              {
+                input: {
+                  mode: 'workflowApi' as const,
+                  connectorId: connector.id,
+                  alertsIndexPattern: '.alerts-security.alerts-default',
+                  size: 100,
+                  ...CORPUS_WINDOW,
+                },
+                output: { attackDiscoveries: [] },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
   }
 );

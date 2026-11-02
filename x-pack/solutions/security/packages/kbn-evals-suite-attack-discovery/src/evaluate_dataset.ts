@@ -16,6 +16,7 @@ import type {
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscoveryClient } from './clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from './clients/attack_discovery_generate_api_client';
+import type { AttackDiscoveryWorkflowApiClient } from './clients/attack_discovery_workflow_api_client';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from './types';
 import { runAttackDiscovery } from './task/run_attack_discovery';
 import { createAttackDiscoveryBasicEvaluator } from './evaluators/attack_discovery_basic_evaluator';
@@ -43,6 +44,7 @@ const configureExperiment = ({
   evaluators,
   attackDiscoveryClient,
   generateApiClient,
+  workflowApiClient,
   inferenceClient,
   evaluationInferenceClient,
   log,
@@ -50,6 +52,7 @@ const configureExperiment = ({
   evaluators: DefaultEvaluators;
   attackDiscoveryClient: AttackDiscoveryClient;
   generateApiClient: AttackDiscoveryGenerateApiClient;
+  workflowApiClient: AttackDiscoveryWorkflowApiClient;
   inferenceClient: BoundInferenceClient;
   evaluationInferenceClient: BoundInferenceClient;
   log: ToolingLog;
@@ -72,6 +75,7 @@ const configureExperiment = ({
         inferenceClient,
         attackDiscoveryClient,
         generateApiClient,
+        workflowApiClient,
         input,
         log,
       });
@@ -93,6 +97,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
   evaluators,
   attackDiscoveryClient,
   generateApiClient,
+  workflowApiClient,
   executorClient,
   inferenceClient,
   evaluationConnectorId,
@@ -101,6 +106,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
   evaluators: DefaultEvaluators;
   attackDiscoveryClient: AttackDiscoveryClient;
   generateApiClient: AttackDiscoveryGenerateApiClient;
+  workflowApiClient: AttackDiscoveryWorkflowApiClient;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
   evaluationConnectorId: string;
@@ -124,6 +130,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
       evaluators,
       attackDiscoveryClient,
       generateApiClient,
+      workflowApiClient,
       inferenceClient,
       evaluationInferenceClient,
       log,

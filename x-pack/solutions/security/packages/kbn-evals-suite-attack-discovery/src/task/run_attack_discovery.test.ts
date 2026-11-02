@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { generateInsights } from './run_attack_discovery';
+import { generateInsights, runAttackDiscovery } from './run_attack_discovery';
+import type { AttackDiscoveryWorkflowApiClient } from '../clients/attack_discovery_workflow_api_client';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 
 const FENCED_JSON_REPLY = [
@@ -135,5 +136,84 @@ describe('generateInsights', () => {
     if (message == null) throw new Error('chatComplete was not called with a message');
     expect(message.content).toContain(alertsWithDollars[0]);
     expect(message.content).not.toContain('{query}');
+  });
+});
+
+describe('runAttackDiscovery workflowApi mode', () => {
+  const taskLog = { error: jest.fn() } as unknown as Parameters<
+    typeof runAttackDiscovery
+  >[0]['log'];
+
+  const baseArgs = {
+    inferenceClient: {} as BoundInferenceClient,
+    attackDiscoveryClient: {} as Parameters<typeof runAttackDiscovery>[0]['attackDiscoveryClient'],
+    log: taskLog,
+  };
+
+  it('forwards the input to the workflow client and returns run ids in raw', async () => {
+    const generate = jest.fn(async () => ({
+      discoveries: [{ title: 't', summaryMarkdown: 's', detailsMarkdown: 'd', alertIds: ['a'] }],
+      executionUuid: 'exec-1',
+      status: 'succeeded',
+      workflowRuns: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
+      latencyMs: 42,
+    }));
+
+    const output = await runAttackDiscovery({
+      ...baseArgs,
+      workflowApiClient: { generate } as unknown as AttackDiscoveryWorkflowApiClient,
+      input: {
+        mode: 'workflowApi',
+        connectorId: 'c-1',
+        size: 10,
+        workflowConfig: { ground_truth_gate_enabled: true },
+      },
+    });
+
+    expect(generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'c-1',
+        size: 10,
+        workflowConfig: { ground_truth_gate_enabled: true },
+      })
+    );
+    expect(output.insights).toHaveLength(1);
+    expect(output.errors).toBeUndefined();
+    expect(output.raw).toEqual({
+      execution_uuid: 'exec-1',
+      status: 'succeeded',
+      workflow_runs: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
+      latency_ms: 42,
+    });
+  });
+
+  it('surfaces a client error with null insights', async () => {
+    const generate = jest.fn(async () => ({
+      discoveries: [],
+      executionUuid: 'exec-1',
+      status: 'failed',
+      workflowRuns: { alertRetrieval: [], gate: [] },
+      latencyMs: 1,
+      error: 'workflow run g failed',
+    }));
+
+    const output = await runAttackDiscovery({
+      ...baseArgs,
+      workflowApiClient: { generate } as unknown as AttackDiscoveryWorkflowApiClient,
+      input: { mode: 'workflowApi', connectorId: 'c-1' },
+    });
+
+    expect(output.insights).toBeNull();
+    expect(output.errors).toEqual(['workflow run g failed']);
+  });
+
+  it('errors when no workflow client is provided', async () => {
+    const output = await runAttackDiscovery({
+      ...baseArgs,
+      input: { mode: 'workflowApi', connectorId: 'c-1' },
+    });
+
+    expect(output.insights).toBeNull();
+    expect(output.errors?.[0]).toContain('workflowApiClient');
   });
 });

@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
+import {
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
+  getManagedWorkflowDefinition,
+} from '@kbn/workflows/managed';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import {
+  ATTACK_DISCOVERY_GATE_FEATURE_ID,
+  ATTACK_DISCOVERY_GENERATION_FEATURE_ID,
+  ATTACK_DISCOVERY_PARENT_FEATURE_ID,
+  ATTACK_DISCOVERY_REPORT_FEATURE_ID,
   ATTACK_DISCOVERY_TOKEN_PHASES,
   computePhaseTokenUsage,
   createAttackDiscoveryTokenUsageEvaluators,
@@ -70,20 +80,20 @@ describe('computePhaseTokenUsage', () => {
       doc({
         atSec: 0,
         prompt: 100,
-        featureId: 'attack_discovery_gate',
-        parentFeatureId: 'attack_discovery',
+        featureId: ATTACK_DISCOVERY_GATE_FEATURE_ID,
+        parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
       }),
       doc({
         atSec: 1,
         prompt: 200,
-        featureId: 'attack_discovery_report',
-        parentFeatureId: 'attack_discovery',
+        featureId: ATTACK_DISCOVERY_REPORT_FEATURE_ID,
+        parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
       }),
       doc({
         atSec: 2,
         prompt: 300,
-        featureId: 'attack_discovery_generation',
-        parentFeatureId: 'attack_discovery',
+        featureId: ATTACK_DISCOVERY_GENERATION_FEATURE_ID,
+        parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
       }),
       doc({ atSec: 3, prompt: 400 }),
       doc({ atSec: 4, prompt: 50, featureId: 'something_else' }),
@@ -94,6 +104,32 @@ describe('computePhaseTokenUsage', () => {
     expect(usage.generation.inputTokens).toBe(300);
     expect(usage.untagged.inputTokens).toBe(450);
     expect(usage.untagged.calls).toBe(2);
+  });
+
+  it('does not classify generation by the parent feature alone', () => {
+    const usage = computePhaseTokenUsage([
+      doc({ atSec: 0, prompt: 300, parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID }),
+      doc({
+        atSec: 1,
+        prompt: 70,
+        featureId: 'some_other_step',
+        parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
+      }),
+    ]);
+
+    expect(usage.generation.calls).toBe(0);
+    expect(usage.untagged.inputTokens).toBe(370);
+  });
+
+  it('skips calls with a non-finite timestamp in the peak window but still counts them', () => {
+    const gate = ATTACK_DISCOVERY_GATE_FEATURE_ID;
+    const bad = doc({ atSec: 0, prompt: 500, featureId: gate });
+    bad['@timestamp'] = 'not-a-date';
+    const usage = computePhaseTokenUsage([bad, doc({ atSec: 5, prompt: 100, featureId: gate })]);
+
+    expect(usage.gate.inputTokens).toBe(600);
+    expect(usage.gate.calls).toBe(2);
+    expect(usage.gate.peak60sInputTokens).toBe(100);
   });
 
   it('treats cached tokens as a subset of input and derives uncached', () => {
@@ -146,15 +182,63 @@ describe('computePhaseTokenUsage', () => {
   });
 });
 
+describe('phase ids', () => {
+  const featureIdOf = (workflowId: string): string | undefined => {
+    const definition = getManagedWorkflowDefinition(workflowId);
+    if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
+      throw new Error(`managed workflow ${workflowId} has no static yaml`);
+    }
+    const parsed = parse(definition.yaml) as {
+      steps?: Array<{ 'plugin-id'?: string; 'aggregate-by'?: string }>;
+    };
+    const tagged = (parsed.steps ?? []).filter((step) => step['plugin-id'] !== undefined);
+    expect(tagged).toHaveLength(1);
+    expect(tagged[0]['aggregate-by']).toBe(ATTACK_DISCOVERY_PARENT_FEATURE_ID);
+    return tagged[0]['plugin-id'];
+  };
+
+  it('matches the ids the gate and report workflows emit', () => {
+    expect(featureIdOf(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID)).toBe(
+      ATTACK_DISCOVERY_GATE_FEATURE_ID
+    );
+    expect(featureIdOf(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID)).toBe(
+      ATTACK_DISCOVERY_REPORT_FEATURE_ID
+    );
+  });
+
+  it('exports the literal ids the usage index is queried with', () => {
+    expect(ATTACK_DISCOVERY_GATE_FEATURE_ID).toBe('attack_discovery_gate');
+    expect(ATTACK_DISCOVERY_REPORT_FEATURE_ID).toBe('attack_discovery_report');
+    expect(ATTACK_DISCOVERY_GENERATION_FEATURE_ID).toBe('attack_discovery_generation');
+    expect(ATTACK_DISCOVERY_PARENT_FEATURE_ID).toBe('attack_discovery');
+  });
+});
+
+interface SearchRequest {
+  size?: number;
+  track_total_hits?: boolean;
+  query?: {
+    bool?: {
+      filter?: Array<{
+        range?: Record<string, { gte?: string; lte?: string }>;
+        term?: Record<string, string>;
+      }>;
+    };
+  };
+}
+
 describe('createAttackDiscoveryTokenUsageEvaluators', () => {
   const log = { warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
+  const STARTED_AT = '2026-01-01T00:00:00.000Z';
 
-  const workflowOutput = (): AttackDiscoveryTaskOutput => ({
+  const workflowOutput = (raw: Record<string, unknown> = {}): AttackDiscoveryTaskOutput => ({
     insights: null,
     raw: {
-      started_at: '2026-01-01T00:00:00.000Z',
+      started_at: STARTED_AT,
       latency_ms: 1000,
       workflow_runs: {},
+      token_usage_tracking_enabled: true,
+      ...raw,
     },
   });
 
@@ -164,13 +248,78 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
     metadata: {},
   } as unknown as AttackDiscoveryDatasetExample;
 
-  const createEs = (docs: TokenUsageDoc[] | Error) => {
-    const search = jest.fn(async () => {
-      if (docs instanceof Error) throw docs;
-      return { hits: { hits: docs.map((_source) => ({ _source })) } };
+  /** Injected clock: `sleep` advances `now`, so settle logic runs without real timers. */
+  const createClock = () => {
+    const clock = { t: 0 };
+    return {
+      clock,
+      now: () => clock.t,
+      sleep: async (ms: number) => {
+        clock.t += ms;
+      },
+    };
+  };
+
+  interface FakeDoc {
+    doc: TokenUsageDoc;
+    /** Clock time (ms) from which the doc is visible to searches. */
+    arrivesAtMs?: number;
+  }
+
+  /** Interprets the range / connector filters of the evaluator's queries. */
+  const createEs = (
+    source: Array<TokenUsageDoc | FakeDoc> | Error,
+    options: { clock?: { t: number }; totalOverride?: number } = {}
+  ) => {
+    const search = jest.fn(async (request: SearchRequest) => {
+      if (source instanceof Error) throw source;
+      const filters = request.query?.bool?.filter ?? [];
+      const range = filters.find((f) => f.range)?.range?.['@timestamp'] ?? {};
+      const connector = filters.find((f) => f.term)?.term?.['inference.connector_id'];
+      const now = options.clock?.t ?? 0;
+      const visible = source
+        .map((entry) => ('doc' in entry ? entry : { doc: entry as TokenUsageDoc }))
+        .filter(({ arrivesAtMs = 0 }) => arrivesAtMs <= now)
+        .map(({ doc: d }) => d)
+        .filter((d) => {
+          const at = Date.parse(d['@timestamp']);
+          if (range.gte !== undefined && at < Date.parse(range.gte)) return false;
+          if (range.lte !== undefined && at > Date.parse(range.lte)) return false;
+          return connector === undefined || d.inference?.connector_id === connector;
+        });
+      const maxMs = visible.length
+        ? Math.max(...visible.map((d) => Date.parse(d['@timestamp'])))
+        : null;
+      return {
+        hits: {
+          total: { value: options.totalOverride ?? visible.length, relation: 'eq' },
+          hits: (request.size === 0 ? [] : visible.slice(0, request.size)).map((_source) => ({
+            _source,
+          })),
+        },
+        aggregations: {
+          last_doc: {
+            value: maxMs,
+            ...(maxMs !== null ? { value_as_string: new Date(maxMs).toISOString() } : {}),
+          },
+        },
+      };
     });
     return { esClient: { search } as unknown as EsClient, search };
   };
+
+  const build = (
+    esClient: EsClient,
+    clockKit = createClock(),
+    settle = { quietMs: 60_000, maxWaitMs: 600_000, pollIntervalMs: 10_000 }
+  ) =>
+    createAttackDiscoveryTokenUsageEvaluators({
+      esClient,
+      log,
+      settle,
+      now: clockKit.now,
+      sleep: clockKit.sleep,
+    });
 
   const run = async (
     evaluators: ReturnType<typeof createAttackDiscoveryTokenUsageEvaluators>,
@@ -189,22 +338,20 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
       }))
     );
 
-  it('emits one neutral informational evaluator per phase, with the breakdown in metadata', async () => {
-    const { esClient } = createEs([
-      doc({
-        atSec: 1,
-        prompt: 800,
-        cached: 300,
-        completion: 20,
-        featureId: 'attack_discovery_gate',
-        parentFeatureId: 'attack_discovery',
-      }),
-    ]);
+  const taggedGate = (atSec: number, prompt = 800) =>
+    doc({
+      atSec,
+      prompt,
+      cached: 300,
+      completion: 20,
+      featureId: ATTACK_DISCOVERY_GATE_FEATURE_ID,
+      parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
+    });
 
-    const results = await run(
-      createAttackDiscoveryTokenUsageEvaluators({ esClient, log }),
-      workflowOutput()
-    );
+  it('emits one neutral informational evaluator per phase, with the breakdown in metadata', async () => {
+    const { esClient } = createEs([taggedGate(1)]);
+
+    const results = await run(build(esClient), workflowOutput());
 
     expect(results.map((r) => r.name)).toEqual([
       'AttackDiscoveryTokens:gate',
@@ -216,7 +363,7 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
 
     const gate = results[0].result;
     expect(gate.score).toBe(800);
-    expect(gate.metadata).toEqual({
+    expect(gate.metadata).toMatchObject({
       phase: 'gate',
       inputTokens: 800,
       cachedTokens: 300,
@@ -225,74 +372,228 @@ describe('createAttackDiscoveryTokenUsageEvaluators', () => {
       calls: 1,
       peak60sInputTokens: 800,
       maxCallInputTokens: 800,
+      truncated: false,
     });
     expect(results[1].result.score).toBe(0);
   });
 
-  it('queries the token usage index once per run, bounded by the run window and connector', async () => {
-    const { esClient, search } = createEs([]);
-    const output = workflowOutput();
+  it('mirrors production today: untagged generation calls are counted in untagged, with a note', async () => {
+    const { esClient } = createEs([
+      taggedGate(1),
+      doc({
+        atSec: 2,
+        prompt: 100,
+        featureId: ATTACK_DISCOVERY_REPORT_FEATURE_ID,
+        parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
+      }),
+      doc({ atSec: 3, prompt: 5000 }),
+      doc({ atSec: 4, prompt: 6000 }),
+    ]);
 
-    await run(createAttackDiscoveryTokenUsageEvaluators({ esClient, log }), output);
-
-    expect(search).toHaveBeenCalledTimes(1);
-    const request = JSON.stringify((search.mock.calls as unknown[][])[0][0]);
-    expect(request).toContain('.kibana-inference-token-usage');
-    expect(request).toContain('2026-01-01T00:00:00.000Z');
-    expect(request).toContain('inference.connector_id');
-    expect(request).toContain('c-1');
-  });
-
-  it('reports zeros, not an error, when the index is empty', async () => {
-    const { esClient } = createEs([]);
-
-    const results = await run(
-      createAttackDiscoveryTokenUsageEvaluators({ esClient, log }),
-      workflowOutput()
+    const byName = Object.fromEntries(
+      (await run(build(esClient), workflowOutput())).map((r) => [r.name, r.result])
     );
 
-    for (const { result } of results) {
-      expect(result.score).toBe(0);
-      expect(result.label).toBe('no_usage');
-    }
+    const generation = byName['AttackDiscoveryTokens:generation'];
+    const untagged = byName['AttackDiscoveryTokens:untagged'];
+    expect(generation.score).toBe(0);
+    expect(untagged.score).toBe(11_000);
+    expect(generation.label).toBe('generation_untagged');
+    expect(untagged.label).toBe('generation_untagged');
+    expect(generation.metadata?.note).toMatch(/generation calls are untagged on this build/);
+    expect(untagged.metadata?.note).toMatch(/counted in `untagged`/);
+    expect(byName['AttackDiscoveryTokens:gate'].label).toBe('ok');
   });
 
-  it('reports zeros when the token usage index does not exist yet', async () => {
-    const missing = Object.assign(new Error('index_not_found_exception'), {
-      meta: { statusCode: 404 },
+  it('attributes generation when the generation feature id is emitted', async () => {
+    const { esClient } = createEs([
+      taggedGate(1),
+      doc({
+        atSec: 3,
+        prompt: 5000,
+        featureId: ATTACK_DISCOVERY_GENERATION_FEATURE_ID,
+        parentFeatureId: ATTACK_DISCOVERY_PARENT_FEATURE_ID,
+      }),
+    ]);
+
+    const byName = Object.fromEntries(
+      (await run(build(esClient), workflowOutput())).map((r) => [r.name, r.result])
+    );
+
+    expect(byName['AttackDiscoveryTokens:generation'].score).toBe(5000);
+    expect(byName['AttackDiscoveryTokens:generation'].label).toBe('ok');
+    expect(byName['AttackDiscoveryTokens:generation'].metadata).not.toHaveProperty('note');
+    expect(byName['AttackDiscoveryTokens:untagged'].score).toBe(0);
+  });
+
+  it('queries once per run, bounded by the run start, the usage window end and the connector', async () => {
+    const { esClient, search } = createEs([taggedGate(1), taggedGate(20)]);
+
+    const results = await run(build(esClient), workflowOutput());
+
+    const finalRequest = (search.mock.calls as unknown as Array<[SearchRequest]>)
+      .map(([request]) => request)
+      .filter((request) => request.size !== 0);
+    expect(finalRequest).toHaveLength(1);
+    const body = JSON.stringify(finalRequest[0]);
+    expect(body).toContain('.kibana-inference-token-usage');
+    expect(body).toContain(STARTED_AT);
+    expect(body).toContain('inference.connector_id');
+    expect(body).toContain('c-1');
+    expect(finalRequest[0].track_total_hits).toBe(true);
+
+    const windowEnd = new Date(T0 + 20_000).toISOString();
+    expect(JSON.stringify(finalRequest[0].query)).toContain(`"lte":"${windowEnd}"`);
+    expect(results[0].result.metadata?.usage_window_end).toBe(windowEnd);
+  });
+
+  describe('settling', () => {
+    it('waits for a quiet period with no new usage docs before reading', async () => {
+      const clockKit = createClock();
+      const { esClient } = createEs(
+        [
+          { doc: taggedGate(1), arrivesAtMs: 0 },
+          {
+            doc: doc({
+              atSec: 40,
+              prompt: 200,
+              featureId: ATTACK_DISCOVERY_REPORT_FEATURE_ID,
+            }),
+            arrivesAtMs: 30_000,
+          },
+        ],
+        { clock: clockKit.clock }
+      );
+
+      const results = await run(build(esClient, clockKit), workflowOutput());
+
+      const byName = Object.fromEntries(results.map((r) => [r.name, r.result]));
+      // the report doc arrived 30s in; settle must keep waiting past it
+      expect(byName['AttackDiscoveryTokens:report'].score).toBe(200);
+      // last new doc seen at ~30s + 60s quiet
+      expect(clockKit.clock.t).toBeGreaterThanOrEqual(90_000);
+      expect(byName['AttackDiscoveryTokens:report'].metadata).toMatchObject({
+        settled: true,
+        usage_window_end: new Date(T0 + 40_000).toISOString(),
+      });
     });
-    const { esClient } = createEs(missing);
 
-    const results = await run(
-      createAttackDiscoveryTokenUsageEvaluators({ esClient, log }),
-      workflowOutput()
-    );
+    it('stops at the max wait when usage keeps arriving, and says it did not settle', async () => {
+      const clockKit = createClock();
+      const trickle = Array.from({ length: 40 }, (_, i) => ({
+        doc: doc({ atSec: i * 15, prompt: 10, featureId: ATTACK_DISCOVERY_REPORT_FEATURE_ID }),
+        arrivesAtMs: i * 15_000,
+      }));
+      const { esClient } = createEs(trickle, { clock: clockKit.clock });
 
-    for (const { result } of results) {
-      expect(result.score).toBe(0);
-      expect(result.label).toBe('no_usage');
-    }
+      const results = await run(
+        build(esClient, clockKit, { quietMs: 60_000, maxWaitMs: 120_000, pollIntervalMs: 10_000 }),
+        workflowOutput()
+      );
+
+      expect(clockKit.clock.t).toBeGreaterThanOrEqual(120_000);
+      expect(clockKit.clock.t).toBeLessThan(140_000);
+      expect(results[1].result.metadata).toMatchObject({ settled: false });
+    });
+
+    it('settles once per run, not once per phase evaluator', async () => {
+      const clockKit = createClock();
+      const { esClient, search } = createEs([taggedGate(1)], { clock: clockKit.clock });
+      const output = workflowOutput();
+
+      await run(build(esClient, clockKit), output);
+      const callsAfterFirstRun = search.mock.calls.length;
+      await run(build(esClient, clockKit), output);
+
+      // a second evaluator set shares nothing, but within one set every phase shares the lookup
+      expect(callsAfterFirstRun).toBeGreaterThan(1);
+      const finalQueries = (search.mock.calls as unknown as Array<[SearchRequest]>).filter(
+        ([request]) => request.size !== 0
+      );
+      expect(finalQueries).toHaveLength(2);
+    });
   });
 
-  it('does not throw and reports unavailable on other search errors', async () => {
-    const { esClient } = createEs(new Error('boom'));
+  describe('when usage cannot be trusted', () => {
+    it('reports unavailable, not zero, when the run found no usage docs', async () => {
+      const { esClient } = createEs([]);
+
+      const results = await run(build(esClient), workflowOutput());
+
+      for (const { result } of results) {
+        expect(result.score).toBeNull();
+        expect(result.label).toBe('unavailable');
+        expect(result.explanation).toMatch(/no token usage docs/i);
+      }
+    });
+
+    it('reports unavailable when the token usage index does not exist', async () => {
+      const missing = Object.assign(new Error('index_not_found_exception'), {
+        meta: { statusCode: 404 },
+      });
+      const { esClient } = createEs(missing);
+
+      const results = await run(build(esClient), workflowOutput());
+
+      for (const { result } of results) {
+        expect(result.score).toBeNull();
+        expect(result.label).toBe('unavailable');
+        expect(result.explanation).toMatch(/index/i);
+      }
+    });
+
+    it('reports unavailable without querying when tracking is reported off', async () => {
+      const { esClient, search } = createEs([taggedGate(1)]);
+
+      const results = await run(
+        build(esClient),
+        workflowOutput({ token_usage_tracking_enabled: false })
+      );
+
+      expect(search).not.toHaveBeenCalled();
+      for (const { result } of results) {
+        expect(result.score).toBeNull();
+        expect(result.label).toBe('unavailable');
+        expect(result.explanation).toContain('genAiSettings:tokenUsageTracking');
+      }
+    });
+
+    it('does not throw and reports unavailable on other search errors', async () => {
+      const { esClient } = createEs(new Error('boom'));
+
+      const results = await run(build(esClient), workflowOutput());
+
+      for (const { result } of results) {
+        expect(result.score).toBeNull();
+        expect(result.label).toBe('unavailable');
+        expect(result.explanation).toContain('boom');
+      }
+    });
+  });
+
+  it('flags truncation and logs a warning when the usage query hit the doc cap', async () => {
+    const warning = jest.fn();
+    const { esClient } = createEs([taggedGate(1)], { totalOverride: 25_000 });
 
     const results = await run(
-      createAttackDiscoveryTokenUsageEvaluators({ esClient, log }),
+      createAttackDiscoveryTokenUsageEvaluators({
+        esClient,
+        log: { warning, debug: jest.fn() } as unknown as ToolingLog,
+        settle: { quietMs: 0, maxWaitMs: 0, pollIntervalMs: 1 },
+        now: createClock().now,
+        sleep: createClock().sleep,
+      }),
       workflowOutput()
     );
 
-    for (const { result } of results) {
-      expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
-      expect(result.explanation).toContain('boom');
-    }
+    expect(results[0].result.metadata).toMatchObject({ truncated: true, total_hits: 25_000 });
+    expect(warning).toHaveBeenCalledWith(expect.stringMatching(/truncated/i));
   });
 
   it('is not applicable, and does not query, for outputs without a workflow run window', async () => {
     const { esClient, search } = createEs([]);
 
-    const results = await run(createAttackDiscoveryTokenUsageEvaluators({ esClient, log }), {
+    const results = await run(build(esClient), {
       insights: null,
       raw: { execution_uuid: 'x' },
     });

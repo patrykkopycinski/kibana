@@ -50,6 +50,7 @@ const configureExperiment = ({
   inferenceClient,
   evaluationInferenceClient,
   esClient,
+  includeTokenUsage,
   log,
 }: {
   evaluators: DefaultEvaluators;
@@ -59,6 +60,8 @@ const configureExperiment = ({
   inferenceClient: BoundInferenceClient;
   evaluationInferenceClient: BoundInferenceClient;
   esClient: EsClient;
+  /** Per-phase token rows only make sense for workflow runs; other modes get no extra rows. */
+  includeTokenUsage: boolean;
   log: ToolingLog;
 }): {
   task: (params: {
@@ -93,7 +96,7 @@ const configureExperiment = ({
       inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       outputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
-      ...createAttackDiscoveryTokenUsageEvaluators({ esClient, log }),
+      ...(includeTokenUsage ? createAttackDiscoveryTokenUsageEvaluators({ esClient, log }) : []),
     ],
   };
 };
@@ -141,6 +144,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
       inferenceClient,
       evaluationInferenceClient,
       esClient,
+      includeTokenUsage: examples.some(({ input }) => input?.mode === 'workflowApi'),
       log,
     });
 

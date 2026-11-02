@@ -8,7 +8,9 @@
 /**
  * Client for the workflow-based Attack Discovery pipeline.
  *
- *   1. enable the `securitySolution:enableAttackDiscoveryWorkflows` setting (once)
+ *   1. enable the `securitySolution:enableAttackDiscoveryWorkflows` setting (once), and try to
+ *      enable `genAiSettings:tokenUsageTracking`; the latter never fails the run, its final
+ *      state is reported as `tokenUsageTrackingEnabled`
  *   2. POST /internal/attack_discovery/_generate → { execution_uuid } (fire-and-forget)
  *   3. poll GET /internal/attack_discovery/executions/{id}/tracking until the
  *      validation workflow run reaches a terminal status; any tracked run that
@@ -33,6 +35,7 @@ const WORKFLOWS_API_VERSION = '2023-10-31';
 const SETTINGS_ROUTE = '/internal/kibana/settings';
 const GENERATE_ROUTE = '/internal/attack_discovery/_generate';
 const AD_WORKFLOWS_SETTING = 'securitySolution:enableAttackDiscoveryWorkflows';
+const TOKEN_USAGE_TRACKING_SETTING = 'genAiSettings:tokenUsageTracking';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default';
 const DEFAULT_SIZE = 100;
@@ -74,6 +77,8 @@ export interface WorkflowApiResult {
   readonly workflowRuns: WorkflowRuns;
   /** ISO timestamp taken before the generate request; lower bound for time-window queries. */
   readonly startedAt: string;
+  /** Whether `genAiSettings:tokenUsageTracking` was on after setup; false also when unknown. */
+  readonly tokenUsageTrackingEnabled: boolean;
   readonly latencyMs: number;
   readonly error?: string;
 }
@@ -103,6 +108,12 @@ const statusOf = (e: unknown): number | undefined => {
 
 const messageOf = (e: unknown): string =>
   (e instanceof Error ? e.message : String(e)).slice(0, 800);
+
+/** `HTTP <status>: <message>` when there is a status, else just the message. */
+const describeError = (e: unknown): string => {
+  const status = statusOf(e);
+  return status === undefined ? messageOf(e) : `HTTP ${status}: ${messageOf(e)}`;
+};
 
 const runIdsOf = (entries: TrackedWorkflow[] | null | undefined): string[] =>
   (entries ?? []).flatMap((entry) => (entry.workflow_run_id ? [entry.workflow_run_id] : []));
@@ -162,12 +173,14 @@ export class AttackDiscoveryWorkflowApiClient {
     const t0 = Date.now();
     const startedAt = new Date(t0).toISOString();
     const empty: WorkflowRuns = { alertRetrieval: [], gate: [] };
+    let tokenUsageTrackingEnabled = false;
     const failure = (error: string, executionUuid = '', workflowRuns = empty) => ({
       discoveries: [],
       executionUuid,
       status: 'failed',
       workflowRuns,
       startedAt,
+      tokenUsageTrackingEnabled,
       latencyMs: Date.now() - t0,
       error,
     });
@@ -175,8 +188,9 @@ export class AttackDiscoveryWorkflowApiClient {
     try {
       await this.ensureWorkflowsSetting();
     } catch (e) {
-      return failure(`enable workflows setting failed: ${messageOf(e)}`);
+      return failure(`enable workflows setting failed: ${describeError(e)}`);
     }
+    tokenUsageTrackingEnabled = await this.ensureTokenUsageTracking();
 
     const body: Record<string, unknown> = {
       alerts_index_pattern: opts.alertsIndexPattern ?? DEFAULT_ALERTS_INDEX,
@@ -204,7 +218,7 @@ export class AttackDiscoveryWorkflowApiClient {
       });
       executionUuid = response.execution_uuid ?? '';
     } catch (e) {
-      return failure(`generate HTTP ${statusOf(e) ?? 'n/a'}: ${messageOf(e)}`);
+      return failure(`generate ${describeError(e)}`);
     }
 
     if (!executionUuid) {
@@ -219,6 +233,7 @@ export class AttackDiscoveryWorkflowApiClient {
       status: outcome.status,
       workflowRuns: outcome.workflowRuns,
       startedAt,
+      tokenUsageTrackingEnabled,
       latencyMs: Date.now() - t0,
       error: outcome.error,
     };
@@ -238,6 +253,44 @@ export class AttackDiscoveryWorkflowApiClient {
       });
     }
     this.workflowsSettingEnabled = true;
+  }
+
+  private async readSetting(key: string): Promise<unknown> {
+    const current = await this.fetch<{
+      settings?: Record<string, { userValue?: unknown }>;
+    }>(SETTINGS_ROUTE, { method: 'GET' });
+    return current?.settings?.[key]?.userValue;
+  }
+
+  /**
+   * Never throws. The setting can be a read-only uiSettings override (a write returns 400), so a
+   * failed write only means the caller must check the re-read value.
+   */
+  private async ensureTokenUsageTracking(): Promise<boolean> {
+    try {
+      if ((await this.readSetting(TOKEN_USAGE_TRACKING_SETTING)) !== true) {
+        try {
+          await this.fetch(SETTINGS_ROUTE, {
+            method: 'POST',
+            headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ changes: { [TOKEN_USAGE_TRACKING_SETTING]: true } }),
+          });
+        } catch (e) {
+          this.log.warning(
+            `could not enable ${TOKEN_USAGE_TRACKING_SETTING} (${describeError(e)}); ` +
+              'it may be a read-only override'
+          );
+        }
+      }
+      const enabled = (await this.readSetting(TOKEN_USAGE_TRACKING_SETTING)) === true;
+      if (!enabled) {
+        this.log.warning(`${TOKEN_USAGE_TRACKING_SETTING} is off; token usage will be unavailable`);
+      }
+      return enabled;
+    } catch (e) {
+      this.log.warning(`could not read ${TOKEN_USAGE_TRACKING_SETTING}: ${describeError(e)}`);
+      return false;
+    }
   }
 
   private async probeRunStatus(runId: string): Promise<string | undefined> {
@@ -266,7 +319,7 @@ export class AttackDiscoveryWorkflowApiClient {
     } catch (e) {
       const status = statusOf(e);
       if (status !== undefined && PERMANENT_HTTP_STATUSES.has(status)) {
-        return { permanentError: `tracking HTTP ${status}: ${messageOf(e)}` };
+        return { permanentError: `tracking ${describeError(e)}` };
       }
       // 404 until the execution is in the event log; 429/5xx are transient.
       return {};
@@ -308,10 +361,7 @@ export class AttackDiscoveryWorkflowApiClient {
             if (status) runStatuses.set(runId, status);
           }
         } catch (e) {
-          return fail(
-            'failed',
-            `workflow run status HTTP ${statusOf(e) ?? 'n/a'}: ${messageOf(e)}`
-          );
+          return fail('failed', `workflow run status ${describeError(e)}`);
         }
 
         const failedRun = allRunIds(workflowRuns).find((runId) =>
@@ -371,7 +421,7 @@ export class AttackDiscoveryWorkflowApiClient {
         discoveries: [],
         status: 'failed',
         workflowRuns,
-        error: `pipeline data HTTP ${statusOf(e) ?? 'n/a'}: ${messageOf(e)}`,
+        error: `pipeline data ${describeError(e)}`,
       };
     }
   }

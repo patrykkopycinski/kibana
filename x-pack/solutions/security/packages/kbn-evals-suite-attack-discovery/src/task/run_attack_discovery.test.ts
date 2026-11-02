@@ -157,6 +157,7 @@ describe('runAttackDiscovery workflowApi mode', () => {
       status: 'succeeded',
       workflowRuns: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
       startedAt: '2026-01-01T00:00:00.000Z',
+      tokenUsageTrackingEnabled: true,
       latencyMs: 42,
     }));
 
@@ -185,6 +186,7 @@ describe('runAttackDiscovery workflowApi mode', () => {
       status: 'succeeded',
       workflow_runs: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
       started_at: '2026-01-01T00:00:00.000Z',
+      token_usage_tracking_enabled: true,
       latency_ms: 42,
     });
   });
@@ -196,6 +198,7 @@ describe('runAttackDiscovery workflowApi mode', () => {
       status: 'failed',
       workflowRuns: { alertRetrieval: [], gate: [] },
       startedAt: '2026-01-01T00:00:00.000Z',
+      tokenUsageTrackingEnabled: false,
       latencyMs: 1,
       error: 'workflow run g failed',
     }));

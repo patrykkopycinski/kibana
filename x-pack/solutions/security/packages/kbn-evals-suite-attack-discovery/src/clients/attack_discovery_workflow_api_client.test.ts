@@ -110,7 +110,10 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
     await client.generate({ connectorId: 'c-1' });
 
     const settingsWrites = calls.filter(
-      (c) => c.path === '/internal/kibana/settings' && c.method === 'POST'
+      (c) =>
+        c.path === '/internal/kibana/settings' &&
+        c.method === 'POST' &&
+        'securitySolution:enableAttackDiscoveryWorkflows' in (c.body?.changes as object)
     );
     expect(settingsWrites).toHaveLength(1);
     expect(settingsWrites[0].body).toEqual({
@@ -250,7 +253,7 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
 
     expect(result.status).toBe('failed');
     expect(result.executionUuid).toBe('');
-    expect(result.error).toContain('generate HTTP 400');
+    expect(result.error).toContain('HTTP 400');
   });
 
   it('fails when the generate response has no execution_uuid', async () => {
@@ -264,5 +267,96 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
 
     expect(result.status).toBe('failed');
     expect(result.error).toContain('execution_uuid');
+  });
+
+  describe('token usage tracking setting', () => {
+    const TRACKING = 'genAiSettings:tokenUsageTracking';
+
+    const runWith = async (
+      settings: (call: Call) => unknown,
+      extra: Record<string, Responder> = {}
+    ) => {
+      const { fetch, calls } = createFetch({
+        '/internal/kibana/settings': settings,
+        '/internal/attack_discovery/_generate': () => ({ execution_uuid: 'exec-1' }),
+        '/tracking': () => ({}),
+        ...extra,
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, {
+        pollIntervalMs: 1,
+        pollMaxWaitMs: 5,
+      });
+      const result = await client.generate({ connectorId: 'c-1' });
+      return { result, calls };
+    };
+
+    it('reports enabled without writing when the setting is already true', async () => {
+      const { result, calls } = await runWith(() => ({
+        settings: { [TRACKING]: { userValue: true } },
+      }));
+
+      expect(result.tokenUsageTrackingEnabled).toBe(true);
+      expect(
+        calls.filter((c) => c.method === 'POST' && TRACKING in ((c.body?.changes as object) ?? {}))
+      ).toHaveLength(0);
+    });
+
+    it('sets the setting when it is off and re-reads it', async () => {
+      let tracking = false;
+      const { result, calls } = await runWith((call) => {
+        if (call.method === 'POST') {
+          if (TRACKING in (call.body?.changes as object)) tracking = true;
+          return {};
+        }
+        return { settings: { [TRACKING]: { userValue: tracking } } };
+      });
+
+      expect(result.tokenUsageTrackingEnabled).toBe(true);
+      const write = calls.find(
+        (c) => c.method === 'POST' && TRACKING in ((c.body?.changes as object) ?? {})
+      );
+      expect(write?.body).toEqual({ changes: { [TRACKING]: true } });
+    });
+
+    it('reports disabled, without throwing, when the setting is an override and the write is rejected', async () => {
+      const { result } = await runWith((call) => {
+        if (call.method === 'POST' && TRACKING in ((call.body?.changes as object) ?? {})) {
+          return httpError(400);
+        }
+        if (call.method === 'POST') return {};
+        return { settings: { [TRACKING]: { userValue: false, isOverridden: true } } };
+      });
+
+      expect(result.tokenUsageTrackingEnabled).toBe(false);
+      expect(result.status).not.toBe('failed');
+      expect(result.executionUuid).toBe('exec-1');
+    });
+
+    it('reports disabled when the re-read still says off after a write that did not fail', async () => {
+      const { result } = await runWith((call) =>
+        call.method === 'POST' ? {} : { settings: { [TRACKING]: { userValue: false } } }
+      );
+
+      expect(result.tokenUsageTrackingEnabled).toBe(false);
+    });
+
+    it('reports disabled, without throwing, when reading the setting fails', async () => {
+      const { result } = await runWith((call) => (call.method === 'POST' ? {} : httpError(500)));
+
+      expect(result.tokenUsageTrackingEnabled).toBe(false);
+    });
+  });
+
+  it('uses the bare error message when a failure has no HTTP status', async () => {
+    const { fetch } = createFetch({
+      ...settingsOk,
+      '/internal/attack_discovery/_generate': () => new Error('socket hang up'),
+    });
+    const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+    const result = await client.generate({ connectorId: 'c-1' });
+
+    expect(result.error).toContain('socket hang up');
+    expect(result.error).not.toContain('n/a');
   });
 });

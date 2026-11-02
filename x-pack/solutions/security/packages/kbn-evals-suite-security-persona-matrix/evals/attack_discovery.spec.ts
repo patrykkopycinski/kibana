@@ -25,6 +25,12 @@ const CHRYSALIS_95_SNAPSHOT = {
 // start:'now-24h', which selects nothing outside this window).
 const CORPUS_WINDOW = { start: '2026-03-01T00:00:00.000Z', end: '2026-04-01T00:00:00.000Z' };
 
+// The workflow pipeline spends several LLM calls per phase, so it runs on demand, not in the
+// weekly suite.
+const WORKFLOW_API_ENABLED = ['1', 'true'].includes(
+  process.env.ATTACK_DISCOVERY_EVAL_WORKFLOW_API ?? ''
+);
+
 evaluate.describe(
   'Attack Discovery (Chrysalis kill-chains)',
   { tag: tags.stateful.classic },
@@ -64,6 +70,10 @@ evaluate.describe(
     evaluate(
       'workflow API (GCS 95-alert snapshot)',
       async ({ evaluateDataset, connector, esClient, log }) => {
+        evaluate.skip(
+          !WORKFLOW_API_ENABLED,
+          'workflow API run only with ATTACK_DISCOVERY_EVAL_WORKFLOW_API=true'
+        );
         await restoreAlertsSnapshot({ esClient, log, config: CHRYSALIS_95_SNAPSHOT });
         const { count } = await esClient.count({ index: '.alerts-security.alerts-default' });
         log.info(`[attack-discovery] corpus ready: ${count} alerts (reference: 95)`);

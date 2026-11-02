@@ -203,6 +203,7 @@ export const runAttackDiscovery = async ({
           status: result.status,
           workflow_runs: result.workflowRuns,
           started_at: result.startedAt,
+          token_usage_tracking_enabled: result.tokenUsageTrackingEnabled,
           latency_ms: result.latencyMs,
         },
       };

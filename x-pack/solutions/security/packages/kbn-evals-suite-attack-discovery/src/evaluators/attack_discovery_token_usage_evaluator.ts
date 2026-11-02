@@ -14,9 +14,22 @@ const TOKEN_USAGE_INDEX = '.kibana-inference-token-usage';
 const MAX_USAGE_DOCS = 10_000;
 const PEAK_WINDOW_MS = 60_000;
 
-const GATE_FEATURE_ID = 'attack_discovery_gate';
-const REPORT_FEATURE_ID = 'attack_discovery_report';
-const PARENT_FEATURE_ID = 'attack_discovery';
+/** Must equal the `plugin-id` / `aggregate-by` of the managed workflows (asserted in the tests). */
+export const ATTACK_DISCOVERY_GATE_FEATURE_ID = 'attack_discovery_gate';
+export const ATTACK_DISCOVERY_REPORT_FEATURE_ID = 'attack_discovery_report';
+export const ATTACK_DISCOVERY_GENERATION_FEATURE_ID = 'attack_discovery_generation';
+export const ATTACK_DISCOVERY_PARENT_FEATURE_ID = 'attack_discovery';
+
+const TOKEN_USAGE_TRACKING_SETTING = 'genAiSettings:tokenUsageTracking';
+
+const DEFAULT_SETTLE: SettleOptions = {
+  quietMs: 60_000,
+  maxWaitMs: 600_000,
+  pollIntervalMs: 10_000,
+};
+
+const GENERATION_UNTAGGED_NOTE =
+  'generation calls are untagged on this build and are counted in `untagged`';
 
 export const ATTACK_DISCOVERY_TOKEN_PHASES = ['gate', 'report', 'generation', 'untagged'] as const;
 
@@ -46,17 +59,29 @@ export interface PhaseTokenUsage {
   maxCallInputTokens: number;
 }
 
+export interface SettleOptions {
+  /** No new usage docs for this long means the run's usage has settled. */
+  quietMs: number;
+  /** Give up waiting for the usage to settle after this long. */
+  maxWaitMs: number;
+  pollIntervalMs: number;
+}
+
 /**
- * `gate` and `report` are the agent steps tagged with their own plugin id.
- * `generation` is every other call under the `attack_discovery` parent feature.
- * Anything else, including calls with no feature id, is `untagged`.
+ * Each phase is matched on its exact feature id. The parent feature alone is not enough to call
+ * a doc `generation`: anything else, including calls with no feature id, is `untagged`.
  */
 const phaseOf = (doc: TokenUsageDoc): AttackDiscoveryTokenPhase => {
-  const featureId = doc.inference?.feature_id;
-  if (featureId === GATE_FEATURE_ID) return 'gate';
-  if (featureId === REPORT_FEATURE_ID) return 'report';
-  if (doc.inference?.parent_feature_id === PARENT_FEATURE_ID) return 'generation';
-  return 'untagged';
+  switch (doc.inference?.feature_id) {
+    case ATTACK_DISCOVERY_GATE_FEATURE_ID:
+      return 'gate';
+    case ATTACK_DISCOVERY_REPORT_FEATURE_ID:
+      return 'report';
+    case ATTACK_DISCOVERY_GENERATION_FEATURE_ID:
+      return 'generation';
+    default:
+      return 'untagged';
+  }
 };
 
 const emptyUsage = (): PhaseTokenUsage => ({
@@ -71,7 +96,7 @@ const emptyUsage = (): PhaseTokenUsage => ({
 
 /** Largest input sum over any window of `PEAK_WINDOW_MS` (start inclusive, end exclusive). */
 const peakWindowInput = (calls: ReadonlyArray<{ at: number; input: number }>): number => {
-  const sorted = [...calls].sort((a, b) => a.at - b.at);
+  const sorted = calls.filter(({ at }) => Number.isFinite(at)).sort((a, b) => a.at - b.at);
   let peak = 0;
   let windowSum = 0;
   let tail = 0;
@@ -125,15 +150,25 @@ export const computePhaseTokenUsage = (
 interface RunWindow {
   startedAt: string;
   connectorId?: string;
+  trackingEnabled?: boolean;
 }
 
 const readRunWindow = (
   output: AttackDiscoveryTaskOutput,
   connectorId: string | undefined
 ): RunWindow | undefined => {
-  const raw = output?.raw as { started_at?: unknown; workflow_runs?: unknown } | undefined;
+  const raw = output?.raw as
+    | { started_at?: unknown; workflow_runs?: unknown; token_usage_tracking_enabled?: unknown }
+    | undefined;
   if (typeof raw?.started_at !== 'string' || raw.workflow_runs === undefined) return undefined;
-  return { startedAt: raw.started_at, connectorId };
+  return {
+    startedAt: raw.started_at,
+    connectorId,
+    trackingEnabled:
+      typeof raw.token_usage_tracking_enabled === 'boolean'
+        ? raw.token_usage_tracking_enabled
+        : undefined,
+  };
 };
 
 const isIndexMissing = (e: unknown): boolean => {
@@ -141,9 +176,22 @@ const isIndexMissing = (e: unknown): boolean => {
   return err?.meta?.statusCode === 404 || /index_not_found/.test(err?.message ?? '');
 };
 
+const totalOf = (total: number | { value?: number } | undefined, fallback: number): number =>
+  typeof total === 'number' ? total : total?.value ?? fallback;
+
 type UsageLookup =
-  | { kind: 'ok'; usage: Record<AttackDiscoveryTokenPhase, PhaseTokenUsage> }
+  | {
+      kind: 'ok';
+      usage: Record<AttackDiscoveryTokenPhase, PhaseTokenUsage>;
+      totalHits: number;
+      truncated: boolean;
+      usageWindowEnd: string;
+      settled: boolean;
+    }
   | { kind: 'unavailable'; reason: string };
+
+const defaultSleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * One evaluator per phase, report-only: the score is the phase's total input tokens, the full
@@ -151,53 +199,135 @@ type UsageLookup =
  * `metadata`. Direction is `neutral`, so no pass/fail or regression semantics apply.
  *
  * Token usage documents carry no execution or conversation id, so the run is attributed by time
- * window (from the run's start, with no upper bound because the report phase runs in the
- * background after the workflow run completes) and by connector id. Concurrent runs on the same
- * connector are counted together, and report calls still running at evaluation time are missing.
- * Only populated for `workflowApi` outputs.
+ * window and connector id. The window starts at the run's start. Its end is found by waiting for
+ * the usage to settle (no new docs for `settle.quietMs`, capped at `settle.maxWaitMs`), because
+ * the report phase keeps running in the background after the workflow run completes. The end of
+ * the window is the newest doc seen, `usage_window_end` in the metadata. Concurrent runs on the
+ * same connector are still counted together.
+ *
+ * A run with tracking off, a missing index or no docs is `unavailable`, never 0. Until the
+ * generation step is tagged with `ATTACK_DISCOVERY_GENERATION_FEATURE_ID`, its calls land in
+ * `untagged` and both phases carry a note saying so. Only populated for `workflowApi` outputs.
  */
 export const createAttackDiscoveryTokenUsageEvaluators = ({
   esClient,
   log,
+  settle = DEFAULT_SETTLE,
+  now = Date.now,
+  sleep = defaultSleep,
 }: {
   esClient: EsClient;
   log: ToolingLog;
+  settle?: SettleOptions;
+  now?: () => number;
+  sleep?: (ms: number) => Promise<void>;
 }): Array<Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput>> => {
   const lookups = new WeakMap<AttackDiscoveryTaskOutput, Promise<UsageLookup>>();
 
-  const lookup = (window: RunWindow): Promise<UsageLookup> =>
-    esClient
-      .search<TokenUsageDoc>({
+  const baseFilter = (window: RunWindow, upperBound?: string) => [
+    {
+      range: {
+        '@timestamp': { gte: window.startedAt, ...(upperBound ? { lte: upperBound } : {}) },
+      },
+    },
+    ...(window.connectorId ? [{ term: { 'inference.connector_id': window.connectorId } }] : []),
+  ];
+
+  /** Waits until no new usage docs arrive for `quietMs`; returns the newest doc's timestamp. */
+  const settleUsage = async (
+    window: RunWindow
+  ): Promise<{ lastDocAt?: number; settled: boolean }> => {
+    const startedWaiting = now();
+    let lastCount = -1;
+    let lastChangeAt = startedWaiting;
+    let lastDocAt: number | undefined;
+
+    for (;;) {
+      const response = await esClient.search({
+        index: TOKEN_USAGE_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        track_total_hits: true,
+        query: { bool: { filter: baseFilter(window) } },
+        aggs: { last_doc: { max: { field: '@timestamp' } } },
+      });
+      const count = totalOf(response.hits.total as number | { value?: number }, 0);
+      const maxValue = (response.aggregations as { last_doc?: { value?: number | null } })?.last_doc
+        ?.value;
+      lastDocAt = typeof maxValue === 'number' ? maxValue : undefined;
+
+      const at = now();
+      if (count !== lastCount) {
+        lastCount = count;
+        lastChangeAt = at;
+      }
+      if (at - lastChangeAt >= settle.quietMs) return { lastDocAt, settled: true };
+      if (at - startedWaiting >= settle.maxWaitMs) return { lastDocAt, settled: false };
+      await sleep(settle.pollIntervalMs);
+    }
+  };
+
+  const lookup = async (window: RunWindow): Promise<UsageLookup> => {
+    if (window.trackingEnabled === false) {
+      return {
+        kind: 'unavailable',
+        reason: `${TOKEN_USAGE_TRACKING_SETTING} is off for this run, so no token usage was recorded`,
+      };
+    }
+
+    try {
+      const { lastDocAt, settled } = await settleUsage(window);
+      if (lastDocAt === undefined) {
+        return {
+          kind: 'unavailable',
+          reason:
+            `no token usage docs found for this run in ${TOKEN_USAGE_INDEX} ` +
+            `(check ${TOKEN_USAGE_TRACKING_SETTING} and the connector id)`,
+        };
+      }
+      const usageWindowEnd = new Date(lastDocAt).toISOString();
+
+      const response = await esClient.search<TokenUsageDoc>({
         index: TOKEN_USAGE_INDEX,
         ignore_unavailable: true,
         size: MAX_USAGE_DOCS,
+        track_total_hits: true,
         sort: [{ '@timestamp': 'asc' }],
         _source: ['@timestamp', 'token_usage', 'inference'],
-        query: {
-          bool: {
-            filter: [
-              { range: { '@timestamp': { gte: window.startedAt } } },
-              ...(window.connectorId
-                ? [{ term: { 'inference.connector_id': window.connectorId } }]
-                : []),
-            ],
-          },
-        },
-      })
-      .then(
-        (response): UsageLookup => ({
-          kind: 'ok',
-          usage: computePhaseTokenUsage(
-            response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : []))
-          ),
-        }),
-        (e: unknown): UsageLookup => {
-          if (isIndexMissing(e)) return { kind: 'ok', usage: computePhaseTokenUsage([]) };
-          const reason = e instanceof Error ? e.message : String(e);
-          log.warning(`token usage lookup failed: ${reason}`);
-          return { kind: 'unavailable', reason };
-        }
-      );
+        query: { bool: { filter: baseFilter(window, usageWindowEnd) } },
+      });
+      const docs = response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : []));
+      const totalHits = totalOf(response.hits.total as number | { value?: number }, docs.length);
+      const truncated = totalHits > docs.length;
+      if (truncated) {
+        log.warning(
+          `token usage truncated: ${totalHits} docs match the run window but only ${docs.length} were read`
+        );
+      }
+      if (!settled) {
+        log.warning(
+          `token usage did not settle within ${
+            settle.maxWaitMs / 1000
+          }s; later calls may be missing`
+        );
+      }
+      return {
+        kind: 'ok',
+        usage: computePhaseTokenUsage(docs),
+        totalHits,
+        truncated,
+        usageWindowEnd,
+        settled,
+      };
+    } catch (e) {
+      if (isIndexMissing(e)) {
+        return { kind: 'unavailable', reason: `token usage index ${TOKEN_USAGE_INDEX} not found` };
+      }
+      const reason = e instanceof Error ? e.message : String(e);
+      log.warning(`token usage lookup failed: ${reason}`);
+      return { kind: 'unavailable', reason };
+    }
+  };
 
   return ATTACK_DISCOVERY_TOKEN_PHASES.map((phase) => ({
     name: `AttackDiscoveryTokens:${phase}`,
@@ -221,18 +351,31 @@ export const createAttackDiscoveryTokenUsageEvaluators = ({
       const result = await pending;
 
       if (result.kind === 'unavailable') {
-        return {
-          score: null,
-          label: 'unavailable',
-          explanation: `token usage lookup failed: ${result.reason}`,
-        };
+        return { score: null, label: 'unavailable', explanation: result.reason };
       }
 
       const phaseUsage = result.usage[phase];
+      const generationUntagged =
+        (phase === 'generation' || phase === 'untagged') &&
+        result.usage.generation.calls === 0 &&
+        result.usage.untagged.calls > 0;
+
+      let label = 'ok';
+      if (generationUntagged) label = 'generation_untagged';
+      else if (phaseUsage.calls === 0) label = 'no_usage';
+
       return {
         score: phaseUsage.inputTokens,
-        label: phaseUsage.calls === 0 ? 'no_usage' : 'ok',
-        metadata: { phase, ...phaseUsage },
+        label,
+        metadata: {
+          phase,
+          ...phaseUsage,
+          total_hits: result.totalHits,
+          truncated: result.truncated,
+          usage_window_end: result.usageWindowEnd,
+          settled: result.settled,
+          ...(generationUntagged ? { note: GENERATION_UNTAGGED_NOTE } : {}),
+        },
       };
     },
   }));

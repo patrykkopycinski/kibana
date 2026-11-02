@@ -423,7 +423,7 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
       expect(result.reportRunId).toBeUndefined();
     });
 
-    it('stops at the cap with status timed_out when the report run never becomes terminal', async () => {
+    it('stops at the cap with status wait_timed_out when the report run never becomes terminal', async () => {
       const { fetch } = succeededPipeline({
         [REPORT_LIST]: () => ({ results: [{ id: 'report-1', status: 'running' }] }),
       });
@@ -433,7 +433,26 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
 
       expect(result.status).toBe('succeeded');
       expect(result.reportRunId).toBe('report-1');
-      expect(result.reportRunStatus).toBe('timed_out');
+      expect(result.reportRunStatus).toBe('wait_timed_out');
+    });
+
+    it('retries a transient list error and reports the terminal run', async () => {
+      let listCalls = 0;
+      const { fetch } = succeededPipeline({
+        [REPORT_LIST]: () => {
+          listCalls += 1;
+          return listCalls === 1
+            ? httpError(503)
+            : { results: [{ id: 'report-1', status: 'completed' }] };
+        },
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, FAST);
+
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(listCalls).toBe(2);
+      expect(result.reportRunId).toBe('report-1');
+      expect(result.reportRunStatus).toBe('completed');
     });
 
     it('skips the wait without throwing on a permanent list error', async () => {

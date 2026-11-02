@@ -49,7 +49,8 @@ const DEFAULT_END = 'now';
 
 const DEFAULT_POLL_INTERVAL_MS = 5000;
 // Time budget under the 30-min Playwright timeout: poll 20 min + report wait 3 min
-// + evaluator settle 5 min = 28 min.
+// + evaluator settle 5 min = 28 min, leaving ~2 min margin. Runs still queued have no
+// `startedAt`, so a run queued longer than the 60s grace reads as `none`.
 const DEFAULT_POLL_MAX_WAIT_MS = 1200_000;
 const DEFAULT_REPORT_GRACE_MS = 60_000;
 const DEFAULT_REPORT_MAX_WAIT_MS = 180_000;
@@ -95,7 +96,8 @@ export interface WorkflowApiResult {
   readonly reportRunId?: string;
   /**
    * Final report run status when terminal; `none` (no run within the grace period, e.g. the
-   * report is skipped), `timed_out` (still running at the cap) or `unavailable` (list failed).
+   * report is skipped), `wait_timed_out` (this wait's cap hit while still running, distinct from an
+   * execution's own `timed_out` status) or `unavailable` (list failed).
    * Absent when the pipeline did not succeed, since no report is scheduled then.
    */
   readonly reportRunStatus?: string;
@@ -396,7 +398,7 @@ export class AttackDiscoveryWorkflowApiClient {
       if (!latest && now >= graceDeadline) return { status: 'none' };
       if (now >= deadline) {
         this.log.warning('report workflow run did not reach a terminal status before the cap');
-        return { runId: latest?.id, status: latest ? 'timed_out' : 'none' };
+        return { runId: latest?.id, status: latest ? 'wait_timed_out' : 'none' };
       }
       await sleep(this.pollIntervalMs);
     }

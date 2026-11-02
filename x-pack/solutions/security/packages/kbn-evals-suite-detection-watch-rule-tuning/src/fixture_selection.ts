@@ -6,18 +6,43 @@
  */
 
 /**
- * `EVAL_EXAMPLES=<n>` caps a run to the first `n` fixtures so a bounded smoke can exercise the
- * whole path (approval gate, trace probe, scoring) inside its time budget instead of being killed
- * mid-suite by a 39-fixture run. Unset means every fixture; anything that is not a positive
- * integer fails loudly rather than silently running the full (hours-long) suite.
+ * `EVAL_EXAMPLES` narrows a run so a bounded smoke or a cross-suite comparison does not pay for
+ * the whole (hours-long) suite:
+ *  - `<n>` keeps the first `n` fixtures.
+ *  - `<id>[,<id>...]` keeps exactly those fixtures, in the listed order. The ids a comparison needs
+ *    are not a prefix of the fixture list, so a count cannot select them.
+ * Unset means every fixture. Anything else (0, a negative or fractional count, an unknown id)
+ * throws instead of silently running the full suite.
  */
-export const selectFixtures = <T>(fixtures: readonly T[], limit: string | undefined): T[] => {
-  if (limit === undefined || limit.trim() === '') {
+export const selectFixtures = <T>(
+  fixtures: readonly T[],
+  limit: string | undefined,
+  idOf?: (fixture: T) => string
+): T[] => {
+  const raw = limit?.trim() ?? '';
+  if (raw === '') {
     return [...fixtures];
   }
-  const n = Number(limit.trim());
-  if (!Number.isInteger(n) || n < 1) {
+  if (/^-?\d+(\.\d+)?$/.test(raw)) {
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 1) {
+      throw new Error(
+        `EVAL_EXAMPLES must be a positive integer or a list of fixture ids, got "${limit}"`
+      );
+    }
+    return fixtures.slice(0, n);
+  }
+  if (!idOf) {
     throw new Error(`EVAL_EXAMPLES must be a positive integer fixture count, got "${limit}"`);
   }
-  return fixtures.slice(0, n);
+  const ids = raw
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
+  const byId = new Map(fixtures.map((fixture) => [idOf(fixture), fixture]));
+  const unknown = ids.filter((id) => !byId.has(id));
+  if (unknown.length > 0) {
+    throw new Error(`EVAL_EXAMPLES names unknown fixture ids: ${unknown.join(', ')}`);
+  }
+  return [...new Set(ids)].map((id) => byId.get(id) as T);
 };

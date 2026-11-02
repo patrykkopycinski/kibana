@@ -28,4 +28,30 @@ describe('selectFixtures', () => {
       expect(() => selectFixtures(fixtures, bad)).toThrow(/EVAL_EXAMPLES/);
     }
   });
+
+  describe('with fixture ids', () => {
+    const byId = (fixture: string) => fixture;
+
+    it('keeps exactly the listed ids in the listed order', () => {
+      expect(selectFixtures(fixtures, 'c, a', byId)).toEqual(['c', 'a']);
+    });
+
+    it('drops duplicate ids', () => {
+      expect(selectFixtures(fixtures, 'b,b', byId)).toEqual(['b']);
+    });
+
+    it('still treats a bare integer as a count', () => {
+      expect(selectFixtures(fixtures, '3', byId)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('rejects unknown ids instead of running a partial or full suite', () => {
+      expect(() => selectFixtures(fixtures, 'a,zz', byId)).toThrow(/unknown fixture ids: zz/);
+    });
+
+    it('rejects invalid counts', () => {
+      for (const bad of ['0', '-1', '1.5']) {
+        expect(() => selectFixtures(fixtures, bad, byId)).toThrow(/EVAL_EXAMPLES/);
+      }
+    });
+  });
 });

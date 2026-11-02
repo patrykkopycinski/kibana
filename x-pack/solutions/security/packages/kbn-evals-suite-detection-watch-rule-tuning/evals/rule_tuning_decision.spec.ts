@@ -510,7 +510,11 @@ evaluate.describe(
         traceEsClient,
         connector: _judgeConnector,
       }) => {
-        const selectedFixtures = selectFixtures(TUNING_FIXTURES, process.env.EVAL_EXAMPLES);
+        const selectedFixtures = selectFixtures(
+          TUNING_FIXTURES,
+          process.env.EVAL_EXAMPLES,
+          (fixture) => fixture.id
+        );
         const examples: RuleTuningExample[] = selectedFixtures.map((fixture) => ({
           id: fixture.id,
           input: { fixtureId: fixture.id },

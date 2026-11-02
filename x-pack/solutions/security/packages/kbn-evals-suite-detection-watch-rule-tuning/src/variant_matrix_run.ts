@@ -18,7 +18,7 @@ export const isVariantMatrixEnabled = (value: string | undefined): boolean => va
 
 /** The variant cases for this run; `EVAL_EXAMPLES` caps them like it caps the base fixtures. */
 export const selectVariantCases = (limit: string | undefined): TuningVariantSpec[] =>
-  selectFixtures(buildTuningVariantMatrix(), limit);
+  selectFixtures(buildTuningVariantMatrix(), limit, (spec) => spec.caseId);
 
 /** A variant runs on its base rule's fixture; a missing base is matrix/spec drift, not a skip. */
 export const baseFixtureFor = <T extends { id: string }>(

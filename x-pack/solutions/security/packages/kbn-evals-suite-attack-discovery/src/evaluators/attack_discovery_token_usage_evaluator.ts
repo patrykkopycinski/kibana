@@ -212,16 +212,14 @@ const defaultSleep = (ms: number): Promise<void> =>
  * breakdown (input, cached, uncached, output, calls, peak 60s input, max per-call input) is in
  * `metadata`. Direction is `neutral`, so no pass/fail or regression semantics apply.
  *
- * Token usage documents carry no execution or conversation id, so the run is attributed by time
- * window and connector id. The window starts at the run's start. Its end is found by waiting for
- * the usage to settle (no new docs for `settle.quietMs`, capped at `settle.maxWaitMs`), because
- * the report phase keeps running in the background after the workflow run completes. The end of
- * the window is the newest doc seen, `usage_window_end` in the metadata. Concurrent runs on the
- * same connector are still counted together.
+ * Usage docs carry no execution id, so a run is attributed by time window and connector id;
+ * concurrent runs on the same connector are mixed. The window starts at the run's start and ends
+ * at the newest doc seen once usage settles (`usage_window_end`), since the report phase keeps
+ * running after the workflow run completes.
  *
- * A run with tracking off or no docs (a missing index included, via `ignore_unavailable`) is `unavailable`, never 0. Until the
- * generation step is tagged with `ATTACK_DISCOVERY_GENERATION_FEATURE_ID`, its calls land in
- * `untagged` and both phases carry a note saying so. Only populated for `workflowApi` outputs.
+ * Tracking off or no docs (a missing index included, via `ignore_unavailable`) is `unavailable`,
+ * never 0. Until generation is tagged with `ATTACK_DISCOVERY_GENERATION_FEATURE_ID`, its calls
+ * land in `untagged` with a note. Only populated for `workflowApi` outputs.
  */
 export const createAttackDiscoveryTokenUsageEvaluators = ({
   esClient,

@@ -6,26 +6,11 @@
  */
 
 /**
- * Client for the workflow-based Attack Discovery pipeline.
- *
- *   1. enable the `securitySolution:enableAttackDiscoveryWorkflows` setting (once), and try to
- *      enable `genAiSettings:tokenUsageTracking`; the latter never fails the run, its final
- *      state is reported as `tokenUsageTrackingEnabled`
- *   2. POST /internal/attack_discovery/_generate → { execution_uuid } (fire-and-forget)
- *   3. poll GET /internal/attack_discovery/executions/{id}/tracking until the
- *      validation workflow run reaches a terminal status; any tracked run that
- *      ends failed/cancelled ends the poll as a failure
- *   4. read `validated_discoveries` from the generation pipeline data
- *   5. wait for the report workflow run (scheduled in the background after generation, so it is
- *      not in the tracking response) to reach a terminal status, so token usage written by its
- *      long LLM call is complete before the evaluator reads it
- *
- * Unlike {@link AttackDiscoveryGenerateApiClient}, this runs the managed
- * alert-retrieval / gate / generation / validation workflows, so it can set
- * `workflow_config` (e.g. `ground_truth_gate_enabled`).
- *
- * The report run is found by listing the report workflow's executions started at or after the
- * generate request; none appearing within the grace period means the report was skipped.
+ * Drives the managed AD 2.0 workflow route, unlike {@link AttackDiscoveryGenerateApiClient}, so
+ * `workflow_config` (e.g. `ground_truth_gate_enabled`) applies. The tracking response has no
+ * report run, so it is found by listing the report workflow's executions started after the
+ * request; none within the grace period means it was skipped. Token usage tracking setting
+ * failures never fail the run.
  */
 
 import type { HttpHandler } from '@kbn/core/public';

@@ -35,6 +35,8 @@ interface ParsedStep {
   'connector-id'?: string;
   'max-step-size'?: string;
   'on-failure'?: unknown;
+  'plugin-id'?: string;
+  'aggregate-by'?: string;
   status?: string;
   with?: Record<string, unknown>;
 }
@@ -74,8 +76,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 13 for the lowercase display tags', () => {
-    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(13);
+  it('bumps the version to 14 for the token usage attribution tags', () => {
+    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(14);
   });
 
   it('titles the workflow "Security - Attack discovery - Skill"', () => {
@@ -125,6 +127,11 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
 
     it('persists the conversation via create-conversation', () => {
       expect(step['create-conversation']).toBe(true);
+    });
+
+    it('attributes token usage to the attack_discovery_gate feature under attack_discovery', () => {
+      expect(step['plugin-id']).toBe('attack_discovery_gate');
+      expect(step['aggregate-by']).toBe('attack_discovery');
     });
 
     it('routes model calls through the connector_id input (Constraint A)', () => {
@@ -318,8 +325,8 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 4 for the lowercase display tags', () => {
-    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(4);
+  it('bumps the version to 5 for the token usage attribution tags', () => {
+    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(5);
   });
 
   it('is discoverable from the managed registry by id', () => {
@@ -355,6 +362,11 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
 
     it('does not create a new conversation', () => {
       expect(step['create-conversation']).toBeUndefined();
+    });
+
+    it('attributes token usage to the attack_discovery_report feature under attack_discovery', () => {
+      expect(step['plugin-id']).toBe('attack_discovery_report');
+      expect(step['aggregate-by']).toBe('attack_discovery');
     });
 
     it('mentions the attack-discovery-generator skill', () => {

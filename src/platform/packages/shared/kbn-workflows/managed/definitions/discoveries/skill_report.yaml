@@ -63,6 +63,10 @@ steps:
     # generation (Constraint A). When the input is empty/omitted, this renders
     # to undefined and the step falls back to the Agent Builder default model.
     connector-id: '${{ inputs.connector_id }}'
+    # plugin-id: per-phase token usage attribution (inference.feature_id);
+    # aggregate-by groups every Attack Discovery phase under one parent feature.
+    plugin-id: attack_discovery_report
+    aggregate-by: attack_discovery
     with:
       conversation_id: ${{ inputs.conversation_id }}
       message: >

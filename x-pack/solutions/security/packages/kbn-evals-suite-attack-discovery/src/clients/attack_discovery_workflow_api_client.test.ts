@@ -210,6 +210,37 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
     expect(result.error).toContain('failed');
   });
 
+  it.each(['timed_out', 'skipped', 'cancelled'])(
+    'ends the poll promptly as failed when a tracked workflow run ends %s',
+    async (runStatus) => {
+      const { fetch, calls } = createFetch({
+        ...settingsOk,
+        '/internal/attack_discovery/_generate': () => ({ execution_uuid: 'exec-1' }),
+        '/executions/exec-1/tracking': () => ({
+          gate: [{ workflow_id: 'wf-g', workflow_run_id: 'run-g' }],
+          generation: null,
+          validation: null,
+        }),
+        '/api/workflows/executions/run-g': () => ({ status: runStatus }),
+      });
+      const client = new AttackDiscoveryWorkflowApiClient(fetch, log, {
+        ...FAST,
+        pollMaxWaitMs: 30_000,
+      });
+
+      const startedAt = Date.now();
+      const result = await client.generate({ connectorId: 'c-1' });
+
+      expect(Date.now() - startedAt).toBeLessThan(5_000);
+      expect(result.status).toBe('failed');
+      expect(result.error).toContain('run-g');
+      expect(result.error).toContain(runStatus);
+      expect(calls.filter((c) => c.path.includes('/api/workflows/executions/run-g'))).toHaveLength(
+        1
+      );
+    }
+  );
+
   it('times out when validation never becomes terminal', async () => {
     const { fetch } = createFetch({
       ...settingsOk,

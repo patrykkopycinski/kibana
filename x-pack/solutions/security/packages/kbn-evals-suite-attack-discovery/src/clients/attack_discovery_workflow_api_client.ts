@@ -17,7 +17,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import { TerminalExecutionStatuses } from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import { ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 const INTERNAL_API_VERSION = '1';
@@ -43,8 +43,12 @@ const REPORT_LIST_PAGE_SIZE = 10;
 
 const TERMINAL_RUN_STATUSES: ReadonlySet<string> = new Set(TerminalExecutionStatuses);
 
-const RUN_SUCCESS_STATUSES = new Set(['completed']);
-const RUN_FAILURE_STATUSES = new Set(['failed', 'cancelled']);
+const RUN_SUCCESS_STATUSES: ReadonlySet<string> = new Set([ExecutionStatus.COMPLETED]);
+// Any other terminal status ends a tracked run unsuccessfully; `skipped` means a concurrency
+// conflict, which the server-side generation invoker also treats as a failure.
+const RUN_FAILURE_STATUSES: ReadonlySet<string> = new Set(
+  TerminalExecutionStatuses.filter((status) => !RUN_SUCCESS_STATUSES.has(status))
+);
 
 // A 401/403/… can never succeed on retry; 404 (not indexed yet) and 5xx/network are retried.
 const PERMANENT_HTTP_STATUSES = new Set([400, 401, 403, 405, 410, 499, 501]);

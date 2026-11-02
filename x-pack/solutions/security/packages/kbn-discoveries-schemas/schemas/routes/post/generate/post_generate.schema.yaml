@@ -112,6 +112,10 @@ paths:
                       description: >-
                         ES|QL query for alert retrieval (required when default_retrieval_enabled is
                         true and alert_retrieval_mode is 'esql').
+                    ground_truth_gate_enabled:
+                      type: boolean
+                      description: >-
+                        Whether the generation-phase ground-truth gate runs. When omitted, the gate runs.
                     skill_enabled:
                       type: boolean
                       description: >-

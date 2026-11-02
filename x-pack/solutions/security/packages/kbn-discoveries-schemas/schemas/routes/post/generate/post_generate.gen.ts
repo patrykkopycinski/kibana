@@ -144,6 +144,15 @@ export const PostGenerateRequestBody = lazySchema(() =>
             "ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql')."
           ),
         /**
+         * Whether the generation-phase ground-truth gate runs. When omitted, the gate runs.
+         */
+        ground_truth_gate_enabled: z
+          .boolean()
+          .optional()
+          .describe(
+            'Whether the generation-phase ground-truth gate runs. When omitted, the gate runs.'
+          ),
+        /**
          * Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
          */
         skill_enabled: z

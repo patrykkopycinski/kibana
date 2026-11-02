@@ -8,6 +8,7 @@
 import { AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE } from '@kbn/discoveries-schemas';
 
 import { validateRequest } from '.';
+import { shouldRunGate } from '../should_run_gate';
 
 describe('validateRequest', () => {
   const validRequestBody = {
@@ -105,5 +106,51 @@ describe('validateRequest', () => {
     });
 
     expect(result.ok).toBe(true);
+  });
+
+  describe('ground_truth_gate_enabled', () => {
+    const getWorkflowConfig = (workflowConfig?: Record<string, unknown>) => {
+      const result = validateRequest({
+        requestBody: {
+          ...validRequestBody,
+          ...(workflowConfig ? { workflow_config: workflowConfig } : {}),
+        },
+      });
+
+      if (!result.ok) {
+        throw new Error('expected validation to succeed');
+      }
+
+      return result.workflowConfig;
+    };
+
+    it.each([true, false])('passes %s through to the workflowConfig', (enabled) => {
+      expect(
+        getWorkflowConfig({ skill_enabled: true, ground_truth_gate_enabled: enabled })
+          .ground_truth_gate_enabled
+      ).toBe(enabled);
+    });
+
+    it('leaves it undefined when workflow_config omits it, so the gate runs', () => {
+      const workflowConfig = getWorkflowConfig({ skill_enabled: true });
+
+      expect(workflowConfig.ground_truth_gate_enabled).toBeUndefined();
+      expect(shouldRunGate('manual', workflowConfig.ground_truth_gate_enabled)).toBe(true);
+    });
+
+    it('leaves it undefined when workflow_config is omitted entirely', () => {
+      expect(getWorkflowConfig().ground_truth_gate_enabled).toBeUndefined();
+    });
+
+    it('rejects a non-boolean value', () => {
+      const result = validateRequest({
+        requestBody: {
+          ...validRequestBody,
+          workflow_config: { skill_enabled: true, ground_truth_gate_enabled: 'no' },
+        },
+      });
+
+      expect(result.ok).toBe(false);
+    });
   });
 });

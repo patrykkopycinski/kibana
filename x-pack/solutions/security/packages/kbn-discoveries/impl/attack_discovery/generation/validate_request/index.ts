@@ -81,6 +81,9 @@ export const validateRequest = ({
           ...(parsedWorkflowConfig.esql_query != null
             ? { esql_query: parsedWorkflowConfig.esql_query }
             : {}),
+          ...(parsedWorkflowConfig.ground_truth_gate_enabled != null
+            ? { ground_truth_gate_enabled: parsedWorkflowConfig.ground_truth_gate_enabled }
+            : {}),
           skill_enabled: parsedWorkflowConfig.skill_enabled,
           validation_workflow_id: parsedWorkflowConfig.validation_workflow_id,
         }

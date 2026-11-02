@@ -72,6 +72,8 @@ export interface WorkflowApiResult {
   readonly executionUuid: string;
   readonly status: string;
   readonly workflowRuns: WorkflowRuns;
+  /** ISO timestamp taken before the generate request; lower bound for time-window queries. */
+  readonly startedAt: string;
   readonly latencyMs: number;
   readonly error?: string;
 }
@@ -158,12 +160,14 @@ export class AttackDiscoveryWorkflowApiClient {
 
   async generate(opts: WorkflowApiOptions): Promise<WorkflowApiResult> {
     const t0 = Date.now();
+    const startedAt = new Date(t0).toISOString();
     const empty: WorkflowRuns = { alertRetrieval: [], gate: [] };
     const failure = (error: string, executionUuid = '', workflowRuns = empty) => ({
       discoveries: [],
       executionUuid,
       status: 'failed',
       workflowRuns,
+      startedAt,
       latencyMs: Date.now() - t0,
       error,
     });
@@ -214,6 +218,7 @@ export class AttackDiscoveryWorkflowApiClient {
       executionUuid,
       status: outcome.status,
       workflowRuns: outcome.workflowRuns,
+      startedAt,
       latencyMs: Date.now() - t0,
       error: outcome.error,
     };

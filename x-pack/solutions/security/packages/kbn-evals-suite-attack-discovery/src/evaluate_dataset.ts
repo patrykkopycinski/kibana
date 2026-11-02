@@ -13,6 +13,7 @@ import type {
   Evaluator,
   TaskOutput,
 } from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscoveryClient } from './clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from './clients/attack_discovery_generate_api_client';
@@ -21,6 +22,7 @@ import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '.
 import { runAttackDiscovery } from './task/run_attack_discovery';
 import { createAttackDiscoveryBasicEvaluator } from './evaluators/attack_discovery_basic_evaluator';
 import { createAttackDiscoveryRubricEvaluator } from './evaluators/attack_discovery_rubric_evaluator';
+import { createAttackDiscoveryTokenUsageEvaluators } from './evaluators/attack_discovery_token_usage_evaluator';
 import { createAttackDiscoveryCriteriaEvaluator } from './evaluators/attack_discovery_criteria_evaluator';
 
 const resolveConcurrency = (): number | undefined => {
@@ -47,6 +49,7 @@ const configureExperiment = ({
   workflowApiClient,
   inferenceClient,
   evaluationInferenceClient,
+  esClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
@@ -55,6 +58,7 @@ const configureExperiment = ({
   workflowApiClient: AttackDiscoveryWorkflowApiClient;
   inferenceClient: BoundInferenceClient;
   evaluationInferenceClient: BoundInferenceClient;
+  esClient: EsClient;
   log: ToolingLog;
 }): {
   task: (params: {
@@ -89,6 +93,7 @@ const configureExperiment = ({
       inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       outputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+      ...createAttackDiscoveryTokenUsageEvaluators({ esClient, log }),
     ],
   };
 };
@@ -101,6 +106,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
   executorClient,
   inferenceClient,
   evaluationConnectorId,
+  esClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
@@ -110,6 +116,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
   evaluationConnectorId: string;
+  esClient: EsClient;
   log: ToolingLog;
 }): EvaluateAttackDiscoveryDataset => {
   const evaluateAttackDiscoveryDataset: EvaluateAttackDiscoveryDataset = async ({
@@ -133,6 +140,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
       workflowApiClient,
       inferenceClient,
       evaluationInferenceClient,
+      esClient,
       log,
     });
 

@@ -178,6 +178,7 @@ describe('AttackDiscoveryWorkflowApiClient', () => {
       validation: 'run-v',
     });
     expect(result.latencyMs).toBeGreaterThanOrEqual(0);
+    expect(new Date(result.startedAt).toISOString()).toBe(result.startedAt);
   });
 
   it('reports failure when a tracked workflow run ends failed', async () => {

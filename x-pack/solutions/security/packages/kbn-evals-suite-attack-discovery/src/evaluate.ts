@@ -49,6 +49,7 @@ export const evaluate = base.extend<
         inferenceClient,
         evaluators,
         evaluationConnector,
+        esClient,
         log,
       },
       use
@@ -62,6 +63,7 @@ export const evaluate = base.extend<
           executorClient,
           inferenceClient,
           evaluationConnectorId: evaluationConnector.id,
+          esClient,
           log,
         })
       );

@@ -156,6 +156,7 @@ describe('runAttackDiscovery workflowApi mode', () => {
       executionUuid: 'exec-1',
       status: 'succeeded',
       workflowRuns: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
+      startedAt: '2026-01-01T00:00:00.000Z',
       latencyMs: 42,
     }));
 
@@ -183,6 +184,7 @@ describe('runAttackDiscovery workflowApi mode', () => {
       execution_uuid: 'exec-1',
       status: 'succeeded',
       workflow_runs: { alertRetrieval: ['r'], gate: ['g'], generation: 'gen', validation: 'v' },
+      started_at: '2026-01-01T00:00:00.000Z',
       latency_ms: 42,
     });
   });
@@ -193,6 +195,7 @@ describe('runAttackDiscovery workflowApi mode', () => {
       executionUuid: 'exec-1',
       status: 'failed',
       workflowRuns: { alertRetrieval: [], gate: [] },
+      startedAt: '2026-01-01T00:00:00.000Z',
       latencyMs: 1,
       error: 'workflow run g failed',
     }));

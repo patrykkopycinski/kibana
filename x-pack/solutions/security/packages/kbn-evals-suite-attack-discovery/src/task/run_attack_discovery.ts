@@ -202,6 +202,7 @@ export const runAttackDiscovery = async ({
           execution_uuid: result.executionUuid,
           status: result.status,
           workflow_runs: result.workflowRuns,
+          started_at: result.startedAt,
           latency_ms: result.latencyMs,
         },
       };

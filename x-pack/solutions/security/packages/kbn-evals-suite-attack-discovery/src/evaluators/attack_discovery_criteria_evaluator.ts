@@ -7,6 +7,7 @@
 
 import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
+import { isInfrastructureFailure } from './is_infrastructure_failure';
 
 export const createAttackDiscoveryCriteriaEvaluator = ({
   evaluators,
@@ -24,6 +25,14 @@ export const createAttackDiscoveryCriteriaEvaluator = ({
           score: null,
           label: 'N/A',
           explanation: 'No criteria annotation — skipping criteria evaluation.',
+        };
+      }
+
+      if (isInfrastructureFailure(output)) {
+        return {
+          score: null,
+          label: 'task_error',
+          explanation: 'Task failed before a model response — skipping criteria evaluation.',
         };
       }
 

@@ -21,6 +21,7 @@ import Path from 'path';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
+import { InferenceRequestError } from './inference_request_error';
 import type {
   AttackDiscoveryTaskInput,
   AttackDiscoveryTaskOutput,
@@ -105,7 +106,7 @@ export const generateInsights = async ({
       // No model response (transport failure or an HTTP/connector error), so not a parse
       // failure: fail here rather than in the parse loop, naming the layer instead of a bare
       // `fetch failed`.
-      throw new Error(
+      throw new InferenceRequestError(
         `Attack Discovery inference request failed before a model response: ${
           error instanceof Error ? error.message : String(error)
         }`,
@@ -176,6 +177,7 @@ export const runAttackDiscovery = async ({
       return {
         insights: result.discoveries.length > 0 ? result.discoveries : null,
         errors: result.error ? [result.error] : undefined,
+        errorKind: result.error ? result.errorKind ?? 'model' : undefined,
         traceId,
         raw: {
           execution_uuid: result.executionUuid,
@@ -240,6 +242,10 @@ export const runAttackDiscovery = async ({
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error(new Error(`runAttackDiscovery failed: ${message}`, { cause: e as Error }));
-    return { insights: null, errors: [message] };
+    return {
+      insights: null,
+      errors: [message],
+      errorKind: e instanceof InferenceRequestError ? 'infrastructure' : 'model',
+    };
   }
 };

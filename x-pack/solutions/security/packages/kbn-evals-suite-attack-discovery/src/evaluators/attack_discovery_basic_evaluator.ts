@@ -7,6 +7,7 @@
 
 import type { Evaluator } from '@kbn/evals';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
+import { isInfrastructureFailure } from './is_infrastructure_failure';
 
 export const ATTACK_DISCOVERY_BASIC_EVALUATOR_NAME = 'AttackDiscoveryBasic';
 
@@ -19,6 +20,15 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
     kind: 'CODE',
     direction: 'maximize',
     evaluate: async ({ output }) => {
+      if (isInfrastructureFailure(output)) {
+        // No model response was produced, so there is nothing to score: N/A, not a failure.
+        return {
+          score: null,
+          label: 'task_error',
+          explanation: String(output?.errors?.[0] ?? 'Infrastructure failure').slice(0, 1000),
+        };
+      }
+
       const insights = output?.insights;
       if (!insights || !Array.isArray(insights)) {
         return { score: 0, label: 'missing_insights' };

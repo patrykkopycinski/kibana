@@ -27,6 +27,7 @@ import {
   ATTACK_DISCOVERY_GENERATIONS_BY_ID,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryTaskErrorKind } from '../types';
 
 const PUBLIC_API_VERSION = '2023-10-31';
 
@@ -64,6 +65,12 @@ export interface GenerateApiResult {
   readonly alertsContextCount?: number;
   readonly latencyMs: number;
   readonly error?: string;
+  /**
+   * Set to `infrastructure` only when no generation was started (the `_generate` request failed
+   * or returned no execution id), so no model call can have happened. Failures after a
+   * generation started stay unmarked and are scored as model failures.
+   */
+  readonly errorKind?: AttackDiscoveryTaskErrorKind;
 }
 
 export interface AttackDiscoveryGenerateApiClientConfig {
@@ -164,6 +171,7 @@ export class AttackDiscoveryGenerateApiClient {
         executionUuid: '',
         status: 'failed',
         latencyMs: Date.now() - t0,
+        errorKind: 'infrastructure',
         error: `generate HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractBodyTextFromError(
           e
         )}`,
@@ -176,6 +184,7 @@ export class AttackDiscoveryGenerateApiClient {
         executionUuid: '',
         status: 'failed',
         latencyMs: Date.now() - t0,
+        errorKind: 'infrastructure',
         error: 'generate response missing execution_uuid',
       };
     }

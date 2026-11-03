@@ -70,9 +70,19 @@ export interface AttackDiscoveryTaskExpectedOutput {
   criteria?: string[];
 }
 
+/**
+ * Why a task run produced `errors`.
+ * - `infrastructure`: the request never produced a model response (transport failure, HTTP or
+ *   connector error before a reply), so nothing about the model can be scored.
+ * - `model`: anything else, including empty or unparseable replies and refusals.
+ * Absence of the marker is treated as `model`.
+ */
+export type AttackDiscoveryTaskErrorKind = 'infrastructure' | 'model';
+
 export interface AttackDiscoveryTaskOutput {
   insights: AttackDiscovery[] | null;
   errors?: string[];
+  errorKind?: AttackDiscoveryTaskErrorKind;
   raw?: unknown;
   traceId?: string;
 }

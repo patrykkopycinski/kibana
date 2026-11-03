@@ -11,6 +11,7 @@ import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { Evaluator } from '@kbn/evals';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import { AttackDiscoveryRubricPrompt } from './attack_discovery_rubric_prompt';
+import { isInfrastructureFailure } from './is_infrastructure_failure';
 
 export const createAttackDiscoveryRubricEvaluator = ({
   inferenceClient,
@@ -27,7 +28,8 @@ export const createAttackDiscoveryRubricEvaluator = ({
       const errors = (output as AttackDiscoveryTaskOutput | undefined)?.errors;
       if (errors && errors.length > 0) {
         return {
-          score: 0,
+          // Infrastructure failures never reached a model: N/A. Model failures stay 0.
+          score: isInfrastructureFailure(output) ? null : 0,
           label: 'task_error',
           explanation: String(errors[0]).slice(0, 1000),
         };

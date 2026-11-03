@@ -182,5 +182,73 @@ describe('generateInsights', () => {
       'inference request failed before a model response: fetch failed'
     );
     expect(output.errors?.[0]).not.toContain('Failed to parse insights');
+    expect(output.errorKind).toBe('infrastructure');
+  });
+
+  it('marks parse exhaustion as a model failure', async () => {
+    const { inferenceClient, chatComplete } = createInferenceClient('');
+    const attackDiscoveryClient = { searchAlertsAsContext: jest.fn() } as never;
+
+    const output = await runAttackDiscovery({
+      inferenceClient,
+      attackDiscoveryClient,
+      log,
+      input: { mode: 'graphState', anonymizedAlerts: [] } as AttackDiscoveryTaskInput,
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(3);
+    expect(output.insights).toBeNull();
+    expect(output.errors?.[0]).toContain('Failed to parse insights');
+    expect(output.errorKind).toBe('model');
+  });
+
+  it('does not classify a message that merely resembles the wire-failure text as infrastructure', async () => {
+    const chatComplete = jest.fn(async () => ({
+      content: 'inference request failed before a model response',
+    }));
+    const inferenceClient = { chatComplete } as unknown as BoundInferenceClient;
+
+    const output = await runAttackDiscovery({
+      inferenceClient,
+      attackDiscoveryClient: { searchAlertsAsContext: jest.fn() } as never,
+      log,
+      input: { mode: 'graphState', anonymizedAlerts: [] } as AttackDiscoveryTaskInput,
+    });
+
+    expect(output.errorKind).toBe('model');
+  });
+
+  it('marks a failed generateApi start as infrastructure and a failed generation as model', async () => {
+    const run = (result: Record<string, unknown>) =>
+      runAttackDiscovery({
+        inferenceClient: {} as unknown as BoundInferenceClient,
+        attackDiscoveryClient: {} as never,
+        generateApiClient: {
+          generate: jest.fn(async () => ({
+            discoveries: [],
+            executionUuid: '',
+            status: 'failed',
+            latencyMs: 1,
+            ...result,
+          })),
+        } as never,
+        log,
+        input: { mode: 'generateApi', connectorId: 'c' } as AttackDiscoveryTaskInput,
+      });
+
+    const started = await run({
+      error: 'generate HTTP 502: bad gateway',
+      errorKind: 'infrastructure',
+    });
+    expect(started.errorKind).toBe('infrastructure');
+
+    const generation = await run({
+      executionUuid: 'u',
+      error: 'generation failed: Maximum generation attempts (10) reached',
+    });
+    expect(generation.errorKind).toBe('model');
+
+    const ok = await run({ status: 'succeeded' });
+    expect(ok.errorKind).toBeUndefined();
   });
 });

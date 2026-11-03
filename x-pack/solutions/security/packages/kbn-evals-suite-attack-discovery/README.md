@@ -22,6 +22,17 @@ The core task is: **generate Attack Discoveries** from alert context.
 Outputs are scored by:
 - **`AttackDiscoveryBasic`** (`CODE`): ensures the output is present and shaped correctly
 - **`AttackDiscoveryRubric`** (`LLM`): legacy rubric-based correctness judgement (Y/N mapped to score 1/0)
+- **`Criteria`** (`LLM`): per-example criteria judgement, when the example has criteria
+
+### Task failures
+
+A run that never received a model response (transport failure, HTTP/connector error before a
+reply, or a `_generate` request that failed to start) is tagged `errorKind: 'infrastructure'` on the
+task output. Every evaluator scores such a run `score: null` (N/A, label `task_error`), so it is
+excluded from means instead of counting as a wrong answer. Everything else is a model failure and
+keeps scoring `0`: empty or unparseable completions (`Failed to parse insights ... after 3 attempts`),
+refusals, `invalid_shape`, and a generation that started and then failed. A task error without the
+marker is never treated as N/A.
 
 ---
 

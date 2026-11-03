@@ -31,7 +31,11 @@ describe('AttackDiscoveryCriteria task errors', () => {
       errorKind: 'infrastructure',
     });
 
-    expect(await result).toMatchObject({ score: null, label: 'task_error' });
+    expect(await result).toMatchObject({
+      score: null,
+      label: 'task_error',
+      explanation: 'request failed',
+    });
     expect(judge).not.toHaveBeenCalled();
   });
 

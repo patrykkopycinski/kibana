@@ -66,9 +66,10 @@ export interface GenerateApiResult {
   readonly latencyMs: number;
   readonly error?: string;
   /**
-   * Set to `infrastructure` only when no generation was started (the `_generate` request failed
-   * or returned no execution id), so no model call can have happened. Failures after a
-   * generation started stay unmarked and are scored as model failures.
+   * Set to `infrastructure` when the harness could not observe a model outcome: the `_generate`
+   * request failed or returned no execution id, or polling failed (404 after the grace window,
+   * transport error, non-retryable HTTP status). A generation that reported `failed`/`canceled`
+   * and a poll timeout stay unmarked and are scored as model failures.
    */
   readonly errorKind?: AttackDiscoveryTaskErrorKind;
 }
@@ -189,7 +190,7 @@ export class AttackDiscoveryGenerateApiClient {
       };
     }
 
-    const { discoveries, status, alertsContextCount, error } = await this.pollUntilDone(
+    const { discoveries, status, alertsContextCount, error, errorKind } = await this.pollUntilDone(
       executionUuid
     );
 
@@ -200,6 +201,7 @@ export class AttackDiscoveryGenerateApiClient {
       alertsContextCount,
       latencyMs: Date.now() - t0,
       error,
+      errorKind,
     };
   }
 
@@ -208,6 +210,7 @@ export class AttackDiscoveryGenerateApiClient {
     status: string;
     alertsContextCount?: number;
     error?: string;
+    errorKind?: AttackDiscoveryTaskErrorKind;
   }> {
     const endpoint = ATTACK_DISCOVERY_GENERATIONS_BY_ID.replace(
       '{execution_uuid}',
@@ -242,6 +245,7 @@ export class AttackDiscoveryGenerateApiClient {
           return {
             discoveries: [],
             status: 'failed',
+            errorKind: 'infrastructure',
             error: `poll HTTP 404 (generation never materialized): ${extractBodyTextFromError(
               e
             ).slice(0, 400)}`,
@@ -250,6 +254,7 @@ export class AttackDiscoveryGenerateApiClient {
           return {
             discoveries: [],
             status: 'failed',
+            errorKind: 'infrastructure',
             error: `poll HTTP ${status ?? 'n/a'}: ${extractBodyTextFromError(e)}`,
           };
         }

@@ -26,13 +26,34 @@ Outputs are scored by:
 
 ### Task failures
 
-A run that never received a model response (transport failure, HTTP/connector error before a
-reply, or a `_generate` request that failed to start) is tagged `errorKind: 'infrastructure'` on the
-task output. Every evaluator scores such a run `score: null` (N/A, label `task_error`), so it is
-excluded from means instead of counting as a wrong answer. Everything else is a model failure and
-keeps scoring `0`: empty or unparseable completions (`Failed to parse insights ... after 3 attempts`),
-refusals, `invalid_shape`, and a generation that started and then failed. A task error without the
-marker is never treated as N/A.
+A run that never received a model response is tagged `errorKind: 'infrastructure'` on the task
+output. The quality evaluators (`AttackDiscoveryBasic`, `AttackDiscoveryRubric`, `Criteria`) score
+such a run `score: null` (N/A, label `task_error`, with the first error as the explanation), so it
+is excluded from means instead of counting as a wrong answer. Trace-based neutral metrics (token
+and latency evaluators) are not gated on the marker and may still record values for a run that has
+a `traceId`.
+
+Infrastructure failures:
+
+- `inferenceClient.chatComplete` rejects with no numeric HTTP status (transport failure or abort),
+  or with HTTP `401`, `403`, `404`, `408`, `429`, `502`, `503` or `504`.
+- `searchAlerts` mode: the Elasticsearch alert fetch throws before any model call.
+- `generateApi` mode: the `_generate` request fails or returns no `execution_uuid`, or polling
+  fails (HTTP 404 after the grace window, a transport error, or a non-retryable status such as
+  `400`/`401`/`403`).
+
+Everything else is a model failure and keeps scoring `0`: `chatComplete` rejections with any other
+status (including `400` provider refusals / content filters and `500` token-limit or
+context-length errors), empty or unparseable completions
+(`Failed to parse insights ... after 3 attempts`), `invalid_shape`, a generation that reported
+`failed`, and a poll timeout. A task error without the marker is never treated as N/A.
+
+Harness misconfiguration (`Missing input`, a missing `generateApiClient` in `generateApi` mode, an
+unreadable prompt file) is deliberately not tagged: it keeps scoring `0` so a broken setup fails
+loudly instead of hiding as N/A.
+
+A model whose runs all failed on infrastructure has no scored examples, so its count is `0` (the
+CLI table shows `-`).
 
 ---
 

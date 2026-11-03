@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
+import type { AttackDiscoveryTaskOutput } from '../types';
 import { createAttackDiscoveryBasicEvaluator } from './attack_discovery_basic_evaluator';
 
-const evaluate = (output: AttackDiscoveryTaskOutput) =>
-  createAttackDiscoveryBasicEvaluator().evaluate({
+type BasicEvaluator = ReturnType<typeof createAttackDiscoveryBasicEvaluator>;
+type EvaluateParams = Parameters<BasicEvaluator['evaluate']>[0];
+
+const evaluate = (output: AttackDiscoveryTaskOutput) => {
+  const params: EvaluateParams = {
     input: { mode: 'bundledAlerts', anonymizedAlerts: [] },
     output,
     expected: { attackDiscoveries: [] },
     metadata: {},
-  } as unknown as Parameters<ReturnType<typeof createAttackDiscoveryBasicEvaluator>['evaluate']>[0] & { input: AttackDiscoveryDatasetExample['input'] });
+  };
+  return createAttackDiscoveryBasicEvaluator().evaluate(params);
+};
 
 const validInsight = {
   title: 'Suspicious login',

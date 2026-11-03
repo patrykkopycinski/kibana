@@ -32,7 +32,10 @@ export const createAttackDiscoveryCriteriaEvaluator = ({
         return {
           score: null,
           label: 'task_error',
-          explanation: 'Task failed before a model response — skipping criteria evaluation.',
+          explanation: String(
+            output?.errors?.[0] ??
+              'Task failed before a model response — skipping criteria evaluation.'
+          ).slice(0, 1000),
         };
       }
 

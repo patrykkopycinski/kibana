@@ -21,7 +21,7 @@ import Path from 'path';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
-import { InferenceRequestError } from './inference_request_error';
+import { InfrastructureError, isInfrastructureInferenceError } from './infrastructure_error';
 import type {
   AttackDiscoveryTaskInput,
   AttackDiscoveryTaskOutput,
@@ -103,15 +103,20 @@ export const generateInsights = async ({
     try {
       response = await inferenceClient.chatComplete({ messages });
     } catch (error) {
-      // No model response (transport failure or an HTTP/connector error), so not a parse
-      // failure: fail here rather than in the parse loop, naming the layer instead of a bare
-      // `fetch failed`.
-      throw new InferenceRequestError(
-        `Attack Discovery inference request failed before a model response: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-        { cause: error }
-      );
+      // A rejection is only infrastructure when it says nothing about the model (transport
+      // failure, auth/routing/throttling/outage status). Token-limit, context-length and
+      // provider-refusal errors are also thrown by `chatComplete` but are model outcomes, so they
+      // stay plain errors and score 0.
+      const reason = error instanceof Error ? error.message : String(error);
+      if (isInfrastructureInferenceError(error)) {
+        throw new InfrastructureError(
+          `Attack Discovery inference request failed before a model response: ${reason}`,
+          { cause: error }
+        );
+      }
+      throw new Error(`Attack Discovery inference request failed with a model error: ${reason}`, {
+        cause: error,
+      });
     }
 
     try {
@@ -200,13 +205,24 @@ export const runAttackDiscovery = async ({
     }
 
     if (input.mode === 'searchAlerts') {
-      const alerts = await attackDiscoveryClient.searchAlertsAsContext({
-        alertsIndexPattern: input.alertsIndexPattern,
-        start: input.start,
-        end: input.end,
-        size: input.size,
-        filter: input.filter,
-      });
+      let alerts: AnonymizedAlert[];
+      try {
+        alerts = await attackDiscoveryClient.searchAlertsAsContext({
+          alertsIndexPattern: input.alertsIndexPattern,
+          start: input.start,
+          end: input.end,
+          size: input.size,
+          filter: input.filter,
+        });
+      } catch (error) {
+        // Fetching alert context happens before any model call.
+        throw new InfrastructureError(
+          `Attack Discovery alert search failed before a model call: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+          { cause: error }
+        );
+      }
 
       const prompt = await loadDefaultPrompt();
       const res = await generateInsights({
@@ -245,7 +261,7 @@ export const runAttackDiscovery = async ({
     return {
       insights: null,
       errors: [message],
-      errorKind: e instanceof InferenceRequestError ? 'infrastructure' : 'model',
+      errorKind: e instanceof InfrastructureError ? 'infrastructure' : 'model',
     };
   }
 };

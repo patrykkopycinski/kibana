@@ -218,6 +218,80 @@ describe('generateInsights', () => {
     expect(output.errorKind).toBe('model');
   });
 
+  describe('classifies chatComplete rejections', () => {
+    const runRejecting = (error: Error) => {
+      const chatComplete = jest.fn(async () => {
+        throw error;
+      });
+      return runAttackDiscovery({
+        inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
+        attackDiscoveryClient: { searchAlertsAsContext: jest.fn() } as never,
+        log,
+        input: { mode: 'graphState', anonymizedAlerts: [] } as AttackDiscoveryTaskInput,
+      }).then((output) => ({ output, chatComplete }));
+    };
+
+    const withStatus = (message: string, status?: number) =>
+      Object.assign(new Error(message), status === undefined ? {} : { status });
+
+    it('keeps a token-limit error (HTTP 500) a model failure', async () => {
+      const { output } = await runRejecting(
+        withStatus('Token limit reached. Increase the max tokens in your connector settings', 500)
+      );
+      expect(output.errorKind).toBe('model');
+      expect(output.errors?.[0]).toContain('Token limit reached');
+    });
+
+    it('keeps a provider refusal (HTTP 400) a model failure', async () => {
+      const { output } = await runRejecting(withStatus('content_filter: blocked', 400));
+      expect(output.errorKind).toBe('model');
+    });
+
+    it('keeps an unlisted status a model failure', async () => {
+      const { output } = await runRejecting(withStatus('teapot', 418));
+      expect(output.errorKind).toBe('model');
+    });
+
+    it.each([401, 403, 404, 408, 429, 502, 503, 504])(
+      'classifies HTTP %i as infrastructure',
+      async (status) => {
+        const { output, chatComplete } = await runRejecting(withStatus('upstream', status));
+        expect(output.errorKind).toBe('infrastructure');
+        expect(chatComplete).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('classifies a rejection without an HTTP status as infrastructure', async () => {
+      const { output } = await runRejecting(new TypeError('fetch failed'));
+      expect(output.errorKind).toBe('infrastructure');
+    });
+
+    it('classifies a transport error code without a status as infrastructure', async () => {
+      const { output } = await runRejecting(
+        Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' })
+      );
+      expect(output.errorKind).toBe('infrastructure');
+    });
+  });
+
+  it('marks a failed alert search as infrastructure', async () => {
+    const chatComplete = jest.fn();
+    const output = await runAttackDiscovery({
+      inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
+      attackDiscoveryClient: {
+        searchAlertsAsContext: jest.fn(async () => {
+          throw new Error('es unavailable');
+        }),
+      } as never,
+      log,
+      input: { mode: 'searchAlerts' } as AttackDiscoveryTaskInput,
+    });
+
+    expect(output.errorKind).toBe('infrastructure');
+    expect(output.errors?.[0]).toContain('es unavailable');
+    expect(chatComplete).not.toHaveBeenCalled();
+  });
+
   it('marks a failed generateApi start as infrastructure and a failed generation as model', async () => {
     const run = (result: Record<string, unknown>) =>
       runAttackDiscovery({

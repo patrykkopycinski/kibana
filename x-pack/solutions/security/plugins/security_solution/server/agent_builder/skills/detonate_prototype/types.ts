@@ -174,7 +174,6 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
     ...(task.sample_source ? { sample_source: task.sample_source } : {}),
 
     ...(task.vm_os_family ? { vm_os_family: task.vm_os_family } : {}),
-    ...(task.vm_architecture ? { vm_architecture: task.vm_architecture } : {}),
     ...(task.elastic_agent_id ? { elastic_agent_id: task.elastic_agent_id } : {}),
 
     total_alerts_count: totalDetonationAlerts(task),

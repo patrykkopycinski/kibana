@@ -50,12 +50,6 @@ triggers:
             Optional Investigation conversation to journal the verdict into (an
             AlertZero Watch Orchestrator passes its sweep's Investigation).
             Absent on standalone runs — no journal note is written then.
-        force_fresh:
-          type: boolean
-          description: >-
-            Detonate again even when the service holds a reusable run of this
-            hash — after a sandbox-profile change, or when a stored run was
-            quiet or inconclusive. Spends a VM; leave unset for routine triage.
       required:
         - sha256
         - alert_id
@@ -97,9 +91,9 @@ steps:
             with:
               document_id: "{{ inputs.alert_id }}"
               text: >-
-                Detonate triage: reputation gate reports this hash as
-                known-malicious{% if steps.reputation.output.malware_family != blank %} (family
-                {{ steps.reputation.output.malware_family }}){% endif %}. No new detonation was
+                Detonate triage: an earlier detonation of this hash in this space
+                was malicious{% if steps.reputation.output.last_task_id != blank %} (run
+                {{ steps.reputation.output.last_task_id }}){% endif %}. No new detonation was
                 run — the verdict comes from prior runs of the same sample.
 
           # F9 journal leg for the reputation-gated path: same contract as the
@@ -113,8 +107,8 @@ steps:
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
                 File detonation verdict for alert {{ inputs.alert_id }}:
-                KNOWN-MALICIOUS (reputation gate{% if steps.reputation.output.malware_family != blank %},
-                family {{ steps.reputation.output.malware_family }}{% endif %}) — no new
+                KNOWN-MALICIOUS (prior run{% if steps.reputation.output.last_task_id != blank %}
+                {{ steps.reputation.output.last_task_id }}{% endif %}) — no new
                 detonation was run; the verdict comes from prior runs of the same sample
                 (hash {{ inputs.sha256 | slice: 0, 12 }}…).
 
@@ -129,8 +123,6 @@ steps:
           # output — the blocklist artifact below is compiled per OS and
           # accepts exactly one, so it must travel with the run.
           vm_os_family: linux
-          # `== true` keeps an omitted input a real `false`, not an empty value.
-          force_fresh: "${{ inputs.force_fresh == true }}"
           tags:
             - "alert:{{ inputs.alert_id }}"
             - "triage"
@@ -477,9 +469,9 @@ steps:
                 - "{{ inputs.sha256 }}"
           # An endpoint blocklist artifact is compiled per OS and the validator
           # accepts exactly one os_types entry (minSize 1, maxSize 1) — the OS
-          # the sample actually ran on, from the verdict output. A deduplicated
-          # submit returns an earlier run that may not have recorded its OS;
-          # fall back to the OS the detonate step requested.
+          # the sample actually ran on, from the verdict output. A task that
+          # did not record its OS falls back to the OS the detonate step
+          # requested.
           os_types:
             - "{{ steps.verdict.output.vm_os_family | default: 'linux' }}"
           # Attribution: the resumed execution writes under the workflow

@@ -10,10 +10,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
-import {
-  DETONATE_VM_ARCHITECTURES,
-  DETONATE_VM_OS_FAMILIES,
-} from '../../../../../common/detonate_prototype';
+import { DETONATE_VM_OS_FAMILIES } from '../../../../../common/detonate_prototype';
 import { SUBMIT_DETONATION_TOOL_ID } from '..';
 import { submitInSpace } from '../../../../detonate_prototype/space_scope';
 import {
@@ -48,7 +45,6 @@ const submitDetonationSchema = lazySchema(() =>
       .describe(
         'Operating system of the detonation VM. Set this when the sample only runs on one platform; otherwise omit it and let the service choose.'
       ),
-    vmArchitecture: z.enum(DETONATE_VM_ARCHITECTURES).optional().describe('CPU architecture.'),
   })
 );
 
@@ -93,22 +89,16 @@ export const submitDetonationTool = ({
       return insufficientPrivilegesResult('Security Solution write or Detonate');
     }
 
-    const { sampleHash, tags, vmOsFamily, vmArchitecture } = params;
+    const { sampleHash, tags, vmOsFamily } = params;
 
     try {
-      // The tool has the request in scope, so the actor travels with the
-      // submit and the service's quota keys on the real user.
-      const username = endpointAppContextService.getCurrentUsername(request);
-      const actor = username !== 'unknown' ? username : undefined;
-
       const client = getClient();
-      const { task, deduplicated } = await submitInSpace(
-        (scoped) => client.submitHash(scoped, actor),
+      const task = await submitInSpace(
+        (scoped) => client.submitHash(scoped),
         {
           sample_hash: sampleHash,
           ...(tags ? { tags } : {}),
           ...(vmOsFamily ? { vm_os_family: vmOsFamily } : {}),
-          ...(vmArchitecture ? { vm_architecture: vmArchitecture } : {}),
         },
         endpointAppContextService.getActiveSpaceId(request)
       );
@@ -120,14 +110,7 @@ export const submitDetonationTool = ({
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: {
-              ...summarizeDetonationTask(task),
-              submitted: true,
-              // An existing report is a different answer than a new run: the
-              // agent says "a completed report already exists" instead of
-              // "the run has started", and does not wait for completion.
-              ...(deduplicated ? { deduplicated: true } : {}),
-            },
+            data: { ...summarizeDetonationTask(task), submitted: true },
           },
         ],
       };

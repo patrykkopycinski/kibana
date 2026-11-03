@@ -65,7 +65,7 @@ const keepValid = (values: string[], normalize: (value: string) => string | unde
  * Later steps splice these IOCs into queries, so a value that is not a valid
  * domain, IP or hex digest is dropped rather than escaped: it cannot be hunted.
  */
-const sanitizeIocs = (iocs: DetonateExtractedIocs): DetonateExtractedIocs => ({
+export const sanitizeIocs = (iocs: DetonateExtractedIocs): DetonateExtractedIocs => ({
   domains: keepValid(iocs.domains, (value) => {
     const domain = value.trim().toLowerCase();
     return DOMAIN_PATTERN.test(domain) ? domain : undefined;
@@ -107,10 +107,6 @@ const toOutput = (task: DetonateTask, completed: boolean) => ({
   detection_rule_names: [
     ...new Set(task.production_detection_alert_groups.map((group) => group.kibana_alert_rule_name)),
   ],
-  // Absent (not empty) when the service version predates extraction —
-  // the output schema documents that downstream steps treat both as "no
-  // IOCs to hunt".
-  ...(task.extracted_iocs ? { extracted_iocs: sanitizeIocs(task.extracted_iocs) } : {}),
 });
 
 export const detonateSampleStepDefinition = createPollServerStepDefinition({
@@ -122,9 +118,7 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       sample_hash: sampleHash,
       tags,
       vm_os_family: vmOsFamily,
-      vm_architecture: vmArchitecture,
       exec_wait_secs: execWaitSecs,
-      force_fresh: forceFresh,
       // zod `.default()` does not run here: the engine renders `input` from the
       // `with` block and never calls `inputSchema.parse()` (same reason the
       // sibling `setAlertTags` handler defaults its arrays by destructuring).
@@ -143,9 +137,7 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
           sample_hash: sampleHash,
           ...(tags ? { tags } : {}),
           ...(vmOsFamily ? { vm_os_family: vmOsFamily } : {}),
-          ...(vmArchitecture ? { vm_architecture: vmArchitecture } : {}),
           ...(execWaitSecs !== undefined ? { exec_wait_secs: execWaitSecs } : {}),
-          ...(forceFresh === true ? { force_fresh: true } : {}),
         },
       });
 

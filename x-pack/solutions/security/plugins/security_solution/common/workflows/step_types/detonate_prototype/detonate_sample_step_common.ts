@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import {
   DETONATE_PROTOTYPE_NAMESPACE,
   DETONATE_SAMPLE_SOURCES,
-  DETONATE_VM_ARCHITECTURES,
   DETONATE_VM_OS_FAMILIES,
   DETONATE_WORKERS,
   DETONATE_WORKER_STATUSES,
@@ -56,10 +55,6 @@ export const detonateSampleInputSchema = lazySchema(() =>
       .enum(DETONATE_VM_OS_FAMILIES)
       .optional()
       .describe('Operating system family of the detonation VM. Defaults to the service default.'),
-    vm_architecture: z
-      .enum(DETONATE_VM_ARCHITECTURES)
-      .optional()
-      .describe('CPU architecture of the detonation VM.'),
     exec_wait_secs: z
       .number()
       .int()
@@ -67,12 +62,6 @@ export const detonateSampleInputSchema = lazySchema(() =>
       .max(3600)
       .optional()
       .describe('How long the sample is left running inside the VM before the VM is torn down.'),
-    force_fresh: z
-      .boolean()
-      .optional()
-      .describe(
-        'Run a new detonation even when a stored run of this sample can be reused. Spends a VM; leave unset for routine triage.'
-      ),
     /**
      * A detonation boots a VM, runs the sample, waits, tears the VM down and
      * summarises telemetry — minutes, not seconds. The ceiling is the author's
@@ -119,11 +108,10 @@ export const detonateSampleOutputSchema = lazySchema(() =>
     endpoint_alert_event_codes: z.array(z.string()),
     detection_rule_names: z.array(z.string()),
     /**
-     * IOCs the service extracted from this run's telemetry — DNS domains,
-     * public IPs, and non-sample file hashes. Empty arrays mean the run's
-     * telemetry contained none; absent means the service version predates
-     * extraction. Downstream steps (the fleet hunt) must treat both as "no
-     * IOCs to hunt".
+     * IOCs read from this run's alert documents — DNS domains, public IPs,
+     * and non-sample file hashes. Empty arrays mean the alerts contained
+     * none; absent means they could not be read. Downstream steps (the fleet
+     * hunt) must treat both as "no IOCs to hunt".
      */
     extracted_iocs: z
       .object({

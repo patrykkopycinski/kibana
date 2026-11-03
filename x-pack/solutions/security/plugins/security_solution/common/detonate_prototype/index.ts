@@ -102,11 +102,9 @@ export const detonationProgress = (
 export const DETONATE_SAMPLE_SOURCES = ['virtustotal', 'malwarebazaar', 'provided-url'] as const;
 export type DetonateSampleSource = (typeof DETONATE_SAMPLE_SOURCES)[number];
 
-export const DETONATE_VM_OS_FAMILIES = ['linux', 'windows', 'macos'] as const;
+/** FIDELITY: the service spells macOS `darwin`. */
+export const DETONATE_VM_OS_FAMILIES = ['linux', 'windows', 'darwin'] as const;
 export type DetonateVmOsFamily = (typeof DETONATE_VM_OS_FAMILIES)[number];
-
-export const DETONATE_VM_ARCHITECTURES = ['x86_64', 'aarch64'] as const;
-export type DetonateVmArchitecture = (typeof DETONATE_VM_ARCHITECTURES)[number];
 
 export const DETONATE_DETECTION_SEVERITIES = ['low', 'medium', 'high'] as const;
 export type DetonateDetectionSeverity = (typeof DETONATE_DETECTION_SEVERITIES)[number];
@@ -182,15 +180,18 @@ export interface DetonateTask {
   exec_sample_arguments?: string;
 
   vm_os_family?: DetonateVmOsFamily;
-  vm_architecture?: DetonateVmArchitecture;
   vm_disk_image?: string;
   vm_has_internet: boolean;
   vm_instance_name?: string;
-  vm_zone?: string;
-  vm_termination_time?: string;
 
   elastic_agent_id?: string;
   elastic_endpoint_id?: string;
+  /**
+   * SECURITY: the service returns the sandbox's Fleet enrollment token in
+   * clear. Declared only so `redactDetonateTask` can strip it; nothing in
+   * Kibana may read or forward it.
+   */
+  agent_fleet_enrollment_token?: string;
 
   production_endpoint_alerts_count?: number;
   production_endpoint_alert_groups: DetonateEndpointAlertsGroup[];
@@ -198,11 +199,13 @@ export interface DetonateTask {
   diagnostic_endpoint_alert_groups: DetonateEndpointAlertsGroup[];
   production_detection_alerts_count?: number;
   production_detection_alert_groups: DetonateDetectionAlertsGroup[];
-  /** IOCs extracted from this run's telemetry: DNS domains, public IPs, and
-   *  file hashes other than the sample's own. Empty arrays mean the run's
-   *  telemetry contained none — not that extraction was skipped. */
-  extracted_iocs?: DetonateExtractedIocs;
 }
+
+/** The task without fields Kibana must never surface. */
+export const redactDetonateTask = (task: DetonateTask): DetonateTask => {
+  const { agent_fleet_enrollment_token: _token, ...rest } = task;
+  return rest;
+};
 
 /** One point on the timeline, from `/tasks/{id}/updates`. */
 export interface DetonateTaskUpdate {
@@ -224,11 +227,8 @@ export interface DetonateBaseRequest {
   exec_commands?: string[];
   exec_sample_arguments?: string;
   vm_os_family?: DetonateVmOsFamily;
-  vm_architecture?: DetonateVmArchitecture;
   vm_disk_image?: string;
   vm_has_internet?: boolean;
-  /** Bypass dedup when the analyst explicitly asked for a fresh run. */
-  force_fresh?: boolean;
 }
 
 export interface DetonateHashRequest extends DetonateBaseRequest {
@@ -247,12 +247,13 @@ export interface DetonateFileRequest extends DetonateBaseRequest {
 /** Both submits answer with the created task. */
 export type DetonateSubmitResponse = DetonateTask;
 
-/** A page of tasks. */
+/** A page of tasks. The service reports no total; a short page is the last. */
 export interface DetonateTaskSearchResponse {
-  total: number;
+  tasks: DetonateTask[];
+  query_string?: string | null;
   offset: number;
   size: number;
-  tasks: DetonateTask[];
+  order: 'asc' | 'desc';
 }
 
 /** Deep links back into the telemetry cluster for one task. */
@@ -430,28 +431,54 @@ export const DETONATE_QUIET_SEED_SHA256 =
 export const DETONATE_NOTE_MARKER = '[detonate] ' as const;
 
 /* -------------------------------------------------------------------------- */
-/* Reputation                                                                  */
+/* Prior-run lookup                                                            */
 /* -------------------------------------------------------------------------- */
 
-/** Reputation route, proxied like the rest of the service's routes. */
-export const DETONATE_REPUTATION_PATH = `${DETONATE_PROTOTYPE_API}/reputation` as const;
+/**
+ * Prior-run lookup route. The service has no reputation endpoint, so "have we
+ * seen this sample" is answered from this space's own earlier detonations.
+ */
+export const DETONATE_PRIOR_RUNS_PATH = `${DETONATE_PROTOTYPE_API}/prior_runs` as const;
+
+/** How many of a hash's newest runs the lookup reads. */
+export const DETONATE_PRIOR_RUNS_LOOKBACK = 20;
 
 /**
- * What the reputation gate says about a digest. `unknown` is honest
- * uncertainty — it must never be read as benign, only as "no prior verdict",
- * which is what routes the sample to a detonation.
+ * `known-malicious` means the newest completed run of this sample in this
+ * space was malicious. `unknown` is honest uncertainty — no run, or no
+ * malicious one — and must route the sample to a detonation, never be read as
+ * benign.
  */
-export const DETONATE_REPUTATION_STATUSES = ['known-malicious', 'unknown'] as const;
-export type DetonateReputationStatus = (typeof DETONATE_REPUTATION_STATUSES)[number];
+export const DETONATE_PRIOR_RUN_STATUSES = ['known-malicious', 'unknown'] as const;
+export type DetonatePriorRunStatus = (typeof DETONATE_PRIOR_RUN_STATUSES)[number];
 
-/** The reputation gate's answer for one digest. */
-export interface DetonateReputationResponse {
+export const DETONATE_PRIOR_RUN_SOURCE = 'prior-detonation' as const;
+
+/** The lookup's answer for one digest. */
+export interface DetonatePriorRunResponse {
   sha256: string;
-  status: DetonateReputationStatus;
-  source: string;
-  malware_family?: string;
+  status: DetonatePriorRunStatus;
+  source: typeof DETONATE_PRIOR_RUN_SOURCE;
+  /** The newest completed run the status was read from, when there is one. */
+  last_task_id?: string;
+  last_verdict?: DetonateVerdictName;
   last_seen?: string;
 }
+
+/** A value quoted for an ES `query_string` phrase. */
+export const quoteQueryValue = (value: string): string =>
+  `"${value.replace(/[\\"]/g, (char) => `\\${char}`)}"`;
+
+/** The service-side search for one space's runs, optionally narrowed. */
+export const spaceTaskQuery = (
+  spaceId: string,
+  filters: { sampleHash?: string; alertId?: string } = {}
+): string =>
+  [
+    `tags:${quoteQueryValue(spaceRunTag(spaceId))}`,
+    ...(filters.sampleHash ? [`sample_hash:${quoteQueryValue(filters.sampleHash)}`] : []),
+    ...(filters.alertId ? [`tags:${quoteQueryValue(alertRunTag(filters.alertId))}`] : []),
+  ].join(' AND ');
 
 /** One detonation's conclusion, shaped for workflows, notes and tags. */
 export interface DetonateVerdict {
@@ -541,5 +568,35 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
     detection_rule_names: ruleNames,
     evidence,
     suggested_tag: detonateVerdictTag(verdict),
+  };
+};
+
+/**
+ * Read a prior-run status off a hash's runs, newest first. Runs from other
+ * spaces are dropped again here even though the query already filtered them:
+ * the service's search is not the isolation boundary.
+ */
+export const derivePriorRunLookup = (
+  sha256: string,
+  tasks: readonly DetonateTask[],
+  spaceId: string
+): DetonatePriorRunResponse => {
+  const lastCompleted = tasks.find(
+    (task) =>
+      runBelongsToSpace(task.tags, spaceId) &&
+      task.sample_hash?.toLowerCase() === sha256 &&
+      isDetonationComplete(task)
+  );
+  if (!lastCompleted) {
+    return { sha256, status: 'unknown', source: DETONATE_PRIOR_RUN_SOURCE };
+  }
+  const { verdict } = deriveDetonateVerdict(lastCompleted);
+  return {
+    sha256,
+    status: verdict === 'malicious' ? 'known-malicious' : 'unknown',
+    source: DETONATE_PRIOR_RUN_SOURCE,
+    last_task_id: lastCompleted.id,
+    last_verdict: verdict,
+    last_seen: lastCompleted.created_at,
   };
 };

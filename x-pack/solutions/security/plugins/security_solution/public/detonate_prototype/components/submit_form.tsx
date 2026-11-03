@@ -17,12 +17,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiCheckbox,
   EuiComboBox,
   EuiConfirmModal,
   EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPanel,
@@ -37,15 +34,8 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
-import {
-  DETONATE_VM_ARCHITECTURES,
-  DETONATE_VM_OS_FAMILIES,
-} from '../../../common/detonate_prototype';
-import type {
-  DetonateTask,
-  DetonateVmArchitecture,
-  DetonateVmOsFamily,
-} from '../../../common/detonate_prototype';
+import { DETONATE_VM_OS_FAMILIES } from '../../../common/detonate_prototype';
+import type { DetonateTask, DetonateVmOsFamily } from '../../../common/detonate_prototype';
 import { useSubmitFile, useSubmitHash } from '../hooks/use_detonate';
 import { useCanSubmitDetonation } from '../hooks/use_can_submit_detonation';
 import * as i18n from '../translations';
@@ -58,12 +48,11 @@ export const SUBMIT_ERROR_TEST_ID = 'detonatePrototypeSubmitError';
 export const SUBMIT_READ_ONLY_TEST_ID = 'detonatePrototypeSubmitReadOnly';
 /** The modal root. EUI renders its own confirm/cancel button test subjects. */
 export const SUBMIT_CONFIRM_TEST_ID = 'detonatePrototypeSubmitConfirm';
-export const SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID = 'detonatePrototypeSubmitConfirmForceFresh';
 
 type SubmitMode = 'hash' | 'file';
 
 /**
- * The service decides OS and architecture when the request omits them, and its
+ * The service decides the OS when the request omits it, and its
  * default is the right answer more often than ours would be. An empty value
  * means "do not send the field".
  */
@@ -72,11 +61,6 @@ const UNSET = '' as const;
 const osOptions = [
   { value: UNSET, text: i18n.SERVICE_DEFAULT },
   ...DETONATE_VM_OS_FAMILIES.map((value) => ({ value, text: value })),
-];
-
-const archOptions = [
-  { value: UNSET, text: i18n.SERVICE_DEFAULT },
-  ...DETONATE_VM_ARCHITECTURES.map((value) => ({ value, text: value })),
 ];
 
 const errorMessage = (error: unknown): string => {
@@ -105,11 +89,8 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
     (initialTags ?? []).map((label) => ({ label }))
   );
   const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(UNSET);
-  const [architecture, setArchitecture] = useState<DetonateVmArchitecture | typeof UNSET>(UNSET);
   /** The button arms the run; the modal's confirm is what actually submits. */
   const [isConfirming, setIsConfirming] = useState(false);
-  /** Checked = bypass the completed-report dedup and spend a fresh VM run. */
-  const [forceFresh, setForceFresh] = useState(false);
 
   const submitHash = useSubmitHash();
   const submitFile = useSubmitFile();
@@ -121,10 +102,8 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
     () => ({
       ...(tagValues.length ? { tags: tagValues } : {}),
       ...(osFamily ? { vm_os_family: osFamily } : {}),
-      ...(architecture ? { vm_architecture: architecture } : {}),
-      ...(forceFresh ? { force_fresh: true } : {}),
     }),
-    [tagValues, osFamily, architecture, forceFresh]
+    [tagValues, osFamily]
   );
 
   const hasSubmitPrivilege = useCanSubmitDetonation();
@@ -214,34 +193,17 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
           />
         </EuiFormRow>
 
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
-            <EuiFormRow label={i18n.OS_FAMILY_LABEL} fullWidth>
-              <EuiSelect
-                fullWidth
-                options={osOptions}
-                value={osFamily}
-                onChange={(event) =>
-                  setOsFamily(event.target.value as DetonateVmOsFamily | typeof UNSET)
-                }
-                data-test-subj="detonatePrototypeOsFamily"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label={i18n.ARCHITECTURE_LABEL} fullWidth>
-              <EuiSelect
-                fullWidth
-                options={archOptions}
-                value={architecture}
-                onChange={(event) =>
-                  setArchitecture(event.target.value as DetonateVmArchitecture | typeof UNSET)
-                }
-                data-test-subj="detonatePrototypeArchitecture"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFormRow label={i18n.OS_FAMILY_LABEL} fullWidth>
+          <EuiSelect
+            fullWidth
+            options={osOptions}
+            value={osFamily}
+            onChange={(event) =>
+              setOsFamily(event.target.value as DetonateVmOsFamily | typeof UNSET)
+            }
+            data-test-subj="detonatePrototypeOsFamily"
+          />
+        </EuiFormRow>
 
         {active.isError && (
           <>
@@ -293,16 +255,6 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
           data-test-subj={SUBMIT_CONFIRM_TEST_ID}
         >
           <p>{i18n.SUBMIT_CONFIRM_BODY}</p>
-          <EuiCheckbox
-            id={`${SUBMIT_CONFIRM_TEST_ID}-forceFresh`}
-            data-test-subj={SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID}
-            label={i18n.SUBMIT_CONFIRM_FORCE_FRESH_LABEL}
-            checked={forceFresh}
-            onChange={(event) => setForceFresh(event.target.checked)}
-          />
-          <p>
-            <small>{i18n.SUBMIT_CONFIRM_FORCE_FRESH_HELP}</small>
-          </p>
         </EuiConfirmModal>
       )}
     </EuiPanel>

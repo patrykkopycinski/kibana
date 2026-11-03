@@ -10,8 +10,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
-import { spaceRunTag } from '../../../../../common/detonate_prototype';
 import { LIST_DETONATIONS_TOOL_ID } from '..';
+import { listTasksInSpace } from '../../../../detonate_prototype/space_scope';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateServiceErrorResult,
@@ -52,9 +52,7 @@ const listDetonationsSchema = lazySchema(() =>
       .min(0)
       .max(MAX_LIST_DETONATIONS_PAGE)
       .optional()
-      .describe(
-        '0-based page. The result reports `total` and `hasMore` so further pages can be walked.'
-      ),
+      .describe('0-based page. The result reports `hasMore` so further pages can be walked.'),
   })
 );
 
@@ -83,13 +81,16 @@ export const listDetonationsTool = ({
     const offset = page * LIST_DETONATIONS_PAGE_SIZE;
 
     try {
-      const response = await getClient().listTasks({
-        ...(queryString ? { query_string: queryString } : {}),
-        ...(alertId ? { alert_id: alertId } : {}),
-        tag: spaceRunTag(endpointAppContextService.getActiveSpaceId(request)),
-        offset,
-        size: LIST_DETONATIONS_PAGE_SIZE,
-      });
+      const response = await listTasksInSpace(
+        getClient(),
+        endpointAppContextService.getActiveSpaceId(request),
+        {
+          ...(queryString ? { query_string: queryString } : {}),
+          offset,
+          size: LIST_DETONATIONS_PAGE_SIZE,
+        },
+        alertId ? { alertId } : {}
+      );
 
       return {
         results: [
@@ -98,10 +99,11 @@ export const listDetonationsTool = ({
             type: ToolResultType.other,
             data: {
               kind: 'detonation_task_list' as const,
-              total: response.total,
               page,
               pageSize: LIST_DETONATIONS_PAGE_SIZE,
-              hasMore: offset + response.tasks.length < response.total,
+              // The service reports no total: a full page is the only
+              // signal that another page may exist.
+              hasMore: response.tasks.length >= LIST_DETONATIONS_PAGE_SIZE,
               tasks: response.tasks.map(summarizeDetonationTask),
             },
           },

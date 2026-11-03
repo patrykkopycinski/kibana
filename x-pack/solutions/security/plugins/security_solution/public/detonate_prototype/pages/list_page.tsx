@@ -207,7 +207,11 @@ export const DetonateListPage = React.memo(() => {
           pagination={{
             pageIndex,
             pageSize,
-            totalItemCount: data?.total ?? 0,
+            // The service reports no total; a full page means another may follow.
+            totalItemCount:
+              pageIndex * pageSize +
+              (data?.tasks.length ?? 0) +
+              (data?.tasks.length === pageSize ? 1 : 0),
             pageSizeOptions: PAGE_SIZE_OPTIONS,
           }}
           onChange={onTableChange}

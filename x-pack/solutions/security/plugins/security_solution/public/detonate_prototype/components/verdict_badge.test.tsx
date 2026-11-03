@@ -16,7 +16,6 @@ const baseTask = {
   created_at: '2026-10-27T10:00:00Z',
   file_name: 'invoice.pdf',
   file_sha256: 'a'.repeat(64),
-  reputation: 'unknown',
   production_endpoint_alert_groups: [],
   diagnostic_endpoint_alert_groups: [],
   production_detection_alert_groups: [],

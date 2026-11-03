@@ -13,8 +13,8 @@
  */
 
 import { detonateReputationStepDefinition } from './detonate_reputation_step';
-import { DETONATE_REPUTATION_PATH } from '../../../../common/detonate_prototype';
-import type { DetonateReputationResponse } from '../../../../common/detonate_prototype';
+import { DETONATE_PRIOR_RUNS_PATH } from '../../../../common/detonate_prototype';
+import type { DetonatePriorRunResponse } from '../../../../common/detonate_prototype';
 
 type HandlerContext = Parameters<typeof detonateReputationStepDefinition.handler>[0];
 
@@ -26,12 +26,14 @@ const createMockContext = (input: Record<string, unknown>, body: unknown) =>
   } as unknown as HandlerContext);
 
 describe('detonateReputationStepDefinition', () => {
-  it('reads the gate through the internal route and returns the answer untouched', async () => {
-    const known: DetonateReputationResponse = {
+  it('reads prior runs through the internal route and returns the answer untouched', async () => {
+    const known: DetonatePriorRunResponse = {
       sha256: 'a'.repeat(64),
       status: 'known-malicious',
-      source: 'detonate-seed',
-      malware_family: 'eicar-test-file',
+      source: 'prior-detonation',
+      last_task_id: 'task-7',
+      last_verdict: 'malicious',
+      last_seen: '2026-11-01T10:00:00.000Z',
     };
     const context = createMockContext({ sha256: 'a'.repeat(64) }, known);
 
@@ -39,17 +41,17 @@ describe('detonateReputationStepDefinition', () => {
 
     expect(context.contextManager.callKibanaApi).toHaveBeenCalledWith({
       method: 'GET',
-      path: `${DETONATE_REPUTATION_PATH}/${'a'.repeat(64)}`,
+      path: `${DETONATE_PRIOR_RUNS_PATH}/${'a'.repeat(64)}`,
       headers: { 'elastic-api-version': '1' },
     });
     expect(result.output).toEqual(known);
   });
 
   it('passes `unknown` through without softening it into benign', async () => {
-    const unknown: DetonateReputationResponse = {
+    const unknown: DetonatePriorRunResponse = {
       sha256: 'b'.repeat(64),
       status: 'unknown',
-      source: 'detonate-seed',
+      source: 'prior-detonation',
     };
     const context = createMockContext({ sha256: 'b'.repeat(64) }, unknown);
 

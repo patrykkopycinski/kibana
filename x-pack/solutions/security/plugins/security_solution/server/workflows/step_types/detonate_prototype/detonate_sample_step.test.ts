@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { detonateSampleStepDefinition } from './detonate_sample_step';
+import { detonateSampleStepDefinition, sanitizeIocs } from './detonate_sample_step';
 import {
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
@@ -77,27 +77,6 @@ describe('detonateSampleStepDefinition', () => {
         headers: { 'elastic-api-version': '1' },
         body: { sample_hash: 'a'.repeat(64) },
       });
-    });
-
-    it.each([
-      ['true', true, { force_fresh: true }],
-      ['false', false, {}],
-      ['omitted', undefined, {}],
-    ])('forwards force_fresh only when true (input %s)', async (_label, forceFresh, extra) => {
-      const mockContext = createMockContext({
-        sample_hash: 'a'.repeat(64),
-        ...(forceFresh === undefined ? {} : { force_fresh: forceFresh }),
-      });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
-        status: 200,
-        body: createTaskFixture({ id: 'task-42' }),
-      });
-
-      await detonateSampleStepDefinition.start!(mockContext);
-
-      expect(mockContext.contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { sample_hash: 'a'.repeat(64), ...extra } })
-      );
     });
 
     it('seeds state with taskId and a deadline 900s out when max_wait_secs is omitted', async () => {
@@ -211,64 +190,22 @@ describe('detonateSampleStepDefinition', () => {
       });
     });
 
-    it('passes through only syntactically valid IOCs, normalized and de-duplicated', async () => {
-      const task = createTaskFixture({
-        extracted_iocs: {
-          domains: [
-            'Evil.Example.com',
-            'evil.example.com',
-            'x") OR TRUE | WHERE ("',
-            'a b.com',
-            '',
-          ],
-          ips: ['203.0.113.7', '2001:DB8::1', '203.0.113.7"', '999.1.1.1'],
-          file_hashes: ['A'.repeat(64), 'zz'.repeat(32), 'b'.repeat(31)],
-        },
-      });
-      const context = pollContext({
-        taskId: 'task-1',
-        submittedAt: new Date().toISOString(),
-        deadlineAt: new Date(Date.now() + 60_000).toISOString(),
+    it('drops service fields the real contract does not have from the submit body', async () => {
+      const context = createMockContext({
+        sample_hash: 'a'.repeat(64),
+        force_fresh: true,
+        vm_architecture: 'aarch64',
       });
       (context.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
-        body: task,
+        body: createTaskFixture({ id: 'task-42' }),
       });
 
-      const result = (await detonateSampleStepDefinition.poll(context)) as {
-        output: Record<string, unknown>;
-      };
+      await detonateSampleStepDefinition.start!(context);
 
-      expect(result.output.extracted_iocs).toEqual({
-        domains: ['evil.example.com'],
-        ips: ['203.0.113.7', '2001:db8::1'],
-        file_hashes: ['a'.repeat(64)],
-      });
-    });
-
-    it('caps each IOC family so the hunt query stays bounded', async () => {
-      const task = createTaskFixture({
-        extracted_iocs: {
-          domains: Array.from({ length: 150 }, (_, i) => `host${i}.example.com`),
-          ips: [],
-          file_hashes: [],
-        },
-      });
-      const context = pollContext({
-        taskId: 'task-1',
-        submittedAt: new Date().toISOString(),
-        deadlineAt: new Date(Date.now() + 60_000).toISOString(),
-      });
-      (context.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
-        status: 200,
-        body: task,
-      });
-
-      const result = (await detonateSampleStepDefinition.poll(context)) as {
-        output: { extracted_iocs: { domains: string[] } };
-      };
-
-      expect(result.output.extracted_iocs.domains).toHaveLength(100);
+      expect(context.contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: { sample_hash: 'a'.repeat(64) } })
+      );
     });
 
     it('returns failed: true for a failed run instead of throwing', async () => {
@@ -344,5 +281,30 @@ describe('detonateSampleStepDefinition', () => {
 
       expect(result).toEqual({ state });
     });
+  });
+});
+
+describe('sanitizeIocs', () => {
+  it('passes through only syntactically valid IOCs, normalized and de-duplicated', () => {
+    expect(
+      sanitizeIocs({
+        domains: ['Evil.Example.com', 'evil.example.com', 'x") OR TRUE | WHERE ("', 'a b.com', ''],
+        ips: ['203.0.113.7', '2001:DB8::1', '203.0.113.7"', '999.1.1.1'],
+        file_hashes: ['A'.repeat(64), 'zz'.repeat(32), 'b'.repeat(31)],
+      })
+    ).toEqual({
+      domains: ['evil.example.com'],
+      ips: ['203.0.113.7', '2001:db8::1'],
+      file_hashes: ['a'.repeat(64)],
+    });
+  });
+
+  it('caps each IOC family so the hunt query stays bounded', () => {
+    const { domains } = sanitizeIocs({
+      domains: Array.from({ length: 150 }, (_, i) => `host${i}.example.com`),
+      ips: [],
+      file_hashes: [],
+    });
+    expect(domains).toHaveLength(100);
   });
 });

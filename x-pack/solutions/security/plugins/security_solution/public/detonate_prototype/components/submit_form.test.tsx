@@ -10,12 +10,10 @@
  *
  * The acceptance criteria: a submit never reaches the API without an explicit
  * confirm (a detonation spends a VM), cancelling the modal submits nothing,
- * and the force-fresh checkbox reaches the request (bypassing completed-report
- * dedup is the analyst's explicit choice, not a form default).
+ * and an untouched form sends only the hash, leaving OS choice to the service.
  *
- * Mutation checks: wire the button straight to `doSubmit` and the first case
- * goes red; drop `force_fresh` from `options` and the force-fresh case goes
- * red.
+ * Mutation check: wire the button straight to `doSubmit` and the first case
+ * goes red.
  */
 
 import React from 'react';
@@ -27,7 +25,6 @@ import * as useDetonate from '../hooks/use_detonate';
 import {
   SubmitForm,
   SUBMIT_BUTTON_TEST_ID,
-  SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID,
   SUBMIT_HASH_INPUT_TEST_ID,
   SUBMIT_READ_ONLY_TEST_ID,
 } from './submit_form';
@@ -90,19 +87,12 @@ describe('SubmitForm', () => {
     expect(screen.queryByTestId('confirmModalConfirmButton')).toBeNull();
   });
 
-  it('sends force_fresh only when the analyst checked the box', async () => {
+  it('sends only the hash when no option was chosen', async () => {
     render(<SubmitForm onSubmitted={jest.fn()} />);
 
     await submit();
-    // Default: dedup applies — no force_fresh in the request.
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    expect(mutateAsync).toHaveBeenCalledWith(expect.not.objectContaining({ force_fresh: true }));
-
-    mutateAsync.mockClear();
-    await submit();
-    fireEvent.click(screen.getByTestId(SUBMIT_CONFIRM_FORCE_FRESH_TEST_ID));
-    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ force_fresh: true }));
+    expect(mutateAsync).toHaveBeenCalledWith({ sample_hash: 'a'.repeat(64) });
   });
 
   it('calls onSubmitted with the task the service answered', async () => {

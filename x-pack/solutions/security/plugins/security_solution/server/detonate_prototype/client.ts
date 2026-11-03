@@ -22,20 +22,31 @@
 import type { Logger } from '@kbn/core/server';
 
 import type {
+  DetonateAlertDoc,
   DetonateFileRequest,
   DetonateHashRequest,
-  DetonateReputationResponse,
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
 } from '../../common/detonate_prototype';
+import { quoteQueryValue, redactDetonateTask } from '../../common/detonate_prototype';
 
 /** Service paths, relative to the configured base URL. */
 const API_PREFIX = '/v1/detonate';
 
+/** The service's per-task alert reads. Each 404s until the sandbox agent enrolls. */
+export const DETONATE_ALERT_KINDS = [
+  'production-endpoint-alerts',
+  'diagnostic-endpoint-alerts',
+  'production-detection-alerts',
+] as const;
+export type DetonateAlertKind = (typeof DETONATE_ALERT_KINDS)[number];
+
 export interface DetonateClientOptions {
   /** Base URL of the detonation service, from configuration. */
   baseUrl: string;
+  /** Sent as the gateway's `Auth` header when configured; a local simulator needs none. */
+  apiKey?: string;
   /** Per-request ceiling. A detonation is polled, so no single call is slow. */
   requestTimeoutMs: number;
   logger: Logger;
@@ -52,54 +63,41 @@ export class DetonateServiceError extends Error {
   }
 }
 
+export interface DetonateTaskSearchQuery {
+  /** An ES `query_string`, evaluated by the service against its task index. */
+  query_string?: string;
+  offset?: number;
+  size?: number;
+  order?: 'asc' | 'desc';
+}
+
 export interface DetonateClient {
   healthcheck(): Promise<{ status: string }>;
-  reputation(sha256: string): Promise<DetonateReputationResponse>;
   submitFile(
     request: DetonateFileRequest,
-    file: { filename: string; body: Buffer },
-    actor?: string
-  ): Promise<DetonateSubmitOutcome>;
-  submitHash(request: DetonateHashRequest, actor?: string): Promise<DetonateSubmitOutcome>;
+    file: { filename: string; body: Buffer }
+  ): Promise<DetonateTask>;
+  submitHash(request: DetonateHashRequest): Promise<DetonateTask>;
+  /**
+   * A read right after submit can 404 while the service indexes the task, so
+   * callers that just submitted treat a 404 as "not yet", not "gone".
+   */
   getTask(taskId: string): Promise<DetonateTask>;
   getTaskUpdates(taskId: string): Promise<DetonateTaskUpdate[]>;
-  listTasks(query?: {
-    query_string?: string;
-    alert_id?: string;
-    /** Exact match against one of the run's tags, unlike the substring `query_string`. */
-    tag?: string;
-    offset?: number;
-    size?: number;
-  }): Promise<DetonateTaskSearchResponse>;
+  getTaskAlerts(taskId: string, kind: DetonateAlertKind): Promise<DetonateAlertDoc[]>;
+  listTasks(query?: DetonateTaskSearchQuery): Promise<DetonateTaskSearchResponse>;
+  /** The newest runs of one sample, before any Kibana-side space filtering. */
+  findTasksByHash(sha256: string, size?: number): Promise<DetonateTask[]>;
 }
-
-/**
- * What a submit answered. `deduplicated: true` means the service already had
- * a completed report for the sample and returned it instead of spending a
- * second VM — the caller surfaces this so the analyst is not left wondering
- * why no new run appeared.
- */
-export interface DetonateSubmitOutcome {
-  task: DetonateTask;
-  deduplicated: boolean;
-}
-
-/** Submit calls carry the actor so the service's quota keys on the real user. */
-const actorHeaders = (actor?: string): Record<string, string> =>
-  actor ? { 'x-detonate-actor': actor.slice(0, 128) } : {};
-
-/** Split the submit response into task + dedup marker. */
-const toSubmitOutcome = (body: DetonateSubmitOutcome & DetonateTask): DetonateSubmitOutcome => ({
-  task: body,
-  deduplicated: body.deduplicated === true,
-});
 
 export const createDetonateClient = ({
   baseUrl,
+  apiKey,
   requestTimeoutMs,
   logger,
 }: DetonateClientOptions): DetonateClient => {
   const url = (path: string) => `${baseUrl.replace(/\/$/, '')}${API_PREFIX}${path}`;
+  const authHeaders: Record<string, string> = apiKey ? { Auth: apiKey } : {};
 
   /**
    * Every call is bounded by an AbortSignal. Without it an unreachable service
@@ -113,6 +111,7 @@ export const createDetonateClient = ({
     try {
       response = await fetch(target, {
         ...init,
+        headers: { ...authHeaders, ...(init?.headers as Record<string, string> | undefined) },
         signal: AbortSignal.timeout(requestTimeoutMs),
       });
     } catch (error) {
@@ -146,46 +145,60 @@ export const createDetonateClient = ({
     return (await response.json()) as T;
   };
 
+  const listTasks = async (query: DetonateTaskSearchQuery = {}) => {
+    const params = new URLSearchParams();
+    if (query.query_string) params.set('query_string', query.query_string);
+    if (query.offset !== undefined) params.set('offset', String(query.offset));
+    if (query.size !== undefined) params.set('size', String(query.size));
+    if (query.order) params.set('order', query.order);
+    const qs = params.toString();
+    const page = await call<DetonateTaskSearchResponse>(`/tasks${qs ? `?${qs}` : ''}`);
+    return { ...page, tasks: page.tasks.map(redactDetonateTask) };
+  };
+
   return {
     healthcheck: () => call<{ status: string }>('/healthcheck'),
 
-    reputation: (sha256) =>
-      call<DetonateReputationResponse>(`/reputation/${encodeURIComponent(sha256)}`),
-
-    submitFile: (request, file, actor) => {
+    submitFile: async (request, file) => {
       // `POST /submit-file` is multipart: a `request_json` field plus the
       // sample itself. The field name is the service's, not a choice.
       const form = new FormData();
       form.set('request_json', JSON.stringify(request));
       form.set('sample_file', new Blob([new Uint8Array(file.body)]), file.filename);
-      return call<DetonateSubmitOutcome & DetonateTask>('/submit-file', {
-        method: 'POST',
-        headers: actorHeaders(actor),
-        body: form,
-      }).then(toSubmitOutcome);
+      return redactDetonateTask(
+        await call<DetonateTask>('/submit-file', { method: 'POST', body: form })
+      );
     },
 
-    submitHash: (request, actor) =>
-      call<DetonateSubmitOutcome & DetonateTask>('/submit-hash', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', ...actorHeaders(actor) },
-        body: JSON.stringify(request),
-      }).then(toSubmitOutcome),
+    submitHash: async (request) =>
+      redactDetonateTask(
+        await call<DetonateTask>('/submit-hash', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(request),
+        })
+      ),
 
-    getTask: (taskId) => call<DetonateTask>(`/tasks/${encodeURIComponent(taskId)}`),
+    getTask: async (taskId) =>
+      redactDetonateTask(await call<DetonateTask>(`/tasks/${encodeURIComponent(taskId)}`)),
 
-    getTaskUpdates: (taskId) =>
-      call<DetonateTaskUpdate[]>(`/tasks/${encodeURIComponent(taskId)}/updates`),
+    getTaskUpdates: async (taskId) =>
+      (await call<DetonateTaskUpdate[]>(`/tasks/${encodeURIComponent(taskId)}/updates`)).map(
+        (update) => ({ ...update, task: redactDetonateTask(update.task) })
+      ),
 
-    listTasks: (query = {}) => {
-      const params = new URLSearchParams();
-      if (query.query_string) params.set('query_string', query.query_string);
-      if (query.alert_id) params.set('alert_id', query.alert_id);
-      if (query.tag) params.set('tag', query.tag);
-      if (query.offset !== undefined) params.set('offset', String(query.offset));
-      if (query.size !== undefined) params.set('size', String(query.size));
-      const qs = params.toString();
-      return call<DetonateTaskSearchResponse>(`/tasks${qs ? `?${qs}` : ''}`);
-    },
+    getTaskAlerts: (taskId, kind) =>
+      call<DetonateAlertDoc[]>(`/tasks/${encodeURIComponent(taskId)}/${kind}`),
+
+    listTasks,
+
+    findTasksByHash: async (sha256, size = 10) =>
+      (
+        await listTasks({
+          query_string: `sample_hash:${quoteQueryValue(sha256.toLowerCase())}`,
+          size,
+          order: 'desc',
+        })
+      ).tasks,
   };
 };

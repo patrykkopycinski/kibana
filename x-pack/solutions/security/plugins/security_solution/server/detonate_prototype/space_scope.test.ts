@@ -7,7 +7,12 @@
 
 import type { DetonateClient } from './client';
 import { DetonateServiceError } from './client';
-import { getTaskInSpace, scopeTagsToSpace, submitInSpace } from './space_scope';
+import {
+  getTaskInSpace,
+  lookupPriorRunsInSpace,
+  scopeTagsToSpace,
+  submitInSpace,
+} from './space_scope';
 
 describe('space scope', () => {
   describe('scopeTagsToSpace', () => {
@@ -24,46 +29,89 @@ describe('space scope', () => {
   });
 
   describe('submitInSpace', () => {
-    const request = { sample_hash: 'a'.repeat(64) };
+    it('submits once with the active space tag', async () => {
+      const submit = jest.fn().mockResolvedValue({ id: 'fresh', tags: ['space:team-a'] });
 
-    it('returns a fresh run without a second submit', async () => {
-      const submit = jest.fn().mockResolvedValue({
-        task: { id: 'fresh', tags: ['space:team-a'] },
-        deduplicated: false,
+      await submitInSpace(
+        submit,
+        { sample_hash: 'a'.repeat(64), tags: ['space:team-b'] },
+        'team-a'
+      );
+
+      expect(submit).toHaveBeenCalledTimes(1);
+      expect(submit).toHaveBeenCalledWith({ sample_hash: 'a'.repeat(64), tags: ['space:team-a'] });
+    });
+  });
+
+  describe('lookupPriorRunsInSpace', () => {
+    const sha = 'A'.repeat(64);
+    const completed = (id: string, tags: string[], alerts: number) => ({
+      id,
+      tags,
+      created_at: `2026-11-0${id.length}T00:00:00Z`,
+      sample_hash: sha.toLowerCase(),
+      last_worker_name: 'detonate.workers.make_summary',
+      last_worker_status: 'success',
+      production_endpoint_alerts_count: alerts,
+      production_endpoint_alert_groups:
+        alerts > 0 ? [{ alerts_count: alerts, event_code: 'malicious_file' }] : [],
+      diagnostic_endpoint_alert_groups: [],
+      production_detection_alert_groups: [],
+    });
+    const clientWith = (tasks: unknown[]) =>
+      ({
+        listTasks: jest.fn().mockResolvedValue({ tasks, offset: 0, size: 20, order: 'desc' }),
+      } as unknown as DetonateClient & { listTasks: jest.Mock });
+
+    it('searches this space by the lowercased hash', async () => {
+      const client = clientWith([]);
+
+      await lookupPriorRunsInSpace(client, sha, 'team-a');
+
+      expect(client.listTasks).toHaveBeenCalledWith({
+        query_string: `tags:"space:team-a" AND sample_hash:"${sha.toLowerCase()}"`,
+        size: 20,
+        order: 'desc',
       });
-
-      await submitInSpace(submit, request, 'team-a');
-
-      expect(submit).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps a deduplicated run from the same space', async () => {
-      const outcome = { task: { id: 'reused', tags: ['space:team-a'] }, deduplicated: true };
-      const submit = jest.fn().mockResolvedValue(outcome);
+    it('answers known-malicious from the newest completed malicious run', async () => {
+      const result = await lookupPriorRunsInSpace(
+        clientWith([completed('run-1', ['space:team-a'], 3)]),
+        sha,
+        'team-a'
+      );
 
-      await expect(submitInSpace(submit, request, 'team-a')).resolves.toBe(outcome);
-      expect(submit).toHaveBeenCalledTimes(1);
-    });
-
-    it('forces a fresh run instead of returning another space’s report', async () => {
-      const submit = jest
-        .fn()
-        .mockResolvedValueOnce({
-          task: { id: 'foreign', tags: ['space:team-b'] },
-          deduplicated: true,
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'known-malicious',
+          last_task_id: 'run-1',
+          last_verdict: 'malicious',
         })
-        .mockResolvedValueOnce({
-          task: { id: 'own', tags: ['space:team-a'] },
-          deduplicated: false,
-        });
+      );
+    });
 
-      const outcome = await submitInSpace(submit, request, 'team-a');
+    it('answers unknown when the newest completed run was quiet', async () => {
+      const result = await lookupPriorRunsInSpace(
+        clientWith([completed('run-2', ['space:team-a'], 0), completed('r1', ['space:team-a'], 3)]),
+        sha,
+        'team-a'
+      );
 
-      expect(outcome.task.id).toBe('own');
-      expect(submit).toHaveBeenLastCalledWith({
-        ...request,
-        tags: ['space:team-a'],
-        force_fresh: true,
+      expect(result).toEqual(expect.objectContaining({ status: 'unknown', last_verdict: 'quiet' }));
+    });
+
+    it('ignores a run from another space even if the service returned it', async () => {
+      const result = await lookupPriorRunsInSpace(
+        clientWith([completed('run-1', ['space:team-b'], 3)]),
+        sha,
+        'team-a'
+      );
+
+      expect(result).toEqual({
+        sha256: sha.toLowerCase(),
+        status: 'unknown',
+        source: 'prior-detonation',
       });
     });
   });

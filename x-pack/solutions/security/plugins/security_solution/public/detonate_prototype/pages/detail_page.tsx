@@ -73,11 +73,8 @@ const details = (task: DetonateTask): EuiDescriptionListProps['listItems'] => {
   if (task.sample_source) {
     items.push({ title: 'Sample source', description: task.sample_source });
   }
-  if (task.vm_os_family || task.vm_architecture) {
-    items.push({
-      title: 'VM',
-      description: [task.vm_os_family, task.vm_architecture].filter(Boolean).join(' / '),
-    });
+  if (task.vm_os_family) {
+    items.push({ title: 'VM', description: task.vm_os_family });
   }
   if (task.elastic_agent_id) {
     items.push({ title: 'Elastic Agent ID', description: task.elastic_agent_id });

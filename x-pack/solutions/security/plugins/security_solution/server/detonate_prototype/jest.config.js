@@ -7,6 +7,8 @@
 
 module.exports = {
   preset: '@kbn/test',
+  // Server code only; the client relies on Node's fetch and AbortSignal.timeout.
+  testEnvironment: 'node',
   rootDir: '../../../../../../..',
   roots: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/detonate_prototype',

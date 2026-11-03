@@ -30,11 +30,10 @@ import { DETONATE_API_ACTION_ALL } from '@kbn/security-solution-features/actions
 
 import {
   DETONATE_HEALTHCHECK_PATH,
-  DETONATE_REPUTATION_PATH,
+  DETONATE_PRIOR_RUNS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
-  spaceRunTag,
 } from '../../../common/detonate_prototype';
 import type { DetonateFileRequest, DetonateTask } from '../../../common/detonate_prototype';
 import type { SecuritySolutionPluginRouter } from '../../types';
@@ -42,7 +41,12 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import type { DetonateClient } from '../client';
 import { DetonateServiceError } from '../client';
 import type { HasDetonatePrivilege } from '../authz';
-import { getTaskInSpace, submitInSpace } from '../space_scope';
+import {
+  getTaskInSpace,
+  listTasksInSpace,
+  lookupPriorRunsInSpace,
+  submitInSpace,
+} from '../space_scope';
 
 /**
  * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
@@ -62,7 +66,6 @@ const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
 /** Mirrors the service's optional submit fields. Everything is bounded. */
 const submitOptionsSchema = {
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 32 })),
-  force_fresh: schema.maybe(schema.boolean()),
   exec_wait_secs: schema.maybe(schema.number({ min: 0, max: 3600 })),
   pre_exec_commands: schema.maybe(
     schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 64 })
@@ -70,10 +73,7 @@ const submitOptionsSchema = {
   exec_commands: schema.maybe(schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 64 })),
   exec_sample_arguments: schema.maybe(schema.string({ maxLength: 4096 })),
   vm_os_family: schema.maybe(
-    schema.oneOf([schema.literal('linux'), schema.literal('windows'), schema.literal('macos')])
-  ),
-  vm_architecture: schema.maybe(
-    schema.oneOf([schema.literal('x86_64'), schema.literal('aarch64')])
+    schema.oneOf([schema.literal('linux'), schema.literal('windows'), schema.literal('darwin')])
   ),
   vm_disk_image: schema.maybe(schema.string({ maxLength: 512 })),
   vm_has_internet: schema.maybe(schema.boolean()),
@@ -88,7 +88,7 @@ export interface DetonateRoutesDeps {
    * breaking Kibana's route registration at startup.
    */
   getClient: () => DetonateClient;
-  /** Resolves the authenticated user, as the service's quota key. */
+  /** Resolves the active space, which scopes every run. */
   endpointAppContextService: EndpointAppContextService;
   /**
    * Submission is a write: it boots a VM and runs the sample as live malware.
@@ -148,15 +148,6 @@ export const registerDetonatePrototypeRoutes = ({
     });
   };
 
-  /**
-   * The authenticated Kibana user, as the detonation service's quota key.
-   * Anonymous-style internal calls resolve to a stable service-side default.
-   */
-  const actorFromRequest = (request: KibanaRequest): string | undefined => {
-    const username = endpointAppContextService.getCurrentUsername(request);
-    return username !== 'unknown' ? username : undefined;
-  };
-
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
   const spaceIdFromRequest = (request: KibanaRequest): string =>
     endpointAppContextService.getActiveSpaceId(request);
@@ -175,14 +166,13 @@ export const registerDetonatePrototypeRoutes = ({
       }
     });
 
-  // The reputation gate the workflow's first switch reads. Proxied like every
-  // other detonate route so the privilege check and service URL stay in one
-  // place; `unknown` is passed through untouched — the workflow, not the
-  // route, decides that unknown means "detonate".
+  // The prior-run gate the workflow's first switch reads. `unknown` is passed
+  // through untouched — the workflow, not the route, decides that unknown
+  // means "detonate".
   router.versioned
     .get({
       access: 'internal',
-      path: `${DETONATE_REPUTATION_PATH}/{sha256}`,
+      path: `${DETONATE_PRIOR_RUNS_PATH}/{sha256}`,
       security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
@@ -191,7 +181,12 @@ export const registerDetonatePrototypeRoutes = ({
         validate: {
           request: {
             params: schema.object({
-              sha256: schema.string({ minLength: 64, maxLength: 64 }),
+              sha256: schema.string({
+                minLength: 64,
+                maxLength: 64,
+                validate: (value) =>
+                  /^[a-fA-F0-9]{64}$/.test(value) ? undefined : 'must be a hex sha256',
+              }),
             }),
           },
         },
@@ -199,7 +194,11 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           return response.ok({
-            body: await getClient().reputation(request.params.sha256),
+            body: await lookupPriorRunsInSpace(
+              getClient(),
+              request.params.sha256,
+              spaceIdFromRequest(request)
+            ),
           });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -277,16 +276,13 @@ export const registerDetonatePrototypeRoutes = ({
           }
 
           const client = getClient();
-          const actor = actorFromRequest(request);
-          const { task, deduplicated } = await submitInSpace<DetonateFileRequest>(
-            (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }, actor),
+          const task = await submitInSpace<DetonateFileRequest>(
+            (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }),
             { ...options, sample_filename: sampleFilename },
             spaceIdFromRequest(request)
           );
 
-          return response.ok<DetonateTask & { deduplicated: boolean }>({
-            body: { ...task, deduplicated },
-          });
+          return response.ok<DetonateTask>({ body: task });
         } catch (error) {
           return toErrorResponse(error, response);
         }
@@ -324,15 +320,12 @@ export const registerDetonatePrototypeRoutes = ({
           }
 
           const client = getClient();
-          const actor = actorFromRequest(request);
-          const { task, deduplicated } = await submitInSpace(
-            (scoped) => client.submitHash(scoped, actor),
+          const task = await submitInSpace(
+            (scoped) => client.submitHash(scoped),
             request.body,
             spaceIdFromRequest(request)
           );
-          return response.ok<DetonateTask & { deduplicated: boolean }>({
-            body: { ...task, deduplicated },
-          });
+          return response.ok<DetonateTask>({ body: task });
         } catch (error) {
           return toErrorResponse(error, response);
         }
@@ -417,10 +410,7 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           return response.ok({
-            body: await getClient().listTasks({
-              ...request.query,
-              tag: spaceRunTag(spaceIdFromRequest(request)),
-            }),
+            body: await listTasksInSpace(getClient(), spaceIdFromRequest(request), request.query),
           });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -453,10 +443,14 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           return response.ok({
-            body: await getClient().listTasks({
-              alert_id: request.params.alertId,
-              tag: spaceRunTag(spaceIdFromRequest(request)),
-            }),
+            body: await listTasksInSpace(
+              getClient(),
+              spaceIdFromRequest(request),
+              {},
+              {
+                alertId: request.params.alertId,
+              }
+            ),
           });
         } catch (error) {
           return toErrorResponse(error, response);

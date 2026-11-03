@@ -13,18 +13,18 @@
  */
 
 /**
- * Detonate prototype — reputation step, server implementation.
+ * Detonate prototype — prior-run lookup step, server implementation.
  *
- * Reads the reputation gate through this plugin's own internal route, so the
- * privilege check and service URL stay with the other detonate routes. No
+ * Reads through this plugin's own internal route, so the privilege check,
+ * space filtering and service URL stay with the other detonate routes. No
  * writes and no interpretation: `unknown` is passed through untouched — the
  * workflow's switch, not this step, decides that unknown means "detonate".
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
-import { DETONATE_REPUTATION_PATH } from '../../../../common/detonate_prototype';
-import type { DetonateReputationResponse } from '../../../../common/detonate_prototype';
+import { DETONATE_PRIOR_RUNS_PATH } from '../../../../common/detonate_prototype';
+import type { DetonatePriorRunResponse } from '../../../../common/detonate_prototype';
 import { detonateReputationStepCommonDefinition } from '../../../../common/workflows/step_types/detonate_prototype/detonate_reputation_step_common';
 import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
@@ -33,17 +33,17 @@ export const detonateReputationStepDefinition = createServerStepDefinition({
   handler: async ({ input, contextManager }) => {
     const { sha256 } = input;
 
-    let reputation: DetonateReputationResponse;
+    let lookup: DetonatePriorRunResponse;
     try {
-      ({ body: reputation } = await contextManager.callKibanaApi<DetonateReputationResponse>({
+      ({ body: lookup } = await contextManager.callKibanaApi<DetonatePriorRunResponse>({
         method: 'GET',
-        path: `${DETONATE_REPUTATION_PATH}/${encodeURIComponent(sha256)}`,
+        path: `${DETONATE_PRIOR_RUNS_PATH}/${encodeURIComponent(sha256)}`,
         headers: { 'elastic-api-version': '1' },
       }));
     } catch (error) {
-      throw toApiExecutionError(error, `look up reputation for ${sha256}`);
+      throw toApiExecutionError(error, `look up prior detonations of ${sha256}`);
     }
 
-    return { output: reputation };
+    return { output: lookup };
   },
 });

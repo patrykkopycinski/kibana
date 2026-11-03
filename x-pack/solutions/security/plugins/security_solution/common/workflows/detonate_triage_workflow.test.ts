@@ -111,9 +111,8 @@ describe('detonate triage managed workflow', () => {
     // is templated from the verdict output instead of enumerated here.
     expect(input.os_types).toHaveLength(1);
     expect(input.os_types[0]).toContain('steps.verdict.output.vm_os_family');
-    // A deduplicated submit can return an earlier run without a recorded OS;
-    // the template must still render a value instead of an empty string.
-    expect(input.os_types[0]).toMatch(/\| default: '(linux|windows|macos)'/);
+    // A task without a recorded OS must still render a value, not an empty string.
+    expect(input.os_types[0]).toMatch(/\| default: '(linux|windows|darwin)'/);
     // And the detonate step must actually record the OS, or the template
     // renders empty and the write fails the same validator from below.
     const detonate = steps.find(
@@ -366,7 +365,7 @@ describe.each([
     }
   });
 
-  it('accepts exactly a sha256 on the manual trigger, matching the reputation route', () => {
+  it('accepts exactly a sha256 on the manual trigger, matching the prior-run route', () => {
     const { triggers } = parse(definition.yaml) as {
       triggers: Array<{ type: string; inputs?: { properties: Record<string, object> } }>;
     };
@@ -374,20 +373,13 @@ describe.each([
     expect(manual?.inputs?.properties.sha256).toMatchObject({ minLength: 64, maxLength: 64 });
   });
 
-  it('reuses stored runs unless the caller opts into force_fresh', () => {
+  it('passes the detonate step no force_fresh, which the service does not accept', () => {
     const { triggers } = parse(definition.yaml) as {
-      triggers: Array<{
-        type: string;
-        inputs?: { properties: Record<string, object>; required?: string[] };
-      }>;
+      triggers: Array<{ type: string; inputs?: { properties: Record<string, object> } }>;
     };
     const manual = triggers.find(({ type }) => type === 'manual');
-    expect(manual?.inputs?.properties.force_fresh).toMatchObject({ type: 'boolean' });
-    expect(manual?.inputs?.required).not.toContain('force_fresh');
-    // `== true` renders an omitted input as a typed false, so dedup stays the default.
+    expect(manual?.inputs?.properties).not.toHaveProperty('force_fresh');
     const detonate = workflowSteps.find(({ type }) => type === 'detonate.prototype.detonateSample');
-    expect((detonate?.with as { force_fresh?: string } | undefined)?.force_fresh).toBe(
-      '${{ inputs.force_fresh == true }}'
-    );
+    expect(detonate?.with).not.toHaveProperty('force_fresh');
   });
 });

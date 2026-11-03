@@ -13,12 +13,13 @@
  */
 
 /**
- * Detonate prototype — reputation step, shared definition.
+ * Detonate prototype — prior-run lookup step, shared definition.
  *
- * Pure: asks the detonate service's reputation gate about one digest and
- * returns the answer. `unknown` is passed through untouched — it is honest
- * uncertainty ("no prior verdict"), never benign, and it is the workflow
- * (the `switch` after this step) that decides unknown means "detonate".
+ * Pure: reads this space's earlier runs of one digest and returns whether the
+ * newest completed one was malicious. The step id keeps its `reputation` name
+ * so existing workflows resolve. `unknown` is honest uncertainty ("no prior
+ * malicious run here"), never benign, and it is the workflow (the `switch`
+ * after this step) that decides unknown means "detonate".
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -27,8 +28,9 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
 import {
+  DETONATE_PRIOR_RUN_STATUSES,
   DETONATE_PROTOTYPE_NAMESPACE,
-  DETONATE_REPUTATION_STATUSES,
+  DETONATE_VERDICTS,
 } from '../../../detonate_prototype';
 
 export const DetonateReputationStepId =
@@ -46,20 +48,13 @@ export const detonateReputationInputSchema = lazySchema(() =>
 export const detonateReputationOutputSchema = lazySchema(() =>
   z.object({
     sha256: z.string(),
-    status: z.enum(DETONATE_REPUTATION_STATUSES),
+    status: z.enum(DETONATE_PRIOR_RUN_STATUSES),
     source: z.string(),
-    malware_family: z.string().optional(),
+    last_task_id: z.string().optional().describe('The run the status was read from.'),
+    last_verdict: z.enum(DETONATE_VERDICTS).optional(),
     last_seen: z.string().optional(),
   })
 );
-
-export interface DetonateReputationStepOutput {
-  sha256: string;
-  status: (typeof DETONATE_REPUTATION_STATUSES)[number];
-  source: string;
-  malware_family?: string;
-  last_seen?: string;
-}
 
 export const detonateReputationStepCommonDefinition: BaseStepDefinition<
   typeof detonateReputationInputSchema,
@@ -68,13 +63,13 @@ export const detonateReputationStepCommonDefinition: BaseStepDefinition<
   id: DetonateReputationStepId,
   category: StepCategory.KibanaSecurity,
   label: i18n.translate('xpack.securitySolution.workflows.steps.detonateReputation.label', {
-    defaultMessage: 'Detonate reputation (prototype)',
+    defaultMessage: 'Detonate prior-run lookup (prototype)',
   }),
   description: i18n.translate(
     'xpack.securitySolution.workflows.steps.detonateReputation.description',
     {
       defaultMessage:
-        'Asks the detonate service reputation gate about one sha256. Pure — returns `known-malicious` or `unknown`; `unknown` is honest uncertainty, not benign.',
+        'Looks up earlier detonations of one sha256 in this space. Pure — returns `known-malicious` or `unknown`; `unknown` is honest uncertainty, not benign.',
     }
   ),
   inputSchema: detonateReputationInputSchema,
@@ -84,11 +79,11 @@ export const detonateReputationStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateReputation.documentation.details',
       {
         defaultMessage:
-          'Prototype step. The gate only answers `known-malicious` or `unknown` — there is no benign answer, so a workflow must route `unknown` to a detonation rather than reading it as clean. Use it as the switch before `detonate.prototype.detonateSample` so already-known malware is never detonated again.',
+          'Prototype step. Answers `known-malicious` when the newest completed run of the sample in this space was malicious, otherwise `unknown` — there is no benign answer, so a workflow must route `unknown` to a detonation rather than reading it as clean. Use it as the switch before `detonate.prototype.detonateSample` so malware this space has already detonated is not detonated again.',
       }
     ),
     examples: [
-      `## Only detonate what the reputation gate has never seen
+      `## Only detonate what this space has not already seen detonate
 \`\`\`yaml
 - name: reputation
   type: ${DetonateReputationStepId}

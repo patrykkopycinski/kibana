@@ -19,7 +19,11 @@ import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
-import { isDetonationComplete, isDetonationFailed } from '../../../common/detonate_prototype';
+import {
+  isDetonationComplete,
+  isDetonationFailed,
+  quoteQueryValue,
+} from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
   DetonateTask,
@@ -27,7 +31,7 @@ import type {
   DetonateTaskUpdate,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
-import type { DetonateSubmitResult, SubmitFileParams } from '../api/client';
+import type { SubmitFileParams } from '../api/client';
 import { useTrackDetonation } from '../components/detonation_notifier';
 
 /**
@@ -40,7 +44,6 @@ export const DETONATE_QUERY_KEY = 'detonate_prototype' as const;
 
 export interface DetonateListQuery {
   query_string?: string;
-  alert_id?: string;
   offset?: number;
   size?: number;
 }
@@ -137,7 +140,12 @@ export const useCompletedDetonationByHash = (hash: string | undefined) => {
   const query = useQuery<DetonateTaskSearchResponse>({
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'by-hash', hash ?? ''] as const,
     enabled: Boolean(hash),
-    queryFn: ({ signal }) => detonateApi.listTasks(http, { query_string: hash }, signal),
+    queryFn: ({ signal }) =>
+      detonateApi.listTasks(
+        http,
+        { query_string: `sample_hash:${quoteQueryValue(hash ?? '')}` },
+        signal
+      ),
     staleTime: 60_000,
   });
 
@@ -162,7 +170,12 @@ export const useCompletedDetonationHistoryByHash = (hash: string | undefined) =>
   const query = useQuery<DetonateTaskSearchResponse>({
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'history-by-hash', hash ?? ''] as const,
     enabled: Boolean(hash),
-    queryFn: ({ signal }) => detonateApi.listTasks(http, { query_string: hash }, signal),
+    queryFn: ({ signal }) =>
+      detonateApi.listTasks(
+        http,
+        { query_string: `sample_hash:${quoteQueryValue(hash ?? '')}` },
+        signal
+      ),
     staleTime: 60_000,
   });
 
@@ -192,13 +205,11 @@ export const useSubmitHash = () => {
   const invalidate = useInvalidateTaskList();
   const track = useTrackDetonation();
 
-  return useMutation<DetonateSubmitResult, Error, DetonateHashRequest>({
+  return useMutation<DetonateTask, Error, DetonateHashRequest>({
     mutationFn: (request) => detonateApi.submitHash(http, request),
     onSuccess: (result) => {
       invalidate();
-      // A deduplicated answer is a completed report, not a new run — nothing
-      // to track. A new run is in flight and owns a completion notification.
-      if (!result.deduplicated) track(result.id);
+      track(result.id);
     },
   });
 };
@@ -208,11 +219,11 @@ export const useSubmitFile = () => {
   const invalidate = useInvalidateTaskList();
   const track = useTrackDetonation();
 
-  return useMutation<DetonateSubmitResult, Error, SubmitFileParams>({
+  return useMutation<DetonateTask, Error, SubmitFileParams>({
     mutationFn: (params) => detonateApi.submitFile(http, params),
     onSuccess: (result) => {
       invalidate();
-      if (!result.deduplicated) track(result.id);
+      track(result.id);
     },
   });
 };

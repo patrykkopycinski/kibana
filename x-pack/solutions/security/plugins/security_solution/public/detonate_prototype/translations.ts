@@ -60,11 +60,6 @@ export const OS_FAMILY_LABEL = i18n.translate(
   { defaultMessage: 'Operating system' }
 );
 
-export const ARCHITECTURE_LABEL = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.submit.architectureLabel',
-  { defaultMessage: 'Architecture' }
-);
-
 export const SERVICE_DEFAULT = i18n.translate(
   'xpack.securitySolution.detonatePrototype.submit.serviceDefault',
   { defaultMessage: 'Service default' }
@@ -268,21 +263,6 @@ export const SUBMIT_CONFIRM_BODY = i18n.translate(
   {
     defaultMessage:
       'The sample runs in a sandbox VM with Elastic Defend installed. Each run occupies a VM for several minutes.',
-  }
-);
-
-export const SUBMIT_CONFIRM_FORCE_FRESH_LABEL = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.submitConfirm.forceFreshLabel',
-  {
-    defaultMessage: 'Run a fresh detonation even if a completed report exists',
-  }
-);
-
-export const SUBMIT_CONFIRM_FORCE_FRESH_HELP = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.submitConfirm.forceFreshHelp',
-  {
-    defaultMessage:
-      'Leave unchecked to reuse the existing report for the same sample instead of spending a new VM run.',
   }
 );
 

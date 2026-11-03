@@ -16,6 +16,7 @@ export * from './specs/bigquery/bigquery';
 export * from './specs/brave_search/brave_search';
 export * from './specs/censys/censys';
 export * from './specs/databricks/databricks';
+export * from './specs/detonate/detonate';
 export * from './specs/gcp_cloud_functions/gcp_cloud_functions';
 export * from './specs/figma/figma';
 export * from './specs/github/github';

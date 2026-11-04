@@ -96,33 +96,48 @@ export class AttackDiscoveryClient {
       }));
     };
 
-    // The final error propagates (no empty-alert fallback) so the task can tell an outage from a
-    // model outcome.
-    return pRetry(run, {
-      retries: 2,
-      minTimeout: 2000,
-      onFailedAttempt: (err) => {
-        const status = getHttpStatus(err);
-        if (status !== undefined && !RETRYABLE_SEARCH_STATUSES.has(status)) {
-          this.log.error(
-            new Error(`Alerts search failed with non-retryable HTTP ${status}`, { cause: err })
-          );
-          throw err;
-        }
-        if (err.retriesLeft === 0) {
-          this.log.error(
-            new Error(`Failed to search alerts after ${err.attemptNumber} attempts`, {
-              cause: err,
-            })
-          );
-        } else {
-          this.log.warning(
-            new Error(`Alerts search failed on attempt ${err.attemptNumber}; retrying...`, {
-              cause: err,
-            })
-          );
-        }
-      },
-    });
+    // p-retry rejects with its most frequent message, not the last error, so keep the last one to
+    // classify. The final error propagates (no empty-alert fallback) so the task can tell an outage
+    // from a model outcome.
+    let lastError: unknown;
+    const runRecordingError = async () => {
+      try {
+        return await run();
+      } catch (e) {
+        lastError = e;
+        throw e;
+      }
+    };
+
+    try {
+      return await pRetry(runRecordingError, {
+        retries: 2,
+        minTimeout: 2000,
+        onFailedAttempt: (err) => {
+          const status = getHttpStatus(err);
+          if (status !== undefined && !RETRYABLE_SEARCH_STATUSES.has(status)) {
+            this.log.error(
+              new Error(`Alerts search failed with non-retryable HTTP ${status}`, { cause: err })
+            );
+            throw err;
+          }
+          if (err.retriesLeft === 0) {
+            this.log.error(
+              new Error(`Failed to search alerts after ${err.attemptNumber} attempts`, {
+                cause: err,
+              })
+            );
+          } else {
+            this.log.warning(
+              new Error(`Alerts search failed on attempt ${err.attemptNumber}; retrying...`, {
+                cause: err,
+              })
+            );
+          }
+        },
+      });
+    } catch (e) {
+      throw lastError ?? e;
+    }
   }
 }

@@ -71,17 +71,7 @@ export interface GenerateApiResult {
   readonly alertsContextCount?: number;
   readonly latencyMs: number;
   readonly error?: string;
-  /**
-   * Set to `infrastructure` when the harness could not observe a model outcome: the `_generate`
-   * request returned no execution id, or it or a poll was rejected with an infrastructure
-   * status (`isInfrastructureInferenceError`: 401/403/404/408/429/502/503/504), a transport
-   * error or an abort; a poll got 404 after the grace window; 24 or more consecutive polls hit a
-   * retryable 429/5xx by the deadline; or the generation ended `canceled`/`dismissed` (nobody
-   * cancels in an eval, so the harness or stack stopped it). A deterministic rejection (for
-   * example a 400 for a bad `alertsIndexPattern`), a generation that reported `failed` and a
-   * deadline reached while the generation was still reporting a non-terminal status stay
-   * unmarked and are scored as model failures.
-   */
+  /** `infrastructure` when no model outcome was observed; the rule is in the package README. */
   readonly errorKind?: AttackDiscoveryTaskErrorKind;
 }
 
@@ -125,6 +115,7 @@ const extractBodyTextFromError = (e: unknown): string => {
 export class AttackDiscoveryGenerateApiClient {
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
+  // Rejects on failure: an empty list would make Kibana fail the run with `NO_FIELDS_ALLOWED`.
   async fetchAnonymizationFields(): Promise<AnonymizationField[]> {
     try {
       const query = { page: '1', per_page: '1000' };
@@ -144,17 +135,29 @@ export class AttackDiscoveryGenerateApiClient {
         anonymized: f.anonymized === true,
       }));
     } catch (e) {
-      this.log.warning(
-        `anonymization_fields find failed (${extractStatusFromError(e) ?? 'n/a'}); using empty list`
-      );
-      return [];
+      this.log.warning(`anonymization_fields find failed (${extractStatusFromError(e) ?? 'n/a'})`);
+      throw e;
     }
   }
 
   async generate(opts: GenerateApiOptions): Promise<GenerateApiResult> {
     const t0 = Date.now();
 
-    const anonymizationFields = await this.fetchAnonymizationFields();
+    let anonymizationFields: AnonymizationField[];
+    try {
+      anonymizationFields = await this.fetchAnonymizationFields();
+    } catch (e) {
+      return {
+        discoveries: [],
+        executionUuid: '',
+        status: 'failed',
+        latencyMs: Date.now() - t0,
+        ...infrastructureKind(e),
+        error: `generate HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractBodyTextFromError(
+          e
+        )}`,
+      };
+    }
 
     const body: Record<string, unknown> = {
       alertsIndexPattern: opts.alertsIndexPattern ?? DEFAULT_ALERTS_INDEX,

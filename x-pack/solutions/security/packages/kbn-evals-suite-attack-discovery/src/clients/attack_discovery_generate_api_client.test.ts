@@ -19,21 +19,23 @@ const httpError = (message: string, status?: number): Error =>
   Object.assign(new Error(message), status === undefined ? {} : { status });
 
 interface FetchScript {
+  readonly find?: () => Promise<unknown>;
   readonly generate?: () => Promise<unknown>;
   readonly poll?: () => Promise<unknown>;
 }
 
-const createClient = ({ generate, poll }: FetchScript) => {
+const createClient = ({ find, generate, poll }: FetchScript) => {
+  const generateMock = jest.fn(generate ?? (async () => ({ execution_uuid: 'exec-1' })));
   const pollMock = jest.fn(poll ?? (async () => ({})));
   const fetchMock = jest.fn(async (path: string) => {
-    if (path === ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND) return { data: [] };
-    if (path === ATTACK_DISCOVERY_GENERATE) {
-      return generate ? generate() : { execution_uuid: 'exec-1' };
+    if (path === ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND) {
+      return find ? find() : { data: [] };
     }
+    if (path === ATTACK_DISCOVERY_GENERATE) return generateMock();
     return pollMock();
   });
   const client = new AttackDiscoveryGenerateApiClient(fetchMock as unknown as HttpHandler, log);
-  return { client, pollMock };
+  return { client, pollMock, generateMock };
 };
 
 const runToCompletion = async (client: AttackDiscoveryGenerateApiClient) => {
@@ -45,6 +47,51 @@ const runToCompletion = async (client: AttackDiscoveryGenerateApiClient) => {
 describe('AttackDiscoveryGenerateApiClient error classification', () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
+
+  it.each([401, 403, 502, 503])(
+    'marks an anonymization-fields lookup rejected with HTTP %i as infrastructure and skips _generate',
+    async (code) => {
+      const { client, generateMock } = createClient({
+        find: async () => {
+          throw httpError('upstream', code);
+        },
+      });
+
+      const result = await runToCompletion(client);
+
+      expect(result.status).toBe('failed');
+      expect(result.errorKind).toBe('infrastructure');
+      expect(result.error).toContain(`generate HTTP ${code}`);
+      expect(generateMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('marks an anonymization-fields transport failure as infrastructure and skips _generate', async () => {
+    const { client, generateMock } = createClient({
+      find: async () => {
+        throw new TypeError('fetch failed');
+      },
+    });
+
+    const result = await runToCompletion(client);
+
+    expect(result.errorKind).toBe('infrastructure');
+    expect(generateMock).not.toHaveBeenCalled();
+  });
+
+  it('leaves an anonymization-fields lookup rejected with HTTP 400 unmarked and skips _generate', async () => {
+    const { client, generateMock } = createClient({
+      find: async () => {
+        throw httpError('bad request', 400);
+      },
+    });
+
+    const result = await runToCompletion(client);
+
+    expect(result.status).toBe('failed');
+    expect(result.errorKind).toBeUndefined();
+    expect(generateMock).not.toHaveBeenCalled();
+  });
 
   it.each([401, 403, 429, 502, 503])(
     'marks a _generate request rejected with HTTP %i as infrastructure',

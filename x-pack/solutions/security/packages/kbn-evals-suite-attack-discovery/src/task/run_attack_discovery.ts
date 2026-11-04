@@ -21,7 +21,11 @@ import Path from 'path';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
-import { InfrastructureError, isInfrastructureInferenceError } from './infrastructure_error';
+import {
+  getHttpStatus,
+  InfrastructureError,
+  isInfrastructureInferenceError,
+} from './infrastructure_error';
 import type {
   AttackDiscoveryTaskInput,
   AttackDiscoveryTaskOutput,
@@ -217,11 +221,13 @@ export const runAttackDiscovery = async ({
       } catch (error) {
         // Fetching alert context happens before any model call. Same rule as `chatComplete`:
         // a deterministic harness/dataset error (e.g. an ES 400 for a malformed filter or
-        // index pattern) is not an outage and must fail loudly as a scored failure.
+        // index pattern) is not an outage and must fail loudly as a scored failure. A 404 here is
+        // `index_not_found_exception` for a concrete `alertsIndexPattern`, a dataset error, so it
+        // scores 0 even though `isInfrastructureInferenceError` treats 404 as infrastructure.
         const message = `Attack Discovery alert search failed before a model call: ${
           error instanceof Error ? error.message : String(error)
         }`;
-        throw isInfrastructureInferenceError(error)
+        throw isInfrastructureInferenceError(error) && getHttpStatus(error) !== 404
           ? new InfrastructureError(message, { cause: error })
           : new Error(message, { cause: error });
       }

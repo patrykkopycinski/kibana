@@ -8,7 +8,7 @@
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { AttackDiscoveryClient } from '../clients/attack_discovery_client';
-import { esConnectivityErrors, responseError } from './es_error_fixtures';
+import { esConnectivityErrors, responseError } from './es_error_fixtures.mock';
 import { generateInsights, runAttackDiscovery } from './run_attack_discovery';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttackDiscoveryTaskInput } from '../types';
@@ -355,6 +355,23 @@ describe('generateInsights', () => {
 
       expect(search).toHaveBeenCalledTimes(1);
       expect(output.errorKind).toBe('model');
+    });
+
+    it('scores an ES 404 (missing alertsIndexPattern index) as a model failure without retrying', async () => {
+      const search = jest.fn().mockRejectedValue(responseError(404));
+      const output = await runSearch(search);
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(output.errorKind).toBe('model');
+      expect(output.errors?.[0]).toContain('alert search failed');
+    });
+
+    it.each([401, 403])('marks an ES %i as infrastructure without retrying', async (code) => {
+      const search = jest.fn().mockRejectedValue(responseError(code));
+      const output = await runSearch(search);
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(output.errorKind).toBe('infrastructure');
     });
   });
 

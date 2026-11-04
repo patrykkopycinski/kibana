@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { esConnectivityErrors, responseError } from './es_error_fixtures';
+import { esConnectivityErrors, responseError } from './es_error_fixtures.mock';
 import { getHttpStatus, isInfrastructureInferenceError } from './infrastructure_error';
 
 describe('Elasticsearch client error shapes', () => {

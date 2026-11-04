@@ -36,7 +36,7 @@ a `traceId`.
 Infrastructure failures:
 
 - One status rule covers `inferenceClient.chatComplete`, the `searchAlerts` Elasticsearch fetch and
-  the `generateApi` `_generate` and poll requests. The HTTP status is read from `status`,
+  the `generateApi` anonymization-fields lookup, `_generate` and poll requests. The HTTP status is read from `status`,
   `statusCode` or `meta.statusCode` (values below 100, such as the `0` Elasticsearch sets on
   connection errors, are not a status). It is infrastructure for `401`, `403`, `404`, `408`, `429`,
   `502`, `503` or `504`. With no HTTP status it is infrastructure only for a transport error
@@ -48,8 +48,14 @@ Infrastructure failures:
   twice, rethrows any other HTTP status at once, and rethrows the final error after the retries
   (there is no empty-alert fallback). The rule above then decides: an ES `503` or a connection
   failure is infrastructure, while a deterministic harness/dataset error such as an ES `400` for a
-  malformed `filter` or `alertsIndexPattern` scores `0`.
+  malformed `filter` or `alertsIndexPattern` scores `0`. An ES `404` here is also scored `0`: it
+  is `index_not_found_exception` for an `alertsIndexPattern` that does not exist, a dataset error
+  (`chatComplete` and `generateApi` keep treating `404` as infrastructure).
 - `generateApi` mode:
+  - the anonymization-fields lookup that runs before `_generate` is rejected with an infrastructure
+    status or a transport error (`_generate` is then not called); a `400` or other unlisted status
+    scores `0`. A successful lookup that returns an empty list is a misconfiguration and scores
+    `0`;
   - the `_generate` request returns no `execution_uuid` (the stack produced no generation), or it
     is rejected with an infrastructure status or a transport error; a `400` or other unlisted
     status scores `0`;

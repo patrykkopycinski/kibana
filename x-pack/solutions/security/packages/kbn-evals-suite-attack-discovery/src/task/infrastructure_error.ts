@@ -27,9 +27,18 @@ export const INFRASTRUCTURE_HTTP_STATUSES: ReadonlySet<number> = new Set([
   401, 403, 404, 408, 429, 502, 503, 504,
 ]);
 
+interface StatusCarrier {
+  status?: unknown;
+  statusCode?: unknown;
+  meta?: { statusCode?: unknown };
+}
+
+// Inference errors carry `status`; Elasticsearch client errors carry `statusCode` and
+// `meta.statusCode`.
 const getNumericStatus = (error: unknown): number | undefined => {
-  const status = (error as { status?: unknown } | null | undefined)?.status;
-  return typeof status === 'number' ? status : undefined;
+  const carrier = error as StatusCarrier | null | undefined;
+  const candidates = [carrier?.status, carrier?.statusCode, carrier?.meta?.statusCode];
+  return candidates.find((candidate): candidate is number => typeof candidate === 'number');
 };
 
 const MAX_CAUSE_DEPTH = 5;
@@ -44,7 +53,7 @@ const isAbortError = (error: unknown): boolean => {
 };
 
 /**
- * True when a rejected `chatComplete` call says nothing about the model: a status in
+ * True when a rejected `chatComplete` or alert-search call says nothing about the model: a status in
  * {@link INFRASTRUCTURE_HTTP_STATUSES}, or, when there is no HTTP status at all, only a real
  * transport failure (`isTransportError`, walks the `cause` chain) or an abort. Any other
  * status-less error (for example a `TypeError` from a harness bug) is not evidence about the

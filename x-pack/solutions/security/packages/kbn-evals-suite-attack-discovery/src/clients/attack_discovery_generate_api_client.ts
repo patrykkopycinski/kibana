@@ -40,6 +40,10 @@ const TERMINAL_STATUSES = new Set(['succeeded', 'failed', 'canceled', 'dismissed
 const POLL_INTERVAL_MS = 5000;
 const POLL_MAX_WAIT_MS = 1500_000;
 const GENERATION_NOT_FOUND_GRACE_MS = 120_000;
+// Consecutive failed polls needed before a deadline counts as infrastructure. Reuses the grace
+// window: a gateway that stayed down that long is an outage, while a single failed final poll
+// after a long healthy run says nothing about it and the timeout stays the model's.
+const MIN_POLL_FAILURE_STREAK = Math.ceil(GENERATION_NOT_FOUND_GRACE_MS / POLL_INTERVAL_MS);
 
 export interface AnonymizationField {
   readonly id: string;
@@ -226,8 +230,10 @@ export class AttackDiscoveryGenerateApiClient {
 
     const deadline = Date.now() + POLL_MAX_WAIT_MS;
     const notFoundGraceDeadline = Date.now() + GENERATION_NOT_FOUND_GRACE_MS;
-    // Set by a failed poll that is retried, cleared by the next poll that returns a payload.
+    // The latest retried poll failure and the length of the current run of such failures; a poll
+    // that returns a payload resets both.
     let lastPollError: { status: number | undefined; message: string } | undefined;
+    let pollFailureStreak = 0;
 
     while (Date.now() < deadline) {
       let status: number | undefined;
@@ -247,6 +253,7 @@ export class AttackDiscoveryGenerateApiClient {
 
         if (shouldRetry || isNotFoundGrace) {
           pollFailed = true;
+          pollFailureStreak += 1;
           lastPollError = { status, message: extractBodyTextFromError(e).slice(0, 400) };
         } else if (status === 404) {
           return {
@@ -269,6 +276,7 @@ export class AttackDiscoveryGenerateApiClient {
 
       if (!pollFailed) {
         lastPollError = undefined;
+        pollFailureStreak = 0;
         const generation = payload?.generation ?? {};
         const genStatus = String(generation.status ?? '');
 
@@ -297,7 +305,7 @@ export class AttackDiscoveryGenerateApiClient {
       await sleep(POLL_INTERVAL_MS);
     }
 
-    if (lastPollError) {
+    if (lastPollError && pollFailureStreak >= MIN_POLL_FAILURE_STREAK) {
       return {
         discoveries: [],
         status: 'timed_out',

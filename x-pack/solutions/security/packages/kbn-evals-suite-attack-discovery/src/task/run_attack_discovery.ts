@@ -215,13 +215,15 @@ export const runAttackDiscovery = async ({
           filter: input.filter,
         });
       } catch (error) {
-        // Fetching alert context happens before any model call.
-        throw new InfrastructureError(
-          `Attack Discovery alert search failed before a model call: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-          { cause: error }
-        );
+        // Fetching alert context happens before any model call. Same rule as `chatComplete`:
+        // a deterministic harness/dataset error (e.g. an ES 400 for a malformed filter or
+        // index pattern) is not an outage and must fail loudly as a scored failure.
+        const message = `Attack Discovery alert search failed before a model call: ${
+          error instanceof Error ? error.message : String(error)
+        }`;
+        throw isInfrastructureInferenceError(error)
+          ? new InfrastructureError(message, { cause: error })
+          : new Error(message, { cause: error });
       }
 
       const prompt = await loadDefaultPrompt();

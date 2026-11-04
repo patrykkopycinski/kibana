@@ -25,6 +25,10 @@ const TRANSPORT_ERROR_CODES = new Set([
   'ECONNREFUSED',
   'EPIPE',
   'ETIMEDOUT',
+  'ENOTFOUND',
+  'EAI_AGAIN',
+  'EHOSTUNREACH',
+  'UND_ERR_CLOSED',
 ]);
 
 /**
@@ -45,6 +49,7 @@ export function isTransportError(error: unknown): boolean {
     if (code && TRANSPORT_ERROR_CODES.has(code)) {
       return true;
     }
+    // undici's fixed message for a fetch that failed before getting a response.
     if (current instanceof TypeError && message === 'fetch failed') {
       return true;
     }
@@ -118,8 +123,10 @@ export function httpHandlerFromKbnClient({
 
     // With a default of 0 a single dropped connection lost the run and the suite published the
     // serving-layer error as a scored model failure. `KBN_EVALS_HTTP_RETRIES=0` disables retries.
-    const maxRetries =
-      Number(process.env.KBN_EVALS_HTTP_RETRIES ?? String(DEFAULT_HTTP_RETRIES)) || 0;
+    const maxRetries = Math.max(
+      0,
+      Number(process.env.KBN_EVALS_HTTP_RETRIES ?? String(DEFAULT_HTTP_RETRIES)) || 0
+    );
     const retryStatuses = new Set([429, 503, 504]);
 
     async function sleep(ms: number) {

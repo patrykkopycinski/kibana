@@ -108,6 +108,19 @@ describe('httpHandlerFromKbnClient retries', () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 
+  it('treats a negative KBN_EVALS_HTTP_RETRIES as retries off and rethrows the real error', async () => {
+    process.env.KBN_EVALS_HTTP_RETRIES = '-1';
+    const error = socketClosedError();
+    const request = jest.fn().mockRejectedValue(error);
+
+    const result = await run(
+      createFetch(request)('/internal/inference/chat_complete', { method: 'POST' })
+    );
+
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ error });
+  });
+
   it('retries a GET after a transport failure', async () => {
     const request = jest
       .fn()
@@ -224,6 +237,13 @@ describe('httpHandlerFromKbnClient retries', () => {
 });
 
 describe('isTransportError', () => {
+  it.each(['ENOTFOUND', 'EAI_AGAIN', 'EHOSTUNREACH', 'UND_ERR_CLOSED'])(
+    'recognises the %s connection error code',
+    (code) => {
+      expect(isTransportError(Object.assign(new Error('connect failed'), { code }))).toBe(true);
+    }
+  );
+
   it('detects a closed socket through the error cause chain', () => {
     expect(isTransportError(socketClosedError())).toBe(true);
   });

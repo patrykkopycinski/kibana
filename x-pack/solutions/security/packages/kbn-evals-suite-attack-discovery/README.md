@@ -40,11 +40,14 @@ Infrastructure failures:
   reset/refused/timeout codes or `fetch failed`, found anywhere in the `cause` chain) or an
   `AbortError`; any other status-less error (for example a `TypeError` from a harness bug) scores
   `0`.
-- `searchAlerts` mode: the Elasticsearch alert fetch throws before any model call.
+- `searchAlerts` mode: the Elasticsearch alert fetch throws before any model call, judged by the
+  same rule as `chatComplete` (status from `status`, `statusCode` or `meta.statusCode`). A
+  deterministic harness/dataset error such as an ES `400` for a malformed `filter` or
+  `alertsIndexPattern` scores `0`.
 - `generateApi` mode: the `_generate` request fails or returns no `execution_uuid`; polling fails
   (HTTP 404 after the grace window, a transport error, or a non-retryable status such as
-  `400`/`401`/`403`); a retryable poll status (`429`/`5xx`) is still failing when the poll deadline
-  is reached; or the generation ends `canceled` or `dismissed` (nobody cancels in an eval, so the
+  `400`/`401`/`403`); a retryable poll status (`429`/`5xx`) kept failing for at least the last 24 polls
+  (the 120s grace window at the 5s poll interval) when the poll deadline is reached; or the generation ends `canceled` or `dismissed` (nobody cancels in an eval, so the
   harness or the stack stopped it).
 
 Everything else is a model failure and keeps scoring `0`: `chatComplete` rejections with any other
@@ -52,7 +55,7 @@ status (including `400` provider refusals / content filters and `500` token-limi
 context-length errors), empty or unparseable completions
 (`Failed to parse insights ... after 3 attempts`), `invalid_shape`, a generation that reported
 `failed`, and a poll deadline reached while the generation is still reporting a non-terminal
-status. A task error without the marker is never treated as N/A.
+status (including when only a few trailing polls, fewer than 24, failed). A task error without the marker is never treated as N/A.
 
 A client socket timeout or gateway `504` on `chatComplete` is N/A; the generate-API poll deadline
 (while the generation is still running) is the only timeout that scores `0`.

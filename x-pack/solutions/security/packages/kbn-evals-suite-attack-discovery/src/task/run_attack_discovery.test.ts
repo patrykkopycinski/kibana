@@ -261,7 +261,7 @@ describe('generateInsights', () => {
       }
     );
 
-    it('classifies a rejection without an HTTP status as infrastructure', async () => {
+    it('classifies a status-less `fetch failed` rejection as infrastructure', async () => {
       const { output } = await runRejecting(new TypeError('fetch failed'));
       expect(output.errorKind).toBe('infrastructure');
     });
@@ -305,22 +305,58 @@ describe('generateInsights', () => {
     expect(output.errorKind).toBe('model');
   });
 
-  it('marks a failed alert search as infrastructure', async () => {
-    const chatComplete = jest.fn();
-    const output = await runAttackDiscovery({
-      inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
-      attackDiscoveryClient: {
-        searchAlertsAsContext: jest.fn(async () => {
-          throw new Error('es unavailable');
-        }),
-      } as never,
-      log,
-      input: { mode: 'searchAlerts' } as AttackDiscoveryTaskInput,
+  describe('classifies alert-search rejections', () => {
+    const runSearchRejecting = async (error: Error) => {
+      const chatComplete = jest.fn();
+      const output = await runAttackDiscovery({
+        inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
+        attackDiscoveryClient: {
+          searchAlertsAsContext: jest.fn(async () => {
+            throw error;
+          }),
+        } as never,
+        log,
+        input: { mode: 'searchAlerts' } as AttackDiscoveryTaskInput,
+      });
+      expect(chatComplete).not.toHaveBeenCalled();
+      return output;
+    };
+
+    it.each([
+      ['statusCode', { statusCode: 503 }],
+      ['meta.statusCode', { meta: { statusCode: 503 } }],
+      ['status', { status: 503 }],
+    ])('marks an ES 503 (%s) as infrastructure', async (_shape, props) => {
+      const output = await runSearchRejecting(Object.assign(new Error('es unavailable'), props));
+      expect(output.errorKind).toBe('infrastructure');
+      expect(output.errors?.[0]).toContain('es unavailable');
     });
 
-    expect(output.errorKind).toBe('infrastructure');
-    expect(output.errors?.[0]).toContain('es unavailable');
-    expect(chatComplete).not.toHaveBeenCalled();
+    it('marks a transport failure as infrastructure', async () => {
+      const output = await runSearchRejecting(
+        Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' })
+      );
+      expect(output.errorKind).toBe('infrastructure');
+    });
+
+    it.each([
+      ['statusCode', { statusCode: 400 }],
+      ['meta.statusCode', { meta: { statusCode: 400 } }],
+    ])(
+      'scores an ES 400 (%s) from a malformed filter as a model failure',
+      async (_shape, props) => {
+        const output = await runSearchRejecting(
+          Object.assign(new Error('parsing_exception: bad filter'), props)
+        );
+        expect(output.errorKind).toBe('model');
+        expect(output.errors?.[0]).toContain('parsing_exception');
+      }
+    );
+
+    it('scores a status-less non-transport error as a model failure', async () => {
+      const output = await runSearchRejecting(new TypeError('x is not a function'));
+      expect(output.errorKind).toBe('model');
+    });
   });
 
   it('marks a failed generateApi start as infrastructure and a failed generation as model', async () => {

@@ -123,6 +123,47 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
     expect(result.error).toContain('poll HTTP 503 until deadline');
   });
 
+  describe('deadline failure streak', () => {
+    // Polls run every 5s for 1,500s, so a full run makes 300 polls; the streak bound is 24.
+    const TOTAL_POLLS = 300;
+    const MIN_STREAK = 24;
+
+    const runWithTrailingFailures = async (failures: number) => {
+      let calls = 0;
+      const { client } = createClient({
+        poll: async () => {
+          calls += 1;
+          if (calls > TOTAL_POLLS - failures) throw httpError('service unavailable', 503);
+          return { generation: { status: 'running' } };
+        },
+      });
+      const result = await runToCompletion(client);
+      expect(calls).toBe(TOTAL_POLLS);
+      return result;
+    };
+
+    it('leaves a deadline unmarked when a running generation gets one 503 on the final poll', async () => {
+      const result = await runWithTrailingFailures(1);
+
+      expect(result.status).toBe('timed_out');
+      expect(result.error).toContain('poll timed out');
+      expect(result.errorKind).toBeUndefined();
+    });
+
+    it('leaves a deadline unmarked when the trailing failure streak is just under the bound', async () => {
+      const result = await runWithTrailingFailures(MIN_STREAK - 1);
+
+      expect(result.errorKind).toBeUndefined();
+    });
+
+    it('marks a deadline as infrastructure when the trailing failure streak reaches the bound', async () => {
+      const result = await runWithTrailingFailures(MIN_STREAK);
+
+      expect(result.errorKind).toBe('infrastructure');
+      expect(result.error).toContain('poll HTTP 503 until deadline');
+    });
+  });
+
   it('leaves a deadline unmarked when polls failed earlier but the last one succeeded', async () => {
     let calls = 0;
     const { client } = createClient({

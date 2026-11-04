@@ -36,12 +36,12 @@ a `traceId`.
 Infrastructure failures:
 
 - One status rule covers `inferenceClient.chatComplete`, the `searchAlerts` Elasticsearch fetch and
-  the `generateApi` anonymization-fields lookup, `_generate` and poll requests. The HTTP status is read from `status`,
-  `statusCode` or `meta.statusCode` (values below 100, such as the `0` Elasticsearch sets on
-  connection errors, are not a status). It is infrastructure for `401`, `403`, `404`, `408`, `429`,
-  `502`, `503` or `504`. With no HTTP status it is infrastructure only for a transport error
-  (connection reset/refused/timeout/DNS codes or `fetch failed`, found anywhere in the `cause`
-  chain), an `AbortError`, or an Elasticsearch client `ConnectionError`, `TimeoutError`,
+  the `generateApi` anonymization-fields lookup, `_generate` and poll requests. The HTTP status is
+  read from `status`, `statusCode` or `meta.statusCode` (values below 100, such as the `0`
+  Elasticsearch sets on connection errors, are not a status). It is infrastructure for `401`, `403`,
+  `404`, `408`, `429`, `502`, `503` or `504`. With no HTTP status it is infrastructure only for a
+  transport error (connection reset/refused/timeout/DNS codes or `fetch failed`, found anywhere in
+  the `cause` chain), an `AbortError`, or an Elasticsearch client `ConnectionError`, `TimeoutError`,
   `NoLivingConnectionsError` or `RequestAbortedError`. Any other status-less error (for example a
   `TypeError` from a harness bug) scores `0`.
 - `searchAlerts` mode: the alert search retries `408`/`429`/`502`/`503`/`504` and status-less errors

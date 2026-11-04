@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import DETONATE_COMPLETION_SWEEP_YAML from './detonate_completion_sweep.yaml';
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
 import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
@@ -51,5 +52,29 @@ export const DETONATE_TRIAGE_WORKFLOW = {
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const DETONATE_COMPLETION_SWEEP_WORKFLOW_ID = 'system-security-detonate-completion-sweep';
+
+/**
+ * Detonate prototype: the scheduled write-back. Completed runs land on their
+ * source alert (tag + note) and are journaled into one Investigation per
+ * sweep. It starts no detonations. Ships disabled and `restorable`, so turning
+ * the schedule on is the operator's choice and survives managed updates.
+ */
+export const DETONATE_COMPLETION_SWEEP_WORKFLOW = {
+  id: DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_COMPLETION_SWEEP_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+  visibility: {
+    solutions: ['security'],
   },
 } as const satisfies ManagedWorkflowDefinition;

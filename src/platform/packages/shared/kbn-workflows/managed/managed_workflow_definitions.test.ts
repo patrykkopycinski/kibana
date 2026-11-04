@@ -34,6 +34,7 @@ import {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
@@ -388,6 +389,11 @@ describe('managedWorkflowDefinitions', () => {
   it('contains the detonate triage workflow (prototype)', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(ids).toContain(DETONATE_TRIAGE_WORKFLOW_ID);
+  });
+
+  it('contains the detonate completion sweep workflow (prototype)', () => {
+    const ids = managedWorkflowDefinitions.map(({ id }) => id);
+    expect(ids).toContain(DETONATE_COMPLETION_SWEEP_WORKFLOW_ID);
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

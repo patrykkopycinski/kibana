@@ -10,6 +10,7 @@ import { detonateSampleStepDefinition } from './detonate_prototype/detonate_samp
 import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
 import { detonateReputationStepDefinition } from './detonate_prototype/detonate_reputation_step';
 import { detonateRunHistoryStepDefinition } from './detonate_prototype/detonate_run_history_step';
+import { detonateCompletedRunsStepDefinition } from './detonate_prototype/detonate_completed_runs_step';
 import { applyDetonationVerdictStepDefinition } from './detonate_prototype/apply_detonation_verdict_step';
 import { caseCommentStepDefinition } from './detonate_prototype/case_comment_step';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
@@ -72,6 +73,7 @@ export const registerWorkflowSteps = (
     workflowsExtensions.registerStepDefinition(detonateVerdictStepDefinition);
     workflowsExtensions.registerStepDefinition(detonateReputationStepDefinition);
     workflowsExtensions.registerStepDefinition(detonateRunHistoryStepDefinition);
+    workflowsExtensions.registerStepDefinition(detonateCompletedRunsStepDefinition);
     workflowsExtensions.registerStepDefinition(applyDetonationVerdictStepDefinition);
     workflowsExtensions.registerStepDefinition(caseCommentStepDefinition);
   }

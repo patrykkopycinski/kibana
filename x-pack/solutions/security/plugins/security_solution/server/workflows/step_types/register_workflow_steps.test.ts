@@ -30,6 +30,7 @@ import { detonateSampleStepDefinition } from './detonate_prototype/detonate_samp
 import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
 import { detonateReputationStepDefinition } from './detonate_prototype/detonate_reputation_step';
 import { detonateRunHistoryStepDefinition } from './detonate_prototype/detonate_run_history_step';
+import { detonateCompletedRunsStepDefinition } from './detonate_prototype/detonate_completed_runs_step';
 import { applyDetonationVerdictStepDefinition } from './detonate_prototype/apply_detonation_verdict_step';
 import { caseCommentStepDefinition } from './detonate_prototype/case_comment_step';
 
@@ -106,11 +107,12 @@ describe('registerWorkflowSteps (server)', () => {
 
     const on = createWorkflowsExtensionsMock();
     registerWorkflowSteps(on, true);
-    expect(on.registerStepDefinition).toHaveBeenCalledTimes(26);
+    expect(on.registerStepDefinition).toHaveBeenCalledTimes(27);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateSampleStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateVerdictStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateReputationStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateRunHistoryStepDefinition);
+    expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateCompletedRunsStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(applyDetonationVerdictStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(caseCommentStepDefinition);
   });

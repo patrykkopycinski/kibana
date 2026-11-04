@@ -8,3 +8,4 @@
 export { submitDetonationTool } from './submit_detonation';
 export { getDetonationTool } from './get_detonation';
 export { listDetonationsTool } from './list_detonations';
+export { lookupHashTool } from './lookup_hash';

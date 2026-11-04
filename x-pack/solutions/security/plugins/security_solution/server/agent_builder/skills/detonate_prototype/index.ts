@@ -17,7 +17,12 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import type { DetonateSkillDeps } from './types';
-import { getDetonationTool, listDetonationsTool, submitDetonationTool } from './tools';
+import {
+  getDetonationTool,
+  listDetonationsTool,
+  lookupHashTool,
+  submitDetonationTool,
+} from './tools';
 import { DETONATE_PROTOTYPE_REFERENCE } from './skill_reference';
 
 const ID = 'detonate-sample';
@@ -29,21 +34,28 @@ const toolName = (name: string) => `${ID}.${name}`;
 export const SUBMIT_DETONATION_TOOL_ID = toolName('submit_detonation');
 export const GET_DETONATION_TOOL_ID = toolName('get_detonation');
 export const LIST_DETONATIONS_TOOL_ID = toolName('list_detonations');
+export const LOOKUP_HASH_TOOL_ID = toolName('lookup_hash');
 
 const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented sandbox VM running Elastic Defend, and report what the sample did.
 
 ## Tools
 
+- \`lookup_hash\` — has this space already detonated a hash, and what did the
+  newest completed run conclude.
 - \`list_detonations\` — past runs, filtered by hash, filename or tag.
 - \`submit_detonation\` — starts a run for a hash. Returns immediately.
 - \`get_detonation\` — reads one run by task ID.
 
 ## How to run a detonation
 
-1. **Look first.** Call \`list_detonations\` with the hash. If a completed run
-   already exists, report it and stop — do not re-run a sample to reproduce an
-   answer you already have, unless the analyst asks for a fresh run or the
-   recorded run failed.
+1. **Look up first, submit only if unknown.** Call \`lookup_hash\` with the hash.
+   - \`known-malicious\`: report the prior run (\`last_task_id\`) and stop.
+   - \`unknown\` with \`has_completed_run: true\`: a completed run exists but was
+     not malicious. Read it with \`get_detonation\` and report it — do not
+     re-run a sample to reproduce an answer you already have, unless the
+     analyst asks for a fresh run or that run failed in the sandbox.
+   - \`unknown\` with \`has_completed_run: false\`: nothing on record. Go to step 2.
+   \`unknown\` is never evidence the sample is benign.
 2. **Submit.** Call \`submit_detonation\` with the hash. Every submit is a new
    run on a fresh VM — the service never reuses an earlier report, which is
    why step 1 matters. Tell the analyst the run has started, how long it takes
@@ -124,6 +136,7 @@ export const createDetonateSampleSkill = (
       },
     ],
     getInlineTools: () => [
+      lookupHashTool(deps),
       listDetonationsTool(deps),
       submitDetonationTool(deps),
       getDetonationTool(deps),

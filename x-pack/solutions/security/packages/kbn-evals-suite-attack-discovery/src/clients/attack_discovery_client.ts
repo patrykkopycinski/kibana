@@ -8,11 +8,15 @@
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import { getHttpStatus } from '../task/infrastructure_error';
 import type { AnonymizedAlert } from '../types';
 
 const DEFAULT_ALERTS_INDEX_PATTERN = '.alerts-security.alerts-default*';
 const DEFAULT_SIZE = 20;
 const DEFAULT_TIME_RANGE = 'now-24h';
+// Statuses worth another attempt; any other HTTP status (400 for a malformed filter or index
+// pattern, 401, 404, ...) repeats identically, so it is rethrown at once.
+const RETRYABLE_SEARCH_STATUSES: ReadonlySet<number> = new Set([408, 429, 502, 503, 504]);
 
 const formatAsPageContent = (source: Record<string, unknown>, fallbackId?: string): string => {
   const lines: string[] = [];
@@ -92,31 +96,33 @@ export class AttackDiscoveryClient {
       }));
     };
 
-    try {
-      return await pRetry(run, {
-        retries: 2,
-        minTimeout: 2000,
-        onFailedAttempt: (err) => {
-          if (err.retriesLeft === 0) {
-            this.log.error(
-              new Error(`Failed to search alerts after ${err.attemptNumber} attempts`, {
-                cause: err,
-              })
-            );
-          } else {
-            this.log.warning(
-              new Error(`Alerts search failed on attempt ${err.attemptNumber}; retrying...`, {
-                cause: err,
-              })
-            );
-          }
-        },
-      });
-    } catch (e) {
-      this.log.error(
-        new Error('searchAlertsAsContext: falling back to empty alert set', { cause: e as Error })
-      );
-      return [];
-    }
+    // The final error propagates (no empty-alert fallback) so the task can tell an outage from a
+    // model outcome.
+    return pRetry(run, {
+      retries: 2,
+      minTimeout: 2000,
+      onFailedAttempt: (err) => {
+        const status = getHttpStatus(err);
+        if (status !== undefined && !RETRYABLE_SEARCH_STATUSES.has(status)) {
+          this.log.error(
+            new Error(`Alerts search failed with non-retryable HTTP ${status}`, { cause: err })
+          );
+          throw err;
+        }
+        if (err.retriesLeft === 0) {
+          this.log.error(
+            new Error(`Failed to search alerts after ${err.attemptNumber} attempts`, {
+              cause: err,
+            })
+          );
+        } else {
+          this.log.warning(
+            new Error(`Alerts search failed on attempt ${err.attemptNumber}; retrying...`, {
+              cause: err,
+            })
+          );
+        }
+      },
+    });
   }
 }

@@ -46,17 +46,62 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
 
-  it('marks a failed _generate request as infrastructure', async () => {
+  it.each([401, 403, 429, 502, 503])(
+    'marks a _generate request rejected with HTTP %i as infrastructure',
+    async (code) => {
+      const { client } = createClient({
+        generate: async () => {
+          throw httpError('upstream', code);
+        },
+      });
+
+      const result = await runToCompletion(client);
+
+      expect(result.errorKind).toBe('infrastructure');
+      expect(result.error).toContain(`generate HTTP ${code}`);
+    }
+  );
+
+  it('marks a _generate transport failure (no HTTP status) as infrastructure', async () => {
     const { client } = createClient({
       generate: async () => {
-        throw httpError('bad gateway', 502);
+        throw new TypeError('fetch failed');
       },
     });
 
     const result = await runToCompletion(client);
 
     expect(result.errorKind).toBe('infrastructure');
-    expect(result.error).toContain('generate HTTP 502');
+    expect(result.error).toContain('generate HTTP n/a');
+  });
+
+  it.each([400, 418])(
+    'leaves a _generate request rejected with HTTP %i unmarked (a model failure)',
+    async (code) => {
+      const { client } = createClient({
+        generate: async () => {
+          throw httpError('invalid alertsIndexPattern', code);
+        },
+      });
+
+      const result = await runToCompletion(client);
+
+      expect(result.status).toBe('failed');
+      expect(result.errorKind).toBeUndefined();
+      expect(result.error).toContain(`generate HTTP ${code}`);
+    }
+  );
+
+  it('leaves a status-less non-transport _generate error unmarked (a harness bug)', async () => {
+    const { client } = createClient({
+      generate: async () => {
+        throw new TypeError('x is not a function');
+      },
+    });
+
+    const result = await runToCompletion(client);
+
+    expect(result.errorKind).toBeUndefined();
   });
 
   it('marks a _generate response without execution_uuid as infrastructure', async () => {
@@ -95,7 +140,7 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
     expect(result.error).toContain('poll HTTP n/a');
   });
 
-  it.each([400, 401, 403])('marks a non-retryable poll HTTP %i as infrastructure', async (code) => {
+  it.each([401, 403])('marks a non-retryable poll HTTP %i as infrastructure', async (code) => {
     const { client } = createClient({
       poll: async () => {
         throw httpError('denied', code);
@@ -106,6 +151,21 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
 
     expect(result.errorKind).toBe('infrastructure');
     expect(result.error).toContain(`poll HTTP ${code}`);
+  });
+
+  it('leaves a poll rejected with HTTP 400 unmarked (a model failure)', async () => {
+    const { client, pollMock } = createClient({
+      poll: async () => {
+        throw httpError('bad request', 400);
+      },
+    });
+
+    const result = await runToCompletion(client);
+
+    expect(pollMock).toHaveBeenCalledTimes(1);
+    expect(result.status).toBe('failed');
+    expect(result.errorKind).toBeUndefined();
+    expect(result.error).toContain('poll HTTP 400');
   });
 
   it('marks a poll that keeps failing with 503 until the deadline as infrastructure', async () => {

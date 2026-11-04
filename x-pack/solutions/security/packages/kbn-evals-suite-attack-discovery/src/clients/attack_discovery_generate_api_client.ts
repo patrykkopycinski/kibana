@@ -27,6 +27,7 @@ import {
   ATTACK_DISCOVERY_GENERATIONS_BY_ID,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
+import { isInfrastructureInferenceError } from '../task/infrastructure_error';
 import type { AttackDiscoveryTaskErrorKind } from '../types';
 
 const PUBLIC_API_VERSION = '2023-10-31';
@@ -40,9 +41,10 @@ const TERMINAL_STATUSES = new Set(['succeeded', 'failed', 'canceled', 'dismissed
 const POLL_INTERVAL_MS = 5000;
 const POLL_MAX_WAIT_MS = 1500_000;
 const GENERATION_NOT_FOUND_GRACE_MS = 120_000;
-// Consecutive failed polls needed before a deadline counts as infrastructure. Reuses the grace
-// window: a gateway that stayed down that long is an outage, while a single failed final poll
-// after a long healthy run says nothing about it and the timeout stays the model's.
+// Consecutive failed polls needed before a deadline counts as infrastructure. Counted in polls,
+// not seconds: each failed poll also spends the HTTP handler's own retries, so 24 of them span
+// well over 120s. A single failed final poll after a long healthy run says nothing about an
+// outage and the timeout stays the model's.
 const MIN_POLL_FAILURE_STREAK = Math.ceil(GENERATION_NOT_FOUND_GRACE_MS / POLL_INTERVAL_MS);
 
 export interface AnonymizationField {
@@ -71,12 +73,14 @@ export interface GenerateApiResult {
   readonly error?: string;
   /**
    * Set to `infrastructure` when the harness could not observe a model outcome: the `_generate`
-   * request failed or returned no execution id; polling failed (404 after the grace window,
-   * transport error, non-retryable HTTP status, or retryable 429/5xx still failing at the
-   * deadline); or the generation ended `canceled`/`dismissed` (nobody cancels in an eval, so the
-   * harness or stack stopped it). A generation that reported `failed` and a deadline reached
-   * while the generation was still reporting a non-terminal status stay unmarked and are scored
-   * as model failures.
+   * request returned no execution id, or it or a poll was rejected with an infrastructure
+   * status (`isInfrastructureInferenceError`: 401/403/404/408/429/502/503/504), a transport
+   * error or an abort; a poll got 404 after the grace window; 24 or more consecutive polls hit a
+   * retryable 429/5xx by the deadline; or the generation ended `canceled`/`dismissed` (nobody
+   * cancels in an eval, so the harness or stack stopped it). A deterministic rejection (for
+   * example a 400 for a bad `alertsIndexPattern`), a generation that reported `failed` and a
+   * deadline reached while the generation was still reporting a non-terminal status stay
+   * unmarked and are scored as model failures.
    */
   readonly errorKind?: AttackDiscoveryTaskErrorKind;
 }
@@ -107,6 +111,11 @@ const extractStatusFromError = (e: unknown): number | undefined => {
   const err = e as Partial<KbnClientRequesterError>;
   return typeof err?.status === 'number' ? err.status : undefined;
 };
+
+// Same rule as `chatComplete` and the alert search: a deterministic rejection (for example a 400
+// for a bad `alertsIndexPattern` or filter) stays unmarked and scores as a model failure.
+const infrastructureKind = (e: unknown): { errorKind?: 'infrastructure' } =>
+  isInfrastructureInferenceError(e) ? { errorKind: 'infrastructure' } : {};
 
 const extractBodyTextFromError = (e: unknown): string => {
   if (e instanceof Error) return e.message.slice(0, 800);
@@ -179,7 +188,7 @@ export class AttackDiscoveryGenerateApiClient {
         executionUuid: '',
         status: 'failed',
         latencyMs: Date.now() - t0,
-        errorKind: 'infrastructure',
+        ...infrastructureKind(e),
         error: `generate HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractBodyTextFromError(
           e
         )}`,
@@ -268,7 +277,7 @@ export class AttackDiscoveryGenerateApiClient {
           return {
             discoveries: [],
             status: 'failed',
-            errorKind: 'infrastructure',
+            ...infrastructureKind(e),
             error: `poll HTTP ${status ?? 'n/a'}: ${extractBodyTextFromError(e)}`,
           };
         }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { isTransportError } from '@kbn/evals';
 
 /**
@@ -33,34 +34,57 @@ interface StatusCarrier {
   meta?: { statusCode?: unknown };
 }
 
+// Elasticsearch client errors without a response (`ConnectionError`, `TimeoutError`, ...) carry
+// `meta.statusCode: 0`, so only values in the HTTP range count as a status.
+const MIN_HTTP_STATUS = 100;
+
 // Inference errors carry `status`; Elasticsearch client errors carry `statusCode` and
 // `meta.statusCode`.
-const getNumericStatus = (error: unknown): number | undefined => {
+export const getHttpStatus = (error: unknown): number | undefined => {
   const carrier = error as StatusCarrier | null | undefined;
   const candidates = [carrier?.status, carrier?.statusCode, carrier?.meta?.statusCode];
-  return candidates.find((candidate): candidate is number => typeof candidate === 'number');
+  return candidates.find(
+    (candidate): candidate is number =>
+      typeof candidate === 'number' && candidate >= MIN_HTTP_STATUS
+  );
 };
 
 const MAX_CAUSE_DEPTH = 5;
 
-const isAbortError = (error: unknown): boolean => {
+const someInCauseChain = (error: unknown, predicate: (current: unknown) => boolean): boolean => {
   let current: unknown = error;
   for (let depth = 0; depth < MAX_CAUSE_DEPTH && current; depth++) {
-    if ((current as { name?: unknown }).name === 'AbortError') return true;
+    if (predicate(current)) return true;
     current = (current as { cause?: unknown }).cause;
   }
   return false;
 };
 
+const isAbortError = (error: unknown): boolean =>
+  someInCauseChain(error, (current) => (current as { name?: unknown }).name === 'AbortError');
+
+// The Elasticsearch client rebuilds connection failures as these classes without a `code` or
+// `cause`, so `isTransportError` cannot see them.
+const isElasticsearchConnectivityError = (error: unknown): boolean =>
+  someInCauseChain(
+    error,
+    (current) =>
+      current instanceof errors.ConnectionError ||
+      current instanceof errors.TimeoutError ||
+      current instanceof errors.NoLivingConnectionsError ||
+      current instanceof errors.RequestAbortedError
+  );
+
 /**
  * True when a rejected `chatComplete` or alert-search call says nothing about the model: a status in
  * {@link INFRASTRUCTURE_HTTP_STATUSES}, or, when there is no HTTP status at all, only a real
- * transport failure (`isTransportError`, walks the `cause` chain) or an abort. Any other
+ * transport failure (`isTransportError`, walks the `cause` chain), an abort, or an Elasticsearch
+ * client connection/timeout/abort error. Any other
  * status-less error (for example a `TypeError` from a harness bug) is not evidence about the
  * infrastructure and is scored like a model failure so it fails loudly.
  */
 export const isInfrastructureInferenceError = (error: unknown): boolean => {
-  const status = getNumericStatus(error);
+  const status = getHttpStatus(error);
   if (status !== undefined) return INFRASTRUCTURE_HTTP_STATUSES.has(status);
-  return isTransportError(error) || isAbortError(error);
+  return isTransportError(error) || isAbortError(error) || isElasticsearchConnectivityError(error);
 };

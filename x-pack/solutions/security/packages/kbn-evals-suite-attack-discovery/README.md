@@ -35,27 +35,39 @@ a `traceId`.
 
 Infrastructure failures:
 
-- `inferenceClient.chatComplete` rejects with HTTP `401`, `403`, `404`, `408`, `429`, `502`, `503`
-  or `504`. With no HTTP status at all it counts only when it is a transport error (connection
-  reset/refused/timeout codes or `fetch failed`, found anywhere in the `cause` chain) or an
-  `AbortError`; any other status-less error (for example a `TypeError` from a harness bug) scores
-  `0`.
-- `searchAlerts` mode: the Elasticsearch alert fetch throws before any model call, judged by the
-  same rule as `chatComplete` (status from `status`, `statusCode` or `meta.statusCode`). A
-  deterministic harness/dataset error such as an ES `400` for a malformed `filter` or
-  `alertsIndexPattern` scores `0`.
-- `generateApi` mode: the `_generate` request fails or returns no `execution_uuid`; polling fails
-  (HTTP 404 after the grace window, a transport error, or a non-retryable status such as
-  `400`/`401`/`403`); a retryable poll status (`429`/`5xx`) kept failing for at least the last 24 polls
-  (the 120s grace window at the 5s poll interval) when the poll deadline is reached; or the generation ends `canceled` or `dismissed` (nobody cancels in an eval, so the
-  harness or the stack stopped it).
+- One status rule covers `inferenceClient.chatComplete`, the `searchAlerts` Elasticsearch fetch and
+  the `generateApi` `_generate` and poll requests. The HTTP status is read from `status`,
+  `statusCode` or `meta.statusCode` (values below 100, such as the `0` Elasticsearch sets on
+  connection errors, are not a status). It is infrastructure for `401`, `403`, `404`, `408`, `429`,
+  `502`, `503` or `504`. With no HTTP status it is infrastructure only for a transport error
+  (connection reset/refused/timeout/DNS codes or `fetch failed`, found anywhere in the `cause`
+  chain), an `AbortError`, or an Elasticsearch client `ConnectionError`, `TimeoutError`,
+  `NoLivingConnectionsError` or `RequestAbortedError`. Any other status-less error (for example a
+  `TypeError` from a harness bug) scores `0`.
+- `searchAlerts` mode: the alert search retries `408`/`429`/`502`/`503`/`504` and status-less errors
+  twice, rethrows any other HTTP status at once, and rethrows the final error after the retries
+  (there is no empty-alert fallback). The rule above then decides: an ES `503` or a connection
+  failure is infrastructure, while a deterministic harness/dataset error such as an ES `400` for a
+  malformed `filter` or `alertsIndexPattern` scores `0`.
+- `generateApi` mode:
+  - the `_generate` request returns no `execution_uuid` (the stack produced no generation), or it
+    is rejected with an infrastructure status or a transport error; a `400` or other unlisted
+    status scores `0`;
+  - a poll is rejected with an infrastructure status or a transport error, or gets `404` after the
+    grace window; a poll `400` or other unlisted status scores `0`;
+  - a retryable poll status (`429`/`5xx`) failed on at least 24 consecutive polls when the poll
+    deadline is reached. The bound is counted in polls, not seconds: each failed poll also spends
+    the HTTP handler's own retries, so it spans well over the 120s grace window. A shorter run of
+    failed polls at the end leaves the timeout a model outcome;
+  - the generation ends `canceled` or `dismissed` (nobody cancels in an eval, so the harness or the
+    stack stopped it).
 
-Everything else is a model failure and keeps scoring `0`: `chatComplete` rejections with any other
-status (including `400` provider refusals / content filters and `500` token-limit or
-context-length errors), empty or unparseable completions
-(`Failed to parse insights ... after 3 attempts`), `invalid_shape`, a generation that reported
-`failed`, and a poll deadline reached while the generation is still reporting a non-terminal
-status (including when only a few trailing polls, fewer than 24, failed). A task error without the marker is never treated as N/A.
+Everything else is a model failure and keeps scoring `0`: rejections with any other status
+(including `400` provider refusals / content filters and `500` token-limit or context-length
+errors), empty or unparseable completions (`Failed to parse insights ... after 3 attempts`),
+`invalid_shape`, a generation that reported `failed`, and a poll deadline reached while the
+generation is still reporting a non-terminal status. A task error without the marker is never
+treated as N/A.
 
 A client socket timeout or gateway `504` on `chatComplete` is N/A; the generate-API poll deadline
 (while the generation is still running) is the only timeout that scores `0`.

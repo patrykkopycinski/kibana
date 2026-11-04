@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { EsClient } from '@kbn/scout';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { AttackDiscoveryClient } from '../clients/attack_discovery_client';
+import { esConnectivityErrors, responseError } from './es_error_fixtures';
 import { generateInsights, runAttackDiscovery } from './run_attack_discovery';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttackDiscoveryTaskInput } from '../types';
@@ -305,56 +309,51 @@ describe('generateInsights', () => {
     expect(output.errorKind).toBe('model');
   });
 
-  describe('classifies alert-search rejections', () => {
-    const runSearchRejecting = async (error: Error) => {
+  describe('classifies alert-search rejections end to end through the real client', () => {
+    const searchLog = { warning: jest.fn(), error: jest.fn() } as unknown as ToolingLog;
+
+    const runSearch = async (search: jest.Mock) => {
       const chatComplete = jest.fn();
-      const output = await runAttackDiscovery({
+      const pending = runAttackDiscovery({
         inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
-        attackDiscoveryClient: {
-          searchAlertsAsContext: jest.fn(async () => {
-            throw error;
-          }),
-        } as never,
+        attackDiscoveryClient: new AttackDiscoveryClient(
+          { search } as unknown as EsClient,
+          searchLog
+        ),
         log,
         input: { mode: 'searchAlerts' } as AttackDiscoveryTaskInput,
       });
+      await jest.advanceTimersByTimeAsync(10_000);
+      const output = await pending;
       expect(chatComplete).not.toHaveBeenCalled();
       return output;
     };
 
-    it.each([
-      ['statusCode', { statusCode: 503 }],
-      ['meta.statusCode', { meta: { statusCode: 503 } }],
-      ['status', { status: 503 }],
-    ])('marks an ES 503 (%s) as infrastructure', async (_shape, props) => {
-      const output = await runSearchRejecting(Object.assign(new Error('es unavailable'), props));
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('marks an ES 503 as infrastructure after the retries are spent', async () => {
+      const search = jest.fn().mockRejectedValue(responseError(503));
+      const output = await runSearch(search);
+
+      expect(search).toHaveBeenCalledTimes(3);
       expect(output.errorKind).toBe('infrastructure');
-      expect(output.errors?.[0]).toContain('es unavailable');
+      expect(output.errors?.[0]).toContain('alert search failed');
     });
 
-    it('marks a transport failure as infrastructure', async () => {
-      const output = await runSearchRejecting(
-        Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' })
-      );
-      expect(output.errorKind).toBe('infrastructure');
-    });
-
-    it.each([
-      ['statusCode', { statusCode: 400 }],
-      ['meta.statusCode', { meta: { statusCode: 400 } }],
-    ])(
-      'scores an ES 400 (%s) from a malformed filter as a model failure',
-      async (_shape, props) => {
-        const output = await runSearchRejecting(
-          Object.assign(new Error('parsing_exception: bad filter'), props)
-        );
-        expect(output.errorKind).toBe('model');
-        expect(output.errors?.[0]).toContain('parsing_exception');
+    it.each(Object.entries(esConnectivityErrors))(
+      'marks an ES %s as infrastructure',
+      async (_name, create) => {
+        const output = await runSearch(jest.fn().mockRejectedValue(create()));
+        expect(output.errorKind).toBe('infrastructure');
       }
     );
 
-    it('scores a status-less non-transport error as a model failure', async () => {
-      const output = await runSearchRejecting(new TypeError('x is not a function'));
+    it('scores an ES 400 (malformed filter or index pattern) as a model failure without retrying', async () => {
+      const search = jest.fn().mockRejectedValue(responseError(400));
+      const output = await runSearch(search);
+
+      expect(search).toHaveBeenCalledTimes(1);
       expect(output.errorKind).toBe('model');
     });
   });

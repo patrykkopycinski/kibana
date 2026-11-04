@@ -153,9 +153,9 @@ export class AttackDiscoveryGenerateApiClient {
         status: 'failed',
         latencyMs: Date.now() - t0,
         ...infrastructureKind(e),
-        error: `generate HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractBodyTextFromError(
-          e
-        )}`,
+        error: `anonymization_fields HTTP ${
+          extractStatusFromError(e) ?? 'n/a'
+        }: ${extractBodyTextFromError(e)}`,
       };
     }
 

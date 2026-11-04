@@ -72,8 +72,9 @@ Everything else is a model failure and keeps scoring `0`: rejections with any ot
 (including `400` provider refusals / content filters and `500` token-limit or context-length
 errors), empty or unparseable completions (`Failed to parse insights ... after 3 attempts`),
 `invalid_shape`, a generation that reported `failed`, and a poll deadline reached while the
-generation is still reporting a non-terminal status. A task error without the marker is never
-treated as N/A.
+generation is still reporting a non-terminal status. That includes a poll that returns 2xx without
+`generation.status`: the client treats it as non-terminal and keeps polling until the deadline,
+then reports `timed_out` unmarked. A task error without the marker is never treated as N/A.
 
 A client socket timeout or gateway `504` on `chatComplete` is N/A; the generate-API poll deadline
 (while the generation is still running) is the only timeout that scores `0`.

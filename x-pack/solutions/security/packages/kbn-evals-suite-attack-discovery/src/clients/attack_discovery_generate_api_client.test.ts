@@ -61,7 +61,8 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
 
       expect(result.status).toBe('failed');
       expect(result.errorKind).toBe('infrastructure');
-      expect(result.error).toContain(`generate HTTP ${code}`);
+      expect(result.error).toContain(`anonymization_fields HTTP ${code}`);
+      expect(result.error).not.toContain('generate HTTP');
       expect(generateMock).not.toHaveBeenCalled();
     }
   );
@@ -76,6 +77,7 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
     const result = await runToCompletion(client);
 
     expect(result.errorKind).toBe('infrastructure');
+    expect(result.error).toContain('anonymization_fields HTTP n/a');
     expect(generateMock).not.toHaveBeenCalled();
   });
 
@@ -90,6 +92,8 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
 
     expect(result.status).toBe('failed');
     expect(result.errorKind).toBeUndefined();
+    expect(result.error).toContain('anonymization_fields HTTP 400');
+    expect(result.error).not.toContain('generate HTTP');
     expect(generateMock).not.toHaveBeenCalled();
   });
 

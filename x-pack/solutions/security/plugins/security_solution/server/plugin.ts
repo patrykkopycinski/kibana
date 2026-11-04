@@ -737,9 +737,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       router,
       logger,
       serviceUrl: config.detonatePrototype?.serviceUrl,
+      connectorId: config.detonatePrototype?.connectorId,
       enabled: config.experimentalFeatures.detonatePrototypeEnabled,
       endpointAppContextService: this.endpointAppContextService,
       getSecurityStart: async () => (await core.getStartServices())[1].security,
+      getActionsStart: async () => (await core.getStartServices())[1].actions,
     });
 
     registerEndpointSuggestionsRoutes(

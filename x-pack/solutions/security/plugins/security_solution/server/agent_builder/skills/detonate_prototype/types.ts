@@ -12,6 +12,7 @@
  * endpoint skills answer in the same vocabulary.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -86,7 +87,7 @@ export const detonateErrorResult = (
 /** What the skill's tools share. The privilege check is the same one the HTTP routes use. */
 export interface DetonateSkillDeps {
   endpointAppContextService: EndpointAppContextService;
-  getClient: () => DetonateClient;
+  getClient: (request: KibanaRequest) => DetonateClient;
   hasDetonatePrivilege: HasDetonatePrivilege;
 }
 

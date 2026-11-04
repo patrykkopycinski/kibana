@@ -56,6 +56,10 @@ export class DetonateServiceError extends Error {
   }
 }
 
+/** Statuses a caller can act on keep their code; anything else is an outage to the analyst. */
+export const toDetonateStatusCode = (status: number): number =>
+  status === 404 || status === 400 || status === 429 || status === 501 ? status : 502;
+
 export interface DetonateTaskSearchQuery {
   /** An ES `query_string`, evaluated by the service against its task index. */
   query_string?: string;
@@ -129,13 +133,7 @@ export const createDetonateClient = ({
       );
       throw new DetonateServiceError(
         `The detonation service answered ${response.status}.`,
-        // Pass through the ones a caller can act on; collapse the rest.
-        response.status === 404 ||
-        response.status === 400 ||
-        response.status === 429 ||
-        response.status === 501
-          ? response.status
-          : 502
+        toDetonateStatusCode(response.status)
       );
     }
 

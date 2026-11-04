@@ -82,7 +82,7 @@ export const listDetonationsTool = ({
 
     try {
       const response = await listTasksInSpace(
-        getClient(),
+        getClient(request),
         endpointAppContextService.getActiveSpaceId(request),
         {
           ...(queryString ? { query_string: queryString } : {}),

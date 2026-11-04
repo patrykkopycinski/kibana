@@ -55,7 +55,7 @@ export const getDetonationTool = ({
 
     try {
       const task = await getTaskInSpace(
-        getClient(),
+        getClient(request),
         taskId,
         endpointAppContextService.getActiveSpaceId(request)
       );

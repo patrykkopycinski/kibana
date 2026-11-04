@@ -61,7 +61,7 @@ export const lookupHashTool = ({
         last_verdict: verdict,
         last_seen: lastSeen,
       } = await lookupPriorRunsInSpace(
-        getClient(),
+        getClient(request),
         sampleHash,
         endpointAppContextService.getActiveSpaceId(request)
       );

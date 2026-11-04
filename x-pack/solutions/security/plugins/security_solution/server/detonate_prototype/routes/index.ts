@@ -86,9 +86,10 @@ export interface DetonateRoutesDeps {
   /**
    * Resolved lazily so the routes exist even when the service is unreachable:
    * a misconfigured prototype answers 502 with an explanation, rather than
-   * breaking Kibana's route registration at startup.
+   * breaking Kibana's route registration at startup. Takes the request because
+   * a connector-backed client runs as the requesting user.
    */
-  getClient: () => DetonateClient;
+  getClient: (request: KibanaRequest) => DetonateClient;
   /** Resolves the active space, which scopes every run. */
   endpointAppContextService: EndpointAppContextService;
   /**
@@ -159,9 +160,9 @@ export const registerDetonatePrototypeRoutes = ({
       path: DETONATE_HEALTHCHECK_PATH,
       security: DETONATE_ROUTE_SECURITY,
     })
-    .addVersion({ version: '1', validate: false }, async (_context, _request, response) => {
+    .addVersion({ version: '1', validate: false }, async (_context, request, response) => {
       try {
-        return response.ok({ body: await getClient().healthcheck() });
+        return response.ok({ body: await getClient(request).healthcheck() });
       } catch (error) {
         return toErrorResponse(error, response);
       }
@@ -196,7 +197,7 @@ export const registerDetonatePrototypeRoutes = ({
         try {
           return response.ok({
             body: await lookupPriorRunsInSpace(
-              getClient(),
+              getClient(request),
               request.params.sha256,
               spaceIdFromRequest(request)
             ),
@@ -276,7 +277,7 @@ export const registerDetonatePrototypeRoutes = ({
             return response.badRequest({ body: { message: 'The sample file is empty.' } });
           }
 
-          const client = getClient();
+          const client = getClient(request);
           const task = await submitInSpace<DetonateFileRequest>(
             (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }),
             { ...options, sample_filename: sampleFilename },
@@ -320,7 +321,7 @@ export const registerDetonatePrototypeRoutes = ({
             });
           }
 
-          const client = getClient();
+          const client = getClient(request);
           const task = await submitInSpace(
             (scoped) => client.submitHash(scoped),
             request.body,
@@ -352,7 +353,7 @@ export const registerDetonatePrototypeRoutes = ({
         try {
           return response.ok<DetonateTask>({
             body: await getTaskInSpace(
-              getClient(),
+              getClient(request),
               request.params.taskId,
               spaceIdFromRequest(request)
             ),
@@ -380,7 +381,7 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          const client = getClient();
+          const client = getClient(request);
           await getTaskInSpace(client, request.params.taskId, spaceIdFromRequest(request));
           return response.ok({ body: await client.getTaskUpdates(request.params.taskId) });
         } catch (error) {
@@ -414,7 +415,7 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          const client = getClient();
+          const client = getClient(request);
           await getTaskInSpace(client, request.params.taskId, spaceIdFromRequest(request));
           return response.ok({
             body: await client.getTaskAlerts(
@@ -451,7 +452,11 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           return response.ok({
-            body: await listTasksInSpace(getClient(), spaceIdFromRequest(request), request.query),
+            body: await listTasksInSpace(
+              getClient(request),
+              spaceIdFromRequest(request),
+              request.query
+            ),
           });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -485,7 +490,7 @@ export const registerDetonatePrototypeRoutes = ({
         try {
           return response.ok({
             body: await listTasksInSpace(
-              getClient(),
+              getClient(request),
               spaceIdFromRequest(request),
               {},
               {

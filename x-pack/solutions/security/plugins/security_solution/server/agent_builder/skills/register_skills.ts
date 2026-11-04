@@ -167,7 +167,7 @@ export const registerSkills = async ({
     await agentBuilder.skills.register(
       createDetonateSampleSkill({
         endpointAppContextService: options.endpointAppContextService,
-        getClient: () => detonatePrototype.client,
+        getClient: (request) => detonatePrototype.getClient(request),
         hasDetonatePrivilege: detonatePrototype.hasDetonatePrivilege,
       })
     );

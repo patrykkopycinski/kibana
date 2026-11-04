@@ -121,7 +121,7 @@ describe('registerSkills - detonate sample', () => {
     await expect(
       registerSkills(
         buildDetonateOpts(agentBuilder, {
-          client: {},
+          getClient: jest.fn(),
           hasDetonatePrivilege: jest.fn(),
         }) as Parameters<typeof registerSkills>[0]
       )

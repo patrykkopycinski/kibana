@@ -226,6 +226,11 @@ export const configSchema = schema.object({
   detonatePrototype: schema.maybe(
     schema.object({
       serviceUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      /**
+       * A `.detonate` connector to call the service through instead. It holds
+       * the address and the API key, and runs as the requesting user.
+       */
+      connectorId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
     })
   ),
   cdn: schema.maybe(

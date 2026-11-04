@@ -92,7 +92,7 @@ export const submitDetonationTool = ({
     const { sampleHash, tags, vmOsFamily } = params;
 
     try {
-      const client = getClient();
+      const client = getClient(request);
       const task = await submitInSpace(
         (scoped) => client.submitHash(scoped),
         {

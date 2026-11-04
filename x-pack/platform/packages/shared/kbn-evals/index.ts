@@ -103,6 +103,7 @@ export { createQuantitativeGroundednessEvaluator } from './src/evaluators/ground
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
+export { isTransportError } from './src/utils/http_handler_from_kbn_client';
 export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
   containsAllTerms,

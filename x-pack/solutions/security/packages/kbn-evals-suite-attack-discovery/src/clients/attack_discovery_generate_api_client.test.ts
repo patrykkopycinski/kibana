@@ -108,6 +108,54 @@ describe('AttackDiscoveryGenerateApiClient error classification', () => {
     expect(result.error).toContain(`poll HTTP ${code}`);
   });
 
+  it('marks a poll that keeps failing with 503 until the deadline as infrastructure', async () => {
+    const { client, pollMock } = createClient({
+      poll: async () => {
+        throw httpError('service unavailable', 503);
+      },
+    });
+
+    const result = await runToCompletion(client);
+
+    expect(pollMock.mock.calls.length).toBeGreaterThan(10);
+    expect(result.status).toBe('timed_out');
+    expect(result.errorKind).toBe('infrastructure');
+    expect(result.error).toContain('poll HTTP 503 until deadline');
+  });
+
+  it('leaves a deadline unmarked when polls failed earlier but the last one succeeded', async () => {
+    let calls = 0;
+    const { client } = createClient({
+      poll: async () => {
+        calls += 1;
+        if (calls <= 3) throw httpError('service unavailable', 503);
+        return { generation: { status: 'running' } };
+      },
+    });
+
+    const result = await runToCompletion(client);
+
+    expect(calls).toBeGreaterThan(4);
+    expect(result.status).toBe('timed_out');
+    expect(result.error).toContain('poll timed out');
+    expect(result.errorKind).toBeUndefined();
+  });
+
+  it.each(['canceled', 'dismissed'])(
+    'marks a generation that ended %s as infrastructure',
+    async (terminal) => {
+      const { client } = createClient({
+        poll: async () => ({ generation: { status: terminal, reason: 'stopped' } }),
+      });
+
+      const result = await runToCompletion(client);
+
+      expect(result.status).toBe(terminal);
+      expect(result.error).toContain(`generation ${terminal}`);
+      expect(result.errorKind).toBe('infrastructure');
+    }
+  );
+
   it('leaves a generation that reported failed unmarked (a model failure)', async () => {
     const { client } = createClient({
       poll: async () => ({

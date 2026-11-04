@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, Message } from '@kbn/inference-common';
+import type { BoundInferenceClient, ChatCompleteResponse, Message } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
@@ -99,7 +99,7 @@ export const generateInsights = async ({
 
   let lastParseError: unknown;
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
-    let response;
+    let response: ChatCompleteResponse;
     try {
       response = await inferenceClient.chatComplete({ messages });
     } catch (error) {

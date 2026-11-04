@@ -35,18 +35,27 @@ a `traceId`.
 
 Infrastructure failures:
 
-- `inferenceClient.chatComplete` rejects with no numeric HTTP status (transport failure or abort),
-  or with HTTP `401`, `403`, `404`, `408`, `429`, `502`, `503` or `504`.
+- `inferenceClient.chatComplete` rejects with HTTP `401`, `403`, `404`, `408`, `429`, `502`, `503`
+  or `504`. With no HTTP status at all it counts only when it is a transport error (connection
+  reset/refused/timeout codes or `fetch failed`, found anywhere in the `cause` chain) or an
+  `AbortError`; any other status-less error (for example a `TypeError` from a harness bug) scores
+  `0`.
 - `searchAlerts` mode: the Elasticsearch alert fetch throws before any model call.
-- `generateApi` mode: the `_generate` request fails or returns no `execution_uuid`, or polling
-  fails (HTTP 404 after the grace window, a transport error, or a non-retryable status such as
-  `400`/`401`/`403`).
+- `generateApi` mode: the `_generate` request fails or returns no `execution_uuid`; polling fails
+  (HTTP 404 after the grace window, a transport error, or a non-retryable status such as
+  `400`/`401`/`403`); a retryable poll status (`429`/`5xx`) is still failing when the poll deadline
+  is reached; or the generation ends `canceled` or `dismissed` (nobody cancels in an eval, so the
+  harness or the stack stopped it).
 
 Everything else is a model failure and keeps scoring `0`: `chatComplete` rejections with any other
 status (including `400` provider refusals / content filters and `500` token-limit or
 context-length errors), empty or unparseable completions
 (`Failed to parse insights ... after 3 attempts`), `invalid_shape`, a generation that reported
-`failed`, and a poll timeout. A task error without the marker is never treated as N/A.
+`failed`, and a poll deadline reached while the generation is still reporting a non-terminal
+status. A task error without the marker is never treated as N/A.
+
+A client socket timeout or gateway `504` on `chatComplete` is N/A; the generate-API poll deadline
+(while the generation is still running) is the only timeout that scores `0`.
 
 Harness misconfiguration (`Missing input`, a missing `generateApiClient` in `generateApi` mode, an
 unreadable prompt file) is deliberately not tagged: it keeps scoring `0` so a broken setup fails

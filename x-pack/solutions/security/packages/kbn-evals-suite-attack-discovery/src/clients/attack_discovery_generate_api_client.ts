@@ -67,9 +67,12 @@ export interface GenerateApiResult {
   readonly error?: string;
   /**
    * Set to `infrastructure` when the harness could not observe a model outcome: the `_generate`
-   * request failed or returned no execution id, or polling failed (404 after the grace window,
-   * transport error, non-retryable HTTP status). A generation that reported `failed`/`canceled`
-   * and a poll timeout stay unmarked and are scored as model failures.
+   * request failed or returned no execution id; polling failed (404 after the grace window,
+   * transport error, non-retryable HTTP status, or retryable 429/5xx still failing at the
+   * deadline); or the generation ended `canceled`/`dismissed` (nobody cancels in an eval, so the
+   * harness or stack stopped it). A generation that reported `failed` and a deadline reached
+   * while the generation was still reporting a non-terminal status stay unmarked and are scored
+   * as model failures.
    */
   readonly errorKind?: AttackDiscoveryTaskErrorKind;
 }
@@ -223,10 +226,13 @@ export class AttackDiscoveryGenerateApiClient {
 
     const deadline = Date.now() + POLL_MAX_WAIT_MS;
     const notFoundGraceDeadline = Date.now() + GENERATION_NOT_FOUND_GRACE_MS;
+    // Set by a failed poll that is retried, cleared by the next poll that returns a payload.
+    let lastPollError: { status: number | undefined; message: string } | undefined;
 
     while (Date.now() < deadline) {
       let status: number | undefined;
       let payload: GenerationPollResponse | undefined;
+      let pollFailed = false;
 
       try {
         payload = await this.fetch<GenerationPollResponse>(endpoint, {
@@ -240,7 +246,8 @@ export class AttackDiscoveryGenerateApiClient {
         const isNotFoundGrace = status === 404 && Date.now() < notFoundGraceDeadline;
 
         if (shouldRetry || isNotFoundGrace) {
-          await sleep(POLL_INTERVAL_MS);
+          pollFailed = true;
+          lastPollError = { status, message: extractBodyTextFromError(e).slice(0, 400) };
         } else if (status === 404) {
           return {
             discoveries: [],
@@ -260,28 +267,45 @@ export class AttackDiscoveryGenerateApiClient {
         }
       }
 
-      const generation = payload?.generation ?? {};
-      const genStatus = String(generation.status ?? '');
+      if (!pollFailed) {
+        lastPollError = undefined;
+        const generation = payload?.generation ?? {};
+        const genStatus = String(generation.status ?? '');
 
-      if (TERMINAL_STATUSES.has(genStatus)) {
-        const data = payload?.data ?? [];
+        if (TERMINAL_STATUSES.has(genStatus)) {
+          const data = payload?.data ?? [];
 
-        if (genStatus !== 'succeeded') {
+          if (genStatus !== 'succeeded') {
+            return {
+              discoveries: [],
+              status: genStatus,
+              // `failed` is the generation's own verdict; `canceled`/`dismissed` mean something
+              // outside the model stopped it.
+              ...(genStatus === 'failed' ? {} : { errorKind: 'infrastructure' as const }),
+              error: `generation ${genStatus}: ${String(generation.reason ?? genStatus)}`,
+            };
+          }
+
           return {
-            discoveries: [],
+            discoveries: data,
             status: genStatus,
-            error: `generation ${genStatus}: ${String(generation.reason ?? genStatus)}`,
+            alertsContextCount: generation.alerts_context_count,
           };
         }
-
-        return {
-          discoveries: data,
-          status: genStatus,
-          alertsContextCount: generation.alerts_context_count,
-        };
       }
 
       await sleep(POLL_INTERVAL_MS);
+    }
+
+    if (lastPollError) {
+      return {
+        discoveries: [],
+        status: 'timed_out',
+        errorKind: 'infrastructure',
+        error: `poll HTTP ${lastPollError.status ?? 'n/a'} until deadline (${
+          POLL_MAX_WAIT_MS / 1000
+        }s): ${lastPollError.message}`,
+      };
     }
 
     return {

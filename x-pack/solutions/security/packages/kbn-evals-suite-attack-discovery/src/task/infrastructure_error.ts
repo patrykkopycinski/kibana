@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isTransportError } from '@kbn/evals';
+
 /**
  * A task failure that happened before any model response could exist (transport failure, auth
  * or routing failure, throttling, upstream outage, Elasticsearch failure while fetching alerts).
@@ -30,12 +32,26 @@ const getNumericStatus = (error: unknown): number | undefined => {
   return typeof status === 'number' ? status : undefined;
 };
 
+const MAX_CAUSE_DEPTH = 5;
+
+const isAbortError = (error: unknown): boolean => {
+  let current: unknown = error;
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current; depth++) {
+    if ((current as { name?: unknown }).name === 'AbortError') return true;
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+};
+
 /**
- * True when a rejected `chatComplete` call says nothing about the model: no HTTP status at all
- * (transport failure or abort, mirroring `isTransportError` in `@kbn/evals`' kbn client
- * handler), or a status in {@link INFRASTRUCTURE_HTTP_STATUSES}.
+ * True when a rejected `chatComplete` call says nothing about the model: a status in
+ * {@link INFRASTRUCTURE_HTTP_STATUSES}, or, when there is no HTTP status at all, only a real
+ * transport failure (`isTransportError`, walks the `cause` chain) or an abort. Any other
+ * status-less error (for example a `TypeError` from a harness bug) is not evidence about the
+ * infrastructure and is scored like a model failure so it fails loudly.
  */
 export const isInfrastructureInferenceError = (error: unknown): boolean => {
   const status = getNumericStatus(error);
-  return status === undefined || INFRASTRUCTURE_HTTP_STATUSES.has(status);
+  if (status !== undefined) return INFRASTRUCTURE_HTTP_STATUSES.has(status);
+  return isTransportError(error) || isAbortError(error);
 };

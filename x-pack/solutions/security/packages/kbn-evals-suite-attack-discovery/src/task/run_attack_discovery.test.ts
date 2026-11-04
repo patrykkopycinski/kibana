@@ -272,6 +272,37 @@ describe('generateInsights', () => {
       );
       expect(output.errorKind).toBe('infrastructure');
     });
+
+    it('keeps a harness bug (status-less TypeError) a model failure so it fails loudly', async () => {
+      const { output } = await runRejecting(new TypeError('chatComplete is not a function'));
+      expect(output.errorKind).toBe('model');
+    });
+
+    it('classifies an AbortError as infrastructure', async () => {
+      const abort = new Error('The operation was aborted');
+      abort.name = 'AbortError';
+      const { output } = await runRejecting(abort);
+      expect(output.errorKind).toBe('infrastructure');
+    });
+
+    it('classifies a transport error nested in the cause chain as infrastructure', async () => {
+      const reset = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+      const { output } = await runRejecting(new Error('request failed', { cause: reset }));
+      expect(output.errorKind).toBe('infrastructure');
+    });
+  });
+
+  it('scores a missing generateApiClient (harness misconfiguration) as a model failure', async () => {
+    const output = await runAttackDiscovery({
+      inferenceClient: {} as unknown as BoundInferenceClient,
+      attackDiscoveryClient: {} as never,
+      log,
+      input: { mode: 'generateApi', connectorId: 'c' } as AttackDiscoveryTaskInput,
+    });
+
+    expect(output.insights).toBeNull();
+    expect(output.errors?.[0]).toContain('generateApi mode requires');
+    expect(output.errorKind).toBe('model');
   });
 
   it('marks a failed alert search as infrastructure', async () => {

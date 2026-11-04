@@ -151,6 +151,27 @@ describe('createDetonateClient', () => {
     });
   });
 
+  describe('alert reads', () => {
+    it('reads one alert kind for a task, passing the limit through', async () => {
+      fetchMock.mockResolvedValue(jsonResponse([{ '@timestamp': '2026-01-01T00:00:00Z' }]));
+
+      const docs = await client().getTaskAlerts('task/1', 'diagnostic-endpoint-alerts', 250);
+
+      const url = new URL(fetchMock.mock.calls[0][0]);
+      expect(url.pathname).toBe('/v1/detonate/tasks/task%2F1/diagnostic-endpoint-alerts');
+      expect(url.searchParams.get('limit')).toBe('250');
+      expect(docs).toHaveLength(1);
+    });
+
+    it('leaves the limit to the service when none is given', async () => {
+      fetchMock.mockResolvedValue(jsonResponse([]));
+
+      await client().getTaskAlerts('task-1', 'production-detection-alerts');
+
+      expect(new URL(fetchMock.mock.calls[0][0]).search).toBe('');
+    });
+  });
+
   describe('errors', () => {
     it('passes a 404 through so callers can tell "not yet indexed" from an outage', async () => {
       fetchMock.mockResolvedValue(new Response('not found', { status: 404 }));

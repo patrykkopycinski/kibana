@@ -50,6 +50,10 @@ describe('registerDetonatePrototypeRoutes', () => {
     router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/{taskId}/updates`).versions['1']
       .handler;
 
+  const taskAlertsHandler = () =>
+    router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/{taskId}/alerts`).versions['1']
+      .handler;
+
   const listTasksHandler = () =>
     router.versioned.getRoute('get', DETONATE_TASKS_PATH).versions['1'].handler;
 
@@ -398,6 +402,82 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+    });
+
+    const alertsRequest = (taskId: string, query: Record<string, unknown>) =>
+      httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: `${DETONATE_TASKS_PATH}/${taskId}/alerts`,
+        params: { taskId },
+        query,
+      });
+
+    it("answers 404 for another space's alert documents without reading them", async () => {
+      client.getTask.mockResolvedValue({ id: 'task-foreign', tags: ['space:team-b'] } as never);
+
+      await taskAlertsHandler()(
+        createContext(),
+        alertsRequest('task-foreign', { kind: 'production-endpoint-alerts', limit: 500 }),
+        mockResponse
+      );
+
+      expect(client.getTaskAlerts).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+    });
+
+    it('reads alert documents for a run in the active space', async () => {
+      const docs = [{ dns: { question: { name: 'evil.example.com' } } }];
+      client.getTask.mockResolvedValue({ id: 'task-1', tags: ['space:team-a'] } as never);
+      client.getTaskAlerts.mockResolvedValue(docs);
+
+      await taskAlertsHandler()(
+        createContext(),
+        alertsRequest('task-1', { kind: 'diagnostic-endpoint-alerts', limit: 200 }),
+        mockResponse
+      );
+
+      expect(client.getTaskAlerts).toHaveBeenCalledWith(
+        'task-1',
+        'diagnostic-endpoint-alerts',
+        200
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: docs });
+    });
+
+    it('accepts only the three service alert kinds and a bounded limit', () => {
+      const { config } = router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/{taskId}/alerts`)
+        .versions['1'];
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      const querySchema = (validation as { request: { query: { validate(q: unknown): unknown } } })
+        .request.query;
+
+      expect(querySchema.validate({ kind: 'production-endpoint-alerts' })).toEqual({
+        kind: 'production-endpoint-alerts',
+        limit: 500,
+      });
+      expect(() => querySchema.validate({ kind: 'updates' })).toThrow();
+      expect(() => querySchema.validate({ kind: '../meta' })).toThrow();
+      expect(() =>
+        querySchema.validate({ kind: 'production-endpoint-alerts', limit: 5000 })
+      ).toThrow();
+    });
+
+    it('passes the service 404 through while the sandbox agent has not enrolled', async () => {
+      client.getTask.mockResolvedValue({ id: 'task-1', tags: ['space:team-a'] } as never);
+      client.getTaskAlerts.mockRejectedValue(new Ctor('not found', 404));
+
+      await taskAlertsHandler()(
+        createContext(),
+        alertsRequest('task-1', { kind: 'production-detection-alerts', limit: 500 }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
     });
 
     const page = (tasks: unknown[]) =>

@@ -35,7 +35,7 @@ export const DETONATE_FP_VALIDATION_WORKFLOW = {
 export const DETONATE_TRIAGE_WORKFLOW_ID = 'system-security-detonate-triage';
 
 /**
- * Detonate prototype: the automated triage tier. A reputation gate runs
+ * Detonate prototype: the automated triage tier. A prior-run lookup runs
  * first — known-malicious hashes are written back without spending a VM;
  * only `unknown` hashes detonate, and the run's verdict lands on the alert.
  * A malicious verdict additionally offers an approval-gated blocklist entry.
@@ -44,7 +44,7 @@ export const DETONATE_TRIAGE_WORKFLOW_ID = 'system-security-detonate-triage';
 export const DETONATE_TRIAGE_WORKFLOW = {
   id: DETONATE_TRIAGE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 10,
+  version: 11,
   billable: false,
   yaml: DETONATE_TRIAGE_YAML,
   management: {

@@ -30,6 +30,7 @@ import { DETONATE_API_ACTION_ALL } from '@kbn/security-solution-features/actions
 
 import {
   DETONATE_HEALTHCHECK_PATH,
+  DETONATE_MAX_ALERT_DOCS,
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
@@ -382,6 +383,46 @@ export const registerDetonatePrototypeRoutes = ({
           const client = getClient();
           await getTaskInSpace(client, request.params.taskId, spaceIdFromRequest(request));
           return response.ok({ body: await client.getTaskUpdates(request.params.taskId) });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  router.versioned
+    .get({
+      access: 'internal',
+      path: `${DETONATE_TASKS_PATH}/{taskId}/alerts`,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ taskId: schema.string({ minLength: 1, maxLength: 128 }) }),
+            query: schema.object({
+              kind: schema.oneOf([
+                schema.literal('production-endpoint-alerts'),
+                schema.literal('diagnostic-endpoint-alerts'),
+                schema.literal('production-detection-alerts'),
+              ]),
+              limit: schema.number({ min: 1, max: DETONATE_MAX_ALERT_DOCS, defaultValue: 500 }),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const client = getClient();
+          await getTaskInSpace(client, request.params.taskId, spaceIdFromRequest(request));
+          return response.ok({
+            body: await client.getTaskAlerts(
+              request.params.taskId,
+              request.query.kind,
+              request.query.limit
+            ),
+          });
         } catch (error) {
           return toErrorResponse(error, response);
         }

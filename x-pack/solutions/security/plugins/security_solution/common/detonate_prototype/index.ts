@@ -116,6 +116,17 @@ export type DetonateDetectionSeverity = (typeof DETONATE_DETECTION_SEVERITIES)[n
 /** Raw alert documents are ES documents; the contract does not narrow them. */
 export type DetonateAlertDoc = Record<string, unknown>;
 
+/** The service's per-task alert reads. Each 404s until the sandbox agent enrolls. */
+export const DETONATE_ALERT_KINDS = [
+  'production-endpoint-alerts',
+  'diagnostic-endpoint-alerts',
+  'production-detection-alerts',
+] as const;
+export type DetonateAlertKind = (typeof DETONATE_ALERT_KINDS)[number];
+
+/** The service defaults an alert read to 5000 documents; nothing here needs that many. */
+export const DETONATE_MAX_ALERT_DOCS = 1000;
+
 /**
  * Endpoint alerts (production and diagnostic) group by `event.code`.
  * `alert_docs` is only present on the per-task alert reads, not on the task.

@@ -1,9 +1,10 @@
 version: "1"
 name: Detonate triage
 description: >
-  Detonate prototype: the automated triage tier. A reputation gate runs
-  first — a digest the service has already seen detonate is tagged straight
-  away and never spends a VM. Only `unknown` hashes are detonated, and the
+  Detonate prototype: the automated triage tier. A prior-run lookup runs
+  first — a digest whose newest completed run in this space was malicious is
+  tagged straight away and never spends a VM. Only `unknown` hashes are
+  detonated, the run's IOCs are hunted across the fleet, and the
   run's verdict is written back to the alert (tag plus evidence note; the
   alert's status is never touched by the workflow). A malicious verdict also
   offers a fleet-wide blocklist entry — behind an analyst approval, never on
@@ -73,8 +74,8 @@ steps:
     type: switch
     expression: "{{ steps.reputation.output.status }}"
     cases:
-      # Already-known malware: write the verdict back from reputation alone.
-      # No VM is spent re-confirming what the service has already seen, and
+      # Already-known malware: write the verdict back from the prior run alone.
+      # No VM is spent re-confirming what this space has already detonated, and
       # the note says so explicitly so nobody hunts for a run that does not
       # exist.
       - match: known-malicious
@@ -163,7 +164,8 @@ steps:
       # F3: the run's extracted IOCs (domains, IPs, hashes) are only as
       # valuable as the question they answer next — which OTHER hosts in
       # the fleet contacted the same infrastructure? Two hunts, one per
-      # indicator family the sim extracts: DNS answers for the domains,
+      # indicator family the step derives from the run's alert documents:
+      # DNS questions for the domains,
       # destination IPs for the IPs.
       #
       # The IN-lists splice textually (the alertzero batched-generation
@@ -172,8 +174,8 @@ steps:
       # hostname pattern and IPs must parse, so no value carries a quote
       # or backslash, and each family is capped at 100 entries. The `if`
       # guards keep an empty family from ever compiling an invalid
-      # `IN ("")` — an absent `extracted_iocs` (service predates
-      # extraction) also never fires the step.
+      # `IN ("")` — an absent `extracted_iocs` (the alert documents could
+      # not be read) also never fires the step.
       #
       # `on-failure: continue` on both: a stack without endpoint network
       # data (the common lab case) fails the FROM clause at

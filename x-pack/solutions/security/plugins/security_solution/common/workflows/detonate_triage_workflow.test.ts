@@ -130,8 +130,8 @@ describe('detonate triage managed workflow', () => {
 
     for (const hunt of hunts) {
       // The `if` must key on the family being non-empty AND the whole
-      // `extracted_iocs` being present — an absent field (service
-      // predates extraction) renders `.size` as 0 in this engine, but
+      // `extracted_iocs` being present — an absent field (alert documents
+      // unreadable) renders `.size` as 0 in this engine, but
       // the explicit `!= blank` keeps that from being load-bearing.
       expect(hunt.if).toContain('steps.detonate.output.extracted_iocs != blank');
       // A stack without endpoint network data fails the hunt at

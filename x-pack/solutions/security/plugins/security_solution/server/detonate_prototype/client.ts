@@ -23,6 +23,7 @@ import type { Logger } from '@kbn/core/server';
 
 import type {
   DetonateAlertDoc,
+  DetonateAlertKind,
   DetonateFileRequest,
   DetonateHashRequest,
   DetonateTask,
@@ -33,14 +34,6 @@ import { quoteQueryValue, redactDetonateTask } from '../../common/detonate_proto
 
 /** Service paths, relative to the configured base URL. */
 const API_PREFIX = '/v1/detonate';
-
-/** The service's per-task alert reads. Each 404s until the sandbox agent enrolls. */
-export const DETONATE_ALERT_KINDS = [
-  'production-endpoint-alerts',
-  'diagnostic-endpoint-alerts',
-  'production-detection-alerts',
-] as const;
-export type DetonateAlertKind = (typeof DETONATE_ALERT_KINDS)[number];
 
 export interface DetonateClientOptions {
   /** Base URL of the detonation service, from configuration. */
@@ -84,7 +77,11 @@ export interface DetonateClient {
    */
   getTask(taskId: string): Promise<DetonateTask>;
   getTaskUpdates(taskId: string): Promise<DetonateTaskUpdate[]>;
-  getTaskAlerts(taskId: string, kind: DetonateAlertKind): Promise<DetonateAlertDoc[]>;
+  getTaskAlerts(
+    taskId: string,
+    kind: DetonateAlertKind,
+    limit?: number
+  ): Promise<DetonateAlertDoc[]>;
   listTasks(query?: DetonateTaskSearchQuery): Promise<DetonateTaskSearchResponse>;
   /** The newest runs of one sample, before any Kibana-side space filtering. */
   findTasksByHash(sha256: string, size?: number): Promise<DetonateTask[]>;
@@ -187,8 +184,12 @@ export const createDetonateClient = ({
         (update) => ({ ...update, task: redactDetonateTask(update.task) })
       ),
 
-    getTaskAlerts: (taskId, kind) =>
-      call<DetonateAlertDoc[]>(`/tasks/${encodeURIComponent(taskId)}/${kind}`),
+    getTaskAlerts: (taskId, kind, limit) =>
+      call<DetonateAlertDoc[]>(
+        `/tasks/${encodeURIComponent(taskId)}/${kind}${
+          limit !== undefined ? `?limit=${encodeURIComponent(String(limit))}` : ''
+        }`
+      ),
 
     listTasks,
 

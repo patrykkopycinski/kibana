@@ -7,7 +7,7 @@
 
 import type { EsClient } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { apiTest, getAdminApi, tags, testData } from '../fixtures';
+import { apiTest, getAdminApi, runCleanupSteps, tags, testData } from '../fixtures';
 import {
   COVERAGE_SWEEP_OUTPUT_TYPES,
   COVERAGE_SWEEP_WORKFLOW_ID,
@@ -44,10 +44,14 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
   };
 
   apiTest.afterAll(async ({ esClient }) => {
-    for (const index of ownedEsIndices) {
-      // A 404 means an earlier teardown already removed it.
-      await esClient.indices.delete({ index }, { ignore: [404] });
-    }
+    // Each delete runs even when an earlier one throws, so one failure cannot leak the rest.
+    await runCleanupSteps(
+      ownedEsIndices.map((index) => ({
+        name: `delete index ${index}`,
+        // A 404 means an earlier teardown already removed it.
+        run: () => esClient.indices.delete({ index }, { ignore: [404] }),
+      }))
+    );
   });
 
   apiTest(
@@ -77,7 +81,7 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
     }
   );
 
-  // Known gap until security-team#19988 (fix: elastic/kibana#296929) lands: a sweep over an AI
+  // Known gap until elastic/kibana#296929 lands: a sweep over an AI
   // index that does not exist yet should complete with `search_failed: false`, since a space that
   // has produced no indicator has nothing to review. Today the search throws index_not_found and
   // the sweep reports `search_failed: true`. The index id is minted per run and never created, so
@@ -88,7 +92,7 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
   // the `search_failed` read is an ordinary assertion; only that one expectation is inverted, and
   // the inversion flips red the moment the product is fixed so the guard gets removed.
   apiTest(
-    'treats an absent AI index as empty, not as an error (security-team#19988, elastic/kibana#296929)',
+    'treats an absent AI index as empty, not as an error (elastic/kibana#296929)',
     async ({ apiClient, samlAuth }) => {
       apiTest.setTimeout(TEST_TIMEOUT_MS);
       const api = await getAdminApi(apiClient, samlAuth);
@@ -120,7 +124,7 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
       }
       expect(
         expectationHolds,
-        'the absent-index sweep now reports search_failed: false, so security-team#19988 is fixed: assert it directly and drop this inversion'
+        'the absent-index sweep now reports search_failed: false, so elastic/kibana#296929 is fixed: assert it directly and drop this inversion'
       ).toBe(false);
     }
   );

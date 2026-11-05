@@ -31,7 +31,7 @@
     },
     {
       "id": "9b2010df3aa164c-1188c6b53ff2712",
-      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable (security-team#19991)",
+      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -393,7 +393,7 @@
     },
     {
       "id": "c7af268757bd0dd-3f040dddb1a4206",
-      "title": "AlertZero e2e - rule coverage treats an absent AI index as empty, not as an error (security-team#19988, elastic/kibana#296929)",
+      "title": "AlertZero e2e - rule coverage treats an absent AI index as empty, not as an error (elastic/kibana#296929)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -547,7 +547,7 @@
     },
     {
       "id": "3ec923da60545bd-5e966f521a25c6b",
-      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
+      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

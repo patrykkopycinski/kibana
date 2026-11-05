@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { PROPOSAL_TIMEOUT_MS, PROPOSALS_URL } from './constants';
 import { ok } from './kbn';
 import type { AlertZeroApi } from './kbn';
-import { describeExecution, waitForExecutionStatus } from './alertzero';
+import { describeExecution, listPendingProposals, waitForExecutionStatus } from './alertzero';
 import type { WorkflowExecution } from './alertzero';
 
 /**
@@ -37,12 +36,7 @@ export interface TuningProposal {
 }
 
 export const listTuningProposals = async (api: AlertZeroApi): Promise<TuningProposal[]> =>
-  ok(
-    await api.internal<ListProposalsResponse>('GET', PROPOSALS_URL, {
-      query: { origin: 'alertzero', status: 'pending', excludeSuperseded: true, size: 100 },
-    }),
-    'list pending proposals'
-  ).proposals as TuningProposal[];
+  (await listPendingProposals(api, { excludeSuperseded: true })) as TuningProposal[];
 
 /** The rule a proposal's action points at, by either id field the flows write. */
 export const actionTarget = (input: Record<string, unknown> | undefined): unknown =>

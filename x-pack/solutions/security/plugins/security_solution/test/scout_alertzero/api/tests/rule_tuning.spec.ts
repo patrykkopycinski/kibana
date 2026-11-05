@@ -56,7 +56,7 @@ const FP_COUNT = 12;
 const OPEN_COUNT = 9;
 const TOTAL_COUNT = FP_COUNT + OPEN_COUNT;
 // 12/21 = 57.1428...%: a rate whose rounded rendering differs from the unrounded one, which is
-// what the security-team#19992 assertion below reads out of the review's own proposal text.
+// what the rounding assertion below reads out of the review's own proposal text.
 const FP_RATE_UNROUNDED = (FP_COUNT * 100) / TOTAL_COUNT;
 const FP_RATE_ROUNDED_TO_INTEGER = Math.round(FP_RATE_UNROUNDED); // 57
 const FP_RATE_ROUNDED_TO_ONE_DECIMAL = Math.round(FP_RATE_UNROUNDED * 10) / 10; // 57.1
@@ -515,12 +515,9 @@ const applyScopedExceptionToRule = async (
 };
 
 /**
- * security-team#19992: the review's own false-positive sentence has to render the rate rounded.
+ * The review's own false-positive sentence has to render the rate rounded.
  * The counts are asserted alongside the rate, so a comment that dropped the sentence cannot pass
  * by accident, and the unrounded render (57.142857142857146%) is named in the failure.
- *
- * Fixed in d4993a212 (`| round` added to `compose_evidence.fp_summary`), which is in this
- * branch's base, so the assertion is a regression guard: removing that filter turns this red.
  */
 const assertFpRateRendersRounded = (comment: string): void => {
   const match = FP_RATE_SENTENCE.exec(comment);
@@ -535,7 +532,7 @@ const assertFpRateRendersRounded = (comment: string): void => {
   const decimals = rate.includes('.') ? rate.split('.')[1].length : 0;
   if (decimals > 1) {
     throw new Error(
-      `security-team#19992: the false-positive rate renders unrounded (${rate}%, expected ${FP_RATE_ROUNDED_TO_INTEGER}% or ${FP_RATE_ROUNDED_TO_ONE_DECIMAL}%):\n${comment}`
+      `the false-positive rate renders unrounded (${rate}%, expected ${FP_RATE_ROUNDED_TO_INTEGER}% or ${FP_RATE_ROUNDED_TO_ONE_DECIMAL}%):\n${comment}`
     );
   }
   expect([FP_RATE_ROUNDED_TO_INTEGER, FP_RATE_ROUNDED_TO_ONE_DECIMAL]).toContain(Number(rate));
@@ -671,23 +668,21 @@ const alertUserName = (alert: Record<string, unknown>): string | undefined => {
   return undefined;
 };
 
-/**
- * Every test here is LLM-dependent: the tuning worker refuses to turn on without an AI model, and
- * its diagnosis needs one. A stack booted without a chat-completion inference connector (plain CI:
- * the `alertzero` config set only wires one when a connector source exists) fails on the worker
- * enable with a 400, so each test skips with an explicit reason instead. Called before anything is
- * seeded, so a skipped test leaves nothing for teardown to undo.
- */
-const skipWithoutChatConnector = async (adminApi: AlertZeroApi): Promise<void> => {
-  const chatConnectors = await listChatCompletionConnectors(adminApi);
-  apiTest.skip(
-    chatConnectors.length === 0,
-    'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero rule-tuning flow requires one (agent_builder_smoke-style EIS connector source)'
-  );
-};
-
 apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic] }, () => {
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    // Every test here is LLM-dependent: the tuning worker refuses to turn on without an AI model,
+    // and its diagnosis needs one. A stack booted without a chat-completion inference connector
+    // (plain CI: the `alertzero` config set only wires one when a connector source exists) fails
+    // on the worker enable with a 400. Skipping before the gate is switched leaves a skipped run
+    // with no state to restore.
+    const chatConnectors = await listChatCompletionConnectors(
+      await getAdminApi(apiClient, samlAuth)
+    );
+    apiTest.skip(
+      chatConnectors.length === 0,
+      'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero rule-tuning flow requires one (agent_builder_smoke-style EIS connector source)'
+    );
+
     // The worker routes this suite drives are gated on the per-space AlertZero setting, which the
     // server config deliberately leaves writable (an override would make it read-only and break
     // the hunt suites' baseline writes). Enable it for this suite and restore the baseline in
@@ -701,6 +696,10 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    // Unset when beforeAll skipped (or failed before enabling the gate): nothing was changed.
+    if (!restoreAlertZero) {
+      return;
+    }
     const errors: unknown[] = [];
     const attempt = async (step: () => Promise<unknown>) => {
       try {
@@ -832,8 +831,6 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
-      await skipWithoutChatConnector(adminApi);
-
       const rule = await applyScopedExceptionToRule(adminApi, esClient);
       tunedRule = rule;
     }
@@ -850,8 +847,6 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
-      await skipWithoutChatConnector(adminApi);
-
       // Self-sufficient by design: the control needs a rule with the exception applied, and it
       // gets it the same way the first test does instead of reading module state that a red
       // between the two (which restarts the Playwright worker) wipes. When the tuning test ran
@@ -901,30 +896,24 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
 
   // Last on purpose: it seeds and sweeps on its own, so a red here (which restarts the Playwright
   // worker) cannot take the control above down with it, which needs the first test's module state.
-  // security-team#19992, fixed in d4993a212: the review's rate used to render the raw float
-  // (57.142857142857146%). The test seeds and sweeps on its own, so a worker restart after a red
+  // The review's rate must not render the raw float (57.142857142857146%). The test seeds and sweeps on its own, so a worker restart after a red
   // test above does not break it, and it stops before the diagnosis: reading the entry proposal's
   // own text costs no model call.
-  apiTest(
-    'renders the false-positive rate rounded (security-team#19992)',
-    async ({ apiClient, samlAuth, esClient }) => {
-      apiTest.setTimeout(testData.PROPOSAL_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
-      const adminApi = await getAdminApi(apiClient, samlAuth);
-      api = adminApi;
-      esClientRef = esClient;
-      await skipWithoutChatConnector(adminApi);
+  apiTest('renders the false-positive rate rounded', async ({ apiClient, samlAuth, esClient }) => {
+    apiTest.setTimeout(testData.PROPOSAL_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
+    const adminApi = await getAdminApi(apiClient, samlAuth);
+    api = adminApi;
+    esClientRef = esClient;
+    const rule = await seedNoisyRule(adminApi, esClient);
+    const startedAt = new Date().toISOString();
+    const sweepExecutionId = await runTuningSweep(adminApi);
+    const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
 
-      const rule = await seedNoisyRule(adminApi, esClient);
-      const startedAt = new Date().toISOString();
-      const sweepExecutionId = await runTuningSweep(adminApi);
-      const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
+    assertFpRateRendersRounded(entryProposal.comment);
 
-      assertFpRateRendersRounded(entryProposal.comment);
-
-      // Settling the review is what closes it without a diagnosis: declining marks its alerts
-      // reviewed and ends the run, so no model call and no second proposal is left behind.
-      investigationIds.add(entryProposal.conversationId);
-      await dismissTuningProposal(adminApi, entryProposal);
-    }
-  );
+    // Settling the review is what closes it without a diagnosis: declining marks its alerts
+    // reviewed and ends the run, so no model call and no second proposal is left behind.
+    investigationIds.add(entryProposal.conversationId);
+    await dismissTuningProposal(adminApi, entryProposal);
+  });
 });

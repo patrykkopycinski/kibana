@@ -6,9 +6,8 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { AI_INDEX_KI_BACKING_INDEX, CONVERSATIONS_URL, PROPOSALS_URL } from './constants';
-import { ok } from './kbn';
+import { listPendingProposals } from './alertzero';
 import type { AlertZeroApi } from './kbn';
 
 export interface InvestigationProposal {
@@ -28,18 +27,10 @@ export const listInvestigationProposals = async (
   api: AlertZeroApi,
   conversationId?: string
 ): Promise<InvestigationProposal[]> =>
-  ok(
-    await api.internal<ListProposalsResponse>('GET', PROPOSALS_URL, {
-      query: {
-        origin: 'alertzero',
-        status: 'pending',
-        excludeSuperseded: true,
-        size: 100,
-        ...(conversationId ? { conversationId } : {}),
-      },
-    }),
-    'list pending proposals'
-  ).proposals as InvestigationProposal[];
+  (await listPendingProposals(api, {
+    excludeSuperseded: true,
+    ...(conversationId ? { conversationId } : {}),
+  })) as InvestigationProposal[];
 
 /**
  * Deletes an Investigation conversation; its attachments are deleted with it. A 404 means an

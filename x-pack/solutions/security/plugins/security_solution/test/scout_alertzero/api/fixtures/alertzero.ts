@@ -465,8 +465,12 @@ const PROPOSALS_MAX_OFFSET = 9_900;
  * leftovers from other runs can push this run's proposals past page one. `order: 'newest'` is a
  * total order, which keeps the pages from repeating or skipping a row. Paging follows `total`
  * rather than the page length, because the route drops a proposal it settles while reading.
+ * `filters` narrows the read server-side (for example to one conversation).
  */
-export const listPendingProposals = async (api: AlertZeroApi): Promise<PendingProposal[]> => {
+export const listPendingProposals = async (
+  api: AlertZeroApi,
+  filters: Record<string, string | number | boolean> = {}
+): Promise<PendingProposal[]> => {
   const proposals: PendingProposal[] = [];
   for (let from = 0; from <= PROPOSALS_MAX_OFFSET; from += PROPOSALS_PAGE_SIZE) {
     const page = ok(
@@ -477,6 +481,7 @@ export const listPendingProposals = async (api: AlertZeroApi): Promise<PendingPr
           order: 'newest',
           size: PROPOSALS_PAGE_SIZE,
           from,
+          ...filters,
         },
       }),
       `list pending proposals from ${from}`

@@ -37,6 +37,7 @@ import {
   processSelectorOf,
   readKnowledgeIndicator,
   readSeedIdentifiers,
+  removeInvestigationsAiIndex,
   resetWorker,
   seedAttackScenario,
   seedKnowledgeIndicator,
@@ -48,7 +49,12 @@ import {
   waitForNewExecution,
   waitForEndpointAnalysisRun,
 } from '../fixtures';
-import type { AlertZeroApi, InvestigationProposal, SeededScenario } from '../fixtures';
+import type {
+  AlertZeroApi,
+  InvestigationProposal,
+  InvestigationsAiIndexProvisioning,
+  SeededScenario,
+} from '../fixtures';
 
 const WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
 const RUN_WORKFLOW_ID = testData.FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID;
@@ -169,7 +175,11 @@ const publishHandoff = async (
   chain: AnalysisChainContext,
   ledger: TeardownLedger
 ): Promise<string> => {
-  await ensureInvestigationsAiIndex(adminApi);
+  const provisioned = await ensureInvestigationsAiIndex(adminApi, esClient);
+  provisionedAiIndex = {
+    recordCreated: provisionedAiIndex.recordCreated || provisioned.recordCreated,
+    backingIndexCreated: provisionedAiIndex.backingIndexCreated || provisioned.backingIndexCreated,
+  };
   const kiId = await seedKnowledgeIndicator(esClient, {
     kiId: `e2e-analyze-endpoint-${chain.scenario.runMarker}`,
     type: 'security.analyze_endpoint',
@@ -213,6 +223,11 @@ const executionSnapshots: Array<{ workflowId: string; knownIds: string[] }> = []
 let api: AlertZeroApi | undefined;
 let esClientRef: EsClient | undefined;
 let serviceAccountId: string | undefined;
+/** What this run provisioned of the investigations AI index; teardown removes only that. */
+let provisionedAiIndex: InvestigationsAiIndexProvisioning = {
+  recordCreated: false,
+  backingIndexCreated: false,
+};
 
 apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.classic] }, () => {
   // The worker routes this suite drives are gated on the per-space AlertZero setting, which the
@@ -307,6 +322,11 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     await attempt(async () => {
       if (esClientRef) await cleanupKnowledgeIndicators(esClientRef, kiIds);
     });
+    await attempt(async () => {
+      if (api && esClientRef) {
+        await removeInvestigationsAiIndex(api, esClientRef, provisionedAiIndex);
+      }
+    });
     for (const scenario of scenarios) {
       await attempt(async () => scenario.cleanup());
     }
@@ -330,7 +350,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
   // the regression). Playwright runs a file's tests serially in one worker, so folding the
   // stage in here keeps it deterministic.
   apiTest(
-    'analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable (security-team#19991)',
+    'analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable',
     async ({ apiClient, samlAuth, esClient }) => {
       apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS * 3 + testData.ACTION_TIMEOUT_MS * 2);
       const adminApi = await getAdminApi(apiClient, samlAuth);
@@ -526,11 +546,9 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       );
       expect(indicator.found).toBe(true);
 
-      // Regression guard for security-team#19991: containment proposals raised for two different
-      // hosts must stay distinguishable — each investigation's card must target its own seeded
-      // host, and the two cards must not share one title. (The marker on the P2 branch was
-      // apiTest.fail; at this head the per-action title pass-through and per-action endpoint ids
-      // make the distinguishable behaviour hold, verified live, so this is now a green guard.)
+      // Containment proposals raised for two different hosts must stay distinguishable: each
+      // investigation's card must target its own seeded host, and the two cards must not share
+      // one title.
       const second = await seedAnalysisChain(
         adminApi,
         esClient,

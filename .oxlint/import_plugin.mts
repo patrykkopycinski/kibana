@@ -245,7 +245,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: [
       'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
       'src/platform/packages/shared/kbn-connector-specs/scripts/**/*.ts',
-      'src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/**/*.ts',
+      'src/platform/packages/shared/kbn-connector-specs/src/test/**/*.ts',
     ],
     rules: {
       'import/no-nodejs-modules': 'off',
@@ -337,6 +337,7 @@ export const importPluginOverrides: OxlintOverride[] = [
         'kbn-evals-suite-attack-discovery',
         'kbn-evals-suite-detection-watch-rule-creation',
         'kbn-evals-suite-detection-watch-rule-tuning',
+        'kbn-evals-suite-attack-discovery-worker',
         'kbn-evals-suite-hunt-watch',
         'kbn-evals-suite-lead-generation',
         'kbn-evals-suite-security-alert-triage',

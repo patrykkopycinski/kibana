@@ -147,12 +147,15 @@ describe('rule-tuning coverage characterization', () => {
     // severity can never be rendered by the gate or applied by the action. Since
     // #291874/#294332 every branch additionally requires the proposal-text fields
     // (title, fp_pattern, reasoning, confidence) the analyst's proposal card shows.
+    // Since #302090 the exception branch also requires `exception_name`, the name the
+    // exception card shows for what the exception excludes.
     const branches = schemaBranches();
     const shared = ['title', 'fp_pattern', 'reasoning', 'confidence'];
     expect(requiredFields(branches.get('exception') ?? '')).toEqual([
       'change_type',
       'summary',
       'exception_entries',
+      'exception_name',
       ...shared,
     ]);
     expect(requiredFields(branches.get('query') ?? '')).toEqual([

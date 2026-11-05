@@ -5,54 +5,98 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { HttpHandler } from '@kbn/core/public';
-import { seedAttackDiscoveryFixtures } from './fixtures';
+import { attackDiscoveryFixtureMarker, seedAttackDiscoveryFixtures } from './fixtures';
 
-interface SeededAlert {
-  kibana: { alert: { rule: { name: string; uuid: string } } };
-  process: { name: string; entity_id?: string; parent?: { name: string; entity_id: string } };
+interface SeededDocument {
+  id: string;
+  source: Record<string, unknown>;
 }
 
-const seedAndCollect = async (): Promise<SeededAlert[]> => {
-  const bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
-  const esClient = { bulk } as unknown as EsClient;
-  const fetch = jest.fn().mockResolvedValue({}) as unknown as HttpHandler;
+interface SeededProcess {
+  name: string;
+  entity_id?: string;
+  parent?: { name: string; entity_id: string };
+}
 
-  await seedAttackDiscoveryFixtures(esClient, fetch);
+/** The documents `seedAttackDiscoveryFixtures` actually sends to the index. */
+const seededDocuments = async (): Promise<SeededDocument[]> => {
+  const operations: unknown[] = [];
+  const esClient = {
+    bulk: jest.fn(async (request: { operations: unknown[] }) => {
+      operations.push(...request.operations);
+      return {};
+    }),
+  };
+  const fetch = jest.fn(async () => ({}));
 
-  const [{ operations }] = bulk.mock.calls[0];
-  return (operations as Array<Record<string, unknown>>).filter(
-    (_operation, index) => index % 2 === 1
-  ) as unknown as SeededAlert[];
+  await seedAttackDiscoveryFixtures(esClient as never, fetch as never);
+
+  // `bulk` operations alternate action metadata and document body.
+  return operations
+    .filter((_, index) => index % 2 === 0)
+    .map((action, index) => ({
+      id: String((action as { index: { _id: string } }).index._id),
+      source: operations[index * 2 + 1] as Record<string, unknown>,
+    }));
 };
 
-describe('seedAttackDiscoveryFixtures', () => {
+describe('the golden fixture is retrievable by the query its question implies', () => {
+  it('seeds the marker into the text field a marker search targets', async () => {
+    const documents = await seededDocuments();
+
+    expect(documents.length).toBeGreaterThan(0);
+    for (const { source } of documents) {
+      expect(String(source.message)).toContain(attackDiscoveryFixtureMarker);
+    }
+  });
+
+  it('gives every alert its own identity, countable without the _id metadata', async () => {
+    const documents = await seededDocuments();
+    const ids = documents.map(({ id }) => id);
+    expect(new Set(ids).size).toBe(ids.length);
+
+    for (const { id, source } of documents) {
+      const alert = (source.kibana as { alert?: { uuid?: unknown } })?.alert;
+      expect(alert?.uuid).toBe(id);
+    }
+  });
+});
+
+describe('the golden fixture seeds a chain that spans more than one rule', () => {
+  const seededRules = async (): Promise<Array<{ name: unknown; uuid: unknown }>> =>
+    (await seededDocuments()).map(({ source }) => {
+      const { rule } = (source.kibana as { alert: { rule: { name: unknown; uuid: unknown } } })
+        .alert;
+      return { name: rule.name, uuid: rule.uuid };
+    });
+
   // The skill requires an attack chain to span more than one rule. Alerts from
   // two differently named rules that share one rule uuid read as a single rule
   // by id, so the seeded chain must carry a distinct rule identity per alert.
   it('seeds each alert under its own rule uuid', async () => {
-    const alerts = await seedAndCollect();
-    const ruleUuids = new Set(alerts.map(({ kibana }) => kibana.alert.rule.uuid));
+    const rules = await seededRules();
 
-    expect(alerts).toHaveLength(2);
-    expect(ruleUuids.size).toBe(alerts.length);
+    expect(rules).toHaveLength(2);
+    expect(new Set(rules.map(({ uuid }) => uuid)).size).toBe(rules.length);
   });
 
   it('keeps rule names and rule uuids one-to-one', async () => {
-    const alerts = await seedAndCollect();
-    const ruleNames = new Set(alerts.map(({ kibana }) => kibana.alert.rule.name));
+    const rules = await seededRules();
 
-    expect(ruleNames.size).toBe(alerts.length);
+    expect(new Set(rules.map(({ name }) => name)).size).toBe(rules.length);
   });
+});
 
+describe('the golden fixture links the attack chain by a direct process relationship', () => {
   it('links the LSASS access to the encoded PowerShell process as its child', async () => {
-    const [powershell, lsass] = await seedAndCollect();
+    const [powershell, lsass] = (await seededDocuments()).map(
+      ({ source }) => source.process as SeededProcess
+    );
 
-    expect(lsass.process.parent).toEqual(
+    expect(lsass.parent).toEqual(
       expect.objectContaining({
-        name: powershell.process.name,
-        entity_id: powershell.process.entity_id,
+        name: powershell.name,
+        entity_id: powershell.entity_id,
       })
     );
   });

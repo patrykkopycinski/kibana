@@ -141,6 +141,18 @@ const importsRules: DummyRuleMap = {
       },
     ],
   ],
+  '@kbn/imports/restricted_redux_imports': [
+    'warn',
+    {
+      paths: ['redux', 'redux-v4'].map((name) => ({
+        name,
+        importNames: ['createStore', 'legacy_createStore'],
+        message: 'Prefer configureStore from the matching Redux Toolkit package.',
+      })),
+    },
+  ],
+  '@kbn/imports/no_redux_toolkit_middleware_spread': 'warn',
+  '@kbn/imports/no_redux_toolkit_state_reassignment': 'warn',
   '@kbn/imports/no_unresolvable_imports': 'error',
   '@kbn/imports/uniform_imports': 'error',
   '@kbn/imports/no_unused_imports': 'error',
@@ -148,7 +160,6 @@ const importsRules: DummyRuleMap = {
   '@kbn/imports/no_group_crossing_manifests': 'error',
   '@kbn/imports/no_group_crossing_imports': 'error',
   '@kbn/imports/no_direct_handlebars_import': 'error',
-  '@kbn/imports/no_direct_monaco_import': 'warn',
   '@kbn/imports/no_undeclared_plugin_target': 'error',
 };
 
@@ -256,6 +267,7 @@ export const importsOverrides: OxlintOverride[] = [
     files: [
       'kbn-evals-suite-alert-analysis-workflow',
       'kbn-evals-suite-attack-discovery-fp-tp',
+      'kbn-evals-suite-attack-discovery-worker',
       'kbn-evals-suite-security-alert-triage',
     ].map((suite) => `${SECURITY_PACKAGES_DIR}/${suite}/${ESLINT_LINTED_FILES}`),
     rules: {

@@ -218,7 +218,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
   // teardown, so the next gated suite starts from the state this one found.
   let restoreAlertZero: (() => Promise<void>) | undefined;
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     // This flow is LLM-dependent end to end. When the stack was booted without a
     // chat-completion inference connector (the `alertzero` config set only wires connectors
     // when a connector source exists, which plain CI does not have), every workflow run
@@ -235,6 +235,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     restoreAlertZero = await withAlertZeroEnabledInSpace({
       apiClient,
+      apiServices,
       headers: cookieHeader,
       spaceId: 'default',
     });

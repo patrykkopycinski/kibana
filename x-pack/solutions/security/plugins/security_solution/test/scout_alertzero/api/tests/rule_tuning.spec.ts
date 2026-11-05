@@ -669,7 +669,7 @@ const alertUserName = (alert: Record<string, unknown>): string | undefined => {
 };
 
 apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic] }, () => {
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     // Every test here is LLM-dependent: the tuning worker refuses to turn on without an AI model,
     // and its diagnosis needs one. A stack booted without a chat-completion inference connector
     // (plain CI: the `alertzero` config set only wires one when a connector source exists) fails
@@ -690,6 +690,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     restoreAlertZero = await withAlertZeroEnabledInSpace({
       apiClient,
+      apiServices,
       headers: cookieHeader,
       spaceId: 'default',
     });

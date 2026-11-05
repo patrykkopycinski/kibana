@@ -6,7 +6,11 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-import { AI_INDEX_KI_BACKING_INDEX, CONVERSATIONS_URL } from './constants';
+import {
+  AI_INDEX_KI_BACKING_INDEX,
+  COLD_ELSER_REQUEST_TIMEOUT_MS,
+  CONVERSATIONS_URL,
+} from './constants';
 import type { InvestigationProposal } from './investigations';
 import { listExecutionIds } from './alertzero';
 import type { WorkflowExecution } from './alertzero';
@@ -209,27 +213,32 @@ export const seedKnowledgeIndicator = async (
   seed: KnowledgeIndicatorSeed
 ): Promise<string> => {
   const now = new Date().toISOString();
-  await esClient.index({
-    index: AI_INDEX_KI_BACKING_INDEX,
-    id: seed.kiId,
-    refresh: 'wait_for',
-    document: {
-      '@timestamp': now,
-      updated_at: now,
+  // `title`/`description`/`content` carry `semantic_text` multi-fields, so the write waits on the
+  // embedding inference, which on a cold stack outlasts the Scout ES client's 30s default.
+  await esClient.index(
+    {
+      index: AI_INDEX_KI_BACKING_INDEX,
       id: seed.kiId,
-      type: seed.type,
-      title: seed.title,
-      ...(seed.description ? { description: seed.description } : {}),
-      tags: ['consumer:detection', 'status:pending', 'watch:test', ...(seed.tags ?? [])],
-      attributes: {
-        status: 'pending',
-        producer: 'alertzero-e2e.seed.v1',
-        watch_id: 'test',
-        space_id: 'default',
-        ...seed.attributes,
+      refresh: 'wait_for',
+      document: {
+        '@timestamp': now,
+        updated_at: now,
+        id: seed.kiId,
+        type: seed.type,
+        title: seed.title,
+        ...(seed.description ? { description: seed.description } : {}),
+        tags: ['consumer:detection', 'status:pending', 'watch:test', ...(seed.tags ?? [])],
+        attributes: {
+          status: 'pending',
+          producer: 'alertzero-e2e.seed.v1',
+          watch_id: 'test',
+          space_id: 'default',
+          ...seed.attributes,
+        },
       },
     },
-  });
+    { requestTimeout: COLD_ELSER_REQUEST_TIMEOUT_MS }
+  );
   return seed.kiId;
 };
 

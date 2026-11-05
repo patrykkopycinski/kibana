@@ -1,0 +1,34 @@
+{
+  "security": {
+    "bm25 (abstain on zero overlap)": {
+      "k": 32,
+      "n": 65
+    },
+    "majority constant": {
+      "k": 6,
+      "n": 65
+    },
+    "oracle gate + bm25 (ceiling)": {
+      "k": 46,
+      "n": 65
+    }
+  },
+  "full": {
+    "bm25 (abstain on zero overlap)": {
+      "k": 76,
+      "n": 174
+    },
+    "majority constant": {
+      "k": 17,
+      "n": 174
+    },
+    "oracle gate + bm25 (ceiling)": {
+      "k": 94,
+      "n": 174
+    },
+    "oracle domain + bm25 (ceiling)": {
+      "k": 102,
+      "n": 174
+    }
+  }
+}

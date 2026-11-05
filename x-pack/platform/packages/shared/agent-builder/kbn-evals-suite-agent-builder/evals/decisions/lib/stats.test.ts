@@ -7,11 +7,15 @@
 
 import {
   assertRate,
+  assertRateFields,
   binaryMetrics,
   mcnemar,
+  noiseBandCount,
   percentile,
   pickThreshold,
   sweepThresholds,
+  rateWithCi,
+  rocAuc,
   thresholdSweep,
   wilsonInterval,
 } from './stats';
@@ -112,5 +116,27 @@ describe('helpers', () => {
     expect(percentile([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 50)).toBe(5);
     expect(percentile([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 95)).toBe(10);
     expect(percentile([], 50)).toBeUndefined();
+  });
+});
+
+describe('routing helpers', () => {
+  it('rateWithCi omits the rate on an empty population but keeps the interval', () => {
+    expect(rateWithCi(3, 4, 'x')).toMatchObject({ k: 3, n: 4, rate: 0.75 });
+    expect(rateWithCi(0, 0, 'x').rate).toBeUndefined();
+  });
+
+  it('rocAuc counts ties as half and is undefined without both classes', () => {
+    expect(rocAuc([0.9, 0.8], [0.1, 0.2])).toBe(1);
+    expect(rocAuc([0.5], [0.5])).toBe(0.5);
+    expect(rocAuc([], [0.1])).toBeUndefined();
+  });
+
+  it('noiseBandCount includes scores exactly one step from the threshold', () => {
+    expect(noiseBandCount([0.45, 0.5, 0.55, 0.56, 0.3], 0.5)).toBe(3);
+  });
+
+  it('assertRateFields throws on a rate-like field outside [0, 1] anywhere in the tree', () => {
+    expect(() => assertRateFields({ arms: [{ endToEnd: { rate: 0.4, k: 7 } }] })).not.toThrow();
+    expect(() => assertRateFields({ arms: [{ fireRate: 1.2 }] })).toThrow();
   });
 });

@@ -209,6 +209,64 @@ export const pickThreshold = (rows: readonly SweepRow[], prior = 0.5): SweepRow 
   });
 };
 
+export interface RateWithCi {
+  k: number;
+  n: number;
+  /** Undefined when n is 0. */
+  rate?: number;
+  ci: Interval;
+}
+
+export const rateWithCi = (k: number, n: number, name: string): RateWithCi => ({
+  k,
+  n,
+  ...(n > 0 ? { rate: assertRate(k / n, name) } : {}),
+  ci: wilsonInterval(k, n),
+});
+
+/**
+ * Probability that a random positive scores above a random negative (ties count half).
+ * Threshold-independent, so it is the headline when no swept threshold is clear of noise.
+ */
+export const rocAuc = (
+  positives: readonly number[],
+  negatives: readonly number[]
+): number | undefined => {
+  if (positives.length === 0 || negatives.length === 0) return undefined;
+  let wins = 0;
+  for (const p of positives) {
+    for (const q of negatives) {
+      if (p > q) wins += 1;
+      else if (p === q) wins += 0.5;
+    }
+  }
+  return assertRate(wins / (positives.length * negatives.length), 'rocAuc');
+};
+
+/** Cases whose score sits within `band` of the threshold: they can flip between runs. */
+export const noiseBandCount = (scores: readonly number[], threshold: number, band = SWEEP_STEP) =>
+  scores.filter((score) => Math.abs(score - threshold) <= band + 1e-12).length;
+
+const RATE_KEY = /rate|ratio|share|agreement|accuracy|recall|specificity|precision|auc/i;
+
+/**
+ * Walks a report and throws on any number under a rate-like key that is outside [0, 1].
+ * Catches a numerator and denominator drawn from different populations, which no
+ * directional check (`a > b`) does.
+ */
+export const assertRateFields = (value: unknown, at = '$'): void => {
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => assertRateFields(entry, `${at}[${index}]`));
+    return;
+  }
+  if (value === null || typeof value !== 'object') return;
+  for (const [key, child] of Object.entries(value)) {
+    const where = `${at}.${key}`;
+    if (typeof child === 'number' && RATE_KEY.test(key)) assertRate(child, where);
+    else assertRateFields(child, where);
+  }
+};
+
 export const percentile = (values: readonly number[], p: number): number | undefined => {
   if (values.length === 0) return undefined;
   const sorted = [...values].sort((a, b) => a - b);

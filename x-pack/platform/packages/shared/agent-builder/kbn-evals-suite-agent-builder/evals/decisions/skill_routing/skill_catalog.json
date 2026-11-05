@@ -1,0 +1,489 @@
+{
+  "provenance": {
+    "built": "2026-11-05",
+    "live": "GET /api/agent_builder/skills on a local stateful Kibana (main-based dev branch, commit f15b6f3c0566e), 58 skills",
+    "static": "defineSkillType exports imported from this branch (nightshift/streams skills not registered on that stack), 7 skills",
+    "source": "descriptions read from this branch for skills gated off on that stack (alerting v2, KI identification), 3 skills",
+    "check": "the 51 skills present in both live and static sources have identical descriptions",
+    "aliases": "benchmark skill-authoring was renamed skill-management in #271463"
+  },
+  "skills": [
+    {
+      "id": "action-policy-authoring",
+      "name": "action-policy-authoring",
+      "description": "Compose, discover, and modify universal alerting action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows (\"notify me when this rule fires\", \"set up email notifications for my alert\", \"create a notification policy\", \"change my alert to page via PagerDuty\", \"list my action policies\"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-authoring skill.",
+      "domain": "platform",
+      "source": "source"
+    },
+    {
+      "id": "agent-builder-traces",
+      "name": "agent-builder-traces",
+      "description": "Answer questions about Agent Builder OTel (OpenTelemetry) traces and activity: token usage, model and provider breakdowns, conversation and agent latency, tool-call volume, error rates, and captured message content (user prompts, LLM responses, system prompts, tool results). Use this when the user asks about Agent Builder traces, tracing, telemetry, conversations, or what users prompted or said to the agent \u2014 including recent prompts or messages in trace data.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "ai-index-automations",
+      "name": "ai-index-automations",
+      "description": "Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "ai-index-sources",
+      "name": "ai-index-sources",
+      "description": "Choose and configure the data a Context Engine AI index draws on. Load when picking which Elasticsearch indices or connectors should feed an AI index, when writing or fixing an ES|QL source query, when agreeing the corpus filter that bounds one, or when working out whether a coverage gap is a source problem.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "alert-analysis",
+      "name": "alert-analysis",
+      "description": "Count, list, prioritize, and investigate Security detection alerts in the current Kibana space. Use for questions like \"how many alerts\", \"high/critical alerts in last 24h\", or triage of a specific alert. Fetches alerts via security.alerts (space-scoped), correlates related alerts, enriches with Security Labs, and assesses entity risk.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "alert-triage",
+      "name": "alert-triage",
+      "description": "Alert queue triage: prioritize and rank the alert queue by weighted risk factors \u2014 base risk score, MITRE tactic boost, Entity Analytics entity risk, asset criticality, and status \u2014 then cluster alerts into entity groups. Use when a user asks \"what should I focus on?\", \"which alerts are most urgent?\", or wants a ranked starting point across the queue without investigating individual alerts.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "alertzero-action-discovery",
+      "name": "alertzero-action-discovery",
+      "description": "Discover installed AlertZero action workflows and their input schemas when choosing an action to propose or explaining available response and configuration actions.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "analyze-and-improve",
+      "name": "analyze-and-improve",
+      "description": "Decide what a Context Engine AI index should contain and whether what it contains is working. Load when setting up the Context Engine for a user's Elasticsearch data or connector sources, when choosing a Knowledge Indicator (KI) generation strategy, when handling an \"Analyze & improve\" hand-off, or when diagnosing why an index's KIs are not being retrieved and agents keep falling back to raw data. Directs to `context-engine-signals`, `ai-index-sources` and `ai-index-automations` for the mechanics.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "attack-discovery-alert-retrieval-builder",
+      "name": "attack-discovery-alert-retrieval-builder",
+      "description": "Guides the agent to build ES|QL queries for retrieving security alerts from the .alerts-security.alerts-<spaceId> index for Attack Discovery analysis.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "attack-discovery-generator",
+      "name": "attack-discovery-generator",
+      "description": "Identifies real attack chains in Elastic Security alerts and reports the status of prior generations. In generate mode, the agent gathers and corroborates evidence with whatever tools and skills are available (threat hunting, entity analytics, alert analysis, threat intelligence, knowledge base), then delegates the canonical generation pipeline to the security.attack-discovery.run inline tool (sync mode; mode preference: provided > esql > custom_only > custom_query with explicit params \u2014 never bare invocations) so anonymization, hallucination detection, validation, and persistence remain inside the audited pipeline. It then renders an analyst Attack Discovery Report \u2014 summary statistics, per-chain narrative, best-effort raw-log corroboration, evidence table, and an attack-flow graph \u2014 that mirrors the persisted discoveries, alongside the insights JSON. In status-only mode, when given an execution_uuid, it looks up status without starting a new generation and emits the report if discoveries are ready.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "attack-discovery-workflow-troubleshooting",
+      "name": "attack-discovery-workflow-troubleshooting",
+      "description": "Troubleshoot Attack Discovery workflow execution failures by analyzing the 3-phase pipeline (alert retrieval, generation, validation), identifying failing phases and steps, and providing root cause analysis with suggested fixes.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-delete-migration",
+      "name": "automatic-migration-rules-delete-migration",
+      "description": "Permanently delete an Automatic Rule Migration and all its associated rule items and resources.\n\nThis action is destructive and irreversible. The skill resolves the migration by name, checks it is not currently running, then deletes it.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-install-rules",
+      "name": "automatic-migration-rules-install-rules",
+      "description": "Install translated rules from an Automatic Rule Migration into Elastic. Mutating. Resolves the installable count, confirms scope and enabled-default, and requires Rules: All privileges.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-start-migration",
+      "name": "automatic-migration-rules-start-migration",
+      "description": "Start, reprocess, or resume an Automatic Rule Migration translation run. Mutating.\n\nResolves the inference endpoint (AI connector), runs a missing-resources pre-flight check before a fresh start, and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-stop-migration",
+      "name": "automatic-migration-rules-stop-migration",
+      "description": "Stop a running Automatic Rule Migration translation run. Mutating.\n\nResolves the migration by name and stops the run. Use when the user wants to pause a migration that is currently translating rules.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-summarize",
+      "name": "automatic-migration-rules-summarize",
+      "description": "Summarize Automatic Rule Migration progress: list every rule migration with its status and rule counts, or drill into one migration's task progress, translation stats, and missing resources.\n\nUse when the user asks \"how are my rule migrations doing\", wants an overview, asks about a specific rule migration by name, or asks which resources (macros, lookups, reference sets, watchlists) a migration is missing.\n\nRead-only. Automatic Migration also covers dashboards \u2014 this skill handles rule migrations only.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-update-migration",
+      "name": "automatic-migration-rules-update-migration",
+      "description": "Rename an Automatic Rule Migration. Mutating.\n\nPrompts for the new name and applies the change. Use when the user wants to rename a migration.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic-migration-rules-update-translated-rule",
+      "name": "automatic-migration-rules-update-translated-rule",
+      "description": "Find and fix translated Automatic Migration rules that are not installed yet.\n\nUse when a migrated rule:\n- is missing an index pattern (`[indexPattern]` placeholder) or uses the wrong index pattern;\n- has a wrong ES|QL query, unresolved `[macro:\u2026]` / `[lookup:\u2026]` placeholders, or wrong field names;\n- was matched to the wrong prebuilt rule or the wrong integration.\n\nAlso use to list the rules in a migration that are missing an index pattern or need fixing, and let the user pick which to fix. Mutating: every fix is confirmed by the user.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "automatic_troubleshooting",
+      "name": "elastic-defend-configuration-troubleshooting",
+      "description": "Use to diagnose observed Elastic Defend endpoint behavior and operational outcomes: why an endpoint or host is offline, unhealthy, degraded, missing or not reporting; why a response action such as isolation or release failed; a policy not taking effect or not being enforced; protection not blocking; unexpected quarantine or allow behavior; policy response failures; or failures involving protection updates, trusted applications, exceptions, blocklists, custom YARA signatures, antivirus compatibility, and endpoint event output.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "cases-analytics",
+      "name": "cases-analytics",
+      "description": "Analyze and report on Elastic Cases at scale: case volume and trends, closure rates, MTTR/SLA timings, time-in-status, assignee workload, alert/observable breakdowns, and custom-field analytics \u2014 answered with ES|QL over the case analytics indices, and rendered as visualizations or dashboards. Use for aggregate/reporting/metric/dashboard questions about cases (not single-case create/read/update \u2014 that is the cases-management skill).",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "cases-management",
+      "name": "cases-management",
+      "description": "Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "connector-authoring",
+      "name": "connector-authoring",
+      "description": "Set up a Kibana connector from chat. Use when the user wants to add, connect, set up, or integrate an external system \u2014 such as GitHub, Slack, PagerDuty, or Notion \u2014 so the agent can act on it. Also use when the user mentions giving the agent access to a tool, repo, or data source, even if they do not say the word \"connector\".",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "connector-discovery",
+      "name": "connector-discovery",
+      "description": "Use when the user's request might involve an external service or integration \u2014 such as creating a GitHub issue, sending a Slack message, querying a database, or taking any action that an external tool could handle. Also use when the user asks what the agent can do or connect to.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "context-engine-signals",
+      "name": "context-engine-signals",
+      "description": "Read Context Engine signals \u2014 the record of how agents retrieved context. Load when investigating failed or empty retrievals, when agents fall back to raw data, when quantifying how often an AI index is working, or when tracing a retrieval back to the conversation that caused it.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "dashboards",
+      "name": "dashboards",
+      "description": "Create, find, and update Kibana dashboards, including generating every panel and visualization on them. Use this for any request that involves a dashboard, even if it also asks for charts; do not also load visualization-creation.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "detection-coverage",
+      "name": "detection-coverage",
+      "description": "Make a behavior covered by detection. Use when the user wants coverage to exist (\"I need detection for X\", \"I want a rule that covers X\", \"we need to detect X\", \"we have no coverage for X\", \"can we catch X\", a reported gap or hunt finding) and gives no rule logic. Checks installed rules (enabled and disabled) and the installable prebuilt catalog, then routes to one action: nothing, enable, install, or create. NOT for questions about existing coverage (\"do we have a rule for X?\", \"which tactics am I missing?\") \u2014 those are reporting intents for find-security-rules or recommend-prebuilt-rules. Decides only; never mutates.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "detection-rule-edit",
+      "name": "detection-rule-edit",
+      "description": "Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE mappings, severity, and schedule. Use when the user supplies the rule logic or explicitly asks to author or modify a rule (\"create a rule that...\", \"update the severity\", \"add MITRE mappings\"), or asks how to write one (\"how would I detect this?\"). NOT for gap statements that supply no rule logic (\"I need detection for X\", \"we need to detect X\", \"can we catch lateral movement?\", \"I want an alert for privilege escalation\"): those belong to detection-coverage, which checks installed and installable rules first and hands back here to author. Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "discover-data-analysis",
+      "name": "discover-data-analysis",
+      "description": "Analyzes ES|QL query results in Kibana Discover, identifying patterns, trends, and anomalies by running aggregation queries against the full dataset.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "discover-session",
+      "name": "discover-session",
+      "description": "Shows Elasticsearch documents and events as a live Discover table in chat. Use when the user wants to see rows, hits, or logs \u2014 not charts or aggregations.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "elastic-defend-policy-management",
+      "name": "elastic-defend-policy-management",
+      "description": "Use for Elastic Defend integration policy decisions, inspection, and applying a confirmed bounded policy change, including malware, ransomware, memory threat, and behavior protection; detect and prevent modes; event collection and advanced settings; policy baselines and comparisons; proposed configuration changes; policy-level rollout planning; and aggregate assigned-versus-applied counts for a named policy. Also use to explain an individual Elastic Defend policy setting named by UI label or exact configuration path and to discover its accepted values, without first selecting or reading a policy. Apply this scope separately to each task in a combined request.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "endpoint-forensic-analysis",
+      "name": "endpoint-forensic-analysis",
+      "description": "Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. Use for incident-scoped questions naming specific hosts or outbreaks \u2014 NOT fleet-wide proactive hunts (use threat-hunting). NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security \u2014 no dedicated Agent Builder skill yet). NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, performance/resource troubleshooting, or output/integration failures \u2014 even when the question names a specific host (use elastic-defend-configuration-troubleshooting).",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "endpoint-response-actions",
+      "name": "endpoint-response-actions",
+      "description": "List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use elastic-defend-configuration-troubleshooting.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "entity-analytics",
+      "name": "entity-analytics",
+      "description": "Investigate security entities (hosts, users, services, generic) in Entity Analytics: search for entities and view their profiles, risk scores and risk score history over time, alert contributions to risk, asset criticality, watchlist membership, behaviors, relationship graphs, and relationship history (first/last seen, ever related to). Also discovers the riskiest entities and lists the members of a watchlist. Also covers Entity Analytics management requests with no dedicated tool \u2014 enabling/disabling Entity Analytics, clearing/deleting/resetting entity data, changing risk scoring settings, CSV uploads, and flyout-based editing \u2014 by pointing the user to the right UI page. Do NOT use for creating or editing watchlists (manage-watchlists skill) or entity resolution groups (entity-resolution skill).",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "entity-analytics-leads",
+      "name": "entity-analytics-leads",
+      "description": "AI-generated investigation leads for security entities. Use when the user asks to review, list, show, triage, dismiss, or generate AI-generated investigation leads, or when the user wants to find proactive threat hunting opportunities surfaced from entity data.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "entity-resolution",
+      "name": "entity-resolution",
+      "description": "Manage Entity Analytics entity resolution: inspect a resolution group \u2014 what aliases an entity has, which entities are linked to it, and what it resolves to \u2014 link or unlink entities into/out of a group, and enumerate/enable/disable the automated resolution rules. All mutating actions in this skill require explicit user confirmation before executing. Do NOT use for the resolution-group risk score trend (entity-analytics skill).",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "feature-identification",
+      "name": "feature-identification",
+      "description": "Provides the finalization tool required to submit feature-identification results.\n",
+      "domain": "platform",
+      "source": "static"
+    },
+    {
+      "id": "find-security-ml-jobs",
+      "name": "find-security-ml-jobs",
+      "description": "Guide to investigating anomalous and unusual behavior in your environment, especially related to security entities\n(hosts, users, services, service accounts, privileged accounts). Detects: unusual or first-time access patterns\nby users or service accounts, access to sensitive data or systems outside working hours, privileged accounts with unusual command\npatterns, logins from multiple or unexpected geographic locations, lateral movement between systems, unusually large data downloads\nor uploads, and data exfiltration to external domains.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "find-security-rules",
+      "name": "find-security-rules",
+      "description": "Discover, list, rank, and count Security detection rules. Filter by tags, MITRE technique, severity, rule type, name, or enabled state. Read-only.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "graph-creation",
+      "name": "graph-creation",
+      "description": "Visualize topology, node/entity relationships, or dependency graphs inline in the conversation by rendering data as React Flow nodes and edges. Not for charts, metrics, or dashboard panels.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "investigate-rule",
+      "name": "investigate-rule",
+      "description": "Single-rule noise and false-positive analysis: identify why a specific detection rule is generating too many alerts, surface the top contributing entities, and classify whether the root cause is benign activity, an overly broad query, or a threshold misconfiguration. If no rule attachment is present yet (e.g. the user selected one rule from find-security-rules output), the skill resolves the rule by its rule_id (detection rule signature ID) and creates the attachment before proceeding. Do not use for plural list, rank, or count requests for noisy rules; use find-security-rules until a single rule is selected.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "ki-identification-management",
+      "name": "ki-identification-management",
+      "description": "Start, monitor, and cancel source KI identification background tasks: trigger KI identification, surface a clickable tracking URL to the Significant Events page, check task status/results, and cancel in-progress runs. Pass the source slug. Tell the user the source title.",
+      "domain": "platform",
+      "source": "source",
+      "excludeFromElasticCapabilities": true
+    },
+    {
+      "id": "ki-retrieval",
+      "name": "ki-retrieval",
+      "description": "Retrieve context from a Context Engine AI Index at query time using keyword, semantic, or hybrid (FORK+FUSE) ES|QL search.",
+      "domain": "platform",
+      "source": "static"
+    },
+    {
+      "id": "knowledge-indicators-management",
+      "name": "knowledge-indicators-management",
+      "description": "Discover and manage Knowledge Indicators (KIs) for Nightshift sources: search existing indicators, avoid duplicates, and create feature or query KIs with built-in tool confirmation. Pass the source slug. Tell the user the source title.\n",
+      "domain": "platform",
+      "source": "static"
+    },
+    {
+      "id": "manage-watchlists",
+      "name": "manage-watchlists",
+      "description": "Manage Entity Analytics watchlists: create, update, delete, and add/remove entity membership (one-time or standing/rule-based); enumerate existing watchlists and resolve a watchlist name to its canonical id. Also covers rule-based data sources \u2014 the queries/index correlations that automatically keep a watchlist in sync \u2014 including listing the candidate sources behind \"what/how are we tracking/syncing this watchlist\" or \"why is this entity on this watchlist\" (watchlist-level source list, not a definitive per-entity lookup), and setting or removing them. All mutating actions in this skill require explicit user confirmation before executing. Do NOT use for which watchlists a specific entity belongs to (that is on the entity profile via the entity-analytics skill).",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "ml.anomaly-detection",
+      "name": "anomaly-detection",
+      "description": "Elastic ML anomaly detection skill \u2014 investigation/RCA, score explanation, job operations (create, datafeed, start/stop, results), and troubleshooting (missing docs, memory limits, datafeed health, lifecycle). Operates against `.ml-anomalies` (results materialized view), `.ml-anomalies-*` (model plot / forecast / snapshot / categories / memory), `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*` via ES|QL and ML API tools. Use when answering \"what broke?\"/\"which entity?\"/RCA, \"why is score high/low?\"/renormalization, \"datafeed stopped\"/\"memory limit\", or any request to set up or configure an ML anomaly detection job.\n",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "nightshift-sources-management",
+      "name": "nightshift-sources-management",
+      "description": "Lists, creates, updates and deletes the Nightshift sources of the current space, the ES|QL FROM queries that Knowledge Indicators and significant events come from. Use when the user asks which sources exist, how many there are, whether a source is enabled or healthy, for a source's slug or query, including sources with no Knowledge Indicators, or asks to add, change, enable, disable or delete a source.\n",
+      "domain": "observability",
+      "source": "static"
+    },
+    {
+      "id": "observability.investigate-service-map",
+      "name": "investigate-service-map",
+      "description": "Whole-map investigation launched from the APM service map page. Activates when an observability.service-map-context attachment is present \u2014 it carries the user's map view filters (environment, kuery, time range, service group, highlighted services), not data. Surveys all services in scope for problems: active alerts, violated or degrading SLOs, ML anomalies, unusual error rates or latency between services, and isolated services with missing connections. Renders a service map attachment of the topology, explains the architecture (entry points, hubs, datastores, external dependencies) and links to the most problematic services and their alerts. Do NOT use for plain requests to visualize a service map without the context attachment \u2014 defer to service-map.",
+      "domain": "observability",
+      "source": "live"
+    },
+    {
+      "id": "observability.investigation",
+      "name": "investigation",
+      "description": "Answers observability questions, lists and diagnoses observability alerts, and investigates service or infrastructure issues. Covers APM, logs, metrics, threshold, SLO burn rate, uptime/synthetics, and infrastructure alerts. Use when a user asks about alerts, service health, error rates, latency, failed transactions, topology, traces, log patterns, SLO breaches, or infrastructure issues. Do NOT use for security alerts, threat hunting, detection rules, or SIEM investigations.",
+      "domain": "observability",
+      "source": "live"
+    },
+    {
+      "id": "observability.service-map",
+      "name": "service-map",
+      "description": "Show a service map when the user asks to see, show, or visualize a service map, service topology, or service dependencies in an APM or observability context. Activates for requests about how services connect, what calls what between services, or upstream/downstream dependencies. Do not use for generic data graphing or generic architecture diagrams. Do NOT use when observability.service-map-context is attached \u2014 defer to investigate-service-map.",
+      "domain": "observability",
+      "source": "live"
+    },
+    {
+      "id": "pci-compliance",
+      "name": "pci-compliance",
+      "description": "PCI DSS v4.0.1 compliance assessments with violation detection, confidence scoring, data quality preflight checks, and visual audit reporting. Use when the user asks about PCI compliance, PCI DSS requirements, compliance audits, or cardholder data security.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "proposal-management",
+      "name": "proposal-management",
+      "description": "Read and revise proposals when an analyst asks to change a proposed action, its parameters, rationale, impact, or confidence. Use for requests such as \"change the index pattern in this proposal\" or \"revise the proposed rule\". Edits a pending proposal for human review; does not approve, dismiss, or execute actions.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "recommend-prebuilt-rules",
+      "name": "recommend-prebuilt-rules",
+      "description": "Discover and recommend Elastic prebuilt detection rules to install on this deployment. Handles install recommendations and browse/coverage questions about the installable catalog (by tag, MITRE, rule type, integration, or keyword). Read-only.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "rule-authoring",
+      "name": "rule-authoring",
+      "description": "Compose, discover, and modify universal alerting rules within a conversation. Use when the user wants to be alerted about conditions in their data \u2014 metrics, logs, or any index (\"create an alert rule that fires when...\", \"alert me when CPU goes above...\", \"set up alerting on my data\"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-authoring skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) \u2014 use the detection-rule-edit skill for those.",
+      "domain": "platform",
+      "source": "source"
+    },
+    {
+      "id": "search.catalog-ecommerce",
+      "name": "catalog-ecommerce",
+      "description": "Guide for building catalog and e-commerce search with Elasticsearch. Use when a developer wants product search, faceted navigation, autocomplete, \"did you mean\" suggestions, or shopping-oriented search experiences.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "search.elasticsearch-onboarding",
+      "name": "elasticsearch-onboarding",
+      "description": "Primary guided playbook for Elasticsearch search in Kibana Agent Builder: intent \u2192 data \u2192 mapping \u2192 Dev Tools API snippets (SENSE), with one question at a time. Load this skill whenever the user wants to learn Elasticsearch search, get started, begin building, take first steps, onboard, follow a walkthrough or tutorial, go from zero to a working query, or get structured help setting up indices and search \u2014 including casual openers like hi, help, getting started, new to Elasticsearch, how do I build search, or I want to try search. Use when they need end-to-end onboarding, not a single narrow API answer. If they only ask what they can build with Elastic (exploration without the full playbook), prefer invoking /use-case-library first; you can still load this skill afterward for the guided build.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "search.elasticsearch-tutorial",
+      "name": "elasticsearch-tutorial",
+      "description": "Topic-driven, hands-on Elasticsearch tutorial flow that runs in Kibana Dev Console. Use whenever the user says \"walk me through\", \"give me a tutorial for\", \"teach me\", \"show me how X works\", \"tutorial on\", or similar topical learning intent \u2014 and they are NOT asking you to build their real, specific use case. Topics are open-ended: any Elasticsearch / Kibana search concept the user names (e.g. mappings, analyzers, bool queries, semantic_text, kNN, RRF, aggregations, ingest pipelines, reranking, data streams, ES|QL). Tutorials use sample data on isolated resources, present every step as a SENSE snippet to run in Dev Tools, and end with cleanup plus pointers to docs and the onboarding / pattern skills.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "search.keyword-search",
+      "name": "keyword-search",
+      "description": "Guide for building keyword/full-text search with Elasticsearch. Use when a developer wants text matching, filters, faceted search, autocomplete, or traditional search functionality.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "search.rag-chatbot",
+      "name": "rag-chatbot",
+      "description": "Guide for building RAG (retrieval-augmented generation) chatbots and Q&A systems with Elasticsearch. Use when a developer wants to build a chatbot, Q&A system, or AI assistant that answers questions from their own data.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "search.use-case-library",
+      "name": "use-case-library",
+      "description": "Elasticsearch use case library \u2014 the full map of what you can build, with industry examples and technologies. Use when a developer asks \"what can Elastic do?\", \"what can I build?\", \"what use cases does Elasticsearch support?\", or needs help choosing what to build.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "search.vector-hybrid-search",
+      "name": "vector-hybrid-search",
+      "description": "Guide for building vector search, hybrid search, and using Elasticsearch as a vector database. Covers semantic_text, dense_vector, embedding strategies, hybrid BM25+kNN via RRF, reranking, and production optimization. Use when a developer wants semantic search, hybrid search, kNN, embeddings, or Elasticsearch as a vector store.",
+      "domain": "search",
+      "source": "live"
+    },
+    {
+      "id": "siem-readiness",
+      "name": "siem-readiness",
+      "description": "SIEM readiness health assessment across four dimensions: Coverage (data ingested per category), Quality (ECS field compatibility), Continuity (ingest pipeline health), and Retention (data retention compliance). Use when the user asks about SIEM health, readiness, data coverage, pipeline failures, ECS quality, or retention compliance.",
+      "domain": "security",
+      "source": "static"
+    },
+    {
+      "id": "significant-events-ki-grounding",
+      "name": "significant-events-ki-grounding",
+      "description": "Discovery / SigEvents confirmation only. Unlocks search_knowledge_indicators and execute_esql for confirming candidate significant events against the knowledge base. Provides the search-first protocol, KI type guidance, confirmation-query recipe, cause_kis derivation (including topology filter), dependency_edges/infra_components construction, and shared array field formats. Do not load for general RCA investigation \u2014 discovery agents pin this skill explicitly.",
+      "domain": "platform",
+      "source": "static"
+    },
+    {
+      "id": "significant-events-management",
+      "name": "significant-events-management",
+      "description": "Search, create, and update significant events for Nightshift sources, with guidance to avoid duplicates and keep event lifecycle state accurate. Pass source slugs. Tell the user the source title.\n",
+      "domain": "platform",
+      "source": "static"
+    },
+    {
+      "id": "skill-management",
+      "name": "skill-management",
+      "description": "Author a new Agent Builder skill, or view or edit an existing one. Use when the user asks to create, build, generate, design, scaffold, see, show, display, view, edit, update, modify, change, improve, or fix a skill, capability, or expertise area for an agent.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "streams-management",
+      "name": "streams-management",
+      "description": "Explore and manage Elastic streams. Use when the user mentions streams, stream names (logs.ecs, logs.otel, or any child like logs.ecs.android, logs.otel.linux), data quality, processing pipelines, or ingestion failures. Inspect definitions, schema, quality, lifecycle, and documents. Modify processing, retention, partitions, field mappings, failure store, and descriptions.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "threat-hunting",
+      "name": "threat-hunting",
+      "description": "Hypothesis-driven threat hunting using iterative ES|QL exploration. Covers IOC search, anomaly identification, baseline comparison, lateral movement tracking, and converting hunt findings into actionable intelligence. Use when investigating suspected threats, running proactive hunts, or analyzing suspicious activity patterns.",
+      "domain": "security",
+      "source": "live"
+    },
+    {
+      "id": "visualization-creation",
+      "name": "visualization-creation",
+      "description": "Create or update standalone charts and visualizations shown in the conversation, not on a dashboard. If the request involves a dashboard, use the dashboards skill instead.",
+      "domain": "platform",
+      "source": "live"
+    },
+    {
+      "id": "workflow-authoring",
+      "name": "workflow-authoring",
+      "description": "Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating, editing, or running workflows** \u2014 call `platform.core.generate_workflow` or `platform.core.execute_workflow` directly.",
+      "domain": "platform",
+      "source": "live"
+    }
+  ]
+}

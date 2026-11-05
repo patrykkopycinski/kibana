@@ -1,0 +1,22 @@
+[
+  { "id": "N01", "query": "Thanks, that's all I needed for now." },
+  { "id": "N02", "query": "Hi! Are you there?" },
+  { "id": "N03", "query": "Can you translate your last answer into French?" },
+  { "id": "N04", "query": "Make that summary shorter, three bullet points max." },
+  { "id": "N05", "query": "What is the capital of Australia?" },
+  { "id": "N06", "query": "Write a short haiku about autumn." },
+  { "id": "N07", "query": "How do I reverse a list in Python?" },
+  { "id": "N08", "query": "What's the difference between a process and a thread?" },
+  { "id": "N09", "query": "Convert 72 degrees Fahrenheit to Celsius." },
+  { "id": "N10", "query": "Recommend a good book about the history of computing." },
+  { "id": "N11", "query": "Explain what a regular expression lookahead does." },
+  { "id": "N12", "query": "Help me write a polite email declining a meeting invite." },
+  { "id": "N13", "query": "What time zone is Warsaw in?" },
+  { "id": "N14", "query": "Please rephrase your previous answer in simpler words." },
+  { "id": "N15", "query": "How many days are there between March 3 and April 17?" },
+  { "id": "N16", "query": "Tell me a fun fact about octopuses." },
+  { "id": "N17", "query": "What does HTTP status code 418 mean?" },
+  { "id": "N18", "query": "Give me a recipe for a quick vegetarian dinner." },
+  { "id": "N19", "query": "Sort these words alphabetically: pear, apple, mango, kiwi." },
+  { "id": "N20", "query": "OK, never mind, forget my last question." }
+]

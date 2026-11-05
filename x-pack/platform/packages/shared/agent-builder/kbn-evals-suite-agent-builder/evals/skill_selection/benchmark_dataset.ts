@@ -89,7 +89,7 @@ function parseCsv(): BenchmarkExample[] {
   });
 }
 
-const ALL_EXAMPLES: BenchmarkExample[] = parseCsv();
+export const ALL_EXAMPLES: BenchmarkExample[] = parseCsv();
 
 const bySkill = (skillId: string): BenchmarkExample[] =>
   ALL_EXAMPLES.filter((e) => e.metadata.skillId === skillId);

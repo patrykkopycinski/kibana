@@ -154,9 +154,7 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
     title: 'Agent Builder auto-trigger: should_respond (Jev direct API)',
     provenance: [
       `run started ${started.toISOString()}, ${examples.length} items, 1 repetition`,
-      `requested ${client.model}, served ${servedModels.join(
-        ', '
-      )}, via TypeSafe direct API (personal key, not EIS-only)`,
+      `requested ${client.model}, served ${servedModels.join(', ')}, via TypeSafe direct API`,
       'input built by the production buildTriggerDecisionInput; three Jev arms share it: ' +
         'the production shouldRespondQuestions, a human-will-answer framing, and a compound ' +
         'product framing',

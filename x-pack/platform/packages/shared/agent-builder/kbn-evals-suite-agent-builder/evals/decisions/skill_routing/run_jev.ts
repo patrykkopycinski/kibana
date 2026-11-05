@@ -189,7 +189,7 @@ export const main = async (
           `run started ${run.startedAt}, 1 repetition, one request per item per view`,
           `requested ${run.requestedModel}, served ${servedModels.join(
             ', '
-          )}, via TypeSafe direct API (personal key, not EIS-only)`,
+          )}, via TypeSafe direct API`,
           'synthetic benchmark queries; Jev run-to-run noise is about +/-0.05',
           'zero-cost arms reproduce the frozen baselines',
         ]

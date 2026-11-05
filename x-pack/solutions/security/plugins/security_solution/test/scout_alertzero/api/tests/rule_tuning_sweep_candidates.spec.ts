@@ -512,7 +512,7 @@ apiTest.describe.serial(
       }
     );
 
-    // security-team#20315: a rule's alerts outlive its deletion or disabling, and the
+    // Regression: a rule's alerts outlive its deletion or disabling, and the
     // sweep used to rank the 20 noisiest rules before checking which were enabled, so
     // 20 such rules starved every enabled one. Each case seeds more noisy rules than
     // the sweep has candidate slots, each noisier than the two enabled rules.

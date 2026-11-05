@@ -128,8 +128,8 @@ describe('run_jev', () => {
       expect(eisCalls).toBe(examples.length);
       expect(directCalls).toBe(0);
 
-      const reports = fs.readdirSync(outDir).filter((f) => f.endsWith('.json'));
-      expect(reports).toHaveLength(2);
+      const reports = fs.readdirSync(outDir);
+      expect(reports.filter((f) => f.endsWith('.json'))).toHaveLength(2);
       const report = JSON.parse(
         fs.readFileSync(
           path.join(outDir, reports.find((f) => f.startsWith('should_respond_report')) as string),

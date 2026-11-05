@@ -167,6 +167,8 @@ export const main = async (
 ): Promise<void> => {
   const catalog = loadCatalog();
   const frozen = loadFrozenBaselines();
+  // Read once at the top: the live-run branch and the provenance both need it.
+  const eisConfigured = Boolean(env.JEV_EIS_URL && env.JEV_EIS_AUTH_HEADER);
 
   if (argv.includes('--freeze')) {
     const report = buildRoutingReport(catalog);
@@ -197,9 +199,8 @@ export const main = async (
     }
     // The direct route needs its own credential; an EIS-only run (no personal key) runs the
     // production route in its place. Parity needs both routes, so it only renders when both ran.
-    const eisUrl = env.JEV_EIS_URL;
-    const eisAuth = env.JEV_EIS_AUTH_HEADER;
-    const eisConfigured = Boolean(eisUrl && eisAuth);
+    const eisUrl = env.JEV_EIS_URL as string;
+    const eisAuth = env.JEV_EIS_AUTH_HEADER as string;
     const createEisClient = () =>
       createJevClient({
         pathId: SKILL_ROUTING_PATH_ID,
@@ -259,12 +260,18 @@ export const main = async (
       ? [
           `run started ${run.startedAt}, 1 repetition, one request per item per view`,
           `requested ${run.requestedModel}, served ${servedModels.join(', ')}${
-            eisModels.length > 0
+            run.eis && eisModels.length > 0
               ? ` (direct) and ${eisModels.join(', ')} (EIS production route)`
               : run.eis
               ? ' via the EIS decision inference route'
               : ' via TypeSafe direct API'
           }`,
+          ...(run.eis || (!env.TYPESAFE_API_KEY && eisConfigured)
+            ? [
+                'EIS decision responses carry no usage; token/cost columns for EIS arms are 0 ' +
+                  'by construction (latency is measured client-side)',
+              ]
+            : []),
           'synthetic benchmark queries; Jev run-to-run noise is about +/-0.05',
           'zero-cost arms reproduce the frozen baselines',
         ]

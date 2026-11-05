@@ -170,11 +170,12 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
     );
   }
   const report = buildShouldRespondReport(items, armPredictions);
+  // Constant arms never made a request; only arms that actually called a model report one.
   const servedModels = [
     ...new Set(
-      Object.values(armPredictions).flatMap((predictions) =>
-        predictions.map((p) => p.servedModel ?? 'unknown')
-      )
+      Object.values(armPredictions)
+        .flatMap((predictions) => predictions.map((p) => p.servedModel))
+        .filter((m): m is string => Boolean(m))
     ),
   ];
 

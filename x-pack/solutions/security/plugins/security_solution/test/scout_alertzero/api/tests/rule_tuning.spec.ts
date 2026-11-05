@@ -229,12 +229,17 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
   const seeded = { ruleId: rule.id, revision: rule.revision, runMarker };
   seededRules.push(seeded);
 
+  // The sweep's harvest collects `kibana.alert.uuid` into the review's `alert_ids`, which the
+  // review requires to be non-empty; without it the review fails input validation and never
+  // raises the entry proposal. Real alerts carry their document id there.
+  const alertId = (number: number) => `${runMarker}-${number}`;
   const alertDoc = (closed: boolean, number: number) => ({
     '@timestamp': new Date(Date.now() - number * 60_000).toISOString(),
     labels: { ad_portable_seed: runMarker },
     rule: { id: rule.id, name: `E2E noisy backup rule ${runMarker}` },
     host: { name: FP_HOST },
     user: { name: closed ? FP_USER : TP_USER },
+    'kibana.alert.uuid': alertId(number),
     'kibana.alert.rule.uuid': rule.id,
     'kibana.alert.rule.name': `E2E noisy backup rule ${runMarker}`,
     'kibana.alert.rule.revision': rule.revision,
@@ -251,8 +256,8 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
   ];
   const response = await esClient.bulk({
     refresh: 'wait_for',
-    operations: documents.flatMap((doc, i) => [
-      { index: { _index: testData.ALERTS_INDEX, _id: `${runMarker}-${i}` } },
+    operations: documents.flatMap((doc) => [
+      { index: { _index: testData.ALERTS_INDEX, _id: doc['kibana.alert.uuid'] } },
       doc,
     ]),
   });
@@ -469,7 +474,8 @@ const assertPersistedScopedException = async (
   assertScopedToFpPattern(item.entries ?? [], `the exception item on rule ${rule.ruleId}`);
 };
 
-const FP_RATE_SENTENCE = /Analysts closed (\d+) of (\d+) alerts \((\d+(?:\.\d+)?)%\)/;
+// `fp_summary` in rule_tuning_review.yaml.
+const FP_RATE_SENTENCE = /(\d+) of (\d+) alerts \((\d+(?:\.\d+)?)%\) were judged false positives/;
 
 /**
  * Seeds the noisy rule and drives the sweep through both gates — the review's entry proposal and

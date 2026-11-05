@@ -140,7 +140,12 @@ const seedAnalysisChain = async (
 ): Promise<AnalysisChainContext> => {
   const seeded = await seedAttackScenario(esClient, adminApi, { scenarioKey });
   ledger.scenario(seeded);
-  const hostName = scenarioHost(scenarioKey);
+  // The seed rewrote the scenario's host to a run-owned name; the Attack Discovery alert must
+  // carry that name or the run's telemetry lookup misses the seeded events.
+  const hostName = `${scenarioHost(scenarioKey)}-${seeded.runMarker}`;
+  if (!seeded.entityNames.includes(hostName)) {
+    throw new Error(`Seeded scenario ${scenarioKey} has no run-owned host ${hostName}`);
+  }
   const attackDiscoveryAlertId = `e2e-${label}-${seeded.runMarker}`;
 
   await indexAttackDiscoveryAlert(esClient, {

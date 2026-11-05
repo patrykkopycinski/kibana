@@ -108,24 +108,6 @@ const readSpaceSolution = async ({
   return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
 };
 
-const setSpaceSolution = async ({
-  apiClient,
-  headers,
-  spaceId,
-  solution,
-}: {
-  apiClient: ApiClientFixture;
-  headers: Record<string, string>;
-  spaceId: string;
-  solution: SpaceSolution;
-}): Promise<void> => {
-  const response = await apiClient.put(
-    `internal/spaces/space/${encodeURIComponent(spaceId)}/solution`,
-    { headers, responseType: 'json', body: { solution } }
-  );
-  expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
-};
-
 /** Execution ids of one workflow; the teardown drain cancels what is NOT in this list. */
 const listExecutionIds = async (
   apiClient: ApiClientFixture,
@@ -196,7 +178,7 @@ const cancelNewExecutions = async (
  *
  * Enabling a worker requires an AI model in the space (Kibana answers 400
  * otherwise), so the dynamic-worker half of this suite skips with an explicit
- * reason on a stack booted without a preconfigured inference connector. The
+ * reason on a stack booted without a preconfigured AI connector. The
  * static coverage workflows need no model and always run.
  */
 apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic] }, () => {
@@ -213,7 +195,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
   // cancels and drains the rest (see `cancelNewExecutions`).
   let knownExecutionIds: string[] = [];
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const internalHeaders = { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader };
 
@@ -227,12 +209,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     });
     if (solution !== 'security') {
       solutionBaseline = solution;
-      await setSpaceSolution({
-        apiClient,
-        headers: internalHeaders,
-        spaceId: DEFAULT_SPACE_ID,
-        solution: 'security',
-      });
+      await apiServices.spaces.setSolutionView({ id: DEFAULT_SPACE_ID, solution: 'security' });
     }
 
     alertZeroBaseline = {
@@ -256,12 +233,16 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
       responseType: 'json',
     });
     expect(connectors.statusCode, JSON.stringify(connectors.body)).toBe(200);
+    // Same predicate as `listChatCompletionConnectors` in the security_solution scout_alertzero
+    // fixtures (not importable from this plugin's tests): the connector types the inference
+    // plugin accepts, `.inference` only as a `chat_completion` endpoint.
     hasChatCompletionConnector = (
       connectors.body as Array<{ connector_type_id: string; config?: { taskType?: string } }>
     ).some(
       (connector) =>
-        connector.connector_type_id === '.inference' &&
-        connector.config?.taskType === 'chat_completion'
+        ['.gen-ai', '.bedrock', '.gemini'].includes(connector.connector_type_id) ||
+        (connector.connector_type_id === '.inference' &&
+          connector.config?.taskType === 'chat_completion')
     );
     if (!hasChatCompletionConnector) {
       return;
@@ -315,7 +296,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     expect(enable.statusCode, JSON.stringify(enable.body)).toBe(200);
   });
 
-  apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+  apiTest.afterAll(async ({ apiClient, apiServices, samlAuth }) => {
     apiTest.setTimeout(TEARDOWN_TIMEOUT_MS);
     const errors: unknown[] = [];
     const attempt = async (step: () => Promise<unknown>) => {
@@ -397,10 +378,8 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     });
     await attempt(async () => {
       if (solutionBaseline) {
-        await setSpaceSolution({
-          apiClient,
-          headers,
-          spaceId: DEFAULT_SPACE_ID,
+        await apiServices.spaces.setSolutionView({
+          id: DEFAULT_SPACE_ID,
           solution: solutionBaseline,
         });
       }
@@ -422,7 +401,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
       apiTest.skip(
         workflowId === FLOOR_ALERT_TRIAGE_WORKFLOW_ID && !hasChatCompletionConnector,
-        'no preconfigured chat-completion inference connector on this stack; enabling the floor alert triage worker requires an AI model'
+        'no preconfigured chat-completion AI connector on this stack; enabling the floor alert triage worker requires an AI model'
       );
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };

@@ -37,6 +37,15 @@ export const FLOOR_ATTACK_DISCOVERY_WORKER_ID = 'system-security-floor-attack-di
 export const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-endpoint-analysis';
 export const ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
+/**
+ * The workflows an Attack Discovery Worker run executes besides its own: the shared runner it
+ * calls and the per-attack reviews the runner dispatches. Teardown has to drain these too, or
+ * they can still be mid-model-call when the service account is deleted.
+ */
+export const ATTACK_DISCOVERY_RUN_WORKFLOW_IDS = [
+  ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
+] as const;
 export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
   'system-security-forensics-run-endpoint-analysis';
 export const FORENSICS_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-forensics-proposal-gate';
@@ -86,6 +95,15 @@ export const DRAIN_BUDGET_MS = DRAIN_TIMEOUT_MS + 30_000;
  * neither a single slow drain nor this, so each hook sets its own budget.
  */
 export const TEARDOWN_CLEANUP_BUDGET_MS = 3 * 60_000;
+
+/**
+ * Request timeout for the first direct write into a `semantic_text` index. On a cold stack that
+ * write triggers the ELSER model import and deployment (~40s observed), past the Scout ES
+ * client's 30s default.
+ */
+export const COLD_ELSER_REQUEST_TIMEOUT_MS = 3 * 60_000;
+/** A `beforeAll` that makes such a write: the request ceiling plus the rest of its setup. */
+export const SEMANTIC_SEED_HOOK_TIMEOUT_MS = COLD_ELSER_REQUEST_TIMEOUT_MS + 2 * 60_000;
 
 /**
  * Managed AI index the AlertZero producers write knowledge indicators into. The AlertZero plugin

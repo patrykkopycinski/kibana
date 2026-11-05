@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, ApiServicesFixture } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
@@ -20,7 +20,12 @@ import {
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import { HUNT_WORKER_URL, INTERNAL_HEADERS, TI_HEADERS } from './constants';
+import {
+  COLD_ELSER_REQUEST_TIMEOUT_MS,
+  HUNT_WORKER_URL,
+  INTERNAL_HEADERS,
+  TI_HEADERS,
+} from './constants';
 import { SUPPLY_WORKFLOW_IDS, type SupplyWorkflowKey } from './supply_workflow_ids';
 
 /** Minimal ES client surface these tests rely on. */
@@ -32,12 +37,15 @@ interface EsLike {
     ignore_unavailable?: boolean;
     conflicts?: 'proceed' | 'abort';
   }): Promise<unknown>;
-  index(args: {
-    index: string;
-    id: string;
-    document: Record<string, unknown>;
-    refresh?: boolean;
-  }): Promise<unknown>;
+  index(
+    args: {
+      index: string;
+      id: string;
+      document: Record<string, unknown>;
+      refresh?: boolean;
+    },
+    options?: { requestTimeout?: number }
+  ): Promise<unknown>;
 }
 
 /**
@@ -225,34 +233,6 @@ const readSpaceSolution = async ({
   return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
 };
 
-const setSpaceSolution = async ({
-  apiClient,
-  headers,
-  spaceId,
-  solution,
-}: {
-  apiClient: ApiClientFixture;
-  headers: Record<string, string>;
-  spaceId: string;
-  solution: SpaceSolution;
-}): Promise<void> => {
-  const response = await apiClient.put(
-    `/internal/spaces/space/${encodeURIComponent(spaceId)}/solution`,
-    {
-      headers: { ...INTERNAL_HEADERS, ...headers },
-      responseType: 'json',
-      body: { solution },
-    }
-  );
-  if (response.statusCode !== 200) {
-    throw new Error(
-      `Setup: failed to set solution ${solution} on space ${spaceId} (status ${
-        response.statusCode
-      }): ${JSON.stringify(response.body)}`
-    );
-  }
-};
-
 /**
  * Makes one suite's space usable by AlertZero and returns the restore callback for its afterAll.
  *
@@ -265,13 +245,17 @@ const setSpaceSolution = async ({
  */
 export const withAlertZeroEnabledInSpace = async (args: {
   apiClient: ApiClientFixture;
+  apiServices: ApiServicesFixture;
   headers: Record<string, string>;
   spaceId: string;
 }): Promise<() => Promise<void>> => {
+  const { apiServices, spaceId } = args;
+  const setSpaceSolution = (solution: SpaceSolution): Promise<void> =>
+    apiServices.spaces.setSolutionView({ id: spaceId, solution });
   const baselineSolution = await readSpaceSolution(args);
   const switchedSolution = baselineSolution !== 'security';
   if (switchedSolution) {
-    await setSpaceSolution({ ...args, solution: 'security' });
+    await setSpaceSolution('security');
   }
   let baselineEnabled: boolean | undefined;
   try {
@@ -281,7 +265,7 @@ export const withAlertZeroEnabledInSpace = async (args: {
     // The caller never receives a restore callback when setup throws, so the solution switch
     // would outlive the suite. Roll it back here before surfacing the original failure.
     if (switchedSolution) {
-      await setSpaceSolution({ ...args, solution: baselineSolution }).catch(() => undefined);
+      await setSpaceSolution(baselineSolution).catch(() => undefined);
     }
     throw error;
   }
@@ -292,7 +276,7 @@ export const withAlertZeroEnabledInSpace = async (args: {
       await setAlertZeroEnabledInSpace({ ...args, enabled: baselineEnabled });
     } finally {
       if (switchedSolution) {
-        await setSpaceSolution({ ...args, solution: baselineSolution });
+        await setSpaceSolution(baselineSolution);
       }
     }
   };
@@ -560,31 +544,35 @@ export const seedSharedReportWithEvidence = async ({
   spaceA: string;
   spaceB: string;
 }): Promise<void> => {
-  await esClient.index({
-    index: THREAT_REPORTS_INDEX,
-    id: reportId,
-    refresh: true,
-    document: {
-      space_id: '*',
-      source: { name: sourceName },
-      content: {
-        title: `Scout isolation ${reportId}`,
-        body_text: `Shared report for evidence projection ${reportId}`,
+  // `content.*` is `semantic_text`: on a cold stack this write waits for the ELSER deployment.
+  await esClient.index(
+    {
+      index: THREAT_REPORTS_INDEX,
+      id: reportId,
+      refresh: true,
+      document: {
+        space_id: '*',
+        source: { name: sourceName },
+        content: {
+          title: `Scout isolation ${reportId}`,
+          body_text: `Shared report for evidence projection ${reportId}`,
+        },
+        evidence: [
+          {
+            space_id: spaceA,
+            alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
+            alert_hits_total: 1,
+          },
+          {
+            space_id: spaceB,
+            alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
+            alert_hits_total: 10,
+          },
+        ],
       },
-      evidence: [
-        {
-          space_id: spaceA,
-          alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
-          alert_hits_total: 1,
-        },
-        {
-          space_id: spaceB,
-          alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
-          alert_hits_total: 10,
-        },
-      ],
     },
-  });
+    { requestTimeout: COLD_ELSER_REQUEST_TIMEOUT_MS }
+  );
 };
 
 /** Headers for hunt/TI internal calls as a given cookie session. */

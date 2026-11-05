@@ -63,16 +63,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isCapture = (value: unknown): value is RuntimeSettingsCapture =>
   isRecord(value) && isRecord(value.prior) && isRecord(value.applied);
 
-/**
- * The capture format before `applied` existed: a flat map of setting key -> prior value. An
- * interrupted run of an older checkout can leave one behind.
- */
-const isLegacyCapture = (value: unknown): value is SettingValues =>
-  isRecord(value) &&
-  !('prior' in value) &&
-  !('applied' in value) &&
-  Object.keys(value).every((key) => key.includes(':'));
-
 /** The parsed file, or `undefined` when it cannot be read or is not JSON. */
 const readCaptureFile = (file: string): unknown => {
   try {
@@ -129,21 +119,39 @@ export const applyRuntimeSettings = async ({
   const file = stateFile(suiteKey);
   if (existsSync(file)) {
     const existing = readCaptureFile(file);
+    let capture: RuntimeSettingsCapture;
     if (isCapture(existing)) {
       log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${file}`);
-    } else if (isLegacyCapture(existing)) {
-      log.warning(
-        `[setup] converting a flat-map prior-value capture left by an older run: ${file}`
-      );
-      const capture: RuntimeSettingsCapture = { prior: existing, applied: changes };
-      writeFileSync(file, JSON.stringify(capture, null, 2));
+      capture = existing;
     } else {
-      // Neither writing over it nor applying without a baseline is safe: leave both alone.
-      log.warning(
-        `[setup] unreadable prior-value capture at ${file}; leaving the settings as they are`
+      // Neither writing over it nor applying without a baseline is safe, and returning would
+      // leave every later run silently unconfigured: fail setup so the leftover gets resolved.
+      throw new Error(
+        `[setup] unreadable or older-format prior-value capture at ${file}: check the live values of ${Object.keys(
+          changes
+        ).join(', ')}, restore them if needed, then delete ${file}`
       );
-      return;
     }
+    // A setting the interrupted run did not write has no baseline in the capture yet, and its
+    // live value is still the user's own, so capture it now or teardown would never revert it.
+    const uncaptured = Object.keys(changes).filter((key) => !(key in capture.prior));
+    if (uncaptured.length > 0) {
+      const current = await readUserValues(kbnClient);
+      capture = {
+        prior: {
+          ...capture.prior,
+          ...Object.fromEntries(uncaptured.map((key) => [key, current[key] ?? null])),
+        },
+        applied: capture.applied,
+      };
+      log.warning(
+        `[setup] captured settings missing from the kept capture: ${uncaptured.join(', ')}`
+      );
+    }
+    // Teardown restores a setting only while it still holds what this suite applied, so the
+    // capture has to record the values about to be written now, not the interrupted run's.
+    capture = { ...capture, applied: { ...capture.applied, ...changes } };
+    writeFileSync(file, JSON.stringify(capture, null, 2));
   } else {
     const current = await readUserValues(kbnClient);
     const capture: RuntimeSettingsCapture = {

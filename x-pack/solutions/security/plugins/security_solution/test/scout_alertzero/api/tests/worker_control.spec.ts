@@ -63,6 +63,20 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     });
   };
 
+  // The floor worker's run executes the shared Attack Discovery runner as its service account,
+  // and the runner dispatches one review per generated attack. Those children are separate
+  // executions (and separate workflows), so cancelling only the floor worker's own run leaves
+  // them mid-model-call when the account is deleted. Baselined together with the worker's
+  // workflow, before the enable that starts them.
+  const snapshotWorkerWorkflowsBeforeEnable = async (
+    api: Awaited<ReturnType<typeof getAdminApi>>
+  ): Promise<void> => {
+    await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
+    for (const workflowId of testData.ATTACK_DISCOVERY_RUN_WORKFLOW_IDS) {
+      await snapshotBeforeEnable(api, workflowId);
+    }
+  };
+
   // The settings write installs the managed workflow, but the catalog surfaces it through the
   // SML indexer asynchronously, so the read can lag the install. Without the baseline the
   // teardown cannot tell this suite's runs from anyone else's, so a workflow that never shows
@@ -89,10 +103,11 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   // the captured baseline back in teardown.
   let restoreAlertZero: (() => Promise<void>) | undefined;
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     restoreAlertZero = await withAlertZeroEnabledInSpace({
       apiClient,
+      apiServices,
       headers: cookieHeader,
       spaceId: 'default',
     });
@@ -169,7 +184,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // with that reason instead of asserting whatever 4xx comes back first.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion inference connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
+        'no preconfigured chat-completion AI connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
       );
       // Do not trust spec order: another spec may have left an account bound to this worker.
       await resetWorker(api, WORKER_ID);
@@ -193,7 +208,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // stack booted without a preconfigured inference connector.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion inference connector on this stack; enabling a worker requires an AI model'
+        'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
       );
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
@@ -207,7 +222,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // BEFORE enabling: the enable below makes Task Manager run the worker at once as its
       // service account, and teardown must be able to cancel exactly that run (see afterAll),
       // not whatever else shares the workflow.
-      await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
+      await snapshotWorkerWorkflowsBeforeEnable(api);
       await updateWorker(api, WORKER_ID, { enabled: true });
 
       await resetWorker(api, WORKER_ID);
@@ -226,7 +241,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // stack booted without a preconfigured inference connector.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion inference connector on this stack; enabling a worker requires an AI model'
+        'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
       );
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
@@ -240,7 +255,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // workflow, before the enable starts a real run that teardown must be able to end
       // (see afterAll). The helper keeps the reset spec's earlier baseline if the workflow is
       // the same, so that spec's run is still cancelled as one of ours.
-      await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
+      await snapshotWorkerWorkflowsBeforeEnable(api);
 
       expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
       expect((await updateWorker(api, WORKER_ID, { enabled: false })).enabled).toBe(false);

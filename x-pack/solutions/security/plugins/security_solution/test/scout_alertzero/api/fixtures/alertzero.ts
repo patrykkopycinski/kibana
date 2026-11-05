@@ -443,10 +443,15 @@ export interface PendingProposal {
    * teardowns that collect it must treat `undefined` as "nothing to delete".
    */
   conversationId?: string;
+  title?: string;
+  comment?: string;
   actionWorkflowId?: string;
   workflowExecutionId?: string;
   actionInput?: unknown;
 }
+
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Identifiers that tie a proposal to one e2e run's seeded data. Every member must be minted
  * per run: a constant such as the scenario hostname matches the proposals of every run that
@@ -459,17 +464,13 @@ export interface RunReferences {
 const PROPOSALS_PAGE_SIZE = 100;
 // The list route rejects an offset past this.
 const PROPOSALS_MAX_OFFSET = 9_900;
+const PROPOSALS_MAX_READABLE = PROPOSALS_MAX_OFFSET + PROPOSALS_PAGE_SIZE;
+// Full passes attempted before giving up on two consecutive passes agreeing.
+const PROPOSALS_MAX_STABLE_PASSES = 5;
 
-/**
- * Reads every pending AlertZero proposal, not just the first page: the space is shared, so
- * leftovers from other runs can push this run's proposals past page one. `order: 'newest'` is a
- * total order, which keeps the pages from repeating or skipping a row. Paging follows `total`
- * rather than the page length, because the route drops a proposal it settles while reading.
- * `filters` narrows the read server-side (for example to one conversation).
- */
-export const listPendingProposals = async (
+const readPendingProposalPass = async (
   api: AlertZeroApi,
-  filters: Record<string, string | number | boolean> = {}
+  filters: Record<string, string | number | boolean>
 ): Promise<PendingProposal[]> => {
   const proposals: PendingProposal[] = [];
   for (let from = 0; from <= PROPOSALS_MAX_OFFSET; from += PROPOSALS_PAGE_SIZE) {
@@ -486,12 +487,49 @@ export const listPendingProposals = async (
       }),
       `list pending proposals from ${from}`
     );
+    if (page.total > PROPOSALS_MAX_READABLE) {
+      throw new Error(
+        `${page.total} pending proposals exceed the ${PROPOSALS_MAX_READABLE} the list route can page through; narrow the read with filters`
+      );
+    }
     proposals.push(...page.proposals);
     if (from + PROPOSALS_PAGE_SIZE >= page.total) {
       break;
     }
   }
   return proposals;
+};
+
+/**
+ * Reads every pending AlertZero proposal, not just the first page: the space is shared, so
+ * leftovers from other runs can push this run's proposals past page one. The list route is
+ * offset-paged only (no `search_after`), and it settles orphaned proposals while reading, so a
+ * page can shift under the offset. A single pass can therefore skip or repeat a row; the read
+ * repeats full passes until two consecutive passes return the same id set. It throws when
+ * `total` exceeds what the route can page through, and when the set never settles, instead of
+ * returning a silently partial list. `filters` narrows the read server-side (for example to
+ * one conversation).
+ */
+export const listPendingProposals = async (
+  api: AlertZeroApi,
+  filters: Record<string, string | number | boolean> = {}
+): Promise<PendingProposal[]> => {
+  let previous = await readPendingProposalPass(api, filters);
+  for (let attempt = 1; attempt < PROPOSALS_MAX_STABLE_PASSES; attempt++) {
+    const current = await readPendingProposalPass(api, filters);
+    const previousIds = new Set(previous.map(({ id }) => id));
+    const currentIds = new Set(current.map(({ id }) => id));
+    if (
+      previousIds.size === currentIds.size &&
+      [...currentIds].every((id) => previousIds.has(id))
+    ) {
+      return current;
+    }
+    previous = current;
+  }
+  throw new Error(
+    `pending proposal list did not settle across ${PROPOSALS_MAX_STABLE_PASSES} consecutive passes`
+  );
 };
 
 /**

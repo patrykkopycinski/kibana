@@ -7,7 +7,7 @@
 
 import type { EsClient } from '@kbn/scout-security';
 import { AI_INDEX_KI_BACKING_INDEX, CONVERSATIONS_URL, PROPOSALS_URL } from './constants';
-import { listPendingProposals } from './alertzero';
+import { isRecord, listPendingProposals } from './alertzero';
 import type { AlertZeroApi } from './kbn';
 
 export interface InvestigationProposal {
@@ -26,11 +26,29 @@ export interface InvestigationProposal {
 export const listInvestigationProposals = async (
   api: AlertZeroApi,
   conversationId?: string
-): Promise<InvestigationProposal[]> =>
-  (await listPendingProposals(api, {
+): Promise<InvestigationProposal[]> => {
+  const pending = await listPendingProposals(api, {
     excludeSuperseded: true,
     ...(conversationId ? { conversationId } : {}),
-  })) as InvestigationProposal[];
+  });
+  return pending.flatMap((proposal) => {
+    const { id, createdAt, title, actionWorkflowId, actionInput } = proposal;
+    if (typeof proposal.conversationId !== 'string' || typeof title !== 'string') {
+      // The queue is shared: a proposal without these fields is not an investigation card.
+      return [];
+    }
+    return [
+      {
+        id,
+        createdAt,
+        conversationId: proposal.conversationId,
+        title,
+        actionWorkflowId,
+        actionInput: isRecord(actionInput) ? actionInput : undefined,
+      },
+    ];
+  });
+};
 
 /**
  * Deletes an Investigation conversation; its attachments are deleted with it. A 404 means an

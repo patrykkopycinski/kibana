@@ -25,7 +25,6 @@ import {
   dismissInvestigationProposals,
   dismissRunProposals,
   endpointIdsOf,
-  ensureInvestigationsAiIndex,
   getAdminApi,
   getWorker,
   hasAttachment,
@@ -37,7 +36,6 @@ import {
   processSelectorOf,
   readKnowledgeIndicator,
   readSeedIdentifiers,
-  removeInvestigationsAiIndex,
   resetWorker,
   seedAttackScenario,
   seedKnowledgeIndicator,
@@ -49,12 +47,7 @@ import {
   waitForNewExecution,
   waitForEndpointAnalysisRun,
 } from '../fixtures';
-import type {
-  AlertZeroApi,
-  InvestigationProposal,
-  InvestigationsAiIndexProvisioning,
-  SeededScenario,
-} from '../fixtures';
+import type { AlertZeroApi, InvestigationProposal, SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
 const RUN_WORKFLOW_ID = testData.FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID;
@@ -170,16 +163,10 @@ const seedAnalysisChain = async (
  * up) a second chain before its handoff exists.
  */
 const publishHandoff = async (
-  adminApi: AlertZeroApi,
   esClient: EsClient,
   chain: AnalysisChainContext,
   ledger: TeardownLedger
 ): Promise<string> => {
-  const provisioned = await ensureInvestigationsAiIndex(adminApi, esClient);
-  provisionedAiIndex = {
-    recordCreated: provisionedAiIndex.recordCreated || provisioned.recordCreated,
-    backingIndexCreated: provisionedAiIndex.backingIndexCreated || provisioned.backingIndexCreated,
-  };
   const kiId = await seedKnowledgeIndicator(esClient, {
     kiId: `e2e-analyze-endpoint-${chain.scenario.runMarker}`,
     type: 'security.analyze_endpoint',
@@ -203,7 +190,7 @@ const runEndpointAnalysis = async (
   ledger: TeardownLedger
 ): Promise<EndpointAnalysisContext> => {
   const chain = await seedAnalysisChain(adminApi, esClient, scenarioKey, label, ledger);
-  const kiId = await publishHandoff(adminApi, esClient, chain, ledger);
+  const kiId = await publishHandoff(esClient, chain, ledger);
   return { ...chain, kiId };
 };
 
@@ -223,11 +210,6 @@ const executionSnapshots: Array<{ workflowId: string; knownIds: string[] }> = []
 let api: AlertZeroApi | undefined;
 let esClientRef: EsClient | undefined;
 let serviceAccountId: string | undefined;
-/** What this run provisioned of the investigations AI index; teardown removes only that. */
-let provisionedAiIndex: InvestigationsAiIndexProvisioning = {
-  recordCreated: false,
-  backingIndexCreated: false,
-};
 
 apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.classic] }, () => {
   // The worker routes this suite drives are gated on the per-space AlertZero setting, which the
@@ -237,6 +219,19 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
   let restoreAlertZero: (() => Promise<void>) | undefined;
 
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    // This flow is LLM-dependent end to end. When the stack was booted without a
+    // chat-completion inference connector (the `alertzero` config set only wires connectors
+    // when a connector source exists, which plain CI does not have), every workflow run
+    // would fail on its first model call. Skip before the AlertZero gate is switched, so a
+    // skipped run leaves no state to restore.
+    const chatConnectors = await listChatCompletionConnectors(
+      await getAdminApi(apiClient, samlAuth)
+    );
+    apiTest.skip(
+      chatConnectors.length === 0,
+      'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero endpoint-analysis flow requires one (agent_builder_smoke-style EIS connector source)'
+    );
+
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     restoreAlertZero = await withAlertZeroEnabledInSpace({
       apiClient,
@@ -246,6 +241,15 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    // Unset when beforeAll skipped (or failed before enabling the gate): nothing was changed.
+    if (!restoreAlertZero) {
+      return;
+    }
+    // One drain per workflow this run snapshotted, each up to DRAIN_BUDGET_MS, then the cleanup.
+    // Without this a slow drain trips the default hook timeout before the account is deleted.
+    apiTest.setTimeout(
+      executionSnapshots.length * testData.DRAIN_BUDGET_MS + testData.TEARDOWN_CLEANUP_BUDGET_MS
+    );
     // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
     // scenarios, the Attack Discovery alerts, the indicators, the investigations and their
     // pending cards, the service account or the worker.
@@ -322,11 +326,6 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     await attempt(async () => {
       if (esClientRef) await cleanupKnowledgeIndicators(esClientRef, kiIds);
     });
-    await attempt(async () => {
-      if (api && esClientRef) {
-        await removeInvestigationsAiIndex(api, esClientRef, provisionedAiIndex);
-      }
-    });
     for (const scenario of scenarios) {
       await attempt(async () => scenario.cleanup());
     }
@@ -357,17 +356,6 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       api = adminApi;
       esClientRef = esClient;
       const startedAt = new Date().toISOString();
-
-      // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
-      // chat-completion inference connector (the `alertzero` config set only wires connectors
-      // when a connector source exists, which plain CI does not have), every workflow run
-      // would fail on its first model call — and this suite enables the worker and seeds real
-      // telemetry before that. Skip with an explicit reason instead of failing.
-      const chatConnectors = await listChatCompletionConnectors(adminApi);
-      apiTest.skip(
-        chatConnectors.length === 0,
-        'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero endpoint-analysis flow requires one (agent_builder_smoke-style EIS connector source)'
-      );
 
       // Snapshot the run workflow's executions before the worker can start any: the poll below
       // correlates on this snapshot, and teardown drains whatever appeared after it.
@@ -573,7 +561,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         identifiers.hostByAgentId.forEach((host, agentId) => hostByAgentId.set(agentId, host));
       }
       await context.scenario.cleanup();
-      await publishHandoff(adminApi, esClient, second, ledger);
+      await publishHandoff(esClient, second, ledger);
 
       // The worker's next scheduled sweep analyzes the second handoff; each investigation must
       // end up with its own pending isolate card.

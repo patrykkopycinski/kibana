@@ -8,7 +8,12 @@
 import { PROPOSAL_TIMEOUT_MS, PROPOSALS_URL } from './constants';
 import { ok } from './kbn';
 import type { AlertZeroApi } from './kbn';
-import { describeExecution, listPendingProposals, waitForExecutionStatus } from './alertzero';
+import {
+  describeExecution,
+  isRecord,
+  listPendingProposals,
+  waitForExecutionStatus,
+} from './alertzero';
 import type { WorkflowExecution } from './alertzero';
 
 /**
@@ -35,8 +40,33 @@ export interface TuningProposal {
   readonly createdAt: string;
 }
 
-export const listTuningProposals = async (api: AlertZeroApi): Promise<TuningProposal[]> =>
-  (await listPendingProposals(api, { excludeSuperseded: true })) as TuningProposal[];
+export const listTuningProposals = async (api: AlertZeroApi): Promise<TuningProposal[]> => {
+  const pending = await listPendingProposals(api, { excludeSuperseded: true });
+  return pending.flatMap((proposal) => {
+    const { id, createdAt, title, comment, actionWorkflowId, actionInput, workflowExecutionId } =
+      proposal;
+    if (
+      typeof proposal.conversationId !== 'string' ||
+      typeof title !== 'string' ||
+      typeof comment !== 'string'
+    ) {
+      // The queue is shared: a proposal without these fields is not a tuning card.
+      return [];
+    }
+    return [
+      {
+        id,
+        createdAt,
+        conversationId: proposal.conversationId,
+        title,
+        comment,
+        actionWorkflowId,
+        actionInput: isRecord(actionInput) ? actionInput : undefined,
+        workflowExecutionId,
+      },
+    ];
+  });
+};
 
 /** The rule a proposal's action points at, by either id field the flows write. */
 export const actionTarget = (input: Record<string, unknown> | undefined): unknown =>

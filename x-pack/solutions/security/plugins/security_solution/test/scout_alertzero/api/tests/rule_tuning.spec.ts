@@ -700,6 +700,11 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     if (!restoreAlertZero) {
       return;
     }
+    // One drain per workflow this run baselined, each up to DRAIN_BUDGET_MS, then the cleanup.
+    // Without this a slow drain trips the default hook timeout before the account is deleted.
+    apiTest.setTimeout(
+      executionBaselines.size * testData.DRAIN_BUDGET_MS + testData.TEARDOWN_CLEANUP_BUDGET_MS
+    );
     const errors: unknown[] = [];
     const attempt = async (step: () => Promise<unknown>) => {
       try {

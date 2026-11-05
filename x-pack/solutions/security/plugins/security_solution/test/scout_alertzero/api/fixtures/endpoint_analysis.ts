@@ -6,12 +6,7 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-import {
-  AI_INDEX_KI_BACKING_INDEX,
-  AI_INDEX_URL,
-  CONVERSATIONS_URL,
-  SECURITY_INVESTIGATIONS_AI_INDEX_ID,
-} from './constants';
+import { AI_INDEX_KI_BACKING_INDEX, CONVERSATIONS_URL } from './constants';
 import type { InvestigationProposal } from './investigations';
 import { listExecutionIds } from './alertzero';
 import type { WorkflowExecution } from './alertzero';
@@ -251,68 +246,6 @@ export const readKnowledgeIndicator = async (
       return { found: false };
     }
     throw error;
-  }
-};
-
-export interface InvestigationsAiIndexProvisioning {
-  /** This call registered the AI index record. */
-  readonly recordCreated: boolean;
-  /** The backing index was absent before the call, so the run's first write will create it. */
-  readonly backingIndexCreated: boolean;
-}
-
-/**
- * Registers the `security-investigations` AI index record if the stack has none yet. Producers
- * get it lazily from `context-engine.createKi`; seeding straight into the backing index skips
- * that, and a sweep's `context-engine.updateKi` then fails with "AI index not found" before it
- * dispatches anything. Idempotent: an existing record answers 409. The result says what this
- * call provisioned, so teardown removes only that and never a record or index the stack already had.
- */
-export const ensureInvestigationsAiIndex = async (
-  api: AlertZeroApi,
-  esClient: EsClient
-): Promise<InvestigationsAiIndexProvisioning> => {
-  const backingIndexExisted = await esClient.indices.exists({ index: AI_INDEX_KI_BACKING_INDEX });
-  const result = await api.public('POST', AI_INDEX_URL, {
-    body: {
-      id: SECURITY_INVESTIGATIONS_AI_INDEX_ID,
-      dest: { type: 'index', value: AI_INDEX_KI_BACKING_INDEX },
-      automations: [],
-      sources: [],
-      traces: [],
-    },
-  });
-  const recordExisted = result.statusCode === 409;
-  if (!recordExisted) {
-    ok(result, 'register the security-investigations AI index');
-  }
-  return { recordCreated: !recordExisted, backingIndexCreated: !backingIndexExisted };
-};
-
-/**
- * Removes what `ensureInvestigationsAiIndex` provisioned. A 404 means an earlier teardown already
- * removed it; the record goes first so no AI index points at a deleted backing index.
- */
-export const removeInvestigationsAiIndex = async (
-  api: AlertZeroApi,
-  esClient: EsClient,
-  provisioned: InvestigationsAiIndexProvisioning
-): Promise<void> => {
-  if (provisioned.recordCreated) {
-    const response = await api.public(
-      'DELETE',
-      `${AI_INDEX_URL}/${encodeURIComponent(SECURITY_INVESTIGATIONS_AI_INDEX_ID)}`
-    );
-    if (response.statusCode >= 300 && response.statusCode !== 404) {
-      throw new Error(
-        `Delete AI index ${SECURITY_INVESTIGATIONS_AI_INDEX_ID} failed: ${
-          response.statusCode
-        } ${JSON.stringify(response.body)}`
-      );
-    }
-  }
-  if (provisioned.backingIndexCreated) {
-    await esClient.indices.delete({ index: AI_INDEX_KI_BACKING_INDEX, ignore_unavailable: true });
   }
 };
 

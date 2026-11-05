@@ -13,6 +13,10 @@ import {
   buildAd2SeedPlan,
   getAd2ScenarioAlertIds,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
+import type {
+  Ad2IndexedAlert,
+  Ad2IndexedRawEvent,
+} from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { ATTACK_SCENARIO_KEY, DRAIN_TIMEOUT_MS } from './constants';
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
@@ -23,13 +27,53 @@ const SERVICE_ACCOUNT_URL = '/internal/security/service_account';
 export interface SeededScenario {
   readonly runMarker: string;
   readonly alertIds: readonly string[];
+  /**
+   * Run-owned host and user names the seeded scenario was rewritten to (see
+   * `seedAttackScenario`): teardown discovers this run's Investigations by them.
+   */
+  readonly entityNames: readonly string[];
   readonly cleanup: () => Promise<void>;
 }
 
 /**
- * Indexes one AD2 attack chain (alerts + raw endpoint events) whose ids derive from a marker owned
- * by this run, so cleanup removes only what this run wrote.
+ * Rewrites every host and user name in the plan to one owned by this run: `<name>-<runMarker>`.
+ * Attack Discovery fingerprint matching correlates attacks by host/user names within a 24h
+ * window, so scenario-canonical names are shared by every run that seeds the same scenario in
+ * the shared space — a previous run's investigation can absorb this run's attack and its
+ * teardown then misses it. Document ids need no rewrite: they already derive from the run
+ * marker. The rewrite is a plain substring replacement over the serialized documents, so the
+ * names also disappear from messages, command lines and file paths that spell them out; longer
+ * names are replaced first so one name that prefixes another is never half-rewritten.
  */
+const runOwnEntityNames = (
+  docs: ReadonlyArray<Ad2IndexedAlert | Ad2IndexedRawEvent>,
+  runMarker: string
+): { docs: Array<Ad2IndexedAlert | Ad2IndexedRawEvent>; entityNames: readonly string[] } => {
+  const names = new Set<string>();
+  for (const doc of docs) {
+    const source = doc.source as {
+      host?: { name?: unknown; hostname?: unknown };
+      user?: { name?: unknown };
+    };
+    for (const value of [source.host?.name, source.host?.hostname, source.user?.name]) {
+      if (typeof value === 'string' && value.length > 0) {
+        names.add(value);
+      }
+    }
+  }
+  const replacements = [...names]
+    .map((name) => [name, `${name}-${runMarker}`] as const)
+    .sort(([a], [b]) => b.length - a.length);
+  const rewritten = docs.map((doc) => {
+    let encoded = JSON.stringify(doc.source);
+    for (const [name, runOwned] of replacements) {
+      encoded = encoded.split(name).join(runOwned);
+    }
+    return { ...doc, source: JSON.parse(encoded) };
+  });
+  return { docs: rewritten, entityNames: replacements.map(([, runOwned]) => runOwned) };
+};
+
 export const seedAttackScenario = async (
   esClient: EsClient,
   api: AlertZeroApi,
@@ -42,6 +86,16 @@ export const seedAttackScenario = async (
     .toString(36)
     .slice(2, 8)}`;
   const plan = buildAd2SeedPlan({ scenarioKey, runMarker, baseTime: new Date(), agentIdByHost });
+  const { docs: scenarioDocs, entityNames } = runOwnEntityNames(
+    [...plan.alerts, ...plan.rawEvents],
+    runMarker
+  );
+  const alerts = scenarioDocs.filter((doc): doc is Ad2IndexedAlert =>
+    plan.alerts.some((alert) => alert.id === doc.id)
+  );
+  const rawEvents = scenarioDocs.filter((doc): doc is Ad2IndexedRawEvent =>
+    plan.rawEvents.some((event) => event.id === doc.id)
+  );
 
   // Creates the alerts index + mappings the seeded alerts are written into.
   ok(await api.public('POST', '/api/detection_engine/index'), 'create the detection alerts index');
@@ -87,9 +141,9 @@ export const seedAttackScenario = async (
   };
 
   try {
-    await bulk(plan.alerts, 'index');
+    await bulk(alerts, 'index');
     // Raw endpoint events live in data streams, which only accept `create`.
-    await bulk(plan.rawEvents, 'create');
+    await bulk(rawEvents, 'create');
   } catch (error) {
     // A failed bulk can still have written some documents (the raw-events bulk can fail after
     // every alert already landed). Throwing here without a rollback would leave this function's
@@ -102,6 +156,7 @@ export const seedAttackScenario = async (
   return {
     runMarker,
     alertIds: getAd2ScenarioAlertIds(scenarioKey, 'clean', runMarker),
+    entityNames,
     cleanup: removeSeeded,
   };
 };
@@ -350,25 +405,55 @@ export const waitForWorkflowExecution = async (
   }
 };
 
+const EXECUTIONS_PAGE_SIZE = 100;
+// The route rejects `page * size` past the 10k ES result window.
+const EXECUTIONS_MAX_PAGE = 100;
+
 // Newest first, and without the index's step-run docs, so a new execution is on page 1 even
 // past ~100 matching docs. Without a sort the query emits no sort and the order is arbitrary,
 // which makes waitForNewExecution time out. The per-workflow route only accepts createdAt /
 // finishedAt as sort fields, so "newest" means the latest createdAt here.
-export const listExecutions = async (
+const listExecutionPage = async (
   api: AlertZeroApi,
-  workflowId: string
+  workflowId: string,
+  page: number
 ): Promise<Array<{ id: string; status: string }>> =>
   ok(
     await api.public<{ results: Array<{ id: string; status: string }> }>(
       'GET',
       `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions` +
-        `?size=100&sortField=createdAt&sortOrder=desc&omitStepRuns=true`
+        `?size=${EXECUTIONS_PAGE_SIZE}&page=${page}&sortField=createdAt&sortOrder=desc&omitStepRuns=true`
     ),
     `list executions of ${workflowId}`
   ).results.map((run) => ({ id: run.id, status: run.status }));
 
-export const listExecutionIds = async (api: AlertZeroApi, workflowId: string): Promise<string[]> =>
-  (await listExecutions(api, workflowId)).map((run) => run.id);
+/** The newest page only: where a run started after the caller's snapshot shows up. */
+export const listExecutions = (
+  api: AlertZeroApi,
+  workflowId: string
+): Promise<Array<{ id: string; status: string }>> => listExecutionPage(api, workflowId, 1);
+
+/**
+ * Every execution id of the workflow, paged until a short page. This is the baseline teardown
+ * compares against, so a truncated read would make an older in-flight run look like this
+ * suite's and get cancelled. Throws instead of truncating once the result window is exhausted.
+ */
+export const listExecutionIds = async (
+  api: AlertZeroApi,
+  workflowId: string
+): Promise<string[]> => {
+  const ids: string[] = [];
+  for (let page = 1; page <= EXECUTIONS_MAX_PAGE; page++) {
+    const runs = await listExecutionPage(api, workflowId, page);
+    ids.push(...runs.map((run) => run.id));
+    if (runs.length < EXECUTIONS_PAGE_SIZE) return ids;
+  }
+  throw new Error(
+    `${workflowId} has more than ${
+      EXECUTIONS_PAGE_SIZE * EXECUTIONS_MAX_PAGE
+    } executions; cannot baseline them`
+  );
+};
 
 export const isTerminalExecutionStatus = (status: string): boolean =>
   TERMINAL_EXECUTION_STATUSES.includes(status);
@@ -386,6 +471,7 @@ export const cancelNewExecutions = async (
   knownIds: readonly string[],
   { timeoutMs = DRAIN_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<void> => {
+  // Newest page only: runs started after the baseline sort first, so they are on page 1.
   const inFlightNew = async () =>
     (await listExecutions(api, workflowId)).filter(
       (run) => !knownIds.includes(run.id) && !isTerminalExecutionStatus(run.status)
@@ -430,7 +516,8 @@ export const waitForNewExecution = async (
 ): Promise<string> =>
   pollUntil(
     `a new execution of ${workflowId} (the enabled worker's immediate scheduled run)`,
-    async () => (await listExecutionIds(api, workflowId)).find((id) => !knownIds.includes(id)),
+    async () =>
+      (await listExecutions(api, workflowId)).find((run) => !knownIds.includes(run.id))?.id,
     { timeoutMs }
   );
 

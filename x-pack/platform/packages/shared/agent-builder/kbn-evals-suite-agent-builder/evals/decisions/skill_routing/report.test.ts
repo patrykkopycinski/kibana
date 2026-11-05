@@ -156,10 +156,35 @@ describe('path decisions', () => {
     expect(decision.failureMode).toMatch(/false abstain/);
   });
 
-  it('rejects a path that only ties the baseline', () => {
+  it('rejects a path that only abstains better but routes worse than the baseline', () => {
     const [decision] = decidePaths(
       report.arms.map((arm) =>
-        arm.arm === ARMS.jevCascade ? { ...arm, endToEnd: { ...arm.endToEnd, rate: 0.4 } } : arm
+        arm.arm === ARMS.jevCascade
+          ? {
+              ...arm,
+              endToEnd: { ...arm.endToEnd, rate: 0.7 },
+              routed: { ...arm.routed, top1: { ...arm.routed.top1, rate: 0.3 } },
+            }
+          : arm
+      )
+    );
+    expect(decision).toMatchObject({
+      adopted: false,
+      value: 0.7,
+      top1: 0.3,
+      baselineValue: 0.4,
+    });
+    expect(decision.failureMode).toMatch(/wrong skill/);
+  });
+
+  it('rejects a path that ties the baseline on top-1', () => {
+    const baselineTop1 = report.arms.find(({ arm }) => arm === ARMS.bm25)!.routed.top1
+      .rate as number;
+    const [decision] = decidePaths(
+      report.arms.map((arm) =>
+        arm.arm === ARMS.jevCascade
+          ? { ...arm, routed: { ...arm.routed, top1: { ...arm.routed.top1, rate: baselineTop1 } } }
+          : arm
       )
     );
     expect(decision.adopted).toBe(false);

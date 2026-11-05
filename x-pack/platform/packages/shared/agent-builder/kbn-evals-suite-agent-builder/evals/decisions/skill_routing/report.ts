@@ -90,6 +90,9 @@ export interface PathDecision {
   value: number;
   baseline: string;
   baselineValue: number;
+  /** Top-1 on routed rows; a path that only abstains better is not adopted (Rule 20). */
+  top1: number;
+  baselineTop1: number;
   failureMode?: string;
 }
 
@@ -343,18 +346,22 @@ const describeFailure = ({ errors, abstain, routed }: ArmMetrics): string => {
 };
 
 /**
- * Rule 20: every model path is either adopted (beats the lexical baseline end to end) or
- * recorded as rejected with its number, the baseline's, and how it fails.
+ * Rule 20: every model path is either adopted (beats the lexical baseline end to end
+ * AND on top-1 of the routed rows — a path that only abstains better while routing
+ * worse than the baseline is rejected) or recorded as rejected with its number, the
+ * baseline's, and how it fails.
  */
 export const decidePaths = (arms: readonly ArmMetrics[], baseline = ARMS.bm25): PathDecision[] => {
   const base = arms.find(({ arm }) => arm === baseline);
   const baselineValue = base?.endToEnd.rate;
-  if (baselineValue === undefined) return [];
+  const baselineTop1 = base?.routed.top1.rate;
+  if (baselineValue === undefined || baselineTop1 === undefined) return [];
   return arms
     .filter(({ kind }) => kind === 'model')
     .map((metrics) => {
       const value = metrics.endToEnd.rate ?? 0;
-      const adopted = value > baselineValue;
+      const top1 = metrics.routed.top1.rate ?? 0;
+      const adopted = value > baselineValue && top1 > baselineTop1;
       return {
         path: metrics.arm,
         adopted,
@@ -362,6 +369,8 @@ export const decidePaths = (arms: readonly ArmMetrics[], baseline = ARMS.bm25): 
         value,
         baseline,
         baselineValue,
+        top1,
+        baselineTop1,
         ...(adopted ? {} : { failureMode: describeFailure(metrics) }),
       };
     });
@@ -376,12 +385,22 @@ export const assertDecisions = (report: ViewReport): void => {
     if (arm.endToEnd.rate !== decision.value || base.endToEnd.rate !== decision.baselineValue) {
       throw new Error(`[${report.view}] decision ${decision.path} does not match its arms`);
     }
-    if (!decision.adopted && !(decision.value <= decision.baselineValue)) {
+    if (arm.routed.top1.rate !== decision.top1 || base.routed.top1.rate !== decision.baselineTop1) {
+      throw new Error(`[${report.view}] decision ${decision.path} top-1 does not match its arms`);
+    }
+    if (
+      !decision.adopted &&
+      decision.value > decision.baselineValue &&
+      decision.top1 > decision.baselineTop1
+    ) {
       throw new Error(`[${report.view}] ${decision.path} is rejected but beats the baseline`);
     }
-    if (decision.adopted && !(decision.value > decision.baselineValue)) {
+    if (
+      decision.adopted &&
+      !(decision.value > decision.baselineValue && decision.top1 > decision.baselineTop1)
+    ) {
       throw new Error(
-        `[${report.view}] ${decision.path} is adopted but does not beat the baseline`
+        `[${report.view}] ${decision.path} is adopted but does not beat the baseline on both metrics`
       );
     }
   }
@@ -574,13 +593,15 @@ export const renderViewMarkdown = (report: ViewReport): string => {
         )} |`
     ),
     '',
-    '### Path decisions (baseline: bm25, end-to-end)',
+    '### Path decisions (baseline: bm25, end-to-end and top-1)',
     '',
-    '| path | adopted | value | baseline | failure mode |',
-    '|---|---|---|---|---|',
+    '| path | adopted | value | baseline | top-1 | baseline top-1 | failure mode |',
+    '|---|---|---|---|---|---|---|',
     ...decisions.map(
-      ({ path, adopted, value, baselineValue, failureMode }) =>
-        `| ${path} | ${adopted} | ${pct(value)} | ${pct(baselineValue)} | ${failureMode ?? ''} |`
+      ({ path, adopted, value, baselineValue, top1, baselineTop1, failureMode }) =>
+        `| ${path} | ${adopted} | ${pct(value)} | ${pct(baselineValue)} | ${pct(top1)} | ${pct(
+          baselineTop1
+        )} | ${failureMode ?? ''} |`
     ),
     '',
   ].join('\n');

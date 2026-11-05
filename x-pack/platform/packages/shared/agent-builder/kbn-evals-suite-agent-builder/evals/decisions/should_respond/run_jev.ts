@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import {
+  SHOULD_RESPOND_QUESTION,
+  shouldRespondQuestions,
+} from '@kbn/agent-builder-plugin/server/services/execution/auto_trigger/build_trigger_decision_input';
+import type { JevClient, JevQuestion } from '../lib/jev_client';
+import { createJevClient, jevCostUsd, jevState } from '../lib/jev_client';
+import { loadShouldRespondExamples } from './dataset';
+import type { ArmPrediction, ReportItem } from './report';
+import { buildShouldRespondReport, renderShouldRespondMarkdown } from './report';
+
+/**
+ * Runs the Jev arm of the should_respond eval directly against TypeSafe's API, plus the
+ * always/never constants. No Kibana stack is needed. The fast-model arm runs through the
+ * evals spec instead, because it needs an EIS connector.
+ *
+ *   JEV_ENABLED=1 JEV_ENABLED_PATHS=AB-SHOULD-RESPOND JEV_CAPTURE_DIR=<outside repo> \
+ *   TYPESAFE_API_KEY=... SHOULD_RESPOND_OUT=<dir> node scripts/run_should_respond_jev.js
+ */
+
+export const SHOULD_RESPOND_PATH_ID = 'AB-SHOULD-RESPOND';
+
+/** The plugin's predicate question in Jev's wire format (predicate -> noul). */
+export const toJevQuestions = (): Record<string, JevQuestion> =>
+  Object.fromEntries(
+    Object.entries(shouldRespondQuestions).map(([name, question]) => {
+      if (question.type !== 'predicate') {
+        throw new Error(`[${name}] is a ${question.type} question; this eval expects a predicate`);
+      }
+      return [name, { type: 'noul', instructions: question.instructions }];
+    })
+  );
+
+export const runJevArm = async (
+  client: JevClient,
+  examples: ReturnType<typeof loadShouldRespondExamples>
+): Promise<ArmPrediction[]> => {
+  const questions = toJevQuestions();
+  return Promise.all(
+    examples.map(async ({ input, metadata }) => {
+      const result = await client.ask(input.state, questions, metadata.id);
+      const answer = result.answers[SHOULD_RESPOND_QUESTION];
+      if (answer.type !== 'noul') throw new Error(`[${metadata.id}] expected a noul answer`);
+      return {
+        id: metadata.id,
+        probability: answer.noul,
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
+        latencyMs: result.latencyMs,
+        costUsd: jevCostUsd(result.inputTokens),
+        servedModel: result.model,
+      };
+    })
+  );
+};
+
+const constantArm = (items: readonly ReportItem[], probability: number): ArmPrediction[] =>
+  items.map(({ id }) => ({
+    id,
+    probability,
+    inputTokens: 0,
+    outputTokens: 0,
+    latencyMs: 0,
+    costUsd: 0,
+  }));
+
+export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> => {
+  const { enabled, reason } = jevState(SHOULD_RESPOND_PATH_ID, env);
+  if (!enabled) {
+    throw new Error(`Jev is off (${reason}); refusing to run. No request was made.`);
+  }
+  const outDir = env.SHOULD_RESPOND_OUT;
+  if (!outDir) throw new Error('SHOULD_RESPOND_OUT is required');
+
+  const examples = loadShouldRespondExamples();
+  const items: ReportItem[] = examples.map(({ output, metadata }) => ({
+    id: metadata.id,
+    label: output.shouldRespond,
+    split: metadata.split,
+    ambiguous: metadata.ambiguous,
+  }));
+
+  const client = createJevClient({ pathId: SHOULD_RESPOND_PATH_ID, env });
+  const started = new Date();
+  const jev = await runJevArm(client, examples);
+
+  const armPredictions = {
+    [`jev (${client.model})`]: jev,
+    'always-respond': constantArm(items, 1),
+    'never-respond': constantArm(items, 0),
+  };
+  const report = buildShouldRespondReport(items, armPredictions);
+  const servedModels = [...new Set(jev.map(({ servedModel }) => servedModel ?? 'unknown'))];
+
+  fs.mkdirSync(outDir, { recursive: true });
+  const stamp = started.toISOString().replace(/[:.]/g, '-');
+  fs.writeFileSync(
+    path.join(outDir, `should_respond_predictions_${stamp}.json`),
+    JSON.stringify({ items, armPredictions }, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(outDir, `should_respond_report_${stamp}.json`),
+    JSON.stringify(report, null, 2)
+  );
+  const markdown = renderShouldRespondMarkdown(report, {
+    title: 'Agent Builder auto-trigger: should_respond (Jev direct API)',
+    provenance: [
+      `run started ${started.toISOString()}, ${examples.length} items, 1 repetition`,
+      `requested ${client.model}, served ${servedModels.join(
+        ', '
+      )}, via TypeSafe direct API (personal key, not EIS-only)`,
+      'input built by the production buildTriggerDecisionInput, question = shouldRespondQuestions',
+      'synthetic dataset; noise band for Jev run-to-run is about +/-0.05, re-run before trusting small deltas',
+    ],
+  });
+  fs.writeFileSync(path.join(outDir, `should_respond_report_${stamp}.md`), markdown);
+  process.stdout.write(`${markdown}\n`);
+};

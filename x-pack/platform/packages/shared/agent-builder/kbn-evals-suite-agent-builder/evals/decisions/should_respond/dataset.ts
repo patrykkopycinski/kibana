@@ -23,6 +23,8 @@ export interface ShouldRespondItem {
   id: string;
   category: string;
   agent: AgentKey;
+  /** Replaces the built-in profile for this item, e.g. a room-appropriate agent. */
+  agentOverride?: { name: string; description: string };
   /** `[author, text]`; author `AGENT` is a reply from the agent under test. */
   history: Array<[string, string]>;
   author: string;
@@ -65,10 +67,23 @@ export const SPLIT_SEED = 20261105;
 export const TEST_FRACTION = 0.4;
 const DATASET_FILES = ['positives.json', 'negatives.json', 'borderline.json'];
 
+/**
+ * External dataset override: `SHOULD_RESPOND_DATASET` points at a directory with the
+ * same JSON shape as the built-in files. Used for unauthored datasets (e.g. public IRC
+ * logs) that must not be committed. The same validation applies as to built-in data.
+ */
 export const loadShouldRespondItems = (
-  dir = path.join(__dirname, 'dataset')
+  dir = process.env.SHOULD_RESPOND_DATASET ?? path.join(__dirname, 'dataset')
 ): ShouldRespondItem[] => {
-  const items = DATASET_FILES.flatMap(
+  const files =
+    dir === path.join(__dirname, 'dataset')
+      ? DATASET_FILES
+      : fs
+          .readdirSync(dir)
+          .filter((file) => file.endsWith('.json'))
+          .sort();
+  if (files.length === 0) throw new Error(`no dataset files in [${dir}]`);
+  const items = files.flatMap(
     (file) => JSON.parse(fs.readFileSync(path.join(dir, file), 'utf-8')) as ShouldRespondItem[]
   );
   const seen = new Set<string>();
@@ -137,7 +152,7 @@ const toEvents = (item: ShouldRespondItem): TimelineEvent[] =>
 export const toDecisionState = (item: ShouldRespondItem): string =>
   buildTriggerDecisionInput({
     events: toEvents(item),
-    agent: AGENT_PROFILES[item.agent],
+    agent: item.agentOverride ?? AGENT_PROFILES[item.agent],
     message: {
       text: item.text,
       hasAttachments: item.hasAttachments ?? false,

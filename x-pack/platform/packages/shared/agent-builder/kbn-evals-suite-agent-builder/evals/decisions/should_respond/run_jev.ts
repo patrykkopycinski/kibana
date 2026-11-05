@@ -118,7 +118,11 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
         ', '
       )}, via TypeSafe direct API (personal key, not EIS-only)`,
       'input built by the production buildTriggerDecisionInput, question = shouldRespondQuestions',
-      'synthetic dataset; noise band for Jev run-to-run is about +/-0.05, re-run before trusting small deltas',
+      `dataset: ${
+        process.env.SHOULD_RESPOND_DATASET
+          ? `external [${process.env.SHOULD_RESPOND_DATASET}] (unauthored)`
+          : 'built-in synthetic'
+      }; noise band for Jev run-to-run is about +/-0.05, re-run before trusting small deltas`,
     ],
   });
   fs.writeFileSync(path.join(outDir, `should_respond_report_${stamp}.md`), markdown);

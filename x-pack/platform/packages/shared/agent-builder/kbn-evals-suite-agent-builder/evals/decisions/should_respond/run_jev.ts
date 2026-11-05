@@ -39,11 +39,23 @@ export const toJevQuestions = (): Record<string, JevQuestion> =>
     })
   );
 
+/**
+ * Ablation arm: asks Jev to predict whether a human will answer the message, which is
+ * what the IRC-derived labels measure, rather than whether the message is directed at
+ * the agent (the production question).
+ */
+export const HUMAN_WILL_ANSWER_INSTRUCTIONS =
+  'This is a shared conversation between people and an AI agent. Predict whether a person other than the author will answer the new message, judging from who is present, whether someone is already engaged with the author, and how the conversation is flowing. Answer true when a person is likely to reply to the author. Answer false when the message is likely to go unanswered by people.';
+
+/** Ablation arm: the compound product decision, matching the IRC-derived labels. */
+export const COMPOUND_INSTRUCTIONS =
+  'This is a shared conversation between people and an AI agent. Decide whether the AI agent should respond to the new message. Answer true when the message asks for help or information that no person in the conversation is likely to provide, so the agent is the best respondent. Answer false when a person is already answering the author, or when the message does not ask the agent for anything.';
+
 export const runJevArm = async (
   client: JevClient,
-  examples: ReturnType<typeof loadShouldRespondExamples>
+  examples: ReturnType<typeof loadShouldRespondExamples>,
+  questions: Record<string, JevQuestion> = toJevQuestions()
 ): Promise<ArmPrediction[]> => {
-  const questions = toJevQuestions();
   return Promise.all(
     examples.map(async ({ input, metadata }) => {
       const result = await client.ask(input.state, questions, metadata.id);
@@ -90,15 +102,43 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
 
   const client = createJevClient({ pathId: SHOULD_RESPOND_PATH_ID, env });
   const started = new Date();
-  const jev = await runJevArm(client, examples);
 
-  const armPredictions = {
-    [`jev (${client.model})`]: jev,
+  /** Production question plus ablation arms, one batched request per item per arm. */
+  const questionSets: Array<{ key: string; questions: Record<string, JevQuestion> }> = [
+    { key: 'jev (production shouldRespondQuestions)', questions: toJevQuestions() },
+    {
+      key: 'jev (human-will-answer framing)',
+      questions: {
+        [SHOULD_RESPOND_QUESTION]: {
+          type: 'noul',
+          instructions: HUMAN_WILL_ANSWER_INSTRUCTIONS,
+        },
+      },
+    },
+    {
+      key: 'jev (compound product framing)',
+      questions: {
+        [SHOULD_RESPOND_QUESTION]: {
+          type: 'noul',
+          instructions: COMPOUND_INSTRUCTIONS,
+        },
+      },
+    },
+  ];
+
+  const armPredictions: Record<string, ArmPrediction[]> = {
     'always-respond': constantArm(items, 1),
     'never-respond': constantArm(items, 0),
   };
+  for (const { key, questions } of questionSets) {
+    armPredictions[key] = await runJevArm(client, examples, questions);
+  }
   const report = buildShouldRespondReport(items, armPredictions);
-  const servedModels = [...new Set(jev.map(({ servedModel }) => servedModel ?? 'unknown'))];
+  const servedModels = [
+    ...new Set(
+      questionSets.flatMap(({ key }) => armPredictions[key].map((p) => p.servedModel ?? 'unknown'))
+    ),
+  ];
 
   fs.mkdirSync(outDir, { recursive: true });
   const stamp = started.toISOString().replace(/[:.]/g, '-');
@@ -117,7 +157,9 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
       `requested ${client.model}, served ${servedModels.join(
         ', '
       )}, via TypeSafe direct API (personal key, not EIS-only)`,
-      'input built by the production buildTriggerDecisionInput, question = shouldRespondQuestions',
+      'input built by the production buildTriggerDecisionInput; three Jev arms share it: ' +
+        'the production shouldRespondQuestions, a human-will-answer framing, and a compound ' +
+        'product framing',
       `dataset: ${
         process.env.SHOULD_RESPOND_DATASET
           ? `external [${process.env.SHOULD_RESPOND_DATASET}] (unauthored)`

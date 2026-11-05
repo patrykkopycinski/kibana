@@ -68,6 +68,13 @@ describe('should_respond report', () => {
     expect(getArm('never').testAtFitted.accuracy).toBeCloseTo(2 / 3);
   });
 
+  it('computes test AUC for scored arms only, Rule 17', () => {
+    // Test items: d=true @0.3, e/f=false @0.1 -> perfect ordering, AUC 1.
+    expect(getArm('model').testAuc).toBeCloseTo(1);
+    expect(getArm('always').testAuc).toBeUndefined();
+    expect(getArm('never').testAuc).toBeUndefined();
+  });
+
   it('reports the train-majority control and every pairwise comparison', () => {
     expect(report.majorityControl.label).toBe(false);
     expect(report.comparisons).toHaveLength(3);
@@ -92,5 +99,7 @@ describe('should_respond report', () => {
     expect(markdown).toContain('| model | 0.30 | 3 | 3 |');
     expect(markdown).toContain('| always | constant |');
     expect(markdown).toContain('## Paired comparisons');
+    expect(markdown).toContain('test AUC');
+    expect(markdown).toContain('| model | 0.30 | 3 | 3 | 100.0%');
   });
 });

@@ -6,7 +6,14 @@
  */
 
 import type { BinaryMetrics, McNemarResult, SweepRow } from '../lib/stats';
-import { binaryMetrics, mcnemar, percentile, pickThreshold, thresholdSweep } from '../lib/stats';
+import {
+  binaryMetrics,
+  mcnemar,
+  percentile,
+  pickThreshold,
+  rocAuc,
+  thresholdSweep,
+} from '../lib/stats';
 import type { Split } from './dataset';
 
 /** The shipped `agentBuilder.decisionModel.triggerThreshold` default. */
@@ -39,6 +46,8 @@ export interface ArmReport {
   trainSweep: SweepRow[];
   testAtDefault: BinaryMetrics;
   testAtFitted: BinaryMetrics;
+  /** Rule 17: separation independent of any threshold. Present for scored arms. */
+  testAuc?: number;
   ambiguousAtFitted?: BinaryMetrics;
   usage: {
     calls: number;
@@ -109,6 +118,12 @@ export const buildArmReport = (
     probabilities.map((probability) => probability >= threshold);
 
   const latencies = predictions.map(({ latencyMs }) => latencyMs).filter((ms) => ms > 0);
+  const testAuc = fitted
+    ? rocAuc(
+        test.probabilities.filter((_, i) => test.labels[i]),
+        test.probabilities.filter((_, i) => !test.labels[i])
+      )
+    : undefined;
   const totals = predictions.reduce(
     (sum, { inputTokens, outputTokens, costUsd }) => ({
       inputTokens: sum.inputTokens + inputTokens,
@@ -126,6 +141,7 @@ export const buildArmReport = (
     trainSweep,
     testAtDefault: binaryMetrics(at(DEFAULT_TRIGGER_THRESHOLD, test.probabilities), test.labels),
     testAtFitted: binaryMetrics(at(fittedThreshold, test.probabilities), test.labels),
+    ...(testAuc !== undefined ? { testAuc } : {}),
     ...(ambiguous.labels.length > 0
       ? {
           ambiguousAtFitted: binaryMetrics(
@@ -232,10 +248,10 @@ export const renderShouldRespondMarkdown = (
     '',
     '## Held-out test',
     '',
-    '| arm | threshold | n | pass | accuracy (95% Wilson) | balanced acc | recall | specificity | acc @0.5 | in tok/call | out tok/call | $/call | $ total | p50 ms | p95 ms |',
-    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
+    '| arm | threshold | n | pass | accuracy (95% Wilson) | balanced acc | recall | specificity | acc @0.5 | test AUC | in tok/call | out tok/call | $/call | $ total | p50 ms | p95 ms |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     ...arms
-      .map(({ arm, fitted, fittedThreshold, testAtFitted: m, testAtDefault, usage }) =>
+      .map(({ arm, fitted, fittedThreshold, testAtFitted: m, testAtDefault, testAuc, usage }) =>
         [
           arm,
           fitted ? fittedThreshold.toFixed(2) : 'constant',
@@ -246,6 +262,7 @@ export const renderShouldRespondMarkdown = (
           pct(m.recall),
           pct(m.specificity),
           pct(testAtDefault.accuracy),
+          testAuc === undefined ? 'n/a' : testAuc.toFixed(3),
           usage.inputTokensPerCall.toFixed(0),
           usage.outputTokensPerCall.toFixed(0),
           usage.costUsdPerCall.toFixed(6),

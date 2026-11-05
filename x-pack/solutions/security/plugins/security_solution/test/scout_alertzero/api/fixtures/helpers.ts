@@ -544,34 +544,66 @@ export const seedSharedReportWithEvidence = async ({
   spaceA: string;
   spaceB: string;
 }): Promise<void> => {
-  // `content.*` is `semantic_text`: on a cold stack this write waits for the ELSER deployment.
-  await esClient.index(
-    {
-      index: THREAT_REPORTS_INDEX,
-      id: reportId,
-      refresh: true,
-      document: {
-        space_id: '*',
-        source: { name: sourceName },
-        content: {
-          title: `Scout isolation ${reportId}`,
-          body_text: `Shared report for evidence projection ${reportId}`,
-        },
-        evidence: [
-          {
-            space_id: spaceA,
-            alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
-            alert_hits_total: 1,
-          },
-          {
-            space_id: spaceB,
-            alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
-            alert_hits_total: 10,
-          },
-        ],
-      },
+  const document = {
+    space_id: '*',
+    source: { name: sourceName },
+    content: {
+      title: `Scout isolation ${reportId}`,
+      body_text: `Shared report for evidence projection ${reportId}`,
     },
-    { requestTimeout: COLD_ELSER_REQUEST_TIMEOUT_MS }
+    evidence: [
+      {
+        space_id: spaceA,
+        alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
+        alert_hits_total: 1,
+      },
+      {
+        space_id: spaceB,
+        alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
+        alert_hits_total: 10,
+      },
+    ],
+  };
+
+  // `content.*` is `semantic_text`: on a cold stack this write waits for the ELSER deployment
+  // while the threat-reports index replica can still be unassigned, and ES then fails the write
+  // with inference/search-phase shard errors. Both clear on their own once the import finishes,
+  // so retry only those instead of failing the whole spec.
+  const maxAttempts = 3;
+  const retryDelayMs = 20_000;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await esClient.index(
+        {
+          index: THREAT_REPORTS_INDEX,
+          id: reportId,
+          refresh: true,
+          document,
+        },
+        { requestTimeout: COLD_ELSER_REQUEST_TIMEOUT_MS }
+      );
+      return;
+    } catch (error) {
+      if (attempt >= maxAttempts || !isTransientShardError(error)) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+    }
+  }
+};
+
+/**
+ * Matches the ES failure modes of a cold-boot race on `.kibana-threat-reports`:
+ * `inference_exception` wrapping `search_phase_execution_exception: all shards failed`
+ * with `no_shard_available_action_exception` root causes. Anything else (mapping,
+ * authz, timeout) must fail the spec, not be retried.
+ */
+const isTransientShardError = (error: unknown): boolean => {
+  const text = error instanceof Error ? `${error.message}` : JSON.stringify(error);
+  return (
+    text.includes('inference_exception') ||
+    text.includes('no_shard_available_action_exception') ||
+    (text.includes('all shards failed') && text.includes('search_phase_execution_exception'))
   );
 };
 

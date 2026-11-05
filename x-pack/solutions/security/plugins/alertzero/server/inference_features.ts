@@ -25,6 +25,10 @@ import {
  * Each list is the product-recommended default for its tier and spans at least two vendors, so a
  * tier that loses a vendor degrades to a comparable model from another one rather than collapsing
  * onto the cluster default.
+ *
+ * The last entry of each tier is served by the Serverless trial EIS catalog, which provisions none
+ * of the entries above it. Without it every tier resolves to the first connector in the catalog,
+ * so all three collapse onto one arbitrary model.
  */
 
 // The efficient tier takes the highest-volume and lowest-stakes calls we make, so every model here
@@ -33,6 +37,7 @@ const EFFICIENT_RECOMMENDED_ENDPOINTS = [
   '.openai-gpt-6-luna-chat_completion', // GPT-6 Luna, GA 2026-09-28
   '.google-gemini-3.5-flash-lite-chat_completion', // Gemini 3.5 Flash Lite, GA 2026-07-21
   '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
+  '.nvidia-nemotron-3.5-super-vl-chat_completion', // Nemotron 3.5 Super VL
 ];
 
 // The balanced tier covers calls where accuracy matters but which either run often (triaging every
@@ -42,6 +47,7 @@ const BALANCED_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5.5-sonnet-chat_completion', // Claude Sonnet 5.5, GA 2026-09-28
   '.openai-gpt-5.6-terra-chat_completion', // GPT-5.6 Terra
   '.google-gemini-3.6-flash-chat_completion', // Gemini 3.6 Flash
+  '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
 ];
 
 // Attack Discovery reads a whole batch of alerts and rule creation drafts an ES|QL rule from a gap
@@ -53,6 +59,7 @@ const FRONTIER_RECOMMENDED_ENDPOINTS = [
   '.openai-gpt-6-sol-chat_completion', // GPT-6 Sol, GA 2026-09-28
   '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
   '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
+  '.moonshot-kimi-k3-chat_completion', // Kimi K3
 ];
 
 /**

@@ -1,5 +1,5 @@
 {
-  "sha1": "eeee5c75f693da9e8a4750518a99b506763b21e2",
+  "sha1": "9411c5195db5a21b5a2ad7ae28eb146a8226905f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,6 +27,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
         "line": 322,
         "column": 53
+      }
+    },
+    {
+      "id": "9b2010df3aa164c-cdf09c8dabb3096",
+      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
+        "line": 329,
+        "column": 22
       }
     },
     {
@@ -364,6 +378,34 @@
       }
     },
     {
+      "id": "c7af268757bd0dd-b64a3774585f9ee",
+      "title": "AlertZero e2e - rule coverage completes a coverage sweep and reports its counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
+        "line": 52,
+        "column": 55
+      }
+    },
+    {
+      "id": "c7af268757bd0dd-f82aba917a6ea1b",
+      "title": "AlertZero e2e - rule coverage treats an absent AI index as empty, not as an error (elastic/kibana#296929)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
+        "line": 84,
+        "column": 3
+      }
+    },
+    {
       "id": "a69e576b394b908-a542a371a6543c7",
       "title": "Rule Tuning sweep - candidate rules starts a review only for enabled rules with enough unreviewed false positives at a high enough rate",
       "expectedStatus": "passed",
@@ -473,6 +515,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
         "line": 752,
         "column": 18
+      }
+    },
+    {
+      "id": "3ec923da60545bd-d9a9d259fe3fb56",
+      "title": "AlertZero e2e - rule tuning tunes a noisy rule with an exception scoped to the FP pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 849,
+        "column": 33
+      }
+    },
+    {
+      "id": "3ec923da60545bd-cce3f511e6a2f92",
+      "title": "AlertZero e2e - rule tuning keeps alerting on a true positive from another user after the tuning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 859,
+        "column": 7
+      }
+    },
+    {
+      "id": "3ec923da60545bd-c0f56325b21361d",
+      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 914,
+        "column": 27
       }
     },
     {

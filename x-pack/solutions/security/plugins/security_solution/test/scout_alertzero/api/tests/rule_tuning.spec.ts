@@ -324,8 +324,10 @@ const runTuningSweep = async (adminApi: AlertZeroApi): Promise<string> => {
 
 /**
  * Manual autonomy gates the diagnosis behind a "Review rule for tuning" entry proposal on the
- * rule's investigation. The proposal names the rule, and the run marker in that name keeps a
- * re-run from reading the entry proposal of an earlier run.
+ * rule's investigation. The title is that literal string (the proposal is raised before any
+ * diagnosis names it), while the comment carries the rule link — so the match keys on the title
+ * and the rule name. The run marker in that name keeps a re-run from reading the entry proposal
+ * of an earlier run.
  */
 const waitForEntryProposal = async (
   adminApi: AlertZeroApi,
@@ -338,7 +340,7 @@ const waitForEntryProposal = async (
     async () =>
       (await listTuningProposals(adminApi)).find(
         (proposal) =>
-          proposal.comment.includes(ENTRY_PROPOSAL_TITLE) &&
+          proposal.title === ENTRY_PROPOSAL_TITLE &&
           proposal.comment.includes(rule.runMarker) &&
           proposal.createdAt >= since
       ),

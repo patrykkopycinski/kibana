@@ -86,6 +86,156 @@ export const fetchTransport: JevTransport = {
   },
 };
 
+/**
+ * Transport for the Elasticsearch `decision` inference task, the production route the plugin
+ * uses (`POST /_inference/decision/<id>`, questions as `task_settings.questions`). The caller
+ * supplies the auth header, so the credential never appears in this file or in captures.
+ *
+ * The direct API and ES task use different wire formats for the same model. Questions are
+ * translated noul->predicate (folding `criteria` into the instructions, which the ES shape
+ * does not carry), choice `criteria`->`choices`. Answers are translated back predicate->noul
+ * and the ES probability lists (keyed by `value` for choices, `label` for score levels) are
+ * re-keyed into records. The captured `body.json` keeps the original ES body under
+ * `source_body` so the production wire format stays inspectable.
+ */
+export const createEisTransport = ({
+  url,
+  inferenceId,
+  authHeaders,
+}: {
+  url: string;
+  inferenceId: string;
+  authHeaders: Record<string, string>;
+}): JevTransport => {
+  const toEsQuestion = (question: JevQuestion): Record<string, unknown> => {
+    switch (question.type) {
+      case 'noul': {
+        const criteria = question.criteria
+          ? [
+              question.criteria.true && `Answer true when: ${question.criteria.true}`,
+              question.criteria.false && `Answer false when: ${question.criteria.false}`,
+            ]
+              .filter((line): line is string => Boolean(line))
+              .join(' ')
+          : '';
+        return {
+          type: 'predicate',
+          instructions: `${question.instructions}${criteria ? ` ${criteria}` : ''}`,
+        };
+      }
+      case 'choice':
+        return {
+          type: 'choice',
+          instructions: question.instructions,
+          choices: Object.fromEntries(
+            Object.entries(question.criteria).map(([value, description]) => [
+              value,
+              description ?? '',
+            ])
+          ),
+        };
+      case 'score':
+        return {
+          type: 'score',
+          instructions: question.instructions,
+          levels: question.criteria.map((label) => ({ label })),
+        };
+    }
+  };
+
+  const toJevAnswer = (raw: unknown): JevAnswer => {
+    const answer = raw as {
+      type?: string;
+      probability?: number;
+      choice?: string;
+      score?: number;
+      confidence?: number;
+      probabilities?: Array<{ value?: unknown; label?: unknown; probability: number }>;
+    };
+    switch (answer.type) {
+      case 'predicate':
+        return { type: 'noul', noul: answer.probability as number };
+      case 'choice':
+        return {
+          type: 'choice',
+          choice: answer.choice as string,
+          confidence: answer.confidence as number,
+          probabilities: Object.fromEntries(
+            (answer.probabilities ?? []).map(({ value, probability }) => [
+              String(value),
+              probability,
+            ])
+          ),
+        };
+      case 'score':
+        return {
+          type: 'score',
+          score: answer.score as number,
+          confidence: answer.confidence as number,
+          probabilities: Object.fromEntries(
+            (answer.probabilities ?? []).map(({ label, probability }) => [
+              String(label),
+              probability,
+            ])
+          ),
+        };
+      default:
+        throw new Error(`EIS decision answer has unknown type [${String(answer.type)}]`);
+    }
+  };
+
+  return {
+    async post(_directUrl, body, headers) {
+      const {
+        model: _model,
+        state,
+        questions,
+      } = JSON.parse(body) as {
+        model: string;
+        state: string;
+        questions: Record<string, JevQuestion>;
+      };
+      const response = await fetch(
+        `${url}/_inference/decision/${encodeURIComponent(inferenceId)}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            input: state,
+            task_settings: {
+              questions: Object.fromEntries(
+                Object.entries(questions).map(([name, q]) => [name, toEsQuestion(q)])
+              ),
+            },
+          }),
+          headers: { ...headers, ...authHeaders },
+          signal: AbortSignal.timeout(60_000),
+        }
+      );
+      const raw = await response.text();
+      let out = raw;
+      if (response.status === 200) {
+        const parsed = JSON.parse(raw) as { decision?: { answers?: Record<string, unknown> } };
+        out = JSON.stringify({
+          model: inferenceId,
+          answers: Object.fromEntries(
+            Object.entries(parsed.decision?.answers ?? {}).map(([name, answer]) => [
+              name,
+              toJevAnswer(answer),
+            ])
+          ),
+          usage: { input_tokens: 0, output_tokens: 0 },
+          source_body: parsed,
+        });
+      }
+      return {
+        status: response.status,
+        body: out,
+        headers: Object.fromEntries(response.headers.entries()),
+      };
+    },
+  };
+};
+
 export const keyFingerprint = (key: string): string =>
   key ? createHash('sha256').update(key).digest('hex').slice(0, 12) : 'none';
 
@@ -203,7 +353,11 @@ export const createJevClient = ({
     if (!enabled) throw new JevError('disabled', `Jev is off (${reason}); no request made`);
     const captureDir = resolveCaptureDir(env, repoRoot);
     const key = env.TYPESAFE_API_KEY ?? '';
-    if (!key) throw new JevError('disabled', 'TYPESAFE_API_KEY is not set; no request made');
+    // A custom transport owns its own auth (e.g. the EIS route); only the direct API needs
+    // the TypeSafe credential, and an accidental direct run without it must fail closed.
+    if (!key && transport === fetchTransport) {
+      throw new JevError('disabled', 'TYPESAFE_API_KEY is not set; no request made');
+    }
 
     const payload = JSON.stringify({ model, state, questions });
     await acquire();
@@ -214,10 +368,9 @@ export const createJevClient = ({
       while (attempts < maxAttempts) {
         attempts++;
         const started = performance.now();
-        response = await transport.post(JEV_ENDPOINT, payload, {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${key}`,
-        });
+        const directHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (key) directHeaders.Authorization = `Bearer ${key}`;
+        response = await transport.post(JEV_ENDPOINT, payload, directHeaders);
         latencyMs = performance.now() - started;
         if (!RETRYABLE.has(response.status) || attempts === maxAttempts) break;
         const retryAfter = Number(response.headers['retry-after']);
@@ -243,9 +396,9 @@ export const createJevClient = ({
             latencyMs: Math.round(latencyMs),
             requestId,
             requestedModel: model,
-            keyPresent: true,
+            keyPresent: Boolean(key),
             keyLength: key.length,
-            keyFingerprint: keyFingerprint(key),
+            keyFingerprint: key ? keyFingerprint(key) : 'none',
             capturedAt: new Date().toISOString(),
           },
           null,

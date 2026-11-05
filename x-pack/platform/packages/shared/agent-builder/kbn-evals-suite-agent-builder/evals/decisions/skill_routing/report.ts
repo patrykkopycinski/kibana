@@ -18,8 +18,9 @@ import {
   sweepThresholds,
 } from '../lib/stats';
 import type { CatalogSkill, RoutingView } from './catalog';
-import type { ArmKind, RoutedPrediction, RoutingItem } from './cascade';
-import { ARM_KINDS, ARMS, DEFAULT_GATE_THRESHOLD } from './cascade';
+import type { ArmKind, RoutedPrediction, RoutingItem, JevRaw, buildRoutingItems } from './cascade';
+import { ARMS, ARM_KINDS, canonicaliseJevRaw, DEFAULT_GATE_THRESHOLD, deriveArms } from './cascade';
+import { createBm25Ranker } from './bm25';
 
 export const TOP_K = [1, 3, 5] as const;
 /** The incumbent pre-selection surfaces at most this many skills (select_relevant_skills). */
@@ -94,6 +95,21 @@ export interface PathDecision {
   top1: number;
   baselineTop1: number;
   failureMode?: string;
+}
+
+export interface RouteParity {
+  view: RoutingView;
+  /** Items both routes answered; parity is only meaningful on the shared population. */
+  n: number;
+  /** Share of items where both routes clear the default gate threshold. */
+  gateAgreement: RateWithCi;
+  /** Share of items where both routes pick the same top skill. */
+  choiceAgreement: RateWithCi;
+  /** end-to-end accuracy of the jev cascade arm on the shared population, per route. */
+  direct: { endToEnd: RateWithCi; top1: RateWithCi };
+  eis: { endToEnd: RateWithCi; top1: RateWithCi };
+  /** Mean |gate_direct - gate_eis| where both routes returned a gate. */
+  meanGateDelta: number;
 }
 
 export interface ViewReport {
@@ -406,6 +422,79 @@ export const assertDecisions = (report: ViewReport): void => {
   }
 };
 
+/**
+ * Direct-API vs EIS-route parity on the shared population of one view: gate/choice agreement
+ * from the raw answers, plus each route's cascade arm scored through the identical pipeline
+ * (`deriveArms` + `buildArmMetrics`), so any delta is attributable to the route, not the
+ * scoring. Both runs must cover the same items; anything else fails loudly.
+ */
+export const buildRouteParity = ({
+  view,
+  items,
+  skills,
+  resolver,
+  direct,
+  eis,
+}: {
+  view: RoutingView;
+  items: readonly RoutingItem[];
+  skills: readonly CatalogSkill[];
+  resolver: ReturnType<typeof buildRoutingItems>['resolver'];
+  direct: readonly JevRaw[];
+  eis: readonly JevRaw[];
+}): RouteParity => {
+  const directById = new Map(direct.map((entry) => [entry.id, entry]));
+  const eisById = new Map(eis.map((entry) => [entry.id, entry]));
+  const sharedIds = items.map(({ id }) => id).filter((id) => directById.has(id) && eisById.has(id));
+  if (sharedIds.length === 0) {
+    throw new Error(`[${view}] direct and EIS runs share no items; parity is undefined`);
+  }
+  const sharedItems = items.filter(({ id }) => sharedIds.includes(id));
+  const scoreRoute = (raw: readonly JevRaw[]) => {
+    const { raw: canonical } = canonicaliseJevRaw(raw, resolver);
+    return buildArmMetrics(
+      ARMS.jevCascade,
+      sharedItems,
+      deriveArms({
+        items: sharedItems,
+        skills,
+        view,
+        bm25: createBm25Ranker(skills),
+        jev: canonical,
+      })[ARMS.jevCascade],
+      skills
+    );
+  };
+  const directMetrics = scoreRoute(direct);
+  const eisMetrics = scoreRoute(eis);
+  const gateAgree = sharedIds.filter(
+    (id) =>
+      (directById.get(id)?.gate ?? 0) >= DEFAULT_GATE_THRESHOLD ===
+      (eisById.get(id)?.gate ?? 0) >= DEFAULT_GATE_THRESHOLD
+  ).length;
+  const choiceAgree = sharedIds.filter(
+    (id) => (directById.get(id)?.choice ?? null) === (eisById.get(id)?.choice ?? null)
+  ).length;
+  const gateDeltas = sharedIds
+    .map((id) => Math.abs((directById.get(id)?.gate ?? 0) - (eisById.get(id)?.gate ?? 0)))
+    .filter((delta) => Number.isFinite(delta));
+  return {
+    view,
+    n: sharedIds.length,
+    gateAgreement: rateWithCi(gateAgree, sharedIds.length, `${view}.routeParity.gateAgreement`),
+    choiceAgreement: rateWithCi(
+      choiceAgree,
+      sharedIds.length,
+      `${view}.routeParity.choiceAgreement`
+    ),
+    direct: { endToEnd: directMetrics.endToEnd, top1: directMetrics.routed.top1 },
+    eis: { endToEnd: eisMetrics.endToEnd, top1: eisMetrics.routed.top1 },
+    meanGateDelta: gateDeltas.length
+      ? gateDeltas.reduce((sum, delta) => sum + delta, 0) / gateDeltas.length
+      : 0,
+  };
+};
+
 export const buildViewReport = ({
   view,
   items,
@@ -503,6 +592,22 @@ const pct = (value: number | undefined) =>
 const withCi = ({ k, n, rate, ci }: RateWithCi) =>
   `${k}/${n} ${pct(rate)} [${pct(ci.low)}, ${pct(ci.high)}]`;
 const ms = (value: number | undefined) => (value === undefined ? 'n/a' : `${Math.round(value)}`);
+
+export const renderRouteParityMarkdown = (parity: RouteParity): string =>
+  [
+    `### Route parity: ${parity.view}`,
+    '',
+    `Direct API vs EIS decision inference on ${parity.n} shared item(s), scored through the same pipeline.`,
+    '',
+    `| metric | direct | EIS |`,
+    `| --- | --- | --- |`,
+    `| end-to-end | ${withCi(parity.direct.endToEnd)} | ${withCi(parity.eis.endToEnd)} |`,
+    `| top-1 | ${withCi(parity.direct.top1)} | ${withCi(parity.eis.top1)} |`,
+    `| gate agreement | ${withCi(parity.gateAgreement)} | |`,
+    `| choice agreement | ${withCi(parity.choiceAgreement)} | |`,
+    `| mean gate delta | ${parity.meanGateDelta.toFixed(3)} | |`,
+    '',
+  ].join('\n');
 
 export const renderViewMarkdown = (report: ViewReport): string => {
   const { view, population, arms, gates, comparisons, decisions } = report;

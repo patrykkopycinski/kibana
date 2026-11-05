@@ -89,4 +89,64 @@ describe('run_jev', () => {
       /No request was made/
     );
   });
+
+  it('adds the EIS arm only when the route is fully configured, without a TypeSafe key', async () => {
+    const examples = loadShouldRespondExamples();
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jev-sr-out-'));
+    // Both transports stubbed by spying on fetch: the direct arm must never fire (no key),
+    // the EIS arm must fire once per example.
+    const originalFetch = globalThis.fetch;
+    let eisCalls = 0;
+    let directCalls = 0;
+    globalThis.fetch = (async (url) => {
+      const target = String(url);
+      if (target.includes('/_inference/decision/')) {
+        eisCalls++;
+        return new Response(
+          JSON.stringify({
+            decision: {
+              answers: { should_respond: { type: 'predicate', probability: 0.8 } },
+            },
+          }),
+          { status: 200 }
+        );
+      }
+      directCalls++;
+      return new Response('{}', { status: 200 });
+    }) as typeof fetch;
+    try {
+      await main({
+        JEV_ENABLED: '1',
+        JEV_ENABLED_PATHS: SHOULD_RESPOND_PATH_ID,
+        JEV_CAPTURE_DIR: captureDir,
+        SHOULD_RESPOND_OUT: outDir,
+        TYPESAFE_API_KEY: undefined,
+        JEV_EIS_URL: 'http://localhost:9220',
+        JEV_EIS_AUTH_HEADER: 'Basic abc',
+      });
+
+      expect(eisCalls).toBe(examples.length);
+      expect(directCalls).toBe(0);
+
+      const reports = fs.readdirSync(outDir).filter((f) => f.endsWith('.json'));
+      expect(reports).toHaveLength(2);
+      const report = JSON.parse(
+        fs.readFileSync(
+          path.join(outDir, reports.find((f) => f.startsWith('should_respond_report')) as string),
+          'utf-8'
+        )
+      );
+      const arms = report.arms.map(({ arm }: { arm: string }) => arm);
+      expect(arms).toContain('jev via EIS (production route)');
+      expect(arms).not.toContain('jev (production shouldRespondQuestions)');
+      const markdown = fs.readFileSync(
+        path.join(outDir, reports.find((f) => f.endsWith('.md')) as string),
+        'utf-8'
+      );
+      expect(markdown).toMatch(/EIS production route/);
+    } finally {
+      globalThis.fetch = originalFetch;
+      fs.rmSync(outDir, { recursive: true, force: true });
+    }
+  });
 });

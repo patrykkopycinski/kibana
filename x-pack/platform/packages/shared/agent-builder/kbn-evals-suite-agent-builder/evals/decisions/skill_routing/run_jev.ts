@@ -7,7 +7,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { createJevClient, jevState } from '../lib/jev_client';
+import { createEisTransport, createJevClient, jevState } from '../lib/jev_client';
 import type { JevClient } from '../lib/jev_client';
 import { createBm25Ranker } from './bm25';
 import type { Catalog, RoutingView } from './catalog';
@@ -21,11 +21,13 @@ import {
   SKILL_ROUTING_PATH_ID,
 } from './cascade';
 import { loadRoutingCases } from './dataset';
-import type { FrozenBaselines, ViewReport } from './report';
+import type { FrozenBaselines, RouteParity, ViewReport } from './report';
 import {
   assertFrozenBaselines,
+  buildRouteParity,
   buildViewReport,
   freezeBaselines,
+  renderRouteParityMarkdown,
   renderViewMarkdown,
 } from './report';
 
@@ -39,6 +41,10 @@ import {
  *   node scripts/run_skill_routing_jev.js --recompute <raw.json>   rebuilds from a frozen run
  *   JEV_ENABLED=1 JEV_ENABLED_PATHS=AB-SKILL-ROUTING JEV_CAPTURE_DIR=<outside repo> \
  *   TYPESAFE_API_KEY=... SKILL_ROUTING_OUT=<dir> node scripts/run_skill_routing_jev.js
+ *
+ * Set JEV_EIS_URL and JEV_EIS_AUTH_HEADER (optionally JEV_EIS_INFERENCE_ID) to repeat the
+ * run through the production EIS decision route and report per-view route parity. The raw
+ * file gains an `eis` field; `--recompute` picks it up automatically.
  */
 
 export const FROZEN_BASELINES_FILE = path.join(__dirname, 'frozen_baselines.json');
@@ -48,19 +54,25 @@ export interface FrozenRun {
   requestedModel: string;
   /** Raw Jev answers per view, before canonicalisation. */
   jev: Partial<Record<RoutingView, JevRaw[]>>;
+  /** Same run through the production EIS route, when `JEV_EIS_URL` is set. */
+  eis?: Partial<Record<RoutingView, JevRaw[]>>;
 }
 
 export interface RoutingRunReport {
   views: ViewReport[];
   datasetResolution: ReturnType<typeof loadRoutingCases>['resolution'];
   outputResolution: Partial<Record<RoutingView, OutputResolution>>;
+  /** Direct vs EIS-route parity per view; present only when the run carried an EIS arm. */
+  parity?: RouteParity[];
 }
 
 export const buildRoutingReport = (
   catalog: Catalog,
-  jev: FrozenRun['jev'] = {}
+  jev: FrozenRun['jev'] = {},
+  eis?: FrozenRun['eis']
 ): RoutingRunReport => {
   const outputResolution: RoutingRunReport['outputResolution'] = {};
+  let parity: RouteParity[] | undefined;
   const views = ROUTING_VIEWS.map((view) => {
     const { items, skills, resolver } = buildRoutingItems(catalog, view);
     const raw = jev[view];
@@ -83,7 +95,21 @@ export const buildRoutingReport = (
       }),
     });
   });
-  return { views, datasetResolution: loadRoutingCases(catalog).resolution, outputResolution };
+  if (eis) {
+    parity = ROUTING_VIEWS.flatMap((view) => {
+      const directRaw = jev[view];
+      const eisRaw = eis[view];
+      if (!directRaw || !eisRaw) return [];
+      const { items, skills, resolver } = buildRoutingItems(catalog, view);
+      return [buildRouteParity({ view, items, skills, resolver, direct: directRaw, eis: eisRaw })];
+    });
+  }
+  return {
+    views,
+    datasetResolution: loadRoutingCases(catalog).resolution,
+    outputResolution,
+    ...(parity && parity.length > 0 ? { parity } : {}),
+  };
 };
 
 export const runJevViews = async (
@@ -121,6 +147,8 @@ export const renderRoutingMarkdown = (
       ([view, r]) =>
         `- Jev output names (${view}): ${r.checked} checked, ${r.exact} exact, ${r.canonicalised.length} canonicalised, ${r.unresolved.length} unresolved`
     ),
+    ...(report.parity ? ['', '## Route parity (direct API vs EIS)', ''] : []),
+    ...(report.parity ?? []).flatMap((parity) => [renderRouteParityMarkdown(parity), '']),
     '',
     ...report.views.map(renderViewMarkdown),
   ].join('\n');
@@ -167,12 +195,48 @@ export const main = async (
     if (!env.SKILL_ROUTING_OUT) {
       throw new Error('SKILL_ROUTING_OUT is required for a live run so the raw answers are frozen');
     }
-    const client = createJevClient({ pathId: SKILL_ROUTING_PATH_ID, env });
+    // The direct route needs its own credential; an EIS-only run (no personal key) runs the
+    // production route in its place. Parity needs both routes, so it only renders when both ran.
+    const eisUrl = env.JEV_EIS_URL;
+    const eisAuth = env.JEV_EIS_AUTH_HEADER;
+    const eisConfigured = Boolean(eisUrl && eisAuth);
+    const createEisClient = () =>
+      createJevClient({
+        pathId: SKILL_ROUTING_PATH_ID,
+        env,
+        model: env.JEV_EIS_INFERENCE_ID ?? '.typesafe-jev-1.13_decision',
+        transport: createEisTransport({
+          url: eisUrl as string,
+          inferenceId: env.JEV_EIS_INFERENCE_ID ?? '.typesafe-jev-1.13_decision',
+          authHeaders: { Authorization: eisAuth as string },
+        }),
+      });
     const startedAt = new Date().toISOString();
-    run = { startedAt, requestedModel: client.model, jev: await runJevViews(client, catalog) };
+    if (!env.TYPESAFE_API_KEY) {
+      if (!eisConfigured) {
+        throw new Error(
+          'No Jev route is configured: set TYPESAFE_API_KEY for the direct API, or JEV_EIS_URL ' +
+            'and JEV_EIS_AUTH_HEADER for the EIS decision route. No request was made.'
+        );
+      }
+      const eisClient = createEisClient();
+      run = {
+        startedAt,
+        requestedModel: eisClient.model,
+        jev: await runJevViews(eisClient, catalog),
+      };
+    } else {
+      const client = createJevClient({ pathId: SKILL_ROUTING_PATH_ID, env });
+      run = { startedAt, requestedModel: client.model, jev: await runJevViews(client, catalog) };
+      if (eisConfigured) {
+        // Same items through the plugin's production route (ES decision inference), so any
+        // direct-vs-production delta is attributable to the route, not the model.
+        run.eis = await runJevViews(createEisClient(), catalog);
+      }
+    }
   }
 
-  const report = buildRoutingReport(catalog, run?.jev);
+  const report = buildRoutingReport(catalog, run?.jev, run?.eis);
   assertFrozenBaselines(report.views, frozen);
 
   const servedModels = [
@@ -182,14 +246,25 @@ export const main = async (
         .map(({ servedModel }) => servedModel ?? 'unknown')
     ),
   ];
+  const eisModels = [
+    ...new Set(
+      Object.values(run?.eis ?? {})
+        .flat()
+        .map(({ servedModel }) => servedModel ?? 'unknown')
+    ),
+  ];
   const markdown = renderRoutingMarkdown(report, {
     title: 'Agent Builder skill routing: Jev cascade vs lexical and oracle baselines',
     provenance: run
       ? [
           `run started ${run.startedAt}, 1 repetition, one request per item per view`,
-          `requested ${run.requestedModel}, served ${servedModels.join(
-            ', '
-          )}, via TypeSafe direct API`,
+          `requested ${run.requestedModel}, served ${servedModels.join(', ')}${
+            eisModels.length > 0
+              ? ` (direct) and ${eisModels.join(', ')} (EIS production route)`
+              : run.eis
+              ? ' via the EIS decision inference route'
+              : ' via TypeSafe direct API'
+          }`,
           'synthetic benchmark queries; Jev run-to-run noise is about +/-0.05',
           'zero-cost arms reproduce the frozen baselines',
         ]

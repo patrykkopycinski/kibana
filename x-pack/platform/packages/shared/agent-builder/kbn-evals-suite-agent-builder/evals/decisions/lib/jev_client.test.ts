@@ -8,8 +8,9 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import type { JevTransport, TransportResponse } from './jev_client';
+import type { JevQuestion, JevTransport, TransportResponse } from './jev_client';
 import {
+  createEisTransport,
   createJevClient,
   JEV_PINNED_MODEL,
   JevError,
@@ -67,7 +68,6 @@ describe('jev_client', () => {
     ['path not allowlisted', { JEV_ENABLED_PATHS: 'AB-SKILL-ROUTING' }],
     ['allowlist empty', { JEV_ENABLED_PATHS: '' }],
     ['no capture dir', { JEV_CAPTURE_DIR: undefined }],
-    ['no key', { TYPESAFE_API_KEY: undefined }],
   ])('makes zero requests when %s', async (_name, override) => {
     const { transport, calls } = recordingTransport();
     const client = createJevClient({
@@ -78,6 +78,33 @@ describe('jev_client', () => {
     });
     await expect(client.ask('state', QUESTIONS, 'x')).rejects.toMatchObject({ code: 'disabled' });
     expect(calls).toHaveLength(0);
+  });
+
+  it('fails closed without a key on the direct transport, before any request', async () => {
+    // The default transport is the real network one; the missing key must stop it first.
+    const client = createJevClient({
+      pathId: PATH_ID,
+      env: { ...enabledEnv(), TYPESAFE_API_KEY: undefined },
+      repoRoot,
+    });
+    await expect(client.ask('state', QUESTIONS, 'x')).rejects.toMatchObject({
+      code: 'disabled',
+      message: expect.stringContaining('TYPESAFE_API_KEY'),
+    });
+  });
+
+  it('runs without a TypeSafe key when a custom transport owns its own auth', async () => {
+    const { transport, calls } = recordingTransport();
+    const client = createJevClient({
+      pathId: PATH_ID,
+      transport,
+      env: { ...enabledEnv(), TYPESAFE_API_KEY: undefined },
+      repoRoot,
+    });
+    const result = await client.ask('state', QUESTIONS, 'x');
+    expect(calls).toHaveLength(1);
+    expect(result.answers.should_respond).toEqual({ type: 'noul', noul: 0.8 });
+    expect(calls[0].headers.Authorization).toBeUndefined();
   });
 
   it('refuses a capture dir inside the repository', () => {
@@ -179,5 +206,124 @@ describe('jev_client', () => {
     const client = createJevClient({ pathId: PATH_ID, transport, env: enabledEnv(), repoRoot });
     await Promise.all(Array.from({ length: 30 }, (_, i) => client.ask('s', QUESTIONS, `c${i}`)));
     expect(peak).toBe(MAX_JEV_CONCURRENCY);
+  });
+
+  describe('createEisTransport', () => {
+    const ROUTING_QUESTIONS: Record<string, JevQuestion> = {
+      any_skill_applies: {
+        type: 'noul',
+        instructions: 'The message asks for work that needs a specialised skill.',
+        criteria: {
+          true: 'A concrete task on Elastic data or features.',
+          false: 'Small talk or general knowledge.',
+        },
+      },
+      skill: {
+        type: 'choice',
+        instructions: 'Which skill should the agent load?',
+        criteria: { 'alert-analysis': 'Investigate security alerts', 'slack-lookup': null },
+      },
+    };
+
+    const eisBody = JSON.stringify({
+      decision: {
+        answers: {
+          any_skill_applies: { type: 'predicate', probability: 0.73 },
+          skill: {
+            type: 'choice',
+            choice: 'alert-analysis',
+            confidence: 0.6,
+            probabilities: [
+              { value: 'alert-analysis', probability: 0.8 },
+              { value: 'slack-lookup', probability: 0.2 },
+            ],
+          },
+        },
+      },
+    });
+
+    it('translates the direct payload to the ES decision wire and the answers back', async () => {
+      let posted!: { url: string; body: Record<string, unknown>; headers: Record<string, string> };
+      const transport = createEisTransport({
+        url: 'http://localhost:9220',
+        inferenceId: '.typesafe-jev-1.13_decision',
+        authHeaders: { Authorization: 'Basic abc' },
+      });
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async (url, init) => {
+        posted = {
+          url: String(url),
+          body: JSON.parse(String(init?.body)),
+          headers: init?.headers as Record<string, string>,
+        };
+        return new Response(eisBody, { status: 200 });
+      }) as typeof fetch;
+      try {
+        const response = await transport.post(
+          'https://api.typesafe.ai/v1/systemone',
+          JSON.stringify({ model: 'jev-1.13.0', state: 'the state', questions: ROUTING_QUESTIONS }),
+          { 'Content-Type': 'application/json', Authorization: 'Bearer direct-key' }
+        );
+
+        expect(posted.url).toBe(
+          'http://localhost:9220/_inference/decision/.typesafe-jev-1.13_decision'
+        );
+        expect(posted.body.input).toBe('the state');
+        const questions = (posted.body.task_settings as { questions: Record<string, unknown> })
+          .questions;
+        // predicate carries no criteria on the ES wire; they fold into the instructions.
+        expect(questions.any_skill_applies).toEqual({
+          type: 'predicate',
+          instructions: expect.stringContaining('Answer true when: A concrete task'),
+        });
+        expect(questions.skill).toEqual({
+          type: 'choice',
+          instructions: 'Which skill should the agent load?',
+          choices: { 'alert-analysis': 'Investigate security alerts', 'slack-lookup': '' },
+        });
+        // The ES auth wins over any direct-API header; the direct credential never leaks.
+        expect(posted.headers.Authorization).toBe('Basic abc');
+        expect(JSON.stringify(posted.body)).not.toContain('direct-key');
+
+        expect(response.status).toBe(200);
+        const parsed = JSON.parse(response.body);
+        expect(parsed.answers.any_skill_applies).toEqual({ type: 'noul', noul: 0.73 });
+        expect(parsed.answers.skill).toEqual({
+          type: 'choice',
+          choice: 'alert-analysis',
+          confidence: 0.6,
+          probabilities: { 'alert-analysis': 0.8, 'slack-lookup': 0.2 },
+        });
+        // The production wire body is preserved for captures.
+        expect(parsed.source_body.decision.answers.skill.choice).toBe('alert-analysis');
+        expect(parsed.model).toBe('.typesafe-jev-1.13_decision');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it('passes the ES error body through untranslated on failure', async () => {
+      const transport = createEisTransport({
+        url: 'http://localhost:9220',
+        inferenceId: 'missing',
+        authHeaders: {},
+      });
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () =>
+        new Response(JSON.stringify({ error: { type: 'resource_not_found_exception' } }), {
+          status: 404,
+        })) as typeof fetch;
+      try {
+        const response = await transport.post(
+          'https://api.typesafe.ai/v1/systemone',
+          JSON.stringify({ model: 'm', state: 's', questions: ROUTING_QUESTIONS }),
+          {}
+        );
+        expect(response.status).toBe(404);
+        expect(response.body).toContain('resource_not_found_exception');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
   });
 });

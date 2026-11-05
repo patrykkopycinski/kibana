@@ -12,7 +12,7 @@ import {
   shouldRespondQuestions,
 } from '@kbn/agent-builder-plugin/server/services/execution/auto_trigger/build_trigger_decision_input';
 import type { JevClient, JevQuestion } from '../lib/jev_client';
-import { createJevClient, jevCostUsd, jevState } from '../lib/jev_client';
+import { createEisTransport, createJevClient, jevCostUsd, jevState } from '../lib/jev_client';
 import { loadShouldRespondExamples } from './dataset';
 import type { ArmPrediction, ReportItem } from './report';
 import { buildShouldRespondReport, renderShouldRespondMarkdown } from './report';
@@ -100,10 +100,12 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
     ambiguous: metadata.ambiguous,
   }));
 
-  const client = createJevClient({ pathId: SHOULD_RESPOND_PATH_ID, env });
-  const started = new Date();
-
-  /** Production question plus ablation arms, one batched request per item per arm. */
+  /**
+   * Production question plus ablation arms, one batched request per item per arm. When
+   * `JEV_EIS_URL` is set, the production question also runs through the plugin's EIS route
+   * (`POST /_inference/decision/<id>`) so direct-API and production-path scores can differ
+   * only by route. The EIS auth header comes from the caller's env, never this file.
+   */
   const questionSets: Array<{ key: string; questions: Record<string, JevQuestion> }> = [
     { key: 'jev (production shouldRespondQuestions)', questions: toJevQuestions() },
     {
@@ -126,17 +128,53 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
     },
   ];
 
+  const eisUrl = env.JEV_EIS_URL;
+  const eisAuth = env.JEV_EIS_AUTH_HEADER;
+  const directClient = createJevClient({ pathId: SHOULD_RESPOND_PATH_ID, env });
+  const eisConfigured = Boolean(eisUrl && eisAuth);
+  // The direct API needs its own credential; an EIS-only run (no personal key) skips the
+  // direct arms instead of failing, but with neither route configured the run fails closed.
+  const directArms = env.TYPESAFE_API_KEY
+    ? questionSets.map(({ key, questions }) => ({ key, questions, client: directClient }))
+    : [];
+  if (directArms.length === 0 && !eisConfigured) {
+    throw new Error(
+      'No Jev route is configured: set TYPESAFE_API_KEY for the direct API, or JEV_EIS_URL ' +
+        'and JEV_EIS_AUTH_HEADER for the EIS decision route. No request was made.'
+    );
+  }
+
+  const started = new Date();
   const armPredictions: Record<string, ArmPrediction[]> = {
     'always-respond': constantArm(items, 1),
     'never-respond': constantArm(items, 0),
   };
-  for (const { key, questions } of questionSets) {
+  for (const { key, questions, client } of directArms) {
     armPredictions[key] = await runJevArm(client, examples, questions);
+  }
+  if (eisConfigured) {
+    const eisClient = createJevClient({
+      pathId: SHOULD_RESPOND_PATH_ID,
+      env,
+      model: env.JEV_EIS_INFERENCE_ID ?? '.typesafe-jev-1.13_decision',
+      transport: createEisTransport({
+        url: eisUrl as string,
+        inferenceId: env.JEV_EIS_INFERENCE_ID ?? '.typesafe-jev-1.13_decision',
+        authHeaders: { Authorization: eisAuth as string },
+      }),
+    });
+    armPredictions['jev via EIS (production route)'] = await runJevArm(
+      eisClient,
+      examples,
+      toJevQuestions()
+    );
   }
   const report = buildShouldRespondReport(items, armPredictions);
   const servedModels = [
     ...new Set(
-      questionSets.flatMap(({ key }) => armPredictions[key].map((p) => p.servedModel ?? 'unknown'))
+      Object.values(armPredictions).flatMap((predictions) =>
+        predictions.map((p) => p.servedModel ?? 'unknown')
+      )
     ),
   ];
 
@@ -151,16 +189,24 @@ export const main = async (env: NodeJS.ProcessEnv = process.env): Promise<void> 
     JSON.stringify(report, null, 2)
   );
   const markdown = renderShouldRespondMarkdown(report, {
-    title: 'Agent Builder auto-trigger: should_respond (Jev direct API)',
+    title: `Agent Builder auto-trigger: should_respond (Jev${
+      eisConfigured ? ', EIS production route' : ' direct API'
+    })`,
     provenance: [
       `run started ${started.toISOString()}, ${examples.length} items, 1 repetition`,
-      `requested ${client.model}, served ${servedModels.join(', ')}, via TypeSafe direct API`,
-      'input built by the production buildTriggerDecisionInput; three Jev arms share it: ' +
+      `served ${servedModels.join(', ')}${
+        directArms.length > 0
+          ? `, via TypeSafe direct API${
+              eisConfigured ? ' plus the EIS decision inference route' : ''
+            }`
+          : ', via the EIS decision inference route (direct arms skipped: no separate credential)'
+      }`,
+      'input built by the production buildTriggerDecisionInput; the Jev arms that ran share it: ' +
         'the production shouldRespondQuestions, a human-will-answer framing, and a compound ' +
         'product framing',
       `dataset: ${
-        process.env.SHOULD_RESPOND_DATASET
-          ? `external [${process.env.SHOULD_RESPOND_DATASET}] (unauthored)`
+        env.SHOULD_RESPOND_DATASET
+          ? `external [${env.SHOULD_RESPOND_DATASET}] (unauthored)`
           : 'built-in synthetic'
       }; noise band for Jev run-to-run is about +/-0.05, re-run before trusting small deltas`,
     ],

@@ -86,13 +86,46 @@ describe('skill routing run_jev', () => {
     const rawFile = path.join(tmp, 'raw.json');
     fs.writeFileSync(
       rawFile,
-      JSON.stringify({ startedAt: '2026-11-05T00:00:00.000Z', requestedModel: 'jev', jev })
+      JSON.stringify({
+        startedAt: '2026-11-05T00:00:00.000Z',
+        requestedModel: 'jev',
+        jev,
+        // Same answers through the EIS route: parity must be perfect on the shared population.
+        eis: jev,
+      })
     );
     await main(['--recompute', rawFile], { SKILL_ROUTING_OUT: path.join(tmp, 'out') });
     expect(fs.readdirSync(path.join(tmp, 'out')).sort()).toEqual([
       'skill_routing_report_2026-11-05T00-00-00-000Z.json',
       'skill_routing_report_2026-11-05T00-00-00-000Z.md',
     ]);
+    const parsed = JSON.parse(
+      fs.readFileSync(
+        path.join(tmp, 'out', 'skill_routing_report_2026-11-05T00-00-00-000Z.json'),
+        'utf-8'
+      )
+    );
+    expect(parsed.parity).toHaveLength(2);
+    for (const parity of parsed.parity) {
+      expect(parity.n).toBeGreaterThan(0);
+      expect(parity.gateAgreement.rate).toBe(1);
+      expect(parity.choiceAgreement.rate).toBe(1);
+      expect(parity.direct.endToEnd.rate).toBe(parity.eis.endToEnd.rate);
+    }
+    const markdown = fs.readFileSync(
+      path.join(tmp, 'out', 'skill_routing_report_2026-11-05T00-00-00-000Z.md'),
+      'utf-8'
+    );
+    expect(markdown).toMatch(/## Route parity \(direct API vs EIS\)/);
+    expect(markdown).toMatch(/### Route parity: security/);
+  });
+
+  it('reports no parity without an EIS arm', async () => {
+    const report = buildRoutingReport(loadCatalog(), {});
+    expect(report.parity).toBeUndefined();
+    expect(renderRoutingMarkdown(report, { title: 't', provenance: [] })).not.toMatch(
+      /Route parity/
+    );
   });
 
   it('runs offline with no request and asserts the frozen baselines', async () => {

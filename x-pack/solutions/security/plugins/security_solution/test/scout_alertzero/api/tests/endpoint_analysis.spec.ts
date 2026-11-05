@@ -51,6 +51,10 @@ import type { AlertZeroApi, InvestigationProposal, SeededScenario } from '../fix
 
 const WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
 const RUN_WORKFLOW_ID = testData.FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID;
+const GATE_WORKFLOW_IDS: string[] = [
+  testData.FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+  testData.FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+];
 /** The second host of the distinguishability case; the first is the positive flow's scenario. */
 const SECOND_SCENARIO_KEY = 'bits-mshta';
 
@@ -275,11 +279,15 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         await updateWorker(api, WORKER_ID, { enabled: false });
       }
     });
-    // Drain the sweep before the run workflow it dispatches: a sweep that is still live when
-    // the runs are drained could start a fresh run right after. The sort is stable, so
-    // everything but the run workflow keeps its snapshot order.
+    // Drain in dispatch order: the sweep, then the run workflow it dispatches, then the gates the
+    // run dispatches. A workflow that is still live when its dispatches are drained could start a
+    // fresh one right after. The sort is stable, so snapshots of the same rank keep their order.
+    const drainRank = (workflowId: string): number => {
+      if (workflowId === RUN_WORKFLOW_ID) return 1;
+      return GATE_WORKFLOW_IDS.includes(workflowId) ? 2 : 0;
+    };
     const drainOrder = [...executionSnapshots].sort(
-      (a, b) => Number(a.workflowId === RUN_WORKFLOW_ID) - Number(b.workflowId === RUN_WORKFLOW_ID)
+      (a, b) => drainRank(a.workflowId) - drainRank(b.workflowId)
     );
     for (const { workflowId, knownIds } of drainOrder) {
       await attempt(async () => {
@@ -362,6 +370,14 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       // correlates on this snapshot, and teardown drains whatever appeared after it.
       const knownRunExecutionIds = await listExecutionIds(adminApi, RUN_WORKFLOW_ID);
       executionSnapshots.push({ workflowId: RUN_WORKFLOW_ID, knownIds: knownRunExecutionIds });
+      // The gates the run dispatches (the proposal gate that parks on the analyst, then the close
+      // gate behind it) are drained too, or they can outlive the service account.
+      for (const gateWorkflowId of GATE_WORKFLOW_IDS) {
+        executionSnapshots.push({
+          workflowId: gateWorkflowId,
+          knownIds: await listExecutionIds(adminApi, gateWorkflowId),
+        });
+      }
 
       const context = await runEndpointAnalysis(
         adminApi,

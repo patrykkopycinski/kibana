@@ -1,5 +1,5 @@
 {
-  "sha1": "079440838515b2e68915e5334e95216ee266e338",
+  "sha1": "0e74528af35210920319ac0c694b169c233d5c0c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
-        "line": 285,
+        "line": 302,
         "column": 12
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
-        "line": 351,
+        "line": 360,
         "column": 10
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 105,
+        "line": 108,
         "column": 12
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 127,
+        "line": 130,
         "column": 12
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 144,
+        "line": 147,
         "column": 12
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 156,
+        "line": 159,
         "column": 12
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 174,
+        "line": 177,
         "column": 12
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 187,
+        "line": 190,
         "column": 12
       }
     },
@@ -137,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 198,
+        "line": 201,
         "column": 12
       }
     },
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 216,
+        "line": 219,
         "column": 12
       }
     },
@@ -164,7 +164,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -177,7 +177,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 12
       }
     },
@@ -527,7 +527,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 828,
+        "line": 829,
         "column": 10
       }
     },
@@ -541,7 +541,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 844,
+        "line": 845,
         "column": 10
       }
     },
@@ -555,7 +555,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 907,
+        "line": 908,
         "column": 10
       }
     },
@@ -625,7 +625,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 151,
+        "line": 166,
         "column": 10
       }
     },
@@ -639,7 +639,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 163,
+        "line": 178,
         "column": 10
       }
     },
@@ -653,7 +653,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 188,
+        "line": 203,
         "column": 10
       }
     },
@@ -667,7 +667,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 221,
+        "line": 236,
         "column": 10
       }
     },

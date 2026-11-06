@@ -8848,7 +8848,7 @@
                       },
                       "endpoint_policy_version": "1",
                       "id": "99aa77b3-9d50-45f3-a0a8-257b47e072f1",
-                      "name": "patrykkopycinski test policy",
+                      "name": "Detonate sandbox policy",
                       "version": "4"
                     }
                   }
@@ -8941,7 +8941,7 @@
                 },
                 "host": {
                   "architecture": "aarch64",
-                  "hostname": "patrykkopycinski-endpoint-default-9547",
+                  "hostname": "detonate-sandbox-linux-01",
                   "id": "eb63a0f27bba3d758f2721ec0f5470a6",
                   "ip": [
                     "127.0.0.1",
@@ -8953,7 +8953,7 @@
                   "mac": [
                     "52-54-00-ac-6d-3c"
                   ],
-                  "name": "patrykkopycinski-endpoint-default-9547",
+                  "name": "detonate-sandbox-linux-01",
                   "os": {
                     "Ext": {
                       "variant": "Ubuntu"
@@ -9281,7 +9281,7 @@
                       },
                       "endpoint_policy_version": "1",
                       "id": "99aa77b3-9d50-45f3-a0a8-257b47e072f1",
-                      "name": "patrykkopycinski test policy",
+                      "name": "Detonate sandbox policy",
                       "version": "4"
                     }
                   }
@@ -9373,7 +9373,7 @@
                 },
                 "host": {
                   "architecture": "aarch64",
-                  "hostname": "patrykkopycinski-endpoint-default-9547",
+                  "hostname": "detonate-sandbox-linux-01",
                   "id": "eb63a0f27bba3d758f2721ec0f5470a6",
                   "ip": [
                     "127.0.0.1",
@@ -9385,7 +9385,7 @@
                   "mac": [
                     "52-54-00-ac-6d-3c"
                   ],
-                  "name": "patrykkopycinski-endpoint-default-9547",
+                  "name": "detonate-sandbox-linux-01",
                   "os": {
                     "Ext": {
                       "variant": "Ubuntu"
@@ -9508,7 +9508,7 @@
                 "kibana.alert.status": "active",
                 "kibana.alert.workflow_status": "open",
                 "kibana.alert.depth": 1,
-                "kibana.alert.reason": "malware, intrusion_detection, file event with process ls, parent process sshd-session, file eicar.com, by ubuntu on patrykkopycinski-endpoint-default-9547 created high alert Malware Prevention Alert.",
+                "kibana.alert.reason": "malware, intrusion_detection, file event with process ls, parent process sshd-session, file eicar.com, by ubuntu on detonate-sandbox-linux-01 created high alert Malware Prevention Alert.",
                 "kibana.alert.severity": "high",
                 "kibana.alert.risk_score": 73,
                 "kibana.alert.rule.actions": [],
@@ -9743,7 +9743,7 @@
                       },
                       "endpoint_policy_version": "1",
                       "id": "99aa77b3-9d50-45f3-a0a8-257b47e072f1",
-                      "name": "patrykkopycinski test policy",
+                      "name": "Detonate sandbox policy",
                       "version": "4"
                     }
                   }
@@ -9836,7 +9836,7 @@
                 },
                 "host": {
                   "architecture": "aarch64",
-                  "hostname": "patrykkopycinski-endpoint-default-9547",
+                  "hostname": "detonate-sandbox-linux-01",
                   "id": "eb63a0f27bba3d758f2721ec0f5470a6",
                   "ip": [
                     "127.0.0.1",
@@ -9848,7 +9848,7 @@
                   "mac": [
                     "52-54-00-ac-6d-3c"
                   ],
-                  "name": "patrykkopycinski-endpoint-default-9547",
+                  "name": "detonate-sandbox-linux-01",
                   "os": {
                     "Ext": {
                       "variant": "Ubuntu"
@@ -10176,7 +10176,7 @@
                       },
                       "endpoint_policy_version": "1",
                       "id": "99aa77b3-9d50-45f3-a0a8-257b47e072f1",
-                      "name": "patrykkopycinski test policy",
+                      "name": "Detonate sandbox policy",
                       "version": "4"
                     }
                   }
@@ -10268,7 +10268,7 @@
                 },
                 "host": {
                   "architecture": "aarch64",
-                  "hostname": "patrykkopycinski-endpoint-default-9547",
+                  "hostname": "detonate-sandbox-linux-01",
                   "id": "eb63a0f27bba3d758f2721ec0f5470a6",
                   "ip": [
                     "127.0.0.1",
@@ -10280,7 +10280,7 @@
                   "mac": [
                     "52-54-00-ac-6d-3c"
                   ],
-                  "name": "patrykkopycinski-endpoint-default-9547",
+                  "name": "detonate-sandbox-linux-01",
                   "os": {
                     "Ext": {
                       "variant": "Ubuntu"
@@ -10403,7 +10403,7 @@
                 "kibana.alert.status": "active",
                 "kibana.alert.workflow_status": "open",
                 "kibana.alert.depth": 1,
-                "kibana.alert.reason": "malware, intrusion_detection, file event with process ls, parent process sshd-session, file eicar.com, by ubuntu on patrykkopycinski-endpoint-default-9547 created high alert Malware Prevention Alert.",
+                "kibana.alert.reason": "malware, intrusion_detection, file event with process ls, parent process sshd-session, file eicar.com, by ubuntu on detonate-sandbox-linux-01 created high alert Malware Prevention Alert.",
                 "kibana.alert.severity": "high",
                 "kibana.alert.risk_score": 73,
                 "kibana.alert.rule.actions": [],

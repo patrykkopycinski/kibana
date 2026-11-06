@@ -48,11 +48,45 @@ const arg = (name: string, fallback?: string): string => {
 // in production.
 const sha256Of = (seed: string): string => createHash('sha256').update(seed).digest('hex');
 
+const SANDBOX_HOST_NAME = 'detonate-sandbox-linux-01';
+const SANDBOX_POLICY_NAME = 'Detonate sandbox policy';
+
+interface RecordedAlertDoc {
+  host?: { name?: string; hostname?: string };
+  Endpoint?: { policy?: { applied?: { name?: string } } };
+}
+
+const alertDocsOf = (task: DetonateCorpusTask): RecordedAlertDoc[] =>
+  [
+    ...task.production_endpoint_alert_groups,
+    ...task.diagnostic_endpoint_alert_groups,
+    ...task.production_detection_alert_groups,
+  ].flatMap((group) => (group as { alert_docs?: RecordedAlertDoc[] }).alert_docs ?? []);
+
+// Recordings come from a lab endpoint whose host and policy names identify the
+// machine that captured them. They are replaced everywhere in the task,
+// including free-text fields such as `kibana.alert.reason`.
+const scrubLabIdentifiers = (task: DetonateCorpusTask): DetonateCorpusTask => {
+  const swaps = new Map<string, string>();
+  for (const doc of alertDocsOf(task)) {
+    for (const host of [doc.host?.name, doc.host?.hostname]) {
+      if (host) swaps.set(host, SANDBOX_HOST_NAME);
+    }
+    const policy = doc.Endpoint?.policy?.applied?.name;
+    if (policy) swaps.set(policy, SANDBOX_POLICY_NAME);
+  }
+  let json = JSON.stringify(task);
+  for (const [from, to] of swaps) {
+    json = json.split(JSON.stringify(from).slice(1, -1)).join(to);
+  }
+  return JSON.parse(json) as DetonateCorpusTask;
+};
+
 // Task documents carry the agent enrollment token, which must never reach the corpus.
 const recorded = (task: DetonateCorpusTask): DetonateCorpusTask => {
   const copy: DetonateCorpusTask & { agent_fleet_enrollment_token?: unknown } = { ...task };
   delete copy.agent_fleet_enrollment_token;
-  return copy;
+  return scrubLabIdentifiers(copy);
 };
 
 const knownGoodFilename = (i: number): string => {

@@ -16,7 +16,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d9f57d9786c0ae20049cfdd97a5d8dc2a1952edb148f6224e879589da4baf346",
+        "sample_hash": "1ef807fce80ec845876abb48f5cc42451b40a7caa589bd47e46862ba1da52173",
         "sample_filename": "kg-0000-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -45,7 +45,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3bcd190f8c16e4181d028651b7d9a0baec9d84535280321c4c8d5b15e383603e",
+        "sample_hash": "c5609a1c8615203273aafa5eae29ad05d108f6c9450af7f8c2c28d52dc475190",
         "sample_filename": "kg-0001-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -74,7 +74,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "57e490df2da20ae84a40ac21df61158ac02b982360c934ecaa0c9ce5324b310e",
+        "sample_hash": "fcdc7745d542a00672a3a6fbd3018a8278db6b40b59dccc2b9747c810195e4b1",
         "sample_filename": "kg-0002-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -103,7 +103,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "182ba1476bdd8ad01bb0c389e0496c720dbb568b0a8302d442aea24da83715f6",
+        "sample_hash": "d470ce8460e72d7f1083aade359e60867a2d8a302b669834f50126a254bd75d4",
         "sample_filename": "kg-0003-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -132,7 +132,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "42470f5ff7060168bd609aa1cdaf7c0a9852f6a3bd2c0b6c57456b652dac778e",
+        "sample_hash": "f3e340dec95b3086821811f6103cdec313496a4c6629f3b1cad6116e83348dac",
         "sample_filename": "kg-0004-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -161,7 +161,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0ccc8ac7c7fc7c504fbb3d09e974edf2c785600b08311454b0ce3bcdb61db776",
+        "sample_hash": "d7a11d6832ccd4d7ea738191ba177472fa32ca8bf1a90ea341a3cb3f2d39ef47",
         "sample_filename": "kg-0005-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -190,7 +190,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "43859907a56b969010b4a349aef8e03241001e4b69bade94356b520dedfe59b6",
+        "sample_hash": "74a674281ffad6567304599e20c3724df97e8e29f689de4f9a2199831e8ef703",
         "sample_filename": "kg-0006-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -219,7 +219,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8c1c1e8f9ad33198f4559bd17bf4fe3a893aa9d3f0609f9c0efa90956dceddbe",
+        "sample_hash": "6f7a6ddff21084a7e45b02acc157d1d13f7bbc5d2681f22f0507aa250286954e",
         "sample_filename": "kg-0007-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -248,7 +248,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "255f1367224092f083e081a9130900924413e0abe3e3a2f4610c786dc22d4216",
+        "sample_hash": "855a1c189a4a809ba58e20514636cb077ad42c3957e046a940bc25441eaab580",
         "sample_filename": "kg-0008-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -277,7 +277,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bd6885ef43230af804e94731cfaedb9a15ff19334a7600fc9e6943f5b5c1431e",
+        "sample_hash": "20715de2dfedf5dbcbff9bfd8e068890d5a15cf08df4a4f574c8bb65cfccce4d",
         "sample_filename": "kg-0009-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -306,7 +306,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "69b0684bc4980894972f5c0d554343b63cd4508f97cfc3989df88dd1c800503a",
+        "sample_hash": "762dd4e58ce9afe6f503689843c28b395a43a5443e10021bcf93e3f7e2e956e8",
         "sample_filename": "kg-0010-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -335,7 +335,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b120a9a391ffce6c79da3e65c34d5a8e4f0233e701e68b70fb95d229d5f22912",
+        "sample_hash": "0b9ecb3849a28b03dc2e3d841c85bbf98bf82315f5ffc13404acfbd5a7cb8809",
         "sample_filename": "kg-0011-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -364,7 +364,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c7b66f1b76ab0e6453c5b0dd5ffa3786e040335fae4be56879773ea1c8dae00a",
+        "sample_hash": "bf157e2930bb4fc023e8ee30d06a393f4f28f0560212ecd2262cc8c6520fee22",
         "sample_filename": "kg-0012-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -393,7 +393,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e3b7a87bfb4219c41634ee3dd28606e6f58ef4bf6ec5f8c8aaa7040106ccb76a",
+        "sample_hash": "cb481c361b7bdc82c36dbf39b69453aee3d9564df30c8b91eeef712d2ed54cd2",
         "sample_filename": "kg-0013-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -422,7 +422,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "482251733026253cf81494356be1ff5ee85e77b7986ebe40ba7543f93eeb29e2",
+        "sample_hash": "12228575ab010c7de0d4aa987ccd63bde52d7902cb50b3a05f4256fecb404e99",
         "sample_filename": "kg-0014-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -451,7 +451,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "52722afbbb64d44469de60bd5b4cb1660f01573f40ea9348747c568120c941ea",
+        "sample_hash": "e8f862dede90df59d7aabec66b802d138ed92c740019b42486a1dd2b4f67d027",
         "sample_filename": "kg-0015-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -480,7 +480,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "26553683f60b154c74461f45754db56e5254e8c781b37a50c74edb094e332bf2",
+        "sample_hash": "d9881516cdb59fdb3bf9013eb0430770867a721c392ccd3d661c57b7bb0a2eeb",
         "sample_filename": "kg-0016-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -509,7 +509,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3b4aaeb3ebe1de7ccc2ee9755522309e99c7c4f720806780046a8939affb4b22",
+        "sample_hash": "0fd4e40b4b0d50f3ff154c0bed9508082c848337bc1f118f8838d148ad81ab03",
         "sample_filename": "kg-0017-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -538,7 +538,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6372076be78d2db45b1a272d287bd4d6f168c7aff6a440b83fe730f154f9395a",
+        "sample_hash": "c4872d5f5b44cd4b661b86825c8be3ee8563afc9a5dcf7f7a6043bfbcb41d3b1",
         "sample_filename": "kg-0018-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -567,7 +567,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "640af3b3cc6e937c72050e7528aec59e5367c9f72d80dc805c086e391863a022",
+        "sample_hash": "299426a04eeb109cf6a0fef3456920ec1239522224c1af84325046f1628d44d9",
         "sample_filename": "kg-0019-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -596,7 +596,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fd477b83e929ca4cf30e4445aa2c4a6e17a6edc7c6c5ef50655ec0094d6d80f2",
+        "sample_hash": "4f41d551cf287c1229aac147fb9bd4d2f312257e7a50a3321a3b2401a81be9a0",
         "sample_filename": "kg-0020-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -625,7 +625,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1faea3db6f764724175aad9dd2b3b846099cf81fe5aeae2816e6cb6119c1f0ca",
+        "sample_hash": "1eaa3985d3509cbef22248c86eea66da551b8a5b91c589b27a42d284a65d7182",
         "sample_filename": "kg-0021-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -654,7 +654,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d8ea7ccb86f0b514ef87208d1d52a036b1abc50f3e57d018bf71b25106830cba",
+        "sample_hash": "5ea8bdaf15c4e9edfc188c5ba7cc7f915436a1b41c13543544b66f1826f4cd30",
         "sample_filename": "kg-0022-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -683,7 +683,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "44f900cb755df9140a37248d9ee96436a98d490f94a81418f914b651c91cd0ba",
+        "sample_hash": "cd36b496306a132694c0b56fee6a0e261716a54dcd4ccb57565f72fb22296b92",
         "sample_filename": "kg-0023-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -712,7 +712,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e9628f6b6b2335b4f79daf2dc2b4dcd63f9f4faf08a048b886f0b8f12bd8415a",
+        "sample_hash": "a8b82cefef3e82d457ba8c8a3343db8215d6f177070f933475f49d68c271aa4e",
         "sample_filename": "kg-0024-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -741,7 +741,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b6e5f3b398d9937c5b000e75e139c59e9e82c9f7de2bdc8055436e394d2ea022",
+        "sample_hash": "219c9c67db106048a4a8343ff682174a7ad465101a80ef99feecad926dbc41a1",
         "sample_filename": "kg-0025-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -770,7 +770,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6af4ac733d9a103c8c4d0f3506120a5e95c912b72f66e940a55dfef9d73774e2",
+        "sample_hash": "0aea808a8add40de27bf6ced904b9b81e27c77a81bef3b1ee8cb3146b4f590e5",
         "sample_filename": "kg-0026-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -799,7 +799,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1f51fec31d37c98ce520ff859e6101aeb976e107b4465e90b680eb49573ea832",
+        "sample_hash": "f1ed0f7b69ce411c2547fc0f1bc7d4f23978837cc117bbfaf55ce2613f863257",
         "sample_filename": "kg-0027-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -828,7 +828,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e522d8533763461c2e022f15897df43ef410a69738e90720639386d9189346c2",
+        "sample_hash": "d887ad91f7d18f15b0ccede6e7907b0240b7663a0875da9626f74b8fa3b2664f",
         "sample_filename": "kg-0028-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -857,7 +857,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7ef155bb49c62304449e937dd96c8826f2c591ff9a9bf20829279941d4ff28aa",
+        "sample_hash": "91d2f2d0a176aaa7d3f324c7f03f566eefd1e7d0087b1e6f73f2f115f25afd54",
         "sample_filename": "kg-0029-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -886,7 +886,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "cf30e11b0035e0642802e2ddc8ebc986fb48255f1e2c37687851f0a19a31f20a",
+        "sample_hash": "198458ff7ebbffd97b5c63c1fc76f2a8acbf0f87dfb996c5341c5035ecf28830",
         "sample_filename": "kg-0030-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -915,7 +915,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4c9ad47b541f85c463589a3df87bf2e6252320bfd10464c84cdbb0010683a36a",
+        "sample_hash": "f18d25cc389fa4230a26ea4be8a9ece5ad395954e9baccc2b6e4f1a88d94c312",
         "sample_filename": "kg-0031-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -944,7 +944,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "802ca42b25ea4e7407388bedac5e3d9625b5f46fb766f178054e25b19017321a",
+        "sample_hash": "1f2574ed9cb5ac3c966409f9cdfc8be2aaffc736b309620d6be630b1f13eeffd",
         "sample_filename": "kg-0032-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -973,7 +973,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "577821a3b431c66c049eb66559dc528e4313abe7cbb2837031d44a29a5db2112",
+        "sample_hash": "4a73ef1e03de390815989ac1d0610f7e650547b969fd6ba726157cc0f4d7b399",
         "sample_filename": "kg-0033-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1002,7 +1002,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2b3fd4c3c0cebf8c34c71585ea9c37ae04ed370749bdd490dedf81492f8a5e32",
+        "sample_hash": "b155cd8621ca295eec302d28cab9cb2e79b95482be2a4f7d9b4fca6a333952e3",
         "sample_filename": "kg-0034-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1031,7 +1031,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "17d22b63d94e442ca9016825585cf84e249e05a7e9065130c9454be9a51116d2",
+        "sample_hash": "f8bb93a9f0d506c1dd1f08e14158841d9687670b5a6c6ee48d4713dd59beac47",
         "sample_filename": "kg-0035-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1060,7 +1060,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f779d1030ee067cc2d42a9c57adff7ee976363476a1cacd00a694589114d4e72",
+        "sample_hash": "c0d3189f3120388e2ecf71ad73cb0f765fed407402c210414bdcc4f412444e57",
         "sample_filename": "kg-0036-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1089,7 +1089,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b7d4476b6fbb6db41f54672d1d0214d6367b07af188280b876d170f1c52f795a",
+        "sample_hash": "b116fd733e90c07dff89ad535e3e77427df23f73e8f3c487d284df6b226d7eec",
         "sample_filename": "kg-0037-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1118,7 +1118,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e056d68ba78682d4f99a224df08a95f67ac46ecfe8e0edd85b8f0411e2ac527a",
+        "sample_hash": "e8f4dd8f239328d7075c884ccafedea5720e014c73831cc3111128216246402f",
         "sample_filename": "kg-0038-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1147,7 +1147,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0cc9778b27e0d3d4cf55234d514f46f6616bcfcf5673fed84846c511def1c37a",
+        "sample_hash": "3abe18ddb58d2bad0ed4b7118962d7e8ea02d928938b8520c7b87a26418935e2",
         "sample_filename": "kg-0039-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1176,7 +1176,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "76b843d39802199c7e49ea953b3617be7da8b217b0f87aa08459e2592b780a42",
+        "sample_hash": "11542f7ae3713801d60855b0ffc9f707d0dd614510921efda1f6fe10b0f804b4",
         "sample_filename": "kg-0040-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1205,7 +1205,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fa2f43c3d8d17e8c23f42485cdda96ae06f3e6077213d39030dbd0491953fd32",
+        "sample_hash": "220007e5ccc24fa2de1c4e76bd46635841066ac84e602fa719d3a5baba340b1c",
         "sample_filename": "kg-0041-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1234,7 +1234,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "a2a2ca8b505e36d456d1964d85b5c9f6353762cf93afa1d8d38d78110a6e867a",
+        "sample_hash": "3f8545b038099f19796eaf05dc7c63f0abb45a577e1bc2680796e7fa3664683b",
         "sample_filename": "kg-0042-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1263,7 +1263,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "76c61113c05042dcaa93afd59932b8fe064b6f573db093e0c0529799a0d89b82",
+        "sample_hash": "7e0cc9116d11a4ab7f2c4ad7fcf46c23278ff2a550cfb96c6b700f0240a728b3",
         "sample_filename": "kg-0043-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1292,7 +1292,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4d2337eba67c36342ce387ad1ed40d561a9c582fde17a9384696f17161f9d1da",
+        "sample_hash": "864217c875db78c7eef568671fbf6d4f41bd5fa3dd1b71678b8bf8784d99e669",
         "sample_filename": "kg-0044-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1321,7 +1321,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "5a386f2b1804a9746d7476ed2adeb896c3adff6f8a198c786b0e50b1fb47ed1a",
+        "sample_hash": "adf73f936c76d18b7e520419bf661b2e34efbbaea066f6409878fee7cb2ac850",
         "sample_filename": "kg-0045-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1350,7 +1350,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "16b79683496f754c2e0c7f454ad6156e0aff48c756dfda50c45d3b09b0838bf2",
+        "sample_hash": "b96205a6e3ab165156701b861c925c8e71eea998420a5998767b8eb42fd3ba61",
         "sample_filename": "kg-0046-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1379,7 +1379,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8404061bc5af75642b7fe7dd5cb93e866ba30a5ff6418c68373eb5a1d803270a",
+        "sample_hash": "892ded3d0e17e018d7c8adfc47d011e8c896f7eb504a7fc48112e2d0fa913095",
         "sample_filename": "kg-0047-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1408,7 +1408,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "655ef403dcd89accdaf8ecc5208f4aeed8d6c64779af1fd0bc05c889fd6ee172",
+        "sample_hash": "5958e55c000cbd83bceb073758c3c7364bed0b440a63044b04db38d0ccfd7c55",
         "sample_filename": "kg-0048-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1437,7 +1437,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "12acedb3cf966d7c4c9cc875f8805f9e2b1d43f74ea436805103a839ae80ba22",
+        "sample_hash": "04f2b2bacd7a00832688a7a7efd0b8340b953bd181cd6a32cdedc8c842b5e06e",
         "sample_filename": "kg-0049-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1466,7 +1466,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "38816e0b4b14c254ef7789cdd10aa5768f22a64f72c0cd58847c0b91d39a01fa",
+        "sample_hash": "b7dc5d22df3dbc2a8c73bf4d6ea3196a75301b40c15f96f4ed0e95a7f60883c7",
         "sample_filename": "kg-0050-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1495,7 +1495,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e637fe630370272c93ba5b254217fb4ec85618a73146743093287ee9934259d2",
+        "sample_hash": "eaa4d2e97ad43ca56df0eb45632fa01c4febaf496fafdb584ef2394baea62641",
         "sample_filename": "kg-0051-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1524,7 +1524,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6d2b32db9b2c26242f80dc9daa513746d788c71f338fcd2800343a61dac2afca",
+        "sample_hash": "501b6bc6c07c53acd34849fb53269850b1776fe61efbbd56ff807dae92a2d975",
         "sample_filename": "kg-0052-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1553,7 +1553,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "be12bb3b8756d0847e2808fdd88045a65a7d177fbd18bf8825132ec17b0b062a",
+        "sample_hash": "71954780803274a1dfcdd1e47b7c9d7d69de47f8db2c55dcf068cc898ba5dd86",
         "sample_filename": "kg-0053-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1582,7 +1582,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "445a6c03ac6e92cc8be164c51a0242eef08c3e476bdf17d023684089cb3bd972",
+        "sample_hash": "c788896dad5c93ae461629f5416c6aabdd9df13f93e14759bb342241a74f6a85",
         "sample_filename": "kg-0054-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1611,7 +1611,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6caa8a8be979f6d490c1564d263989f6b60f22cfe29b61d8124d38114ec2467a",
+        "sample_hash": "aafb25e8da1e8ba8499c7e6c0ba06b1bc52fa1f4d7dda8e7ea1abeabe29bab8e",
         "sample_filename": "kg-0055-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1640,7 +1640,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ac94a1c34c557c8cf744c285f545d4ae4a67c4078b1e519088aaee4926b5bb32",
+        "sample_hash": "0a3e3ae2449695843e5d69bbf1dfa65b7ee341d38858cf788d27b10c0f4c91e1",
         "sample_filename": "kg-0056-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1669,7 +1669,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "165932a3b5d7876cf77227657576738e493d7ce7b9650470a0387b29db4a0212",
+        "sample_hash": "1338c7da2e7ebb24bf78a71167d67a950d4e72c289f5c9c19d149462801aa496",
         "sample_filename": "kg-0057-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1698,7 +1698,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "aff4a3bb7eed11048d07217dd6d4b626478b5ffff7bd6008fc42a7419651d6aa",
+        "sample_hash": "0fa70388c8dc6d4d45d9b99a8fc7f258348cea906abc9ccde906292ed0db588b",
         "sample_filename": "kg-0058-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1727,7 +1727,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "23bd8323adbfafeccd9aa7e547b3cc0ea7fc2d6748298cf08e1f5ba9b387ba92",
+        "sample_hash": "6637ccc804c621908e9c29b2983754fec947db55d51677118527385a192e603a",
         "sample_filename": "kg-0059-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1756,7 +1756,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0cdefe63abe7272c4d015b25eb2efb4e903d18a796fd743065af7ee9f19959d2",
+        "sample_hash": "3c7a1518f65a5364fee65cd416c81a5055ab063562421dea4f76c165b8fecd6a",
         "sample_filename": "kg-0060-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1785,7 +1785,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1f3672fb8d229c44199da8bdbf957966c3db9f3fefde5b489c919e815e8809ea",
+        "sample_hash": "18c3896514bfa93302a69fee80a408032046aa6d7c34aee4b9183675eddbffe9",
         "sample_filename": "kg-0061-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1814,7 +1814,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bad679eb679ed834e26789ad720b6f56df391a2f942bcb38fc947371f6b2b3da",
+        "sample_hash": "eda2176ad92b3e119131139a3f1ca6a32dbed3e6d307cd228de988efdd62c4eb",
         "sample_filename": "kg-0062-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1843,7 +1843,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "431cc9eb0c0c28346ccbd9adbb36bf561efb6a2fb1551b38dcf4c371cf1a03da",
+        "sample_hash": "b634e08eedce698095e88c75eb2ee7af6c2fa006f440cb94e9a289a190028ae3",
         "sample_filename": "kg-0063-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1872,7 +1872,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8cd1b6bbc6c2340479ef547d587af926e62ab2ffc720c3089ec51a414fde59aa",
+        "sample_hash": "4201ad03611e1e731ea86f73b13c6e42de12db9cc757341842646c07ddcac8f8",
         "sample_filename": "kg-0064-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1901,7 +1901,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "5feec2e3c52e83ac6190cfa5f7ef07ced66e3d2730b830b072645369da90c652",
+        "sample_hash": "2e5731bda2126ac87c3ad699b80af693a40e4e63e7c498c41434e04d76f579b2",
         "sample_filename": "kg-0065-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1930,7 +1930,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "671fe723420ad3ec95928be5b0dc700ece999167db3fb0f073723fa96b9b5e92",
+        "sample_hash": "cfc0d8db658399bde3e0bad8c5a0b64294b3de427de679317fbd30e42ccc6acd",
         "sample_filename": "kg-0066-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1959,7 +1959,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "84336903bc0a7fccf4b541c532f30fee0aeefb47f078c4d09f6ddd89ed526672",
+        "sample_hash": "cbe4d3ae383966a2f26850a70957d31447c612f4c55757b7c4081f9f0a803d46",
         "sample_filename": "kg-0067-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -1988,7 +1988,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "16da4723794733ecefb0ebe5fb3cd00e689bf167164410f0f2d89fa984c3be92",
+        "sample_hash": "13692ae2cae6a6604c4bcf656497f6e23a96a3808285184e02d9c1abc2300de5",
         "sample_filename": "kg-0068-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2017,7 +2017,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b7a312cbfd766b142efff68d170496364cfcdb0faece0618fab308515a5582ba",
+        "sample_hash": "493cdce0bbf8ebf59bda091027bffcde62e0b61dad1f3fa0e3554bc6c0a7d486",
         "sample_filename": "kg-0069-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2046,7 +2046,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "dd46e8db515afc244308d29d48984d469a14fd1f96072328f65cb061868245ca",
+        "sample_hash": "682922d7f4e29349d856883aba35e491378c4915a37d9037178e5f45b623082d",
         "sample_filename": "kg-0070-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2075,7 +2075,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "5c3f9afbac5f444475f5d0bddb712166f122c73f77f903486867c6811e81b1ea",
+        "sample_hash": "c66d076ddee3fd6239597b31bfefcf6baffdd722b08c475c52601552f8c198e8",
         "sample_filename": "kg-0071-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2104,7 +2104,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "baafedeb00cc0c34543c7dad399c2356eb598e2f396fff38a9506771a6fa67da",
+        "sample_hash": "84fd8824ccd38e49930182060ca9957fd324c66c90f9c250612c03cee807426b",
         "sample_filename": "kg-0072-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2133,7 +2133,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "9205837366ddb73cef0286359bc8515e815f29b7f40bd0402d90b5f94bc6fbe2",
+        "sample_hash": "353d1a45a15390d59956b1e50a50abf5f00997e96ab4b48430bc03265254b16b",
         "sample_filename": "kg-0073-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2162,7 +2162,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e5498933dbdd70fc1addb3f5db32b31e22607f77d3bfda0089e733b98943ada2",
+        "sample_hash": "18bb2c3e41973152f79851f9badcc2e382f50c7b8bf71462db7c1dc2abd5d771",
         "sample_filename": "kg-0074-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2191,7 +2191,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ffd80de3b6ee5eac42ba3aa5362502ce4a63c82749304bb0ef31fe6917970152",
+        "sample_hash": "ae665549ac95e8a6a30c50ab1e4dd1676fafee584fe8680eb12fbca0746d1e79",
         "sample_filename": "kg-0075-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2220,7 +2220,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7e7df32371bd1fec29c517e51ffb3c0e05509d67c87afcf0d45dcba9d7a32a92",
+        "sample_hash": "d625480edddbe9ac7380f9c16a5ad693ab66460c447445b52409b2afb265a0f2",
         "sample_filename": "kg-0076-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2249,7 +2249,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b0be287b4f4099c4f3ab6e3d73f486e64d7574bfa7a478c8a6fd8401e11b376a",
+        "sample_hash": "6a90b74351357b83f45f0083bc34c6ce282b203a370d85fbe54e42c38d681bbb",
         "sample_filename": "kg-0077-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2278,7 +2278,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "82086a3bbcebcf84bfb357fdfb28e4a62d3a067f17b0fe88471dbdc1baeee52a",
+        "sample_hash": "1bf142a99d3e3090f8daafe2bdafed389083bd60bdec899f4d9f18de4d95312e",
         "sample_filename": "kg-0078-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2307,7 +2307,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6f1f771b93119664a4f1b8dd0733bf86e84f3b5f13786d68b18946a1cb1a680a",
+        "sample_hash": "ddfd9e796b5183767f23dc9bf70d23f9918d7c02b78ea6e9d646f512845147f3",
         "sample_filename": "kg-0079-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2336,7 +2336,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "35ef47833899d64c69329045d530d66e0ff7b9c77b0efb50268c0c099aab0cf2",
+        "sample_hash": "292d92b564071df3c7f3a9449a12a7e24e066f435b6be404f22dfb763b6eac59",
         "sample_filename": "kg-0080-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2365,7 +2365,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2f4958a39fd7cd6cecb88d653b58f98ef63222e79b01ca704133612929790812",
+        "sample_hash": "d61f4c9b2bb3c14ab41a3764a392e5a5d9aa8491c961713d50083979c332d777",
         "sample_filename": "kg-0081-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2394,7 +2394,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1cfc112b06d9ab74aaacd8ed332c7a96f023216ff2280e78268832b1c45f2f1a",
+        "sample_hash": "9507616b7ce0d805f7c8c510a9246777e6bf35a6df96569e262c46c7c602fcbc",
         "sample_filename": "kg-0082-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2423,7 +2423,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b9eb7ca3d8f6b16c00d8316555bd5d8e24df46e772bbae70417e0529e0986c12",
+        "sample_hash": "0c1c5f7928ac511166fc82d85145b559f929548e53d81fc1b1055044c7d2d53b",
         "sample_filename": "kg-0083-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2452,7 +2452,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fb530c1be7289b64bd392dddb9e8a4862a9e905fae7f326867547ba1eba70d0a",
+        "sample_hash": "430d9f14c2c611c76f7bfb6b7a3c3054b27e046f8a81ad097f02d6eb1275da11",
         "sample_filename": "kg-0084-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2481,7 +2481,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d28b897b9819aac491c92f3d4dbff7e6528795bfd1c649c8ab2805019077686a",
+        "sample_hash": "e8fa73ef0aac25535a63fd89878a13bfb30b7785fdb49ad8f3e2d7e33696ede1",
         "sample_filename": "kg-0085-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2510,7 +2510,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bf610603f0c90cccc819bec5b5827cee859e5847a1ad11d067fc1a89ed7f9372",
+        "sample_hash": "c95b21096d83055f54d427c5bfa44efb41637c164819b1c6a6158a21aa4197bf",
         "sample_filename": "kg-0086-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2539,7 +2539,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2772ca6bad3f00b46cc80a2d5700c7d6272fcaafdaa853b8e8b353f10ba86c5a",
+        "sample_hash": "7b2d6b002a3f20cb1462945873b0b0891f46048214dabefde88694c53c19b8ab",
         "sample_filename": "kg-0087-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2568,7 +2568,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "50ee13c3b30f4e8cf000f485a10666ae6d8eb6073f6da3904f44a0495a1bcd32",
+        "sample_hash": "ec3ab78a6af54910d27eefb90e8d44a81062bbce7825ccfb1d0146424da090c0",
         "sample_filename": "kg-0088-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2597,7 +2597,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "505ff663954a9f2c767f53256d7f734e7a9810a7e71aec307fc776e99863d1d2",
+        "sample_hash": "46d8b47709059397e642ff415eab794605298da1fa727d9af023234c2ff98dd0",
         "sample_filename": "kg-0089-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2626,7 +2626,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "731903cb1feb0c14b8bc478dbb81973653e38c0f84f76718732819519f4f43ba",
+        "sample_hash": "d06be33a32fbc67c3ad9bc3774b9721b82a48fb22e4ebbf3f72562951daf5b48",
         "sample_filename": "kg-0090-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2655,7 +2655,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6af801534f259f1c9672b8155f0dad3e49e08f97e1ca2020eb06cfd9ebc9bfc2",
+        "sample_hash": "584ffa343971ddcd87e876f379176b335052b16536feda7c322b8339c50bee28",
         "sample_filename": "kg-0091-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2684,7 +2684,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6523e49b4a62cbe444e1365dc49b05069b0fc8df13fbc2e87e40e421f5ffcd8a",
+        "sample_hash": "dcd063df9468310851cceda5a2f3ec87d447684d898be903358a1d56f587da38",
         "sample_filename": "kg-0092-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2713,7 +2713,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "77fc32fba59c5c44d18b68bd8ab7396669f15f3f4ca81b485fcf5e81cbf9c9ea",
+        "sample_hash": "7e1c76afc1e2e99aa79d135e1ecd236bce82163c4e27e507e1075f05fc0f7d3c",
         "sample_filename": "kg-0093-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2742,7 +2742,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2789eae3b55d2bac973af7a5177cafceb3c76527f744d8b04d0c7b691bbc6e52",
+        "sample_hash": "334568164b327bdbb0a6b5d53ba9003cfa8bb0f0c7fe7f81e28eb3cc6e420899",
         "sample_filename": "kg-0094-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2771,7 +2771,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3f8987bb20a2b5047221857d3357da26f63b43ffde1e04082e980b413b9ffaaa",
+        "sample_hash": "0cf58bacfa6f2a519092c562908501583dee5cd511d45580874e32697a672a5b",
         "sample_filename": "kg-0095-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2800,7 +2800,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b7b024135a2265dcdc68e2d5c7b5fbfe9eb7c257a8d0f6e065820a99f9021e82",
+        "sample_hash": "ff061a00cfa63ae5c8cdce80e47f5884d85053d053f020966e86b39bee4fbbc0",
         "sample_filename": "kg-0096-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2829,7 +2829,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "a8adc223aea23eec38d686e5a17ffb0e595fac673dfb5bf028067aa902fb2992",
+        "sample_hash": "0a1031700edea9cf101b681e129dc6a17de0eab90e7db3dcc00b04d6afc556c4",
         "sample_filename": "kg-0097-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2858,7 +2858,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ba423cab476d3ef4c1ed546d49a15e1696fbecef7ebc41f875d74e31e690b29a",
+        "sample_hash": "7e405bf35b9e3463b7f4fefb6573777e4ccd7d6d87c05cea52ed95d5b255497b",
         "sample_filename": "kg-0098-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2887,7 +2887,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "33cc3a03467c00cc0a2872c500c0f0eefca08c4720c705d0f941ce89fcc50772",
+        "sample_hash": "5d42c161e0d21453e790b9fc6fb14a68693f8b5587e44ecd387e8c90a85dc66c",
         "sample_filename": "kg-0099-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2916,7 +2916,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ca0bcb8fe14ece98d80228d1bfe77b3afbf816d338ddfc9c699cdd95596b1abe",
+        "sample_hash": "12e598440d317fa4bff87ebec25d9d145f5165185a767c01bdba2556e32e2360",
         "sample_filename": "kg-0100-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2945,7 +2945,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0859ff17edf3b7a088e40f59494627429b74d05b3e038ba463e78a1db3d0acc6",
+        "sample_hash": "49c476af0da7bad6e3ed3380ff3926ce3170f0cdff31620b4a4a7f2cdb1b535a",
         "sample_filename": "kg-0101-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -2974,7 +2974,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1aaa90c79954a250e1a383099e2353f20c4fe60b1b8dba54885301cd04809d76",
+        "sample_hash": "a77b0128b5a03b641d8540c24b1746c3dc2e39438b16095de5111250322bff99",
         "sample_filename": "kg-0102-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3003,7 +3003,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1d3dd05f73da7268bcabbba1ea3a4d0ad81677a3f2513c6c31254c65f9d0088e",
+        "sample_hash": "4cd3d4e48e8e5988d14a2209878b4f889aa3eed5803229592d257acf1d5d9df8",
         "sample_filename": "kg-0103-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3032,7 +3032,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bd7c944730b08dd09300d6894ca18f722436898bc5cc45d4c600f54d325d78f6",
+        "sample_hash": "4aa7902fea5eea4a954992513b390426a625b503a0adb45f62c7a79d3a66fd03",
         "sample_filename": "kg-0104-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3061,7 +3061,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "cf6103df52088de80e0c3f210c9cb88a3b724b237c45f7ec887a6fe539f5140e",
+        "sample_hash": "05ec650ef4afd9086bcfee067fa5cc71dfcf38f9c7949104cc4c7da5d86a7b77",
         "sample_filename": "kg-0105-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3090,7 +3090,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0824a60f81446118fc8af3512bb1fdba442ad1532f976f1c40738815fbed7d3e",
+        "sample_hash": "622def75706600fe49649f8bbe72243c41114d4531fa1e3eaa58b636206bf667",
         "sample_filename": "kg-0106-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3119,7 +3119,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "57590f87c32305100d4289c9e487beb29d7274cbf52b2d1490ac188d491a1836",
+        "sample_hash": "af25ddccd22af30a149d37c34c14168da26a783aae706d07c5798a6196368842",
         "sample_filename": "kg-0107-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3148,7 +3148,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "96b3b36fcf1f0078a3a784b1b2c8e11a961666b384b4167cd9ffa1751169689e",
+        "sample_hash": "78881b0918a561481856fbf17785a652147048e9eae5330a600d201154055821",
         "sample_filename": "kg-0108-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3177,7 +3177,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bbab4de7a61b85704460ac29e13ce3120581fb2b5d0a7574b7e282ed38a10496",
+        "sample_hash": "efa7ba1cbb544e1d2e75d0eda79a5a5f03f2cefc6861460949870235629df7e3",
         "sample_filename": "kg-0109-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3206,7 +3206,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "a4a9fb6764b2faf0e02269a9db4268922decc8abf0840af4451c606dcdd4aa16",
+        "sample_hash": "785d4136c29a68a5a92db1eeab0c53ca44fecdd394d115dd1a5d154f477efd77",
         "sample_filename": "kg-0110-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3235,7 +3235,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2a03ae4f9d1f5558b620139165cb89fa24df09935088935c4b0fd855f1af397e",
+        "sample_hash": "6673e80f84a9d73429ce952764f012c6af2cfc6d6b34e43799b784c87af5c932",
         "sample_filename": "kg-0111-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3264,7 +3264,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b4d690efb66ba5f8585f72319bb5969a82096433f806dbfc2413aef5aa283e1e",
+        "sample_hash": "0d4d16344d8749d08428f69017a1f91a750d6335aa72e3c47524662285a76c59",
         "sample_filename": "kg-0112-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3293,7 +3293,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "38e96687a20e2c10b44780c9c8b585b2c5280bcbaf179414face4f8da7c11f36",
+        "sample_hash": "ff9f4c7c89ac3309a6c31e3fb31f95da24959d56356cf9c646b2537fd2af3972",
         "sample_filename": "kg-0113-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3322,7 +3322,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0defd83ff5cac44801a7378156c7d2eacd56e78341df764c1af630459412766e",
+        "sample_hash": "a3700d6199ea2f1b6a1bc700064372d608f926bdf1fb6161c5a9dc31e28d8845",
         "sample_filename": "kg-0114-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3351,7 +3351,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b457bdf709bc90808563e239d672d422b92e373bc6f38c84f26204fdc0b381a6",
+        "sample_hash": "d7e6379f078b4a7012d87b8a89c5cabd77eb574d885c6decb1414919bce17d2a",
         "sample_filename": "kg-0115-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3380,7 +3380,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "220ca4e72287ac70ca96a3293f4baa12cac8922b9137dc7461f5b9edb5e90b96",
+        "sample_hash": "4674bfb303f10930fad3d6c02731f4db7c4d7018440183c6c0a24f1f5a0b6061",
         "sample_filename": "kg-0116-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3409,7 +3409,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b46a866f1941e378281177b188e4e41a81df79b3a9b5397c7e53d47570bbab9e",
+        "sample_hash": "bb0a800b17944cd535378aeafe6b4b0c22146d54d65af1222036814ca2a54969",
         "sample_filename": "kg-0117-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3438,7 +3438,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bf436ba7ec97d730d338f1e959fcdcd2678968ebbb4d1734a2a818ad9b454e56",
+        "sample_hash": "0a562ab470e6c2f18310d13f38c136d17581ba3f3d36679c1ae194f6f609ab66",
         "sample_filename": "kg-0118-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3467,7 +3467,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "520d177ff7a8bf88b2a32ec16b9b062a895696c33e3ce18c49fe9785c06f19ae",
+        "sample_hash": "5a0c15c2101429f06a02d6668ec25cfc5e93f57f7b9a7fbaf0199b0c3f349efc",
         "sample_filename": "kg-0119-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3496,7 +3496,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8cd5533f9697cf48769ed2818b3cfdeab0aca2832288c14c91760b45fdfbe16e",
+        "sample_hash": "3c9f70a6d629b4ca33d90afcf627eb7242c420fc2953b59c263183487103b951",
         "sample_filename": "kg-0120-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3525,7 +3525,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e61a8ee789c0767066544d2918c83412ad1dfc2b3360267470cae3edbe251596",
+        "sample_hash": "0873a64dd7bfff72649522ea4a9da8cd4b18d3993a98705a32060d3fab64b73b",
         "sample_filename": "kg-0121-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3554,7 +3554,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "5413ce07b1cb3b9046d2b849d4b265329922134b09024394c785270dea879eb6",
+        "sample_hash": "d07ba2f8f8c5638ca322f7efff7317809aee9e8f5db9e61ad6fd1de24a53e112",
         "sample_filename": "kg-0122-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3583,7 +3583,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "54224b6fb66e18781baf1cb1eee0f91aae16feb30cf52e7cfb5939752133809e",
+        "sample_hash": "6a14a186a4f75ad694a67d8e1b2929210a7264b97994daa51ae89023746f84dc",
         "sample_filename": "kg-0123-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3612,7 +3612,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "674d398738ce0f10663e73c9c24e88b24f5e1ecbe275b714826f828d94506236",
+        "sample_hash": "03f46bbd9c6b6553287a3696828a58b3932639f28979b64bfb394cb43df95da9",
         "sample_filename": "kg-0124-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3641,7 +3641,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "cd849e0f9cd6d9180f87eb5125d175badba4c953d923e71ca74a8015f9c6f53e",
+        "sample_hash": "8d09b05277ea700c522b7d1029465a14e5e580de6f25418570f81f2ed6370a43",
         "sample_filename": "kg-0125-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3670,7 +3670,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c5fa8e1f98496428cde4a1619368e6ca603a856391fe7e2c1c438225dd5af24e",
+        "sample_hash": "882ba2becd98dd5a65394a1486e0d328c99bfce7f618c2d1bb67ad4f2d6957f0",
         "sample_filename": "kg-0126-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3699,7 +3699,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "894e51d7d93dae60afe86a19516da602a4ec331bee7b92641554f4dd872c3b86",
+        "sample_hash": "f97c9ac09c0c469c08428035eb41dacc3f43d42f6e97c4878fd320fc2c2e1621",
         "sample_filename": "kg-0127-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3728,7 +3728,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "641ce99fd3ca27a8ced34ce1dffcfa4a805380e39aa3e1aca324cda5d44fa5ce",
+        "sample_hash": "6b1751f49e989fdacfedebd42a9e4451eec60a7eba9f50a0539ca10ed711e8b7",
         "sample_filename": "kg-0128-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3757,7 +3757,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fa9199f734b9ac80e4a03e39faaa7022905d133bf855a8847a7360fdcd301da6",
+        "sample_hash": "a3d41899757f36da7c0a2d2587819be63c971593d6725907dd2391068b1fb03d",
         "sample_filename": "kg-0129-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3786,7 +3786,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2baf8617c9e50ea05de036591b0c1e424813975b64da22a41ca4f11d1573e3c6",
+        "sample_hash": "bd348994632e66905b575078bf7ccb4a11dda19d9c801b52a552c0931588f1d3",
         "sample_filename": "kg-0130-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3815,7 +3815,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2016b17f0c163988c6fe88c1024e402ae7abb0c3465ddb8c34f57185b825d3ae",
+        "sample_hash": "278b7a11152bf8c754322d917e450a4d50b1026b8e4ea7b6d2dc167026b7d017",
         "sample_filename": "kg-0131-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3844,7 +3844,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "af2ff24f38de59588a15d791385c0dfa652e4d93da7a975ceb489c55a992bd7e",
+        "sample_hash": "d3a94428d4666c7c15ac8441db98e17dcf342b8ce6df29287f2d66328cfc22af",
         "sample_filename": "kg-0132-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3873,7 +3873,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bfe055a7c9afa13055259be990f866d2f5add2ebfe946134beec42ad64405856",
+        "sample_hash": "188463a2fe83c34db7f4ad844deb07ca0605038c72237937b66c4bf757f93944",
         "sample_filename": "kg-0133-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3902,7 +3902,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "5dc8deaf40f327b88ca3e7f1e6f2c05ae84f01f3f9f8adbc58a974b5cc6db7de",
+        "sample_hash": "303d54cc502ffb23e6210d41fbd43cb8db60983b5387e75f4e091eb59f368407",
         "sample_filename": "kg-0134-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3931,7 +3931,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f0318527c5c4f8b082c29b6933c88e5266c4a26b8bed58b4b2eae22db5301fd6",
+        "sample_hash": "83bc3679fd8136daa71e1e3657160d85246efe1ba8b0201fc655108a7d9c5c27",
         "sample_filename": "kg-0135-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3960,7 +3960,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "23e69507c395d290c6441f49acc99c32cb2e1a4bd3a21a949da7ce0d3a6c15b6",
+        "sample_hash": "97c8d87d055d70d70c42701dd1f0bcc7923a82a20391a4c108e4c3e7fdab3695",
         "sample_filename": "kg-0136-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -3989,7 +3989,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e5926d1f21b1932826242061e356b5ca837da463560ded2ccf6641252da8014e",
+        "sample_hash": "abc4f6750e1191c62d92af6992ea40478c41ec1fdd3138497fc3325a8de9d105",
         "sample_filename": "kg-0137-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4018,7 +4018,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "609a53c72c457550a2e06609c58746f2bb45e90b0010cd548fee24cd1f4ed076",
+        "sample_hash": "df0ebc4d3e9e4caae4148d8de3170048f8152a630f66fe5cddd778bce5c351c7",
         "sample_filename": "kg-0138-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4047,7 +4047,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "65b4045f982866681ae56fa10233c10a3f63aba30846306c92d60065b6107c8e",
+        "sample_hash": "a95816d79447518c8dc75a1567c230a834a6d672f47b35e925294c241ef84a73",
         "sample_filename": "kg-0139-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4076,7 +4076,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ff7b3a2f0303eb38a7229371f016d3da77f7fd73352e113ce51ac035abf26b5e",
+        "sample_hash": "6846e20cd4bfb9c2f17a3f4293289d8e5c0f84c709204436a785cacc82f1bd6e",
         "sample_filename": "kg-0140-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4105,7 +4105,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c86860b73d69d740d9e28cf94ffba2e255bde9fbd90ae3449fc5bfbd652c6066",
+        "sample_hash": "276c4c2d867bd1fa9b07a4bf6d4c509677f66f0222d38410252f25859427cc56",
         "sample_filename": "kg-0141-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4134,7 +4134,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1022fe27fceaa1b0bfad7469f1b9975296acdb6bad6dc1b41d547b2d1083e8d6",
+        "sample_hash": "849f5eb3007d4f74e33da6f7b66dff03f2c543f19c3b0d1ea2f99143630a1d28",
         "sample_filename": "kg-0142-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4163,7 +4163,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "596dd9ff96fdba08d84ae141116bf0aa4f1f3943bc43bc0c9b822a05c625e42e",
+        "sample_hash": "76b296d460a19afbffdea5e630d942c16bb9642a7ef0c63e1e4772e39618dd36",
         "sample_filename": "kg-0143-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4192,7 +4192,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "9ef5a19788dd92201e5aa1d924fff1c2d92052dbfbc746242ce1fc9da2985746",
+        "sample_hash": "1a1d7e348d37eb5c34d70f84eca183cc6c3940a26bdbeae41fed5a8526f71c6e",
         "sample_filename": "kg-0144-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4221,7 +4221,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "734cd10fd15d1c183b073e513c14d8ba5f073c53ed906a1c353c1315e148983e",
+        "sample_hash": "d44ae072973661eb94c680c0045300f0c220a9ae7383e711e8f58d6497710f97",
         "sample_filename": "kg-0145-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4250,7 +4250,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ba0c17cfd74dc6d846620d11ecd68b7a09b0931319e624dc0106f1d507155afe",
+        "sample_hash": "d076b3fec4c6d43c52c42b5d6c0072f2bd961e2e42d641988268e4548ed414b7",
         "sample_filename": "kg-0146-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4279,7 +4279,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3e2bcb57af4c2fe05da57399d51eb782261ecc9b278533e4c4d31e5d69846d06",
+        "sample_hash": "75e52a54e3fb460342be61250e7d420697bdacad097dfdc19d84df1b73c17bda",
         "sample_filename": "kg-0147-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4308,7 +4308,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "a06824df4d8f5ee8960bc0218f3de98a440e2c23746588ec28d6b0e5ab77050e",
+        "sample_hash": "01efd72682224f16be803ae1da104c74e4e96a7ec64ad32be936bd54b7979790",
         "sample_filename": "kg-0148-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4337,7 +4337,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6866c6d7cb739360d368bf19c8556b02ba48681bab493764458109dd2e93c086",
+        "sample_hash": "8cf46841da7c40d69f8f63def9e5b726dc9fca7b2170b354d3b740ef2148cc31",
         "sample_filename": "kg-0149-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4366,7 +4366,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e4986747b6a870d022afc9898a72927251249c8b726268d4955a284dad24bbf6",
+        "sample_hash": "2b208fee42e5318749a01967971617b24543be12f92e72d43a090eb19e66aaf7",
         "sample_filename": "kg-0150-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4395,7 +4395,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0e4f779fe7dc55a829231ae14b88684a64b88ee34a208fac48971ba5013593ce",
+        "sample_hash": "e336fb55c9e820d5884da8d49e4ddc8db887fe938d97541f4fa889a79b4ace35",
         "sample_filename": "kg-0151-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4424,7 +4424,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "20461a8f07f66d98f50e17d1d21eba3a39f1a5d3c000db9c3d200c95b15599be",
+        "sample_hash": "89a227e7c543762cb6d4bebbff88490a7ca0878d31c13bc45cd3ab38273dd42c",
         "sample_filename": "kg-0152-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4453,7 +4453,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bdf1aba71f521730ae3f31e97d8f1cd2dfe7a8eb40b75734d95e58ad53878e56",
+        "sample_hash": "9df80be80259089f4442c3578d7939ed8f903adea4146f98ce827903ba93dee5",
         "sample_filename": "kg-0153-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4482,7 +4482,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "544226af75d5efb845f82ff15840885afa9e49f393d175bc2613bcb586f17fde",
+        "sample_hash": "3c727797c1ff9b05097ae1841c3e951e8098a35178b841bb3b80ec33755f38d8",
         "sample_filename": "kg-0154-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4511,7 +4511,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "38e75527aac9c8b0d1666b69b05b5e529c96726b9d4e28b4292ab22d509eefd6",
+        "sample_hash": "15eb7c8baa98a4cb1b3725892159167d966e69cae66dfcb26fb697fa23096420",
         "sample_filename": "kg-0155-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4540,7 +4540,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1252aa37dfa428c0173a6679fa0684627e59537b0bdc54c423bab93d05fa61e6",
+        "sample_hash": "96b962c288fdf58073c0323ffe3eabd4b2e9bb85f5fb140751046ecd999f353f",
         "sample_filename": "kg-0156-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4569,7 +4569,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "70837f7f56aea788086096c191b7ee2a64fafec32810c98cf629ff85a69a01ae",
+        "sample_hash": "1657b7822ecd8538837494c49a96fe23277a69c1bd086ab4b7025f253e18cb00",
         "sample_filename": "kg-0157-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4598,7 +4598,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3b695e17e87b66a07b6b0e59902376422dcf6f5b6cd27aa4e8f1c91d10ad3bc6",
+        "sample_hash": "412ba80c61a14f7b43e44e6f091aef9356feb7f8c35a9ef9399da6dd25da212f",
         "sample_filename": "kg-0158-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4627,7 +4627,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e9c828ff0dc559087b76d041ffc32faadf38c8432b869b0c0d2559059230632e",
+        "sample_hash": "06a2cf5b5a4376f0771f0c7b85d0b35dc2b465bfc431b2d2ea11f182bad80ec6",
         "sample_filename": "kg-0159-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4656,7 +4656,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f7fe229fc57390a88695e5e1c6d9c34aa8fb79e39a780aac9b3626a5aa5f2ece",
+        "sample_hash": "12b733c92ec115d52bf4230bab2c40f3eebdfa7eea7b6f7e8faa3497c2243b6b",
         "sample_filename": "kg-0160-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4685,7 +4685,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "edacb607022ba390c2a2a0498c19cd329fc8fb4b5e10ab94bda30f0d0fdd06b6",
+        "sample_hash": "8a3228308a6c9e1fa871ca9194de0c0e69c86a61d2293f66b38512815cb2e4f5",
         "sample_filename": "kg-0161-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4714,7 +4714,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ba1f2e47cde707d03b553089e37dc972ffe4a38b89763fd41bb0cf4d64fd32f6",
+        "sample_hash": "64e8fe7dd430d4f5eb93f602549774dc232b30c4dc76b2a68b6e1f29417e2b6a",
         "sample_filename": "kg-0162-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4743,7 +4743,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ae35be9f8ea26ca809f801e100eb1f4ac77815e3185be6ac9cbd42a599058ace",
+        "sample_hash": "803f32b7f7fb1c025d922b6636c190a28e405a49a9f4a2e1595d55100499619a",
         "sample_filename": "kg-0163-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4772,7 +4772,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c9ff9157ff4e15e0feab79994d1edd825a2f129be1db99e45ac5a45d81891306",
+        "sample_hash": "8194113e79507b5b01d3040fe5f62330477c7eedbbd1d4a0961b54e57d256153",
         "sample_filename": "kg-0164-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4801,7 +4801,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "05fda9cfe555b8d8b9425f11feb13d7afe07a5130f9b96dc245cc3d523ad8cfe",
+        "sample_hash": "e2f6ccd56fd8205ed78a496c922c006d6ccd792eaa3afbadb6f933315494fcc8",
         "sample_filename": "kg-0165-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4830,7 +4830,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "153fea9f0f76d8a8b7e2ade11f780b4a367341e3ffd152ac58f8eea5e69376ce",
+        "sample_hash": "015a7481eaa67c32cede1787fa6b4eedd0cf080ec846d8bd86e609f0a4a3d6cd",
         "sample_filename": "kg-0166-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4859,7 +4859,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "55c5fe87826b4410fcfd18c98b1b9db29716a3cb42e6ac143755e78d40593736",
+        "sample_hash": "01309c02d4437fd37e5dfedacc1cbd21adf688c6e68d02f357511f34d158b027",
         "sample_filename": "kg-0167-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4888,7 +4888,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c74654cf9e66f3d8800f2a11db3c987ae56490136eed11dcfbd5ced5b19127fe",
+        "sample_hash": "d00a8cd73b30c58131ba7bf5224fefed1ac59e37eabc6477e59eb215c9e3804b",
         "sample_filename": "kg-0168-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4917,7 +4917,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "10f5fb476a4fc4d07c14dd896bc96672b461308b7d38bcd46d3e3c4d0b4a8ff6",
+        "sample_hash": "2f07893feb8a60810f123b1a3f2a44ea4259c3058093749edb634d6c906e8c0d",
         "sample_filename": "kg-0169-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4946,7 +4946,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "cedd46570a253ae020e90e99181fe2824440879b1b3a7ee4129ef95d9af9d806",
+        "sample_hash": "2105ae00162390209f93563bed5c829e09cdb4ba8039935b0295ad8f0350f22a",
         "sample_filename": "kg-0170-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -4975,7 +4975,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "47cca1bf9d2f95c867e19101d3ed346af1c4d1038fbb67ccc7ada9c5d1daf7ee",
+        "sample_hash": "47815d8d7ce8945befad71a0d12cd2bca6d7f62d1ba91cb82bea6dc444581b93",
         "sample_filename": "kg-0171-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5004,7 +5004,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4e4dfa8fb4484d98ec89f7d19ba49a3af66185d30a3abb9c0a03ec952fc379be",
+        "sample_hash": "49a5ae950d2e839521f6418e57f1a8d796630d99e405af97ad820c04885d7529",
         "sample_filename": "kg-0172-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5033,7 +5033,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "54757d07ba0c3a907d4a0749da870432494b024b87468294df7bb60dbe977db6",
+        "sample_hash": "27b27112b1af3c8295c9a3471cc8f5179aaaa4b5f330992b644f398161d1e6ed",
         "sample_filename": "kg-0173-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5062,7 +5062,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6b82c8ff556df9081aad70414627cfaa7a6b6843c7273b0cf2d3f905498d032e",
+        "sample_hash": "97c96dd10e85f6ecbbaf4c68aca841e39a16b20b15e7e6db29ce8247903bf002",
         "sample_filename": "kg-0174-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5091,7 +5091,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e497ac374d4c8ac08cf82879c0eba6629dd7d57b8bc636c4ae41fb3de9b103e6",
+        "sample_hash": "cfaed7da5c664573222d7b9ac93f1a5692bc26771a73fbacb1f7c417d99e41b4",
         "sample_filename": "kg-0175-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5120,7 +5120,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7b3505777c068000f135f9b9bc5093a29b831ebb21931c04da07bc7daa82e126",
+        "sample_hash": "95ae5982e13179ead496d813104e2c7b2f8974cda71e50094242bd9c0fe5a27c",
         "sample_filename": "kg-0176-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5149,7 +5149,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bf653bff125a7c08a91f0341062972aa06981b4347a9fe0c8067cc05607ce62e",
+        "sample_hash": "535a9cdfb2ded2d5aab50f0212b0fb7d3afc663a4ece64a650493f58a25fd64b",
         "sample_filename": "kg-0177-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5178,7 +5178,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "aa61b5377b3dc3c093b1917998be3f623fc49e7b9a7e2fc44f26243dcdd25ce6",
+        "sample_hash": "d10db06e6f5e3ed621245415e6998fa90c5f9541871547f2c7cea7680a4121cd",
         "sample_filename": "kg-0178-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5207,7 +5207,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c2ed21ef458ee6f8f078633155dd379a8988b533bb56dcfc35dd5ff552449f1e",
+        "sample_hash": "2fd4a3def1270637d9a8be142e35c9b4b5b10854aff6183dbf124899e52b574c",
         "sample_filename": "kg-0179-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5236,7 +5236,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b267848fa22ab798302f41d166e6c43acafa8fd383c4a59c87f8b6955f7d23be",
+        "sample_hash": "44abc93cc382c99e7109504bee60d79433ffc9c737da5824603227fc65fdcbf2",
         "sample_filename": "kg-0180-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5265,7 +5265,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "588a2307f8c90090a164ed49f1d60a320ac4284bb8ffc894dcab1c0d1d9303b6",
+        "sample_hash": "2d3e712e9798a4ad322befa150f6c9ccf654648d70e198112561ef0e4b2e8389",
         "sample_filename": "kg-0181-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5294,7 +5294,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2bea0fd7b5ba0c601c5368196b7544022fde711bd1467064788672dd92f25986",
+        "sample_hash": "ad17f8744556cc302de4bcd987e6ecce7c1a518167c0d2d812f4726b2cae9a51",
         "sample_filename": "kg-0182-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5323,7 +5323,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d719f45fbe135668edc55fa13778b10a397d9ba3c6a5206ca1e9f0651f496c8e",
+        "sample_hash": "45953169c32af7d92bd72a5c289ae8493b54ba5d22ff1ad4a6838330969dba13",
         "sample_filename": "kg-0183-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5352,7 +5352,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "746483774a6a9e00689cb7b9ac27f1a26cd91cbb1515ba04e604fa7df8e8bf26",
+        "sample_hash": "815048a0b86e2ba8bfe6198e5e4161c2971a1a4b4c784278eb90fecc030ed827",
         "sample_filename": "kg-0184-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5381,7 +5381,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "34a6d7dfe48421e88a719321ff5fcc8a94c71f23e4208bec728ec3e5b9b7280e",
+        "sample_hash": "a799b83504bca45e7daf1cba8b6a0504f62d5c166551d1d2cef144655b912ec5",
         "sample_filename": "kg-0185-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5410,7 +5410,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "a3a2c3ef4ab5e8f85e62c5312b3cf99a016fd7332f375efc5f8941f5edede11e",
+        "sample_hash": "023c4181499b209505e9570ab4a0373b7c1bdbaaad84c040318f5887b16dc372",
         "sample_filename": "kg-0186-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5439,7 +5439,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "9684b8777ebc43009f0cccb9cc9376a23c0d11bb89cf1f04edf0cf7dada40426",
+        "sample_hash": "2fc6ee74a066bd8bbaf5e10bc158cccf12d16d9a25890a82abc5b9f5eb6e3cc9",
         "sample_filename": "kg-0187-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5468,7 +5468,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4907e12f39326238a481da716885eada2fa5e4730799c83c9c134735a696c25e",
+        "sample_hash": "13308557388d0416001b359f0e3da2469e5824d56a9b9b90f7b52fc916235e3c",
         "sample_filename": "kg-0188-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5497,7 +5497,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1d7d13b74e549a40675e5ff9fe5385e22fccdcfbe33be6447b13d2bd02228366",
+        "sample_hash": "602231d07aa3242dfed1a5aa6032a415943f8335b1b7daf4ca7b5a92f51bd298",
         "sample_filename": "kg-0189-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5526,7 +5526,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fec122571dac56e0818f6a9950a17e821c99639bf4a69ae4839a555d4b407406",
+        "sample_hash": "011f7b69b8adb5d23438f9150212592d33a9a9fd19ccf9e60822707521ccd02b",
         "sample_filename": "kg-0190-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5555,7 +5555,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3e30c8cf935527d89b551e1132ee4c7a31560413fcb245dc62c2c2d546b9dbfe",
+        "sample_hash": "6211d010622f56fcf8151dcf8309aa49bacc20e85ade7599a485081a0cb6a912",
         "sample_filename": "kg-0191-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5584,7 +5584,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e04b3e8ff588519827b0bbd1f0161e3a5c41c9d3166dbf9c722db0950e47fdbe",
+        "sample_hash": "c90e4948fd48030bda8fe9e8ca4572410a52a864794281e6ce7e3f059e86dbee",
         "sample_filename": "kg-0192-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5613,7 +5613,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "16c35417f0f47ca04c894459078ccc420149e55be04410a4a4607f1d163f11c6",
+        "sample_hash": "644e112cbae84ffecd42608e3ece9fda4ad319a649693a562d961fa5384e59a7",
         "sample_filename": "kg-0193-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5642,7 +5642,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0feffb9f423b99a848251ee18bd12c4a57ac12e3b9e2d3acfc0c1fa5400157ce",
+        "sample_hash": "853d02b5c74f72a1facf0aef2bb9c0a68d8c719f4ddfa28361e4aa8d10da2f9f",
         "sample_filename": "kg-0194-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5671,7 +5671,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6953c68702fa8c101115e0c91ec5e5b2a3da6bcb97cbf414c0e4af8dd0997f36",
+        "sample_hash": "0e9040ec03fc07db2e0e6fcb82bed02436271fcf03e1bff3074bfffb025c0746",
         "sample_filename": "kg-0195-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5700,7 +5700,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "11f564b79acd9b40af8110f94af8e6e22ffdedfbdd31a744ed3743bdf40ca466",
+        "sample_hash": "31ab67c1b6fbb6a4d96509b6465500d328a51e7c0cff01e727b19a6816151edd",
         "sample_filename": "kg-0196-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5729,7 +5729,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e1e36beffcd210f86ac26d3107c8219adb8e7f3393d186fc6306e9f5d437091e",
+        "sample_hash": "38e7f709795bad36fc4f7a53e31b480f6d4c6591cafc0a22b68d0cff62a49625",
         "sample_filename": "kg-0197-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5758,7 +5758,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b4b6d777b90ab200dabe8bb91ebf85a2189a70bb4274ce048135ce7de5df5326",
+        "sample_hash": "7f4e6b49d18011feae37a043d87d86b7b572999090638d931459ed2dd66cdcff",
         "sample_filename": "kg-0198-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5787,7 +5787,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "9b121fffa8a8200883516741304496aab35fff4334a2a20c19d53005a5630a2e",
+        "sample_hash": "2ab62e806f72330375f147e8a3eef1d8e53068d1f8f73a876e5653f2b7e27b06",
         "sample_filename": "kg-0199-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5816,7 +5816,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "55873e876e488410643658c9b8f0ddb2d2c7e3cb0fb3ec14947f278de91e7736",
+        "sample_hash": "1705c4c2640e8eb685c1b31e4af414c16af65374dd7dec1427dc5412c40165e4",
         "sample_filename": "kg-0200-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5845,7 +5845,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "45e56a9f6b6458a808982de136758b4a6d38c1e3b7ded2ac7bce6ea565b0f6ce",
+        "sample_hash": "fe7251fae02ff113e38131c790473b6b5133ee1fb44624294c75114854ea89e8",
         "sample_filename": "kg-0201-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5874,7 +5874,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6524289f7f93b6a892c62be10f50294aa30dffe30c9cb0ac8302eca5428a14ce",
+        "sample_hash": "1e3fa94df5fedfc873f2c25619a46cfa1b53e884374a9d91f8e06415b2459091",
         "sample_filename": "kg-0202-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5903,7 +5903,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "356856473763afd02ded5889219971721b6bcb8b0bd0e7d42dc6f74df736daf6",
+        "sample_hash": "c567bfaf3bc1c61fc351fd2513ad3caa086326b32bc69a720b846476626baa52",
         "sample_filename": "kg-0203-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5932,7 +5932,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f5d2fdcf9888ccd81007331190fbd17a2f8bf913e3cdaadcd27097d56a9720fe",
+        "sample_hash": "d1c11ccf3c6af0a38773dc0459bd332da0c135357770f4745025958dc30952be",
         "sample_filename": "kg-0204-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5961,7 +5961,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ed90315751ecb5e077f81999c2b97d821fb7b29b68f239e4d30a445d789bb306",
+        "sample_hash": "4220a27772c092cfcc69f9403aafe8d0d1b27c8356ae35233d76c7fb9d2e5409",
         "sample_filename": "kg-0205-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -5990,7 +5990,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "106aa407eefb31901a41ce493fe69b32ffc1694bc6d2b994e66cbd0df88c54b6",
+        "sample_hash": "aaa0a4f4d1b077b3723549ab3919d9f1b4a856d1defc809f80cabe2c4f40447a",
         "sample_filename": "kg-0206-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6019,7 +6019,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bce7da9feb03c8a8b1c49de13f1efb4a904f31e3a55242ac488edea5fbae66ce",
+        "sample_hash": "0ac456f3de129e89cc6ad6b0805fb40d45d7b7f6b3656ff3532c9c2cb14b5552",
         "sample_filename": "kg-0207-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6048,7 +6048,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "300ddb4752b1a4d08aa0bd89b75f4672ede1108bcf829cd45d321c4d57c86ff6",
+        "sample_hash": "433689f295deee61e698f123399a2a82314e30059d928e03f362d2df6a468763",
         "sample_filename": "kg-0208-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6077,7 +6077,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bd97accf473ccbd8b70182114c63707ae557e81352c4e9dcf12a26d51679fffe",
+        "sample_hash": "d5301a521c7ecc7208bf638f689dd9abd64f9fa6012a0b31d53f3a47f464e026",
         "sample_filename": "kg-0209-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6106,7 +6106,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6f4a96dfde0230e8d8b0f22176177b8a147e1e23792ddaecc41962e5c8b6170e",
+        "sample_hash": "54b7611b7f3ac5d9ee37ed300da905399703eb0c31a345c4e76b118c34c3d483",
         "sample_filename": "kg-0210-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6135,7 +6135,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e6b5cd57dfa991e0ff8835999e98d9827ba24e9b5de415e4c33f605dab900f06",
+        "sample_hash": "17035a08d90084fcd1040b5f68daa026cb64c4ce5621712aef437f1ba4c15e79",
         "sample_filename": "kg-0211-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6164,7 +6164,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e3989287e4f798107fb72cc92d3771b25f8837cb54620014a44efb8d9f040b36",
+        "sample_hash": "ce39ab3bbf00b38be63592b179d05d2ad534d0f3d61b525dd3afa9c320710330",
         "sample_filename": "kg-0212-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6193,7 +6193,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "87342b0f43dc5618fd6858511c81d2bac28a16536a13241c0b88ad155709123e",
+        "sample_hash": "f6b9d551e6f84718a6ab21afd98b40e4c5ec78c5abc563aa683344b527eb24f4",
         "sample_filename": "kg-0213-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6222,7 +6222,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "aac25a0734a60790fe85c4490c29b132a9899f4b65c60f944a51330d5f47eab6",
+        "sample_hash": "a0ed0d1174f3c00c51ba691e6508610610e79def82ab8d83bcd4a6238715a7f9",
         "sample_filename": "kg-0214-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6251,7 +6251,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8270e9af6355c2b83b1412f1c3d37b5a05134cf3c22388bc0ccddfb58d2eb2de",
+        "sample_hash": "2a91da359f55ce7485aa0ad60cb9971635052b33f95e344c794ee2ee76a2be65",
         "sample_filename": "kg-0215-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6280,7 +6280,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c05920bfa75a64c82451b001c519a36a8af49003140576cc78f908c56fdea6ee",
+        "sample_hash": "cefee1188fa8a6cf6261245d4c0cb3c5e84ee26414c386954dcf7d765eca534a",
         "sample_filename": "kg-0216-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6309,7 +6309,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d48a8c273ca1cfb04412426962ca05522906e96b704f6fb4e89bc92d12aed6d6",
+        "sample_hash": "1cfdb0dadc7f97b5f153ea05c6435d29d43e150e394638040a86c25173db3267",
         "sample_filename": "kg-0217-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6338,7 +6338,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4b15a5ffcf6dc608676f2d4185707caac0700543198cc80c35af76051c63702e",
+        "sample_hash": "a0f847eccab59f1b98363d906017ec4723a4c9b124dc1a007487bbe68af48d71",
         "sample_filename": "kg-0218-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6367,7 +6367,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "25429667bc7925f0777924a9a99cb392a4cda3ab767e75f440d35b6d40fb3516",
+        "sample_hash": "85b70d0b4964dd99dea264c799c952bc78610298ee885cba36a8e84f64226f90",
         "sample_filename": "kg-0219-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6396,7 +6396,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b079ca97eb9eeb20e81a2ad9992eaac201df3bdb72e75f2414e4459dcfadd046",
+        "sample_hash": "eef5190496d7e51ee1385144ec2d944beed832956022ede7e6517f1f8a15220d",
         "sample_filename": "kg-0220-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6425,7 +6425,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0e6f040f331d5f1815a09151ad523bbaf343af53b2b6ed1cddc7a615f7443b3e",
+        "sample_hash": "d2ac72f2cc7e867989af18a13c895d0f421965a6de219ec719ac86a101173088",
         "sample_filename": "kg-0221-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6454,7 +6454,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "26d403df238b8de8d49f3f21d33fb88a9d254b23a408f7ec314d6fe5aed8140e",
+        "sample_hash": "fa80c4eeef2236bee65ea0a7188b79b9ba476d970f5f8f4b62cc47a3866eedc0",
         "sample_filename": "kg-0222-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6483,7 +6483,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e85cecc7e3223e509b885f09955b6ff28357420ba6205654276cddcd825db976",
+        "sample_hash": "b4e6b98bf54cc6e3e029645a1297e41470cca224402e3f67f6d9b979e6b49b64",
         "sample_filename": "kg-0223-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6512,7 +6512,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "479d105f84f5b26831c2fba19c8d8d0a3ce5b7a35adc7c6c0aac8c650d93488e",
+        "sample_hash": "d421223679e5f418c36922c457a71093038d913e541c6b767933820cdeb5a6a7",
         "sample_filename": "kg-0224-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6541,7 +6541,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0e11384764f9f1d0e602fa8970207372a4b62d8b2e90a9d4850e194d3c775cf6",
+        "sample_hash": "8f6e8c8dce7635dc933aead4eeb71d2ee0966abf754d3a6214327259ff626513",
         "sample_filename": "kg-0225-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6570,7 +6570,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7eed8407535811908458ae4989977b32acec494be5579994ee2b9d0dab6534b6",
+        "sample_hash": "25870a8307a021a212c08e8d10796f592d16528aaea9ea9008065efb8e71650b",
         "sample_filename": "kg-0226-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6599,7 +6599,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7fd4098f880fac98fe49a6d113e3993aa976d4d3e74d5a9cda0adb95a485b8be",
+        "sample_hash": "3099d53e2c8f722694734b2817ac1b92d6e376cc6fd4be25fd995354fb0b1b97",
         "sample_filename": "kg-0227-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6628,7 +6628,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "2671d267c57da1f0762ee0a90f1faf92e179dfabb5eff1f465e6176d21cb3116",
+        "sample_hash": "f896db902883b413ade0721653fccc806e9931a78ac44845f4babce1644bbfc8",
         "sample_filename": "kg-0228-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6657,7 +6657,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d23136ef848e6bf8d800583150aa9c9ab9488a332da621fc894914f5cb49c41e",
+        "sample_hash": "3a6f609be9266542af98e6d40bdb7aa81868e3fb1b6927ce979119b8e0fad2ae",
         "sample_filename": "kg-0229-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6686,7 +6686,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8b1647cf8008f6d8b97e3d112603bb7a3d9ec313e64554dc9c8721d571668afe",
+        "sample_hash": "747716b04095311375df828608e89cd63df5beeeda8745f5f39149667aa26e9f",
         "sample_filename": "kg-0230-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6715,7 +6715,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e51f5027202153b030a08669cb4b0952411ead6b7061f3b411cd0d2d72e2dad6",
+        "sample_hash": "a076aa07b3ee52883a54805f413e28101f91756717bf5032e0be9bc311b7d6a2",
         "sample_filename": "kg-0231-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6744,7 +6744,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f5a62b67e5c02af0a5f099a9638198928f4cf8ab0ab53af4f0ce906d0cb7da16",
+        "sample_hash": "eb5ed2c33c18acbe7f541875ef2efd4d4c6fe284946a619ba4f451b099fd591f",
         "sample_filename": "kg-0232-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6773,7 +6773,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8a031affb0e8ab0896a48241a17d41aa81613a43e55f6d0c25508b0570aff52e",
+        "sample_hash": "9158f0e7a5e6ffb635bf627eba08cc8902bee8eed1414a1360d4ebb086b73794",
         "sample_filename": "kg-0233-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6802,7 +6802,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f92687e7dcb89f70de49a6291f7bbd129a00b52be4930f74141efcedca1b5e96",
+        "sample_hash": "076430d0ea0ff2dbc9f9bd19013cc163621216e7703df5add523d0f5d0bd3046",
         "sample_filename": "kg-0234-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6831,7 +6831,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0ae27c7f52f0948885fa73c19d8ebb2a2663bbc3fdd0768c83759c85d0168eae",
+        "sample_hash": "03f54fa414267a83f3d3abe74007c624db17dd3ffeb62ab55ffbf15146d65906",
         "sample_filename": "kg-0235-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6860,7 +6860,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4e90c3cf3054b2d8cdb739113485f77ab8063f13156e10dcdc8d1dd5ada5c6fe",
+        "sample_hash": "40c71801df45e67bef825c1fb76743c54876eb1abf280ef600511f08e76ce75a",
         "sample_filename": "kg-0236-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6889,7 +6889,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4ace25577e1669e062e18d9971f6b182629ca69b4c92ede4d63ab85d7fefe706",
+        "sample_hash": "50d9756ce50a2f990405a81d789f9999ae7a5f2a952dbdc521007db670d58134",
         "sample_filename": "kg-0237-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6918,7 +6918,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fe00940f93d1ef183a882151947ccbbad5c13f5394977d1c1e1b3615e01acb3e",
+        "sample_hash": "a049e987dfdf23558781ecd2cf817eeee582e7843103f9ab048111b2f4e9b3a1",
         "sample_filename": "kg-0238-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6947,7 +6947,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "70ed8b170d2383a0845c1b5978f2734255815c5be2dc57a4aa38961d3485f8c6",
+        "sample_hash": "3a6881b6e3db6156c6d1ea47b2109a79b4ce9859cb963f186c6bcbb8e162e230",
         "sample_filename": "kg-0239-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -6976,7 +6976,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "91e951c72bf113507836a4095b7624f2fe5b670b9c7aeb544f7ae2cde76c2e76",
+        "sample_hash": "9c66d331dd3719008e6baed402e83a9229b3c7cb3ab50de17b3b6bca6d8a0da9",
         "sample_filename": "kg-0240-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7005,7 +7005,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "29f539ef7d7f7ef8fda97b31d126cf9a3842cd33a75974fc458077f56060371e",
+        "sample_hash": "afda847950138ab498aa72f04804ce690026a352ad5b492497f666b993e908ee",
         "sample_filename": "kg-0241-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7034,7 +7034,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "149351dfb2ae7be87043cd21b923e68a4ba71923e82665ecd4a47de5c5a6c20e",
+        "sample_hash": "c4613ccdae009086370df222deb56aeb0e55291d530451a17b4781bb75db7cc6",
         "sample_filename": "kg-0242-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7063,7 +7063,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "c506dc87c932c210497936c9891a5bb26e0601cb33d4aa14daf0858d64ee7536",
+        "sample_hash": "39c35901884e558b0cc05f7993395b991ec864889910a1fef37bd29035c8989f",
         "sample_filename": "kg-0243-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7092,7 +7092,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "45e43b5f347d6d68e2fe46a149ff680a062122a38f84776cc57417655f3d638e",
+        "sample_hash": "6422699716beae4a09bbb313c522855645188dca98d342331aa35d2a90ad405d",
         "sample_filename": "kg-0244-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7121,7 +7121,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ce54dec712f29050bf53110960a281f284fcb40b7a66285409f50fcd402a4b76",
+        "sample_hash": "bd5b643dd11e2b6037f38c7875e77062f8d59f29aa71d88de0c9c8e4b990f67f",
         "sample_filename": "kg-0245-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7150,7 +7150,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "155962f755dca580d47f67391d56c9221e979c3b688f618419cd49fd887b36a6",
+        "sample_hash": "136a6a55e6f2eec9e1e55ed2fb56f56a788c637c28549ad98857840e4986b000",
         "sample_filename": "kg-0246-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7179,7 +7179,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6bd5fc2f81760d38541e1571586db5da3adc3f730631b33cee2fc2354f6acd5e",
+        "sample_hash": "1ca6062cd0f499f3c4e7c292ae639685158ca59f2e3d2a7b3069066d8f54ebe6",
         "sample_filename": "kg-0247-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7208,7 +7208,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "be3acf3767a2bdc075ac6b793e38f962a189387b3636a9c4615c7e3d6bf096e6",
+        "sample_hash": "d26a9d80e645e9bd9abe88b552dbfd6e93446f8bc198a59a521b0984fb04bfd8",
         "sample_filename": "kg-0248-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7237,7 +7237,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "09f060ef709475f808e742318aec669a7f3f3433298babfcd7377ef5233b0e1e",
+        "sample_hash": "cc13402aa6c90a9783032af1e97bbf43e6ef4d096bf365134e7e640acf5a5d78",
         "sample_filename": "kg-0249-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7266,7 +7266,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "45ac5f1fd503e528a8d0d2611adfc7ca90c51663c755bf2c325073250136934e",
+        "sample_hash": "6908c27741f619376323afd04ab653cced8c15b4666bc1ef6f7848e55a4c8f70",
         "sample_filename": "kg-0250-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7295,7 +7295,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7379ea97add50b20a4a64ad91130cac2dc775bdb5d357f24e208659d98c7f046",
+        "sample_hash": "53dcc5d32d97d0f298a930b3bae018603e8e00ab549d733256a37b703b0dba4b",
         "sample_filename": "kg-0251-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7324,7 +7324,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0f7dbe27af6961b05210346914c057523f179b6bd3fc81b47ec73b2ded9aa8d6",
+        "sample_hash": "b9e5ee34deb8281784a6ba44d0c6ba4cf58a6fcf4cd6202ff754285f1da1bf85",
         "sample_filename": "kg-0252-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7353,7 +7353,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "259fe9cf34c3f8d880bc9f1172777d7a7e59e51368b9d6dcce8703d58323ccfe",
+        "sample_hash": "00190bf31b38b2b273f7171237bce502fd3223476ec6f416eb09471b23f20fdf",
         "sample_filename": "kg-0253-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7382,7 +7382,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "cbba3f3708af2dc0c035db79cd2f696204dca87b62d719c42139ee3dcdfb06e6",
+        "sample_hash": "37ced4129fcda16263804e8a74276af946807b6e12db83bdc48f546603e4a6a0",
         "sample_filename": "kg-0254-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7411,7 +7411,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "77eb249fac43f2a8a8fba7e155e6e54a1421fbe3d189ecacb06568a5d43dd0ce",
+        "sample_hash": "1643bbba46c474e47d1ae671205e2d49dac5d983fcf16638a992eab8ebac4ff7",
         "sample_filename": "kg-0255-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7440,7 +7440,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "4d11669f4ee994a83512a9e17fc1474a4a71bde3bf610eac1f35eaa5edd9b2ce",
+        "sample_hash": "bd34e39f07d4d64ecc421c724fdeaf929b0702c49825a4f18cb8508679cd9534",
         "sample_filename": "kg-0256-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7469,7 +7469,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "83d4a537b725b3c02f7e8179bee02f6237ab8e7bb89a1fc4e4e7143d19a84ce6",
+        "sample_hash": "8b23f610d3dd910e8861d52a662ff7f4841410751bf179ee85c09fe9cd739930",
         "sample_filename": "kg-0257-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7498,7 +7498,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "d6518e6f74c66b784afb7fb1027c6c1a6aec81b3ac7fc17c5ea3dc7513d9339e",
+        "sample_hash": "cfaa7ebde5c38f066cd74cda40bc0024b310d1b6a0d9855d9d6067cb6bda9c59",
         "sample_filename": "kg-0258-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7527,7 +7527,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "f493dff72d6212805344c43907c11622fb7bd93b1e328e847ae466fdd12b43a6",
+        "sample_hash": "dbb7b0c031aaab9e2e29dada426a0456037deb125b5e67033bc267b19e6e07fa",
         "sample_filename": "kg-0259-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7556,7 +7556,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "81ec1bb7f1e122401fd067f922f30de22161e4fb140e6e44f6ebdabd76480b66",
+        "sample_hash": "9a5dfd48afb0121f9df5b06708216c5fd6292eeef1aebd976649021b627dd66c",
         "sample_filename": "kg-0260-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7585,7 +7585,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "01c7c72f1396683834800071413430da693a4a73e56a4e3c5295ed354161885e",
+        "sample_hash": "e4638598af46120f370e4a91c3047d7f274620e982cab4aaa533ce1004882e0b",
         "sample_filename": "kg-0261-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7614,7 +7614,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b93a667fb1535e88dfc21dc195f5452a028325c3cea2c08c2fd4c685febc98ae",
+        "sample_hash": "5772b944780b7fd8fe522b7cbf081176767b9683d3a4c3639d7b108bcc3bb9cd",
         "sample_filename": "kg-0262-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7643,7 +7643,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "35d4622760d4c5b03b945869ba213b525ed93f6b8b62e5b42dd65f2ddb168cd6",
+        "sample_hash": "6344695138eb848863bf11c3d94e4b25eea520ffe348b2f8315f76ae33cbed64",
         "sample_filename": "kg-0263-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7672,7 +7672,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3ee5fd8f8bcd6098ea871ad16234cd3a5d2fc8d301820e9c8d8f4f9549edecbe",
+        "sample_hash": "186c6d03274896627ee514d2febbf12722f62e4eff8f45728c48e80aa99abde3",
         "sample_filename": "kg-0264-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7701,7 +7701,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "dd50c317eb353ba0f69453590c492b42b96e945b21580fa4dfbace1dc806b0c6",
+        "sample_hash": "3987f08c5d89dd49cc7fdddbfcc8db1b7e86cb874f393193f2429664b7976f68",
         "sample_filename": "kg-0265-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7730,7 +7730,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "588f6f5742b493e01c169799b75c9b82cfad709b0aa897e4068f425d859d5106",
+        "sample_hash": "0f0553fb19ee3da9e419aab56869693f800bef20b69a810167b890f0cc0e4109",
         "sample_filename": "kg-0266-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7759,7 +7759,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "fdbb49cf301158d8739bff119348dd7ac57d4513f08f36dc336e63d5437d2cfe",
+        "sample_hash": "16fed8d50eaee5bdcfd6fd41e893e200dfa6b672f90ad5b59ec5a9b5a6e2990f",
         "sample_filename": "kg-0267-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7788,7 +7788,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e4f0a2d753c0af6086f51b1907dd070243c7441bf5fb53641de265dd92605c86",
+        "sample_hash": "405ddfd505ec8987946ea0ff104a2adc03a248a2eb2dcc346432aa5ab2c56882",
         "sample_filename": "kg-0268-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7817,7 +7817,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "7ccde05f0e0582681f01cba1054b5d0a0f7287a32c884c6ce7c75c65496d188e",
+        "sample_hash": "20ebb9197f27f8ecb55a58a34bcc4ececd2ae9a54fc995bc8e21ae4680b960f4",
         "sample_filename": "kg-0269-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7846,7 +7846,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "76d9c78fdbd60a98dedea4d158f5373ab05312d310e2389ca8e659957ad5d6be",
+        "sample_hash": "7700a2d84af167c1f9362f225051d69ae0788561011b54937ba65f51d9e76472",
         "sample_filename": "kg-0270-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7875,7 +7875,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0d318607434f739069b57049a46b9d32cba9cb4ba6d07b946391df0d5a4ad6b6",
+        "sample_hash": "25bfccef41a0d3d1c32470f7178ee4762b77d83f32349144f0341d6ba7cddb81",
         "sample_filename": "kg-0271-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7904,7 +7904,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1dfcc827e6f94bb0082afe690cc001521436256b4353ebb49151852d0231d2d6",
+        "sample_hash": "adcb5193c7b944962db9306ab06c139088533d40590c44c2263d7f70bf7be177",
         "sample_filename": "kg-0272-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7933,7 +7933,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e83489af963762b86db3b2f196d11b5a270eecf38fbd28bc30a57fb59fe452de",
+        "sample_hash": "62b63eba44f53b4c0efd093e0d1056c1082dbc2b4c6bbb2b7970700993c035ea",
         "sample_filename": "kg-0273-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7962,7 +7962,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "83329b378a62c9c0d620b7793a8d8562222a047bf9cfb5c488d9ca3d467e22e6",
+        "sample_hash": "92b8134bf74755699a1c33bf20fb15fb12b86133130a73f2908f514f0855a003",
         "sample_filename": "kg-0274-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -7991,7 +7991,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "122e9adf1f8cf4e8dc467621f7dbbf8a2d55222322bb9eec1cc1e6e5179d5b0e",
+        "sample_hash": "2cceeb61707142ef003215af7b79afa3ac5c89dda13af0e02467338d4028431a",
         "sample_filename": "kg-0275-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8020,7 +8020,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "1eadb5aff9caceb828ad5ef1d3bd075a7cb918f3ad3194bcc9302bb597113ede",
+        "sample_hash": "4cd5d95655a4ecb4acf55c6adc131cedbb43f2fd030496bbf3b2290df7d25ade",
         "sample_filename": "kg-0276-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8049,7 +8049,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "3d99f447475fedd0c6a23689e594ef728cdbe98bea83a5d4752a554d7c58d8f6",
+        "sample_hash": "cfd31eac052026399fb53726b49b26ddc55db7af31574353bf02de0d021391a7",
         "sample_filename": "kg-0277-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8078,7 +8078,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ce11fddfc68f67e83252f921856d528a7276c523da0851ec8e64a9e57c512e0e",
+        "sample_hash": "7cb71a546475e1ced26f864077fbf6ae998e8c8ca6768c4bca6c921b06321b0b",
         "sample_filename": "kg-0278-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8107,7 +8107,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "faadb0c7d59dc2500052a3097b5873f2fa2b060b022eda5405da21cd8d0dbd76",
+        "sample_hash": "b769ec9fdd6d79159d12c4088ed54755d56c8e5e6a9a63a5c6ca811d3e626044",
         "sample_filename": "kg-0279-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8136,7 +8136,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "cd9a871707d9bfa0e2b7975997cf2f4264fb585b624f93a42441121d3affb4c6",
+        "sample_hash": "e0db81c22245f91450dd42af489b36f8d8ebe91227bf12a66f3f728cb726c0ee",
         "sample_filename": "kg-0280-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8165,7 +8165,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "5779ee7f5a886688a634a5c1256d4d2aa848adc3017dc88c980d4e85fe1aa0ae",
+        "sample_hash": "965bf281134bc1a156ac7f9bdced3661697be19541e5d40386fb549feac932c4",
         "sample_filename": "kg-0281-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8194,7 +8194,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8a9bfabfee9d1ec8e95e4a010d9a1d6a9b72ea0389ebb0cc449122c5ae52a0ee",
+        "sample_hash": "1d0da0c71801d63e471b7a61eeb57b367b8505cd8701fb4147c49cbc62345b34",
         "sample_filename": "kg-0282-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8223,7 +8223,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e26b2b57d37d8fe05a28d39924541782c4662c9bf33e93e4de5e7e5d9341cd06",
+        "sample_hash": "84d3761797ad696037bee5baf9c32c3f4923cb46e98ad6ecd3ab0658e9356d04",
         "sample_filename": "kg-0283-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8252,7 +8252,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "ff7edbaf6f5c14b82634c4f107908d5a164ebef3431f5abc5f2c11b5c3f144de",
+        "sample_hash": "efa8fac37979e20c717e527214eb28e69c4a374b45b1918f412e578d5f6fa871",
         "sample_filename": "kg-0284-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8281,7 +8281,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "bcd00c47f51e85d0a5414e892bec87723e44018beed43dd430bb6d4de80270f6",
+        "sample_hash": "94e4290517f0bb35b219423a6e67bc070152ce591d8f16d045688678e8fd5b41",
         "sample_filename": "kg-0285-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8310,7 +8310,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "e1c391374ae2dfc03315ed79009ddb62461b7a7b4e884bc4955f803d3bf6f8e6",
+        "sample_hash": "a14b6986cc24b3a3dc900565c534d15d00b6088a3fbb570ea7f7ec6be45e3fb4",
         "sample_filename": "kg-0286-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8339,7 +8339,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8f7cf1ff41c55208eb22f941642c88aa36205143205d540c920c4205a8f87c2e",
+        "sample_hash": "042133010379922c83efbf50aa43c9d0d481b432cf5c6958b77ff9a0b5a7a780",
         "sample_filename": "kg-0287-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8368,7 +8368,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "22eaa9f7a2ddbc80871f4e39d3148022c342233bdd45b884abfe70fd38e62da6",
+        "sample_hash": "82ec8161f61de1fb095351750e4b1a56ea69141449fdb020f96ab61910fc8835",
         "sample_filename": "kg-0288-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8397,7 +8397,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "b9c20f2f0baa30380bb54871b412f8da19ca9273a334163ce2a13535a636505e",
+        "sample_hash": "d3057b3d2854d076d7c69add29b5d9fb96e72e4a300ebbff4a527e74f3c75822",
         "sample_filename": "kg-0289-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8426,7 +8426,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "03c226dff7bcc0e8c0be822140880b8a3061ae2340946aec0c12f2e57152a70e",
+        "sample_hash": "824bd78a24e05e4ee184da190ea1c8944b0baef5ba850274b3401c01e2f70e60",
         "sample_filename": "kg-0290-notepad.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8455,7 +8455,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "8db9eb47da38b4d08592cd89124c56724859208b8c15acd4b1702c4d5c417ff6",
+        "sample_hash": "f5a1eb5e9f4376b2f450ceb310db47fa7e0df8434282013e7c2b9abf9b9eb94d",
         "sample_filename": "kg-0291-calc.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8484,7 +8484,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6f2a4577d3d7c000502339b94199d3a222685ebb81545c0425e4fc7d71bc2126",
+        "sample_hash": "6a14b9f09b19ea1201a9d411763e549284b8ab9a65f6d4a4927d621d74c42fc9",
         "sample_filename": "kg-0292-libssl.so.3",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8513,7 +8513,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "34d474afa3dbddb8078fbdf15627b65aae3317f35511e3bcd99dcab5ec032dde",
+        "sample_hash": "5dc4054d90b501fcefa7d72d860976836732ada2c8a5ea8032d81a06fc31db4c",
         "sample_filename": "kg-0293-update-helper.bin",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8542,7 +8542,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "96d8be1764dcc6a0211e6e598988d6422746cf5bf4bbdaa4cfad291dc89a9bc6",
+        "sample_hash": "44d4d6f9ce00ec88d7b430b258f595d7e74f64c2feef2acb1316b9315a25838e",
         "sample_filename": "kg-0294-invoice.pdf",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8571,7 +8571,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "6b077c8f2cfd2f986e6c39d188463c3ac5b487d30c911d9c8a0fae95f4969bbe",
+        "sample_hash": "59540798c3b2faa93f7ea4f978aec9cf9d790ed58ae05afd111b48d35c622be2",
         "sample_filename": "kg-0295-backup.tar.gz",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8600,7 +8600,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "773a4bbfc35c1fc87fe6fb01c4c57e6a9849fb03a8a771ccb99a93c55742c1ee",
+        "sample_hash": "cefa7f69f15cf114f345a0d62e2ee906f4eda1d19d402e71627a07ab6e800166",
         "sample_filename": "kg-0296-setup.msi",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8629,7 +8629,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "deb698575528ece0fb992099625e54829b4f599b6bbbb0e48a948b5dfbc5ca06",
+        "sample_hash": "4eaf041a63a40a9186d959eaa5f5c792b97290a18497cb9fc78af53757a994a0",
         "sample_filename": "kg-0297-readme.txt",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8658,7 +8658,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "80efe03f34984c48cb0a3f811b085aea363cef833ab2fe4c587f38459c98fe6e",
+        "sample_hash": "04d7453b44651a108428fc2790e207af3ecdb75a77e957a85a39630c9945203f",
         "sample_filename": "kg-0298-driver.sys",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -8687,7 +8687,7 @@
         "tags": [
           "corpus:known-good"
         ],
-        "sample_hash": "0bc7d7b782aa1e405de2a3f98fea89e2161aa0fbfca46a44cebb16bd83ec8766",
+        "sample_hash": "9aa768eb658c398ddec1f16c74e3e6983a7782099b3b8410c61c02661bdc1df5",
         "sample_filename": "kg-0299-archive.zip",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",
@@ -10505,7 +10505,7 @@
         "tags": [
           "corpus:evasive"
         ],
-        "sample_hash": "6fe9365797d62ae049aefe99676ad2821280779b7ddf6ee4cc18e95d0ab8c806",
+        "sample_hash": "83e6e01a3c4a6cc85168e811c66256d5527f44f63c972aea41b745f2e1891358",
         "sample_filename": "dropper.exe",
         "agent_version": "8.19.0",
         "telemetry_cluster_version": "8.19.0",

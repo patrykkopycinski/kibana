@@ -24,11 +24,12 @@
  *     --count 300 \
  *     --out ../x-pack/solutions/security/packages/kbn-evals-suite-alertzero-detonate-summary/evals/fixtures
  */
+import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { DetonateCorpusEntry } from '../src/types';
+import type { DetonateCorpusEntry, DetonateCorpusTask } from '../src/types';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -36,30 +37,22 @@ const arg = (name: string, fallback?: string): string => {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
   if (hit) return hit.split('=').slice(1).join('=');
   const idx = process.argv.indexOf(`--${name}`);
-  if (idx !== -1 && process.argv[idx + 1]) return process.argv[idx + 1]!;
+  const value = idx === -1 ? undefined : process.argv[idx + 1];
+  if (value) return value;
   if (fallback !== undefined) return fallback;
   throw new Error(`missing required --${name}`);
 };
 
-const sha256Of = (seed: string): string => {
-  // Deterministic per-seed digest: FNV-1a expanded to 64 hex chars. Not
-  // cryptographic — it only needs to be stable and unique per corpus entry so
-  // the replay selector treats each as its own (unmatched → negative control)
-  // sample, the same way an unknown known-good hash behaves in production.
-  let h1 = 0x811c9dc5;
-  let h2 = 0x01000193;
-  for (let i = 0; i < seed.length; i++) {
-    h1 ^= seed.charCodeAt(i);
-    h1 = Math.imul(h1, 16777619) >>> 0;
-    h2 = Math.imul(h2 ^ seed.charCodeAt(i), 2246822519) >>> 0;
-  }
-  let out = '';
-  let s = h1 ^ h2;
-  while (out.length < 64) {
-    s = (Math.imul(s, 2654435761) + 0x9e3779b9) >>> 0;
-    out += s.toString(16).padStart(8, '0');
-  }
-  return out.slice(0, 64);
+// Stable and unique per corpus entry, so the replay selector treats each as
+// its own unmatched sample — the same way an unknown known-good hash behaves
+// in production.
+const sha256Of = (seed: string): string => createHash('sha256').update(seed).digest('hex');
+
+// Task documents carry the agent enrollment token, which must never reach the corpus.
+const recorded = (task: DetonateCorpusTask): DetonateCorpusTask => {
+  const copy: DetonateCorpusTask & { agent_fleet_enrollment_token?: unknown } = { ...task };
+  delete copy.agent_fleet_enrollment_token;
+  return copy;
 };
 
 const knownGoodFilename = (i: number): string => {
@@ -118,7 +111,7 @@ const main = async () => {
       tags: ['corpus:known-good'],
     });
     const final = await runPipeline({ store, executor, taskId: task.id, stepDelayMs: 0 });
-    entries.push({ id: `kg-${i}`, label: 'known_good_quiet', task: final });
+    entries.push({ id: `kg-${i}`, label: 'known_good_quiet', task: recorded(final) });
   }
 
   // ---- known-malware (every recorded malicious fixture) --------------------
@@ -133,7 +126,7 @@ const main = async () => {
   for (const m of malwareSubmissions) {
     const task = await store.create({ ...m, tags: ['corpus:known-malware'] });
     const final = await runPipeline({ store, executor, taskId: task.id, stepDelayMs: 0 });
-    entries.push({ id: `mw-${m.id}`, label: 'known_malicious', task: final });
+    entries.push({ id: `mw-${m.id}`, label: 'known_malicious', task: recorded(final) });
   }
 
   // ---- evasive / no-op ------------------------------------------------------
@@ -152,14 +145,14 @@ const main = async () => {
     {},
     'vm boot failed: image unavailable'
   );
-  entries.push({ id: 'ev-failed-run', label: 'evasive_no_alerts', task: forcedFail });
+  entries.push({ id: 'ev-failed-run', label: 'evasive_no_alerts', task: recorded(forcedFail) });
 
   const noopTask = await store.create({
     exec_commands: ['uname -a'],
     tags: ['corpus:evasive'],
   });
   const noopFinal = await runPipeline({ store, executor, taskId: noopTask.id, stepDelayMs: 0 });
-  entries.push({ id: 'ev-noop-commands', label: 'evasive_no_alerts', task: noopFinal });
+  entries.push({ id: 'ev-noop-commands', label: 'evasive_no_alerts', task: recorded(noopFinal) });
 
   // ---- write ----------------------------------------------------------------
   const counts = entries.reduce<Record<string, number>>((acc, e) => {
@@ -181,14 +174,16 @@ const main = async () => {
     )
   );
 
-  console.log(`wrote ${entries.length} entries to ${file}`);
-  console.log('label counts:', JSON.stringify(counts));
+  process.stdout.write(`wrote ${entries.length} entries to ${file}\n`);
+  process.stdout.write(`label counts: ${JSON.stringify(counts)}\n`);
   if ((counts.known_good_quiet ?? 0) < 300) {
     throw new Error(`known-good corpus below 300 — regenerate with --count 300`);
   }
 };
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
+main().catch((error: unknown) => {
+  process.stderr.write(
+    `${error instanceof Error ? error.stack ?? error.message : String(error)}\n`
+  );
+  process.exitCode = 1;
 });

@@ -29,10 +29,11 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { DETONATE_WORKERS } from '../../../common/detonate_prototype';
+import { DETONATE_WORKER_LABELS, DETONATE_WORKERS } from '../../../common/detonate_prototype';
 import type { DetonateTaskUpdate, DetonateWorkerStatus } from '../../../common/detonate_prototype';
 import { useDetonationTaskUpdates } from '../hooks/use_detonate';
 import { DETONATE_ICONS } from '../icons';
@@ -40,7 +41,7 @@ import * as i18n from '../translations';
 
 export const WORKER_TIMELINE_TEST_ID = 'detonatePrototypeWorkerTimeline';
 
-/** `detonate.workers.prepare_task_data` → `prepare task data`, display only. */
+/** `detonate.workers.prepare_task_data` → `prepare task data`: the hover text and the test id. */
 const workerLabel = (worker: string) => worker.replace('detonate.workers.', '').replace(/_/g, ' ');
 
 const statusIcon = (status: DetonateWorkerStatus | undefined) => {
@@ -88,15 +89,18 @@ export const WorkerTimeline = React.memo<Props>(({ taskId, isComplete }) => {
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>{statusIcon(entry?.status)}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="xs"
-                    data-test-subj={`${WORKER_TIMELINE_TEST_ID}-${workerLabel(worker).replace(
-                      / /g,
-                      '_'
-                    )}`}
-                  >
-                    {workerLabel(worker)}
-                  </EuiText>
+                  <EuiToolTip content={workerLabel(worker)}>
+                    <EuiText
+                      size="xs"
+                      tabIndex={0}
+                      data-test-subj={`${WORKER_TIMELINE_TEST_ID}-${workerLabel(worker).replace(
+                        / /g,
+                        '_'
+                      )}`}
+                    >
+                      {DETONATE_WORKER_LABELS[worker]}
+                    </EuiText>
+                  </EuiToolTip>
                 </EuiFlexItem>
                 {entry && (
                   <EuiFlexItem grow={false}>

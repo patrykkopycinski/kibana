@@ -6,6 +6,7 @@
  */
 
 import type { DetonateTask } from '../../common/detonate_prototype';
+import { DETONATE_ESCALATED_TAG } from '../../common/detonate_prototype';
 import { toDetonationRecord } from './detonation_record';
 
 const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
@@ -149,6 +150,21 @@ describe('toDetonationRecord', () => {
     ]) {
       expect(record).not.toHaveProperty([field]);
     }
+  });
+
+  it('keeps the verdict of a run escalated to a partner sandbox', () => {
+    const record = toDetonationRecord(
+      createTask({
+        tags: ['space:default', DETONATE_ESCALATED_TAG],
+        diagnostic_endpoint_alerts_count: 1,
+      })
+    );
+
+    expect(record).toMatchObject({
+      'detonate.state': 'escalated',
+      'detonate.verdict': 'inconclusive',
+      'detonate.confidence': 'low',
+    });
   });
 
   it('takes the duration from the last update of a finished run', () => {

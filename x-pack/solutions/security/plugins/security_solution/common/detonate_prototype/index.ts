@@ -103,10 +103,17 @@ export const DETONATE_WORKER_LABELS: Readonly<Record<DetonateWorkerName, string>
   'detonate.workers.make_summary': 'Writing the summary',
 };
 
+export interface DetonationStep {
+  step: number;
+  of: number;
+  label: string;
+  worker: string;
+}
+
 /** The step a run is on, with both its plain label and the raw worker name. */
 export const detonationStep = (
   task: Pick<DetonateTask, 'last_worker_name' | 'last_worker_status'>
-): { step: number; of: number; label: string; worker: string } => {
+): DetonationStep => {
   const { step, of } = detonationProgress(task);
   return {
     step,
@@ -626,6 +633,96 @@ export const detonationConfidence = (verdict: DetonateVerdictName): DetonateConf
     default:
       return 'low';
   }
+};
+
+/* -------------------------------------------------------------------------- */
+/* State                                                                       */
+/* -------------------------------------------------------------------------- */
+
+/** States read off a run. */
+export const DETONATION_RUN_STATES = [
+  'running',
+  'complete',
+  'failed',
+  'inconclusive',
+  'escalated',
+] as const;
+export type DetonationRunState = (typeof DETONATION_RUN_STATES)[number];
+
+/** States of an alert that has no run to read them from. */
+export const DETONATION_ALERT_STATES = [
+  'queued',
+  'not_analyzed',
+  'allowance_reached',
+  'unsupported_os',
+] as const;
+export type DetonationAlertState = (typeof DETONATION_ALERT_STATES)[number];
+
+export const DETONATION_STATES = [...DETONATION_RUN_STATES, ...DETONATION_ALERT_STATES] as const;
+export type DetonationState = (typeof DETONATION_STATES)[number];
+
+/**
+ * Run tag for a run handed to a partner sandbox. No partner integration exists,
+ * so only fixtures carry it.
+ */
+export const DETONATE_ESCALATED_TAG = `${DETONATE_TAG_PREFIX}escalated` as const;
+
+/** Alert tag a Worker writes when it chose to detonate an alert but has not submitted it yet. */
+export const DETONATE_QUEUED_TAG = `${DETONATE_TAG_PREFIX}queued` as const;
+
+export const deriveDetonationRunState = (task: DetonateTask): DetonationRunState => {
+  if (!isDetonationComplete(task)) return 'running';
+  if (task.tags.includes(DETONATE_ESCALATED_TAG)) return 'escalated';
+  if (isDetonationFailed(task)) return 'failed';
+  return deriveDetonateVerdict(task).verdict === 'inconclusive' ? 'inconclusive' : 'complete';
+};
+
+/** ECS `host.os.type` to the service's OS family; `undefined` for one it has no VM for. */
+export const detonateOsFamilyFromHostOsType = (
+  hostOsType: string
+): DetonateVmOsFamily | undefined => {
+  switch (hostOsType.toLowerCase()) {
+    case 'linux':
+      return 'linux';
+    case 'windows':
+      return 'windows';
+    case 'macos':
+      return 'darwin';
+    default:
+      return undefined;
+  }
+};
+
+export interface DetonationStateInput {
+  /** The alert's latest run, if it has one. */
+  run?: DetonateTask;
+  alertTags?: readonly string[];
+  /** ECS `host.os.type` of the alert. Missing means "cannot tell", not "unsupported". */
+  hostOsType?: string;
+  allowanceExhausted?: boolean;
+  supportedOsFamilies?: readonly DetonateVmOsFamily[];
+}
+
+/**
+ * The one state every surface shows for a run or an alert. A run always wins;
+ * without one, an OS the sandbox cannot run blocks everything else, then the
+ * monthly allowance, then a Worker's queue marker.
+ */
+export const deriveDetonationState = ({
+  run,
+  alertTags = [],
+  hostOsType,
+  allowanceExhausted = false,
+  supportedOsFamilies = DETONATE_VM_OS_FAMILIES,
+}: DetonationStateInput): DetonationState => {
+  if (run) return deriveDetonationRunState(run);
+  if (hostOsType) {
+    const family = detonateOsFamilyFromHostOsType(hostOsType);
+    if (!family || !supportedOsFamilies.includes(family)) return 'unsupported_os';
+  }
+  if (allowanceExhausted) return 'allowance_reached';
+  if (alertTags.includes(DETONATE_QUEUED_TAG)) return 'queued';
+  return 'not_analyzed';
 };
 
 /**

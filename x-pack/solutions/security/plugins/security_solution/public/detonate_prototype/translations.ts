@@ -142,6 +142,56 @@ export const STATUS_FAILED = i18n.translate(
   { defaultMessage: 'Failed' }
 );
 
+export const STATUS_INCONCLUSIVE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.inconclusive',
+  { defaultMessage: 'Inconclusive' }
+);
+
+export const STATUS_ESCALATED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.escalated',
+  { defaultMessage: 'Escalated' }
+);
+
+export const STATUS_ESCALATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.escalatedDescription',
+  { defaultMessage: 'Sent to a partner sandbox for a second analysis.' }
+);
+
+export const STATUS_QUEUED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.queued',
+  { defaultMessage: 'Queued' }
+);
+
+export const STATUS_QUEUED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.queuedDescription',
+  { defaultMessage: 'A Worker picked this alert for detonation. The run has not started yet.' }
+);
+
+export const STATUS_NOT_ANALYZED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.notAnalyzed',
+  { defaultMessage: 'Not analyzed' }
+);
+
+export const STATUS_ALLOWANCE_REACHED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.allowanceReached',
+  { defaultMessage: 'Allowance reached' }
+);
+
+export const STATUS_ALLOWANCE_REACHED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.allowanceReachedDescription',
+  { defaultMessage: 'Queued until the monthly allowance resets.' }
+);
+
+export const STATUS_UNSUPPORTED_OS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.unsupportedOs',
+  { defaultMessage: 'Unsupported OS' }
+);
+
+export const STATUS_UNSUPPORTED_OS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.status.unsupportedOsDescription',
+  { defaultMessage: "The sandbox has no virtual machine for this host's operating system." }
+);
+
 export const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.timelineTitle',
   { defaultMessage: 'Detonation progress' }

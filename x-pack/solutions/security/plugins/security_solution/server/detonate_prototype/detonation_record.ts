@@ -11,20 +11,18 @@ import type {
   DetonateTask,
   DetonateTaskUpdate,
   DetonateVerdictName,
+  DetonationRunState,
 } from '../../common/detonate_prototype';
 import {
   deriveDetonateVerdict,
+  deriveDetonationRunState,
   detonationConfidence,
   detonationStep,
   diagnosticOnlyEventCodes,
   isDetonationComplete,
-  isDetonationFailed,
   parseAlertTag,
   totalDetonationAlerts,
 } from '../../common/detonate_prototype';
-
-/** Until the full state model lands, a run is one of these. */
-export type DetonationRecordState = 'running' | 'complete' | 'failed' | 'inconclusive';
 
 /**
  * A run as one flat, ECS-style document: what the result flyout's Table and
@@ -40,7 +38,7 @@ export interface DetonationRecord {
   'event.duration'?: number;
   'detonate.task_id': string;
   'detonate.alert_id'?: string;
-  'detonate.state': DetonationRecordState;
+  'detonate.state': DetonationRunState;
   'detonate.verdict'?: DetonateVerdictName;
   'detonate.confidence'?: DetonateConfidence;
   'detonate.evidence'?: string;
@@ -69,12 +67,6 @@ export interface DetonationRecord {
   'detonate.iocs.file_hashes'?: string[];
 }
 
-const recordState = (task: DetonateTask, verdict: DetonateVerdictName): DetonationRecordState => {
-  if (isDetonationFailed(task)) return 'failed';
-  if (!isDetonationComplete(task)) return 'running';
-  return verdict === 'inconclusive' ? 'inconclusive' : 'complete';
-};
-
 /** When the run reached its last update, if it has finished. */
 const finishedAt = (task: DetonateTask, updates: readonly DetonateTaskUpdate[]) => {
   if (!isDetonationComplete(task)) return undefined;
@@ -90,7 +82,7 @@ export const toDetonationRecord = (
   }: { iocs?: DetonateExtractedIocs; updates?: readonly DetonateTaskUpdate[] } = {}
 ): DetonationRecord => {
   const derived = deriveDetonateVerdict(task);
-  const state = recordState(task, derived.verdict);
+  const state = deriveDetonationRunState(task);
   // A running run has no verdict yet, only the placeholder the derivation returns.
   const verdict = state === 'running' ? undefined : derived.verdict;
   const step = detonationStep(task);

@@ -174,8 +174,9 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
     ...(task.sample_filename ? { sample_filename: task.sample_filename } : {}),
     ...(task.sample_source ? { sample_source: task.sample_source } : {}),
 
+    // No sandbox agent, endpoint or VM identifiers: they name lab infrastructure,
+    // and nothing an analyst does with a verdict needs them.
     ...(task.vm_os_family ? { vm_os_family: task.vm_os_family } : {}),
-    ...(task.elastic_agent_id ? { elastic_agent_id: task.elastic_agent_id } : {}),
 
     total_alerts_count: totalDetonationAlerts(task),
     production_endpoint_alerts: {

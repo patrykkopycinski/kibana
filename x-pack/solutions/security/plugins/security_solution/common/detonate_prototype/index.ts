@@ -32,6 +32,8 @@ export const DETONATE_SUBMIT_FILE_PATH = `${DETONATE_PROTOTYPE_API}/submit_file`
 export const DETONATE_SUBMIT_HASH_PATH = `${DETONATE_PROTOTYPE_API}/submit_hash` as const;
 export const DETONATE_TASKS_PATH = `${DETONATE_PROTOTYPE_API}/tasks` as const;
 export const DETONATE_HEALTHCHECK_PATH = `${DETONATE_PROTOTYPE_API}/healthcheck` as const;
+/** Kibana-shaped views of a run, as opposed to the service's raw task. */
+export const DETONATE_RUNS_PATH = `${DETONATE_PROTOTYPE_API}/runs` as const;
 
 /** The prototype's app route, registered as a deep link under Security. */
 export const DETONATE_PROTOTYPE_APP_PATH = '/detonate_prototype' as const;
@@ -86,6 +88,31 @@ export const detonationProgress = (
     step: index < 0 ? 0 : index + 1,
     of: DETONATE_WORKERS.length,
     label: task.last_worker_name.replace('detonate.workers.', ''),
+  };
+};
+
+/**
+ * What each worker is doing, in words an analyst reads on a step chip. The raw
+ * worker name stays available beside it (tooltip, JSON) for anyone debugging
+ * the service.
+ */
+export const DETONATE_WORKER_LABELS: Readonly<Record<DetonateWorkerName, string>> = {
+  'detonate.workers.prepare_task_data': 'Preparing the sample',
+  'detonate.workers.start_vm': 'Running in the sandbox',
+  'detonate.workers.stop_vm': 'Stopping the sandbox',
+  'detonate.workers.make_summary': 'Writing the summary',
+};
+
+/** The step a run is on, with both its plain label and the raw worker name. */
+export const detonationStep = (
+  task: Pick<DetonateTask, 'last_worker_name' | 'last_worker_status'>
+): { step: number; of: number; label: string; worker: string } => {
+  const { step, of } = detonationProgress(task);
+  return {
+    step,
+    of,
+    label: DETONATE_WORKER_LABELS[task.last_worker_name] ?? task.last_worker_name,
+    worker: task.last_worker_name,
   };
 };
 
@@ -580,6 +607,25 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
     evidence,
     suggested_tag: detonateVerdictTag(verdict),
   };
+};
+
+export const DETONATE_CONFIDENCE_LEVELS = ['high', 'medium', 'low'] as const;
+export type DetonateConfidence = (typeof DETONATE_CONFIDENCE_LEVELS)[number];
+
+/**
+ * How much weight a verdict carries. `malicious` rests on production alerts or
+ * rule hits, so it is high; `quiet` is a real observation that proves nothing
+ * about what was not detected, so it is medium; `inconclusive` is low.
+ */
+export const detonationConfidence = (verdict: DetonateVerdictName): DetonateConfidence => {
+  switch (verdict) {
+    case 'malicious':
+      return 'high';
+    case 'quiet':
+      return 'medium';
+    default:
+      return 'low';
+  }
 };
 
 /**

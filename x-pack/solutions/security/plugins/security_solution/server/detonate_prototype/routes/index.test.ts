@@ -15,10 +15,13 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_PRIOR_RUNS_PATH,
+  DETONATE_RUNS_PATH,
   DETONATE_TASKS_PATH,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { registerDetonatePrototypeRoutes } from '.';
+
+const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
 
 describe('registerDetonatePrototypeRoutes', () => {
   let router: RouterMock;
@@ -60,6 +63,8 @@ describe('registerDetonatePrototypeRoutes', () => {
   const alertTasksHandler = () =>
     router.versioned.getRoute('get', `${DETONATE_TASKS_PATH}/alert/{alertId}`).versions['1']
       .handler;
+
+  const recordHandler = () => router.versioned.getRoute('get', RECORD_PATH).versions['1'].handler;
 
   const priorRunsHandler = () =>
     router.versioned.getRoute('get', `${DETONATE_PRIOR_RUNS_PATH}/{sha256}`).versions['1'].handler;
@@ -146,12 +151,15 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('opens every route to either Security Solution access or the Detonate privilege', () => {
-      const securityConfigs = [
-        ...router.versioned.get.mock.calls.map(([config]) => config.security),
-        ...router.versioned.post.mock.calls.map(([config]) => config.security),
+      const routeConfigs = [
+        ...router.versioned.get.mock.calls.map(([config]) => config),
+        ...router.versioned.post.mock.calls.map(([config]) => config),
       ];
+      const securityConfigs = routeConfigs
+        .filter(({ path }) => path !== RECORD_PATH)
+        .map(({ security }) => security);
 
-      expect(securityConfigs.length).toBeGreaterThan(0);
+      expect(securityConfigs.length).toBe(routeConfigs.length - 1);
       for (const security of securityConfigs) {
         expect(security).toEqual({
           authz: {
@@ -533,6 +541,107 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 404 })
       );
+    });
+  });
+
+  describe('run record', () => {
+    const recordRequest = (id: string) =>
+      createRequest('get', `${DETONATE_RUNS_PATH}/${id}/record`, undefined, { id });
+
+    const run = {
+      id: 'run-1',
+      created_at: '2026-11-01T00:00:00.000Z',
+      tags: ['space:team-a', 'alert:alert-1'],
+      sample_hash: 'b'.repeat(64),
+      last_worker_name: 'detonate.workers.make_summary',
+      last_worker_status: 'success',
+      vm_has_internet: false,
+      vm_instance_name: 'sandbox-vm-secret-name',
+      elastic_agent_id: 'sandbox-agent-secret-id',
+      elastic_endpoint_id: 'sandbox-endpoint-secret-id',
+      production_endpoint_alerts_count: 1,
+      production_endpoint_alert_groups: [{ alerts_count: 1, event_code: 'malicious_file' }],
+      diagnostic_endpoint_alerts_count: 0,
+      diagnostic_endpoint_alert_groups: [],
+      production_detection_alerts_count: 0,
+      production_detection_alert_groups: [],
+    };
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+    });
+
+    it('also opens to AlertZero read, and only this route', () => {
+      const [[config]] = router.versioned.get.mock.calls.filter(
+        ([{ path }]) => path === RECORD_PATH
+      );
+
+      expect(config.security).toEqual({
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['securitySolution', 'securitySolution-detonateAll', 'alertzero_read'],
+            },
+          ],
+        },
+      });
+    });
+
+    it("answers 404 for another space's run without reading its timeline or alerts", async () => {
+      client.getTask.mockResolvedValue({ ...run, tags: ['space:team-b'] } as never);
+
+      await recordHandler()(createContext(), recordRequest('run-1'), mockResponse);
+
+      expect(client.getTaskUpdates).not.toHaveBeenCalled();
+      expect(client.getTaskAlerts).not.toHaveBeenCalled();
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+    });
+
+    it('returns the record with duration and IOCs, and no sandbox identifiers', async () => {
+      client.getTask.mockResolvedValue(run as never);
+      client.getTaskUpdates.mockResolvedValue([
+        { task: run, timestamp: '2026-11-01T00:03:00.000Z' },
+      ] as never);
+      client.getTaskAlerts.mockResolvedValue([
+        { dns: { question: { name: 'evil.example.com' } } },
+      ] as never);
+
+      await recordHandler()(createContext(), recordRequest('run-1'), mockResponse);
+
+      expect(client.getTaskAlerts).toHaveBeenCalledWith(
+        'run-1',
+        'production-endpoint-alerts',
+        expect.any(Number)
+      );
+      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
+        [{ body: Record<string, unknown> }]
+      >;
+      expect(body).toMatchObject({
+        'detonate.task_id': 'run-1',
+        'detonate.state': 'complete',
+        'detonate.verdict': 'malicious',
+        'event.duration': 3 * 60 * 1000 * 1_000_000,
+      });
+      expect(body).toHaveProperty(['detonate.iocs.domains']);
+      expect(JSON.stringify(body)).not.toContain('secret');
+    });
+
+    it('still answers when the timeline and alerts cannot be read', async () => {
+      client.getTask.mockResolvedValue(run as never);
+      client.getTaskUpdates.mockRejectedValue(new Error('timeline down'));
+      client.getTaskAlerts.mockRejectedValue(new Error('alerts not enrolled'));
+
+      await recordHandler()(createContext(), recordRequest('run-1'), mockResponse);
+
+      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
+        [{ body: Record<string, unknown> }]
+      >;
+      expect(body).toMatchObject({ 'detonate.task_id': 'run-1', 'detonate.state': 'complete' });
+      expect(body).not.toHaveProperty(['event.duration']);
+      expect(body).not.toHaveProperty(['detonate.iocs.domains']);
     });
   });
 

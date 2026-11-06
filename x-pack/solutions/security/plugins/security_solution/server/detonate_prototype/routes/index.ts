@@ -27,11 +27,13 @@ import type {
 } from '@kbn/core/server';
 import type { Readable } from 'stream';
 import { DETONATE_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ALERTZERO_API_PRIVILEGE_READ } from '@kbn/alertzero-plugin/common/constants';
 
 import {
   DETONATE_HEALTHCHECK_PATH,
   DETONATE_MAX_ALERT_DOCS,
   DETONATE_PRIOR_RUNS_PATH,
+  DETONATE_RUNS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
@@ -48,6 +50,9 @@ import {
   lookupPriorRunsInSpace,
   submitInSpace,
 } from '../space_scope';
+import { toDetonationRecord } from '../detonation_record';
+import { IOC_ALERT_READ_LIMIT, readTaskIocs } from '../ioc_extraction';
+import type { DetonationRecord } from '../detonation_record';
 
 /**
  * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
@@ -55,6 +60,20 @@ import {
  */
 const DETONATE_ROUTE_SECURITY = {
   authz: { requiredPrivileges: [{ anyRequired: ['securitySolution', DETONATE_API_ACTION_ALL] }] },
+};
+
+/**
+ * The run record is also read from AlertZero (the Detonation attachment), whose users may hold
+ * AlertZero read without Security access. It is read-only and space-scoped like every other route.
+ */
+export const DETONATE_RECORD_ROUTE_SECURITY = {
+  authz: {
+    requiredPrivileges: [
+      {
+        anyRequired: ['securitySolution', DETONATE_API_ACTION_ALL, ALERTZERO_API_PRIVILEGE_READ],
+      },
+    ],
+  },
 };
 
 /**
@@ -384,6 +403,47 @@ export const registerDetonatePrototypeRoutes = ({
           const client = getClient(request);
           await getTaskInSpace(client, request.params.taskId, spaceIdFromRequest(request));
           return response.ok({ body: await client.getTaskUpdates(request.params.taskId) });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  router.versioned
+    .get({
+      access: 'internal',
+      path: `${DETONATE_RUNS_PATH}/{id}/record`,
+      security: DETONATE_RECORD_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const client = getClient(request);
+          const task = await getTaskInSpace(client, request.params.id, spaceIdFromRequest(request));
+          // Both reads are best-effort: the record stays useful without a duration or IOCs.
+          const [updates, iocs] = await Promise.all([
+            client.getTaskUpdates(task.id).catch((error) => {
+              logger.debug(`Detonation ${task.id}: could not read updates: ${error}`);
+              return [];
+            }),
+            readTaskIocs(
+              task,
+              (kind) => client.getTaskAlerts(task.id, kind, IOC_ALERT_READ_LIMIT),
+              (kind, reason) =>
+                logger.debug(`Detonation ${task.id}: could not read ${kind}: ${reason}`)
+            ),
+          ]);
+          return response.ok<DetonationRecord>({
+            body: toDetonationRecord(task, { updates, iocs }),
+          });
         } catch (error) {
           return toErrorResponse(error, response);
         }

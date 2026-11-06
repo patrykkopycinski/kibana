@@ -282,6 +282,9 @@ export const SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID =
   'system-security-floor-detonate-sweep' as const;
 export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
   'system-security-forensics-endpoint-analysis' as const;
+/** Detonate prototype Forensics Worker (experimental): detonates a sample and reports the verdict. */
+export const SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID =
+  'system-security-forensics-detonate-sample' as const;
 export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =

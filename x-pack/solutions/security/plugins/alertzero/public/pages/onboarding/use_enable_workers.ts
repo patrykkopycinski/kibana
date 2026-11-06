@@ -36,7 +36,11 @@ export const useEnableWorkers = (
 ) => {
   const queryClient = useQueryClient();
   const { services } = useKibana<
-    CoreStart & { serviceAccounts?: CoreServiceAccounts; isServerless?: boolean }
+    CoreStart & {
+      serviceAccounts?: CoreServiceAccounts;
+      isServerless?: boolean;
+      detonatePrototypeDev?: boolean;
+    }
   >();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -64,7 +68,10 @@ export const useEnableWorkers = (
       services.http!,
       services.serviceAccounts,
       needsAccount,
-      { isServerless: services.isServerless ?? false }
+      {
+        isServerless: services.isServerless ?? false,
+        detonatePrototypeDev: services.detonatePrototypeDev ?? false,
+      }
     );
     const accountFailures = needsAccount.flatMap((id) => {
       const account = accounts.get(id);

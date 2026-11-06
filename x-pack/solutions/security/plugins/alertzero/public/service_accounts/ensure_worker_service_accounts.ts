@@ -10,6 +10,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
+  SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID,
   WORKER_SERVICE_ACCOUNT_NAMES,
   buildSecurityRoleUrl,
   getWorkerRoleName,
@@ -32,11 +33,28 @@ interface ListServiceAccountsResponse {
 
 export interface EnsureWorkerServiceAccountsOptions {
   isServerless: boolean;
+  /** `xpack.alertzero.detonatePrototypeDev`: accept the Detonate sample Worker's local role mirror. */
+  detonatePrototypeDev?: boolean;
 }
 
 interface RoleResponse {
-  metadata?: { _reserved?: unknown };
+  metadata?: { _reserved?: unknown; detonate_prototype_mirror?: unknown };
 }
+
+/**
+ * The Detonate prototype's sample Worker has no built-in role yet. In development only, a role
+ * created locally with `metadata.detonate_prototype_mirror: true` stands in for it on stateful.
+ */
+const acceptsDetonateMirror = (
+  accountName: string,
+  role: RoleResponse,
+  { isServerless, detonatePrototypeDev = false }: EnsureWorkerServiceAccountsOptions
+) =>
+  !isServerless &&
+  detonatePrototypeDev &&
+  accountName ===
+    WORKER_SERVICE_ACCOUNT_NAMES[SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID] &&
+  role.metadata?.detonate_prototype_mirror === true;
 
 export type WorkerServiceAccountResult =
   | { ok: true; serviceAccountId: string }
@@ -88,8 +106,9 @@ type FindRole = (accountName: string) => Promise<string>;
  * Serverless. Each is read by name, which on Serverless also finds roles hidden from the listing.
  */
 const findBuiltInRole =
-  (http: HttpStart, isServerless: boolean): FindRole =>
+  (http: HttpStart, options: EnsureWorkerServiceAccountsOptions): FindRole =>
   async (accountName) => {
+    const { isServerless } = options;
     const roleName = getWorkerRoleName(accountName, { isServerless });
     const missing = () =>
       new Error(
@@ -103,7 +122,9 @@ const findBuiltInRole =
     } catch (error) {
       throw hasStatus(error, 404) ? missing() : error;
     }
-    if (role.metadata?._reserved !== true) throw missing();
+    if (role.metadata?._reserved !== true && !acceptsDetonateMirror(accountName, role, options)) {
+      throw missing();
+    }
     return roleName;
   };
 
@@ -151,7 +172,7 @@ export const ensureWorkerServiceAccounts = async (
   http: HttpStart,
   serviceAccounts: CoreServiceAccounts | undefined,
   workerIds: readonly string[],
-  { isServerless }: EnsureWorkerServiceAccountsOptions
+  options: EnsureWorkerServiceAccountsOptions
 ): Promise<Map<string, WorkerServiceAccountResult>> => {
   const failAll = (error: string) =>
     new Map(
@@ -168,7 +189,7 @@ export const ensureWorkerServiceAccounts = async (
     return failAll(toMessage(error));
   }
 
-  const findRole = findBuiltInRole(http, isServerless);
+  const findRole = findBuiltInRole(http, options);
   const results = await Promise.all(
     workerIds.map(
       async (workerId): Promise<[string, WorkerServiceAccountResult]> => [

@@ -26,6 +26,7 @@ interface RenderAppParams {
   params: AppMountParameters;
   availability$: Observable<SubscriptionAvailability>;
   isServerless: boolean;
+  detonatePrototypeDev: boolean;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -41,6 +42,7 @@ export const renderApp = async ({
   params,
   availability$,
   isServerless,
+  detonatePrototypeDev,
 }: RenderAppParams): Promise<AppUnmount> => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
@@ -62,6 +64,7 @@ export const renderApp = async ({
         // service-account API is exposed under its own key.
         serviceAccounts: coreStart.security.serviceAccounts,
         isServerless,
+        detonatePrototypeDev,
         appParams: { history: params.history },
       }}
     >

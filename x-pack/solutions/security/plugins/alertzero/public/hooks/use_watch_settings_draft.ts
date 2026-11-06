@@ -74,8 +74,14 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
   const {
-    services: { http, serviceAccounts, isServerless = false },
-  } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts; isServerless?: boolean }>();
+    services: { http, serviceAccounts, isServerless = false, detonatePrototypeDev = false },
+  } = useKibana<
+    CoreStart & {
+      serviceAccounts?: CoreServiceAccounts;
+      isServerless?: boolean;
+      detonatePrototypeDev?: boolean;
+    }
+  >();
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -179,7 +185,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         http,
         serviceAccounts,
         needsAccount.map((worker) => worker.id),
-        { isServerless }
+        { isServerless, detonatePrototypeDev }
       );
 
       for (const worker of outstanding) {
@@ -227,7 +233,16 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       setIsSaving(false);
     }
     return savedWorkers;
-  }, [http, isServerless, mutateAsync, overlays, resolve, serviceAccounts, workers]);
+  }, [
+    detonatePrototypeDev,
+    http,
+    isServerless,
+    mutateAsync,
+    overlays,
+    resolve,
+    serviceAccounts,
+    workers,
+  ]);
 
   return {
     discard,

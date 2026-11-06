@@ -17,6 +17,7 @@ import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugi
 
 export interface AlertZeroClientConfig {
   enabled: boolean;
+  detonatePrototypeDev?: boolean;
 }
 
 export type AlertZeroSetupDependencies = Record<string, never>;

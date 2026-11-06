@@ -12,6 +12,7 @@ import {
   WORKER_SERVICE_ACCOUNT_NAMES,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID,
   buildSecurityRoleUrl,
   getWorkerRoleName,
 } from '@kbn/alertzero-common';
@@ -22,6 +23,7 @@ import {
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const DETONATE = SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID;
 const STATEFUL = { isServerless: false };
 const SERVERLESS = { isServerless: true };
 
@@ -46,7 +48,7 @@ const account = (
 
 interface RoleEntry {
   name: string;
-  metadata?: { _reserved?: boolean };
+  metadata?: { _reserved?: boolean; detonate_prototype_mirror?: boolean };
 }
 
 const reserved = (name: string): RoleEntry => ({ name, metadata: { _reserved: true } });
@@ -272,6 +274,66 @@ describe('ensureWorkerServiceAccounts', () => {
       const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], options);
 
       expect(results.get(TRIAGE)).toEqual({ ok: false, error: 'Forbidden' });
+      expect(serviceAccounts.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Detonate prototype role mirror', () => {
+    const mirror = (name: string): RoleEntry => ({
+      name,
+      metadata: { detonate_prototype_mirror: true },
+    });
+    const detonateName = WORKER_SERVICE_ACCOUNT_NAMES[DETONATE];
+    const DEV = { ...STATEFUL, detonatePrototypeDev: true };
+
+    it('accepts the mirror for the Detonate sample Worker when the dev setting is on', async () => {
+      const roleName = getWorkerRoleName(detonateName, STATEFUL);
+      const { http, serviceAccounts } = setup({ roles: [mirror(roleName)] });
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [DETONATE], DEV);
+
+      expect(serviceAccounts.create).toHaveBeenCalledWith(
+        expect.objectContaining({ name: detonateName, roles: [roleName] })
+      );
+      expect(results.get(DETONATE)).toEqual({
+        ok: true,
+        serviceAccountId: `kibana/${detonateName}`,
+      });
+    });
+
+    it('rejects a mirror for any other Worker even with the dev setting on', async () => {
+      const roleName = getWorkerRoleName(WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE], STATEFUL);
+      const { http, serviceAccounts } = setup({ roles: [mirror(roleName)] });
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], DEV);
+
+      expect(results.get(TRIAGE)?.ok).toBe(false);
+      expect(serviceAccounts.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects the mirror when the dev setting is off', async () => {
+      const roleName = getWorkerRoleName(detonateName, STATEFUL);
+      const { http, serviceAccounts } = setup({ roles: [mirror(roleName)] });
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [DETONATE], {
+        ...STATEFUL,
+        detonatePrototypeDev: false,
+      });
+
+      expect(results.get(DETONATE)?.ok).toBe(false);
+      expect(serviceAccounts.create).not.toHaveBeenCalled();
+    });
+
+    it('ignores the mirror on Serverless', async () => {
+      const roleName = getWorkerRoleName(detonateName, SERVERLESS);
+      const { http, serviceAccounts } = setup({ roles: [mirror(roleName)] });
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [DETONATE], {
+        ...SERVERLESS,
+        detonatePrototypeDev: true,
+      });
+
+      expect(results.get(DETONATE)?.ok).toBe(false);
       expect(serviceAccounts.create).not.toHaveBeenCalled();
     });
   });

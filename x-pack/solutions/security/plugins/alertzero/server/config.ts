@@ -16,6 +16,16 @@ export const configSchema = schema.object({
    * user-facing per-space gate is the `securitySolution:enableAlertZero` advanced setting.
    */
   enabled: schema.boolean({ defaultValue: false }),
+  /**
+   * Detonate prototype, development only: lets the Detonate sample Worker bind to a locally created
+   * mirror of its built-in role. Setting it outside dev mode fails startup.
+   */
+  detonatePrototypeDev: schema.conditional(
+    schema.contextRef('dev'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
 });
 
 export type AlertZeroConfig = TypeOf<typeof configSchema>;
@@ -23,6 +33,7 @@ export type AlertZeroConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<AlertZeroConfig> = {
   exposeToBrowser: {
     enabled: true,
+    detonatePrototypeDev: true,
   },
   schema: configSchema,
 };

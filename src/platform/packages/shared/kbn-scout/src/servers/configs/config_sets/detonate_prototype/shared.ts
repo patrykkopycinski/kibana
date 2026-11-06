@@ -35,10 +35,12 @@ const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
  * proposals, agenticInvestigations) and the service accounts the Watch
  * Orchestrator runs as are static settings — none can be flipped at runtime.
  * The per-space gate (`securitySolution:enableAlertZero`) stays a runtime
- * advanced setting set after boot.
+ * advanced setting set after boot. `detonatePrototypeDev` lets the Detonate
+ * sample Worker bind to a local mirror of its role, created after ES is up.
  */
 const alertzeroServerArgs = [
   '--xpack.alertzero.enabled=true',
+  '--xpack.alertzero.detonatePrototypeDev=true',
   '--xpack.proposals.enabled=true',
   '--xpack.agenticInvestigations.enabled=true',
   '--xpack.security.serviceAccounts.enabled=true',
@@ -49,6 +51,11 @@ export const detonatePrototypeServerArgs = [
   `--xpack.securitySolution.detonatePrototype.serviceUrl=${
     process.env.DETONATE_SERVICE_URL ?? DEFAULT_LOCAL_SERVICE_URL
   }`,
+  ...(process.env.DETONATE_MONTHLY_ALLOWANCE
+    ? [
+        `--xpack.securitySolution.detonatePrototype.monthlyAllowance=${process.env.DETONATE_MONTHLY_ALLOWANCE}`,
+      ]
+    : []),
   ...(process.env.DETONATE_ALERTZERO ? alertzeroServerArgs : []),
 ];
 

@@ -116,6 +116,7 @@ export class AlertZeroPublicPlugin
           params,
           availability$: this.availability$,
           isServerless: this.isServerless,
+          detonatePrototypeDev: this.config.detonatePrototypeDev ?? false,
         });
       },
     });

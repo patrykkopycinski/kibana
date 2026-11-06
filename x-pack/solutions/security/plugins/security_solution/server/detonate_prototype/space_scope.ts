@@ -64,7 +64,7 @@ export const getTaskInSpace = async (
 export const listTasksInSpace = async (
   client: DetonateClient,
   spaceId: string,
-  query: { query_string?: string; offset?: number; size?: number },
+  query: { query_string?: string; offset?: number; size?: number; order?: 'asc' | 'desc' },
   filters: { alertId?: string } = {}
 ): Promise<DetonateTaskSearchResponse> => {
   const spaceQuery = spaceTaskQuery(spaceId, filters);

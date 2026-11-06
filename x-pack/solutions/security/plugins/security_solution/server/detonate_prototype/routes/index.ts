@@ -28,9 +28,14 @@ import type {
 } from '@kbn/core/server';
 import type { Readable } from 'stream';
 import { DETONATE_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { ALERTZERO_API_PRIVILEGE_READ } from '@kbn/alertzero-plugin/common/constants';
+import {
+  ALERTZERO_API_PRIVILEGE_READ,
+  ALERTZERO_API_PRIVILEGE_WRITE,
+} from '@kbn/alertzero-plugin/common/constants';
 
 import {
+  DETONATE_HANDOFF_MARKERS,
+  DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
   DETONATE_MAX_ALERT_DOCS,
   DETONATE_PRIOR_RUNS_PATH,
@@ -44,6 +49,8 @@ import {
 } from '../../../common/detonate_prototype';
 import type {
   DetonateFileRequest,
+  DetonateHandoffList,
+  DetonateHandoffUpdate,
   DetonateSandboxIngestResult,
   DetonateTask,
   DetonateUsage,
@@ -63,6 +70,7 @@ import {
 import { toDetonationRecord } from '../detonation_record';
 import { IOC_ALERT_READ_LIMIT, readTaskAlerts, readTaskIocs } from '../ioc_extraction';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
+import { listDetonateHandoffs, setDetonateHandoffMarkers } from '../handoffs';
 import type { DetonationRecord } from '../detonation_record';
 
 /**
@@ -87,6 +95,28 @@ export const DETONATE_RECORD_ROUTE_SECURITY = {
     ],
   },
 };
+
+/**
+ * Setting handoff markers is a Worker write. `securitySolution` is left out on purpose: the Security
+ * read feature grants that API tag, and a read-only analyst must not mark alerts handled.
+ */
+export const DETONATE_HANDOFF_WRITE_ROUTE_SECURITY = {
+  authz: {
+    requiredPrivileges: [{ anyRequired: [DETONATE_API_ACTION_ALL, ALERTZERO_API_PRIVILEGE_WRITE] }],
+  },
+};
+
+/** `DETONATE_HANDOFF_MARKERS`, spelled out so the body type stays the marker union. */
+const handoffMarkerSchema = schema.oneOf([
+  schema.literal('detonate:hunt-requested'),
+  schema.literal('detonate:hunt-done'),
+  schema.literal('detonate:coverage-requested'),
+  schema.literal('detonate:coverage-reviewed'),
+]);
+
+const handoffMarkerListSchema = schema.maybe(
+  schema.arrayOf(handoffMarkerSchema, { maxSize: DETONATE_HANDOFF_MARKERS.length })
+);
 
 /**
  * A detonation sample is a malware binary. It is capped well below Kibana's
@@ -562,6 +592,81 @@ export const registerDetonatePrototypeRoutes = ({
         return toErrorResponse(error, response);
       }
     });
+
+  /** The runs whose alerts wait for the Hunt or the Detection Worker in this space. */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: DETONATE_HANDOFFS_PATH,
+      security: DETONATE_RECORD_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              marker: schema.oneOf([schema.literal('hunt'), schema.literal('coverage')]),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const handoffs = await listDetonateHandoffs({
+            esClient: await getInternalEsClient(),
+            client: getClient(request),
+            spaceId: spaceIdFromRequest(request),
+            kind: request.query.marker,
+          });
+          return response.ok<DetonateHandoffList>({ body: { handoffs } });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /** Sets or clears the handoff markers on the alerts this run was started from. */
+  router.versioned
+    .post({
+      access: 'internal',
+      path: `${DETONATE_RUNS_PATH}/{id}/handoff`,
+      security: DETONATE_HANDOFF_WRITE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+            body: schema.object(
+              { add: handoffMarkerListSchema, remove: handoffMarkerListSchema },
+              {
+                validate: ({ add = [], remove = [] }) =>
+                  add.length + remove.length === 0
+                    ? 'Name at least one marker to add or remove.'
+                    : undefined,
+              }
+            ),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const updated = await setDetonateHandoffMarkers({
+            esClient: await getInternalEsClient(),
+            client: getClient(request),
+            spaceId: spaceIdFromRequest(request),
+            taskId: request.params.id,
+            add: request.body.add ?? [],
+            remove: request.body.remove ?? [],
+          });
+          return response.ok<DetonateHandoffUpdate>({ body: { updated } });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
 
   router.versioned
     .get({

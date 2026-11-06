@@ -449,6 +449,16 @@ export const parseAlertTag = (tags: string[]): string | undefined => {
   return alertId ? alertId : undefined;
 };
 
+/** Every alert id a run's `alert:<id>` tags point at, deduplicated. */
+export const parseAlertTags = (tags: readonly string[]): string[] => [
+  ...new Set(
+    tags
+      .filter((tag) => tag.startsWith(ALERT_TAG_PREFIX))
+      .map((tag) => tag.slice(ALERT_TAG_PREFIX.length))
+      .filter((alertId) => alertId.length > 0)
+  ),
+];
+
 /**
  * Prefix of the tag that records the Kibana space a run was submitted from
  * (`space:<space_id>`). The detonation service has no notion of spaces, so
@@ -502,6 +512,69 @@ export const DETONATE_USAGE_PAGE_SIZE = 200;
  */
 export const DETONATE_USAGE_MAX_PAGES = 50;
 export const DETONATE_MAX_MONTHLY_ALLOWANCE = DETONATE_USAGE_PAGE_SIZE * DETONATE_USAGE_MAX_PAGES;
+
+/* -------------------------------------------------------------------------- */
+/* Worker handoffs                                                             */
+/* -------------------------------------------------------------------------- */
+
+/** Where the Hunt and Detection Workers pick up detonated alerts (server `handoffs.ts`). */
+export const DETONATE_HANDOFFS_PATH = `${DETONATE_PROTOTYPE_API}/handoffs` as const;
+
+export const detonateRunHandoffPath = (taskId: string) =>
+  `${DETONATE_RUNS_PATH}/${encodeURIComponent(taskId)}/handoff` as const;
+
+export const DETONATE_HANDOFF_MARKERS = [
+  'detonate:hunt-requested',
+  'detonate:hunt-done',
+  'detonate:coverage-requested',
+  'detonate:coverage-reviewed',
+] as const;
+export type DetonateHandoffMarker = (typeof DETONATE_HANDOFF_MARKERS)[number];
+
+export const DETONATE_HANDOFF_KINDS = ['hunt', 'coverage'] as const;
+export type DetonateHandoffKind = (typeof DETONATE_HANDOFF_KINDS)[number];
+
+/** Runs returned per list call; a Worker tick handles at most this many. */
+export const DETONATE_HANDOFF_MAX_TASKS = 5;
+
+export const detonateHandoffMarkers = (
+  kind: DetonateHandoffKind
+): { requested: DetonateHandoffMarker; done: DetonateHandoffMarker } =>
+  kind === 'hunt'
+    ? { requested: 'detonate:hunt-requested', done: 'detonate:hunt-done' }
+    : { requested: 'detonate:coverage-requested', done: 'detonate:coverage-reviewed' };
+
+/**
+ * An alert is waiting for a Worker when the Worker was asked for explicitly,
+ * or when the alert is malicious and the Worker has not marked it done. An
+ * explicit request wins over an earlier done marker.
+ */
+export const needsDetonateHandoff = (
+  kind: DetonateHandoffKind,
+  workflowTags: readonly string[]
+): boolean => {
+  const { requested, done } = detonateHandoffMarkers(kind);
+  return (
+    workflowTags.includes(requested) ||
+    (workflowTags.includes(detonateVerdictTag('malicious')) && !workflowTags.includes(done))
+  );
+};
+
+export interface DetonateHandoff {
+  task_id: string;
+  sha256: string;
+  /** This space's alerts whose newest run is this one, oldest first. */
+  alert_ids: string[];
+}
+
+export interface DetonateHandoffList {
+  handoffs: DetonateHandoff[];
+}
+
+export interface DetonateHandoffUpdate {
+  /** Alerts whose markers were rewritten. */
+  updated: number;
+}
 
 /* -------------------------------------------------------------------------- */
 /* Sandbox telemetry                                                           */

@@ -14,7 +14,7 @@
  * is completely unaffected.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
@@ -63,6 +63,8 @@ export interface DetonatePrototypeSetupDeps {
   getSecurityStart: () => Promise<SecurityPluginStart>;
   /** Resolves the Actions plugin, which runs the connector. */
   getActionsStart: () => Promise<ActionsPluginStartContract>;
+  /** Kibana's internal user, which writes the hidden sandbox stream. */
+  getInternalEsClient: () => Promise<ElasticsearchClient>;
 }
 
 /** Hands a surface the client for the request it is serving. */
@@ -89,6 +91,7 @@ export const setupDetonatePrototype = ({
   endpointAppContextService,
   getSecurityStart,
   getActionsStart,
+  getInternalEsClient,
 }: DetonatePrototypeSetupDeps): DetonatePrototype | undefined => {
   if (!enabled) {
     return undefined;
@@ -137,6 +140,7 @@ export const setupDetonatePrototype = ({
     endpointAppContextService,
     hasDetonatePrivilege,
     monthlyAllowance,
+    getInternalEsClient,
   });
 
   return { getClient, hasDetonatePrivilege };

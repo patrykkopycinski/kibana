@@ -34,6 +34,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     getActiveSpaceId: jest.Mock;
   };
   let hasDetonatePrivilege: jest.Mock;
+  let esClient: { indices: { putIndexTemplate: jest.Mock }; bulk: jest.Mock };
 
   const createRequest = (method: 'post' | 'get', path: string, body?: unknown, params?: unknown) =>
     httpServerMock.createKibanaRequest({
@@ -68,6 +69,9 @@ describe('registerDetonatePrototypeRoutes', () => {
       .handler;
 
   const recordHandler = () => router.versioned.getRoute('get', RECORD_PATH).versions['1'].handler;
+
+  const ingestHandler = () =>
+    router.versioned.getRoute('post', `${DETONATE_RUNS_PATH}/{id}/ingest`).versions['1'].handler;
 
   const usageHandler = () =>
     router.versioned.getRoute('get', DETONATE_USAGE_PATH).versions['1'].handler;
@@ -105,6 +109,10 @@ describe('registerDetonatePrototypeRoutes', () => {
       getActiveSpaceId: jest.fn().mockReturnValue('default'),
     };
     hasDetonatePrivilege = jest.fn().mockResolvedValue(canWrite);
+    esClient = {
+      indices: { putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }) },
+      bulk: jest.fn(),
+    };
     registerDetonatePrototypeRoutes({
       router: router as never,
       logger: loggerMock.create(),
@@ -112,6 +120,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       endpointAppContextService: endpointAppContextService as never,
       hasDetonatePrivilege,
       monthlyAllowance,
+      getInternalEsClient: async () => esClient as never,
       now: () => new Date('2026-12-15T10:00:00.000Z'),
     });
   };
@@ -656,6 +665,119 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(body).toMatchObject({ 'detonate.task_id': 'run-1', 'detonate.state': 'complete' });
       expect(body).not.toHaveProperty(['event.duration']);
       expect(body).not.toHaveProperty(['detonate.iocs.domains']);
+    });
+  });
+
+  describe('sandbox ingest', () => {
+    const ingestRequest = (id: string) =>
+      createRequest('post', `${DETONATE_RUNS_PATH}/${id}/ingest`, undefined, { id });
+
+    const run = {
+      id: 'run-1',
+      created_at: '2026-11-01T00:00:00.000Z',
+      tags: ['space:team-a'],
+      last_worker_name: 'detonate.workers.make_summary',
+      last_worker_status: 'success',
+      production_endpoint_alerts_count: 2,
+      production_endpoint_alert_groups: [],
+      diagnostic_endpoint_alerts_count: 1,
+      diagnostic_endpoint_alert_groups: [],
+      production_detection_alerts_count: 0,
+      production_detection_alert_groups: [],
+    };
+    const alert = (eventId: string, timestamp?: string) => ({
+      ...(timestamp ? { '@timestamp': timestamp } : {}),
+      event: { id: eventId, kind: 'alert' },
+      host: { name: 'sandbox-host-secret-name', os: { type: 'linux' } },
+    });
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+    });
+
+    const ingestBody = () => {
+      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
+        [{ body: Record<string, unknown> }]
+      >;
+      return body;
+    };
+
+    it('copies the readable alerts into the space stream and reports counts', async () => {
+      client.getTask.mockResolvedValue(run as never);
+      client.getTaskAlerts.mockImplementation(async (_id, kind) =>
+        kind === 'production-endpoint-alerts'
+          ? [alert('e-1', '2026-11-01T00:01:00.000Z'), alert('e-2')]
+          : Promise.reject(new Error('not enrolled'))
+      );
+      esClient.bulk.mockResolvedValue({ items: [{ create: { status: 201 } }] });
+
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+
+      expect(ingestBody()).toEqual({
+        task_id: 'run-1',
+        stream: '.kibana-detonate-sandbox-team-a',
+        ingested: 1,
+        duplicates: 0,
+        dropped: 1,
+        failed: 0,
+        unread_kinds: ['diagnostic-endpoint-alerts'],
+      });
+      expect(client.getTaskAlerts).not.toHaveBeenCalledWith(
+        'run-1',
+        'production-detection-alerts',
+        expect.anything()
+      );
+      const [[{ operations }]] = esClient.bulk.mock.calls;
+      expect(operations[0]).toEqual({
+        create: { _index: '.kibana-detonate-sandbox-team-a', _id: 'run-1:e-1' },
+      });
+      expect(JSON.stringify(operations)).not.toContain('secret');
+    });
+
+    it('installs the template once across calls', async () => {
+      client.getTask.mockResolvedValue(run as never);
+      client.getTaskAlerts.mockResolvedValue([]);
+
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('retries the template install after a failure', async () => {
+      client.getTask.mockResolvedValue(run as never);
+      client.getTaskAlerts.mockResolvedValue([]);
+      esClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('cluster busy'));
+
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    });
+
+    it('answers 404 for another space and writes nothing', async () => {
+      client.getTask.mockResolvedValue({ ...run, tags: ['space:team-b'] } as never);
+
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+      expect(client.getTaskAlerts).not.toHaveBeenCalled();
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects a read-only analyst before touching the service or Elasticsearch', async () => {
+      register({ canWrite: false });
+
+      await ingestHandler()(createContext(), ingestRequest('run-1'), mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+      expect(client.getTask).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
     });
   });
 

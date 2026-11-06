@@ -54,7 +54,7 @@ export const sanitizeIocs = (iocs: DetonateExtractedIocs): DetonateExtractedIocs
  * Reads `path` from a document whose fields may be nested objects, dotted
  * keys, or a mix of both, flattening arrays along the way.
  */
-const readField = (source: unknown, path: string): unknown[] => {
+export const readField = (source: unknown, path: string): unknown[] => {
   if (source === null || typeof source !== 'object') return [];
   if (Array.isArray(source)) return source.flatMap((item) => readField(item, path));
 
@@ -70,6 +70,12 @@ const readField = (source: unknown, path: string): unknown[] => {
         path.startsWith(`${key}.`) ? readField(value, path.slice(key.length + 1)) : []
       );
 };
+
+/** The service returns bare `_source` bodies; tolerate a full hit as well. */
+export const alertDocSource = (doc: DetonateAlertDoc): Record<string, unknown> =>
+  doc._source !== null && typeof doc._source === 'object' && !Array.isArray(doc._source)
+    ? (doc._source as Record<string, unknown>)
+    : doc;
 
 const readStrings = (source: unknown, path: string): string[] =>
   readField(source, path).filter((value): value is string => typeof value === 'string');
@@ -127,8 +133,7 @@ export const extractIocsFromAlertDocs = (
   const fileHashes: string[] = [];
 
   for (const doc of docs) {
-    const source =
-      doc._source !== null && typeof doc._source === 'object' ? (doc._source as object) : doc;
+    const source = alertDocSource(doc);
     domains.push(...readStrings(source, 'dns.question.name'));
     ips.push(...readStrings(source, 'destination.ip').filter((ip) => isPublicIp(ip.trim())));
 
@@ -167,8 +172,31 @@ export const readTaskIocs = async (
   readKind: (kind: DetonateAlertKind) => Promise<DetonateAlertDoc[]>,
   onReadError: (kind: DetonateAlertKind, reason: unknown) => void
 ): Promise<DetonateExtractedIocs | undefined> => {
-  const kinds = DETONATE_ALERT_KINDS.filter((kind) => task[ALERT_COUNT_FIELD[kind]] !== 0);
+  const { kinds, docs, failedKinds } = await readTaskAlerts(task, readKind, onReadError);
   if (kinds.length === 0) return { domains: [], ips: [], file_hashes: [] };
+
+  return failedKinds.length < kinds.length
+    ? extractIocsFromAlertDocs(
+        docs.map(({ doc }) => doc),
+        task.sample_hash
+      )
+    : undefined;
+};
+
+export interface TaskAlertReads {
+  /** The kinds that were read: those the task does not already count as zero. */
+  kinds: DetonateAlertKind[];
+  docs: Array<{ kind: DetonateAlertKind; doc: DetonateAlertDoc }>;
+  failedKinds: DetonateAlertKind[];
+}
+
+/** Reads every alert kind the task has, tolerating any of them failing (see `readTaskIocs`). */
+export const readTaskAlerts = async (
+  task: DetonateTask,
+  readKind: (kind: DetonateAlertKind) => Promise<DetonateAlertDoc[]>,
+  onReadError: (kind: DetonateAlertKind, reason: unknown) => void
+): Promise<TaskAlertReads> => {
+  const kinds = DETONATE_ALERT_KINDS.filter((kind) => task[ALERT_COUNT_FIELD[kind]] !== 0);
 
   const reads = await Promise.allSettled(
     kinds.map(async (kind) => {
@@ -178,12 +206,17 @@ export const readTaskIocs = async (
     })
   );
 
-  const docs = reads.flatMap((read) => (read.status === 'fulfilled' ? read.value : []));
+  const docs: TaskAlertReads['docs'] = [];
+  const failedKinds: DetonateAlertKind[] = [];
   reads.forEach((read, index) => {
-    if (read.status === 'rejected') onReadError(kinds[index], read.reason);
+    const kind = kinds[index];
+    if (read.status === 'fulfilled') {
+      docs.push(...read.value.map((doc) => ({ kind, doc })));
+    } else {
+      failedKinds.push(kind);
+      onReadError(kind, read.reason);
+    }
   });
 
-  return reads.some((read) => read.status === 'fulfilled')
-    ? extractIocsFromAlertDocs(docs, task.sample_hash)
-    : undefined;
+  return { kinds, docs, failedKinds };
 };

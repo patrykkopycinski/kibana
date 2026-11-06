@@ -503,6 +503,47 @@ export const DETONATE_USAGE_PAGE_SIZE = 200;
 export const DETONATE_USAGE_MAX_PAGES = 50;
 export const DETONATE_MAX_MONTHLY_ALLOWANCE = DETONATE_USAGE_PAGE_SIZE * DETONATE_USAGE_MAX_PAGES;
 
+/* -------------------------------------------------------------------------- */
+/* Sandbox telemetry                                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Sandbox alerts are copied into one hidden data stream per space, kept apart
+ * from production alerts. The `.kibana-` prefix is what lets Kibana's internal
+ * user create and write the stream; analysts need an explicit grant on the
+ * exact name, because wildcards do not expand to hidden streams.
+ */
+export const DETONATE_SANDBOX_STREAM_PREFIX = '.kibana-detonate-sandbox-' as const;
+export const DETONATE_SANDBOX_TEMPLATE_NAME = 'kibana-detonate-sandbox' as const;
+export const DETONATE_SANDBOX_RETENTION = '30d' as const;
+
+/** Kibana space ids are already lowercase `[a-z0-9_-]`; anything else cannot name a stream. */
+const SANDBOX_SPACE_ID_PATTERN = /^[a-z0-9_-]{1,128}$/;
+
+export const detonateSandboxStreamName = (spaceId: string): string => {
+  if (!SANDBOX_SPACE_ID_PATTERN.test(spaceId)) {
+    throw new Error(`Space id "${spaceId}" cannot name a sandbox data stream.`);
+  }
+  return `${DETONATE_SANDBOX_STREAM_PREFIX}${spaceId}`;
+};
+
+/** Copy a run's sandbox alerts into this space's sandbox stream. */
+export const detonateRunIngestPath = (taskId: string) =>
+  `${DETONATE_RUNS_PATH}/${encodeURIComponent(taskId)}/ingest` as const;
+
+export interface DetonateSandboxIngestResult {
+  task_id: string;
+  stream: string;
+  ingested: number;
+  /** Already copied by an earlier call; the copy is idempotent. */
+  duplicates: number;
+  /** No `@timestamp`, so the doc cannot be placed on a timeline. */
+  dropped: number;
+  failed: number;
+  /** Alert kinds whose read failed; their docs are missing from the counts. */
+  unread_kinds: DetonateAlertKind[];
+}
+
 export interface DetonateUsage {
   /** Runs submitted from this space since `since`. Every submission counts. */
   used: number;

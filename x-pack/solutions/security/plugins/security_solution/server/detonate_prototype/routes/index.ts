@@ -20,6 +20,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type {
+  ElasticsearchClient,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
@@ -39,9 +40,11 @@ import {
   DETONATE_TASKS_PATH,
   DETONATE_USAGE_PATH,
   detonateAllowanceWindow,
+  detonateSandboxStreamName,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateFileRequest,
+  DetonateSandboxIngestResult,
   DetonateTask,
   DetonateUsage,
 } from '../../../common/detonate_prototype';
@@ -58,7 +61,8 @@ import {
   submitInSpace,
 } from '../space_scope';
 import { toDetonationRecord } from '../detonation_record';
-import { IOC_ALERT_READ_LIMIT, readTaskIocs } from '../ioc_extraction';
+import { IOC_ALERT_READ_LIMIT, readTaskAlerts, readTaskIocs } from '../ioc_extraction';
+import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import type { DetonationRecord } from '../detonation_record';
 
 /**
@@ -127,6 +131,11 @@ export interface DetonateRoutesDeps {
   hasDetonatePrivilege: HasDetonatePrivilege;
   /** Runs per space per UTC month, reported by the usage route. */
   monthlyAllowance: number;
+  /**
+   * Kibana's internal user: the sandbox stream is a hidden `.kibana-` stream
+   * that analysts cannot write to, and the route checks the run's space first.
+   */
+  getInternalEsClient: () => Promise<ElasticsearchClient>;
   /** Injected so tests can pin the month. */
   now?: () => Date;
 }
@@ -160,8 +169,21 @@ export const registerDetonatePrototypeRoutes = ({
   endpointAppContextService,
   hasDetonatePrivilege,
   monthlyAllowance,
+  getInternalEsClient,
   now = () => new Date(),
 }: DetonateRoutesDeps) => {
+  // Installed once per process; a failed install is retried on the next call.
+  let sandboxTemplate: Promise<void> | undefined;
+  const ensureSandboxTemplate = (esClient: ElasticsearchClient) => {
+    sandboxTemplate =
+      sandboxTemplate ??
+      installSandboxTemplate(esClient).catch((error) => {
+        sandboxTemplate = undefined;
+        throw error;
+      });
+    return sandboxTemplate;
+  };
+
   /**
    * Shape an error for the analyst. The service's own message is passed
    * through only when it carries an actionable status; anything else becomes a
@@ -457,6 +479,57 @@ export const registerDetonatePrototypeRoutes = ({
           ]);
           return response.ok<DetonationRecord>({
             body: toDetonationRecord(task, { updates, iocs }),
+          });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /** Copies a run's sandbox alerts into this space's sandbox stream; safe to repeat. */
+  router.versioned
+    .post({
+      access: 'internal',
+      path: `${DETONATE_RUNS_PATH}/{id}/ingest`,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          if (!(await hasDetonatePrivilege(request, 'write'))) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Copying sandbox alerts requires the Security Solution write privilege or the Detonate privilege.',
+              },
+            });
+          }
+
+          const client = getClient(request);
+          const spaceId = spaceIdFromRequest(request);
+          const task = await getTaskInSpace(client, request.params.id, spaceId);
+          const stream = detonateSandboxStreamName(spaceId);
+          const { docs, failedKinds } = await readTaskAlerts(
+            task,
+            (kind) => client.getTaskAlerts(task.id, kind, DETONATE_MAX_ALERT_DOCS),
+            (kind, reason) =>
+              logger.debug(`Detonation ${task.id}: could not read ${kind}: ${reason}`)
+          );
+
+          const esClient = await getInternalEsClient();
+          await ensureSandboxTemplate(esClient);
+          const counts = await ingestSandboxDocs(esClient, stream, task, docs);
+
+          return response.ok<DetonateSandboxIngestResult>({
+            body: { task_id: task.id, stream, ...counts, unread_kinds: failedKinds },
           });
         } catch (error) {
           return toErrorResponse(error, response);

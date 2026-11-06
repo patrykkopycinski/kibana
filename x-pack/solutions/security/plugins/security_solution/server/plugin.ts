@@ -743,6 +743,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointAppContextService: this.endpointAppContextService,
       getSecurityStart: async () => (await core.getStartServices())[1].security,
       getActionsStart: async () => (await core.getStartServices())[1].actions,
+      getInternalEsClient: async () =>
+        (await core.getStartServices())[0].elasticsearch.client.asInternalUser,
     });
 
     registerEndpointSuggestionsRoutes(

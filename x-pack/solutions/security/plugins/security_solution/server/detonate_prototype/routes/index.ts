@@ -37,14 +37,21 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
+  DETONATE_USAGE_PATH,
+  detonateAllowanceWindow,
 } from '../../../common/detonate_prototype';
-import type { DetonateFileRequest, DetonateTask } from '../../../common/detonate_prototype';
+import type {
+  DetonateFileRequest,
+  DetonateTask,
+  DetonateUsage,
+} from '../../../common/detonate_prototype';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../client';
 import { DetonateServiceError } from '../client';
 import type { HasDetonatePrivilege } from '../authz';
 import {
+  countRunsInSpaceSince,
   getTaskInSpace,
   listTasksInSpace,
   lookupPriorRunsInSpace,
@@ -63,8 +70,9 @@ const DETONATE_ROUTE_SECURITY = {
 };
 
 /**
- * The run record is also read from AlertZero (the Detonation attachment), whose users may hold
- * AlertZero read without Security access. It is read-only and space-scoped like every other route.
+ * The run record and the allowance usage are also read from AlertZero (the Detonation attachment,
+ * the Worker config panel), whose users may hold AlertZero read without Security access. Both are
+ * read-only, run as the requesting user, and are space-scoped like every other route.
  */
 export const DETONATE_RECORD_ROUTE_SECURITY = {
   authz: {
@@ -117,6 +125,10 @@ export interface DetonateRoutesDeps {
    * handlers, the same check the Agent Builder tool performs.
    */
   hasDetonatePrivilege: HasDetonatePrivilege;
+  /** Runs per space per UTC month, reported by the usage route. */
+  monthlyAllowance: number;
+  /** Injected so tests can pin the month. */
+  now?: () => Date;
 }
 
 /** Collect a streamed upload, refusing anything over the cap mid-stream. */
@@ -147,6 +159,8 @@ export const registerDetonatePrototypeRoutes = ({
   getClient,
   endpointAppContextService,
   hasDetonatePrivilege,
+  monthlyAllowance,
+  now = () => new Date(),
 }: DetonateRoutesDeps) => {
   /**
    * Shape an error for the analyst. The service's own message is passed
@@ -449,6 +463,32 @@ export const registerDetonatePrototypeRoutes = ({
         }
       }
     );
+
+  /**
+   * Every submission from this space this UTC month counts, whoever started it. Reputation hits
+   * never submit, so they never count. A batch checks once, so it can overshoot by its size.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: DETONATE_USAGE_PATH,
+      security: DETONATE_RECORD_ROUTE_SECURITY,
+    })
+    .addVersion({ version: '1', validate: false }, async (_context, request, response) => {
+      try {
+        const window = detonateAllowanceWindow(now());
+        const { count, truncated } = await countRunsInSpaceSince(
+          getClient(request),
+          spaceIdFromRequest(request),
+          window.since
+        );
+        return response.ok<DetonateUsage>({
+          body: { used: count, allowance: monthlyAllowance, ...window, truncated },
+        });
+      } catch (error) {
+        return toErrorResponse(error, response);
+      }
+    });
 
   router.versioned
     .get({

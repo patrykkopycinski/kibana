@@ -8,6 +8,7 @@
 import type { DetonateClient } from './client';
 import { DetonateServiceError } from './client';
 import {
+  countRunsInSpaceSince,
   getTaskInSpace,
   lookupPriorRunsInSpace,
   scopeTagsToSpace,
@@ -113,6 +114,81 @@ describe('space scope', () => {
         status: 'unknown',
         source: 'prior-detonation',
       });
+    });
+  });
+
+  describe('countRunsInSpaceSince', () => {
+    const since = '2026-11-01T00:00:00.000Z';
+    const run = (id: string, createdAt: string, space = 'team-a') => ({
+      id,
+      created_at: createdAt,
+      tags: [`space:${space}`],
+    });
+    /** Pages a newest-first list the way the service does: by offset, with no total. */
+    const pagingClient = (tasks: unknown[]) =>
+      ({
+        listTasks: jest.fn(
+          async ({ offset = 0, size = 20 }: { offset?: number; size?: number }) => ({
+            tasks: tasks.slice(offset, offset + size),
+            offset,
+            size,
+            order: 'desc',
+          })
+        ),
+      } as unknown as DetonateClient & { listTasks: jest.Mock });
+
+    it('counts runs at or after the start of the window and stops at the first older one', async () => {
+      const client = pagingClient([
+        run('r3', '2026-11-05T00:00:00.000Z'),
+        run('r2', '2026-11-01T00:00:00.000Z'),
+        run('r1', '2026-10-31T23:59:59.999Z'),
+        run('r0', '2026-10-01T00:00:00.000Z'),
+      ]);
+
+      await expect(
+        countRunsInSpaceSince(client, 'team-a', since, { pageSize: 2 })
+      ).resolves.toEqual({ count: 2, truncated: false });
+      // The second page already reaches past the window, so no third read.
+      expect(client.listTasks).toHaveBeenCalledTimes(2);
+      expect(client.listTasks).toHaveBeenNthCalledWith(2, {
+        query_string: 'tags:"space:team-a"',
+        order: 'desc',
+        offset: 2,
+        size: 2,
+      });
+    });
+
+    it('stops on a short page', async () => {
+      const client = pagingClient([run('r1', '2026-11-02T00:00:00.000Z')]);
+
+      await expect(countRunsInSpaceSince(client, 'team-a', since)).resolves.toEqual({
+        count: 1,
+        truncated: false,
+      });
+      expect(client.listTasks).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count a run from another space even if the service returned it', async () => {
+      const client = pagingClient([
+        run('mine', '2026-11-03T00:00:00.000Z'),
+        run('theirs', '2026-11-02T00:00:00.000Z', 'team-b'),
+      ]);
+
+      await expect(countRunsInSpaceSince(client, 'team-a', since)).resolves.toEqual({
+        count: 1,
+        truncated: false,
+      });
+    });
+
+    it('reports a lower bound when it stops at the page cap', async () => {
+      const client = pagingClient(
+        Array.from({ length: 5 }, (_, i) => run(`r${i}`, '2026-11-02T00:00:00.000Z'))
+      );
+
+      await expect(
+        countRunsInSpaceSince(client, 'team-a', since, { pageSize: 2, maxPages: 2 })
+      ).resolves.toEqual({ count: 4, truncated: true });
+      expect(client.listTasks).toHaveBeenCalledTimes(2);
     });
   });
 

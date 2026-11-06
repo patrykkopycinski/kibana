@@ -13,6 +13,8 @@ import type {
 } from '../../common/detonate_prototype';
 import {
   DETONATE_PRIOR_RUNS_LOOKBACK,
+  DETONATE_USAGE_MAX_PAGES,
+  DETONATE_USAGE_PAGE_SIZE,
   SPACE_TAG_PREFIX,
   derivePriorRunLookup,
   runBelongsToSpace,
@@ -71,6 +73,37 @@ export const listTasksInSpace = async (
     query_string: query.query_string ? `(${query.query_string}) AND ${spaceQuery}` : spaceQuery,
   });
   return { ...page, tasks: page.tasks.filter((task) => runBelongsToSpace(task.tags, spaceId)) };
+};
+
+/**
+ * This space's runs created at or after `since`. The service has no totals and
+ * no range queries, so pages are read newest first until one reaches past
+ * `since` or comes back short, and the date filter is applied here.
+ */
+export const countRunsInSpaceSince = async (
+  client: DetonateClient,
+  spaceId: string,
+  since: string,
+  { pageSize = DETONATE_USAGE_PAGE_SIZE, maxPages = DETONATE_USAGE_MAX_PAGES } = {}
+): Promise<{ count: number; truncated: boolean }> => {
+  const sinceMs = Date.parse(since);
+  const queryString = spaceTaskQuery(spaceId);
+  let count = 0;
+
+  for (let page = 0; page < maxPages; page++) {
+    const { tasks } = await client.listTasks({
+      query_string: queryString,
+      order: 'desc',
+      offset: page * pageSize,
+      size: pageSize,
+    });
+    const inWindow = tasks.filter((task) => Date.parse(task.created_at) >= sinceMs);
+    count += inWindow.filter((task) => runBelongsToSpace(task.tags, spaceId)).length;
+    if (tasks.length < pageSize || inWindow.length < tasks.length) {
+      return { count, truncated: false };
+    }
+  }
+  return { count, truncated: true };
 };
 
 /** "Have we detonated this sample before" — answered from this space's runs only. */

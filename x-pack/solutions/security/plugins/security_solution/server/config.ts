@@ -13,6 +13,10 @@ import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
+import {
+  DETONATE_DEFAULT_MONTHLY_ALLOWANCE,
+  DETONATE_MAX_MONTHLY_ALLOWANCE,
+} from '../common/detonate_prototype';
 
 /**
  * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)
@@ -231,6 +235,15 @@ export const configSchema = schema.object({
        * the address and the API key, and runs as the requesting user.
        */
       connectorId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+      /**
+       * Runs per space per UTC month. Display-only except for Supervised
+       * auto-detonate, which stops at it.
+       */
+      monthlyAllowance: schema.number({
+        defaultValue: DETONATE_DEFAULT_MONTHLY_ALLOWANCE,
+        min: 0,
+        max: DETONATE_MAX_MONTHLY_ALLOWANCE,
+      }),
     })
   ),
   cdn: schema.maybe(

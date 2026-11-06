@@ -18,6 +18,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
+import { DETONATE_DEFAULT_MONTHLY_ALLOWANCE } from '../../common/detonate_prototype';
 import type { SecuritySolutionPluginRouter } from '../types';
 import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from './client';
@@ -52,6 +53,8 @@ export interface DetonatePrototypeSetupDeps {
    * it never appears in `kibana.yml`.
    */
   connectorId?: string;
+  /** `xpack.securitySolution.detonatePrototype.monthlyAllowance`; unset when the block is. */
+  monthlyAllowance?: number;
   /** The experimental flag that gates the entire prototype. */
   enabled: boolean;
   /** Resolves the Security Solution privileges and the acting user. */
@@ -81,6 +84,7 @@ export const setupDetonatePrototype = ({
   logger,
   serviceUrl,
   connectorId,
+  monthlyAllowance = DETONATE_DEFAULT_MONTHLY_ALLOWANCE,
   enabled,
   endpointAppContextService,
   getSecurityStart,
@@ -132,6 +136,7 @@ export const setupDetonatePrototype = ({
     getClient,
     endpointAppContextService,
     hasDetonatePrivilege,
+    monthlyAllowance,
   });
 
   return { getClient, hasDetonatePrivilege };

@@ -488,6 +488,49 @@ export const DETONATE_PRIOR_RUNS_PATH = `${DETONATE_PROTOTYPE_API}/prior_runs` a
 /** How many of a hash's newest runs the lookup reads. */
 export const DETONATE_PRIOR_RUNS_LOOKBACK = 20;
 
+/** Monthly allowance route: this space's submissions in the current UTC month. */
+export const DETONATE_USAGE_PATH = `${DETONATE_PROTOTYPE_API}/usage` as const;
+
+export const DETONATE_DEFAULT_MONTHLY_ALLOWANCE = 500;
+
+/** The service's `GET /tasks` page ceiling. */
+export const DETONATE_USAGE_PAGE_SIZE = 200;
+
+/**
+ * The count reads at most this many pages. The allowance is capped at the same
+ * number of runs, so a count that stops here is already at or over it.
+ */
+export const DETONATE_USAGE_MAX_PAGES = 50;
+export const DETONATE_MAX_MONTHLY_ALLOWANCE = DETONATE_USAGE_PAGE_SIZE * DETONATE_USAGE_MAX_PAGES;
+
+export interface DetonateUsage {
+  /** Runs submitted from this space since `since`. Every submission counts. */
+  used: number;
+  allowance: number;
+  /** 00:00 UTC on the 1st of the current month. */
+  since: string;
+  /** 00:00 UTC on the 1st of the next month. */
+  resetsAt: string;
+  /** The count stopped at the page cap, so `used` is a lower bound. */
+  truncated: boolean;
+}
+
+/** The allowance window that contains `now`: this UTC month. */
+export const detonateAllowanceWindow = (now: Date): { since: string; resetsAt: string } => {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  return {
+    since: new Date(Date.UTC(year, month, 1)).toISOString(),
+    // Date.UTC rolls month 12 over into January of the next year.
+    resetsAt: new Date(Date.UTC(year, month + 1, 1)).toISOString(),
+  };
+};
+
+export const isAllowanceExhausted = ({
+  used,
+  allowance,
+}: Pick<DetonateUsage, 'used' | 'allowance'>) => used >= allowance;
+
 /**
  * `known-malicious` means the newest completed run of this sample in this
  * space was malicious. `unknown` is honest uncertainty — no run, or no

@@ -17,11 +17,14 @@ import {
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_RUNS_PATH,
   DETONATE_TASKS_PATH,
+  DETONATE_USAGE_PATH,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { registerDetonatePrototypeRoutes } from '.';
 
 const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
+/** The only routes AlertZero read also opens. */
+const ALERTZERO_READ_PATHS: string[] = [RECORD_PATH, DETONATE_USAGE_PATH];
 
 describe('registerDetonatePrototypeRoutes', () => {
   let router: RouterMock;
@@ -66,6 +69,9 @@ describe('registerDetonatePrototypeRoutes', () => {
 
   const recordHandler = () => router.versioned.getRoute('get', RECORD_PATH).versions['1'].handler;
 
+  const usageHandler = () =>
+    router.versioned.getRoute('get', DETONATE_USAGE_PATH).versions['1'].handler;
+
   const priorRunsHandler = () =>
     router.versioned.getRoute('get', `${DETONATE_PRIOR_RUNS_PATH}/{sha256}`).versions['1'].handler;
 
@@ -86,7 +92,13 @@ describe('registerDetonatePrototypeRoutes', () => {
 
   const createContext = () => ({} as never);
 
-  const register = ({ canWrite }: { canWrite: boolean }) => {
+  const register = ({
+    canWrite,
+    monthlyAllowance = 500,
+  }: {
+    canWrite: boolean;
+    monthlyAllowance?: number;
+  }) => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = {
@@ -99,6 +111,8 @@ describe('registerDetonatePrototypeRoutes', () => {
       getClient: () => client,
       endpointAppContextService: endpointAppContextService as never,
       hasDetonatePrivilege,
+      monthlyAllowance,
+      now: () => new Date('2026-12-15T10:00:00.000Z'),
     });
   };
 
@@ -156,10 +170,10 @@ describe('registerDetonatePrototypeRoutes', () => {
         ...router.versioned.post.mock.calls.map(([config]) => config),
       ];
       const securityConfigs = routeConfigs
-        .filter(({ path }) => path !== RECORD_PATH)
+        .filter(({ path }) => !ALERTZERO_READ_PATHS.includes(path))
         .map(({ security }) => security);
 
-      expect(securityConfigs.length).toBe(routeConfigs.length - 1);
+      expect(securityConfigs.length).toBe(routeConfigs.length - ALERTZERO_READ_PATHS.length);
       for (const security of securityConfigs) {
         expect(security).toEqual({
           authz: {
@@ -571,9 +585,9 @@ describe('registerDetonatePrototypeRoutes', () => {
       endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
     });
 
-    it('also opens to AlertZero read, and only this route', () => {
+    it.each(ALERTZERO_READ_PATHS)('%s also opens to AlertZero read', (path) => {
       const [[config]] = router.versioned.get.mock.calls.filter(
-        ([{ path }]) => path === RECORD_PATH
+        ([registered]) => registered.path === path
       );
 
       expect(config.security).toEqual({
@@ -642,6 +656,74 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(body).toMatchObject({ 'detonate.task_id': 'run-1', 'detonate.state': 'complete' });
       expect(body).not.toHaveProperty(['event.duration']);
       expect(body).not.toHaveProperty(['detonate.iocs.domains']);
+    });
+  });
+
+  describe('usage', () => {
+    const usageRequest = () => createRequest('get', DETONATE_USAGE_PATH);
+    const run = (id: string, createdAt: string, space = 'team-a') => ({
+      id,
+      created_at: createdAt,
+      tags: [`space:${space}`],
+    });
+    const serveNewestFirst = (tasks: unknown[]) =>
+      client.listTasks.mockImplementation(async ({ offset = 0, size = 20 } = {}) => ({
+        tasks: tasks.slice(offset, offset + size) as never,
+        offset,
+        size,
+        order: 'desc',
+      }));
+    const usageBody = () =>
+      (mockResponse.ok.mock.calls as unknown as Array<[{ body: unknown }]>)[0][0].body;
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+    });
+
+    it("counts this space's runs in the current UTC month", async () => {
+      serveNewestFirst([
+        run('dec-2', '2026-12-14T00:00:00.000Z'),
+        run('other-space', '2026-12-13T00:00:00.000Z', 'team-b'),
+        run('dec-1', '2026-12-01T00:00:00.000Z'),
+        run('nov', '2026-11-30T23:59:59.999Z'),
+      ]);
+
+      await usageHandler()(createContext(), usageRequest(), mockResponse);
+
+      expect(usageBody()).toEqual({
+        used: 2,
+        allowance: 500,
+        since: '2026-12-01T00:00:00.000Z',
+        resetsAt: '2027-01-01T00:00:00.000Z',
+        truncated: false,
+      });
+      expect(client.listTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ query_string: 'tags:"space:team-a"', order: 'desc' })
+      );
+    });
+
+    it('reports the configured allowance', async () => {
+      register({ canWrite: true, monthlyAllowance: 25 });
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+      serveNewestFirst([]);
+
+      await usageHandler()(createContext(), usageRequest(), mockResponse);
+
+      expect(usageBody()).toMatchObject({ used: 0, allowance: 25 });
+    });
+
+    it('shapes a service error with the service status', async () => {
+      const { DetonateServiceError: Ctor } = jest.requireActual<{
+        DetonateServiceError: typeof DetonateServiceError;
+      }>('../client');
+      client.listTasks.mockRejectedValue(new Ctor('The detonation service answered 503.', 503));
+
+      await usageHandler()(createContext(), usageRequest(), mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 503 })
+      );
+      expect(mockResponse.ok).not.toHaveBeenCalled();
     });
   });
 

@@ -77,4 +77,26 @@ describe('config', () => {
       ).toEqual(['/(.*)/', '/(.valid*)/']);
     });
   });
+
+  describe('detonatePrototype.monthlyAllowance', () => {
+    test('leaves the block unset when it is not configured', () => {
+      expect(configSchema.validate({}).detonatePrototype).toBeUndefined();
+    });
+
+    test('defaults to 500 when the block is configured', () => {
+      expect(
+        configSchema.validate({ detonatePrototype: { serviceUrl: 'http://localhost:8787' } })
+          .detonatePrototype?.monthlyAllowance
+      ).toBe(500);
+    });
+
+    test('rejects a negative allowance and one above what the count can read', () => {
+      expect(() => configSchema.validate({ detonatePrototype: { monthlyAllowance: -1 } })).toThrow(
+        /monthlyAllowance/
+      );
+      expect(() =>
+        configSchema.validate({ detonatePrototype: { monthlyAllowance: 10001 } })
+      ).toThrow(/monthlyAllowance/);
+    });
+  });
 });

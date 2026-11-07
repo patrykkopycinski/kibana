@@ -26,6 +26,7 @@ import {
   validateDraftQueryAst,
   validateDraftRuleQuery,
   validateDraftRuleShape,
+  validateSandboxCountRuleQuery,
 } from './esql_draft_guard';
 import { Parser } from '@elastic/esql';
 
@@ -322,5 +323,35 @@ describe('buildDetonateCountQueries', () => {
       const { sandbox_query } = buildDetonateCountQueries(q, TASK, 'default');
       expect(() => assertSandboxCountQuery(sandbox_query, 'default')).not.toThrow();
     }
+  });
+});
+
+describe('validateSandboxCountRuleQuery — the sandbox_count route judgement', () => {
+  it('accepts the full allowed pipeline', () => {
+    const q =
+      'FROM logs-* | WHERE host.name == "web" | EVAL x = 1 | SORT host.name | LIMIT 10 | KEEP host | DROP x | RENAME host AS h | DISSECT msg "%{a}" | GROK msg "%{b}" | MV_EXPAND h';
+    expect(validateSandboxCountRuleQuery(q, ['logs-*']).ok).toBe(true);
+  });
+
+  it.each([
+    ['LOOKUP JOIN', 'FROM logs-* | LOOKUP JOIN dept ON host'],
+    ['ENRICH', 'FROM logs-* | ENRICH policy ON host'],
+    ['FORK', 'FROM logs-* | FORK (WHERE a == 1) (WHERE a == 2)'],
+    ['INLINE STATS', 'FROM logs-* | INLINE STATS c = COUNT(*) BY host'],
+    ['SAMPLE', 'FROM logs-* | SAMPLE 0.5'],
+    ['TS', 'TS metrics'],
+    ['a SET header', 'SET project_routing = "x"; FROM logs-*'],
+    ['a subquery', 'FROM logs-* | WHERE host.name IN (FROM other | KEEP host)'],
+    ['a remote: prefix', 'FROM remote:logs-*'],
+    ['a sandbox source', 'FROM .kibana-detonate-sandbox-default'],
+    ['a :: selector', 'FROM logs-*::failures'],
+    ['a source outside defaultIndex', 'FROM auditbeat-*'],
+  ])('rejects %s whatever its target', (_name, q) => {
+    const result = validateSandboxCountRuleQuery(q, ['logs-*']);
+    expect(result.ok).toBe(false);
+  });
+
+  it('rejects a query that does not parse', () => {
+    expect(validateSandboxCountRuleQuery('FROM | WHERE', ['logs-*']).ok).toBe(false);
   });
 });

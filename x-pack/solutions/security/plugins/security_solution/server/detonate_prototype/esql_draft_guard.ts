@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under
- * one or more contributor license agreements. Licensed under the Elastic
- * License 2.0; you may not use this file except in compliance with the Elastic
- * License 2.0.
- */
-
 /**
  * Detonate prototype — ES|QL draft guard and sandbox-count query builder.
  *
@@ -47,7 +40,8 @@ export type DetonateDraftGuardCode =
   | 'sandbox_match'
   | 'bare_wildcard'
   | 'outside_default_index'
-  | 'selector_or_exclusion_or_datemath';
+  | 'selector_or_exclusion_or_datemath'
+  | 'command_not_allowed';
 
 export interface DetonateDraftGuardFailure {
   code: DetonateDraftGuardCode;
@@ -347,6 +341,70 @@ export const validateDraftQueryAst = (
   }
 
   return { ok: true };
+};
+
+/**
+ * Commands an internal-user sandbox count may run. The FROM guard (rules 1–7)
+ * already bounds the sources; this list bounds the pipeline so the read
+ * cannot reach a lookup index, enrich index, remote cluster or linked
+ * project whatever the source patterns say.
+ */
+const SANDBOX_COUNT_ALLOWED_COMMANDS = new Set([
+  'from',
+  'where',
+  'eval',
+  'stats',
+  'keep',
+  'drop',
+  'rename',
+  'sort',
+  'limit',
+  'dissect',
+  'grok',
+  'mv_expand',
+]);
+
+/** Every command in the pipeline is on the sandbox-count allow-list. */
+export const validateSandboxCountCommandAllowlist = (
+  query: ESQLAstQueryExpression
+): DetonateDraftGuardResult => {
+  if (query.header?.some((cmd) => cmd.name === 'set')) {
+    return fail('set_header', 'query has a SET header; sandbox counts must not use SET');
+  }
+  for (const cmd of query.commands) {
+    if (!SANDBOX_COUNT_ALLOWED_COMMANDS.has(cmd.name)) {
+      return fail(
+        'command_not_allowed',
+        `command "${cmd.name}" is not allowed in a sandbox count query`
+      );
+    }
+  }
+  return { ok: true };
+};
+
+/**
+ * The `sandbox_count` route's whole judgement in one parse: the FROM guard
+ * (rules 1–7) against the space default index, then the command allow-list
+ * over the same AST. The route builds the query it runs; this proves the
+ * text it was handed is bounded first.
+ */
+export const validateSandboxCountRuleQuery = (
+  queryText: string,
+  defaultIndex: readonly string[]
+): DetonateDraftGuardResult => {
+  let query: ESQLAstQueryExpression;
+  try {
+    const parsed = Parser.parse(queryText);
+    if (parsed.errors.length > 0) {
+      return fail('parse', 'query does not parse as ES|QL');
+    }
+    ({ root: query } = parsed);
+  } catch {
+    return fail('parse', 'query does not parse as ES|QL');
+  }
+  const guard = validateDraftQueryAst(query, defaultIndex);
+  if (!guard.ok) return guard;
+  return validateSandboxCountCommandAllowlist(query);
 };
 
 /** Parse + guard in one call. Parse errors are guard failures, not exceptions. */

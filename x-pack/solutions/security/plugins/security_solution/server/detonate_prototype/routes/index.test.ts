@@ -27,6 +27,8 @@ const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
 /** The only routes AlertZero read also opens. */
 const ALERTZERO_READ_PATHS: string[] = [RECORD_PATH, DETONATE_USAGE_PATH, DETONATE_HANDOFFS_PATH];
 const HANDOFF_PATH = `${DETONATE_RUNS_PATH}/{id}/handoff`;
+/** Write-tier worker routes without the `securitySolution` read tag. */
+const WORKER_WRITE_PATHS: string[] = [HANDOFF_PATH, `${DETONATE_RUNS_PATH}/{id}/sandbox_count`];
 
 describe('registerDetonatePrototypeRoutes', () => {
   let router: RouterMock;
@@ -41,6 +43,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     bulk: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
+    esql: { query: jest.Mock };
   };
 
   const createRequest = (method: 'post' | 'get', path: string, body?: unknown, params?: unknown) =>
@@ -101,7 +104,15 @@ describe('registerDetonatePrototypeRoutes', () => {
     return validation.request.body as { validate(body: unknown): unknown };
   };
 
-  const createContext = () => ({} as never);
+  /**
+   * The sandbox-count route reads the space default index through the request
+   * context; everything else ignores `context` entirely.
+   */
+  let uiSettingsGet: jest.Mock;
+  const createContext = () =>
+    ({
+      core: Promise.resolve({ uiSettings: { client: { get: uiSettingsGet } } }),
+    } as never);
 
   const register = ({
     canWrite,
@@ -121,6 +132,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       bulk: jest.fn(),
       search: jest.fn(),
       updateByQuery: jest.fn(),
+      esql: { query: jest.fn() },
     };
     registerDetonatePrototypeRoutes({
       router: router as never,
@@ -145,6 +157,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       listTasks: jest.fn(),
       findTasksByHash: jest.fn(),
     };
+    uiSettingsGet = jest.fn().mockResolvedValue(['logs-*']);
     register({ canWrite: true });
   });
 
@@ -188,10 +201,14 @@ describe('registerDetonatePrototypeRoutes', () => {
         ...router.versioned.post.mock.calls.map(([config]) => config),
       ];
       const securityConfigs = routeConfigs
-        .filter(({ path }) => !ALERTZERO_READ_PATHS.includes(path) && path !== HANDOFF_PATH)
+        .filter(
+          ({ path }) => !ALERTZERO_READ_PATHS.includes(path) && !WORKER_WRITE_PATHS.includes(path)
+        )
         .map(({ security }) => security);
 
-      expect(securityConfigs.length).toBe(routeConfigs.length - ALERTZERO_READ_PATHS.length - 1);
+      expect(securityConfigs.length).toBe(
+        routeConfigs.length - ALERTZERO_READ_PATHS.length - WORKER_WRITE_PATHS.length
+      );
       for (const security of securityConfigs) {
         expect(security).toEqual({
           authz: {
@@ -1177,6 +1194,183 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(() => bodySchema().validate({})).toThrow();
       expect(() => bodySchema().validate({ add: [], remove: [] })).toThrow();
       expect(() => bodySchema().validate({ add: Array(5).fill('detonate:hunt-done') })).toThrow();
+    });
+  });
+
+  describe('sandbox count', () => {
+    const SANDBOX_COUNT_PATH = `${DETONATE_RUNS_PATH}/{id}/sandbox_count`;
+    const handler = () =>
+      router.versioned.getRoute('post', SANDBOX_COUNT_PATH).versions['1'].handler;
+    const request = (id: string, ruleQuery: string) =>
+      createRequest('post', SANDBOX_COUNT_PATH, { rule_query: ruleQuery }, { id });
+    /** The one task id every test starts from: this space, one alert. */
+    const ownRun = () =>
+      client.getTask.mockResolvedValue({
+        id: 'run-1',
+        tags: ['space:default', 'alert:a-1'],
+      } as never);
+
+    it('opens the route only to the Detonate privilege or AlertZero write', () => {
+      const [[config]] = router.versioned.post.mock.calls.filter(
+        ([registered]) => registered.path === SANDBOX_COUNT_PATH
+      );
+
+      expect(config.security).toEqual({
+        authz: {
+          requiredPrivileges: [
+            { anyRequired: ['securitySolution-detonateAll', 'alertzero_write'] },
+          ],
+        },
+      });
+    });
+
+    it('counts matching sandbox docs for the path id as the internal user', async () => {
+      ownRun();
+      esClient.esql.query.mockResolvedValue({ columns: [{ name: 'c' }], values: [[7]] });
+
+      await handler()(
+        createContext(),
+        request('run-1', 'FROM logs-* | WHERE process.command_line LIKE "*curl*"'),
+        mockResponse
+      );
+
+      const [[esqlRequest]] = esClient.esql.query.mock.calls;
+      expect(esqlRequest.query).toContain('FROM .kibana-detonate-sandbox-default');
+      expect(esqlRequest.query).toContain('`detonate.task_id` == "run-1"');
+      expect(esqlRequest.query).toContain('STATS c = COUNT(*)');
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { count: 7 } });
+    });
+
+    it('keeps the path id as the one task filter whatever the body predicates', async () => {
+      ownRun();
+      esClient.esql.query.mockResolvedValue({ columns: [{ name: 'c' }], values: [[0]] });
+
+      await handler()(
+        createContext(),
+        request(
+          'run-1',
+          'FROM logs-* | WHERE detonate.task_id == "other" OR process.name == "curl"'
+        ),
+        mockResponse
+      );
+
+      const [[esqlRequest]] = esClient.esql.query.mock.calls;
+      // The builder inserts its WHERE directly after FROM, so the body's own
+      // predicate is AND-constrained by the path id: `task_id == "other"` can
+      // only narrow the read, never widen it past the path id's rows.
+      expect(esqlRequest.query).toContain('`detonate.task_id` == "run-1"');
+      // The inserted filter is the first WHERE; anything from the body follows.
+      expect(esqlRequest.query.indexOf('`detonate.task_id` == "run-1"')).toBeLessThan(
+        esqlRequest.query.indexOf('detonate.task_id == "other"')
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { count: 0 } });
+    });
+
+    it.each([
+      ['a LOOKUP JOIN', 'FROM logs-* | LOOKUP JOIN dept ON host'],
+      ['an ENRICH', 'FROM logs-* | ENRICH policy ON host'],
+      ['a TS', 'TS metrics'],
+      ['a subquery', 'FROM logs-* | WHERE host.name IN (FROM other | KEEP host)'],
+      ['a SET header', 'SET project_routing = "x"; FROM logs-*'],
+      ['a remote: prefix', 'FROM remote:logs-*'],
+      ['a sandbox source', 'FROM .kibana-detonate-sandbox-default, <x-{now/d}>'],
+      ['a :: selector', 'FROM logs-*::failures'],
+    ])('rejects %s at the guard', async (_name, ruleQuery) => {
+      ownRun();
+
+      await handler()(createContext(), request('run-1', ruleQuery), mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('answers count 0 when the space sandbox stream does not exist yet', async () => {
+      ownRun();
+      const { errors } = jest.requireActual<{
+        errors: typeof import('@elastic/elasticsearch').errors;
+      }>('@elastic/elasticsearch');
+      esClient.esql.query.mockRejectedValue(
+        new errors.ResponseError({
+          body: {
+            error: {
+              type: 'verification_exception',
+              reason: 'Unknown index [.kibana-detonate-sandbox-default]',
+              root_cause: [
+                {
+                  type: 'verification_exception',
+                  reason: 'Unknown index [.kibana-detonate-sandbox-default]',
+                },
+              ],
+            },
+          },
+          statusCode: 400,
+          headers: {},
+        })
+      );
+
+      await handler()(
+        createContext(),
+        request('run-1', 'FROM logs-* | WHERE process.command_line LIKE "*curl*"'),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { count: 0 } });
+    });
+
+    it('still 500s when the ES|QL failure names a different index', async () => {
+      ownRun();
+      const { errors } = jest.requireActual<{
+        errors: typeof import('@elastic/elasticsearch').errors;
+      }>('@elastic/elasticsearch');
+      esClient.esql.query.mockRejectedValue(
+        new errors.ResponseError({
+          body: {
+            error: {
+              type: 'verification_exception',
+              reason: 'Unknown index [.internal.alerts-security.alerts-default]',
+              root_cause: [
+                {
+                  type: 'verification_exception',
+                  reason: 'Unknown index [.internal.alerts-security.alerts-default]',
+                },
+              ],
+            },
+          },
+          statusCode: 400,
+          headers: {},
+        })
+      );
+
+      await handler()(createContext(), request('run-1', 'FROM logs-*'), mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+    });
+
+    it("answers 404 for another space's run", async () => {
+      client.getTask.mockResolvedValue({
+        id: 'run-1',
+        tags: ['space:team-b'],
+      } as never);
+
+      await handler()(createContext(), request('run-1', 'FROM logs-*'), mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('rejects an over-long body', () => {
+      const { config } = router.versioned.getRoute('post', SANDBOX_COUNT_PATH).versions['1'];
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      const body = (validation as { request: { body: { validate(b: unknown): unknown } } }).request
+        .body;
+
+      expect(() => body.validate({ rule_query: 'a'.repeat(10_001) })).toThrow();
+      expect(() => body.validate({ rule_query: 'FROM logs-*' })).not.toThrow();
     });
   });
 });

@@ -51,10 +51,12 @@ import type {
   DetonateFileRequest,
   DetonateHandoffList,
   DetonateHandoffUpdate,
+  DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
   DetonateTask,
   DetonateUsage,
 } from '../../../common/detonate_prototype';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../client';
@@ -71,6 +73,7 @@ import { toDetonationRecord } from '../detonation_record';
 import { IOC_ALERT_READ_LIMIT, readTaskAlerts, readTaskIocs } from '../ioc_extraction';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import { listDetonateHandoffs, setDetonateHandoffMarkers } from '../handoffs';
+import { buildDetonateCountQueries, validateSandboxCountRuleQuery } from '../esql_draft_guard';
 import type { DetonationRecord } from '../detonation_record';
 
 /**
@@ -105,6 +108,13 @@ export const DETONATE_HANDOFF_WRITE_ROUTE_SECURITY = {
     requiredPrivileges: [{ anyRequired: [DETONATE_API_ACTION_ALL, ALERTZERO_API_PRIVILEGE_WRITE] }],
   },
 };
+
+/**
+ * A sandbox count runs caller-chosen WHERE/EVAL predicates as the internal
+ * user against the sandbox stream: a write-tier capability, so it needs the
+ * same privileges as a handoff write and no `securitySolution` read tag.
+ */
+export const DETONATE_SANDBOX_COUNT_ROUTE_SECURITY = DETONATE_HANDOFF_WRITE_ROUTE_SECURITY;
 
 /** `DETONATE_HANDOFF_MARKERS`, spelled out so the body type stays the marker union. */
 const handoffMarkerSchema = schema.oneOf([
@@ -238,6 +248,36 @@ export const registerDetonatePrototypeRoutes = ({
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
   const spaceIdFromRequest = (request: KibanaRequest): string =>
     endpointAppContextService.getActiveSpaceId(request);
+
+  /**
+   * ES|QL's "unknown index" failure for exactly this space's sandbox stream:
+   * the zero-doc state of a space whose first ingest has not run yet. Anything
+   * else — another index name, another error type — is a real failure.
+   */
+  const isMissingSandboxStreamError = (error: unknown, spaceId: string): boolean => {
+    if (!(error instanceof Error) || error.name !== 'ResponseError') return false;
+    // ResponseError.message is just the ES error type (e.g.
+    // "verification_exception"); the index names live in reason / root_cause.
+    const errorBody = (error as { meta?: { body?: { error?: unknown } } }).meta?.body?.error;
+    if (typeof errorBody !== 'object' || errorBody === null) return false;
+    const {
+      type,
+      reason,
+      root_cause: rootCause,
+    } = errorBody as {
+      type?: unknown;
+      reason?: unknown;
+      root_cause?: { reason?: unknown }[];
+    };
+    const namesTheStream = [
+      ...(typeof reason === 'string' ? [reason] : []),
+      ...(rootCause ?? []).map((cause) => (typeof cause.reason === 'string' ? cause.reason : '')),
+    ];
+    return (
+      (type === 'verification_exception' || error.message.includes('verification_exception')) &&
+      namesTheStream.some((r) => r.includes(detonateSandboxStreamName(spaceId)))
+    );
+  };
 
   router.versioned
     .get({
@@ -662,6 +702,83 @@ export const registerDetonatePrototypeRoutes = ({
             remove: request.body.remove ?? [],
           });
           return response.ok<DetonateHandoffUpdate>({ body: { updated } });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * Sandbox-match count for the Detection Worker (P2.3). The caller sends
+   * only the validated stored-rule query; this route re-runs the full P2.2
+   * guard against the request space's default index, applies the command
+   * allow-list, builds the sandbox variant itself (fresh FROM on the space's
+   * sandbox stream, `WHERE detonate.task_id == <path id>`, LIMIT dropped,
+   * count appended, re-parsed and asserted) and runs it as the internal user.
+   * Nothing the caller sends can change the task filter or the source.
+   */
+  router.versioned
+    .post({
+      access: 'internal',
+      path: `${DETONATE_RUNS_PATH}/{id}/sandbox_count`,
+      security: DETONATE_SANDBOX_COUNT_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+            body: schema.object({
+              rule_query: schema.string({ minLength: 1, maxLength: 10_000 }),
+            }),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const client = getClient(request);
+          const spaceId = spaceIdFromRequest(request);
+          await getTaskInSpace(client, request.params.id, spaceId);
+
+          const defaultIndex = await (
+            await context.core
+          ).uiSettings.client.get<string[]>(DEFAULT_INDEX_KEY);
+
+          const guard = validateSandboxCountRuleQuery(request.body.rule_query, defaultIndex);
+          if (!guard.ok) {
+            return response.badRequest({ body: { message: guard.reason } });
+          }
+
+          const { sandbox_query: sandboxQuery } = buildDetonateCountQueries(
+            request.body.rule_query,
+            request.params.id,
+            spaceId
+          );
+
+          const esClient = await getInternalEsClient();
+          // The ES client answers `esql.query` with `{columns, values}` — one
+          // row of one value for `STATS c = COUNT(*)`.
+          let values: unknown[][] | undefined;
+          try {
+            ({ values } = await esClient.esql.query({
+              query: sandboxQuery,
+              format: 'json',
+            }));
+          } catch (error) {
+            // A space's sandbox stream is created by its first ingest, so a
+            // missing stream is the normal zero-doc state, not a failure.
+            // Only the exact-name miss counts as zero; any other verification
+            // error (a builder bug surfacing another index) still 500s.
+            if (isMissingSandboxStreamError(error, spaceId)) {
+              values = [[0]];
+            } else {
+              throw error;
+            }
+          }
+          const count = Number(values?.[0]?.[0] ?? 0);
+
+          return response.ok<DetonateSandboxCountResult>({ body: { count } });
         } catch (error) {
           return toErrorResponse(error, response);
         }

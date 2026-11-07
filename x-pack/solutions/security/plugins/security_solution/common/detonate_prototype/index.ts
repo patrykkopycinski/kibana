@@ -445,8 +445,7 @@ export const ALERT_TAG_PREFIX = 'alert:' as const;
  * `validate_draft` guard; read by proposal comments and `_find` filters.
  */
 export const DETONATE_TRIAL_TAG = `${DETONATE_TAG_PREFIX}trial` as const;
-export const detonateTaskTag = (taskId: string): string =>
-  `${DETONATE_TAG_PREFIX}${taskId}`;
+export const detonateTaskTag = (taskId: string): string => `${DETONATE_TAG_PREFIX}${taskId}`;
 export const detonateCandidateTag = (candidateId: string): string =>
   `${DETONATE_TAG_PREFIX}candidate:${candidateId}`;
 
@@ -626,6 +625,11 @@ export interface DetonateSandboxIngestResult {
   failed: number;
   /** Alert kinds whose read failed; their docs are missing from the counts. */
   unread_kinds: DetonateAlertKind[];
+}
+
+/** Sandbox-match count for one run, run by the route as the internal user. */
+export interface DetonateSandboxCountResult {
+  count: number;
 }
 
 export interface DetonateUsage {

@@ -9,6 +9,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import { detonateSampleStepDefinition } from './detonate_prototype/detonate_sample_step';
 import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
 import { detonateReputationStepDefinition } from './detonate_prototype/detonate_reputation_step';
+import { detonateValidateDraftStepDefinition } from './detonate_prototype/detonate_validate_draft_step';
 import { detonateRunHistoryStepDefinition } from './detonate_prototype/detonate_run_history_step';
 import { detonateCompletedRunsStepDefinition } from './detonate_prototype/detonate_completed_runs_step';
 import { applyDetonationVerdictStepDefinition } from './detonate_prototype/apply_detonation_verdict_step';
@@ -72,6 +73,7 @@ export const registerWorkflowSteps = (
     workflowsExtensions.registerStepDefinition(detonateSampleStepDefinition);
     workflowsExtensions.registerStepDefinition(detonateVerdictStepDefinition);
     workflowsExtensions.registerStepDefinition(detonateReputationStepDefinition);
+    workflowsExtensions.registerStepDefinition(detonateValidateDraftStepDefinition);
     workflowsExtensions.registerStepDefinition(detonateRunHistoryStepDefinition);
     workflowsExtensions.registerStepDefinition(detonateCompletedRunsStepDefinition);
     workflowsExtensions.registerStepDefinition(applyDetonationVerdictStepDefinition);

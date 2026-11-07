@@ -432,12 +432,23 @@ export const DETONATE_TAG_PREFIX = 'detonate:' as const;
 export const detonateVerdictTag = (verdict: DetonateVerdictName): string =>
   `${DETONATE_TAG_PREFIX}${verdict}`;
 
-/**
- * Prefix of the tag that ties a run back to the alert it was started from
+/** Prefix of the tag that ties a run back to the alert it was started from
  * (`alert:<alert_id>`). Written by the alert action; read by the verdict
  * derivation and by run-list filters.
  */
 export const ALERT_TAG_PREFIX = 'alert:' as const;
+
+/**
+ * Tags a validated detection-rule draft carries, on top of its drafted tags:
+ * the trial marker, the run it was drafted for, and a per-draft candidate id
+ * that later steps use to find the created rule back. Written only by the
+ * `validate_draft` guard; read by proposal comments and `_find` filters.
+ */
+export const DETONATE_TRIAL_TAG = `${DETONATE_TAG_PREFIX}trial` as const;
+export const detonateTaskTag = (taskId: string): string =>
+  `${DETONATE_TAG_PREFIX}${taskId}`;
+export const detonateCandidateTag = (candidateId: string): string =>
+  `${DETONATE_TAG_PREFIX}candidate:${candidateId}`;
 
 /** The `alert:<id>` tag for one alert. */
 export const alertRunTag = (alertId: string): string => `${ALERT_TAG_PREFIX}${alertId}`;

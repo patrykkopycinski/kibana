@@ -12,12 +12,6 @@
  * License 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. as a
- * contributor license agreements. Licensed under the Elastic License 2.0;
- * you may not use this file except in compliance with the Elastic License 2.0.
- */
-
 import { detonateValidateDraftStepDefinition } from './detonate_validate_draft_step';
 import { DETONATE_TRIAL_TAG } from '../../../../common/detonate_prototype';
 
@@ -75,6 +69,44 @@ describe('detonateValidateDraftStepDefinition', () => {
     expect(rule?.from).toBe('now-6m');
     expect(result.output?.sandbox_query).toContain('.kibana-detonate-sandbox-default');
     expect(result.output?.sandbox_query).toContain('"task-7"');
+  });
+
+  it('describes the candidate: production query, candidate tag, aggregation flag, source patterns', async () => {
+    const context = createMockContext(
+      { rule: RULE, task_id: 'task-7', space_id: 'default' },
+      SETTINGS_WITH_DEFAULT
+    );
+
+    const result = await detonateValidateDraftStepDefinition.handler(context);
+    const output = result.output ?? {};
+
+    // The production variant reads the same sources with LIMIT removed and a
+    // trailing count; the candidate tag is the one find_created_rule filters by.
+    expect(output.production_query).toContain('FROM logs-*');
+    expect(output.production_query).toContain('COUNT(*)');
+    expect(String(output.production_query).toUpperCase()).not.toContain('LIMIT');
+    expect(output.candidate_tag).toMatch(/^detonate:candidate:/);
+    // A plain WHERE pipeline counts matching events, not would-alert groups.
+    expect(output.aggregating).toBe(false);
+    expect(output.source_patterns).toEqual(['logs-*']);
+  });
+
+  it('flags a trailing STATS … BY as aggregating, so the backtest says would-alert groups', async () => {
+    const context = createMockContext(
+      {
+        rule: {
+          ...RULE,
+          query: 'FROM logs-* | STATS c = COUNT(*) BY host.name | SORT c DESC | LIMIT 5',
+        },
+        task_id: 'task-7',
+        space_id: 'default',
+      },
+      SETTINGS_WITH_DEFAULT
+    );
+
+    const result = await detonateValidateDraftStepDefinition.handler(context);
+
+    expect(result.output?.aggregating).toBe(true);
   });
 
   it('dedupes tags when the draft already carries one', async () => {

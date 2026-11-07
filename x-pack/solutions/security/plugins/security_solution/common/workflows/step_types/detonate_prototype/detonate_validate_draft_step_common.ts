@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under
- * one or more contributor license agreements. Licensed under the Elastic
- * License 2.0; you may not use this file except in compliance with the Elastic
- * License 2.0.
- */
-
 /**
  * Detonate prototype — ES|QL draft validation step, shared definition.
  *
@@ -75,6 +68,14 @@ export const detonateValidateDraftOutputSchema = lazySchema(() =>
     skip_reason: z.string().optional(),
     /** Always set when valid: sandbox count query, ready for the `sandbox_count` route. */
     sandbox_query: z.string().optional(),
+    /** Always set when valid: the per-run candidate tag injected into the rule. */
+    candidate_tag: z.string().optional(),
+    /** Always set when valid: production count query (sources untouched, LIMIT removed, count appended). */
+    production_query: z.string().optional(),
+    /** Always set when valid: true when the pipeline aggregates (`STATS … BY`), so the count is over groups. */
+    aggregating: z.boolean().optional(),
+    /** Always set when valid: index patterns the query reads, for the comment's scope line. */
+    source_patterns: z.array(z.string()).optional(),
   })
 );
 

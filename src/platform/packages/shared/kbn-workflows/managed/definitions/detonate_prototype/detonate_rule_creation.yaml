@@ -1,0 +1,637 @@
+version: "1"
+name: Detonate Detection Rule Creation Worker (prototype)
+description: >
+  Detonate prototype: a detonation-origin copy of the Detection Rule Creation
+  Worker. Drafts an ES|QL detection rule for a coverage gap a detonation
+  surfaced, validates the draft against the space's default indices and the
+  detonate sandbox guard, backtests it, and records it as a proposal on the
+  run's investigation. The rule is created disabled only once an analyst
+  approves, under the approver's identity; a second proposal can then enable
+  the trial rule after a time-of-use check.
+enabled: true
+tags:
+  - security
+  - detection-rule-creation
+  - detonate_prototype
+settings:
+  # One candidate per detonation run at a time; a re-request while a copy is
+  # parked is dropped by this key rather than running twice (the sweep's
+  # open-proposal check runs first, so a dropped second copy is the rare case).
+  concurrency:
+    key: "detonate-coverage-{{ inputs.task_id }}"
+    strategy: drop
+    max: 1
+  # This run parks in WAITING_FOR_CHILD while the proposal gate holds the decision,
+  # and the engine's default 6h workflow timeout would cancel the draft under the
+  # analyst. Budget: a 72h create decision, a 72h enable decision, a re-park
+  # margin, plus the backtest and the verify steps. A test pins the relationship.
+  timeout: "176h"
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        task_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >-
+            Detonate run id the gap came from. Carries the candidate tag and
+            the sandbox match back to this run, and keys the concurrency lock.
+        technique:
+          type: string
+          maxLength: 64
+          description: MITRE ATT&CK technique id the new rule should cover.
+        gap_description:
+          type: string
+          maxLength: 2000
+          description: Detection gap the new rule should cover.
+        evidence:
+          type: string
+          maxLength: 4000
+          description: Hunt findings or event examples supporting the gap.
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence in the detection gap from 0 to 1.
+        preview_invocation_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+          description: Rule executions the preview simulates.
+        investigation_id:
+          type: string
+          maxLength: 512
+          description: >-
+            Investigation the proposals are recorded on. The detonation's own
+            conversation, so the analyst sees a single record for the run.
+      required: [task_id, investigation_id]
+      additionalProperties: false
+outputs:
+  - name: created
+    type: boolean
+  - name: reviewed
+    type: boolean
+  - name: decision
+    type: string
+  - name: rule_name
+    type: string
+  - name: skip_reason
+    type: string
+steps:
+  - name: draft_creation
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    # Keep in sync with ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_frontier
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_rule_creation
+    aggregate-by: alertzero_parent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        # detection-rule-edit calls security.find_rules, an inline tool of
+        # find-security-rules, when it looks up an existing rule.
+        skill_ids:
+          - detection-rule-edit
+          - find-security-rules
+      message: |-
+        Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
+        security.create_detection_rule to create a new ES|QL rule draft now. The
+        supplied context is sufficient; do not ask a follow-up question.
+
+        ATT&CK technique: {{ inputs.technique }}
+        Detection gap: {{ inputs.gap_description }}
+        Evidence: {{ inputs.evidence }}
+        Confidence: {{ inputs.confidence }}
+
+        The query must start with FROM and read only this space's default log
+        indices (for example logs-*). Sandbox detonation output is not a valid
+        source: never read .kibana-detonate-sandbox-* and never emit SET,
+        LOOKUP JOIN, ENRICH, TS, subqueries, remote: or :: selectors.
+
+        Echo the tool's returned rule fields under "rule" and the attachment
+        metadata alongside it. Never return id or rule_id. If the tool did not
+        return a rule, for example because the data source does not exist, do
+        not invent one: return empty strings for name, description, query and
+        attachment_id, give every other rule field the plainest value its type
+        allows (language and type "esql", severity "low", risk_score 0, empty
+        strings for interval, from and to, empty lists for threat and tags),
+        and give the reason in one sentence under "reason". Leave "reason"
+        empty when the tool returned a rule.
+
+        Write the name, the description and the reason in ASD-STE100 Simplified
+        Technical English.
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          rule:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              query:
+                type: string
+              language:
+                type: string
+                enum: [esql]
+              type:
+                type: string
+                enum: [esql]
+              interval:
+                type: string
+              from:
+                type: string
+              to:
+                type: string
+              severity:
+                type: string
+                enum: [low, medium, high, critical]
+              risk_score:
+                # Integer, as the detection engine's own `RiskScore` is; the create
+                # action rejects a fractional score before it reaches an analyst.
+                type: integer
+                minimum: 0
+                maximum: 100
+              threat:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              tags:
+                type: array
+                items:
+                  type: string
+            required:
+              - name
+              - description
+              - query
+              - language
+              - type
+              - interval
+              - from
+              - to
+              - severity
+              - risk_score
+              - threat
+              - tags
+          attachment_id:
+            type: string
+          attachment_version:
+            type: number
+          reason:
+            type: string
+            description: >-
+              Why the tool returned no rule, in one sentence. Empty when it returned one.
+        required:
+          - rule
+          - attachment_id
+
+  # A draft missing its query, name, description or attachment is not reviewable, so
+  # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
+  # open. When the tool built nothing the prompt asks for exactly those four empty,
+  # and plain values everywhere else so the structured output still validates. The
+  # create action requires a name and a description, so such a draft can never be
+  # created: proposing it fails the run instead of asking the analyst anything
+  # answerable. Step `if` cannot group with parentheses, so the compound test lives
+  # here as a flag.
+  - name: draft_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.draft_creation.output.structured_output.rule.query != null
+          and steps.draft_creation.output.structured_output.rule.query != ''
+          and steps.draft_creation.output.structured_output.rule.name != null
+          and steps.draft_creation.output.structured_output.rule.name != ''
+          and steps.draft_creation.output.structured_output.rule.description != null
+          and steps.draft_creation.output.structured_output.rule.description != ''
+          and steps.draft_creation.output.structured_output.attachment_id != null
+          and steps.draft_creation.output.structured_output.attachment_id != '' }}
+  # ----------------------------------------------------------------------
+  # Validate. The custom step is the only security boundary between what the
+  # model drafted and what later steps preview, attach and propose. Output is
+  # either the validated rule (trial tags injected, schedule set to the
+  # shipped trial window) or a skip_reason naming the guard rule that fired.
+  # ----------------------------------------------------------------------
+  - name: validate_draft
+    type: detonate.prototype.validateDraft
+    if: "${{ steps.draft_ready.output.ok == true }}"
+    with:
+      rule: "${{ steps.draft_creation.output.structured_output.rule }}"
+      task_id: "{{ inputs.task_id }}"
+      space_id: "{{ workflow.spaceId }}"
+
+  # Everything below the guard reads the validated rule, never the draft.
+  - name: candidate_ready
+    type: data.set
+    if: "${{ steps.validate_draft.output.valid == true }}"
+    with:
+      candidate_tag: "{{ steps.validate_draft.output.candidate_tag }}"
+      production_query: "{{ steps.validate_draft.output.production_query }}"
+      aggregating: "${{ steps.validate_draft.output.aggregating }}"
+      unit_word: >-
+        {% if steps.validate_draft.output.aggregating == true %}would-alert groups{% else %}matching events{% endif %}
+      source_patterns: "${{ steps.validate_draft.output.source_patterns | default: [] | join: ', ' }}"
+
+  # The sandbox count runs through the internal route the security plugin
+  # owns. The caller never sends a runnable query: it sends the stored rule's
+  # query, and the route builds and runs the sandbox variant itself. A route
+  # error or a zero count skips the candidate; it is never a pass.
+  - name: sandbox_match
+    type: kibana.request
+    if: "${{ steps.validate_draft.output.valid == true }}"
+    timeout: "30s"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/sandbox_count"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        rule_query: "{{ steps.validate_draft.output.rule.query }}"
+    on-failure:
+      continue: true
+
+  - name: sandbox_ready
+    type: data.set
+    if: "${{ steps.validate_draft.output.valid == true }}"
+    with:
+      # At least 1, or the candidate is skipped as "doesn't match the run".
+      ok: >-
+        ${{ steps.sandbox_match.error == null
+          and steps.sandbox_match.output.count != null
+          and steps.sandbox_match.output.count >= 1 }}
+      count: "${{ steps.sandbox_match.output.count | default: 0 }}"
+
+  # ----------------------------------------------------------------------
+  # Backtest. The 90-day figure is a separate count, not a replay of the
+  # rule's alerting over 90 days: the query the guard validated, sources
+  # untouched, LIMIT removed, a single STATS COUNT(*) appended, the window
+  # through the step's `filter` param. `timeout` bounds the count at 60s; a
+  # timeout reads as "Backtest timed out", never a pass.
+  # ----------------------------------------------------------------------
+  - name: backtest_count
+    type: elasticsearch.esql.query
+    if: "${{ steps.sandbox_ready.output.ok == true }}"
+    timeout: "60s"
+    with:
+      allow_partial_results: false
+      filter:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-90d"
+      query: "{{ steps.candidate_ready.output.production_query }}"
+    on-failure:
+      continue: true
+
+  # How many days of data the space actually has in the draft's own source
+  # patterns; a space with less than 30 days reads as "baseline not reached"
+  # on the proposal comment.
+  - name: baseline_days
+    type: elasticsearch.esql.query
+    if: "${{ steps.sandbox_ready.output.ok == true }}"
+    timeout: "30s"
+    with:
+      allow_partial_results: false
+      query: >-
+        FROM {{ steps.validate_draft.output.source_patterns | default: [] | join: ', ' }}
+        | STATS first_seen = MIN(@timestamp)
+        | EVAL covered_days = ROUND(DATE_DIFF("millisecond", first_seen, NOW()) / 86400000.0)
+        | KEEP covered_days
+    on-failure:
+      continue: true
+
+  # Resolve the backtest numbers once, so the comment and the card render
+  # from one place and timeout/permission failures read honestly, never as a
+  # pass.
+  - name: resolve_backtest
+    type: data.set
+    if: "${{ steps.sandbox_ready.output.ok == true }}"
+    with:
+      production_count: "${{ steps.backtest_count.output.values[0][0] | default: null }}"
+      count_status: >-
+        {% if steps.backtest_count.error != null %}{% if steps.backtest_count.error.message contains 'timed out' %}timed_out{% elsif steps.backtest_count.error.message contains '403' %}unavailable_permissions{% else %}failed{% endif %}{% else %}ok{% endif %}
+      covered_days: "${{ steps.baseline_days.output.values[0][0] | default: null }}"
+      unit_word: "${{ steps.candidate_ready.output.unit_word }}"
+      source_patterns: "${{ steps.candidate_ready.output.source_patterns }}"
+
+  # ----------------------------------------------------------------------
+  # Preview, attach, propose. Only a candidate that passed the guard and
+  # matched the sandbox run is previewed, attached and proposed; the proposal
+  # comment carries the backtest numbers, the scope line and the baseline
+  # note. Everything reads the validated rule, never the draft.
+  # ----------------------------------------------------------------------
+  - name: preview_creation
+    type: workflow.execute
+    if: "${{ steps.sandbox_ready.output.ok == true }}"
+    with:
+      workflow-id: system-security-rule-preview
+      run-as-mode: inherit
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          name: "{{ steps.validate_draft.output.rule.name }}"
+          description: "{{ steps.validate_draft.output.rule.description }}"
+          query: "{{ steps.validate_draft.output.rule.query }}"
+          language: esql
+          type: esql
+          interval: "{{ steps.validate_draft.output.rule.interval }}"
+          from: "{{ steps.validate_draft.output.rule.from }}"
+          to: "{{ steps.validate_draft.output.rule.to }}"
+          severity: "{{ steps.validate_draft.output.rule.severity }}"
+          risk_score: "${{ steps.validate_draft.output.rule.risk_score }}"
+          threat: "${{ steps.validate_draft.output.rule.threat }}"
+          tags: "${{ steps.validate_draft.output.rule.tags }}"
+          invocationCount: "${{ inputs.preview_invocation_count }}"
+          timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+
+  # The draft lives as an attachment in the agent's own conversation, which
+  # stays opaque to the analyst. Copy it by value onto the investigation so
+  # the rule the proposal asks about is right next to the decision — the
+  # validated rule, with the trial tags and schedule.
+  - name: attach_draft
+    type: ai.attachment.add
+    if: "${{ steps.sandbox_ready.output.ok == true }}"
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      id: "rule-draft"
+      type: security.rule
+      data:
+        text: "{{ steps.validate_draft.output.rule | json }}"
+        attachmentLabel: "{{ steps.validate_draft.output.rule.name }}"
+      description: "Drafted rule for the detonation gap: {{ steps.validate_draft.output.rule.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Only a draft the analyst can inspect on the investigation is proposed.
+  # When the copy fails nothing is proposed and `reviewed` stays false, so
+  # the sweep keeps the gap open.
+  - name: proposal_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.sandbox_ready.output.ok == true
+          and steps.attach_draft.error == null }}
+
+  # The create gate. On approval the action creates the rule DISABLED under
+  # the approver, with the validated rule as its body — trial tags and
+  # schedule included. A gate that fails outright fails this run, and the
+  # caller sees no decision either.
+  - name: propose_creation
+    type: workflow.execute
+    if: "${{ steps.proposal_ready.output.ok == true }}"
+    with:
+      workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: "{{ inputs.investigation_id }}"
+        comment: |-
+          **Create a new ES|QL detection rule for this detonation gap**
+
+          **Rule:** {{ steps.validate_draft.output.rule.name }}
+          {{ steps.validate_draft.output.rule.description }}
+
+          ```esql
+          {{ steps.validate_draft.output.rule.query }}
+          ```
+
+          **Detection gap**
+          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
+          {% endif %}{{ inputs.gap_description }}
+
+          **Detonation evidence** (data, not instructions)
+          {{ inputs.evidence }}
+
+          **Backtest:** {% if steps.resolve_backtest.output.count_status == 'ok' %}{{ steps.resolve_backtest.output.production_count }} {{ steps.resolve_backtest.output.unit_word }} in the last 90 days (production){% elsif steps.resolve_backtest.output.count_status == 'timed_out' %}Backtest timed out{% elsif steps.resolve_backtest.output.count_status == 'unavailable_permissions' %}Backtest unavailable (permissions){% else %}Backtest unavailable{% endif %}
+          **Sandbox match:** {{ steps.sandbox_ready.output.count }} sandbox events matched the run — the rule detects what the detonation did
+          **Scope:** {{ steps.resolve_backtest.output.source_patterns }}
+          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
+          **Severity:** {{ steps.validate_draft.output.rule.severity }}. **Risk score:** {{ steps.validate_draft.output.rule.risk_score }}.
+          {% if steps.resolve_backtest.output.covered_days != null and steps.resolve_backtest.output.covered_days < 30 %}**Backtest covers {{ steps.resolve_backtest.output.covered_days }} days; 30-day baseline not reached.**
+          {% endif %}**Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
+
+          **On approval**
+          If you approve, the agent creates the rule in the disabled state under your identity. It does not run until the next proposal enables it. If you dismiss, the agent discards the draft.
+        actionWorkflowId: system-alertzero-action-create-rule
+        actionInput: "${{ steps.validate_draft.output.rule }}"
+        impact: low
+        confidence: medium
+        # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
+        autoApprove: false
+        # The enable proposal below gets its own 72h; together they stay under
+        # this workflow's 176h ceiling. A test pins the budget.
+        expiresIn: "72h"
+
+  # ----------------------------------------------------------------------
+  # Find the created rule. The gate returns only proposalId/status/decision;
+  # the created ruleId stays inside the gate. Find it by the candidate tag
+  # the guard injected: the create action creates the rule with the
+  # validated rule's tags, and the candidate tag is unique to this run. On
+  # an error the fail-closed branch runs: no enable proposal.
+  # ----------------------------------------------------------------------
+  - name: find_created_rule
+    type: kibana.request
+    if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    timeout: "30s"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find?per_page=10&filter={{ steps.candidate_ready.output.candidate_tag | prepend: 'alert.attributes.tags:\"' | append: '\"' | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  - name: resolve_found_rule
+    type: data.set
+    if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    with:
+      found: >-
+        ${{ steps.find_created_rule.error == null
+          and steps.find_created_rule.output.data.data.size == 1 }}
+      rule_id: "${{ steps.find_created_rule.output.data.data[0].id | default: '' }}"
+      rule_name_found: "${{ steps.find_created_rule.output.data.data[0].name | default: '' }}"
+      revision: "${{ steps.find_created_rule.output.data.data[0].revision | default: null }}"
+      enabled: "${{ steps.find_created_rule.output.data.data[0].enabled | default: false }}"
+      query_found: "${{ steps.find_created_rule.output.data.data[0].query | default: '' }}"
+
+  # Fail-closed gate for the enable proposal. Exactly one rule, disabled, and
+  # the query unchanged from what the guard validated. Anything else: no
+  # enable proposal; the Investigation gets a note and the analyst enables
+  # from the result flyout.
+  - name: enable_ready
+    type: data.set
+    if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    with:
+      ok: >-
+        ${{ steps.resolve_found_rule.output.found == true
+          and steps.resolve_found_rule.output.enabled == false
+          and steps.resolve_found_rule.output.query_found == steps.validate_draft.output.rule.query }}
+      reason: >-
+        {% if steps.resolve_found_rule.output.found != true %}the created rule could not be found by its candidate tag (it may have been deleted, or edited so the tag was removed){% elsif steps.resolve_found_rule.output.enabled == true %}the created rule is already enabled{% elsif steps.resolve_found_rule.output.query_found != steps.validate_draft.output.rule.query %}the created rule's query changed after creation; enable it from the result flyout after review{% else %}{% endif %}
+
+  # The enable proposal. The action takes only the rule id; the time-of-use
+  # check below re-verifies the rule after the gate returns.
+  - name: propose_enable
+    type: workflow.execute
+    if: "${{ steps.enable_ready.output.ok == true }}"
+    with:
+      workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: "{{ inputs.investigation_id }}"
+        comment: |-
+          **Enable the trial rule, detect-only**
+
+          **Rule:** [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }}) (`{{ steps.resolve_found_rule.output.rule_id }}`)
+
+          The rule was created disabled on approval of the draft. Enabling starts the shipped trial schedule (every 5 minutes over the last 6 minutes) with alerts visible in Detections. If you dismiss, the trial rule stays disabled; enable it manually from the rules page.
+        actionWorkflowId: system-alertzero-action-enable-rule
+        actionInput: "${{ steps.resolve_found_rule.output.rule_id }}"
+        impact: low
+        confidence: medium
+        autoApprove: false
+        expiresIn: "72h"
+
+  # ----------------------------------------------------------------------
+  # Time-of-use check. The enable action takes only an id and enables
+  # whatever the rule holds at approval time, up to 72h later. After the
+  # gate returns approved, re-fetch the rule, compare the revision and the
+  # query. On any mismatch: disable it and note why. Fail closed as far as
+  # the API allows; the failure is never silent.
+  # ----------------------------------------------------------------------
+  - name: verify_enabled_rule
+    type: kibana.request
+    if: "${{ steps.propose_enable.output.decision == 'approved' }}"
+    timeout: "30s"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ steps.resolve_found_rule.output.rule_id }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  - name: resolve_verify
+    type: data.set
+    if: "${{ steps.propose_enable.output.decision == 'approved' }}"
+    with:
+      revision_now: "${{ steps.verify_enabled_rule.output.data.revision | default: null }}"
+      query_now: "${{ steps.verify_enabled_rule.output.data.query | default: '' }}"
+      language_now: "${{ steps.verify_enabled_rule.output.data.language | default: '' }}"
+      type_now: "${{ steps.verify_enabled_rule.output.data.type | default: '' }}"
+
+  # Re-guard at time-of-use. An unchanged revision plus an unchanged,
+  # still-ES|QL query proves the rule the approver enabled is the rule the
+  # guard validated (enabling does not bump the revision; verified live).
+  - name: verify_ok
+    type: data.set
+    if: "${{ steps.propose_enable.output.decision == 'approved' }}"
+    with:
+      ok: >-
+        ${{ steps.verify_enabled_rule.error == null
+          and steps.resolve_verify.output.revision_now == steps.resolve_found_rule.output.revision
+          and steps.resolve_verify.output.query_now == steps.validate_draft.output.rule.query
+          and steps.resolve_verify.output.language_now == 'esql'
+          and steps.resolve_verify.output.type_now == 'esql' }}
+      reason: >-
+        {% if steps.verify_enabled_rule.error != null %}the rule could not be fetched ({{ steps.verify_enabled_rule.error.message }}){% elsif steps.resolve_verify.output.revision_now != steps.resolve_found_rule.output.revision %}query changed after review (revision {{ steps.resolve_found_rule.output.revision }} → {{ steps.resolve_verify.output.revision_now }}){% elsif steps.resolve_verify.output.query_now != steps.validate_draft.output.rule.query %}query changed after review{% elsif steps.resolve_verify.output.language_now != 'esql' or steps.resolve_verify.output.type_now != 'esql' %}rule is no longer ES|QL{% else %}{% endif %}
+
+  # On a failed verify: disable the rule (space-prefixed PATCH) and note it
+  # on the Investigation.
+  - name: disable_changed_rule
+    type: kibana.request
+    if: "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok != true }}"
+    timeout: "30s"
+    with:
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.resolve_found_rule.output.rule_id }}"
+        enabled: false
+    on-failure:
+      continue: true
+
+  - name: note_verification_failure
+    type: ai.conversation.add_user_message
+    if: "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok != true }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: >-
+        {%- if steps.disable_changed_rule.error == null -%}
+        Trial rule disabled: {{ steps.verify_ok.output.reason }}. [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }})
+        {%- else -%}
+        Disable failed, rule still enabled, disable manually: {{ steps.verify_ok.output.reason }} — [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }})
+        {%- endif -%}
+
+  # ----------------------------------------------------------------------
+  # Queue the hunt. On enable approval, POST the handoff set route so the
+  # Hunt Worker picks the run up from the handoff list under its own
+  # account. No cross-Worker call, no direct alert write; this runs as the
+  # copy's caller (inherit), which holds alertzero_write.
+  # ----------------------------------------------------------------------
+  - name: queue_hunt
+    type: kibana.request
+    if: "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok == true }}"
+    timeout: "30s"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        add:
+          - detonate:hunt-requested
+    on-failure:
+      continue: true
+
+  - name: note_hunt_queue_failure
+    type: ai.conversation.add_user_message
+    if: "${{ steps.queue_hunt.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: "Hunt sweep not queued: {{ steps.queue_hunt.error.message }}. Queue it from the detonation result flyout."
+
+  # ----------------------------------------------------------------------
+  # Emit. `created` means the create action completed inside the gate;
+  # `reviewed` means a decision either way. A candidate skipped by the guard
+  # or by the sandbox match reports its skip_reason so a gap that keeps
+  # coming back can be explained from the run alone.
+  # ----------------------------------------------------------------------
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      created: "${{ steps.propose_creation.output.status == 'succeeded' }}"
+      reviewed: >-
+        ${{ steps.propose_creation.output.decision == 'approved'
+          or steps.propose_creation.output.decision == 'dismissed' }}
+      decision: "{{ steps.propose_creation.output.decision }}"
+      rule_name: >-
+        {% if steps.validate_draft.output.valid == true %}{{ steps.validate_draft.output.rule.name }}{% else %}{{ steps.draft_creation.output.structured_output.rule.name }}{% endif %}
+      skip_reason: >-
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.validate_draft.output.valid != true %}{{ steps.validate_draft.output.skip_reason }}{% elsif steps.sandbox_ready.output.ok != true %}the candidate does not match the run: no sandbox events matched the rule query{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

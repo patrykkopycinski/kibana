@@ -8,6 +8,7 @@
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
+  DETONATE_RULE_CREATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -158,6 +159,9 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.install).toHaveBeenCalledWith(DETONATE_TRIAGE_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+    expect(managed.install).toHaveBeenCalledWith(DETONATE_RULE_CREATION_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
     expect(managed.ready).toHaveBeenCalledTimes(1);
   });
 
@@ -183,10 +187,17 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       DETONATE_TRIAGE_WORKFLOW_ID,
       expect.anything()
     );
+    expect(managed.install).not.toHaveBeenCalledWith(
+      DETONATE_RULE_CREATION_WORKFLOW_ID,
+      expect.anything()
+    );
     expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_TRIAGE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_RULE_CREATION_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
   });

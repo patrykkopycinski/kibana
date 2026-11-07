@@ -21,6 +21,7 @@
 import {
   assertSandboxCountQuery,
   buildDetonateCountQueries,
+  describeDraftQuery,
   globMatches,
   globsIntersect,
   validateDraftQueryAst,
@@ -353,5 +354,38 @@ describe('validateSandboxCountRuleQuery — the sandbox_count route judgement', 
 
   it('rejects a query that does not parse', () => {
     expect(validateSandboxCountRuleQuery('FROM | WHERE', ['logs-*']).ok).toBe(false);
+  });
+});
+
+describe('describeDraftQuery — candidate-facing metadata for the D10 copy', () => {
+  it('lists the FROM source patterns and reports a filter pipeline as non-aggregating', () => {
+    const described = describeDraftQuery('FROM logs-* | WHERE process.name == "ls"');
+
+    expect(described.source_patterns).toEqual(['logs-*']);
+    expect(described.aggregating).toBe(false);
+  });
+
+  it('flags aggregation even when a SORT and LIMIT follow the STATS BY', () => {
+    const described = describeDraftQuery(
+      'FROM logs-* | STATS c = COUNT(*) BY host.name | SORT c DESC | LIMIT 5'
+    );
+
+    // The count builder strips LIMIT before appending its count, so the count
+    // runs over the STATS BY output: it counts groups, and the comment must
+    // say would-alert groups.
+    expect(described.aggregating).toBe(true);
+  });
+
+  it('flags a plain trailing STATS BY as aggregating', () => {
+    const described = describeDraftQuery('FROM logs-* | STATS c = COUNT(*) BY host.name');
+
+    expect(described.aggregating).toBe(true);
+    expect(described.source_patterns).toEqual(['logs-*']);
+  });
+
+  it('reports every FROM source', () => {
+    const described = describeDraftQuery('FROM logs-*, logs-other-* | EVAL x = 1');
+
+    expect(described.source_patterns).toEqual(['logs-*', 'logs-other-*']);
   });
 });

@@ -344,6 +344,28 @@ export const validateDraftQueryAst = (
 };
 
 /**
+ * Candidate-facing metadata derived from a validated draft: the source
+ * patterns the comment's scope line names, and whether the pipeline
+ * aggregates (a `stats` with a `by` option), so the backtest stat can say
+ * "would-alert groups" instead of "matching events". The count builder
+ * strips LIMIT before appending its count, so a `by` anywhere in the
+ * pipeline — not only on the trailing command — makes the count one over
+ * groups. Both come from the same AST the guard already accepted.
+ */
+export const describeDraftQuery = (
+  queryText: string
+): { source_patterns: string[]; aggregating: boolean } => {
+  const { root } = Parser.parse(queryText);
+  const sources = collectSources(root);
+  const sourcePatterns = sources.from.map((source) => sourceParts(source).index);
+  const aggregating = root.commands.some(
+    (cmd) =>
+      cmd.name === 'stats' && cmd.args.some((arg) => arg.type === 'option' && arg.name === 'by')
+  );
+  return { source_patterns: sourcePatterns, aggregating };
+};
+
+/**
  * Commands an internal-user sandbox count may run. The FROM guard (rules 1–7)
  * already bounds the sources; this list bounds the pipeline so the read
  * cannot reach a lookup index, enrich index, remote cluster or linked

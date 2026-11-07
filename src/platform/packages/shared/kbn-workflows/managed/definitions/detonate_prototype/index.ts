@@ -8,6 +8,7 @@
  */
 
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
+import DETONATE_RULE_CREATION_YAML from './detonate_rule_creation.yaml';
 import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
@@ -45,6 +46,31 @@ export const DETONATE_TRIAGE_WORKFLOW = {
   version: 14,
   billable: false,
   yaml: DETONATE_TRIAGE_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const DETONATE_RULE_CREATION_WORKFLOW_ID = 'system-security-detonate-rule-creation';
+
+/**
+ * Detonate prototype: a detonation-origin copy of the Detection Rule Creation
+ * Worker (D10). Drafts an ES|QL rule for a coverage gap a detonation
+ * surfaced, gates it through the `validateDraft` guard (the only security
+ * boundary on model output), backtests it (separate 90-day production count
+ * plus a sandbox match through the sandbox_count route), and proposes
+ * creation on the run's Investigation. Approval creates the rule disabled;
+ * a second proposal enables the trial rule after a time-of-use check, and a
+ * verified enable queues the Hunt Worker via the handoff route.
+ */
+export const DETONATE_RULE_CREATION_WORKFLOW = {
+  id: DETONATE_RULE_CREATION_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_RULE_CREATION_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

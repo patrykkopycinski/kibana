@@ -30,6 +30,7 @@ import {
 import { detonateValidateDraftStepCommonDefinition } from '../../../../common/workflows/step_types/detonate_prototype/detonate_validate_draft_step_common';
 import {
   buildDetonateCountQueries,
+  describeDraftQuery,
   validateDraftRuleQuery,
   validateDraftRuleShape,
 } from '../../../detonate_prototype/esql_draft_guard';
@@ -85,22 +86,23 @@ export const detonateValidateDraftStepDefinition = createServerStepDefinition({
     }
 
     const candidateId = randomUUID();
+    const candidateTag = detonateCandidateTag(candidateId);
     const tags = [
-      ...new Set([
-        ...rule.tags,
-        DETONATE_TRIAL_TAG,
-        detonateTaskTag(taskId),
-        detonateCandidateTag(candidateId),
-      ]),
+      ...new Set([...rule.tags, DETONATE_TRIAL_TAG, detonateTaskTag(taskId), candidateTag]),
     ];
 
     const counts = buildDetonateCountQueries(rule.query, taskId, spaceId);
+    const described = describeDraftQuery(rule.query);
 
     return {
       output: {
         valid: true,
         rule: { ...rule, tags, interval: TRIAL_INTERVAL, from: TRIAL_FROM },
         sandbox_query: counts.sandbox_query,
+        production_query: counts.production_query,
+        candidate_tag: candidateTag,
+        aggregating: described.aggregating,
+        source_patterns: described.source_patterns,
       },
     };
   },

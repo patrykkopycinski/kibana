@@ -12,16 +12,13 @@ enabled: true
 tags:
   - security
   - detonate_prototype
-settings:
-  # One run per sample at a time, inherited from the worker's own key: the
-  # relay and the worker's per-run mode collapse into the same
-  # `detonate-<sha256>` bucket, so a parked blocklist gate on one keeps a
-  # second run on the same hash out. The relay itself holds no slot: it hops
-  # and finishes.
-  concurrency:
-    key: "detonate-{{ inputs.sha256 }}"
-    strategy: drop
-    max: 1
+# No concurrency key on the relay. The worker's per-run mode owns the
+# `detonate-<sha256>` slot, and the engine holds a workflow's slot across a
+# synchronous `workflow.execute`: a relay-level copy of the same key makes
+# the hop compete with its own caller for one slot, and every run drops
+# ("Dropped due to concurrency limit"). Duplicate suppression stays where
+# the chain lives — the second relay on a hash hops, its child is dropped
+# by the worker's slot, and the relay finishes.
 triggers:
   # API-fired only (workflow.execute / Run dialog). No alert trigger exists in
   # the registry yet — "automated" today means one API call, with the run

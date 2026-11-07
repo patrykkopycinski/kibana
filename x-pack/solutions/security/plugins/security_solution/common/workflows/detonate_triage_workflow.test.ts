@@ -78,12 +78,11 @@ describe('detonate triage relay workflow', () => {
   const relay = parse(DETONATE_TRIAGE_WORKFLOW.yaml) as ParsedWorkflow;
   const relaySteps = collectSteps(relay.steps);
 
-  it('keeps the per-sample concurrency key, so the relay and the worker share one slot per hash', () => {
-    expect(relay.settings?.concurrency).toEqual({
-      key: 'detonate-{{ inputs.sha256 }}',
-      strategy: 'drop',
-      max: 1,
-    });
+  it('declares no concurrency key of its own, so the hop does not compete with its caller for the per-hash slot', () => {
+    // The worker's per-run mode owns the `detonate-<sha256>` slot. The engine holds a workflow's
+    // slot across a synchronous `workflow.execute`, so a relay-level copy of the same key makes
+    // every hop drop ("Dropped due to concurrency limit") — verified live on the prototype stack.
+    expect(relay.settings?.concurrency).toBeUndefined();
   });
 
   it('is a single synchronous hop to the per-space worker copy under the default run-as mode', () => {

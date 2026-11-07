@@ -12,7 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   type WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
@@ -109,9 +109,9 @@ export const workerNameForCards = (workerId: string): string => {
       return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.threatHunt', {
         defaultMessage: 'Continuous threat hunt',
       });
-    case SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID:
-      return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.fileDetonation', {
-        defaultMessage: 'File detonation',
+    case SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID:
+      return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.detonateSample', {
+        defaultMessage: 'Detonate sample',
       });
     case SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID:
       return i18n.translate(
@@ -357,37 +357,72 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
       },
     ],
   },
-  [SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID]: {
-    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.fileDetonation.intro', {
-      defaultMessage:
-        'File Detonation runs on a fixed Manual autonomy: it detonates on its own, and every Proposal still waits for you.',
-    }),
+  [SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID]: {
+    intro: i18n.translate(
+      'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.intro',
+      {
+        defaultMessage:
+          'You trigger detonations from Forensics; Supervised lets high-severity samples detonate on a schedule. Every Proposal still waits for you.',
+      }
+    ),
     levels: [
       {
         level: 'manual',
         who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.who',
-          { defaultMessage: 'Detonates on its own; every Proposal still waits for you.' }
+          'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.manual.who',
+          { defaultMessage: 'You start each detonation; every Proposal still waits for you.' }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.detonate',
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.manual.detonate',
               { defaultMessage: 'Detonate' }
             ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.detonateValue',
-              '<worker> detonates every untriaged file hash automatically'
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.manual.detonateValue',
+              '<you> pick the sample; <worker> detonates it on demand'
             ),
           },
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.proposals',
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.fileDetonation.manual.proposalsValue',
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.manual.proposalsValue',
               '<you> approve each'
+            ),
+          },
+        ],
+      },
+      {
+        level: 'supervised',
+        who: i18n.translate(
+          'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.supervised.who',
+          {
+            defaultMessage:
+              'Detonates high-severity samples on a schedule; every Proposal still waits for you.',
+          }
+        ),
+        facts: [
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.supervised.detonate',
+              { defaultMessage: 'Detonate' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.supervised.detonateValue',
+              '<worker> detonates high-severity untriaged samples automatically, within the sandbox allowance'
+            ),
+          },
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.supervised.proposals',
+              { defaultMessage: 'Proposals' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.forensicsDetonateSample.supervised.proposalsValue',
+              '<you> approve each — blocklists, exceptions, and alert closes never happen on their own'
             ),
           },
         ],

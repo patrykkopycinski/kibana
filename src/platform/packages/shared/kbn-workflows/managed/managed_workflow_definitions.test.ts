@@ -30,11 +30,10 @@ import {
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
-  ALERTZERO_WORKER_FLOOR_DETONATE_SWEEP_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
-  DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
@@ -52,7 +51,7 @@ import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.
 import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
-import FLOOR_DETONATE_SWEEP_YAML from './definitions/alertzero/floor_detonate_sweep.yaml';
+import FORENSICS_DETONATE_SAMPLE_YAML from './definitions/alertzero/forensics_detonate_sample.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
@@ -61,7 +60,7 @@ import {
   ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
   ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
   CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS,
-  DETONATE_SWEEP_WORKER_SETTINGS_DEFAULTS,
+  DETONATE_SAMPLE_WORKER_SETTINGS_DEFAULTS,
   ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS,
   RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
@@ -106,7 +105,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     autonomyLevel: 'manual',
     scheduleInterval: '24h',
   },
-  [ALERTZERO_WORKER_FLOOR_DETONATE_SWEEP_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '1h',
@@ -239,9 +238,9 @@ it.each([
     '7:81e93c9b',
   ],
   [
-    ALERTZERO_WORKER_FLOOR_DETONATE_SWEEP_WORKFLOW_ID,
-    renderInputs(FLOOR_DETONATE_SWEEP_YAML, DETONATE_SWEEP_WORKER_SETTINGS_DEFAULTS),
-    '4:8e809ed0',
+    ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW_ID,
+    renderInputs(FORENSICS_DETONATE_SAMPLE_YAML, DETONATE_SAMPLE_WORKER_SETTINGS_DEFAULTS),
+    '1:c3c2899a',
   ],
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
@@ -391,9 +390,9 @@ describe('managedWorkflowDefinitions', () => {
     expect(ids).toContain(DETONATE_TRIAGE_WORKFLOW_ID);
   });
 
-  it('contains the detonate completion sweep workflow (prototype)', () => {
+  it('retires the detonate completion sweep: the Forensics worker owns the write-back', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
-    expect(ids).toContain(DETONATE_COMPLETION_SWEEP_WORKFLOW_ID);
+    expect(ids).not.toContain('system-security-detonate-completion-sweep');
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

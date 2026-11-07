@@ -12,7 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 } from '@kbn/alertzero-common';
 
@@ -42,9 +42,9 @@ const WORKER_NAMES: Record<string, () => string> = {
     i18n.translate('xpack.alertzero.watches.workers.detectionRuleCoverage.name', {
       defaultMessage: 'Rule Coverage',
     }),
-  [SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID]: () =>
-    i18n.translate('xpack.alertzero.watches.workers.floorDetonateSweep.name', {
-      defaultMessage: 'File Detonation',
+  [SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID]: () =>
+    i18n.translate('xpack.alertzero.watches.workers.forensicsDetonateSample.name', {
+      defaultMessage: 'Detonate Sample',
     }),
 };
 

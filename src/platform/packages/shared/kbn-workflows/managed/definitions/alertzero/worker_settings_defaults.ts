@@ -58,14 +58,6 @@ export const ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS = {
   scheduleInterval: { defaultValue: '24h' },
 } as const satisfies WorkerSettingsDefaults;
 
-export const DETONATE_SWEEP_WORKER_SETTINGS_DEFAULTS = {
-  // Manual only: the detonation verdict itself is automatic, but every downstream action
-  // (blocklist, exception proposal) is already approval-gated, and detonations spend a
-  // sandbox VM — an unattended schedule that fires them belongs to a later decision.
-  allowedAutonomyLevels: ['manual'],
-  scheduleInterval: { defaultValue: '1h' },
-} as const satisfies WorkerSettingsDefaults;
-
 export const CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS = {
   // Manual only: Hunt Watch locks autonomy at the settings-page level too (see
   // `CONTINUOUS_THREAT_HUNT_SETTINGS` in @kbn/alertzero-common). A stored assisted/supervised
@@ -76,6 +68,14 @@ export const CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS = {
 
 export const ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS = {
   allowedAutonomyLevels: ['manual', 'supervised'],
+} as const satisfies WorkerSettingsDefaults;
+
+export const DETONATE_SAMPLE_WORKER_SETTINGS_DEFAULTS = {
+  // Supervised auto-detonates high/critical file alerts with no verdict, under
+  // the monthly allowance; every enforcement action (blocklist, exception,
+  // close) passes a human gate on both levels, so there is no unattended level.
+  allowedAutonomyLevels: ['manual', 'supervised'],
+  scheduleInterval: { defaultValue: '1h' },
 } as const satisfies WorkerSettingsDefaults;
 
 export const RULE_TUNING_WORKER_SETTINGS_DEFAULTS = {

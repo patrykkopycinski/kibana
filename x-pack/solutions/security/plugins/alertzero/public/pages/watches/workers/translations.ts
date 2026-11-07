@@ -12,7 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 } from '@kbn/alertzero-common';
 
@@ -98,11 +98,11 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
         'Acts on coverage gaps from Continuous Threat Hunt. With Hunt Watch disabled it has nothing to act on.',
     }
   ),
-  [SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.floorDetonateSweep.description',
+  [SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.forensicsDetonateSample.description',
     {
       defaultMessage:
-        'Detonates file hashes from open, untriaged alerts in a sandbox and records each verdict in an Investigation. Proposes closing alerts on a malicious verdict and a rule exception for samples that stay quiet.',
+        'Detonates a file sample in a sandbox and records each verdict in an Investigation. Proposes closing alerts on a malicious verdict and a rule exception for samples that stay quiet.',
     }
   ),
 };

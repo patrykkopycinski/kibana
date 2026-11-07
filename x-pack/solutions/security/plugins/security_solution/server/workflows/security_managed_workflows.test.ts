@@ -7,7 +7,6 @@
 
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-  DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -192,8 +191,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     });
   });
 
-  it('installs the completion sweep once per space, since the scheduler skips global-space workflows', async () => {
-    (enumerate.enumerateSpaceIds as jest.Mock).mockResolvedValue(['default', 'another']);
+  it('installs nothing per space for the detonate prototype: the Forensics worker owns the sweep', async () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
@@ -207,80 +205,20 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       detonatePrototypeEnabled: true,
     });
 
-    const sweepInstalls = managed.install.mock.calls.filter(
-      ([id]) => id === DETONATE_COMPLETION_SWEEP_WORKFLOW_ID
-    );
-    expect(sweepInstalls).toEqual([
-      [DETONATE_COMPLETION_SWEEP_WORKFLOW_ID, { spaceId: 'default', workflowIdSuffix: 'default' }],
-      [DETONATE_COMPLETION_SWEEP_WORKFLOW_ID, { spaceId: 'another', workflowIdSuffix: 'another' }],
-    ]);
-    expect(managed.install.mock.invocationCallOrder.at(-1)).toBeLessThan(
-      managed.ready.mock.invocationCallOrder[0]
-    );
+    expect(managed.install.mock.calls.filter(([, opts]) => 'workflowIdSuffix' in opts)).toEqual([]);
   });
 
-  it('keeps installing the sweep in other spaces when one space fails', async () => {
-    (enumerate.enumerateSpaceIds as jest.Mock).mockResolvedValue(['default', 'broken', 'another']);
-    const managed = createManagedClient();
-    managed.install.mockImplementation(async (id: string, { spaceId }: { spaceId: string }) => {
-      if (id === DETONATE_COMPLETION_SWEEP_WORKFLOW_ID && spaceId === 'broken') {
-        throw new Error('boom');
-      }
-    });
-    const workflowsExtensions = workflowsExtensionsMock.createStart();
-    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
-    const logger = loggerMock.create();
-
-    await installSecurityManagedWorkflowsAndMarkReady({
-      workflowsExtensions,
-      logger,
-      threatIntelSupplyEnabled: false,
-      bootstrapReady: Promise.resolve(),
-      core: coreMock.createStart(),
-      detonatePrototypeEnabled: true,
-    });
-
-    expect(managed.install).toHaveBeenCalledWith(DETONATE_COMPLETION_SWEEP_WORKFLOW_ID, {
-      spaceId: 'another',
-      workflowIdSuffix: 'another',
-    });
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining("space 'broken'"),
-      expect.anything()
-    );
-    expect(managed.ready).toHaveBeenCalledTimes(1);
-  });
-
-  it('uninstalls every installed sweep copy when the prototype flag is off', async () => {
+  it('leaves legacy per-space sweep copies alone: the retired sweep reconciles on managed-definition updates, not the flag path', async () => {
     const managed = createManagedClient();
     managed.listInstalledWorkflowStates.mockResolvedValue([
       {
-        workflowId: `${DETONATE_COMPLETION_SWEEP_WORKFLOW_ID}-default`,
+        workflowId: 'system-security-detonate-completion-sweep-default',
         spaceId: 'default',
-        definitionId: DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
-        templateValues: null,
-        documentVersion: 1,
-      },
-      {
-        workflowId: `${DETONATE_COMPLETION_SWEEP_WORKFLOW_ID}-gone`,
-        spaceId: 'gone',
-        definitionId: DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
-        templateValues: null,
-        documentVersion: 1,
-      },
-      {
-        workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-        spaceId: 'default',
-        definitionId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+        definitionId: 'system-security-detonate-completion-sweep',
         templateValues: null,
         documentVersion: 1,
       },
     ]);
-    managed.uninstall.mockImplementation(async (id: string, { spaceId }: { spaceId: string }) => {
-      if (id === DETONATE_COMPLETION_SWEEP_WORKFLOW_ID && spaceId === 'default') {
-        throw new Error('boom');
-      }
-    });
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
 
@@ -293,21 +231,11 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       detonatePrototypeEnabled: false,
     });
 
-    const sweepUninstalls = managed.uninstall.mock.calls.filter(
-      ([id]) => id === DETONATE_COMPLETION_SWEEP_WORKFLOW_ID
-    );
-    expect(sweepUninstalls).toEqual([
-      [
-        DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
-        { spaceId: 'default', workflowId: `${DETONATE_COMPLETION_SWEEP_WORKFLOW_ID}-default` },
-      ],
-      [
-        DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
-        { spaceId: 'gone', workflowId: `${DETONATE_COMPLETION_SWEEP_WORKFLOW_ID}-gone` },
-      ],
-    ]);
+    // With the sweep gone from the registry, its installed copies are cleaned
+    // up by managed-definition reconciliation, not by this flag-driven
+    // installer — the flag path only owns FP validation and the relay.
     expect(managed.uninstall).not.toHaveBeenCalledWith(
-      SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+      'system-security-detonate-completion-sweep',
       expect.anything()
     );
     expect(managed.ready).toHaveBeenCalledTimes(1);

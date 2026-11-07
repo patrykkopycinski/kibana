@@ -7,7 +7,6 @@
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  DETONATE_COMPLETION_SWEEP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -53,11 +52,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    */
   bootstrapReady: Promise<void>;
   core: Pick<CoreStart, 'savedObjects'>;
-  /**
-   * Installs the detonate workflows when the prototype flag is on: triage and
-   * FP-validation globally, the completion sweep per space. When off, previously
-   * installed copies are uninstalled, so toggling the flag cleanly adds/removes them.
-   */
+  /** Installs the detonate workflows (triage relay and FP validation) on; uninstalls them off. */
   detonatePrototypeEnabled?: boolean;
 }): Promise<void> => {
   let managedWorkflowsClient: SecurityManagedWorkflowsClient;
@@ -94,20 +89,6 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     }
   } catch (error) {
     logger.warn('Failed to install or uninstall the detonate prototype workflows', { error });
-  }
-
-  try {
-    if (detonatePrototypeEnabled) {
-      await installDetonateCompletionSweep({
-        managedWorkflowsClient,
-        spaceIds: await enumerateSpaceIds(createSpaceRepository(core)),
-        logger,
-      });
-    } else {
-      await uninstallDetonateCompletionSweep({ managedWorkflowsClient, logger });
-    }
-  } catch (error) {
-    logger.warn('Failed to install or uninstall the detonate completion sweep', { error });
   }
 
   try {
@@ -202,58 +183,10 @@ export const installThreatIntelManagedWorkflowsForSpaces = async ({
 };
 
 /**
- * The sweep is scheduled, and the scheduler skips workflows stored in the
- * global space, so it is installed once per space instead. Spaces created
- * after boot get their copy on the next restart. One failing space does not
- * stop the others.
+ * The detonate completion sweep is retired: the Forensics Watch's Detonate
+ * sample worker journals every verdict itself, so there is no scheduled
+ * write-back left to install per space.
  */
-const installDetonateCompletionSweep = async ({
-  managedWorkflowsClient,
-  spaceIds,
-  logger,
-}: {
-  managedWorkflowsClient: SecurityManagedWorkflowsClient;
-  spaceIds: readonly string[];
-  logger: Logger;
-}): Promise<void> => {
-  for (const spaceId of spaceIds) {
-    try {
-      await managedWorkflowsClient.install(DETONATE_COMPLETION_SWEEP_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
-    } catch (error) {
-      logger.warn(`Failed to install the detonate completion sweep in space '${spaceId}'`, {
-        error,
-      });
-    }
-  }
-};
-
-/** Removes every installed per-space sweep, including copies in since-deleted spaces. */
-const uninstallDetonateCompletionSweep = async ({
-  managedWorkflowsClient,
-  logger,
-}: {
-  managedWorkflowsClient: SecurityManagedWorkflowsClient;
-  logger: Logger;
-}): Promise<void> => {
-  const sweeps = (await managedWorkflowsClient.listInstalledWorkflowStates()).filter(
-    ({ definitionId }) => definitionId === DETONATE_COMPLETION_SWEEP_WORKFLOW_ID
-  );
-  for (const { spaceId, workflowId } of sweeps) {
-    try {
-      await managedWorkflowsClient.uninstall(DETONATE_COMPLETION_SWEEP_WORKFLOW_ID, {
-        spaceId,
-        workflowId,
-      });
-    } catch (error) {
-      logger.warn(`Failed to uninstall the detonate completion sweep in space ${spaceId}`, {
-        error,
-      });
-    }
-  }
-};
 
 const createSpaceRepository = (
   core: Pick<CoreStart, 'savedObjects'>

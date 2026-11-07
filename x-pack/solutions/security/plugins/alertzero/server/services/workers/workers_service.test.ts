@@ -14,7 +14,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
@@ -40,9 +40,9 @@ const FORENSICS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
-const DETONATE_SWEEP = SYSTEM_SECURITY_WORKER_FLOOR_DETONATE_SWEEP_ID;
+const DETONATE_SAMPLE = SYSTEM_SECURITY_WORKER_FORENSICS_DETONATE_SAMPLE_ID;
 const WORKERS_WITHOUT_GATING_SKILLS = SYSTEM_SECURITY_WORKER_IDS.filter(
-  (id) => id !== FORENSICS && id !== DETONATE_SWEEP
+  (id) => id !== FORENSICS && id !== DETONATE_SAMPLE
 );
 const GATING_SKILL_IDS = ['endpoint-forensic-analysis', 'detonate-sample'];
 
@@ -1355,13 +1355,13 @@ describe('WorkersService', () => {
       const { workers } = await service.list(request, SPACE);
 
       expect(workers.map(({ id }) => id)).toEqual(
-        SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== DETONATE_SWEEP)
+        SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== DETONATE_SAMPLE)
       );
-      expect(await service.get(DETONATE_SWEEP, request, SPACE)).toBeUndefined();
-      expect(await service.update(DETONATE_SWEEP, { enabled: true }, SPACE, request)).toEqual({
+      expect(await service.get(DETONATE_SAMPLE, request, SPACE)).toBeUndefined();
+      expect(await service.update(DETONATE_SAMPLE, { enabled: true }, SPACE, request)).toEqual({
         outcome: 'not-found',
       });
-      expect(harness.documents.has(`${DETONATE_SWEEP}-${SPACE}`)).toBe(false);
+      expect(harness.documents.has(`${DETONATE_SAMPLE}-${SPACE}`)).toBe(false);
     });
 
     it('lists File Detonation when the detonate-sample skill is registered', async () => {
@@ -1369,7 +1369,7 @@ describe('WorkersService', () => {
         .createService(agentBuilderWithSkills(['detonate-sample']))
         .list(request, SPACE);
 
-      expect(workers.map(({ id }) => id)).toContain(DETONATE_SWEEP);
+      expect(workers.map(({ id }) => id)).toContain(DETONATE_SAMPLE);
       expect(workers.map(({ id }) => id)).not.toContain(FORENSICS);
     });
   });

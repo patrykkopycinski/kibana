@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import { DETONATE_FP_VALIDATION_WORKFLOW, DETONATE_TRIAGE_WORKFLOW } from '@kbn/workflows/managed';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0. You may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW,
+  DETONATE_FP_VALIDATION_WORKFLOW,
+  DETONATE_TRIAGE_WORKFLOW,
+} from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
 import { toApiEntries } from '../detection_engine/rule_exceptions/to_api_entries';
@@ -14,9 +25,13 @@ import { createExceptionListItemInputSchema } from './step_types/create_exceptio
 /**
  * Managed workflows install under lightweight validation, so a plugin step's
  * `with` block is only deep-checked against the step's real input schema at
- * execution time. This suite parses the detonate triage YAML and validates the
- * blocklist step's `with` against `createExceptionListItemInputSchema` here,
- * so a malformed entry shape fails CI instead of a demo run.
+ * execution time. This suite parses the detonate workflows' YAML and
+ * validates the blocklist step's `with` against
+ * `createExceptionListItemInputSchema` here, so a malformed entry shape fails
+ * CI instead of a demo run. The detonation chain lives in the Forensics
+ * Watch's Detonate sample worker; the triage workflow is the thin relay that
+ * hops to it, so the per-run contracts below parse the worker's rendered
+ * template.
  */
 
 interface WorkflowStep {
@@ -31,6 +46,18 @@ interface WorkflowStep {
   with?: unknown;
 }
 
+interface ParsedWorkflow {
+  steps: WorkflowStep[];
+  settings?: { concurrency?: Record<string, unknown> };
+  triggers?: Array<{
+    type: string;
+    inputs?: {
+      required?: string[];
+      properties: Record<string, { minLength?: number; maxLength?: number }>;
+    };
+  }>;
+}
+
 /** Depth-first step walker covering every container the schema allows. */
 const collectSteps = (steps: WorkflowStep[] = []): WorkflowStep[] =>
   steps.flatMap((step) => [
@@ -40,12 +67,62 @@ const collectSteps = (steps: WorkflowStep[] = []): WorkflowStep[] =>
     ...collectSteps(step.cases?.flatMap(({ steps: caseSteps }) => caseSteps ?? [])),
   ]);
 
-describe('detonate triage managed workflow', () => {
-  const workflow = parse(DETONATE_TRIAGE_WORKFLOW.yaml) as {
-    steps: WorkflowStep[];
-    settings?: { concurrency?: Record<string, unknown> };
-  };
+/** The worker's template must be rendered (tokens replaced) before parsing. */
+const WORKER_YAML = ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW.yamlTemplate({
+  settingsVersion: 1,
+  autonomyLevel: 'manual',
+  scheduleInterval: '1h',
+});
+
+describe('detonate triage relay workflow', () => {
+  const relay = parse(DETONATE_TRIAGE_WORKFLOW.yaml) as ParsedWorkflow;
+  const relaySteps = collectSteps(relay.steps);
+
+  it('keeps the per-sample concurrency key, so the relay and the worker share one slot per hash', () => {
+    expect(relay.settings?.concurrency).toEqual({
+      key: 'detonate-{{ inputs.sha256 }}',
+      strategy: 'drop',
+      max: 1,
+    });
+  });
+
+  it('is a single synchronous hop to the per-space worker copy under the default run-as mode', () => {
+    const hop = relaySteps.find(({ type }) => type === 'workflow.execute');
+    expect(hop).toBeDefined();
+    const input = hop?.with as {
+      'workflow-id': string;
+      'run-as-mode'?: string;
+      inputs: Record<string, string>;
+    };
+    expect(input['workflow-id']).toBe(
+      'system-security-forensics-detonate-sample-{{ workflow.spaceId }}'
+    );
+    // Absent, not spelled 'default': the schema default is the behavior.
+    expect(input['run-as-mode']).toBeUndefined();
+    expect(input.inputs).toEqual({
+      sha256: '{{ inputs.sha256 }}',
+      alert_id: '{{ inputs.alert_id }}',
+      case_id: '{{ inputs.case_id }}',
+      conversation_id: '{{ inputs.conversation_id }}',
+    });
+    // The relay adds nothing of its own: one step only.
+    expect(relaySteps).toHaveLength(1);
+  });
+
+  it('stays manual-trigger-only with sha256 and alert_id required', () => {
+    const manual = relay.triggers?.find(({ type }) => type === 'manual');
+    expect(manual?.inputs?.required).toEqual(['sha256', 'alert_id']);
+    expect(manual?.inputs?.properties.sha256).toMatchObject({
+      minLength: 64,
+      maxLength: 64,
+    });
+  });
+});
+
+describe('detonate sample worker (managed workflow, per-run mode)', () => {
+  const workflow = parse(WORKER_YAML) as ParsedWorkflow;
   const steps = collectSteps(workflow.steps);
+  const byName = (name: string) => steps.find((step) => step.name === name);
 
   it('runs one triage per sample, so overlapping callers raise one set of proposals', () => {
     expect(workflow.settings?.concurrency).toEqual({
@@ -124,7 +201,12 @@ describe('detonate triage managed workflow', () => {
   });
 
   it('guards every hunt so an empty IOC family never compiles an invalid IN', () => {
-    const hunts = steps.filter(({ type }) => type === 'elasticsearch.esql.query');
+    // The worker's sweep queries are esql too; the hunts are the two keyed on
+    // the detonation's extracted_iocs.
+    const hunts = steps.filter(
+      ({ type, if: guard }) =>
+        type === 'elasticsearch.esql.query' && guard?.includes('extracted_iocs')
+    );
     // Two indicator families the extractor produces: domains and IPs.
     expect(hunts).toHaveLength(2);
 
@@ -148,7 +230,10 @@ describe('detonate triage managed workflow', () => {
   });
 
   it('hunts carry a bounded LIMIT', () => {
-    const hunts = steps.filter(({ type }) => type === 'elasticsearch.esql.query');
+    const hunts = steps.filter(
+      ({ type, if: guard }) =>
+        type === 'elasticsearch.esql.query' && guard?.includes('extracted_iocs')
+    );
     for (const hunt of hunts) {
       const query = (hunt.with as { query: string }).query;
       expect(query).toMatch(/\| LIMIT 100\s*$/);
@@ -156,7 +241,10 @@ describe('detonate triage managed workflow', () => {
   });
 
   it('bounds every hunt to the 30-day window its note reports', () => {
-    const hunts = steps.filter(({ type }) => type === 'elasticsearch.esql.query');
+    const hunts = steps.filter(
+      ({ type, if: guard }) =>
+        type === 'elasticsearch.esql.query' && guard?.includes('extracted_iocs')
+    );
     expect(hunts.length).toBeGreaterThan(0);
     for (const hunt of hunts) {
       expect((hunt.with as { query: string }).query).toContain('WHERE @timestamp >= NOW() - 30d');
@@ -164,7 +252,7 @@ describe('detonate triage managed workflow', () => {
   });
 
   it('attributes the blocklist entry from a variable, not the evictable gate output', () => {
-    const resolve = steps.find(({ name }) => name === 'resolve_blocklist_gate');
+    const resolve = byName('resolve_blocklist_gate');
     expect((resolve?.with as Record<string, string>).blocklist_responded_by).toBe(
       '{{ steps.blocklist_gate.output.respondedBy }}'
     );
@@ -175,16 +263,8 @@ describe('detonate triage managed workflow', () => {
   });
 
   it('writes hunt results to the alert only when a hunt found hosts', () => {
-    const note = steps.find(({ type }) => type === 'security.createNote');
-    // Exactly one createNote lives in the detonate branch (the
-    // known-malicious branch has its own `note_known`); find the hunt one.
-    const huntNote = steps.find(
-      ({ type, with: stepWith }) =>
-        type === 'security.createNote' &&
-        String((stepWith as { text?: string } | undefined)?.text ?? '').includes('Detonate hunt')
-    );
+    const huntNote = byName('hunt_note');
     expect(huntNote).toBeDefined();
-    expect(note).toBeDefined();
 
     // The note only fires when at least one hunt returned rows.
     expect(huntNote?.if).toContain('steps.hunt_domains.output.values.size > 0');
@@ -217,7 +297,6 @@ describe('detonate triage managed workflow', () => {
       };
     }
 
-    const byName = (name: string) => steps.find((step) => step.name === name);
     const proposalWith = (name: string) => byName(name)?.with as ProposalWith;
 
     it('raises both proposals async through the AlertZero bridge as the inherited identity', () => {
@@ -347,10 +426,10 @@ describe('detonate triage managed workflow', () => {
 });
 
 describe.each([
-  ['detonate triage', DETONATE_TRIAGE_WORKFLOW],
-  ['detonate fp validation', DETONATE_FP_VALIDATION_WORKFLOW],
-])('%s managed workflow conditions', (_label, definition) => {
-  const workflowSteps = collectSteps((parse(definition.yaml) as { steps: WorkflowStep[] }).steps);
+  ['detonate fp validation', DETONATE_FP_VALIDATION_WORKFLOW.yaml],
+  ['detonate sample worker', WORKER_YAML],
+])('%s managed workflow conditions', (_label, yaml) => {
+  const workflowSteps = collectSteps((parse(yaml) as ParsedWorkflow).steps);
 
   it('writes every if/condition as a typed ${{ }} expression', () => {
     // A plain `{{ }}` renders to the string "true"/"false", which the engine
@@ -366,18 +445,14 @@ describe.each([
   });
 
   it('accepts exactly a sha256 on the manual trigger, matching the prior-run route', () => {
-    const { triggers } = parse(definition.yaml) as {
-      triggers: Array<{ type: string; inputs?: { properties: Record<string, object> } }>;
-    };
-    const manual = triggers.find(({ type }) => type === 'manual');
+    const { triggers } = parse(yaml) as ParsedWorkflow;
+    const manual = triggers?.find(({ type }) => type === 'manual');
     expect(manual?.inputs?.properties.sha256).toMatchObject({ minLength: 64, maxLength: 64 });
   });
 
   it('passes the detonate step no force_fresh, which the service does not accept', () => {
-    const { triggers } = parse(definition.yaml) as {
-      triggers: Array<{ type: string; inputs?: { properties: Record<string, object> } }>;
-    };
-    const manual = triggers.find(({ type }) => type === 'manual');
+    const { triggers } = parse(yaml) as ParsedWorkflow;
+    const manual = triggers?.find(({ type }) => type === 'manual');
     expect(manual?.inputs?.properties).not.toHaveProperty('force_fresh');
     const detonate = workflowSteps.find(({ type }) => type === 'detonate.prototype.detonateSample');
     expect(detonate?.with).not.toHaveProperty('force_fresh');

@@ -33,6 +33,9 @@ consts:
     tier2When: __WORKER_TIER2_WHEN__
     candidateLimit: __WORKER_CANDIDATE_LIMIT__
     fanOutMax: __WORKER_FAN_OUT_MAX__
+  # Detonate prototype entry gate, render-time only. The AlertZero server fills it from
+  # `xpack.alertzero.detonatePrototypeDev`; the P1.3 ioc-hunt dispatch step reads it.
+  detonate_prototype_dev: __DETONATE_PROTOTYPE_DEV__
 steps:
   # Whether the hunt has anything to search: one scope for the space, the
   # Security Solution default data view and what resolved in it. Not Security

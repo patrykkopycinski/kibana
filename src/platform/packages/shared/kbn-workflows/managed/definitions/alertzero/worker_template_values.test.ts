@@ -157,3 +157,63 @@ describe('Alert Triage sweep rendering', () => {
     expect(() => render('90s')).toThrow(/Unsupported schedule interval/);
   });
 });
+
+describe('Detonate prototype entry gate rendering', () => {
+  const render = (detonatePrototypeDev?: boolean) =>
+    renderRuleCoverageWorkerYaml(DETECTION_RULE_COVERAGE_YAML, {
+      ...shared,
+      scheduleInterval: '1h',
+      extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+      ...(detonatePrototypeDev === undefined ? {} : { detonatePrototypeDev }),
+    });
+
+  it('renders the gate as the boolean true when the dev setting is on', () => {
+    const consts = (parse(render(true)) as { consts: Record<string, unknown> }).consts;
+
+    expect(consts.detonate_prototype_dev).toBe(true);
+  });
+
+  it('renders the gate as the boolean false when the dev setting is off', () => {
+    const consts = (parse(render(false)) as { consts: Record<string, unknown> }).consts;
+
+    expect(consts.detonate_prototype_dev).toBe(false);
+  });
+
+  // Missing is the fresh-install and cross-plugin re-render case: anything but an explicit
+  // boolean would render the literal token or a quoted string into the condition.
+  it('defaults a missing gate to the boolean false, leaving no token behind', () => {
+    const rendered = render();
+    const consts = (parse(rendered) as { consts: Record<string, unknown> }).consts;
+
+    expect(consts.detonate_prototype_dev).toBe(false);
+    expect(rendered).not.toContain('__DETONATE_PROTOTYPE_DEV__');
+  });
+
+  it('renders the detached Detonate entry step with the literal workflow id', () => {
+    const steps = (
+      parse(render(true)) as {
+        steps: Array<{ name: string; with?: Record<string, unknown> }>;
+      }
+    ).steps;
+    const dispatch = steps.find(({ name }) => name === 'dispatch_detonate_coverage_gap');
+
+    expect(dispatch?.with).toEqual({
+      'workflow-id': 'system-security-detonate-coverage-gap',
+      'run-as-mode': 'inherit',
+    });
+  });
+
+  it('renders the Hunt worker gate too, ready for the P1.3 ioc-hunt dispatch', () => {
+    const consts = (
+      parse(
+        renderHuntWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, {
+          ...shared,
+          scheduleInterval: '4h',
+          detonatePrototypeDev: true,
+        })
+      ) as { consts: Record<string, unknown> }
+    ).consts;
+
+    expect(consts.detonate_prototype_dev).toBe(true);
+  });
+});

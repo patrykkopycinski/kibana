@@ -49,6 +49,28 @@ const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
 };
 
 /**
+ * Live `xpack.alertzero.detonatePrototypeDev`, set once at plugin start. Held here rather
+ * than threaded through every caller because every template-values build in this plugin
+ * goes through `toTemplateValues`. The rendered Detonate entry steps read it through the
+ * `detonatePrototypeDev` template value; the platform persists template values verbatim, so
+ * a stored copy is stripped on read below and re-injected from this value on every write.
+ */
+let detonatePrototypeDev = false;
+
+export const setDetonatePrototypeDev = (enabled: boolean): void => {
+  detonatePrototypeDev = enabled;
+};
+
+/**
+ * The only Workers whose YAML carries the Detonate prototype entry gate. The value is
+ * injected for these alone so every other Worker's template values keep their exact shape.
+ */
+const DETONATE_ENTRY_WORKER_IDS: ReadonlySet<string> = new Set([
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+]);
+
+/**
  * Template values mirror the settings API: shared fields flat (with the legacy `autonomyLevel`
  * key the YAML templates read), Worker-specific fields nested under `extras`.
  */
@@ -65,6 +87,10 @@ export const toTemplateValues = (
     ? {}
     : { serviceAccountId: settings.serviceAccountId }),
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
+  // Render-time only: the live `xpack.alertzero.detonatePrototypeDev` value, so the
+  // Detonate entry steps render per the current boot. A stored copy is stripped on
+  // read below; a settings write can never carry it (the PUT schema is strict).
+  ...(DETONATE_ENTRY_WORKER_IDS.has(workerId) ? { detonatePrototypeDev } : {}),
 });
 
 /**
@@ -84,6 +110,10 @@ const parseWorkerValues = (
     scheduleInterval,
     serviceAccountId,
     extras,
+    // Render-time value: a stored copy is leftover from an install-time write, not
+    // user data. Stripped rather than rejected so the platform's verbatim persist
+    // cannot brick the read; the live value is re-injected by `toTemplateValues`.
+    detonatePrototypeDev: _detonatePrototypeDev,
     ...unsupported
   } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {

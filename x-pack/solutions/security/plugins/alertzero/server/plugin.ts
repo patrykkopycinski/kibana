@@ -54,6 +54,7 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
+import { setDetonatePrototypeDev } from './managed_workflows/workers';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
@@ -311,6 +312,10 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
+
+    // Detonate prototype entry steps render per the dev setting for every template-values
+    // build from here on (install, settings save, status projection).
+    setDetonatePrototypeDev(this.config.detonatePrototypeDev ?? false);
 
     const management = this.workflowsManagementApi
       ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)

@@ -17,5 +17,5 @@ export const workerSettingsById: Record<RegisteredWorkerId, WorkerSettingsRegist
     SYSTEM_SECURITY_WORKER_CATALOG.map(({ id }) => [id, createWorkerSettingsRegistration(id)])
   ) as Record<RegisteredWorkerId, WorkerSettingsRegistration>;
 
-export { createWorkerSettingsRegistration } from './worker_settings';
+export { createWorkerSettingsRegistration, setDetonatePrototypeDev } from './worker_settings';
 export type { WorkerSettingsRegistration } from './types';

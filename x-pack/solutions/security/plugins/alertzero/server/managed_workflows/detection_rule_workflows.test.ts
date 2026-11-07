@@ -207,6 +207,8 @@ describe('detection rule workflows', () => {
 
     // Sync, unlike Rule Tuning: the coverage sweep starts its reviews detached and
     // returns in seconds, so waiting on it lets this run carry the sweep's result.
+    // The Detonate entry dispatch is detached: the prototype sweep parks for days,
+    // and it must never delay or fail this Worker's tick.
     it('dispatches the coverage sweep synchronously', () => {
       const calls = flattenSteps(worker.steps as unknown as NestedStep[]).filter(({ type }) =>
         ['workflow.execute', 'workflow.executeAsync'].includes(String(type))
@@ -214,6 +216,7 @@ describe('detection rule workflows', () => {
 
       expect(calls.map(({ name, type }) => [name, type])).toEqual([
         ['run_rule_coverage', 'workflow.execute'],
+        ['dispatch_detonate_coverage_gap', 'workflow.executeAsync'],
       ]);
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID);
       expect(calls[0].with?.inputs).toEqual({
@@ -221,6 +224,8 @@ describe('detection rule workflows', () => {
         lookback_days: '${{ consts.worker_settings.extras.lookbackDays }}',
         batch_size: '${{ consts.worker_settings.extras.maxGapsPerRun }}',
       });
+      expect(calls[1].with?.['workflow-id']).toBe('system-security-detonate-coverage-gap');
+      expect(calls[1].with?.['run-as-mode']).toBe('inherit');
     });
 
     it('forwards the saved lookback and max gaps per run to the sweep', () => {

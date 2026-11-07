@@ -14,6 +14,13 @@ export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValue
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
   /** Absent until an admin selects an account. Omitted from YAML rather than written empty. */
   serviceAccountId?: string;
+  /**
+   * Detonate prototype entry gate, render-time only: the AlertZero server adds the live
+   * `xpack.alertzero.detonatePrototypeDev` value when it builds template values, and the
+   * settings read strips it again. Not part of Worker settings; the settings PUT schema is
+   * strict, so a user write carrying it is a 400. Missing renders the entry step off.
+   */
+  detonatePrototypeDev?: boolean;
 }
 
 const RUN_AS_LINE_TOKEN = '  __WORKER_RUN_AS_LINE__:\n';
@@ -131,7 +138,8 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
     .replaceAll('__WORKER_TRIGGERS__', triggers)
     .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
     .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
-    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
+    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax))
+    .replaceAll('__DETONATE_PROTOTYPE_DEV__', JSON.stringify(values.detonatePrototypeDev ?? false));
 };
 
 export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
@@ -177,7 +185,6 @@ export const renderRuleCoverageWorkerYaml = (
   yaml: string,
   values: RuleCoverageWorkerTemplateValues
 ): string =>
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_EXTRAS__',
-    JSON.stringify(values.extras)
-  );
+  renderScheduledWorkerYaml(yaml, values)
+    .replaceAll('__WORKER_EXTRAS__', JSON.stringify(values.extras))
+    .replaceAll('__DETONATE_PROTOTYPE_DEV__', JSON.stringify(values.detonatePrototypeDev ?? false));

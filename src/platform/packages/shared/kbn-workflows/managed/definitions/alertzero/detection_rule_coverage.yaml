@@ -31,6 +31,10 @@ consts:
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
     extras: __WORKER_EXTRAS__
+  # Detonate prototype entry gate, render-time only. The AlertZero server fills it from
+  # `xpack.alertzero.detonatePrototypeDev`; it is not part of Worker settings, and the
+  # settings PUT schema rejects a write carrying it.
+  detonate_prototype_dev: __DETONATE_PROTOTYPE_DEV__
 steps:
   - name: run_rule_coverage
     type: workflow.execute
@@ -41,6 +45,19 @@ steps:
         autonomy_level: "{{ consts.worker_settings.autonomy }}"
         lookback_days: "${{ consts.worker_settings.extras.lookbackDays }}"
         batch_size: "${{ consts.worker_settings.extras.maxGapsPerRun }}"
+
+  # Detonate prototype hand-off: runs waiting for this Worker in this space. Detached, so
+  # the coverage sweep above is never blocked by a prototype child. Skipped with the dev
+  # setting off: no failed child step on any tick, in any space. The version bump is the
+  # only visible change for deployments that keep the setting off.
+  - name: dispatch_detonate_coverage_gap
+    type: workflow.executeAsync
+    if: "${{ consts.detonate_prototype_dev }}"
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-security-detonate-coverage-gap
+      run-as-mode: inherit
 
   # The sweep swallows read failures and reports them as flags. Without them a
   # failed run looks like an empty queue.

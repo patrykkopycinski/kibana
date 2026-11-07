@@ -22,7 +22,7 @@ import {
   WorkerSettings,
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
-import { createWorkerSettingsRegistration } from './worker_settings';
+import { createWorkerSettingsRegistration, setDetonatePrototypeDev } from './worker_settings';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
@@ -550,7 +550,10 @@ describe('createWorkerSettingsRegistration', () => {
     };
 
     it('stores extras nested and projects them under settings.extras', () => {
-      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.createDefaultValues()).toEqual({
+        ...storedDefaults,
+        detonatePrototypeDev: false,
+      });
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: RULE_COVERAGE_WORKER_ID,
         autonomy: 'manual',
@@ -563,7 +566,7 @@ describe('createWorkerSettingsRegistration', () => {
       const extras = { lookbackDays: 30, maxGapsPerRun: 20 };
 
       expect(registration.applyPatch(storedDefaults, { extras })).toEqual({
-        values: { ...storedDefaults, extras },
+        values: { ...storedDefaults, extras, detonatePrototypeDev: false },
       });
     });
 
@@ -641,7 +644,10 @@ describe('createWorkerSettingsRegistration', () => {
     };
 
     it('has no extras: only autonomy and the schedule interval are configurable', () => {
-      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.createDefaultValues()).toEqual({
+        ...storedDefaults,
+        detonatePrototypeDev: false,
+      });
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: HUNT_WORKER_ID,
         autonomy: 'manual',
@@ -762,6 +768,44 @@ describe('createWorkerSettingsRegistration', () => {
           registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
         )
       ).toContain('autonomy');
+    });
+  });
+});
+
+describe('Detonate prototype dev render value', () => {
+  const registration = createWorkerSettingsRegistration(RULE_COVERAGE_WORKER_ID);
+
+  afterEach(() => {
+    setDetonatePrototypeDev(false);
+  });
+
+  it('injects the live setting into every template-values build', () => {
+    setDetonatePrototypeDev(true);
+
+    expect(registration.createDefaultValues().detonatePrototypeDev).toBe(true);
+  });
+
+  it('defaults to false until the plugin sets it', () => {
+    expect(registration.createDefaultValues().detonatePrototypeDev).toBe(false);
+  });
+
+  // The platform persists template values verbatim, so a document written with the dev
+  // setting on carries the field. Reading it back must not treat that as user data.
+  it('strips a persisted copy on read instead of rejecting the document', () => {
+    const values = { ...registration.createDefaultValues(), detonatePrototypeDev: true };
+
+    expect(() => registration.toSettings(values)).not.toThrow();
+    expect(registration.toSettings(values)).not.toHaveProperty('detonatePrototypeDev');
+  });
+
+  it('re-injects the live setting on the next write after a read', () => {
+    setDetonatePrototypeDev(false);
+    const stored = { ...registration.createDefaultValues(), detonatePrototypeDev: true };
+
+    const applied = registration.applyPatch(stored, {});
+
+    expect(applied).toEqual({
+      values: expect.objectContaining({ detonatePrototypeDev: false }),
     });
   });
 });

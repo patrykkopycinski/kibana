@@ -348,9 +348,9 @@
         "additionalProperties": false
       }
     },
-    "system-security-floor-detonate-sweep": {
+    "system-security-forensics-detonate-sample": {
       "defaults": {
-        "workerId": "system-security-floor-detonate-sweep",
+        "workerId": "system-security-forensics-detonate-sample",
         "autonomy": "manual",
         "scheduleInterval": "1h"
       },
@@ -360,13 +360,14 @@
           "workerId": {
             "kind": "leaf",
             "type": "string",
-            "const": "system-security-floor-detonate-sweep"
+            "const": "system-security-forensics-detonate-sample"
           },
           "autonomy": {
             "kind": "leaf",
             "type": "string",
             "enum": [
-              "manual"
+              "manual",
+              "supervised"
             ]
           },
           "scheduleInterval": {

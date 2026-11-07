@@ -7,12 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import DETONATE_COVERAGE_GAP_YAML from './detonate_coverage_gap.yaml';
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
 import DETONATE_RULE_CREATION_YAML from './detonate_rule_creation.yaml';
 import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const DETONATE_FP_VALIDATION_WORKFLOW_ID = 'system-security-detonate-fp-validation';
+
+export const DETONATE_COVERAGE_GAP_WORKFLOW_ID = 'system-security-detonate-coverage-gap';
+
+/**
+ * Detonate prototype: one sweep over the runs whose alerts wait for the
+ * Detection Worker. Reads the coverage handoff list (oldest first, at most
+ * five tasks), builds the rule-creation inputs from each run record, opens
+ * an Investigation for the gap, marks the run coverage-reviewed before
+ * dispatch so the next tick does not pick it again, and starts the D10 rule
+ * creation copy detached. A failed dispatch rolls the markers back so the
+ * next tick retries the run. The AlertZero Detection Worker's tick calls
+ * this sweep when the detonate prototype dev setting is on.
+ */
+export const DETONATE_COVERAGE_GAP_WORKFLOW = {
+  id: DETONATE_COVERAGE_GAP_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_COVERAGE_GAP_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
 
 /**
  * Detonate prototype: the F1 round trip as one stored workflow. Detonate the

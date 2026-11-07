@@ -7,6 +7,7 @@
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
+  DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_RULE_CREATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
@@ -83,6 +84,9 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
       await managedWorkflowsClient.install(DETONATE_RULE_CREATION_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
+      await managedWorkflowsClient.install(DETONATE_COVERAGE_GAP_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
     } else {
       await managedWorkflowsClient.uninstall(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -91,6 +95,9 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
       await managedWorkflowsClient.uninstall(DETONATE_RULE_CREATION_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+      await managedWorkflowsClient.uninstall(DETONATE_COVERAGE_GAP_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
     }

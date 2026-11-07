@@ -7,6 +7,7 @@
 
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_RULE_CREATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
@@ -162,6 +163,9 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.install).toHaveBeenCalledWith(DETONATE_RULE_CREATION_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+    expect(managed.install).toHaveBeenCalledWith(DETONATE_COVERAGE_GAP_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
     expect(managed.ready).toHaveBeenCalledTimes(1);
   });
 
@@ -191,6 +195,10 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       DETONATE_RULE_CREATION_WORKFLOW_ID,
       expect.anything()
     );
+    expect(managed.install).not.toHaveBeenCalledWith(
+      DETONATE_COVERAGE_GAP_WORKFLOW_ID,
+      expect.anything()
+    );
     expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
@@ -198,6 +206,9 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_RULE_CREATION_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.uninstall).toHaveBeenCalledWith(DETONATE_COVERAGE_GAP_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
   });

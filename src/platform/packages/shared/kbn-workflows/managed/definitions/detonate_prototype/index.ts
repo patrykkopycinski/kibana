@@ -33,7 +33,7 @@ export const DETONATE_IOC_HUNT_WORKFLOW_ID = 'system-security-detonate-ioc-hunt'
 export const DETONATE_COVERAGE_GAP_WORKFLOW = {
   id: DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: DETONATE_COVERAGE_GAP_YAML,
   management: {
@@ -97,7 +97,7 @@ export const DETONATE_RULE_CREATION_WORKFLOW_ID = 'system-security-detonate-rule
 export const DETONATE_RULE_CREATION_WORKFLOW = {
   id: DETONATE_RULE_CREATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: DETONATE_RULE_CREATION_YAML,
   management: {
@@ -118,7 +118,7 @@ export const DETONATE_RULE_CREATION_WORKFLOW = {
 export const DETONATE_IOC_HUNT_WORKFLOW = {
   id: DETONATE_IOC_HUNT_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DETONATE_IOC_HUNT_YAML,
   management: {

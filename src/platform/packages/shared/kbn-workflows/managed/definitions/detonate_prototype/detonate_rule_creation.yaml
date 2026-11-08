@@ -459,15 +459,17 @@ steps:
   - name: resolve_found_rule
     type: data.set
     if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    # The kibana.request step's output IS the response body (no wrapper); the
+    # rules _find route returns `{ page, perPage, total, data }` flat.
     with:
       found: >-
         ${{ steps.find_created_rule.error == null
-          and steps.find_created_rule.output.data.data.size == 1 }}
-      rule_id: "${{ steps.find_created_rule.output.data.data[0].id | default: '' }}"
-      rule_name_found: "${{ steps.find_created_rule.output.data.data[0].name | default: '' }}"
-      revision: "${{ steps.find_created_rule.output.data.data[0].revision | default: null }}"
-      enabled: "${{ steps.find_created_rule.output.data.data[0].enabled | default: false }}"
-      query_found: "${{ steps.find_created_rule.output.data.data[0].query | default: '' }}"
+          and steps.find_created_rule.output.data.size == 1 }}
+      rule_id: "${{ steps.find_created_rule.output.data[0].id | default: '' }}"
+      rule_name_found: "${{ steps.find_created_rule.output.data[0].name | default: '' }}"
+      revision: "${{ steps.find_created_rule.output.data[0].revision | default: null }}"
+      enabled: "${{ steps.find_created_rule.output.data[0].enabled | default: false }}"
+      query_found: "${{ steps.find_created_rule.output.data[0].query | default: '' }}"
 
   # Fail-closed gate for the enable proposal. Exactly one rule, disabled, and
   # the query unchanged from what the guard validated. Anything else: no
@@ -529,11 +531,13 @@ steps:
   - name: resolve_verify
     type: data.set
     if: "${{ steps.propose_enable.output.decision == 'approved' }}"
+    # The rules get-by-id route returns the rule object itself (flat, no
+    # wrapper), so every field reads off `output` directly.
     with:
-      revision_now: "${{ steps.verify_enabled_rule.output.data.revision | default: null }}"
-      query_now: "${{ steps.verify_enabled_rule.output.data.query | default: '' }}"
-      language_now: "${{ steps.verify_enabled_rule.output.data.language | default: '' }}"
-      type_now: "${{ steps.verify_enabled_rule.output.data.type | default: '' }}"
+      revision_now: "${{ steps.verify_enabled_rule.output.revision | default: null }}"
+      query_now: "${{ steps.verify_enabled_rule.output.query | default: '' }}"
+      language_now: "${{ steps.verify_enabled_rule.output.language | default: '' }}"
+      type_now: "${{ steps.verify_enabled_rule.output.type | default: '' }}"
 
   # Re-guard at time-of-use. An unchanged revision plus an unchanged,
   # still-ES|QL query proves the rule the approver enabled is the rule the

@@ -57,7 +57,9 @@ steps:
   - name: resolve_entries
     type: data.set
     with:
-      entries: "${{ steps.list_handoffs.output.data.handoffs | default: consts.no_rows }}"
+      # The kibana.request step's output IS the response body (no wrapper);
+      # the handoffs route returns `{ handoffs: [...] }` flat.
+      entries: "${{ steps.list_handoffs.output.handoffs | default: consts.no_rows }}"
   # Steps 2–7 of 9 run once per run (at most 5, oldest alert first). A branch
   # that fails before dispatch leaves the markers untouched, so the next tick
   # picks the run again; only a failed dispatch rolls the reviewed marker back.

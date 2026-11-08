@@ -58,7 +58,9 @@ steps:
   - name: resolve_entries
     type: data.set
     with:
-      entries: "${{ steps.list_handoffs.output.data.handoffs | default: consts.no_rows }}"
+      # The kibana.request step's output IS the response body (no wrapper);
+      # the handoffs route returns `{ handoffs: [...] }` flat.
+      entries: "${{ steps.list_handoffs.output.handoffs | default: consts.no_rows }}"
   # Steps 2–7 of 8 run once per run (at most 5, oldest alert first). A branch
   # that fails before the marker flip leaves the markers untouched, so the
   # next tick picks the run again; only a failed coverage request rolls the
@@ -94,9 +96,11 @@ steps:
         type: data.set
         if: "${{ steps.read_record.error == null }}"
         with:
-          domains: "${{ steps.read_record.output.data['detonate.iocs.domains'] | default: consts.no_rows }}"
-          ips: "${{ steps.read_record.output.data['detonate.iocs.ips'] | default: consts.no_rows }}"
-          file_hashes: "${{ steps.read_record.output.data['detonate.iocs.file_hashes'] | default: consts.no_rows }}"
+          # The kibana.request step's output IS the response body (no wrapper);
+          # the record route returns the detonation record flat.
+          domains: "${{ steps.read_record.output['detonate.iocs.domains'] | default: consts.no_rows }}"
+          ips: "${{ steps.read_record.output['detonate.iocs.ips'] | default: consts.no_rows }}"
+          file_hashes: "${{ steps.read_record.output['detonate.iocs.file_hashes'] | default: consts.no_rows }}"
 
       # Mark hunt-done and clear hunt-requested BEFORE the hunts, so the next
       # tick cannot pick the same run. The rollback restores the requested

@@ -1,0 +1,769 @@
+version: "1"
+name: Detonate sample
+description: >
+  Detonate prototype Worker on the Forensics Watch. One workflow, two modes:
+  a scheduled sweep over open alerts for file hashes no detonation has triaged
+  yet, and a per-run mode that detonates one hash and writes the verdict back
+  to its alert. Autonomy follows the deck contract: detonation sends a file
+  out and consumes allowance, so Manual (the default) reports candidates and
+  never detonates on its own; Supervised auto-detonates high or critical
+  alerts with no verdict, under the monthly allowance. Every enforcement
+  action (blocklist, exception proposal, close proposal) passes a human gate
+  on both levels.
+enabled: false
+tags:
+  - watch
+  - watch-forensics
+
+settings:
+  __WORKER_RUN_AS_LINE__:
+  # One execution per sample at a time, and one sweep at a time. A scheduled
+  # sweep renders no inputs, so its key collapses to "detonate-" — every sweep
+  # shares it. A per-hash run parked at the blocklist gate keeps its slot, so
+  # a later alert on the same hash waits for the next sweep, which still finds
+  # it untagged. An execution that died mid-run leaves only the transient
+  # running tag, and the next sweep retries the hash: the slot is free again.
+  concurrency:
+    key: "detonate-{{ inputs.sha256 }}"
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
+  # Manual covers both desk uses: no inputs runs the sweep once, a sha256 plus
+  # alert_id runs the per-run mode on one sample.
+  - type: manual
+    inputs:
+      properties:
+        sha256:
+          type: string
+          minLength: 64
+          maxLength: 64
+          description: >-
+            Hash of the sample to detonate (per-run mode). Absent on sweep
+            runs. The relay workflow always pairs it with alert_id.
+        alert_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Elasticsearch _id of the alert the verdict is written back to.
+        case_id:
+          type: string
+          maxLength: 256
+          description: Optional case to carry confirmed-malicious evidence into, as a comment.
+        conversation_id:
+          type: string
+          maxLength: 256
+          description: >-
+            Optional Investigation conversation to journal the verdict into (a
+            Watch sweep passes its own Investigation). Absent on standalone
+            runs — no journal note is written then.
+      additionalProperties: false
+
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+  # Liquid has no array literal, so `| default: []` falls back to nothing at
+  # all rather than to an empty array. A const is the only way to spell that
+  # fallback (the endpoint-analysis worker's `no_rows`).
+  no_rows: []
+
+steps:
+  # ===========================================================================
+  # Sweep mode. Every step below is gated on the run carrying no sha256 input.
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # 1. Find untriaged hashes. An alert qualifies when it carries a
+  #    file.hash.sha256 and none of the detonate outcome tags — the verdict
+  #    set is closed (detonate:malicious / quiet / inconclusive from a run,
+  #    detonate:known-malicious from the reputation gate), so one MV_CONTAINS
+  #    per tag excludes every already-triaged alert. MV_CONTAINS is false on a
+  #    missing field, where NOT (tags IN (...)) would be null and drop the
+  #    untagged alerts this query exists to find. The running tag is
+  #    deliberately not excluded: an execution that died mid-run must be found
+  #    again, and an in-flight duplicate is dropped by the per-hash
+  #    concurrency key. The STATS dedupes by hash: the detonation is per
+  #    sample, not per alert, and one representative alert carries the
+  #    verdict write-back. Columns are ordered alert-first so `map: 'first'`
+  #    (the only positional map key the Liquid engine ships) yields alert ids.
+  # ---------------------------------------------------------------------------
+  - name: find_candidates
+    type: elasticsearch.esql.query
+    if: "${{ inputs.sha256 == blank }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+          | WHERE file.hash.sha256 IS NOT NULL
+          | WHERE kibana.alert.workflow_status == "open"
+          | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
+          | STATS first_alert = MIN(_id) BY file.hash.sha256
+          | KEEP first_alert, file.hash.sha256
+          | LIMIT 20
+
+  # The Supervised subset: same alert contract plus the severity the deck
+  # names ("High or Critical file alerts with no verdict"). A separate query
+  # rather than a per-branch condition — typed `if` expressions have no
+  # shipped precedent over positional foreach rows, and the two candidate
+  # sets are both needed anyway: Manual mode still reports every untriaged
+  # hash, only Supervised acts on the high-severity ones.
+  - name: find_auto_candidates
+    type: elasticsearch.esql.query
+    if: "${{ inputs.sha256 == blank and execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+          | WHERE file.hash.sha256 IS NOT NULL
+          | WHERE kibana.alert.workflow_status == "open"
+          | WHERE kibana.alert.severity IN ("high", "critical")
+          | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
+          | STATS first_alert = MIN(_id) BY file.hash.sha256
+          | KEEP first_alert, file.hash.sha256
+          | LIMIT 20
+
+  # ---------------------------------------------------------------------------
+  # 2. Open the sweep's Investigation. Every detonation verdict of this sweep
+  #    is journaled here, mirroring how a triage batch owns one conversation.
+  #    Failure is terminal for the sweep: journaling is the sweep's core
+  #    value, and detonating without a place the analyst can read the verdict
+  #    spends sandbox VMs for nothing. A sweep with no candidates opens none,
+  #    so an idle schedule does not fill the Investigations list with empty
+  #    entries.
+  # ---------------------------------------------------------------------------
+  - name: create_investigation
+    type: ai.conversation.create
+    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
+    with:
+      template_id: investigation
+      title: "Detonate sample — sweep {{ execution.id }}"
+      access_control:
+        access_mode: public
+      metadata:
+        status: open
+        severity: low
+        description: >-
+          Automated detonation sweep over open alerts with untriaged file
+          hashes.
+
+  # ---------------------------------------------------------------------------
+  # 3. Allowance. Supervised detonations draw on the space's monthly
+  #    allowance, so the sweep reads the usage route once per run before
+  #    dispatching. A failed read fails open (the step continues and the
+  #    comparison reads false): the usage route is reporting, not enforcement,
+  #    and an observability gap must not silently stop detonations. Manual
+  #    mode never detonates, so it never checks.
+  # ---------------------------------------------------------------------------
+  - name: check_allowance
+    type: kibana.request
+    if: "${{ inputs.sha256 == blank and execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' and steps.find_candidates.output.values.size > 0 }}"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/usage"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  - name: resolve_allowance
+    type: data.set
+    if: "${{ steps.check_allowance.output != blank }}"
+    # The kibana.request step's output IS the response body (no wrapper); the
+    # usage route returns the allowance counters flat.
+    with:
+      allowance_exhausted: '${{ steps.check_allowance.output.used >= steps.check_allowance.output.allowance }}'
+
+  # Over the allowance nothing is dispatched; the auto-candidates are marked
+  # queued so the alert state badge shows why, and the Investigation says
+  # when detonation resumes. (Manual mode never dispatches, so never queues;
+  # the manual journal message says detonation is a person's decision.) The
+  # tag is removed by nothing here: the next sweep that runs under the
+  # allowance simply dispatches, and the verdict tags the run writes are what
+  # the sweep query excludes on.
+  - name: mark_queued
+    type: security.setAlertTags
+    if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 and variables.allowance_exhausted == true }}"
+    on-failure:
+      continue: true
+    with:
+      alert_ids: "${{ steps.find_auto_candidates.output.values | map: 'first' }}"
+      tags_to_add:
+        - "detonate:queued"
+
+  # One message stating the sweep's plan, whatever the autonomy decided —
+  # the Investigation is where "detonation shows up as work to do". The
+  # plural form is spelled inline (`{% if … != 1 %}`), the shipped pattern:
+  # the Liquid engine has no `plural` filter.
+  - name: journal_plan
+    type: ai.conversation.add_user_message
+    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: >-
+        {%- assign candidate_count = steps.find_candidates.output.values | size -%}
+        {%- assign auto_count = steps.find_auto_candidates.output.values
+          | default: consts.no_rows | size -%}
+        {%- if variables.allowance_exhausted == true -%}
+        Monthly detonation allowance reached ({{ steps.check_allowance.output.used }}/{{ steps.check_allowance.output.allowance }}):
+        {{ candidate_count }} sample hash{% if candidate_count != 1 %}es{% endif %} marked queued, detonation resumes after
+        {{ steps.check_allowance.output.resetsAt | slice: 0, 10 }}.
+        {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}
+        {{ auto_count }} high/critical sample hash{% if auto_count != 1 %}es{% endif %}
+        of {{ candidate_count }} untriaged queued for detonation (autonomy Supervised).
+        {%- else -%}
+        {{ candidate_count }} untriaged sample hash{% if candidate_count != 1 %}es{% endif %} found (autonomy Manual):
+        detonation is a person's decision here — start one from an alert's
+        Detonate action or an Attack Discovery proposal.
+        {%- endif -%}
+
+  # ---------------------------------------------------------------------------
+  # 4. Dispatch. Each branch is the thin detonate triage relay, which hands
+  #    straight back to this Worker's per-run mode (the engine forbids a
+  #    workflow from triggering itself, so the relay is the load-bearing hop).
+  #    executeAsync returns once started, so the sweep never waits for a
+  #    detonation to finish; ES|QL rows are positional, so [0] is the
+  #    representative alert id and [1] its hash. A parallel branch cannot
+  #    carry an on-failure handler; mode: settled is what keeps one failed
+  #    start from cancelling the other hashes.
+  # ---------------------------------------------------------------------------
+  - name: detonate_fan_out
+    type: parallel
+    mode: settled
+    if: "${{ inputs.sha256 == blank and steps.find_auto_candidates.output.values.size > 0 and variables.allowance_exhausted != true }}"
+    foreach: "${{ steps.find_auto_candidates.output.values }}"
+    steps:
+      - name: detonate_hash
+        type: workflow.executeAsync
+        with:
+          workflow-id: system-security-detonate-triage
+          run-as-mode: inherit
+          inputs:
+            alert_id: "{{ foreach.item[0] }}"
+            sha256: "{{ foreach.item[1] }}"
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
+  # --------------------------------------------------------------------------- 
+  # 5. Report the sweep.
+  # --------------------------------------------------------------------------- 
+  # No `.size` here: workflow.output renders against a context narrowed to the
+  # referenced paths, and `values.size` is not a real key of the array, so the
+  # narrowing drops it and the count reads as empty. `| size` and `values[0]`
+  # reference paths that exist. `find_auto_candidates` is skipped on every
+  # Manual sweep and its output evicted, so its count is read through
+  # `| default:` (nil-navigation is safe, but a bare `.size` on nothing
+  # renders empty — the same fallback the endpoint-analysis worker uses).
+  - name: emit_result
+    type: workflow.output
+    if: "${{ inputs.sha256 == blank }}"
+    status: completed
+    with:
+      skip_reason: >-
+        {%- if steps.find_candidates.output.values[0] -%}
+        {%- if variables.allowance_exhausted == true -%}allowance_reached
+        {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}dispatched
+        {%- else -%}manual_autonomy{%- endif -%}
+        {%- else -%}no_candidates{%- endif -%}
+      candidates: "${{ steps.find_candidates.output.values | size }}"
+      auto_dispatched: "${{ steps.find_auto_candidates.output.values | default: consts.no_rows | size }}"
+      allowance_exhausted: "${{ variables.allowance_exhausted | default: false }}"
+      investigation_conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
+  # ===========================================================================
+  # Per-run mode: one sample, end to end. Reached through the relay (from this
+  # sweep, the alert triage batch, or a manual Run) or directly from the Run
+  # dialog. Everything below is gated on the sha256 input being present.
+  # ===========================================================================
+
+  # The alert says a detonation is underway before any VM is spent, so an
+  # analyst landing on the alert between sweep and verdict sees state, not
+  # silence. Cleared once a verdict tag lands; a run that dies leaves it, and
+  # the next sweep retries the hash.
+  - name: mark_running
+    type: security.setAlertTags
+    if: "${{ inputs.sha256 != blank }}"
+    on-failure:
+      continue: true
+    with:
+      alert_ids: "{{ inputs.alert_id }}"
+      tags_to_add:
+        - "detonate:running"
+
+  # The gate only answers `known-malicious` or `unknown`. `unknown` is honest
+  # uncertainty — no benign answer exists — and it is what earns a detonation.
+  # Both steps are per-run-only (`if`), so a sweep run never evaluates the
+  # switch at all; the expression's `{% else %}sweep` arm plus the no-op
+  # `sweep` case below are the structural backstop keeping a hypothetical
+  # empty-hash run from falling through to the detonate default — the only
+  # path that spends a VM.
+  - name: reputation
+    type: detonate.prototype.detonateReputation
+    if: "${{ inputs.sha256 != blank }}"
+    with:
+      sha256: "{{ inputs.sha256 }}"
+
+  - name: reputation_gate
+    type: switch
+    if: "${{ inputs.sha256 != blank }}"
+    expression: "{% if inputs.sha256 != blank %}{{ steps.reputation.output.status }}{% else %}sweep{% endif %}"
+    cases:
+      # Sweep-mode placeholder: the step's `if` means this case never runs; it
+      # exists only so the guarded expression can never fall through to the
+      # detonate default.
+      - match: sweep
+        steps:
+          - name: sweep_noop
+            type: data.set
+            with:
+              skipped: true
+
+      # Already-known malware: write the verdict back from the prior run alone.
+      # No VM is spent re-confirming what this space has already detonated, and
+      # the note says so explicitly so nobody hunts for a run that does not
+      # exist.
+      - match: known-malicious
+        steps:
+          - name: tag_known
+            type: security.setAlertTags
+            with:
+              alert_ids: "{{ inputs.alert_id }}"
+              tags_to_add:
+                - "detonate:known-malicious"
+              tags_to_remove:
+                - "detonate:running"
+
+          - name: note_known
+            type: security.createNote
+            with:
+              document_id: "{{ inputs.alert_id }}"
+              text: >-
+                Detonate triage: an earlier detonation of this hash in this space
+                was malicious{% if steps.reputation.output.last_task_id != blank %} (run
+                {{ steps.reputation.output.last_task_id }}){% endif %}. No new detonation was
+                run — the verdict comes from prior runs of the same sample.
+
+          # F9 journal leg for the reputation-gated path: same contract as the
+          # detonated branch's journal step, no VM spent.
+          - name: journal_known
+            type: ai.conversation.add_user_message
+            if: "${{ inputs.conversation_id != blank }}"
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ inputs.conversation_id }}"
+              message: >-
+                File detonation verdict for alert {{ inputs.alert_id }}:
+                KNOWN-MALICIOUS (prior run{% if steps.reputation.output.last_task_id != blank %}
+                {{ steps.reputation.output.last_task_id }}{% endif %}) — no new
+                detonation was run; the verdict comes from prior runs of the same sample
+                (hash {{ inputs.sha256 | slice: 0, 12 }}…).
+
+    # `unknown` falls through to the default: detonate, derive the verdict,
+    # write it back. This is the only path that spends a VM.
+    default:
+      - name: detonate
+        type: detonate.prototype.detonateSample
+        with:
+          sample_hash: "{{ inputs.sha256 }}"
+          # The sandbox OS is recorded on the task and surfaces in the verdict
+          # output — the blocklist artifact below is compiled per OS and
+          # accepts exactly one, so it must travel with the run.
+          vm_os_family: linux
+          tags:
+            - "alert:{{ inputs.alert_id }}"
+            - "triage"
+          max_wait_secs: 900
+
+      - name: verdict
+        type: detonate.prototype.detonateVerdict
+        with:
+          task_id: "{{ steps.detonate.output.task_id }}"
+          alert_id: "{{ inputs.alert_id }}"
+
+      - name: apply
+        type: detonate.prototype.applyDetonationVerdict
+        with:
+          verdict: "{{ steps.verdict.output.verdict }}"
+          alert_id: "{{ inputs.alert_id }}"
+          task_id: "{{ steps.verdict.output.task_id }}"
+          evidence: "{{ steps.verdict.output.evidence }}"
+
+      # The verdict tag replaces the transient running tag; the pair on one
+      # alert would otherwise read as both underway and concluded.
+      - name: clear_running
+        type: security.setAlertTags
+        on-failure:
+          continue: true
+        with:
+          alert_ids: "{{ inputs.alert_id }}"
+          tags_to_remove:
+            - "detonate:running"
+
+      # F9 journal leg: when an AlertZero Watch passed its Investigation's
+      # conversation, the verdict is posted there too, so the sweep's whole
+      # evidence trail is readable in one place. Runs after `apply` — the
+      # alert write-back is the primary contract; the journal is additive and
+      # must never fail a run whose verdict already landed.
+      - name: journal_verdict
+        type: ai.conversation.add_user_message
+        if: "${{ inputs.conversation_id != blank }}"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ inputs.conversation_id }}"
+          message: >-
+            File detonation verdict for alert {{ inputs.alert_id }}:
+            {{ steps.verdict.output.verdict | upcase }} —
+            {{ steps.verdict.output.evidence }}
+            (task {{ steps.verdict.output.task_id }}, hash {{ inputs.sha256 | slice: 0, 12 }}…)
+
+      # F3: the run's extracted IOCs (domains, IPs, hashes) are only as
+      # valuable as the question they answer next — which OTHER hosts in
+      # the fleet contacted the same infrastructure? Two hunts, one per
+      # indicator family the step derives from the run's alert documents:
+      # DNS questions for the domains,
+      # destination IPs for the IPs.
+      #
+      # The IN-lists splice textually (the alertzero batched-generation
+      # pattern). That is safe only because the detonate step validates
+      # every IOC before it reaches this workflow: domains must match a
+      # hostname pattern and IPs must parse, so no value carries a quote
+      # or backslash, and each family is capped at 100 entries. The `if`
+      # guards keep an empty family from ever compiling an invalid
+      # `IN ("")` — an absent `extracted_iocs` (the alert documents could
+      # not be read) also never fires the step.
+      #
+      # `on-failure: continue` on both: a stack without endpoint network
+      # data (the common lab case) fails the FROM clause at
+      # verification — "Unknown column [dns.question.name]" — and a
+      # missing hunt must not fail a triage run whose verdict is already
+      # on the alert.
+      - name: hunt_domains
+        type: elasticsearch.esql.query
+        if: "${{ steps.detonate.output.extracted_iocs != blank and steps.detonate.output.extracted_iocs.domains.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            FROM logs-endpoint.events.network-*
+              | WHERE @timestamp >= NOW() - 30d
+              | WHERE dns.question.name IN ("{{ steps.detonate.output.extracted_iocs.domains | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      - name: hunt_ips
+        type: elasticsearch.esql.query
+        if: "${{ steps.detonate.output.extracted_iocs != blank and steps.detonate.output.extracted_iocs.ips.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            FROM logs-endpoint.events.network-*
+              | WHERE @timestamp >= NOW() - 30d
+              | WHERE destination.ip IN ("{{ steps.detonate.output.extracted_iocs.ips | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      # Both hunts land on the alert as a note: the analyst sees the
+      # fleet exposure without leaving the alert. `map: 'first'`
+      # extracts the hostname from each row (rows are
+      # [host.name, last_seen]); `uniq` because a host found by BOTH
+      # hunts (DNS and TCP to the same infrastructure) must not appear
+      # twice. Skipped or failed hunts render as empty lists — `concat`
+      # over an empty array is still an array.
+      - name: hunt_note
+        type: security.createNote
+        if: "${{ (steps.hunt_domains.output != blank and steps.hunt_domains.output.values.size > 0) or (steps.hunt_ips.output != blank and steps.hunt_ips.output.values.size > 0) }}"
+        on-failure:
+          continue: true
+        with:
+          document_id: "{{ inputs.alert_id }}"
+          text: >-
+            {%- if steps.hunt_domains.output != blank -%}
+            {%- assign domain_hosts = steps.hunt_domains.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign domain_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {%- if steps.hunt_ips.output != blank -%}
+            {%- assign ip_hosts = steps.hunt_ips.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign ip_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {%- assign hosts = domain_hosts | concat: ip_hosts | uniq | sort -%}
+            Detonate hunt: {{ hosts | join: ', ' }} also contacted the
+            infrastructure this sample used ({% if domain_hosts.size > 0 %}DNS{% endif %}{% if domain_hosts.size > 0 and ip_hosts.size > 0 %} and {% endif %}{% if ip_hosts.size > 0 %}destination IP{% endif %} matches over the last 30 days).
+
+      # F7 proposals. Only a Watch-driven run raises them: the Watch passes its
+      # Investigation, which is where a proposal lives, and runs as the Watch's
+      # service account, which `run-as-mode: inherit` hands to the proposal
+      # bridge. A standalone run has neither, so every step below is skipped.
+      # They sit before the blocklist gate so a pending approval there (up to an
+      # hour) never delays them, and are started async so this run never parks
+      # on an analyst's decision. Each one is `on-failure: continue`: the verdict
+      # is already on the alert, and a failed proposal must not fail the run.
+      #
+      # Quiet: the sample's run history decides. Enough consecutive quiet runs
+      # earn an exception proposal on the rule that raised the alert.
+      - name: run_history
+        type: detonate.prototype.detonateRunHistory
+        if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'quiet' }}"
+        on-failure:
+          continue: true
+        with:
+          sha256: "{{ inputs.sha256 }}"
+
+      # The exception is added to the rule that raised the alert, so its
+      # saved-object id is read off the alert itself.
+      - name: source_alert
+        type: elasticsearch.search
+        if: "${{ steps.run_history.output.proposal_eligible == true }}"
+        on-failure:
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          ignore_unavailable: true
+          size: 1
+          _source:
+            - kibana.alert.rule.uuid
+            - kibana.alert.rule.name
+          query:
+            ids:
+              values:
+                - "{{ inputs.alert_id }}"
+
+      # Malicious: every alert still open on the same sample is a confirmed
+      # true positive, not just the one this run was started for. A sibling
+      # that already carries a detonate verdict was covered by its own run's
+      # proposal, so only this run's alert and untagged siblings are taken.
+      - name: open_hash_alerts
+        type: elasticsearch.search
+        if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'malicious' }}"
+        on-failure:
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          ignore_unavailable: true
+          size: 100
+          _source: false
+          query:
+            bool:
+              filter:
+                - term:
+                    file.hash.sha256: "{{ inputs.sha256 }}"
+                - term:
+                    kibana.alert.workflow_status: open
+              should:
+                - ids:
+                    values:
+                      - "{{ inputs.alert_id }}"
+                - bool:
+                    must_not:
+                      - terms:
+                          kibana.alert.workflow_tags:
+                            - "detonate:malicious"
+                            - "detonate:quiet"
+                            - "detonate:inconclusive"
+                            - "detonate:known-malicious"
+              minimum_should_match: 1
+
+      # `if` conditions take no filters, so the proposal guards and the
+      # values they need are resolved here first.
+      - name: resolve_proposals
+        type: data.set
+        with:
+          exception_rule_uuid: "{{ steps.source_alert.output.hits.hits[0]._source['kibana.alert.rule.uuid'] }}"
+          exception_rule_name: "{{ steps.source_alert.output.hits.hits[0]._source['kibana.alert.rule.name'] }}"
+          close_alert_ids: "${{ steps.open_hash_alerts.output.hits.hits | map: '_id' }}"
+          close_alert_count: "${{ steps.open_hash_alerts.output.hits.hits | size }}"
+
+      - name: propose_exception
+        type: workflow.executeAsync
+        if: "${{ steps.run_history.output.proposal_eligible == true and variables.exception_rule_uuid != blank }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ inputs.conversation_id }}"
+            title: "Add a rule exception for a quiet sample ({{ inputs.sha256 | slice: 0, 12 }}…)"
+            comment: |-
+              **Exclude this file hash from "{{ variables.exception_rule_name }}"?**
+
+              {{ steps.run_history.output.evidence_comment }}
+
+              Approving adds a `file.hash.sha256 is {{ inputs.sha256 }}` exception to the rule, so it stops alerting on this sample.
+            actionWorkflowId: system-alertzero-action-add-rule-exception
+            actionInput:
+              rule_id: "{{ variables.exception_rule_uuid }}"
+              name: "Detonate: quiet sample {{ inputs.sha256 | slice: 0, 12 }}…"
+              description: >-
+                Added after {{ steps.run_history.output.quiet_streak }} consecutive
+                quiet sandbox detonations of this sample (latest task
+                {{ steps.verdict.output.task_id }}).
+              entries:
+                - field: file.hash.sha256
+                  operator: is
+                  value: "{{ inputs.sha256 }}"
+            category: configure
+            # Removes this one hash from one rule: no other detection changes.
+            impact: low
+            # Absence of behaviour in a sandbox is weaker evidence than its
+            # presence, whatever the streak.
+            confidence: medium
+            autoApprove: false
+
+      # The verdict is per sample, so the siblings in the close proposal get
+      # the tag too. Otherwise the next sweep finds them untagged, detonates
+      # the same hash again and proposes closing them a second time.
+      - name: tag_hash_siblings
+        type: security.setAlertTags
+        if: "${{ variables.close_alert_count > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          alert_ids: "${{ variables.close_alert_ids }}"
+          tags_to_add:
+            - "detonate:malicious"
+
+      - name: propose_close
+        type: workflow.executeAsync
+        if: "${{ variables.close_alert_count > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ inputs.conversation_id }}"
+            title: "Close {{ variables.close_alert_count }} alert{% if variables.close_alert_count != 1 %}s{% endif %} as true positive: detonation confirmed malicious"
+            comment: |-
+              **Close {{ variables.close_alert_count }} open alert{% if variables.close_alert_count != 1 %}s{% endif %} on this sample as true positive?**
+
+              A sandbox detonation confirmed the sample malicious: {{ steps.verdict.output.evidence }}
+
+              Sample: {{ inputs.sha256 }}
+              Detonation task: {{ steps.verdict.output.task_id }}
+
+              Closing records the verdict; containment (blocklist, isolation) is a separate decision.
+            actionWorkflowId: system-alertzero-action-close-alerts-tp
+            actionInput:
+              alertIds: "${{ variables.close_alert_ids }}"
+              reason: true_positive
+            category: respond
+            impact: medium
+            confidence: high
+            autoApprove: false
+
+      # F6: a blocklist write is a fleet-wide enforcement action, so it never
+      # rides on a sandbox verdict alone — an analyst confirms it first. The
+      # gate sits after `apply` (the verdict is already on the alert either
+      # way) and before any blocklist write. A timeout reads as no answer and
+      # skips the blocklist: the run stays honest rather than failing loudly
+      # over a decision nobody made. The failure travels as an error on the
+      # step, adopted below before the output is evicted.
+      - name: blocklist_gate
+        type: waitForApproval
+        if: "${{ steps.verdict.output.verdict == 'malicious' }}"
+        timeout: 3600s
+        on-failure:
+          continue: true
+        with:
+          message: >-
+            Detonate triage: blocklist this hash on every endpoint?
+            {{ steps.verdict.output.evidence }}
+          approveLabel: Blocklist hash
+          rejectLabel: Skip
+
+      # `waitForApproval` output resolves to its latest execution and is not
+      # exempt from eviction, so the answer is adopted into a variable before
+      # anything reads it. Blank on timeout, which is what the guard below
+      # keys on: an unanswered gate is not a yes.
+      - name: resolve_blocklist_gate
+        type: data.set
+        if: "${{ steps.verdict.output.verdict == 'malicious' }}"
+        with:
+          blocklist_approved: '${{ steps.blocklist_gate.output.response.approved == true }}'
+          blocklist_timed_out: '${{ steps.blocklist_gate.error != blank }}'
+          blocklist_responded_by: "{{ steps.blocklist_gate.output.respondedBy }}"
+
+      # The write itself. `item_id` is derived from the hash so the step is
+      # idempotent: re-running triage on the same sample skips instead of
+      # stacking duplicate entries. `on-failure: continue` because a stack
+      # without the blocklist list (it is created by the Artifacts UI, not
+      # provisioned) must not fail the whole triage run — the verdict is
+      # already recorded on the alert.
+      - name: blocklist
+        type: security.createExceptionListItem
+        if: "${{ variables.blocklist_approved == true }}"
+        on-failure:
+          continue: true
+        with:
+          list_id: endpoint_blocklists
+          namespace_type: agnostic
+          item_id: "detonate-{{ inputs.sha256 }}"
+          overwrite: true
+          name: "Detonate: {{ steps.verdict.output.evidence | truncate: 200 }}"
+          description: >-
+            Added by the Detonate triage workflow after an approved malicious
+            detonation (task {{ steps.verdict.output.task_id }}).
+          entries:
+            # Endpoint blocklist entries must be `match_any` + `included` with
+            # an array value (BlocklistValidator) — the step's `is_one_of`
+            # verb maps to exactly that; plain `is` maps to `match` and the
+            # blocklist validator rejects it.
+            - field: file.hash.sha256
+              operator: is_one_of
+              values:
+                - "{{ inputs.sha256 }}"
+          # An endpoint blocklist artifact is compiled per OS and the validator
+          # accepts exactly one os_types entry (minSize 1, maxSize 1) — the OS
+          # the sample actually ran on, from the verdict output. A task that
+          # did not record its OS falls back to the OS the detonate step
+          # requested.
+          os_types:
+            - "{{ steps.verdict.output.vm_os_family | default: 'linux' }}"
+          # Attribution: the resumed execution writes under the workflow
+          # runner's identity, not the approver's, so the approver is recorded
+          # on the item itself — the audit trail the Artifacts UI shows.
+          comments:
+            - "Blocklisted by {{ variables.blocklist_responded_by }} after detonation task {{ steps.verdict.output.task_id }}."
+
+      # A confirmed-malicious detonation is worth a case comment; a quiet or
+      # inconclusive run stays on the alert, where the analyst already is.
+      # Failing to comment on the case must not fail the run — the alert
+      # already carries the verdict.
+      - name: case_comment_on_malicious
+        type: if
+        condition: "${{ steps.verdict.output.verdict == 'malicious' and inputs.case_id != blank }}"
+        steps:
+          - name: comment
+            type: detonate.prototype.caseComment
+            on-failure:
+              continue: true
+            with:
+              case_id: "{{ inputs.case_id }}"
+              comment: "Detonation confirmed malicious — {{ steps.verdict.output.evidence }}"

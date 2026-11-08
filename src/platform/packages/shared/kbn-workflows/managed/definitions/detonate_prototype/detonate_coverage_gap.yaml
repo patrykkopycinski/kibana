@@ -91,23 +91,32 @@ steps:
         type: data.set
         if: "${{ steps.read_record.error == null }}"
         with:
+          # The kibana.request step's output IS the response body (no wrapper);
+          # the record route returns the record fields flat.
           gap_description: >-
             Detonation run {{ foreach.item.task_id }} (sample {{ foreach.item.sha256 | slice: 0, 12 }})
-            was {{ steps.read_record.output.data['detonate.verdict'] }} on
-            {{ steps.read_record.output.data['detonate.vm.os_family'] | default: 'an unknown OS' }}.
-            {{ steps.read_record.output.data['detonate.alerts.total'] }} sandbox alerts fired
-            ({{ steps.read_record.output.data['detonate.endpoint_event_codes'] | join: ', ' }})
-            {%- if steps.read_record.output.data['detonate.detections_to_review'] != empty %},
+            was {{ steps.read_record.output['detonate.verdict'] }} on
+            {{ steps.read_record.output['detonate.vm.os_family'] | default: 'an unknown OS' }}.
+            {{ steps.read_record.output['detonate.alerts.total'] }} sandbox alerts fired
+            ({{ steps.read_record.output['detonate.endpoint_event_codes'] | join: ', ' }})
+            {%- if steps.read_record.output['detonate.detections_to_review'] != empty %},
             and no enabled production rule covered:
-            {{ steps.read_record.output.data['detonate.detections_to_review'] | join: ', ' }}
+            {{ steps.read_record.output['detonate.detections_to_review'] | join: ', ' }}
             {%- endif %}.
             Draft an ES|QL rule that detects this behaviour in production logs.
           evidence: >-
-            Sandbox run record: {{ steps.read_record.output.data['detonate.evidence'] | default: 'no evidence text' }}
-            Production endpoint alerts: {{ steps.read_record.output.data['detonate.alerts.production_endpoint'] | default: 0 }};
-            production detection alerts: {{ steps.read_record.output.data['detonate.alerts.production_detection'] | default: 0 }};
+            Sandbox run record: {{ steps.read_record.output['detonate.evidence'] | default: 'no evidence text' }}
+            Production endpoint alerts: {{ steps.read_record.output['detonate.alerts.production_endpoint'] | default: 0 }};
+            production detection alerts: {{ steps.read_record.output['detonate.alerts.production_detection'] | default: 0 }};
             detection rules that already fired:
-            {{ steps.read_record.output.data['detonate.detection_rule_names'] | join: ', ' }}.
+            {{ steps.read_record.output['detonate.detection_rule_names'] | join: ', ' }}.
+            Field values observed in the sandbox events (ECS field: values):
+            event.code: {{ steps.read_record.output['detonate.endpoint_event_codes'] | default: [] | join: ', ' | default: 'none' }};
+            dns.question.name: {{ steps.read_record.output['detonate.iocs.domains'] | default: [] | join: ', ' | default: 'none' }};
+            destination.ip: {{ steps.read_record.output['detonate.iocs.ips'] | default: [] | join: ', ' | default: 'none' }};
+            file.hash.sha256: {{ steps.read_record.output['detonate.iocs.file_hashes'] | default: [] | join: ', ' | default: 'none' }}.
+            Build the query on these fields and values. Do not invent indicators
+            or field names.
 
       # One Investigation per gap, like the coverage review: the proposal, the
       # draft attachment and the decision all land on this conversation. When

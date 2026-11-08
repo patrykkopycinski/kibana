@@ -462,13 +462,22 @@ export interface DetonateSandboxCountQuery {
  * The sandbox variant swaps the whole source command for a fresh
  * `FROM .kibana-detonate-sandbox-<spaceId>`, inserts
  * `WHERE detonate.task_id == <task_id>` directly after the source command,
- * drops any trailing LIMIT, and appends `STATS c = COUNT(*)` last. The
- * production variant keeps the original sources, still drops the LIMIT and
- * appends the count — the count must not be capped by a page-size LIMIT.
+ * drops any trailing LIMIT and the column-shaping commands that cannot
+ * change a count (KEEP, DROP, SORT), and appends `STATS c = COUNT(*)`
+ * last. The sandbox stream maps a subset of production fields, so a
+ * production-only column inside a KEEP or DROP would fail ES verification
+ * against the sandbox index and reject drafts that are valid in production.
+ * The production variant keeps the original sources and column shaping,
+ * still drops the LIMIT and appends the count — the count must not be
+ * capped by a page-size LIMIT.
  *
- * Both variants are re-parsed after building; the printed sandbox query must
- * have no SET header and exactly one FROM with exactly one source equal to the
- * sandbox stream, unprefixed, unselected. Anything else throws.
+ * The sandbox variant is prefixed with `SET unmapped_fields = "nullify";` so
+ * a WHERE/EVAL on a production-only field reads null instead of failing
+ * verification. The input itself must not carry a SET header (guard rule 1).
+ *
+ * The sandbox variant is re-parsed after building; it must carry exactly
+ * that one SET header and exactly one FROM with exactly one source equal to
+ * the sandbox stream, unprefixed, unselected. Anything else throws.
  */
 export const buildDetonateCountQueries = (
   queryText: string,
@@ -482,6 +491,16 @@ export const buildDetonateCountQueries = (
     args: [Builder.expression.source.index(detonateSandboxStreamName(spaceId))],
   });
   mutate.commands.limit.remove(sandboxAst);
+  // Removing KEEP/DROP only widens the visible columns, so every later
+  // reference still resolves. RENAME stays: removing it would break the
+  // references to the new name.
+  for (const command of [
+    ...mutate.generic.commands.list(sandboxAst, ({ name }) => name === 'keep'),
+    ...mutate.generic.commands.list(sandboxAst, ({ name }) => name === 'drop'),
+    ...mutate.generic.commands.list(sandboxAst, ({ name }) => name === 'sort'),
+  ]) {
+    mutate.generic.commands.remove(sandboxAst, command);
+  }
   sandboxAst.commands.splice(
     1,
     0,
@@ -496,7 +515,7 @@ export const buildDetonateCountQueries = (
     })
   );
   sandboxAst.commands.push(Builder.command({ name: 'stats', args: [countStar()] }));
-  const sandboxQuery = BasicPrettyPrinter.print(sandboxAst);
+  const sandboxQuery = `${SANDBOX_UNMAPPED_FIELDS_HEADER} ${BasicPrettyPrinter.print(sandboxAst)}`;
   assertSandboxCountQuery(sandboxQuery, spaceId);
 
   // Production variant: sources untouched, LIMIT removed, count appended.
@@ -507,6 +526,14 @@ export const buildDetonateCountQueries = (
 
   return { sandbox_query: sandboxQuery, production_query: productionQuery };
 };
+
+/**
+ * The sandbox stream maps only the fields a detonation captures, so a draft
+ * that also filters on a production-only field (`source.ip`) fails ES
+ * verification there. Nullifying unmapped fields makes such a predicate
+ * read null and match nothing: the sandbox did not observe that field.
+ */
+const SANDBOX_UNMAPPED_FIELDS_HEADER = 'SET unmapped_fields = "nullify";';
 
 const countStar = () =>
   Builder.expression.func.binary('=', [
@@ -521,8 +548,13 @@ const countStar = () =>
 export const assertSandboxCountQuery = (sandboxQuery: string, spaceId: string): void => {
   const expected = detonateSandboxStreamName(spaceId);
   const { root } = Parser.parse(sandboxQuery);
-  if (root.header?.some((cmd) => cmd.name === 'set')) {
-    throw new Error('sandbox count query unexpectedly has a SET header');
+  // The builder prepends the header as fixed text, so one parsed header plus
+  // that exact prefix proves it is the only SET in the query.
+  if (
+    (root.header ?? []).length !== 1 ||
+    !sandboxQuery.startsWith(`${SANDBOX_UNMAPPED_FIELDS_HEADER} `)
+  ) {
+    throw new Error('sandbox count query must carry exactly the unmapped_fields SET header');
   }
   const fromCommands = root.commands.filter((cmd) => cmd.name === 'from');
   if (fromCommands.length !== 1) {

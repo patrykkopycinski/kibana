@@ -28,7 +28,11 @@ interface YamlStep {
 }
 
 interface YamlWorkflow {
-  settings?: { timeout?: string; concurrency?: { key: string; strategy: string; max: number } };
+  settings?: {
+    timeout?: string;
+    concurrency?: { key: string; strategy: string; max: number };
+    'on-failure'?: { fallback?: YamlStep[] };
+  };
   triggers?: Array<{
     inputs?: {
       properties?: Record<string, { type?: string; minLength?: number; maxLength?: number }>;
@@ -243,6 +247,21 @@ describe('Detonate Detection Rule Creation worker', () => {
 
     const note = stepByName('note_clear_failure');
     expect(note?.if).toBe('${{ steps.clear_in_progress.error != null }}');
+  });
+
+  // A timed-out draft once failed the run before clear_in_progress, leaving the
+  // lock set and the run invisible to every later sweep.
+  it('does not fail the run on a failed or timed-out draft', () => {
+    expect(stepByName('draft_creation')?.['on-failure']?.continue).toBe(true);
+    expect(emit.skip_reason).toContain('steps.draft_creation.error != null');
+  });
+
+  it('releases the coverage lock from the workflow fallback when a step fails the run', () => {
+    const [release] = worker.settings?.['on-failure']?.fallback ?? [];
+    const clear = stepByName('clear_in_progress');
+    expect(release?.type).toBe('kibana.request');
+    expect(release?.with?.path).toBe(clear?.with?.path);
+    expect(release?.with?.body).toEqual({ remove: ['detonate:coverage-in-progress'] });
   });
 
   it('derives created and reviewed from the create gate only', () => {

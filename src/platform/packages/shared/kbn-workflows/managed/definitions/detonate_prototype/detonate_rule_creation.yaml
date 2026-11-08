@@ -26,6 +26,25 @@ settings:
   # analyst. Budget: a 72h create decision, a 72h enable decision, a re-park
   # margin, plus the backtest and the verify steps. A test pins the relationship.
   timeout: "176h"
+  # A step that fails the run (a gate failing outright) never reaches
+  # clear_in_progress, and the sweep skips a run while its lock is set. This
+  # fallback releases the lock on that path; the run still fails. It does not
+  # run on a workflow timeout or cancellation.
+  on-failure:
+    fallback:
+      - name: release_coverage_lock
+        type: kibana.request
+        timeout: "30s"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            remove:
+              - detonate:coverage-in-progress
 triggers:
   - type: manual
     inputs:
@@ -89,6 +108,11 @@ steps:
     plugin-id: alertzero_rule_creation
     aggregate-by: alertzero_parent
     timeout: "10m"
+    # A failed or timed-out draft must not kill the run: draft_ready reads
+    # false, nothing is proposed, and clear_in_progress still releases the
+    # sweep's coverage lock so the next tick can retry the run.
+    on-failure:
+      continue: true
     create-conversation: true
     with:
       # The thin agent has no skills or tools of its own. List every skill the
@@ -115,6 +139,13 @@ steps:
         indices (for example logs-*). Sandbox detonation output is not a valid
         source: never read .kibana-detonate-sandbox-* and never emit SET,
         LOOKUP JOIN, ENRICH, TS, subqueries, remote: or :: selectors.
+
+        Match exact values from the evidence's ECS field: values list. Do not
+        add fields or search terms that the evidence does not name: the rule
+        must match the events the sandbox recorded. Not every listed field
+        exists in the log indices; use the ones the tool accepts. Call
+        security.create_detection_rule once. Rewrite only when the returned
+        query uses no evidence value or a value not in the evidence.
 
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id. If the tool did not
@@ -673,4 +704,4 @@ steps:
       rule_name: >-
         {% if steps.validate_draft.output.valid == true %}{{ steps.validate_draft.output.rule.name }}{% else %}{{ steps.draft_creation.output.structured_output.rule.name }}{% endif %}
       skip_reason: >-
-        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.validate_draft.output.valid != true %}{{ steps.validate_draft.output.skip_reason }}{% elsif steps.sandbox_ready.output.ok != true %}the candidate does not match the run: no sandbox events matched the rule query{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}
+        {% if steps.draft_creation.error != null %}The draft step failed: {{ steps.draft_creation.error.message }}{% elsif steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.validate_draft.output.valid != true %}{{ steps.validate_draft.output.skip_reason }}{% elsif steps.sandbox_ready.output.ok != true %}the candidate does not match the run: no sandbox events matched the rule query{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

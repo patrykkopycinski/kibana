@@ -89,10 +89,12 @@ describe('Detonate Coverage Gap sweep', () => {
     );
 
     const gap = (stepByName('gap_text')?.with ?? {}) as Record<string, string>;
-    expect(gap.gap_description).toContain("output.data['detonate.verdict']");
-    expect(gap.gap_description).toContain("output.data['detonate.detections_to_review']");
-    expect(gap.evidence).toContain("output.data['detonate.evidence']");
-    expect(gap.evidence).toContain("output.data['detonate.detection_rule_names']");
+    // kibana.request output is the response body itself (no wrapper): the
+    // record route returns the record fields flat.
+    expect(gap.gap_description).toContain("output['detonate.verdict']");
+    expect(gap.gap_description).toContain("output['detonate.detections_to_review']");
+    expect(gap.evidence).toContain("output['detonate.evidence']");
+    expect(gap.evidence).toContain("output['detonate.detection_rule_names']");
     // The technique stays empty: the record carries no ATT&CK mapping.
     expect(inputsOf(stepByName('dispatch_rule_creation')).technique).toBeUndefined();
   });

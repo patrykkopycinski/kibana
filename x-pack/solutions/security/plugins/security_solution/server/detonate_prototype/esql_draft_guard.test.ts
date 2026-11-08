@@ -278,7 +278,7 @@ describe('buildDetonateCountQueries', () => {
       'default'
     );
     expect(sandbox_query).toBe(
-      'FROM .kibana-detonate-sandbox-default | WHERE `detonate.task_id` == "task-7" | EVAL x = 1 | STATS c = COUNT(*)'
+      'SET unmapped_fields = "nullify"; FROM .kibana-detonate-sandbox-default | WHERE `detonate.task_id` == "task-7" | EVAL x = 1 | STATS c = COUNT(*)'
     );
     expect(production_query).toBe('FROM logs-* | EVAL x = 1 | STATS c = COUNT(*)');
   });
@@ -300,18 +300,79 @@ describe('buildDetonateCountQueries', () => {
   it('keeps a task_id containing a quote or pipe as one string literal', () => {
     const { sandbox_query } = buildDetonateCountQueries('FROM logs-*', 'ta"sk|1', 'default');
     expect(sandbox_query).toBe(
-      'FROM .kibana-detonate-sandbox-default | WHERE `detonate.task_id` == "ta\\"sk|1" | STATS c = COUNT(*)'
+      'SET unmapped_fields = "nullify"; FROM .kibana-detonate-sandbox-default | WHERE `detonate.task_id` == "ta\\"sk|1" | STATS c = COUNT(*)'
     );
     expect(() => Parser.parse(sandbox_query)).not.toThrow();
   });
 
+  it('strips column-shaping commands the sandbox mapping cannot verify, but keeps RENAME', () => {
+    // KEEP of production-only columns is the shape real drafts take; the
+    // sandbox stream maps a subset of fields, so the count variant must not
+    // carry the clause. RENAME stays because it changes column names.
+    const { sandbox_query, production_query } = buildDetonateCountQueries(
+      'FROM logs-* | WHERE dns.question.name LIKE "*.detonate.test" | KEEP source.ip, dns.question.name | SORT @timestamp DESC | LIMIT 100',
+      TASK,
+      'default'
+    );
+    expect(sandbox_query).toBe(
+      'SET unmapped_fields = "nullify"; FROM .kibana-detonate-sandbox-default | WHERE `detonate.task_id` == "task-7" | WHERE dns.question.name LIKE "*.detonate.test" | STATS c = COUNT(*)'
+    );
+    // The production variant keeps its shaping, minus the LIMIT.
+    expect(production_query).toBe(
+      'FROM logs-* | WHERE dns.question.name LIKE "*.detonate.test" | KEEP source.ip, dns.question.name | SORT @timestamp DESC | STATS c = COUNT(*)'
+    );
+  });
+
+  it('keeps RENAME in the sandbox variant so later references still resolve', () => {
+    const { sandbox_query } = buildDetonateCountQueries(
+      'FROM logs-* | RENAME source.ip AS client_ip | WHERE client_ip != "10.0.0.1" | KEEP client_ip',
+      TASK,
+      'default'
+    );
+    expect(sandbox_query).toContain('RENAME source.ip AS client_ip');
+    expect(() => Parser.parse(sandbox_query)).not.toThrow();
+  });
+
   it('throws when the built query would not prove the sandbox shape', () => {
+    const SET = 'SET unmapped_fields = "nullify"; ';
     expect(() =>
-      assertSandboxCountQuery('FROM logs-*, other | STATS c = COUNT(*)', 'default')
-    ).toThrow();
+      assertSandboxCountQuery(`${SET}FROM logs-*, other | STATS c = COUNT(*)`, 'default')
+    ).toThrow(/2 sources/);
     expect(() =>
-      assertSandboxCountQuery('FROM .kibana-detonate-sandbox-default | STATS c = COUNT(*)', 'other')
-    ).toThrow();
+      assertSandboxCountQuery(
+        `${SET}FROM .kibana-detonate-sandbox-default | STATS c = COUNT(*)`,
+        'other'
+      )
+    ).toThrow(/expected/);
+  });
+
+  it('throws unless the only SET header is the unmapped_fields nullify header', () => {
+    const tail = 'FROM .kibana-detonate-sandbox-default | STATS c = COUNT(*)';
+    expect(() => assertSandboxCountQuery(tail, 'default')).toThrow(/SET header/);
+    expect(() => assertSandboxCountQuery(`SET project_routing = "x"; ${tail}`, 'default')).toThrow(
+      /SET header/
+    );
+    expect(() =>
+      assertSandboxCountQuery(
+        `SET unmapped_fields = "nullify"; SET project_routing = "x"; ${tail}`,
+        'default'
+      )
+    ).toThrow(/SET header/);
+    expect(() =>
+      assertSandboxCountQuery(`SET unmapped_fields = "nullify"; ${tail}`, 'default')
+    ).not.toThrow();
+  });
+
+  it('nullifies unmapped fields so a production-only predicate verifies on the sandbox', () => {
+    const { sandbox_query, production_query } = buildDetonateCountQueries(
+      'FROM logs-* | WHERE dns.question.name == "a.test" OR source.ip == "203.0.113.53"',
+      TASK,
+      'default'
+    );
+    expect(sandbox_query.startsWith('SET unmapped_fields = "nullify"; FROM ')).toBe(true);
+    expect(Parser.parse(sandbox_query).root.header).toHaveLength(1);
+    // Production verification stays strict: an unknown field there is a real error.
+    expect(production_query).not.toContain('SET');
   });
 
   it('post-build assertion holds for every accepted fixture', () => {
@@ -320,6 +381,7 @@ describe('buildDetonateCountQueries', () => {
       'FROM logs-* | EVAL x = 1 | LIMIT 10',
       'FROM logs-* | STATS c = COUNT(*) BY host.name',
       'FROM logs-* | LOOKUP JOIN dept ON host | LIMIT 5',
+      'FROM logs-* | WHERE dns.question.name LIKE "*.detonate.test" | KEEP source.ip, network.protocol | SORT @timestamp DESC | LIMIT 100',
     ]) {
       const { sandbox_query } = buildDetonateCountQueries(q, TASK, 'default');
       expect(() => assertSandboxCountQuery(sandbox_query, 'default')).not.toThrow();

@@ -118,7 +118,7 @@ export const DETONATE_RULE_CREATION_WORKFLOW = {
 export const DETONATE_IOC_HUNT_WORKFLOW = {
   id: DETONATE_IOC_HUNT_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: DETONATE_IOC_HUNT_YAML,
   management: {

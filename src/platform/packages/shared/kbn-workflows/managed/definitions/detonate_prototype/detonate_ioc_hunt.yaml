@@ -123,7 +123,9 @@ steps:
             remove:
               - detonate:hunt-requested
 
-      # The three hunts. `SET unmapped_fields="nullify"` carries the commit-8
+      # The three hunts. `SET unmapped_fields="nullify";` (semicolon-
+      # terminated: SET is a standalone statement and _query takes one
+      # pipeline after it) carries the commit-8
       # fix: without it, a stack without endpoint network data fails the FROM
       # clause at verification ("Unknown column"); with it, a missing family
       # field nullifies and the hunt returns zero rows. `on-failure:
@@ -137,7 +139,7 @@ steps:
           continue: true
         with:
           query: |-
-            SET unmapped_fields = "nullify"
+            SET unmapped_fields = "nullify";
             FROM logs-endpoint.events.network-*
               | WHERE @timestamp >= NOW() - 30d
               | WHERE dns.question.name IN ("{{ steps.resolve_iocs.output.domains | join: '", "' }}")
@@ -153,7 +155,7 @@ steps:
           continue: true
         with:
           query: |-
-            SET unmapped_fields = "nullify"
+            SET unmapped_fields = "nullify";
             FROM logs-endpoint.events.network-*
               | WHERE @timestamp >= NOW() - 30d
               | WHERE destination.ip IN ("{{ steps.resolve_iocs.output.ips | join: '", "' }}")
@@ -172,7 +174,7 @@ steps:
           continue: true
         with:
           query: |-
-            SET unmapped_fields = "nullify"
+            SET unmapped_fields = "nullify";
             FROM logs-*
               | WHERE @timestamp >= NOW() - 30d
               | WHERE file.hash.sha256 IN ("{{ steps.resolve_iocs.output.file_hashes | join: '", "' }}")

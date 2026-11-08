@@ -1055,6 +1055,29 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(selector).not.toContain('detonate:hunt-');
     });
 
+    // A run whose rule-creation copy is parked carries coverage-in-progress;
+    // the sweep skips it. It must be excluded from the scan itself, not only
+    // from the re-check, or in-progress alerts would consume the scan window
+    // and hide a valid handoff behind them.
+    it('excludes runs with a parked rule-creation copy from the coverage scan', async () => {
+      esClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await listHandler()(createContext(), listRequest('coverage'), mockResponse);
+
+      const selector = JSON.stringify(esClient.search.mock.calls[0][0].query);
+      expect(selector).toContain('detonate:coverage-in-progress');
+      expect(selector).toContain('must_not');
+    });
+
+    it('keeps the hunt scan free of the coverage lock', async () => {
+      esClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+      const selector = JSON.stringify(esClient.search.mock.calls[0][0].query);
+      expect(selector).not.toContain('detonate:coverage-in-progress');
+    });
+
     it('accepts only the two Worker kinds', () => {
       expect(querySchema().validate({ marker: 'hunt' })).toEqual({ marker: 'hunt' });
       expect(() => querySchema().validate({ marker: 'detonate:malicious' })).toThrow();
@@ -1185,15 +1208,18 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { updated: 0 } });
     });
 
-    it('accepts only the four handoff markers, and at least one', () => {
+    it('accepts only the five handoff markers, and at least one', () => {
       expect(bodySchema().validate({ add: ['detonate:hunt-requested'] })).toEqual({
         add: ['detonate:hunt-requested'],
+      });
+      expect(bodySchema().validate({ remove: ['detonate:coverage-in-progress'] })).toEqual({
+        remove: ['detonate:coverage-in-progress'],
       });
       expect(() => bodySchema().validate({ add: ['detonate:malicious'] })).toThrow();
       expect(() => bodySchema().validate({ remove: ['detonate:benign'] })).toThrow();
       expect(() => bodySchema().validate({})).toThrow();
       expect(() => bodySchema().validate({ add: [], remove: [] })).toThrow();
-      expect(() => bodySchema().validate({ add: Array(5).fill('detonate:hunt-done') })).toThrow();
+      expect(() => bodySchema().validate({ add: Array(6).fill('detonate:hunt-done') })).toThrow();
     });
   });
 

@@ -9,6 +9,7 @@
 
 import DETONATE_COVERAGE_GAP_YAML from './detonate_coverage_gap.yaml';
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
+import DETONATE_IOC_HUNT_YAML from './detonate_ioc_hunt.yaml';
 import DETONATE_RULE_CREATION_YAML from './detonate_rule_creation.yaml';
 import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
@@ -16,6 +17,8 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const DETONATE_FP_VALIDATION_WORKFLOW_ID = 'system-security-detonate-fp-validation';
 
 export const DETONATE_COVERAGE_GAP_WORKFLOW_ID = 'system-security-detonate-coverage-gap';
+
+export const DETONATE_IOC_HUNT_WORKFLOW_ID = 'system-security-detonate-ioc-hunt';
 
 /**
  * Detonate prototype: one sweep over the runs whose alerts wait for the
@@ -30,7 +33,7 @@ export const DETONATE_COVERAGE_GAP_WORKFLOW_ID = 'system-security-detonate-cover
 export const DETONATE_COVERAGE_GAP_WORKFLOW = {
   id: DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DETONATE_COVERAGE_GAP_YAML,
   management: {
@@ -94,9 +97,30 @@ export const DETONATE_RULE_CREATION_WORKFLOW_ID = 'system-security-detonate-rule
 export const DETONATE_RULE_CREATION_WORKFLOW = {
   id: DETONATE_RULE_CREATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DETONATE_RULE_CREATION_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * Detonate prototype: one sweep over the runs whose alerts wait for the Hunt
+ * Worker. Reads the hunt handoff list (oldest first, at most five tasks),
+ * hunts each run record's extracted IOCs across production logs, and opens
+ * one Investigation per run whose hunt found exposure on other hosts, then
+ * requests a coverage review from the Detection Worker via a handoff marker. The AlertZero Hunt Worker's tick calls this sweep when the detonate
+ * prototype dev setting is on.
+ */
+export const DETONATE_IOC_HUNT_WORKFLOW = {
+  id: DETONATE_IOC_HUNT_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_IOC_HUNT_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

@@ -617,6 +617,41 @@ steps:
       message: "Hunt sweep not queued: {{ steps.queue_hunt.error.message }}. Queue it from the detonation result flyout."
 
   # ----------------------------------------------------------------------
+  # Release the coverage lock. The sweep set `detonate:coverage-in-progress`
+  # when it dispatched this copy; while it is set, the sweep leaves the run
+  # alone (this copy's own drop key would discard a second copy anyway).
+  # Always runs and always clears, whatever path this copy took — approved,
+  # dismissed, skipped or failed — so the lock can never outlive the copy.
+  # A re-request that landed meanwhile is still queued and the next sweep
+  # picks it up. Runs as this copy's caller (inherit), which holds
+  # alertzero_write; the note on a clear failure keeps the run visible.
+  # ----------------------------------------------------------------------
+  - name: clear_in_progress
+    type: kibana.request
+    timeout: "30s"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        remove:
+          - detonate:coverage-in-progress
+    on-failure:
+      continue: true
+
+  - name: note_clear_failure
+    type: ai.conversation.add_user_message
+    if: "${{ steps.clear_in_progress.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: "Coverage lock not released: {{ steps.clear_in_progress.error.message }}. The run stays hidden from the Detection Worker until the marker is cleared."
+
+  # ----------------------------------------------------------------------
   # Emit. `created` means the create action completed inside the gate;
   # `reviewed` means a decision either way. A candidate skipped by the guard
   # or by the sandbox match reports its skip_reason so a gap that keeps

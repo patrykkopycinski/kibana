@@ -98,6 +98,20 @@ steps:
     on-failure:
       continue: true
 
+  # Detonate prototype hand-off: runs waiting for the Hunt Worker in this space.
+  # Detached, so the report sweep below is never blocked by a prototype child.
+  # Skipped with the dev setting off: no failed child step on any tick, in any
+  # space. The version bump is the only visible change for deployments that
+  # keep the setting off.
+  - name: dispatch_detonate_ioc_hunt
+    type: workflow.executeAsync
+    if: "${{ consts.detonate_prototype_dev }}"
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-security-detonate-ioc-hunt
+      run-as-mode: inherit
+
   # `if:` gates the whole parallel step, not just its `foreach` source: a
   # filter's `| default: []` does not produce a usable array for a skipped or
   # nil predecessor in this engine (bracket array literals are not valid filter

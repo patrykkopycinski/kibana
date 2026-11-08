@@ -127,9 +127,10 @@ steps:
               {{ foreach.item.task_id }}.
             workflow_execution_ids: ["{{ execution.id }}"]
 
-      # Set reviewed and clear requested BEFORE the dispatch, so the next tick
-      # cannot pick the same run. On failure the dispatch still runs: the
-      # copy's own per-task drop key is the backstop against a second copy.
+      # Set reviewed, clear requested and take the coverage lock BEFORE the
+      # dispatch, so the next tick cannot pick the same run. On failure the
+      # dispatch still runs: the copy's own per-task drop key is the backstop
+      # against a second copy.
       - name: set_reviewed
         type: kibana.request
         if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -145,6 +146,7 @@ steps:
           body:
             add:
               - detonate:coverage-reviewed
+              - detonate:coverage-in-progress
             remove:
               - detonate:coverage-requested
 
@@ -185,6 +187,7 @@ steps:
           body:
             remove:
               - detonate:coverage-reviewed
+              - detonate:coverage-in-progress
             add:
               - detonate:coverage-requested
 

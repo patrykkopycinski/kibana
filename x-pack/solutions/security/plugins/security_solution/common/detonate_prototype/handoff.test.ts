@@ -26,6 +26,15 @@ describe('needsDetonateHandoff', () => {
     ['coverage', ['detonate:malicious'], true],
     ['coverage', ['detonate:malicious', 'detonate:coverage-reviewed'], false],
     ['coverage', ['detonate:malicious', 'detonate:hunt-done'], true],
+    // A parked rule-creation copy suspends the coverage handoff, whatever
+    // else the alert carries: the sweep must not dispatch a second copy the
+    // parked one's drop key would silently discard. A re-request that lands
+    // in the window stays queued and is picked up once the copy clears it.
+    ['coverage', ['detonate:malicious', 'detonate:coverage-in-progress'], false],
+    ['coverage', ['detonate:coverage-requested', 'detonate:coverage-in-progress'], false],
+    // The lock is coverage-only: a run parked for coverage is still a normal
+    // hunt handoff, so the Hunt Worker keeps seeing it.
+    ['hunt', ['detonate:malicious', 'detonate:coverage-in-progress'], true],
     ['coverage', [], false],
   ] as const)('%s with %j → %s', (kind, tags, expected) => {
     expect(needsDetonateHandoff(kind, tags)).toBe(expected);

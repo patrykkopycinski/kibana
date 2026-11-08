@@ -114,7 +114,7 @@ describe('Detonate Coverage Gap sweep', () => {
     const reviewed = stepByName('set_reviewed');
     expect(reviewed?.if).toBe('${{ steps.create_investigation.output.conversation_id != null }}');
     expect(reviewed?.with?.body).toEqual({
-      add: ['detonate:coverage-reviewed'],
+      add: ['detonate:coverage-reviewed', 'detonate:coverage-in-progress'],
       remove: ['detonate:coverage-requested'],
     });
 
@@ -138,7 +138,7 @@ describe('Detonate Coverage Gap sweep', () => {
       '${{ steps.dispatch_rule_creation.error != null and steps.set_reviewed.output != null }}'
     );
     expect(rollback?.with?.body).toEqual({
-      remove: ['detonate:coverage-reviewed'],
+      remove: ['detonate:coverage-reviewed', 'detonate:coverage-in-progress'],
       add: ['detonate:coverage-requested'],
     });
     expect(rollback?.['on-failure']?.continue).toBe(true);

@@ -27,6 +27,7 @@ import type {
   DetonateTask,
 } from '../../common/detonate_prototype';
 import {
+  DETONATE_COVERAGE_IN_PROGRESS_MARKER,
   DETONATE_HANDOFF_MAX_TASKS,
   detonateHandoffMarkers,
   detonateVerdictTag,
@@ -49,7 +50,7 @@ const alertsIndex = (spaceId: string) => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
 const handoffSelector = (kind: DetonateHandoffKind): estypes.QueryDslQueryContainer => {
   const { requested, done } = detonateHandoffMarkers(kind);
-  return {
+  const waiting = {
     bool: {
       should: [
         { term: { [ALERT_WORKFLOW_TAGS]: requested } },
@@ -63,6 +64,17 @@ const handoffSelector = (kind: DetonateHandoffKind): estypes.QueryDslQueryContai
       minimum_should_match: 1,
     },
   };
+  // A run with a parked rule-creation copy is excluded from the scan itself,
+  // not only from the re-check: in-progress alerts must not consume the
+  // scan window and hide a valid handoff behind them.
+  return kind === 'coverage'
+    ? {
+        bool: {
+          filter: [waiting],
+          must_not: [{ term: { [ALERT_WORKFLOW_TAGS]: DETONATE_COVERAGE_IN_PROGRESS_MARKER } }],
+        },
+      }
+    : waiting;
 };
 
 const readStrings = (source: unknown, path: string): string[] =>

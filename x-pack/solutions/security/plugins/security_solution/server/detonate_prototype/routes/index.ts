@@ -122,6 +122,7 @@ const handoffMarkerSchema = schema.oneOf([
   schema.literal('detonate:hunt-done'),
   schema.literal('detonate:coverage-requested'),
   schema.literal('detonate:coverage-reviewed'),
+  schema.literal('detonate:coverage-in-progress'),
 ]);
 
 const handoffMarkerListSchema = schema.maybe(

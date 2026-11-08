@@ -1,0 +1,302 @@
+version: "1"
+name: Detonate IOC Hunt Sweep (prototype)
+description: >
+  Detonate prototype: one sweep over this space's detonation runs waiting for
+  the Hunt Worker. For each run (oldest first, at most 5) it reads the run
+  record's extracted IOCs, marks the run hunt-done before the hunt starts so
+  the next tick does not repeat it, then hunts the domains, IPs and file
+  hashes across the last 30 days of production logs. A run whose hunt found
+  exposure on other hosts gets one Investigation carrying the findings and a
+  request to the Detection Worker: a coverage handoff marker, never a
+  cross-Worker workflow call. A failed request rolls the markers back so the
+  next tick retries the run. Does not write to alerts directly; all marker
+  writes go through the handoff route.
+enabled: true
+tags:
+  - security
+  - detonate-prototype
+settings:
+  # One sweep per space at a time. Two sweeps at the same time could hunt the
+  # same run twice; the marker flip before the hunt is the second lock, this
+  # one keeps the sweep itself from piling up on a slow tick.
+  concurrency:
+    key: "detonate-ioc-hunt-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
+triggers:
+  # Manual trigger only. The AlertZero Hunt Worker's tick dispatches this
+  # sweep when the detonate prototype dev setting is on; there is no schedule
+  # of its own, and the Run dialog works for a one-off sweep.
+  - type: manual
+    inputs:
+      properties: {}
+      additionalProperties: false
+outputs:
+  - name: listed
+    type: number
+  - name: list_failed
+    type: boolean
+consts:
+  no_rows: []
+steps:
+  # Step 1 of 8: the runs waiting for this Worker in this space. The route
+  # searches the space's alerts index, drops alerts no run was started from,
+  # groups by run and cuts at five tasks, oldest alert first. A failed read
+  # does not fail the sweep: an empty result would look like an empty queue,
+  # so the failure is reported in the output instead.
+  - name: list_handoffs
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/handoffs?marker=hunt"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  - name: resolve_entries
+    type: data.set
+    with:
+      entries: "${{ steps.list_handoffs.output.data.handoffs | default: consts.no_rows }}"
+  # Steps 2–7 of 8 run once per run (at most 5, oldest alert first). A branch
+  # that fails before the marker flip leaves the markers untouched, so the
+  # next tick picks the run again; only a failed coverage request rolls the
+  # hunt markers back. Every gate below reads an output, not an error: a
+  # skipped step has no error either, so `.error == null` cannot tell
+  # ran-and-failed from never-ran.
+  - name: sweep_entries
+    type: foreach
+    foreach: "${{ steps.resolve_entries.output.entries }}"
+    mode: settled
+    steps:
+      # The record's IOCs are sanitized at extraction (domain pattern, IP
+      # parse, hex digest, capped per family), so they can be spliced into
+      # ES|QL IN-lists. It can 404 when the service dropped the task between
+      # the list and this read; the branch then stops before any marker
+      # write, and the next sweep re-evaluates the alerts.
+      - name: read_record
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ foreach.item.task_id }}/record"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+
+      # The IOC families the record actually carries. The hunts below are
+      # gated on these sizes, so a run with no domains never compiles an
+      # invalid IN ("") and a record without IOCs (the alert reads failed)
+      # skips every hunt.
+      - name: resolve_iocs
+        type: data.set
+        if: "${{ steps.read_record.error == null }}"
+        with:
+          domains: "${{ steps.read_record.output.data['detonate.iocs.domains'] | default: consts.no_rows }}"
+          ips: "${{ steps.read_record.output.data['detonate.iocs.ips'] | default: consts.no_rows }}"
+          file_hashes: "${{ steps.read_record.output.data['detonate.iocs.file_hashes'] | default: consts.no_rows }}"
+
+      # Mark hunt-done and clear hunt-requested BEFORE the hunts, so the next
+      # tick cannot pick the same run. The rollback restores the requested
+      # marker only when the coverage request fails to post.
+      - name: set_hunt_done
+        type: kibana.request
+        if: "${{ steps.resolve_iocs.output != null }}"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ foreach.item.task_id }}/handoff"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            add:
+              - detonate:hunt-done
+            remove:
+              - detonate:hunt-requested
+
+      # The three hunts. `SET unmapped_fields="nullify"` carries the commit-8
+      # fix: without it, a stack without endpoint network data fails the FROM
+      # clause at verification ("Unknown column"); with it, a missing family
+      # field nullifies and the hunt returns zero rows. `on-failure:
+      # continue` stays: a hunt that errors outright (no matching index at
+      # all, a verification failure) must not fail the sweep over the other
+      # runs.
+      - name: hunt_domains
+        type: elasticsearch.esql.query
+        if: "${{ steps.resolve_iocs.output != null and steps.resolve_iocs.output.domains.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            SET unmapped_fields = "nullify"
+            FROM logs-endpoint.events.network-*
+              | WHERE @timestamp >= NOW() - 30d
+              | WHERE dns.question.name IN ("{{ steps.resolve_iocs.output.domains | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      - name: hunt_ips
+        type: elasticsearch.esql.query
+        if: "${{ steps.resolve_iocs.output != null and steps.resolve_iocs.output.ips.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            SET unmapped_fields = "nullify"
+            FROM logs-endpoint.events.network-*
+              | WHERE @timestamp >= NOW() - 30d
+              | WHERE destination.ip IN ("{{ steps.resolve_iocs.output.ips | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      # "Hash seen again" is a Hunt finding: a file the sandbox saw on another
+      # host in production. The sample's own hash is excluded at extraction,
+      # so the IN-list carries only digests other documents contributed.
+      - name: hunt_file_hashes
+        type: elasticsearch.esql.query
+        if: "${{ steps.resolve_iocs.output != null and steps.resolve_iocs.output.file_hashes.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          query: |-
+            SET unmapped_fields = "nullify"
+            FROM logs-*
+              | WHERE @timestamp >= NOW() - 30d
+              | WHERE file.hash.sha256 IN ("{{ steps.resolve_iocs.output.file_hashes | join: '", "' }}")
+              | STATS last_seen = MAX(@timestamp) BY host.name
+              | KEEP host.name, last_seen
+              | SORT host.name ASC
+              | LIMIT 100
+
+      # All findings land on the run's own Investigation. The hosts each
+      # family found (rows are [host.name, last_seen]); `uniq` because a host
+      # found by several families must not appear twice. Skipped or failed
+      # hunts render as empty lists — `concat` over an empty array is still
+      # an array.
+      - name: resolve_hosts
+        type: data.set
+        if: >-
+          ${{ steps.resolve_iocs.output != null
+          and ((steps.hunt_domains.output != blank and steps.hunt_domains.output.values.size > 0)
+          or (steps.hunt_ips.output != blank and steps.hunt_ips.output.values.size > 0)
+          or (steps.hunt_file_hashes.output != blank and steps.hunt_file_hashes.output.values.size > 0)) }}
+        with:
+          hosts: |-
+            {%- if steps.hunt_domains.output != blank -%}
+            {%- assign domain_hosts = steps.hunt_domains.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign domain_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {%- if steps.hunt_ips.output != blank -%}
+            {%- assign ip_hosts = steps.hunt_ips.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign ip_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {%- if steps.hunt_file_hashes.output != blank -%}
+            {%- assign hash_hosts = steps.hunt_file_hashes.output.values | map: 'first' -%}
+            {%- else -%}
+            {%- assign hash_hosts = '' | split: ',' -%}
+            {%- endif -%}
+            {{ domain_hosts | concat: ip_hosts | concat: hash_hosts | uniq | sort | join: ', ' }}
+
+      # One Investigation per run with exposure. The findings note carries the
+      # hosts and links back to the run.
+      - name: create_investigation
+        type: ai.conversation.create
+        if: "${{ steps.resolve_hosts.output.hosts != blank }}"
+        with:
+          template_id: investigation
+          title: "Detonate IOC hunt: {{ foreach.item.sha256 | slice: 0, 12 }} (run {{ foreach.item.task_id | slice: 0, 8 }})"
+          access_control:
+            access_mode: public
+          metadata:
+            status: open
+            severity: medium
+            description: >-
+              Fleet exposure found by the Detonate Hunt Worker for run
+              {{ foreach.item.task_id }}.
+            workflow_execution_ids: ["{{ execution.id }}"]
+
+      - name: note_findings
+        type: ai.conversation.add_user_message
+        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+          message: |-
+            **IOC hunt findings (production logs, last 30 days)**
+
+            Hosts with exposure: {{ steps.resolve_hosts.output.hosts }}.
+
+            {% if steps.resolve_iocs.output.domains.size > 0 %}Domains hunted: {{ steps.resolve_iocs.output.domains | join: ', ' }}.
+            {% endif %}{% if steps.resolve_iocs.output.ips.size > 0 %}IPs hunted: {{ steps.resolve_iocs.output.ips | join: ', ' }}.
+            {% endif %}{% if steps.resolve_iocs.output.file_hashes.size > 0 %}File hashes hunted: {{ steps.resolve_iocs.output.file_hashes | join: ', ' }}.
+            {% endif %}
+            The hunt request came from detonation run {{ foreach.item.task_id }}. A coverage review has been requested so the Detection Worker can draft a rule for this behaviour.
+
+            [View run]({{ execution.url }})
+
+      # Loop back to Detection: a marker, never a cross-Worker call. Runs as
+      # this sweep's caller (inherit), which holds alertzero_write. On
+      # failure the rollback below restores the requested marker so the next
+      # tick retries the hunt for this run.
+      - name: queue_coverage
+        type: kibana.request
+        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        timeout: "30s"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ foreach.item.task_id }}/handoff"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            add:
+              - detonate:coverage-requested
+        on-failure:
+          continue: true
+
+      # Rollback: a coverage request that failed to post leaves the run marked
+      # hunt-done, hiding it forever. Restore the requested marker so the next
+      # tick retries the whole hunt branch for this run. Reached only when the
+      # request actually ran (a skipped step has no error), and only after the
+      # marker was set.
+      - name: rollback_hunt_done
+        type: kibana.request
+        if: >-
+          ${{ steps.queue_coverage.error != null
+          and steps.set_hunt_done.output != null }}
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ foreach.item.task_id }}/handoff"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            remove:
+              - detonate:hunt-done
+            add:
+              - detonate:hunt-requested
+
+  # Step 8 of 8: what the sweep found and did. Per-run outcomes live in the
+  # run's Investigation, not here: a run with no exposure opened none.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      listed: "${{ steps.resolve_entries.output.entries | default: consts.no_rows | size }}"
+      list_failed: "${{ steps.list_handoffs.error != null }}"

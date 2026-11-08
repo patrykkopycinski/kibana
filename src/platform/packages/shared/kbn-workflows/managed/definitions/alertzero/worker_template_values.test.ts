@@ -216,4 +216,23 @@ describe('Detonate prototype entry gate rendering', () => {
 
     expect(consts.detonate_prototype_dev).toBe(true);
   });
+
+  it('renders the detached Detonate ioc-hunt entry step with the literal workflow id', () => {
+    const steps = (
+      parse(
+        renderHuntWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, {
+          ...shared,
+          scheduleInterval: '4h',
+          detonatePrototypeDev: true,
+        })
+      ) as { steps: Array<{ name: string; if?: string; with?: Record<string, unknown> }> }
+    ).steps;
+    const dispatch = steps.find(({ name }) => name === 'dispatch_detonate_ioc_hunt');
+
+    expect(dispatch?.if).toBe('${{ consts.detonate_prototype_dev }}');
+    expect(dispatch?.with).toEqual({
+      'workflow-id': 'system-security-detonate-ioc-hunt',
+      'run-as-mode': 'inherit',
+    });
+  });
 });

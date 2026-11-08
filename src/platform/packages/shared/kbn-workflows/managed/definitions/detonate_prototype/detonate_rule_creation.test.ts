@@ -225,6 +225,26 @@ describe('Detonate Detection Rule Creation worker', () => {
     expect(queue?.with?.body).toEqual({ add: ['detonate:hunt-requested'] });
   });
 
+  // The sweep sets `detonate:coverage-in-progress` when it dispatches this
+  // copy, and while it is set the sweep leaves the run alone. This step is
+  // the lock's only release: unconditional (no `if`), always clearing, on
+  // every path the copy can take — so the lock can never outlive the copy.
+  it('always clears the coverage lock before emitting, on every path', () => {
+    const clear = stepByName('clear_in_progress');
+    expect(clear?.if).toBeUndefined();
+    expect(clear?.['on-failure']?.continue).toBe(true);
+    expect(clear?.with?.body).toEqual({ remove: ['detonate:coverage-in-progress'] });
+    expect(clear?.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff'
+    );
+
+    const names = worker.steps.map(({ name }) => name);
+    expect(names.indexOf('clear_in_progress')).toBeLessThan(names.indexOf('emit_result'));
+
+    const note = stepByName('note_clear_failure');
+    expect(note?.if).toBe('${{ steps.clear_in_progress.error != null }}');
+  });
+
   it('derives created and reviewed from the create gate only', () => {
     expect(emit.created).toContain("steps.propose_creation.output.status == 'succeeded'");
     expect(emit.reviewed).toContain("steps.propose_creation.output.decision == 'approved'");

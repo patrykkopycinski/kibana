@@ -35,6 +35,7 @@ import {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
+  DETONATE_IOC_HUNT_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
@@ -256,7 +257,7 @@ it.each([
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     renderInputs(HUNT_CONTINUOUS_THREAT_HUNT_YAML, CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS),
-    '5:165e5329',
+    '6:349114f2',
   ],
   [
     ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -388,6 +389,11 @@ describe('managedWorkflowDefinitions', () => {
   it('contains the detonate triage workflow (prototype)', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(ids).toContain(DETONATE_TRIAGE_WORKFLOW_ID);
+  });
+
+  it('contains the detonate IOC hunt sweep (prototype)', () => {
+    const ids = managedWorkflowDefinitions.map(({ id }) => id);
+    expect(ids).toContain(DETONATE_IOC_HUNT_WORKFLOW_ID);
   });
 
   it('retires the detonate completion sweep: the Forensics worker owns the write-back', () => {

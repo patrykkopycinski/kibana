@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   // Server code only; the client relies on Node's fetch and AbortSignal.timeout.
   testEnvironment: 'node',
   rootDir: '../../../../../../..',

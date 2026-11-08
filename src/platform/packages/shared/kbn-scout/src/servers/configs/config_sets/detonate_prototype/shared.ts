@@ -63,7 +63,10 @@ export const detonatePrototypeServerArgs = [
  * ES-side args for the detonate prototype config set. Empty unless
  * `DETONATE_EIS` is set, so the default boot is unchanged; set it when the
  * demo/recording needs the Agent Builder skills page or chat-backed skills.
+ * `DETONATE_ES_DATA_PATH` keeps the data directory outside the install path,
+ * which every start-server wipes, so seeded demo state survives a restart.
  */
 export const detonatePrototypeEsServerArgs = [
   ...(process.env.DETONATE_EIS ? [`xpack.inference.elastic.url=${EIS_QA_URL}`] : []),
+  ...(process.env.DETONATE_ES_DATA_PATH ? [`path.data=${process.env.DETONATE_ES_DATA_PATH}`] : []),
 ];

@@ -23,7 +23,8 @@ export const DETONATE_IOC_HUNT_WORKFLOW_ID = 'system-security-detonate-ioc-hunt'
 /**
  * Detonate prototype: one sweep over the runs whose alerts wait for the
  * Detection Worker. Reads the coverage handoff list (oldest first, at most
- * five tasks), builds the rule-creation inputs from each run record, opens
+ * five tasks), closes runs that already have an enabled rule without a
+ * draft, builds the rule-creation inputs from each run record, opens
  * an Investigation for the gap, marks the run coverage-reviewed before
  * dispatch so the next tick does not pick it again, and starts the D10 rule
  * creation copy detached. A failed dispatch rolls the markers back so the
@@ -33,7 +34,7 @@ export const DETONATE_IOC_HUNT_WORKFLOW_ID = 'system-security-detonate-ioc-hunt'
 export const DETONATE_COVERAGE_GAP_WORKFLOW = {
   id: DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 6,
+  version: 7,
   billable: false,
   yaml: DETONATE_COVERAGE_GAP_YAML,
   management: {

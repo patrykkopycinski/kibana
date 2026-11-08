@@ -38,7 +38,7 @@ outputs:
 consts:
   no_rows: []
 steps:
-  # Step 1 of 9: the runs waiting for this Worker in this space. The route
+  # The runs waiting for this Worker in this space. The route
   # searches the space's alerts index, drops alerts no run was started from,
   # groups by run and cuts at five tasks, oldest alert first. A failed read
   # does not fail the sweep: an empty result would look like an empty queue,
@@ -60,7 +60,7 @@ steps:
       # The kibana.request step's output IS the response body (no wrapper);
       # the handoffs route returns `{ handoffs: [...] }` flat.
       entries: "${{ steps.list_handoffs.output.handoffs | default: consts.no_rows }}"
-  # Steps 2–7 of 9 run once per run (at most 5, oldest alert first). A branch
+  # The steps below run once per run (at most 5, oldest alert first). A branch
   # that fails before dispatch leaves the markers untouched, so the next tick
   # picks the run again; only a failed dispatch rolls the reviewed marker back.
   # Every gate below reads an output, not an error: a skipped step has no error
@@ -70,6 +70,50 @@ steps:
     foreach: "${{ steps.resolve_entries.output.entries }}"
     mode: settled
     steps:
+      # A run that already has an enabled rule is covered. Without this check
+      # the hunt's loop back (hunt -> coverage-requested) drafts a duplicate
+      # rule after every enable approval. Every rule this flow creates carries
+      # the run's task tag. A failed lookup reads as not covered, so the run
+      # falls through to a draft, which still waits for an analyst.
+      - name: find_existing_rule
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find?per_page=1&filter={{ foreach.item.task_id | prepend: 'alert.attributes.tags:\"detonate:' | append: '\" AND alert.attributes.enabled:true' | url_encode }}"
+          headers:
+            elastic-api-version: "2023-10-31"
+
+      - name: resolve_coverage
+        type: data.set
+        with:
+          covered: >-
+            ${{ steps.find_existing_rule.error == null
+              and steps.find_existing_rule.output.total > 0 }}
+          covering_rule_id: "${{ steps.find_existing_rule.output.data[0].id | default: '' }}"
+
+      # Covered: close the request without a draft. No lock is taken because
+      # nothing is dispatched.
+      - name: mark_covered
+        type: kibana.request
+        if: "${{ steps.resolve_coverage.output.covered == true }}"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ foreach.item.task_id }}/handoff"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            add:
+              - detonate:coverage-reviewed
+            remove:
+              - detonate:coverage-requested
+
       # The record the inputs are built from. It can 404 when the service
       # dropped the task between the list and this read; the branch then stops
       # before any marker write, and the next sweep re-evaluates the alerts.
@@ -124,7 +168,7 @@ steps:
       # reads its missing output and skips too.
       - name: create_investigation
         type: ai.conversation.create
-        if: "${{ steps.read_record.error == null }}"
+        if: "${{ steps.read_record.error == null and steps.resolve_coverage.output.covered != true }}"
         with:
           template_id: investigation
           title: "Coverage gap: {{ foreach.item.sha256 | slice: 0, 12 }} (run {{ foreach.item.task_id | slice: 0, 8 }})"
@@ -202,7 +246,7 @@ steps:
             add:
               - detonate:coverage-requested
 
-  # Step 9 of 9: what the sweep found and did. `listed` is the handoff-list
+  # What the sweep found and did. `listed` is the handoff-list
   # size; dispatched counts live in the child executions, not here, because
   # dispatch is detached.
   - name: emit_result

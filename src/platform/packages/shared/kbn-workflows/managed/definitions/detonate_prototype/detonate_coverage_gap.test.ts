@@ -102,8 +102,44 @@ describe('Detonate Coverage Gap sweep', () => {
   it('opens one Investigation per gap before any marker write', () => {
     const create = stepByName('create_investigation');
     expect(create?.type).toBe('ai.conversation.create');
-    expect(create?.if).toBe('${{ steps.read_record.error == null }}');
+    expect(create?.if).toBe(
+      '${{ steps.read_record.error == null and steps.resolve_coverage.output.covered != true }}'
+    );
     expect((create?.with as Record<string, unknown>).template_id).toBe('investigation');
+  });
+
+  // The hunt re-queues coverage after every enable approval; without this
+  // check each loop drafts a duplicate rule for an already covered run.
+  it('closes a run that already has an enabled rule without drafting', () => {
+    const steps = sweep.steps.find((step) => step.name === 'sweep_entries')?.steps as YamlStep[];
+    const names = steps.map((step) => step.name);
+    expect(names.slice(0, 3)).toEqual(['find_existing_rule', 'resolve_coverage', 'mark_covered']);
+
+    const find = stepByName('find_existing_rule');
+    expect(find?.type).toBe('kibana.request');
+    expect(find?.with?.method).toBe('GET');
+    expect(find?.with?.headers).toEqual({ 'elastic-api-version': '2023-10-31' });
+    expect(pathOf(find)).toContain('/api/detection_engine/rules/_find?per_page=1&filter=');
+    expect(pathOf(find)).toContain(`prepend: 'alert.attributes.tags:"detonate:'`);
+    expect(pathOf(find)).toContain(`append: '" AND alert.attributes.enabled:true'`);
+    expect(find?.['on-failure']?.continue).toBe(true);
+
+    // A failed lookup must read as not covered, so the draft path still runs.
+    const covered = String((stepByName('resolve_coverage')?.with ?? {}).covered);
+    expect(covered).toContain('steps.find_existing_rule.error == null');
+    expect(covered).toContain('steps.find_existing_rule.output.total > 0');
+
+    const mark = stepByName('mark_covered');
+    expect(mark?.if).toBe('${{ steps.resolve_coverage.output.covered == true }}');
+    expect(mark?.['on-failure']?.continue).toBe(true);
+    expect(pathOf(mark)).toBe(
+      '/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ foreach.item.task_id }}/handoff'
+    );
+    // No lock: nothing is dispatched for a covered run.
+    expect(mark?.with?.body).toEqual({
+      add: ['detonate:coverage-reviewed'],
+      remove: ['detonate:coverage-requested'],
+    });
   });
 
   // The marker must flip before dispatch, or the next tick would pick the

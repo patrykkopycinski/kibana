@@ -87,8 +87,12 @@ export const detonateValidateDraftStepDefinition = createServerStepDefinition({
 
     const candidateId = randomUUID();
     const candidateTag = detonateCandidateTag(candidateId);
+    // The candidate tag is how find_created_rule finds this rule again, so a
+    // drafted one (echoed from an earlier rule) must not survive.
+    const candidatePrefix = detonateCandidateTag('');
+    const draftedTags = rule.tags.filter((tag) => !tag.startsWith(candidatePrefix));
     const tags = [
-      ...new Set([...rule.tags, DETONATE_TRIAL_TAG, detonateTaskTag(taskId), candidateTag]),
+      ...new Set([...draftedTags, DETONATE_TRIAL_TAG, detonateTaskTag(taskId), candidateTag]),
     ];
 
     const counts = buildDetonateCountQueries(rule.query, taskId, spaceId);

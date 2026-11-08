@@ -65,17 +65,15 @@ describe('Detonate Detection Rule Creation worker', () => {
     expect(max).toBe(1);
   });
 
-  // The worker parks in WAITING_FOR_CHILD twice over: the create gate and the
-  // enable gate each hold a 72h decision window. The workflow timeout has to
-  // cover both plus a re-park margin, and stay under the engine's ceiling.
-  it('outlives both decision deadlines (create 72h + enable 72h)', () => {
-    const create = stepByName('propose_creation');
-    const enable = stepByName('propose_enable');
-    expect(inputsOf(create).expiresIn).toBe('72h');
-    expect(inputsOf(enable).expiresIn).toBe('72h');
+  // The worker parks in WAITING_FOR_CHILD while the create gate holds a 72h
+  // decision window. The workflow timeout has to cover it plus a re-park
+  // margin, and stay under the engine's ceiling.
+  it('outlives the create decision deadline (72h)', () => {
+    expect(inputsOf(stepByName('propose_creation')).expiresIn).toBe('72h');
+    expect(stepByName('propose_enable')).toBeUndefined();
 
     expect(String(worker.settings?.timeout)).toMatch(/^\d+h$/);
-    expect(hours(worker.settings?.timeout)).toBeGreaterThanOrEqual(144);
+    expect(hours(worker.settings?.timeout)).toBeGreaterThanOrEqual(80);
     expect(hours(worker.settings?.timeout)).toBeLessThanOrEqual(176);
   });
 
@@ -158,7 +156,7 @@ describe('Detonate Detection Rule Creation worker', () => {
     expect(comment).toContain('**Scope:**');
   });
 
-  describe('enable chain (D12)', () => {
+  describe('post-approval re-check (D12)', () => {
     it('finds the created rule by the candidate tag in the run space', () => {
       const find = stepByName('find_created_rule');
       expect(find?.type).toBe('kibana.request');
@@ -170,63 +168,51 @@ describe('Detonate Detection Rule Creation worker', () => {
       expect(find?.['on-failure']?.continue).toBe(true);
     });
 
-    // Fail closed: zero matches, more than one, already enabled, or a query
-    // changed after creation — none of them produce an enable proposal.
-    it('proposes enable only for one disabled rule with the validated query', () => {
-      const enableReady = (stepByName('enable_ready')?.with as Record<string, string>).ok;
-      expect(enableReady).toContain('steps.resolve_found_rule.output.found == true');
-      expect(enableReady).toContain('steps.resolve_found_rule.output.enabled == false');
-      expect(enableReady).toContain(
+    // The create action creates the rule enabled, so the re-check runs on the
+    // stored rule: exactly one match by the candidate tag, still ES|QL, query
+    // unchanged from what the guard validated. Any mismatch disables it.
+    it('re-verifies the created rule and fails closed', () => {
+      const ok = (stepByName('verify_ok')?.with as Record<string, string>).ok;
+      expect(stepByName('verify_ok')?.if).toBe(
+        "${{ steps.propose_creation.output.decision == 'approved' }}"
+      );
+      expect(ok).toContain('steps.resolve_found_rule.output.found == true');
+      expect(ok).toContain(
         'steps.resolve_found_rule.output.query_found == steps.validate_draft.output.rule.query'
       );
-
-      const enable = stepByName('propose_enable');
-      expect(inputsOf(enable).actionWorkflowId).toBe('system-alertzero-action-enable-rule');
-      // Every action workflow takes one `actionInput` object; a bare id string
-      // fails the gate's input validation.
-      expect(inputsOf(enable).actionInput).toEqual({
-        id: '{{ steps.resolve_found_rule.output.rule_id }}',
-      });
-    });
-
-    // Time-of-use: the enable action takes only an id, so the rule is
-    // re-fetched and compared (revision + query + still ES|QL) after the gate
-    // approves. Any mismatch disables the rule with a space-prefixed PATCH.
-    it('re-verifies the rule after the enable gate and fails closed', () => {
-      const verify = stepByName('verify_enabled_rule');
-      expect(verify?.with?.path).toBe(
-        '/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ steps.resolve_found_rule.output.rule_id }}'
-      );
-
-      const ok = (stepByName('verify_ok')?.with as Record<string, string>).ok;
-      expect(ok).toContain(
-        'steps.resolve_verify.output.revision_now == steps.resolve_found_rule.output.revision'
-      );
-      expect(ok).toContain(
-        'steps.resolve_verify.output.query_now == steps.validate_draft.output.rule.query'
-      );
-      expect(ok).toContain("steps.resolve_verify.output.language_now == 'esql'");
-      expect(ok).toContain("steps.resolve_verify.output.type_now == 'esql'");
+      expect(ok).toContain("steps.resolve_found_rule.output.language_found == 'esql'");
+      expect(ok).toContain("steps.resolve_found_rule.output.type_found == 'esql'");
 
       const disable = stepByName('disable_changed_rule');
       expect(disable?.with?.path).toBe('/s/{{ workflow.spaceId }}/api/detection_engine/rules');
       expect(disable?.with?.method).toBe('PATCH');
       expect((disable?.with?.body as Record<string, unknown>).enabled).toBe(false);
-      expect(disable?.if).toContain('steps.verify_ok.output.ok != true');
+      expect(disable?.if).toContain('steps.verify_ok.output.ok == false');
+      expect(disable?.if).toContain('steps.resolve_found_rule.output.found == true');
 
       const note = String(
         (stepByName('note_verification_failure')?.with as Record<string, string>).message
       );
       expect(note).toContain('Trial rule disabled');
       expect(note).toContain('disable manually');
+      expect(note).toContain('Hunt sweep not queued');
+    });
+
+    it('has no separate enable gate', () => {
+      for (const name of [
+        'enable_ready',
+        'propose_enable',
+        'verify_enabled_rule',
+        'resolve_verify',
+      ]) {
+        expect(stepByName(name)).toBeUndefined();
+      }
     });
   });
 
-  it('queues the hunt through the handoff route only on a verified enable', () => {
+  it('queues the hunt through the handoff route only on a verified create', () => {
     const queue = stepByName('queue_hunt');
-    expect(queue?.if).toBe(
-      "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok == true }}"
-    );
+    expect(queue?.if).toBe('${{ steps.verify_ok.output.ok == true }}');
     expect(queue?.with?.path).toBe(
       '/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff'
     );

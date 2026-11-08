@@ -10,8 +10,8 @@
  *
  * The only security boundary on model-drafted ES|QL: everything later steps
  * preview, attach or propose has passed through `validateDraftRuleQuery`, and
- * every re-check of a stored rule (`propose_enable`, the flyout Enable-trial
- * control) calls it again on the rule as it exists at that moment. All
+ * the post-approval re-check requires the stored rule's query to equal the
+ * query this guard validated. All
  * decisions come from the parsed AST — never string matching — so a source
  * written with quoting, date-math or a selector is judged on what it is.
  *

@@ -91,14 +91,14 @@ export const DETONATE_RULE_CREATION_WORKFLOW_ID = 'system-security-detonate-rule
  * surfaced, gates it through the `validateDraft` guard (the only security
  * boundary on model output), backtests it (separate 90-day production count
  * plus a sandbox match through the sandbox_count route), and proposes
- * creation on the run's Investigation. Approval creates the rule disabled;
- * a second proposal enables the trial rule after a time-of-use check, and a
- * verified enable queues the Hunt Worker via the handoff route.
+ * creation on the run's Investigation. Approval creates the rule enabled; a
+ * re-check of the stored rule then queues the Hunt Worker via the handoff
+ * route, or disables the rule if it changed after review.
  */
 export const DETONATE_RULE_CREATION_WORKFLOW = {
   id: DETONATE_RULE_CREATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 7,
+  version: 8,
   billable: false,
   yaml: DETONATE_RULE_CREATION_YAML,
   management: {

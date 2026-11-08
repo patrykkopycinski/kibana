@@ -5,9 +5,9 @@ description: >
   Worker. Drafts an ES|QL detection rule for a coverage gap a detonation
   surfaced, validates the draft against the space's default indices and the
   detonate sandbox guard, backtests it, and records it as a proposal on the
-  run's investigation. The rule is created disabled only once an analyst
-  approves, under the approver's identity; a second proposal can then enable
-  the trial rule after a time-of-use check.
+  run's investigation. The rule is created, enabled, only once an analyst
+  approves, under the approver's identity; a re-check of the stored rule then
+  queues the Hunt Worker or disables the rule.
 enabled: true
 tags:
   - security
@@ -23,9 +23,9 @@ settings:
     max: 1
   # This run parks in WAITING_FOR_CHILD while the proposal gate holds the decision,
   # and the engine's default 6h workflow timeout would cancel the draft under the
-  # analyst. Budget: a 72h create decision, a 72h enable decision, a re-park
-  # margin, plus the backtest and the verify steps. A test pins the relationship.
-  timeout: "176h"
+  # analyst. Budget: a 72h create decision, a re-park margin, plus the backtest
+  # and the verify steps. A test pins the relationship.
+  timeout: "96h"
   # A step that fails the run (a gate failing outright) never reaches
   # clear_in_progress, and the sweep skips a run while its lock is set. This
   # fallback releases the lock on that path; the run still fails. It does not
@@ -457,15 +457,14 @@ steps:
           {% endif %}**Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
 
           **On approval**
-          If you approve, the agent creates the rule in the disabled state under your identity. It does not run until the next proposal enables it. If you dismiss, the agent discards the draft.
+          If you approve, the agent creates the rule under your identity and it starts running on its schedule, then queues a retro hunt for the sample's indicators. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.validate_draft.output.rule }}"
         impact: low
         confidence: medium
         # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
         autoApprove: false
-        # The enable proposal below gets its own 72h; together they stay under
-        # this workflow's 176h ceiling. A test pins the budget.
+        # Under this workflow's timeout; a test pins the budget.
         expiresIn: "72h"
 
   # ----------------------------------------------------------------------
@@ -473,7 +472,7 @@ steps:
   # the created ruleId stays inside the gate. Find it by the candidate tag
   # the guard injected: the create action creates the rule with the
   # validated rule's tags, and the candidate tag is unique to this run. On
-  # an error the fail-closed branch runs: no enable proposal.
+  # an error the fail-closed branch runs: no hunt is queued.
   # ----------------------------------------------------------------------
   - name: find_created_rule
     type: kibana.request
@@ -499,99 +498,31 @@ steps:
       rule_id: "${{ steps.find_created_rule.output.data[0].id | default: '' }}"
       rule_name_found: "${{ steps.find_created_rule.output.data[0].name | default: '' }}"
       revision: "${{ steps.find_created_rule.output.data[0].revision | default: null }}"
-      enabled: "${{ steps.find_created_rule.output.data[0].enabled | default: false }}"
       query_found: "${{ steps.find_created_rule.output.data[0].query | default: '' }}"
+      language_found: "${{ steps.find_created_rule.output.data[0].language | default: '' }}"
+      type_found: "${{ steps.find_created_rule.output.data[0].type | default: '' }}"
 
-  # Fail-closed gate for the enable proposal. Exactly one rule, disabled, and
-  # the query unchanged from what the guard validated. Anything else: no
-  # enable proposal; the Investigation gets a note and the analyst enables
-  # from the result flyout.
-  - name: enable_ready
+  # Re-guard the created rule. Approval creates it enabled (the create
+  # action owns `enabled`), so the check runs on the rule as stored: exactly
+  # one rule by the candidate tag, still ES|QL, query unchanged from what the
+  # guard validated. On any mismatch: disable it and note why.
+  - name: verify_ok
     type: data.set
     if: "${{ steps.propose_creation.output.decision == 'approved' }}"
     with:
       ok: >-
         ${{ steps.resolve_found_rule.output.found == true
-          and steps.resolve_found_rule.output.enabled == false
-          and steps.resolve_found_rule.output.query_found == steps.validate_draft.output.rule.query }}
+          and steps.resolve_found_rule.output.query_found == steps.validate_draft.output.rule.query
+          and steps.resolve_found_rule.output.language_found == 'esql'
+          and steps.resolve_found_rule.output.type_found == 'esql' }}
       reason: >-
-        {% if steps.resolve_found_rule.output.found != true %}the created rule could not be found by its candidate tag (it may have been deleted, or edited so the tag was removed){% elsif steps.resolve_found_rule.output.enabled == true %}the created rule is already enabled{% elsif steps.resolve_found_rule.output.query_found != steps.validate_draft.output.rule.query %}the created rule's query changed after creation; enable it from the result flyout after review{% else %}{% endif %}
+        {% if steps.resolve_found_rule.output.found != true %}the created rule could not be found by its candidate tag (it may have been deleted, or edited so the tag was removed){% elsif steps.resolve_found_rule.output.query_found != steps.validate_draft.output.rule.query %}query changed after review{% elsif steps.resolve_found_rule.output.language_found != 'esql' or steps.resolve_found_rule.output.type_found != 'esql' %}rule is no longer ES|QL{% else %}{% endif %}
 
-  # The enable proposal. The action takes only the rule id; the time-of-use
-  # check below re-verifies the rule after the gate returns.
-  - name: propose_enable
-    type: workflow.execute
-    if: "${{ steps.enable_ready.output.ok == true }}"
-    with:
-      workflow-id: system-create-alertzero-proposal
-      run-as-mode: inherit
-      inputs:
-        conversationId: "{{ inputs.investigation_id }}"
-        comment: |-
-          **Enable the trial rule, detect-only**
-
-          **Rule:** [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }}) (`{{ steps.resolve_found_rule.output.rule_id }}`)
-
-          The rule was created disabled on approval of the draft. Enabling starts the shipped trial schedule (every 5 minutes over the last 6 minutes) with alerts visible in Detections. If you dismiss, the trial rule stays disabled; enable it manually from the rules page.
-        actionWorkflowId: system-alertzero-action-enable-rule
-        actionInput:
-          id: "{{ steps.resolve_found_rule.output.rule_id }}"
-        impact: low
-        confidence: medium
-        autoApprove: false
-        expiresIn: "72h"
-
-  # ----------------------------------------------------------------------
-  # Time-of-use check. The enable action takes only an id and enables
-  # whatever the rule holds at approval time, up to 72h later. After the
-  # gate returns approved, re-fetch the rule, compare the revision and the
-  # query. On any mismatch: disable it and note why. Fail closed as far as
-  # the API allows; the failure is never silent.
-  # ----------------------------------------------------------------------
-  - name: verify_enabled_rule
-    type: kibana.request
-    if: "${{ steps.propose_enable.output.decision == 'approved' }}"
-    timeout: "30s"
-    with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ steps.resolve_found_rule.output.rule_id }}"
-      headers:
-        elastic-api-version: "2023-10-31"
-    on-failure:
-      continue: true
-
-  - name: resolve_verify
-    type: data.set
-    if: "${{ steps.propose_enable.output.decision == 'approved' }}"
-    # The rules get-by-id route returns the rule object itself (flat, no
-    # wrapper), so every field reads off `output` directly.
-    with:
-      revision_now: "${{ steps.verify_enabled_rule.output.revision | default: null }}"
-      query_now: "${{ steps.verify_enabled_rule.output.query | default: '' }}"
-      language_now: "${{ steps.verify_enabled_rule.output.language | default: '' }}"
-      type_now: "${{ steps.verify_enabled_rule.output.type | default: '' }}"
-
-  # Re-guard at time-of-use. An unchanged revision plus an unchanged,
-  # still-ES|QL query proves the rule the approver enabled is the rule the
-  # guard validated (enabling does not bump the revision; verified live).
-  - name: verify_ok
-    type: data.set
-    if: "${{ steps.propose_enable.output.decision == 'approved' }}"
-    with:
-      ok: >-
-        ${{ steps.verify_enabled_rule.error == null
-          and steps.resolve_verify.output.revision_now == steps.resolve_found_rule.output.revision
-          and steps.resolve_verify.output.query_now == steps.validate_draft.output.rule.query
-          and steps.resolve_verify.output.language_now == 'esql'
-          and steps.resolve_verify.output.type_now == 'esql' }}
-      reason: >-
-        {% if steps.verify_enabled_rule.error != null %}the rule could not be fetched ({{ steps.verify_enabled_rule.error.message }}){% elsif steps.resolve_verify.output.revision_now != steps.resolve_found_rule.output.revision %}query changed after review (revision {{ steps.resolve_found_rule.output.revision }} → {{ steps.resolve_verify.output.revision_now }}){% elsif steps.resolve_verify.output.query_now != steps.validate_draft.output.rule.query %}query changed after review{% elsif steps.resolve_verify.output.language_now != 'esql' or steps.resolve_verify.output.type_now != 'esql' %}rule is no longer ES|QL{% else %}{% endif %}
-
-  # On a failed verify: disable the rule (space-prefixed PATCH) and note it
-  # on the Investigation.
   - name: disable_changed_rule
     type: kibana.request
-    if: "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok != true }}"
+    if: >-
+      ${{ steps.verify_ok.output.ok == false
+        and steps.resolve_found_rule.output.found == true }}
     timeout: "30s"
     with:
       method: PATCH
@@ -608,27 +539,29 @@ steps:
 
   - name: note_verification_failure
     type: ai.conversation.add_user_message
-    if: "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok != true }}"
+    if: "${{ steps.verify_ok.output.ok == false }}"
     on-failure:
       continue: true
     with:
       conversation_id: "{{ inputs.investigation_id }}"
       message: >-
-        {%- if steps.disable_changed_rule.error == null -%}
+        {%- if steps.resolve_found_rule.output.found != true -%}
+        Hunt sweep not queued: {{ steps.verify_ok.output.reason }}.
+        {%- elsif steps.disable_changed_rule.error == null -%}
         Trial rule disabled: {{ steps.verify_ok.output.reason }}. [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }})
         {%- else -%}
         Disable failed, rule still enabled, disable manually: {{ steps.verify_ok.output.reason }} — [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }})
         {%- endif -%}
 
   # ----------------------------------------------------------------------
-  # Queue the hunt. On enable approval, POST the handoff set route so the
+  # Queue the hunt. On a verified create, POST the handoff set route so the
   # Hunt Worker picks the run up from the handoff list under its own
   # account. No cross-Worker call, no direct alert write; this runs as the
   # copy's caller (inherit), which holds alertzero_write.
   # ----------------------------------------------------------------------
   - name: queue_hunt
     type: kibana.request
-    if: "${{ steps.propose_enable.output.decision == 'approved' and steps.verify_ok.output.ok == true }}"
+    if: "${{ steps.verify_ok.output.ok == true }}"
     timeout: "30s"
     with:
       method: POST

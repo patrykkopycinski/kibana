@@ -71,6 +71,25 @@ describe('detonateValidateDraftStepDefinition', () => {
     expect(result.output?.sandbox_query).toContain('"task-7"');
   });
 
+  it('drops a drafted candidate tag so only the fresh one identifies the rule', async () => {
+    const context = createMockContext(
+      {
+        rule: { ...RULE, tags: ['detonate:draft', 'detonate:candidate:stale-id'] },
+        task_id: 'task-7',
+        space_id: 'default',
+      },
+      SETTINGS_WITH_DEFAULT
+    );
+
+    const result = await detonateValidateDraftStepDefinition.handler(context);
+    const candidates = (result.output?.rule?.tags ?? []).filter((t) =>
+      t.startsWith('detonate:candidate:')
+    );
+
+    expect(candidates).toEqual([result.output?.candidate_tag]);
+    expect(result.output?.rule?.tags).toContain('detonate:draft');
+  });
+
   it('describes the candidate: production query, candidate tag, aggregation flag, source patterns', async () => {
     const context = createMockContext(
       { rule: RULE, task_id: 'task-7', space_id: 'default' },

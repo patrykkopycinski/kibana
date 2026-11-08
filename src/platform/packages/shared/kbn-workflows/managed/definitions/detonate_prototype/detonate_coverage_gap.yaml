@@ -72,7 +72,7 @@ steps:
     steps:
       # A run that already has an enabled rule is covered. Without this check
       # the hunt's loop back (hunt -> coverage-requested) drafts a duplicate
-      # rule after every enable approval. Every rule this flow creates carries
+      # rule after every approved create. Every rule this flow creates carries
       # the run's task tag. A failed lookup reads as not covered, so the run
       # falls through to a draft, which still waits for an analyst.
       - name: find_existing_rule

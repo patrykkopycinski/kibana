@@ -223,6 +223,10 @@ describe('Detonate sample worker (Forensics Watch)', () => {
         '${{ variables.blocklist_approved == true }}'
       );
     });
+
+    it('writes a global blocklist entry, so the approved hash is blocked on every endpoint', () => {
+      expect(stepByName('blocklist')?.with?.tags).toEqual(['policy:all']);
+    });
   });
 
   describe('manual trigger', () => {

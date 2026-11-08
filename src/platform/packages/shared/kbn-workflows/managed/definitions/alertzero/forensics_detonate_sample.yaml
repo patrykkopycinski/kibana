@@ -746,6 +746,12 @@ steps:
           # requested.
           os_types:
             - "{{ steps.verdict.output.vm_os_family | default: 'linux' }}"
+          # Without a policy tag an endpoint artifact is per-policy and assigned
+          # to no policy, so it blocks nothing. The gate asks to block the hash
+          # on every endpoint; `policy:all` makes the entry global, which needs
+          # the global artifact management privilege on top of blocklist write.
+          tags:
+            - "policy:all"
           # Attribution: the resumed execution writes under the workflow
           # runner's identity, not the approver's, so the approver is recorded
           # on the item itself — the audit trail the Artifacts UI shows.

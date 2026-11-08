@@ -25,6 +25,7 @@ interface RenderAppParams {
   startDeps: AlertZeroStartDependencies;
   params: AppMountParameters;
   availability$: Observable<SubscriptionAvailability>;
+  spaceSupported$: Observable<boolean>;
   isServerless: boolean;
   detonatePrototypeDev: boolean;
 }
@@ -41,6 +42,7 @@ export const renderApp = async ({
   startDeps,
   params,
   availability$,
+  spaceSupported$,
   isServerless,
   detonatePrototypeDev,
 }: RenderAppParams): Promise<AppUnmount> => {
@@ -73,6 +75,7 @@ export const renderApp = async ({
           <div style={rootStyle}>
             <AccessBoundary
               availability$={availability$}
+              spaceSupported$={spaceSupported$}
               serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
             >
               <AppChromeLayout>

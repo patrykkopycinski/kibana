@@ -18,6 +18,7 @@ import type { ExceptionAttachment } from './types';
 const ValueListText: React.FC<{ children?: React.ReactNode }> = ({ children }) => <>{children}</>;
 
 const CONDITIONS_TEST_SUBJ = 'securityExceptionAttachmentConditions';
+const NAME_TEST_SUBJ = 'securityExceptionAttachmentName';
 
 /**
  * Read-only card for a proposed detection rule exception.
@@ -25,7 +26,7 @@ const CONDITIONS_TEST_SUBJ = 'securityExceptionAttachmentConditions';
 export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAttachment>> = ({
   attachment,
 }) => {
-  const { description, entries, os_types: osTypes } = attachment.data;
+  const { name, description, entries, os_types: osTypes } = attachment.data;
 
   // Exception item card component accepts entries in a format that is returned by the `toApiEntries`.
   const entriesProp = useMemo<EntriesArray | undefined>(() => {
@@ -42,6 +43,14 @@ export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAtt
 
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+      {name ? (
+        <>
+          <EuiText size="s" data-test-subj={NAME_TEST_SUBJ}>
+            <strong>{name}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {description ? (
         <>
           <EuiText size="s">{description}</EuiText>

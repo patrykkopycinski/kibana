@@ -26,6 +26,7 @@ import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
+import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 import { detonateSampleStepDefinition } from './detonate_prototype/detonate_sample_step';
 import { detonateVerdictStepDefinition } from './detonate_prototype/detonate_verdict_step';
 import { detonateReputationStepDefinition } from './detonate_prototype/detonate_reputation_step';
@@ -43,7 +44,7 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(20);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -99,16 +100,19 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       getAlertEntitiesStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      matchAttackFingerprintsStepDefinition
+    );
   });
 
   it('registers the detonate prototype steps only when the flag is on', () => {
     const off = createWorkflowsExtensionsMock();
     registerWorkflowSteps(off, false);
-    expect(off.registerStepDefinition).toHaveBeenCalledTimes(20);
+    expect(off.registerStepDefinition).toHaveBeenCalledTimes(21);
 
     const on = createWorkflowsExtensionsMock();
     registerWorkflowSteps(on, true);
-    expect(on.registerStepDefinition).toHaveBeenCalledTimes(28);
+    expect(on.registerStepDefinition).toHaveBeenCalledTimes(29);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateSampleStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateVerdictStepDefinition);
     expect(on.registerStepDefinition).toHaveBeenCalledWith(detonateReputationStepDefinition);

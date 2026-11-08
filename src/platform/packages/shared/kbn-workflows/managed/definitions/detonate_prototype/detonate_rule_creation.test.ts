@@ -182,7 +182,11 @@ describe('Detonate Detection Rule Creation worker', () => {
 
       const enable = stepByName('propose_enable');
       expect(inputsOf(enable).actionWorkflowId).toBe('system-alertzero-action-enable-rule');
-      expect(inputsOf(enable).actionInput).toBe('${{ steps.resolve_found_rule.output.rule_id }}');
+      // Every action workflow takes one `actionInput` object; a bare id string
+      // fails the gate's input validation.
+      expect(inputsOf(enable).actionInput).toEqual({
+        id: '{{ steps.resolve_found_rule.output.rule_id }}',
+      });
     });
 
     // Time-of-use: the enable action takes only an id, so the rule is

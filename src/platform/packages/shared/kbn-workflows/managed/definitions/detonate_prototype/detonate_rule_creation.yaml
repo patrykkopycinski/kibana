@@ -534,7 +534,8 @@ steps:
 
           The rule was created disabled on approval of the draft. Enabling starts the shipped trial schedule (every 5 minutes over the last 6 minutes) with alerts visible in Detections. If you dismiss, the trial rule stays disabled; enable it manually from the rules page.
         actionWorkflowId: system-alertzero-action-enable-rule
-        actionInput: "${{ steps.resolve_found_rule.output.rule_id }}"
+        actionInput:
+          id: "{{ steps.resolve_found_rule.output.rule_id }}"
         impact: low
         confidence: medium
         autoApprove: false

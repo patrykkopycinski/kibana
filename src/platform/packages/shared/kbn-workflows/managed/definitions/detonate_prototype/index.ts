@@ -97,7 +97,7 @@ export const DETONATE_RULE_CREATION_WORKFLOW_ID = 'system-security-detonate-rule
 export const DETONATE_RULE_CREATION_WORKFLOW = {
   id: DETONATE_RULE_CREATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 6,
+  version: 7,
   billable: false,
   yaml: DETONATE_RULE_CREATION_YAML,
   management: {

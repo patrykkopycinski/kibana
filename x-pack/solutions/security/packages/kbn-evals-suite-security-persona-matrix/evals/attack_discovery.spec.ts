@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { restoreAlertsSnapshot } from '@kbn/security-evals-alerts-snapshot';
 import { evaluate } from '@kbn/evals-suite-attack-discovery/src/evaluate';
@@ -15,6 +16,9 @@ import {
   CHRYSALIS_AD_DATASET_NAME,
   createChrysalisAdExperimentEvaluators,
 } from '../src/attack_discovery_experiment';
+import { assertAttackDiscoveryDataGate } from '../src/fixtures/chrysalis_seed';
+
+const ALERTS_INDEX = '.alerts-security.alerts-default';
 
 const CHRYSALIS_95_SNAPSHOT = {
   bucket: 'security-ai-datasets',
@@ -50,8 +54,14 @@ evaluate.describe(
         executorClient,
       }) => {
         await restoreAlertsSnapshot({ esClient, log, config: CHRYSALIS_95_SNAPSHOT });
-        const { count } = await esClient.count({ index: '.alerts-security.alerts-default' });
-        log.info(`[attack-discovery] corpus ready: ${count} alerts (reference: 95)`);
+        const { nonChrysalis, chrysalis } = await assertAttackDiscoveryDataGate({
+          esClient: esClient as unknown as EsClient,
+          alertsIndex: ALERTS_INDEX,
+          window: CORPUS_WINDOW,
+        });
+        log.info(
+          `[attack-discovery] corpus ready: non-Chrysalis=${nonChrysalis}, Chrysalis=${chrysalis} (reference: 95)`
+        );
 
         const dataset = {
           name: CHRYSALIS_AD_DATASET_NAME,
@@ -64,7 +74,7 @@ evaluate.describe(
               input: {
                 mode: 'generateApi' as const,
                 connectorId: connector.id,
-                alertsIndexPattern: '.alerts-security.alerts-default',
+                alertsIndexPattern: ALERTS_INDEX,
                 size: 100,
                 ...CORPUS_WINDOW,
               },

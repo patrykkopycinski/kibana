@@ -61,6 +61,16 @@ The parity tools are backed by Elastic Workflows, so the **workflows plugin must
 
 Cleanup removes only the tools, workflows and agent created by the run, plus, when the run created the `create-case` workflow, the cases tagged `persona-matrix-parity` opened since then.
 
+### Attack Discovery data gate
+
+`evals/attack_discovery.spec.ts` checks the restored alert corpus before any model traffic and fails setup unless all of these hold:
+
+- the restored indices (`.internal.alerts-security.alerts-default-*`) hold at least 80 non-Chrysalis alerts that Attack Discovery would actually analyse: workflow status `open` or `acknowledged`, not a building block, inside the corpus window (the filters come from Attack Discovery's own alert query);
+- the alerts alias Attack Discovery reads (`.alerts-security.alerts-default`) returns every one of those restored alerts and none from any other index (checked by `_index`, not by comparing counts), so an index outside the restore can neither feed Attack Discovery nor mask a broken restore;
+- no Chrysalis alert exists in either place, whatever its status or timestamp: the alerts seeded by this package (either seed profile), any alert tagged `chrysalis-sim`, and any alert with `agent.id: chrysalis-sim-agent`. This count deliberately ignores the window and status, so it also fails on Chrysalis alerts Attack Discovery would not read; treat that as a contamination signal. Both marker fields must be mapped as searchable `keyword` or `constant_keyword` on every queried index, otherwise setup fails rather than silently matching nothing.
+
+The answer key assumes exactly the snapshot's threats. A persona-matrix run on the same cluster makes the gate fail on purpose rather than corrupting the answer key: the alerts it seeds trip the Chrysalis count (which ignores the window), while minimal-profile alerts are stamped at seed time, outside the corpus window, and parity docs are written to indices outside the alerts alias. What does change what Attack Discovery reads is an extra index behind the alerts alias that the snapshot restore does not delete, or a restore that went wrong. Do not run the two suites concurrently, and drop the extra indices (`GET _alias/.alerts-security.alerts-default` lists what sits behind the alias). The failure message reports the non-Chrysalis and Chrysalis counts and, when the alias is wrong, whether the restored indices are not fully behind it or how many foreign alerts sit behind it.
+
 ## Agent profiles (`AGENT_PROFILE`)
 
 - **`default`** - the built-in Elastic AI Agent, with skills routed naturally. Under `SEED_PROFILE=parity` the five parity tools are attached to it alongside the base tools.

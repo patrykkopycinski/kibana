@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getOpenAndAcknowledgedAlertsQuery } from '@kbn/elastic-assistant-common';
 import { PARITY_DOCS, type ParityDoc } from './chrysalis_parity_docs';
 
 export const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
@@ -228,6 +229,153 @@ const seedIdPrefix = (index: string) => `${SEED_DOC_ID_PREFIX}-${index}`;
 /** Number of alerts `seedChrysalisAlerts` writes when `count` is omitted. */
 export const DEFAULT_SEED_COUNT = 3;
 const MAX_SEED_COUNT = 50;
+
+/** Non-Chrysalis alerts the Attack Discovery answer key needs present. */
+export const MIN_ATTACK_DISCOVERY_ALERTS = 80;
+/** Indices `restoreAlertsSnapshot` deletes and restores for the security alerts. */
+export const RESTORED_ALERTS_INDEX_PATTERN = '.internal.alerts-security.alerts-default-*';
+const CHRYSALIS_SIM_MARKER = 'chrysalis-sim';
+const CHRYSALIS_SIM_AGENT_ID = 'chrysalis-sim-agent';
+// Fields the Chrysalis clauses match on. `labels.simulation` is deliberately absent: the
+// alerts index maps `labels` as a bare object with dynamic:false, so it is never searchable.
+const CHRYSALIS_MARKER_FIELDS = ['tags', 'agent.id'] as const;
+
+const seedIds = (index: string, count: number): string[] =>
+  Array.from({ length: count }, (_, i) => `${seedIdPrefix(index)}-${i}`);
+
+/** Matches any alert written by either seed profile or by a foreign Chrysalis simulator. */
+const buildChrysalisQuery = () => ({
+  bool: {
+    should: [
+      {
+        ids: {
+          values: [
+            ...seedIds(ALERT_INDEX, MAX_SEED_COUNT),
+            ...[...parityDocCountsByIndex()].flatMap(([index, count]) => seedIds(index, count)),
+          ],
+        },
+      },
+      { term: { tags: CHRYSALIS_SIM_MARKER } },
+      { term: { 'agent.id': CHRYSALIS_SIM_AGENT_ID } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+const SEARCHABLE_MARKER_TYPES = new Set(['keyword', 'constant_keyword']);
+
+/**
+ * The marker clauses are exact-value `term` queries, so each marker field must be a searchable
+ * keyword on every queried index. An unmapped, `text` or non-searchable field would match nothing
+ * (or the wrong thing), silently turning the gate green. Fail setup instead.
+ */
+async function assertMarkerFieldsMapped(esClient: EsClient, index: string[]): Promise<void> {
+  const { fields } = await esClient.fieldCaps({
+    index,
+    fields: [...CHRYSALIS_MARKER_FIELDS],
+    include_unmapped: true,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+  });
+  const offending = CHRYSALIS_MARKER_FIELDS.flatMap((field) => {
+    const entries = Object.entries(fields[field] ?? {});
+    if (entries.length === 0) return [`${field}: no mapping`];
+    const badTypes = entries.flatMap(([type, caps]) => {
+      if (!SEARCHABLE_MARKER_TYPES.has(type)) return [type];
+      return caps.searchable === false ? [`${type} (not searchable)`] : [];
+    });
+    return badTypes.length > 0 ? [`${field}: ${badTypes.join(', ')}`] : [];
+  });
+  if (offending.length > 0) {
+    throw new Error(
+      `Attack Discovery data gate failed for ${index.join(', ')}: Chrysalis marker fields are ` +
+        `not mapped as searchable keywords on every index (${offending.join('; ')}), ` +
+        `so the Chrysalis check cannot match`
+    );
+  }
+}
+
+/**
+ * Attack Discovery data gate, run before any model traffic. Passes only when
+ *  - the restored indices hold at least MIN_ATTACK_DISCOVERY_ALERTS non-Chrysalis alerts that
+ *    Attack Discovery's own retriever returns for `window`;
+ *  - the alias Attack Discovery reads returns exactly those restored alerts, split by `_index`:
+ *    every restored alert is readable through the alias, and no alert from an index outside the
+ *    restored pattern is (so a foreign index cannot supply alerts or mask a broken restore, even
+ *    when its count happens to match);
+ *  - no Chrysalis alert exists (seed ids of both profiles, the `chrysalis-sim` tag, or the
+ *    `chrysalis-sim-agent` agent id). That count deliberately ignores the window and status: it
+ *    fails even on Chrysalis alerts Attack Discovery would not read, as a contamination signal
+ *    (seeded alerts are stamped at seed time, outside the corpus window, so a window-aware count
+ *    would never see them).
+ */
+export async function assertAttackDiscoveryDataGate({
+  esClient,
+  alertsIndex,
+  restoredIndexPattern = RESTORED_ALERTS_INDEX_PATTERN,
+  window,
+}: {
+  esClient: EsClient;
+  alertsIndex: string;
+  restoredIndexPattern?: string;
+  window: { start: string; end: string };
+}): Promise<{ nonChrysalis: number; chrysalis: number }> {
+  await assertMarkerFieldsMapped(esClient, [alertsIndex, restoredIndexPattern]);
+
+  const chrysalisQuery = buildChrysalisQuery();
+  const adQuery = (index: string) =>
+    getOpenAndAcknowledgedAlertsQuery({
+      alertsIndexPattern: index,
+      anonymizationFields: [],
+      start: window.start,
+      end: window.end,
+      size: 0,
+    }).query;
+  const countIn = async (index: string | string[], query: object): Promise<number> =>
+    (await esClient.count({ index, query, ignore_unavailable: true })).count;
+
+  const restoredQuery = adQuery(restoredIndexPattern);
+  const aliasQuery = adQuery(alertsIndex);
+  const fromRestored = { wildcard: { _index: restoredIndexPattern } };
+  const [nonChrysalis, restoredVisible, restoredViaAlias, foreignViaAlias, chrysalis] =
+    await Promise.all([
+      countIn(restoredIndexPattern, {
+        bool: { filter: restoredQuery.bool.filter, must_not: [chrysalisQuery] },
+      }),
+      countIn(restoredIndexPattern, restoredQuery),
+      countIn(alertsIndex, {
+        bool: { filter: [...aliasQuery.bool.filter, fromRestored] },
+      }),
+      countIn(alertsIndex, {
+        bool: { filter: aliasQuery.bool.filter, must_not: [fromRestored] },
+      }),
+      countIn([alertsIndex, restoredIndexPattern], chrysalisQuery),
+    ]);
+
+  const restoredNotBehindAlias = restoredViaAlias !== restoredVisible;
+  if (
+    chrysalis !== 0 ||
+    nonChrysalis < MIN_ATTACK_DISCOVERY_ALERTS ||
+    restoredNotBehindAlias ||
+    foreignViaAlias !== 0
+  ) {
+    const provenance = [
+      ...(restoredNotBehindAlias
+        ? [`restored indices not (fully) behind the alias (${restoredViaAlias}/${restoredVisible})`]
+        : []),
+      ...(foreignViaAlias !== 0
+        ? [`${foreignViaAlias} foreign alerts Attack Discovery would read sit behind the alias`]
+        : []),
+    ];
+    const details = [
+      `non-Chrysalis alerts in restored indices=${nonChrysalis} (need >= ${MIN_ATTACK_DISCOVERY_ALERTS})`,
+      `Chrysalis alerts=${chrysalis} (need 0)`,
+      ...provenance,
+    ];
+    throw new Error(`Attack Discovery data gate failed for ${alertsIndex}: ${details.join(', ')}`);
+  }
+  return { nonChrysalis, chrysalis };
+}
 
 function assertValidCount(count: number): void {
   if (!Number.isInteger(count) || count < 1 || count > MAX_SEED_COUNT) {

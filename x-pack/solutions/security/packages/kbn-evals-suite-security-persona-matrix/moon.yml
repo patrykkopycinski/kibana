@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/core'
+  - '@kbn/elastic-assistant-common'
   - '@kbn/evals'
   - '@kbn/evals-suite-attack-discovery'
   - '@kbn/scout'

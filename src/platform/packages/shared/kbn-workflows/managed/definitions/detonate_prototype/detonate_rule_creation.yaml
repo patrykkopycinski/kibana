@@ -418,7 +418,7 @@ steps:
         ${{ steps.sandbox_ready.output.ok == true
           and steps.attach_draft.error == null }}
 
-  # The create gate. On approval the action creates the rule DISABLED under
+  # The create gate. On approval the action creates the rule enabled under
   # the approver, with the validated rule as its body — trial tags and
   # schedule included. A gate that fails outright fails this run, and the
   # caller sees no decision either.

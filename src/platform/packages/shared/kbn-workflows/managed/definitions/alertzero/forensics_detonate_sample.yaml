@@ -225,7 +225,7 @@ steps:
           | default: consts.no_rows | size -%}
         {%- if variables.allowance_exhausted == true -%}
         Monthly detonation allowance reached ({{ steps.check_allowance.output.used }}/{{ steps.check_allowance.output.allowance }}):
-        {{ candidate_count }} sample hash{% if candidate_count != 1 %}es{% endif %} marked queued, detonation resumes after
+        {{ auto_count }} high/critical sample hash{% if auto_count != 1 %}es{% endif %} of {{ candidate_count }} untriaged marked queued, detonation resumes after
         {{ steps.check_allowance.output.resetsAt | slice: 0, 10 }}.
         {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}
         {{ auto_count }} high/critical sample hash{% if auto_count != 1 %}es{% endif %}

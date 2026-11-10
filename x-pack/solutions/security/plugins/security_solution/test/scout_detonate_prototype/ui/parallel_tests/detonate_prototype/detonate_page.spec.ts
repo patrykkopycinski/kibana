@@ -12,7 +12,7 @@
  * reaches the detonation service, the run walks the worker state machine to
  * completion, and the alerts that run actually produced — endpoint alerts
  * raised by Defend on the detonation VM, and detection alerts raised by rules
- * over them — are visible on the run's detail page.
+ * over them — are visible in the run's result flyout.
  *
  * EICAR is used because it is the one sample safe to name in a repository, is
  * detected by Defend, and whose recorded run is a real one. A run that produced
@@ -46,8 +46,10 @@ const SUBMIT_BUTTON = 'detonatePrototypeSubmitButton';
 // on the modal's confirm button is what actually starts the run.
 const CONFIRM_BUTTON = 'confirmModalConfirmButton';
 const SUBMIT_ERROR = 'detonatePrototypeSubmitError';
-const DETAIL_PAGE = 'detonatePrototypeDetailPage';
-const BACK_TO_RUNS = 'detonatePrototypeBackToRuns';
+const DETONATION_FLYOUT = 'securitySolutionFlyoutDetonationDetails';
+const DETONATION_TITLE = 'securitySolutionFlyoutDetonationDetailsTitle';
+const DETONATION_OVERVIEW_TAB = `${DETONATION_FLYOUT}OverviewTab`;
+const FLYOUT_CLOSE = 'euiFlyoutCloseButton';
 const STATUS_COMPLETE = 'detonatePrototypeStatus-complete';
 const STATUS_FAILED = 'detonatePrototypeStatus-failed';
 const ENDPOINT_ALERTS_COUNT = 'detonatePrototypeProductionEndpointAlerts-count';
@@ -99,22 +101,37 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
       await page.testSubj.click(CONFIRM_BUTTON);
       await expect(page.testSubj.locator(SUBMIT_ERROR)).toBeHidden();
 
-      // Submitting navigates to the new run's detail page.
-      await expect(page.testSubj.locator(DETAIL_PAGE)).toBeVisible();
+      // Submitting opens the new run's result flyout on top of the list page.
+      await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
+      await expect(page.testSubj.locator(DETONATION_OVERVIEW_TAB)).toBeVisible();
 
-      // The page polls until the shared completion predicate says the run is
-      // over. A failed run also stops polling, so assert success directly
-      // rather than "no longer running".
-      await expect(page.testSubj.locator(STATUS_COMPLETE)).toBeVisible({
-        timeout: RUN_COMPLETION_TIMEOUT_MS,
-      });
-      await expect(page.testSubj.locator(STATUS_FAILED)).toBeHidden();
+      // The flyout content polls until the shared completion predicate says
+      // the run is over. A failed run also stops polling, so assert success
+      // directly rather than "no longer running".
+      await expect(
+        page.testSubj
+          .locator(DETONATION_OVERVIEW_TAB)
+          .locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
+      ).toBeVisible({ timeout: RUN_COMPLETION_TIMEOUT_MS });
+      await expect(
+        page.testSubj
+          .locator(DETONATION_OVERVIEW_TAB)
+          .locator(`[data-test-subj="${STATUS_FAILED}"]`)
+      ).toBeHidden();
 
       // Real detonation, real alerts: Defend raised endpoint alerts on the VM,
       // and detection rules raised alerts over them.
-      const endpointAlerts = Number(await page.testSubj.locator(ENDPOINT_ALERTS_COUNT).innerText());
+      const endpointAlerts = Number(
+        await page.testSubj
+          .locator(DETONATION_OVERVIEW_TAB)
+          .locator(`[data-test-subj="${ENDPOINT_ALERTS_COUNT}"]`)
+          .innerText()
+      );
       const detectionAlerts = Number(
-        await page.testSubj.locator(DETECTION_ALERTS_COUNT).innerText()
+        await page.testSubj
+          .locator(DETONATION_OVERVIEW_TAB)
+          .locator(`[data-test-subj="${DETECTION_ALERTS_COUNT}"]`)
+          .innerText()
       );
 
       expect(endpointAlerts).toBeGreaterThan(0);
@@ -122,23 +139,30 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     }
   );
 
-  spaceTest('lists the submitted run and navigates back into it', async ({ page }) => {
+  spaceTest('lists the submitted run and reopens it from the runs table', async ({ page }) => {
     await page.gotoApp(DETONATE_APP);
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
     await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
     await page.testSubj.click(SUBMIT_BUTTON);
     await page.testSubj.click(CONFIRM_BUTTON);
-    await expect(page.testSubj.locator(DETAIL_PAGE)).toBeVisible();
 
-    await page.testSubj.click(BACK_TO_RUNS);
+    // Submitting opens the new run's result flyout; the header title is the
+    // run's sample hash, so it identifies the run for the same-run check below.
+    await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
+    const flyoutTitle = await page.testSubj.locator(DETONATION_TITLE).innerText();
+
+    // The flyout closes back onto the list page, which still lists the run.
+    await page.testSubj.locator(FLYOUT_CLOSE).click();
+    await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeHidden();
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    const firstRun = page.testSubj.locator(RUNS_TABLE_LINK).first(); // eslint-disable-line playwright/no-nth-methods -- any listed run proves navigation back into a run
+    const firstRun = page.testSubj.locator(RUNS_TABLE_LINK).first(); // eslint-disable-line playwright/no-nth-methods -- any listed run proves reopening a run
     await expect(firstRun).toBeVisible();
     await firstRun.click();
 
-    await expect(page.testSubj.locator(DETAIL_PAGE)).toBeVisible();
+    await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
+    await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(flyoutTitle);
   });
 
   spaceTest('pre-fills the form the way the alert action does', async ({ page }) => {

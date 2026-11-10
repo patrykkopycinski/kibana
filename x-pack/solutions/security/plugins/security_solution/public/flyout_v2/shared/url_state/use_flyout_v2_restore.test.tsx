@@ -1268,6 +1268,35 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   });
 
   // -----------------------------------------------------------------------
+  // Detonation
+  // -----------------------------------------------------------------------
+
+  it('opens the detonation flyout as the start entry', () => {
+    renderRestore(buildUrl([{ kind: 'detonation', taskId: 't1' }]));
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openDetonationFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: 't1' })
+    );
+  });
+
+  it('opens [document, detonation] — detonation restores via openDetonationFlyoutAsChild', () => {
+    renderRestore(
+      buildUrl([
+        { kind: 'document', documentId: 'doc-1', indexName: 'i' },
+        { kind: 'detonation', taskId: 't1' },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openDetonationFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: 't1' })
+    );
+  });
+
+  // -----------------------------------------------------------------------
   // [tool, child] two-entry chain
   // -----------------------------------------------------------------------
 

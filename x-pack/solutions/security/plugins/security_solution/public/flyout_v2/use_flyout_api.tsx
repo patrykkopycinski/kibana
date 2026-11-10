@@ -10,6 +10,8 @@ import type { AttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import type { CspFlyoutApi } from './csp/use_csp_flyout_api';
 import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
+import type { DetonationFlyoutApi } from './detonation/use_detonation_flyout_api';
+import { useDetonationFlyoutApi } from './detonation/use_detonation_flyout_api';
 import type { DocumentFlyoutApi } from './document/use_document_flyout_api';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import type { EntityFlyoutApi } from './entity/use_entity_flyout_api';
@@ -46,6 +48,7 @@ import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_
 export type FlyoutApi = DocumentFlyoutApi &
   AttackFlyoutApi &
   CspFlyoutApi &
+  DetonationFlyoutApi &
   EntityFlyoutApi &
   IocFlyoutApi &
   NetworkFlyoutApi &
@@ -56,6 +59,7 @@ export const useFlyoutApi = (): FlyoutApi => {
   const documentApi = useDocumentFlyoutApi();
   const attack = useAttackFlyoutApi();
   const csp = useCspFlyoutApi();
+  const detonation = useDetonationFlyoutApi();
   const entity = useEntityFlyoutApi();
   const ioc = useIocFlyoutApi();
   const network = useNetworkFlyoutApi();
@@ -67,12 +71,13 @@ export const useFlyoutApi = (): FlyoutApi => {
       ...documentApi,
       ...attack,
       ...csp,
+      ...detonation,
       ...entity,
       ...ioc,
       ...network,
       ...rule,
       ...sharedTools,
     }),
-    [documentApi, attack, csp, entity, ioc, network, rule, sharedTools]
+    [documentApi, attack, csp, detonation, entity, ioc, network, rule, sharedTools]
   );
 };

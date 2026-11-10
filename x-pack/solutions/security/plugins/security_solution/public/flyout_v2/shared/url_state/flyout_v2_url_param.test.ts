@@ -290,6 +290,7 @@ describe('flyoutV2 URL param', () => {
       ],
       ['network', { kind: 'network' as const, ip: '1.2.3.4', flowTarget: 'source' }],
       ['rule', { kind: 'rule' as const, ruleId: 'r1' }],
+      ['detonation', { kind: 'detonation' as const, taskId: 'task-1' }],
       ['ioc', { kind: 'ioc' as const, indicatorId: 'iid', indicatorIndex: 'ti-*' }],
       [
         'cspMisconfiguration',

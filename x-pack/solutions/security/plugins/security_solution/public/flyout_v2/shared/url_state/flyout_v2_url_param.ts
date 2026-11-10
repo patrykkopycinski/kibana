@@ -43,6 +43,7 @@ import type {
   networkDescriptorSchema,
   ruleDescriptorSchema,
   iocDescriptorSchema,
+  detonationDescriptorSchema,
   cspMisconfigurationDescriptorSchema,
   cspVulnerabilityDescriptorSchema,
 } from './flyout_descriptor_schema';
@@ -113,10 +114,11 @@ export const FLYOUT_DESCRIPTOR_KIND = {
   // NOTE: 'entityFieldsTable' is intentionally omitted — its `document: Record<string, unknown>`
   // prop is a full flattened entity document that is not cheaply URL-serializable. Restorers
   // for this kind would open the parent entity main flyout instead.
-  // Network / Rule / IOC / CSP
+  // Network / Rule / IOC / Detonation / CSP
   network: 'network',
   rule: 'rule',
   ioc: 'ioc',
+  detonation: 'detonation',
   cspMisconfiguration: 'cspMisconfiguration',
   cspVulnerability: 'cspVulnerability',
 } as const satisfies Record<FlyoutDescriptor['kind'], FlyoutDescriptor['kind']>;
@@ -175,6 +177,7 @@ export type EntityOktaInsightsDescriptor = z.infer<typeof entityOktaInsightsDesc
 export type NetworkDescriptor = z.infer<typeof networkDescriptorSchema>;
 export type RuleDescriptor = z.infer<typeof ruleDescriptorSchema>;
 export type IocDescriptor = z.infer<typeof iocDescriptorSchema>;
+export type DetonationDescriptor = z.infer<typeof detonationDescriptorSchema>;
 export type CspMisconfigurationDescriptor = z.infer<typeof cspMisconfigurationDescriptorSchema>;
 export type CspVulnerabilityDescriptor = z.infer<typeof cspVulnerabilityDescriptorSchema>;
 

@@ -77,6 +77,18 @@ export const IOC_TITLE = i18n.translate('xpack.securitySolution.flyoutV2.titles.
   defaultMessage: 'Indicator',
 });
 
+export const DETONATION_TITLE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.titles.detonation',
+  {
+    defaultMessage: 'Detonation',
+  }
+);
+
+export const DETONATION_SUBMIT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.titles.detonationSubmit',
+  { defaultMessage: 'Detonate file' }
+);
+
 export const ATTACK_TITLE = i18n.translate('xpack.securitySolution.flyoutV2.titles.attack', {
   defaultMessage: 'Attack',
 });

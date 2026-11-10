@@ -14,6 +14,7 @@ module.exports = {
   /** all nested directories have their own Jest config file */
   testMatch: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/*.test.{js,mjs,ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/**/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/hooks/**/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/tabs/**/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/utils/**/*.test.{js,mjs,ts,tsx}',

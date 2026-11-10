@@ -13,6 +13,7 @@ module.exports = {
   testMatch: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp/**/*.test.{js,mjs,ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/detonation/**/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/ioc/**/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/network/**/*.test.{js,mjs,ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/rule/**/*.test.{js,mjs,ts,tsx}',
@@ -23,6 +24,7 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/*.{ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/detonation/**/*.{ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/ioc/**/*.{ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/network/**/*.{ts,tsx}',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/rule/**/*.{ts,tsx}',

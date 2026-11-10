@@ -357,6 +357,14 @@ export const iocDescriptorSchema = lazySchema(() =>
   })
 );
 
+/** Detonation result flyout: the task id is enough to re-fetch the run. */
+export const detonationDescriptorSchema = lazySchema(() =>
+  z.object({
+    kind: z.literal('detonation'),
+    taskId: str,
+  })
+);
+
 export const cspMisconfigurationDescriptorSchema = lazySchema(() =>
   z.object({
     kind: z.literal('cspMisconfiguration'),
@@ -420,6 +428,7 @@ export const flyoutDescriptorSchema = lazySchema(() =>
     networkDescriptorSchema.extend(commonShape),
     ruleDescriptorSchema.extend(commonShape),
     iocDescriptorSchema.extend(commonShape),
+    detonationDescriptorSchema.extend(commonShape),
     cspMisconfigurationDescriptorSchema.extend(commonShape),
     cspVulnerabilityDescriptorSchema.extend(commonShape),
   ])

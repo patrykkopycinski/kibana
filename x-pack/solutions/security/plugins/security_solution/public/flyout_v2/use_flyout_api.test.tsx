@@ -13,6 +13,8 @@ import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
 import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
 import { createCspFlyoutApiMock } from './csp/use_csp_flyout_api.mock';
+import { useDetonationFlyoutApi } from './detonation/use_detonation_flyout_api';
+import { createDetonationFlyoutApiMock } from './detonation/use_detonation_flyout_api.mock';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import { createDocumentFlyoutApiMock } from './document/use_document_flyout_api.mock';
 import { useEntityFlyoutApi } from './entity/use_entity_flyout_api';
@@ -29,6 +31,7 @@ import { useFlyoutApi } from './use_flyout_api';
 
 jest.mock('./attack/use_attack_flyout_api');
 jest.mock('./csp/use_csp_flyout_api');
+jest.mock('./detonation/use_detonation_flyout_api');
 jest.mock('./document/use_document_flyout_api');
 jest.mock('./entity/use_entity_flyout_api');
 jest.mock('./ioc/use_ioc_flyout_api');
@@ -41,10 +44,11 @@ describe('useFlyoutApi', () => {
     jest.clearAllMocks();
   });
 
-  it('exposes document, attack, CSP, entity, IOC, network, rule and shared-tools methods from composed hooks', () => {
+  it('exposes document, attack, CSP, detonation, entity, IOC, network, rule and shared-tools methods from composed hooks', () => {
     const documentApi = createDocumentFlyoutApiMock();
     const attackApi = createAttackFlyoutApiMock();
     const cspApi = createCspFlyoutApiMock();
+    const detonationApi = createDetonationFlyoutApiMock();
     const entityApi = createEntityFlyoutApiMock();
     const iocApi = createIocFlyoutApiMock();
     const networkApi = createNetworkFlyoutApiMock();
@@ -53,6 +57,7 @@ describe('useFlyoutApi', () => {
     jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentApi);
     jest.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
     jest.mocked(useCspFlyoutApi).mockReturnValue(cspApi);
+    jest.mocked(useDetonationFlyoutApi).mockReturnValue(detonationApi);
     jest.mocked(useEntityFlyoutApi).mockReturnValue(entityApi);
     jest.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
     jest.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
@@ -68,6 +73,7 @@ describe('useFlyoutApi', () => {
     const hostParams = { hostName: 'host-1' };
     const userParams = { userName: 'user-1' };
     const iocParams = { indicator: { _id: 'ioc-1', fields: {} } as unknown as Indicator };
+    const detonationParams = { taskId: 'task-1' };
     const networkParams = { ip: '1.2.3.4', flowTarget: FlowTargetSourceDest.source };
     const ruleParams = { ruleId: 'rule-1' };
     const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
@@ -93,6 +99,9 @@ describe('useFlyoutApi', () => {
     });
     result.current.openIocFlyout(iocParams);
     result.current.openIocFlyoutAsChild(iocParams);
+    result.current.openDetonationFlyout(detonationParams);
+    result.current.openDetonationFlyoutAsChild(detonationParams);
+    result.current.openDetonationSubmitAsChild({ hash: 'abc' });
     result.current.openNetworkFlyout(networkParams);
     result.current.openNetworkFlyoutAsChild(networkParams);
     result.current.openRuleFlyout(ruleParams);
@@ -118,6 +127,9 @@ describe('useFlyoutApi', () => {
     expect(entityApi.openEntityGraphView).toHaveBeenCalled();
     expect(iocApi.openIocFlyout).toHaveBeenCalledWith(iocParams);
     expect(iocApi.openIocFlyoutAsChild).toHaveBeenCalledWith(iocParams);
+    expect(detonationApi.openDetonationFlyout).toHaveBeenCalledWith(detonationParams);
+    expect(detonationApi.openDetonationFlyoutAsChild).toHaveBeenCalledWith(detonationParams);
+    expect(detonationApi.openDetonationSubmitAsChild).toHaveBeenCalledWith({ hash: 'abc' });
     expect(networkApi.openNetworkFlyout).toHaveBeenCalledWith(networkParams);
     expect(networkApi.openNetworkFlyoutAsChild).toHaveBeenCalledWith(networkParams);
     expect(ruleApi.openRuleFlyout).toHaveBeenCalledWith(ruleParams);

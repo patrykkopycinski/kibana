@@ -19,6 +19,7 @@ export const FLYOUT_TYPE = {
   DOCUMENT: 'document',
   ATTACK: 'attack',
   IOC: 'ioc',
+  DETONATION: 'detonation',
   NETWORK: 'network',
   RULE: 'rule',
   HOST: 'host',

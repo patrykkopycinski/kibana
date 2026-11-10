@@ -48,6 +48,7 @@ import type {
   EntityOktaInsightsDescriptor,
   EntityResolutionDescriptor,
   EntityRiskInputsDescriptor,
+  DetonationDescriptor,
   EntityVulnerabilityInsightsDescriptor,
   FlyoutDescriptor,
   FlyoutV2UrlParamValue,
@@ -641,6 +642,13 @@ export const openDescriptorAsStart = (
       break;
     }
 
+    // --- Detonation ---
+    case 'detonation': {
+      const { taskId } = descriptor as DetonationDescriptor;
+      api.openDetonationFlyout({ taskId, ...originParams });
+      break;
+    }
+
     // --- CSP ---
     case 'cspMisconfiguration': {
       const { resourceId, ruleId } = descriptor as CspMisconfigurationDescriptor;
@@ -742,6 +750,11 @@ export const openDescriptorAsChild = (
       if (ctx.iocIndicator) {
         api.openIocFlyoutAsChild({ indicator: ctx.iocIndicator, ...originParams });
       }
+      break;
+    }
+    case 'detonation': {
+      const { taskId } = descriptor as DetonationDescriptor;
+      api.openDetonationFlyoutAsChild({ taskId, ...originParams });
       break;
     }
     case 'cspMisconfiguration': {

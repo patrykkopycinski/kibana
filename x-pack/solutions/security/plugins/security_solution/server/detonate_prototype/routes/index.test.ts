@@ -415,6 +415,26 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
       expect(client.submitHash).not.toHaveBeenCalled();
     });
+
+    it('fails the submit with 500, not 400, when the alert lookup errors for another reason', async () => {
+      callerSearch.mockRejectedValue(
+        Object.assign(new Error('shard failure'), { statusCode: 503 })
+      );
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+          sample_hash: 'a'.repeat(64),
+          tags: ['alert:alert-1'],
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+      expect(client.submitHash).not.toHaveBeenCalled();
+    });
   });
 
   describe('submit-file handler', () => {

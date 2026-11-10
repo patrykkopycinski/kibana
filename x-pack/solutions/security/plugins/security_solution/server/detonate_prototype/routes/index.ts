@@ -408,6 +408,7 @@ export const registerDetonatePrototypeRoutes = ({
           }
 
           const spaceId = spaceIdFromRequest(request);
+          // Origin-only under CPS: the handoff write lands on this project's alerts index.
           await assertReadableAlertTags({
             esClient: (await context.core).elasticsearch.client.asCurrentUser,
             spaceId,
@@ -459,6 +460,7 @@ export const registerDetonatePrototypeRoutes = ({
           }
 
           const spaceId = spaceIdFromRequest(request);
+          // Origin-only under CPS: the handoff write lands on this project's alerts index.
           await assertReadableAlertTags({
             esClient: (await context.core).elasticsearch.client.asCurrentUser,
             spaceId,

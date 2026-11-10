@@ -24,6 +24,9 @@ interface YamlStep {
   if?: string;
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean };
+  /** Present on `foreach` steps: the branch template repeated per entry. */
+  foreach?: string;
+  steps?: YamlStep[];
 }
 
 interface YamlWorkflow {
@@ -45,8 +48,7 @@ const sweep = parse(DETONATE_COVERAGE_GAP_WORKFLOW.yaml) as YamlWorkflow;
 const stepByName = (name: string) =>
   sweep.steps
     .flatMap((step) => (step.type === 'foreach' ? (step.steps as YamlStep[]) : [step]))
-    .find((step) => step.name === name);
-const inputsOf = (step: YamlStep | undefined) =>
+    .find((step) => step.name === name);const inputsOf = (step: YamlStep | undefined) =>
   (step?.with?.inputs ?? {}) as Record<string, unknown>;
 const pathOf = (step: YamlStep | undefined) => String(step?.with?.path);
 

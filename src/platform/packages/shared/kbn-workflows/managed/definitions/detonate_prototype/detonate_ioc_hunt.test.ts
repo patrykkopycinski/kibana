@@ -27,6 +27,8 @@ interface YamlStep {
   mode?: string;
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean };
+  /** Present on `foreach` steps: the branch template repeated per entry. */
+  steps?: YamlStep[];
 }
 
 interface YamlWorkflow {

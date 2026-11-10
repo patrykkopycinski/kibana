@@ -14,8 +14,10 @@ import { DETONATE_VM_OS_FAMILIES } from '../../../../../common/detonate_prototyp
 import { SUBMIT_DETONATION_TOOL_ID } from '..';
 import { submitInSpace } from '../../../../detonate_prototype/space_scope';
 import { assertReadableAlertTags } from '../../../../detonate_prototype/handoffs';
+import { DetonateServiceError } from '../../../../detonate_prototype/client';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
+  detonateErrorResult,
   detonateServiceErrorResult,
   insufficientPrivilegesResult,
   type DetonateSkillDeps,
@@ -96,7 +98,14 @@ export const submitDetonationTool = ({
     try {
       await assertReadableAlertTags({ esClient: esClient.asCurrentUser, spaceId, tags });
     } catch (error) {
-      return detonateServiceErrorResult(error, `submit sample ${sampleHash} for detonation`);
+      if (error instanceof DetonateServiceError && error.statusCode === 400) {
+        return detonateServiceErrorResult(error, `submit sample ${sampleHash} for detonation`);
+      }
+      logger.error(`Detonate alert tag check failed: ${error}`);
+      return detonateErrorResult(
+        'unknown_error',
+        'Could not check the alert tags against the alerts you can read, so nothing was submitted. Retry later.'
+      );
     }
 
     try {

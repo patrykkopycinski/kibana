@@ -108,6 +108,20 @@ describe('submitDetonationTool', () => {
     expect(JSON.stringify(result.data)).toContain('alert-foreign');
   });
 
+  it('blames the alert lookup, not the detonation service, when that lookup fails', async () => {
+    callerSearch.mockRejectedValue(Object.assign(new Error('shard failure'), { statusCode: 503 }));
+
+    const [result] = results(
+      await tool.handler({ sampleHash: SHA256, tags: ['alert:alert-1'] }, context)
+    );
+
+    expect(mockSubmit).not.toHaveBeenCalled();
+    expect(result.data).toMatchObject({ error: 'unknown_error' });
+    expect(result.data).not.toHaveProperty('submitAttempted');
+    expect(JSON.stringify(result.data)).not.toContain('detonation service');
+    expect(JSON.stringify(result.data)).not.toContain('shard failure');
+  });
+
   it('refuses without the write privilege and never reads alerts or submits', async () => {
     hasDetonatePrivilege.mockResolvedValue(false);
 

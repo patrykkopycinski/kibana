@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
 import {
   PROPOSAL_QUIET_STREAK_THRESHOLD,
@@ -39,8 +40,6 @@ import {
   quietRunStreak,
 } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
-import { useNavigateTo } from '../../common/lib/kibana';
-import { SecurityPageName } from '../../app/types';
 import { DetonateVerdictBadge } from './verdict_badge';
 import { DETONATE_ICONS } from '../icons';
 import * as i18n from '../translations';
@@ -80,15 +79,11 @@ const historyColumns = (
 ];
 
 export const RunHistory = React.memo<RunHistoryProps>(({ runs, hash }) => {
-  const { navigateTo } = useNavigateTo();
+  const { openDetonationFlyout } = useFlyoutApi();
 
   const goToTask = useMemo(
-    () => (id: string) =>
-      navigateTo({
-        deepLinkId: SecurityPageName.detonatePrototype,
-        path: `/${id}`,
-      }),
-    [navigateTo]
+    () => (id: string) => openDetonationFlyout({ taskId: id }),
+    [openDetonationFlyout]
   );
 
   const streak = useMemo(() => quietRunStreak(runs), [runs]);

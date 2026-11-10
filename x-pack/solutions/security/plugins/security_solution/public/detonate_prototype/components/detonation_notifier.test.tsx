@@ -22,14 +22,15 @@ import { MemoryRouter } from 'react-router-dom';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import * as useDetonate from '../hooks/use_detonate';
 import { useToasts } from '../../common/lib/kibana';
-import { SecurityPageName } from '../../app/types';
 import { DetonationNotifier, useTrackDetonation } from './detonation_notifier';
 
-const mockNavigateTo = jest.fn();
+const mockOpenDetonationFlyout = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
   ...jest.requireActual('../../common/lib/kibana'),
   useToasts: jest.fn(),
-  useNavigateTo: () => ({ navigateTo: mockNavigateTo }),
+}));
+jest.mock('../../flyout_v2/detonation/use_detonation_flyout_api', () => ({
+  useDetonationFlyoutApi: () => ({ openDetonationFlyout: mockOpenDetonationFlyout }),
 }));
 
 const baseTask = {
@@ -97,16 +98,13 @@ describe('DetonationNotifier', () => {
     await waitFor(() => expect(successToast).toHaveBeenCalledTimes(1));
   });
 
-  it('opens the run relative to the deep link, which already carries the app path', async () => {
+  it('opens the run in the detonation flyout when the toast is clicked', async () => {
     jest.spyOn(useDetonate, 'useDetonationTask').mockReturnValue({ data: completeTask } as never);
     mountTracked('task-9');
 
     await waitFor(() => expect(successToast).toHaveBeenCalledTimes(1));
     successToast.mock.calls[0][0].onClick();
-    expect(mockNavigateTo).toHaveBeenCalledWith({
-      deepLinkId: SecurityPageName.detonatePrototype,
-      path: '/task-9',
-    });
+    expect(mockOpenDetonationFlyout).toHaveBeenCalledWith({ taskId: 'task-9' });
   });
 
   it('does not toast a second time for the same run', async () => {

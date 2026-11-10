@@ -15,7 +15,7 @@
  * Design: the submit hooks register the new task id with the tracker, and the
  * `DetonationNotifier` (mounted once, above the routes) renders one hidden
  * watcher per tracked id. The watcher is `useDetonationTask` — the same hook
- * the detail page uses — so the poll rule ("stop when the run reaches its
+ * the result flyout uses — so the poll rule ("stop when the run reaches its
  * terminal worker, never before") stays written once, and the notifier adds no
  * second opinion about when a run is done.
  */
@@ -32,8 +32,8 @@ import React, {
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useNavigateTo, useToasts } from '../../common/lib/kibana';
-import { SecurityPageName } from '../../app/types';
+import { useToasts } from '../../common/lib/kibana';
+import { useDetonationFlyoutApi } from '../../flyout_v2/detonation/use_detonation_flyout_api';
 import { useDetonationTask } from '../hooks/use_detonate';
 import {
   DETONATE_PROTOTYPE_APP_PATH,
@@ -58,7 +58,7 @@ export const useTrackDetonation = () => useContext(TrackerContext).track;
 const DetonationWatcher = ({ taskId, activeTaskId }: { taskId: string; activeTaskId?: string }) => {
   const { data: task } = useDetonationTask(taskId);
   const toasts = useToasts();
-  const { navigateTo } = useNavigateTo();
+  const { openDetonationFlyout } = useDetonationFlyoutApi();
   /** Toasts fire from an effect, once per run, never for the open page. */
   const notified = useRef(false);
 
@@ -85,15 +85,10 @@ const DetonationWatcher = ({ taskId, activeTaskId }: { taskId: string; activeTas
       title: i18n.NOTIFY_COMPLETE_TITLE(sample),
       text: i18n.NOTIFY_COMPLETE_TEXT,
       toastLifeTimeMs: 60_000,
-      onClick: () => {
-        navigateTo({
-          deepLinkId: SecurityPageName.detonatePrototype,
-          path: `/${taskId}`,
-        });
-      },
+      onClick: () => openDetonationFlyout({ taskId }),
       'data-test-subj': `${DETONATION_NOTIFIER_TEST_ID}-success-${taskId}`,
     });
-  }, [done, navigateTo, task, taskId, toasts]);
+  }, [done, openDetonationFlyout, task, taskId, toasts]);
 
   return null;
 };

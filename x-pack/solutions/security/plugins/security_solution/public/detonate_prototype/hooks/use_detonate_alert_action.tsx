@@ -11,11 +11,13 @@
  * The sourcing ladder (D11), as menu items, cheapest rung first:
  *
  *   1. "View detonation report" — a completed run for this hash already
- *      exists; navigating to it costs nothing.
- *   2. "Detonate file" — carries the hash to the submission form, which is
- *      the only place a detonation is started from. The form is where the
- *      confirm-before-VM-spent lives; a second submit path here would be a
- *      second thing to keep in step with the service contract.
+ *      exists; opening its result flyout costs nothing.
+ *   2. "Detonate file" — opens the submission form (the same `SubmitForm` the
+ *      Detonate page uses) in a child flyout, prefilled with the hash. The form
+ *      is where the confirm-before-VM-spent lives; a second submit path here
+ *      would be a second thing to keep in step with the service contract.
+ *
+ * Both open as children of the alert flyout, so the analyst stays on the alert.
  *
  * The items are absent, rather than disabled, when they cannot apply: a
  * disabled "Detonate file" on an alert about a network connection is noise in
@@ -27,9 +29,8 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 
-import { useNavigateTo } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { SecurityPageName } from '../../app/types';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import {
   DETONATE_FILE_ACTION_ID,
   DETONATE_VIEW_REPORT_ACTION_ID,
@@ -62,28 +63,10 @@ export const getDetonatableHash = (hit: DataTableRecord): string | undefined => 
   return undefined;
 };
 
-/**
- * Query string the submission form reads to pre-fill itself. Built here so
- * the action and the page cannot disagree about the parameter names.
- */
-export const buildDetonatePrefillPath = ({
-  hash,
-  tags,
-}: {
-  hash: string;
-  tags: string[];
-}): string => {
-  const params = new URLSearchParams({ sample_hash: hash });
-  for (const tag of tags) {
-    params.append('tags', tag);
-  }
-  return `?${params.toString()}`;
-};
-
 export interface UseDetonateAlertActionParams {
   /** The document the flyout is showing. */
   hit: DataTableRecord;
-  /** Closes the Take action popover before navigating away from it. */
+  /** Closes the Take action popover before opening a flyout. */
   closePopover: () => void;
 }
 
@@ -96,7 +79,7 @@ export const useDetonateAlertAction = ({
   closePopover,
 }: UseDetonateAlertActionParams): UseDetonateAlertActionResult => {
   const isEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
-  const { navigateTo } = useNavigateTo();
+  const { openDetonationFlyoutAsChild, openDetonationSubmitAsChild } = useFlyoutApi();
 
   const hash = useMemo(() => getDetonatableHash(hit), [hit]);
   const documentId = hit.raw._id ?? '';
@@ -109,26 +92,21 @@ export const useDetonateAlertAction = ({
       return;
     }
     closePopover();
-    navigateTo({
-      deepLinkId: SecurityPageName.detonatePrototype,
+    openDetonationSubmitAsChild({
+      hash,
       // The tag is what makes the run findable from the alert it came from.
-      path: buildDetonatePrefillPath({
-        hash,
-        tags: documentId ? [`alert:${documentId}`] : [],
-      }),
+      tags: documentId ? [`alert:${documentId}`] : [],
     });
-  }, [closePopover, documentId, hash, navigateTo]);
+  }, [closePopover, documentId, hash, openDetonationSubmitAsChild]);
 
   const viewReport = useCallback(() => {
     if (!completedRun) {
       return;
     }
     closePopover();
-    navigateTo({
-      deepLinkId: SecurityPageName.detonatePrototype,
-      path: `/${completedRun.id}`,
-    });
-  }, [closePopover, completedRun, navigateTo]);
+    openDetonationFlyoutAsChild({ taskId: completedRun.id });
+  }, [closePopover, completedRun, openDetonationFlyoutAsChild]);
+
   const detonateActionItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
     if (!isEnabled || !hash) {
       return [];

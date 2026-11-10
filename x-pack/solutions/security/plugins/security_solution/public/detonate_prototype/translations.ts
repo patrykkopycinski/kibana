@@ -123,10 +123,6 @@ export const COLUMN_TAGS = i18n.translate(
   { defaultMessage: 'Tags' }
 );
 
-export const BACK_TO_RUNS = i18n.translate('xpack.securitySolution.detonatePrototype.detail.back', {
-  defaultMessage: 'Back to detonations',
-});
-
 export const STATUS_RUNNING = i18n.translate(
   'xpack.securitySolution.detonatePrototype.status.running',
   { defaultMessage: 'Running' }

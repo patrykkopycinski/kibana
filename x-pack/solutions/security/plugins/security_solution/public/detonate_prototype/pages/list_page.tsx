@@ -13,8 +13,8 @@
  * them would make them navigate to find out what they just started.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -31,15 +31,13 @@ import type { EuiBasicTableColumn, Criteria } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import {
-  DETONATE_PROTOTYPE_APP_PATH,
-  totalDetonationAlerts,
-} from '../../../common/detonate_prototype';
+import { totalDetonationAlerts } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonateHealthcheck, useDetonationTasks } from '../hooks/use_detonate';
 import { DetonationStatusBadge } from '../components/detonation_status_badge';
 import { DetonateVerdictBadge } from '../components/verdict_badge';
 import { SubmitForm } from '../components/submit_form';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import * as i18n from '../translations';
 
 export const LIST_PAGE_TEST_ID = 'detonatePrototypeListPage';
@@ -58,7 +56,8 @@ const serviceErrorMessage = (error: unknown): string => {
 };
 
 export const DetonateListPage = React.memo(() => {
-  const history = useHistory();
+  const { openDetonationFlyout } = useFlyoutApi();
+  const { taskId: deepLinkedTaskId } = useParams<{ taskId?: string }>();
   const { search: locationSearch } = useLocation();
   const [search, setSearch] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -85,9 +84,17 @@ export const DetonateListPage = React.memo(() => {
   });
 
   const goToTask = useCallback(
-    (taskId: string) => history.push(`${DETONATE_PROTOTYPE_APP_PATH}/${taskId}`),
-    [history]
+    (taskId: string) => openDetonationFlyout({ taskId }),
+    [openDetonationFlyout]
   );
+
+  /** `/detonate_prototype/:taskId` stays a shareable link: it opens the run's flyout over the list. */
+  const openedDeepLink = useRef<string>();
+  useEffect(() => {
+    if (!deepLinkedTaskId || openedDeepLink.current === deepLinkedTaskId) return;
+    openedDeepLink.current = deepLinkedTaskId;
+    openDetonationFlyout({ taskId: deepLinkedTaskId });
+  }, [deepLinkedTaskId, openDetonationFlyout]);
 
   const onTableChange = useCallback(({ page }: Criteria<DetonateTask>) => {
     if (page) {

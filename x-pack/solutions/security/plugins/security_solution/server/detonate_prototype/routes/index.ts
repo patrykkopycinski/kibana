@@ -72,7 +72,11 @@ import {
 import { toDetonationRecord } from '../detonation_record';
 import { IOC_ALERT_READ_LIMIT, readTaskAlerts, readTaskIocs } from '../ioc_extraction';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
-import { listDetonateHandoffs, setDetonateHandoffMarkers } from '../handoffs';
+import {
+  assertReadableAlertTags,
+  listDetonateHandoffs,
+  setDetonateHandoffMarkers,
+} from '../handoffs';
 import { buildDetonateCountQueries, validateSandboxCountRuleQuery } from '../esql_draft_guard';
 import type { DetonationRecord } from '../detonation_record';
 
@@ -365,7 +369,7 @@ export const registerDetonatePrototypeRoutes = ({
           },
         },
       },
-      async (_context, request, response): Promise<IKibanaResponse> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         try {
           if (!(await hasDetonatePrivilege(request, 'write'))) {
             return response.forbidden({
@@ -378,7 +382,7 @@ export const registerDetonatePrototypeRoutes = ({
 
           const { sample_file: sampleFile, sample_filename: sampleFilename } = request.body;
 
-          let options = {};
+          let options: { tags?: string[] } = {};
           if (request.body.request_json) {
             try {
               options = JSON.parse(request.body.request_json);
@@ -403,11 +407,18 @@ export const registerDetonatePrototypeRoutes = ({
             return response.badRequest({ body: { message: 'The sample file is empty.' } });
           }
 
+          const spaceId = spaceIdFromRequest(request);
+          await assertReadableAlertTags({
+            esClient: (await context.core).elasticsearch.client.asCurrentUser,
+            spaceId,
+            tags: options.tags,
+          });
+
           const client = getClient(request);
           const task = await submitInSpace<DetonateFileRequest>(
             (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }),
             { ...options, sample_filename: sampleFilename },
-            spaceIdFromRequest(request)
+            spaceId
           );
 
           return response.ok<DetonateTask>({ body: task });
@@ -436,7 +447,7 @@ export const registerDetonatePrototypeRoutes = ({
           },
         },
       },
-      async (_context, request, response): Promise<IKibanaResponse> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         try {
           if (!(await hasDetonatePrivilege(request, 'write'))) {
             return response.forbidden({
@@ -447,11 +458,18 @@ export const registerDetonatePrototypeRoutes = ({
             });
           }
 
+          const spaceId = spaceIdFromRequest(request);
+          await assertReadableAlertTags({
+            esClient: (await context.core).elasticsearch.client.asCurrentUser,
+            spaceId,
+            tags: request.body.tags,
+          });
+
           const client = getClient(request);
           const task = await submitInSpace(
             (scoped) => client.submitHash(scoped),
             request.body,
-            spaceIdFromRequest(request)
+            spaceId
           );
           return response.ok<DetonateTask>({ body: task });
         } catch (error) {
@@ -639,7 +657,9 @@ export const registerDetonatePrototypeRoutes = ({
     .get({
       access: 'internal',
       path: DETONATE_HANDOFFS_PATH,
-      security: DETONATE_RECORD_ROUTE_SECURITY,
+      // The list searches every alert in the space as the internal user, so it
+      // is a Worker capability like the marker write, not an AlertZero read.
+      security: DETONATE_HANDOFF_WRITE_ROUTE_SECURITY,
     })
     .addVersion(
       {

@@ -12,7 +12,8 @@
  * read nor tag Security alerts. These two operations are all they get instead:
  * list the runs whose alerts are waiting for them, and set or clear the four
  * handoff markers on one run's own alerts. Both run as Kibana's internal user
- * against this space's alerts index only.
+ * against this space's alerts index only. The alerts a run names come from its
+ * `alert:<id>` tags, which `assertReadableAlertTags` checks at submit time.
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -35,6 +36,7 @@ import {
   parseAlertTags,
 } from '../../common/detonate_prototype';
 import type { DetonateClient } from './client';
+import { DetonateServiceError } from './client';
 import { getTaskInSpace, listTasksInSpace } from './space_scope';
 import { readField } from './ioc_extraction';
 
@@ -75,6 +77,55 @@ const handoffSelector = (kind: DetonateHandoffKind): estypes.QueryDslQueryContai
         },
       }
     : waiting;
+};
+
+const isForbidden = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  (error as { statusCode?: unknown }).statusCode === 403;
+
+/**
+ * Rejects a submit whose `alert:<id>` tags name an alert the caller cannot read
+ * in this space. The handoff writes later tag those alerts as the internal
+ * user, so the submitter must already be able to see every one of them.
+ */
+export const assertReadableAlertTags = async ({
+  esClient,
+  spaceId,
+  tags,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  tags: readonly string[] | undefined;
+}): Promise<void> => {
+  const alertIds = parseAlertTags(tags ?? []);
+  if (alertIds.length === 0) return;
+
+  const rejected = (ids: string[]) =>
+    new DetonateServiceError(
+      `The run names alerts you cannot read in this space: ${ids.join(', ')}.`,
+      400
+    );
+
+  let readable: Set<string>;
+  try {
+    const { hits } = await esClient.search({
+      index: alertsIndex(spaceId),
+      ignore_unavailable: true,
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: { filter: [{ ids: { values: alertIds } }, { term: { [SPACE_IDS]: spaceId } }] },
+      },
+    });
+    readable = new Set(hits.hits.map((hit) => hit._id));
+  } catch (error) {
+    if (isForbidden(error)) throw rejected(alertIds);
+    throw error;
+  }
+
+  const unreadable = alertIds.filter((alertId) => !readable.has(alertId));
+  if (unreadable.length > 0) throw rejected(unreadable);
 };
 
 const readStrings = (source: unknown, path: string): string[] =>

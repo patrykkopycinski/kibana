@@ -25,10 +25,14 @@ import { registerDetonatePrototypeRoutes } from '.';
 
 const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
 /** The only routes AlertZero read also opens. */
-const ALERTZERO_READ_PATHS: string[] = [RECORD_PATH, DETONATE_USAGE_PATH, DETONATE_HANDOFFS_PATH];
+const ALERTZERO_READ_PATHS: string[] = [RECORD_PATH, DETONATE_USAGE_PATH];
 const HANDOFF_PATH = `${DETONATE_RUNS_PATH}/{id}/handoff`;
 /** Write-tier worker routes without the `securitySolution` read tag. */
-const WORKER_WRITE_PATHS: string[] = [HANDOFF_PATH, `${DETONATE_RUNS_PATH}/{id}/sandbox_count`];
+const WORKER_WRITE_PATHS: string[] = [
+  HANDOFF_PATH,
+  DETONATE_HANDOFFS_PATH,
+  `${DETONATE_RUNS_PATH}/{id}/sandbox_count`,
+];
 
 describe('registerDetonatePrototypeRoutes', () => {
   let router: RouterMock;
@@ -109,10 +113,17 @@ describe('registerDetonatePrototypeRoutes', () => {
    * context; everything else ignores `context` entirely.
    */
   let uiSettingsGet: jest.Mock;
+  /** The caller's own ES client, kept apart from the internal one to prove whose identity reads. */
+  let callerSearch: jest.Mock;
   const createContext = () =>
     ({
-      core: Promise.resolve({ uiSettings: { client: { get: uiSettingsGet } } }),
+      core: Promise.resolve({
+        uiSettings: { client: { get: uiSettingsGet } },
+        elasticsearch: { client: { asCurrentUser: { search: callerSearch } } },
+      }),
     } as never);
+  const callerCanRead = (ids: string[]) =>
+    callerSearch.mockResolvedValue({ hits: { hits: ids.map((_id) => ({ _id })) } });
 
   const register = ({
     canWrite,
@@ -158,6 +169,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       findTasksByHash: jest.fn(),
     };
     uiSettingsGet = jest.fn().mockResolvedValue(['logs-*']);
+    callerSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     register({ canWrite: true });
   });
 
@@ -313,6 +325,96 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect.objectContaining({ statusCode: 400 })
       );
     });
+
+    it('skips the alert lookup when no alert tags are given', async () => {
+      client.submitHash.mockResolvedValue({ id: 'task-1' } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+          sample_hash: 'a'.repeat(64),
+          tags: ['demo'],
+        }),
+        mockResponse
+      );
+
+      expect(callerSearch).not.toHaveBeenCalled();
+      expect(client.submitHash).toHaveBeenCalledTimes(1);
+    });
+
+    it('checks alert tags against the alerts the caller can read in this space', async () => {
+      callerCanRead(['alert-1', 'alert-2']);
+      client.submitHash.mockResolvedValue({ id: 'task-1' } as never);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+          sample_hash: 'a'.repeat(64),
+          tags: ['alert:alert-1', 'alert:alert-2', 'alert:alert-1'],
+        }),
+        mockResponse
+      );
+
+      const [[searchRequest]] = callerSearch.mock.calls;
+      expect(searchRequest).toEqual(
+        expect.objectContaining({
+          index: '.alerts-security.alerts-default',
+          ignore_unavailable: true,
+          size: 2,
+          _source: false,
+          query: {
+            bool: {
+              filter: [
+                { ids: { values: ['alert-1', 'alert-2'] } },
+                { term: { 'kibana.space_ids': 'default' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(client.submitHash).toHaveBeenCalledTimes(1);
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('rejects an alert tag the caller cannot read with 400 and does not submit', async () => {
+      callerCanRead(['alert-1']);
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+          sample_hash: 'a'.repeat(64),
+          tags: ['alert:alert-1', 'alert:alert-foreign'],
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: { message: expect.stringContaining('alert-foreign') },
+      });
+      expect(client.submitHash).not.toHaveBeenCalled();
+    });
+
+    it('rejects alert tags with 400 when the caller has no read access to the alerts index', async () => {
+      callerSearch.mockRejectedValue(
+        Object.assign(new Error('security_exception'), { statusCode: 403 })
+      );
+
+      await submitHashHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+          sample_hash: 'a'.repeat(64),
+          tags: ['alert:alert-1'],
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 400 })
+      );
+      expect(client.submitHash).not.toHaveBeenCalled();
+    });
   });
 
   describe('submit-file handler', () => {
@@ -384,6 +486,36 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect.objectContaining({ filename: 'sample.txt' })
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+      expect(callerSearch).not.toHaveBeenCalled();
+    });
+
+    it('submits when every alert tag in request_json names an alert the caller can read', async () => {
+      callerCanRead(['alert-1']);
+      client.submitFile.mockResolvedValue({ id: 'task-2' } as never);
+
+      await submitFileHandler()(
+        createContext(),
+        createFileRequest('{"tags":["alert:alert-1"]}'),
+        mockResponse
+      );
+
+      expect(callerSearch).toHaveBeenCalledTimes(1);
+      expect(client.submitFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an alert tag in request_json the caller cannot read with 400', async () => {
+      callerCanRead([]);
+
+      await submitFileHandler()(
+        createContext(),
+        createFileRequest('{"tags":["alert:alert-foreign"]}'),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 400 })
+      );
+      expect(client.submitFile).not.toHaveBeenCalled();
     });
   });
 
@@ -1000,6 +1132,20 @@ describe('registerDetonatePrototypeRoutes', () => {
     it('opens the set route only to the Detonate privilege or AlertZero write', () => {
       const [[config]] = router.versioned.post.mock.calls.filter(
         ([registered]) => registered.path === HANDOFF_PATH
+      );
+
+      expect(config.security).toEqual({
+        authz: {
+          requiredPrivileges: [
+            { anyRequired: ['securitySolution-detonateAll', 'alertzero_write'] },
+          ],
+        },
+      });
+    });
+
+    it('opens the list route only to the Detonate privilege or AlertZero write', () => {
+      const [[config]] = router.versioned.get.mock.calls.filter(
+        ([registered]) => registered.path === DETONATE_HANDOFFS_PATH
       );
 
       expect(config.security).toEqual({

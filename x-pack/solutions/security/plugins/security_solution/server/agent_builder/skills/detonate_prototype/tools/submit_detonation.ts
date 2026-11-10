@@ -13,6 +13,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { DETONATE_VM_OS_FAMILIES } from '../../../../../common/detonate_prototype';
 import { SUBMIT_DETONATION_TOOL_ID } from '..';
 import { submitInSpace } from '../../../../detonate_prototype/space_scope';
+import { assertReadableAlertTags } from '../../../../detonate_prototype/handoffs';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateServiceErrorResult,
@@ -81,7 +82,7 @@ export const submitDetonationTool = ({
       color: 'danger',
     }),
   },
-  handler: async (params, { request, logger }) => {
+  handler: async (params, { request, logger, esClient }) => {
     // A detonation boots a VM and runs live malware. That is a write action in
     // every sense that matters, so it requires the write privilege even though
     // it mutates nothing inside Kibana.
@@ -90,6 +91,13 @@ export const submitDetonationTool = ({
     }
 
     const { sampleHash, tags, vmOsFamily } = params;
+    const spaceId = endpointAppContextService.getActiveSpaceId(request);
+
+    try {
+      await assertReadableAlertTags({ esClient: esClient.asCurrentUser, spaceId, tags });
+    } catch (error) {
+      return detonateServiceErrorResult(error, `submit sample ${sampleHash} for detonation`);
+    }
 
     try {
       const client = getClient(request);
@@ -100,7 +108,7 @@ export const submitDetonationTool = ({
           ...(tags ? { tags } : {}),
           ...(vmOsFamily ? { vm_os_family: vmOsFamily } : {}),
         },
-        endpointAppContextService.getActiveSpaceId(request)
+        spaceId
       );
 
       logger.info(`Submitted detonation ${task.id} for sample ${sampleHash}`);

@@ -48,6 +48,10 @@ const CONFIRM_BUTTON = 'confirmModalConfirmButton';
 const SUBMIT_ERROR = 'detonatePrototypeSubmitError';
 const DETONATION_FLYOUT = 'securitySolutionFlyoutDetonationDetails';
 const DETONATION_TITLE = 'securitySolutionFlyoutDetonationDetailsTitle';
+// The container subj attaches to the flyout header (document-flyout
+// convention): the status badge lives there, but the tab content — timeline,
+// alert groups and their counts — renders in the body wrapper below it.
+const DETONATION_BODY = 'securitySolutionFlyoutDetonationDetailsBody';
 const DETONATION_OVERVIEW_TAB = `${DETONATION_FLYOUT}OverviewTab`;
 const FLYOUT_CLOSE = 'euiFlyoutCloseButton';
 const STATUS_COMPLETE = 'detonatePrototypeStatus-complete';
@@ -109,27 +113,24 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
       // the run is over. A failed run also stops polling, so assert success
       // directly rather than "no longer running".
       await expect(
-        page.testSubj
-          .locator(DETONATION_OVERVIEW_TAB)
-          .locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
+        page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
       ).toBeVisible({ timeout: RUN_COMPLETION_TIMEOUT_MS });
       await expect(
-        page.testSubj
-          .locator(DETONATION_OVERVIEW_TAB)
-          .locator(`[data-test-subj="${STATUS_FAILED}"]`)
+        page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_FAILED}"]`)
       ).toBeHidden();
 
       // Real detonation, real alerts: Defend raised endpoint alerts on the VM,
-      // and detection rules raised alerts over them.
+      // and detection rules raised alerts over them. The counts live in the
+      // flyout body (Overview tab content), not the tab button.
       const endpointAlerts = Number(
         await page.testSubj
-          .locator(DETONATION_OVERVIEW_TAB)
+          .locator(DETONATION_BODY)
           .locator(`[data-test-subj="${ENDPOINT_ALERTS_COUNT}"]`)
           .innerText()
       );
       const detectionAlerts = Number(
         await page.testSubj
-          .locator(DETONATION_OVERVIEW_TAB)
+          .locator(DETONATION_BODY)
           .locator(`[data-test-subj="${DETECTION_ALERTS_COUNT}"]`)
           .innerText()
       );

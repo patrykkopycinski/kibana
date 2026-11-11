@@ -16,6 +16,7 @@ import { Header } from './header';
 import { Content } from './content';
 import { getTabsDisplayed, type DetonationPanelPaths, validTabIds } from './tabs';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
+import { DETONATION_DETAILS_TEST_ID } from './test_ids';
 
 /**
  * Styles applied to the EuiFlyoutBody so the JSON tab's Monaco editor
@@ -54,7 +55,7 @@ export const DetonationDetails: FC<DetonationDetailsProps> = memo(({ taskId }) =
 
   return (
     <>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader data-test-subj={DETONATION_DETAILS_TEST_ID}>
         <Header
           taskId={taskId}
           task={task}

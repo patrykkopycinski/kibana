@@ -7,7 +7,7 @@
 
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
-const DETONATION_DETAILS_TEST_ID = `${PREFIX}DetonationDetails` as const;
+export const DETONATION_DETAILS_TEST_ID = `${PREFIX}DetonationDetails` as const;
 
 export const DETONATION_DETAILS_TITLE_TEST_ID = `${DETONATION_DETAILS_TEST_ID}Title` as const;
 export const DETONATION_DETAILS_BODY_TEST_ID = `${DETONATION_DETAILS_TEST_ID}Body` as const;

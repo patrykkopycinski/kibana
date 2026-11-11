@@ -36,7 +36,7 @@ jest.mock('./routes/register_routes', () => ({
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 const createPlugin = () => {
-  const config: AlertZeroConfig = { enabled: true };
+  const config: AlertZeroConfig = { enabled: true, detonatePrototypeDev: false };
   const context = {
     env: { packageInfo: { buildFlavor: 'traditional' } },
     logger: { get: () => loggerMock.create() },

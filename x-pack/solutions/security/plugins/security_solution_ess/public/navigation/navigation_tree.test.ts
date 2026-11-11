@@ -9,9 +9,10 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { mockServices } from '../common/__mocks__/services.mock';
+import { allowedExperimentalValues } from '@kbn/security-solution-plugin/common';
 import type { Services } from '../common/services';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { alertZeroLink } from '@kbn/security-solution-navigation/links';
+import { alertZeroLink, securityLink } from '@kbn/security-solution-navigation/links';
 import { createNavigationTree } from './navigation_tree';
 
 describe('createNavigationTree', () => {
@@ -108,6 +109,43 @@ describe('createNavigationTree', () => {
       expect(body[0].link).toBe('context_engine');
       expect(body.some((item) => item.link === 'agent_builder')).toBe(false);
     });
+  });
+
+  it('includes the flag-gated Detonate node after Workflows when the experimental feature is on', () => {
+    const services = {
+      ...createServices(),
+      experimentalFeatures: { ...allowedExperimentalValues, detonatePrototypeEnabled: true },
+    };
+    const { body } = createNavigationTree(
+      services,
+      AIChatExperience.Agent,
+      false
+    ) as NavigationTreeDefinition;
+
+    const detonateIndex = body.findIndex((item) => item.id === SecurityPageName.detonatePrototype);
+    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
+    const attackDiscoveryIndex = body.findIndex(
+      (item) => item.id === SecurityPageName.attackDiscovery
+    );
+
+    expect(detonateIndex).toBeGreaterThan(-1);
+    expect(body[detonateIndex]).toMatchObject({
+      icon: 'flask',
+      link: securityLink(SecurityPageName.detonatePrototype),
+    });
+    expect(contextEngineIndex).toBeGreaterThan(-1);
+    expect(detonateIndex).toBe(contextEngineIndex + 1);
+    expect(attackDiscoveryIndex).toBe(detonateIndex + 1);
+  });
+
+  it('omits the Detonate node when the experimental feature is off', () => {
+    const { body } = createNavigationTree(
+      createServices(),
+      AIChatExperience.Agent,
+      false
+    ) as NavigationTreeDefinition;
+
+    expect(body.some((item) => item.id === SecurityPageName.detonatePrototype)).toBe(false);
   });
 
   it('includes Stack Rules in Stack Management > Alerts and Insights', () => {

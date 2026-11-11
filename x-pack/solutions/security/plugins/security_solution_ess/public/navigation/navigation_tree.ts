@@ -63,6 +63,17 @@ export const createNavigationTree = (
       ...getWorkflowsNavPanel(services),
       ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink] : []),
       ...(alertZeroEnabled || showAgentBuilder ? [contextEngineLink] : []),
+      // Detonate prototype: rendered only when the experimental flag is on; the
+      // underlying link is dropped upstream otherwise, which would leave a dead node.
+      ...(services.experimentalFeatures?.detonatePrototypeEnabled
+        ? [
+            {
+              id: SecurityPageName.detonatePrototype,
+              icon: 'flask',
+              link: securityLink(SecurityPageName.detonatePrototype),
+            },
+          ]
+        : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',

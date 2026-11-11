@@ -20,7 +20,12 @@
  * handing it to anyone: a builder that cannot prove what it built throws.
  */
 
-import type { ESQLAstItem, ESQLAstQueryExpression, ESQLSource } from '@elastic/esql/types';
+import type {
+  ESQLAstItem,
+  ESQLAstNode,
+  ESQLAstQueryExpression,
+  ESQLSource,
+} from '@elastic/esql/types';
 import { Parser, Builder, BasicPrettyPrinter, mutate } from '@elastic/esql';
 
 import {
@@ -44,6 +49,7 @@ export type DetonateDraftGuardCode =
   | 'command_not_allowed';
 
 export interface DetonateDraftGuardFailure {
+  ok: false;
   code: DetonateDraftGuardCode;
   /** Human-readable, names the offending source when there is one. */
   reason: string;
@@ -103,7 +109,8 @@ interface DraftSources {
   ts: ESQLSource[];
 }
 
-const isSourceItem = (item: ESQLAstItem): item is ESQLSource => item.type === 'source';
+const isSourceItem = (item: ESQLAstItem): item is ESQLSource =>
+  !Array.isArray(item) && item.type === 'source';
 
 const collectSources = (query: ESQLAstQueryExpression): DraftSources => {
   const sources: DraftSources = { from: [], join: [], enrich: [], ts: [] };
@@ -123,17 +130,19 @@ const collectSources = (query: ESQLAstQueryExpression): DraftSources => {
 /** True when any node in the tree is a parenthesized subquery. */
 const hasSubquery = (query: ESQLAstQueryExpression): boolean => {
   let found = false;
-  const walk = (item: ESQLAstItem): void => {
+  const walk = (item: ESQLAstNode): void => {
     if (found || item == null) return;
-    if (item.type === 'parens') {
+    if (!Array.isArray(item) && item.type === 'parens') {
       const paren = item as { child?: { type?: string } };
       if (paren.child?.type === 'query') {
         found = true;
         return;
       }
     }
-    if (Array.isArray(item.args)) item.args.forEach(walk);
-    if (Array.isArray(item.commands)) item.commands.forEach(walk);
+    if (!Array.isArray(item)) {
+      if ('args' in item && Array.isArray(item.args)) item.args.forEach(walk);
+      if ('commands' in item && Array.isArray(item.commands)) item.commands.forEach(walk);
+    }
   };
   query.commands.forEach(walk);
   return found;
@@ -360,7 +369,8 @@ export const describeDraftQuery = (
   const sourcePatterns = sources.from.map((source) => sourceParts(source).index);
   const aggregating = root.commands.some(
     (cmd) =>
-      cmd.name === 'stats' && cmd.args.some((arg) => arg.type === 'option' && arg.name === 'by')
+      cmd.name === 'stats' &&
+      cmd.args.some((arg) => !Array.isArray(arg) && arg.type === 'option' && arg.name === 'by')
   );
   return { source_patterns: sourcePatterns, aggregating };
 };
@@ -560,7 +570,9 @@ export const assertSandboxCountQuery = (sandboxQuery: string, spaceId: string): 
   if (fromCommands.length !== 1) {
     throw new Error(`sandbox count query has ${fromCommands.length} FROM commands`);
   }
-  const fromSources = fromCommands[0].args.filter((arg) => arg.type === 'source');
+  const fromSources = fromCommands[0].args.filter(
+    (arg) => !Array.isArray(arg) && arg.type === 'source'
+  );
   if (fromSources.length !== 1) {
     throw new Error(`sandbox count FROM has ${fromSources.length} sources`);
   }

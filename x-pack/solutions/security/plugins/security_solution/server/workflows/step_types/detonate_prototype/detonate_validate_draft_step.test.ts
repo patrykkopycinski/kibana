@@ -97,17 +97,16 @@ describe('detonateValidateDraftStepDefinition', () => {
     );
 
     const result = await detonateValidateDraftStepDefinition.handler(context);
-    const output = result.output ?? {};
 
     // The production variant reads the same sources with LIMIT removed and a
     // trailing count; the candidate tag is the one find_created_rule filters by.
-    expect(output.production_query).toContain('FROM logs-*');
-    expect(output.production_query).toContain('COUNT(*)');
-    expect(String(output.production_query).toUpperCase()).not.toContain('LIMIT');
-    expect(output.candidate_tag).toMatch(/^detonate:candidate:/);
+    expect(result.output?.production_query).toContain('FROM logs-*');
+    expect(result.output?.production_query).toContain('COUNT(*)');
+    expect(String(result.output?.production_query).toUpperCase()).not.toContain('LIMIT');
+    expect(result.output?.candidate_tag).toMatch(/^detonate:candidate:/);
     // A plain WHERE pipeline counts matching events, not would-alert groups.
-    expect(output.aggregating).toBe(false);
-    expect(output.source_patterns).toEqual(['logs-*']);
+    expect(result.output?.aggregating).toBe(false);
+    expect(result.output?.source_patterns).toEqual(['logs-*']);
   });
 
   it('flags a trailing STATS … BY as aggregating, so the backtest says would-alert groups', async () => {

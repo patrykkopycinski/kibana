@@ -1497,6 +1497,8 @@ describe('registerDetonatePrototypeRoutes', () => {
           },
           statusCode: 400,
           headers: {},
+          warnings: [],
+          meta: {} as never,
         })
       );
 
@@ -1530,6 +1532,8 @@ describe('registerDetonatePrototypeRoutes', () => {
           },
           statusCode: 400,
           headers: {},
+          warnings: [],
+          meta: {} as never,
         })
       );
 

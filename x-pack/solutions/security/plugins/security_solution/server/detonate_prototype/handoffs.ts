@@ -118,7 +118,7 @@ export const assertReadableAlertTags = async ({
         bool: { filter: [{ ids: { values: alertIds } }, { term: { [SPACE_IDS]: spaceId } }] },
       },
     });
-    readable = new Set(hits.hits.map((hit) => hit._id));
+    readable = new Set(hits.hits.map((hit) => hit._id).filter((id): id is string => id != null));
   } catch (error) {
     if (isForbidden(error)) throw rejected(alertIds);
     throw error;

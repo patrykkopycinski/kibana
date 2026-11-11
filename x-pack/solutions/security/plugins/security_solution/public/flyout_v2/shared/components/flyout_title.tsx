@@ -101,6 +101,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
         <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" responsive={false}>
           <EuiFlexItem>
             <div
+              data-test-subj={dataTestSubj}
               css={css`
                 word-break: break-word;
                 display: -webkit-box;

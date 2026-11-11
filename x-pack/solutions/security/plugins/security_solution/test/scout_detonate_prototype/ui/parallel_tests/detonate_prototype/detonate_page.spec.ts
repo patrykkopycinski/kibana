@@ -158,9 +158,15 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeHidden();
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    const firstRun = page.testSubj.locator(RUNS_TABLE_LINK).first(); // eslint-disable-line playwright/no-nth-methods -- any listed run proves reopening a run
-    await expect(firstRun).toBeVisible();
-    await firstRun.click();
+    // The runs table lists newest first; the just-submitted run is the top
+    // row for this sample hash. Scope by text so leftover runs from other
+    // specs cannot satisfy this assertion for a run that never appeared.
+    const submittedRun = page.testSubj
+      .locator(RUNS_TABLE_LINK)
+      .filter({ hasText: flyoutTitle })
+      .first(); // eslint-disable-line playwright/no-nth-methods -- parallel specs share the table; the text filter already pins the sample
+    await expect(submittedRun).toBeVisible();
+    await submittedRun.click();
 
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
     await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(flyoutTitle);

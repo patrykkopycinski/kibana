@@ -7,7 +7,8 @@ description: >
   forwards a Run (slide 15's "Detonate suspicious file hash") to that
   per-space copy in the caller's space. The engine forbids a workflow from
   triggering itself, which is why the worker's sweep dispatches here rather
-  than recursing. Experimental, off by default.
+  than recursing. Experimental: installed only while the Detonate prototype
+  feature flag is on.
 enabled: true
 tags:
   - security

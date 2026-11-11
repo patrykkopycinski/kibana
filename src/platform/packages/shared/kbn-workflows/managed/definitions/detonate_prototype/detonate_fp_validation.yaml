@@ -5,7 +5,8 @@ description: >
   the alert it came from — tag `detonate:<verdict>` plus an evidence note.
   Validates false positives the honest way: a quiet run is recorded as
   quiet, the alert is never closed by the workflow, and prior runs of the
-  same hash are surfaced for the analyst. Experimental, off by default.
+  same hash are surfaced for the analyst. Experimental: installed only
+  while the Detonate prototype feature flag is on.
 enabled: true
 tags:
   - security

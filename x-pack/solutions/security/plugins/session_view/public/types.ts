@@ -69,6 +69,15 @@ export interface SessionViewDeps {
   // start time is passed in order to scope session_view queries to the appropriate time range, and avoid querying data across all time.
   sessionStartTime: string;
 
+  /**
+   * Use the `index` prop verbatim, skipping the integration index inference
+   * (which rewrites any non-agent-integration index to `logs-*`). Callers that
+   * store their process events in a dedicated index — e.g. a sandbox data
+   * stream — need this so the inferred default does not redirect the session
+   * queries away from their events.
+   */
+  preserveIndex?: boolean;
+
   height?: number;
   isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader

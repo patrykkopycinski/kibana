@@ -53,11 +53,15 @@ const DETONATION_TITLE = 'securitySolutionFlyoutDetonationDetailsTitle';
 // alert groups and their counts — renders in the body wrapper below it.
 const DETONATION_BODY = 'securitySolutionFlyoutDetonationDetailsBody';
 const DETONATION_OVERVIEW_TAB = `${DETONATION_FLYOUT}OverviewTab`;
+const DETONATION_SESSION_TAB = `${DETONATION_FLYOUT}SessionTab`;
 const FLYOUT_CLOSE = 'euiFlyoutCloseButton';
 const STATUS_COMPLETE = 'detonatePrototypeStatus-complete';
 const STATUS_FAILED = 'detonatePrototypeStatus-failed';
 const ENDPOINT_ALERTS_COUNT = 'detonatePrototypeProductionEndpointAlerts-count';
 const DETECTION_ALERTS_COUNT = 'detonatePrototypeProductionDetectionAlerts-count';
+// Session View's own test subjects, reused as-is: the tree container and a node.
+const PROCESS_TREE = 'sessionView:sessionViewProcessTree';
+const PROCESS_NODE = 'sessionView:processTreeNode';
 
 /** `/internal/detonate_prototype/healthcheck` — the page's readiness probe. */
 const HEALTHCHECK_URL = '/internal/detonate_prototype/healthcheck';
@@ -171,6 +175,38 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
     await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(flyoutTitle);
   });
+
+  spaceTest(
+    'shows the run\'s process lineage in the Session tab',
+    async ({ page }) => {
+      await page.gotoApp(DETONATE_APP);
+      await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
+
+      await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
+      await page.testSubj.click(SUBMIT_BUTTON);
+      await page.testSubj.click(CONFIRM_BUTTON);
+
+      await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
+      await expect(
+        page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
+      ).toBeVisible({ timeout: RUN_COMPLETION_TIMEOUT_MS });
+
+      // Session View renders the run's process events: the recorded lineage
+      // from the entry leader down to the payload process. A bare "renders"
+      // check would pass on an empty tree, so the tab must show the lineage
+      // expanded — more than the root node — the way an interactive session
+      // auto-expands (the session/group leader markers the service emits).
+      await page.testSubj.click(DETONATION_SESSION_TAB);
+      await expect(page.testSubj.locator(PROCESS_TREE)).toBeVisible();
+
+      const processNodes = page.testSubj.locator(PROCESS_NODE);
+      await expect(processNodes.first()).toBeVisible();
+      expect(
+        await processNodes.count(),
+        'the session tree must show the lineage, not just the entry leader'
+      ).toBeGreaterThan(1);
+    }
+  );
 
   spaceTest('pre-fills the form the way the alert action does', async ({ page }) => {
     // What the "Detonate file" alert action builds: the hash it extracted from

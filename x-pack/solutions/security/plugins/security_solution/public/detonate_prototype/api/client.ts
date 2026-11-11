@@ -24,9 +24,11 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
+  detonateRunSessionPath,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
+  DetonateRunSessionResult,
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
@@ -113,4 +115,14 @@ export const detonateApi = {
       `${DETONATE_TASKS_PATH}/alert/${encodeURIComponent(alertId)}`,
       { version: VERSION.version, signal }
     ),
+
+  /**
+   * Session View config for a run: copies its process events into the space's
+   * sandbox stream (idempotent) and returns the tree root + time floor.
+   */
+  getRunSession: (http: HttpSetup, taskId: string, signal?: AbortSignal) =>
+    http.get<DetonateRunSessionResult>(detonateRunSessionPath(taskId), {
+      version: VERSION.version,
+      signal,
+    }),
 };

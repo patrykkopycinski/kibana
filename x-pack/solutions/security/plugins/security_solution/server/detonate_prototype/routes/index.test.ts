@@ -165,6 +165,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       getTask: jest.fn(),
       getTaskUpdates: jest.fn(),
       getTaskAlerts: jest.fn(),
+      getTaskProcessEvents: jest.fn(),
       listTasks: jest.fn(),
       findTasksByHash: jest.fn(),
     };

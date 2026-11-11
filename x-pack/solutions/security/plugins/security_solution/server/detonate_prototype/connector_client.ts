@@ -47,6 +47,9 @@ const ALERT_SOURCE_BY_KIND: Record<DetonateAlertKind, string> = {
   'production-detection-alerts': 'production_detection',
 };
 
+/** The events read's source name, in the connector's snake_case convention. */
+const PROCESS_EVENTS_SOURCE = 'process_events';
+
 /** Run options the connector's submit actions declare. Its params schema rejects any other key. */
 const RUN_OPTION_KEYS = [
   'tags',
@@ -249,6 +252,16 @@ export const createConnectorDetonateClient = ({
       const data = await execute('getTaskAlerts', {
         taskId,
         source: ALERT_SOURCE_BY_KIND[kind],
+        ...(limit !== undefined ? { limit } : {}),
+      });
+      if (!isRecord(data) || !Array.isArray(data.alerts)) return unexpected('getTaskAlerts');
+      return data.alerts as DetonateAlertDoc[];
+    },
+
+    getTaskProcessEvents: async (taskId, limit) => {
+      const data = await execute('getTaskAlerts', {
+        taskId,
+        source: PROCESS_EVENTS_SOURCE,
         ...(limit !== undefined ? { limit } : {}),
       });
       if (!isRecord(data) || !Array.isArray(data.alerts)) return unexpected('getTaskAlerts');

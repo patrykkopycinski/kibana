@@ -96,7 +96,7 @@ const CrossProjectUnsupportedPrompt = () => (
 export const getSessionViewLazy = (
   props: SessionViewDeps & { usageCollection?: UsageCollectionStart }
 ) => {
-  const index = getIndexPattern(props.index);
+  const index = props.preserveIndex ? props.index : getIndexPattern(props.index);
 
   if (isNonLocalIndexName(index)) {
     return <CrossProjectUnsupportedPrompt />;

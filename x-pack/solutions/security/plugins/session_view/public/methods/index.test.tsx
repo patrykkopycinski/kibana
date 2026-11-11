@@ -46,6 +46,29 @@ describe('getIndexPattern', () => {
   });
 });
 
+describe('getSessionViewLazy preserveIndex', () => {
+  const baseProps = {
+    sessionEntityId: 'test-entity-id',
+    sessionStartTime: '2021-11-23T15:14:21.000Z',
+    openDetails: jest.fn(),
+    closeDetails: jest.fn(),
+  };
+
+  it('uses a dedicated session index verbatim instead of the inferred default', async () => {
+    const { render } = createAppRootMockRenderer();
+    const sandboxStream = '.kibana-detonate-sandbox-default';
+    const { container, unmount } = render(
+      getSessionViewLazy({ ...baseProps, index: sandboxStream, preserveIndex: true })
+    );
+
+    // Not the cross-project prompt, and not rewritten: the lazy component
+    // mounts and queries the stream itself.
+    expect(container.querySelector(CROSS_PROJECT_TEST_SUBJ)).toBeNull();
+    await act(async () => {});
+    unmount();
+  });
+});
+
 describe('getSessionViewLazy', () => {
   const baseProps = {
     sessionEntityId: 'test-entity-id',

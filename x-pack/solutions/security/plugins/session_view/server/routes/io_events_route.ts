@@ -20,6 +20,7 @@ import {
   IO_EVENT_FIELDS,
 } from '../../common/constants';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { isDetonateSandboxStream } from './process_events_route';
 import {
   sessionEntityIdSchema,
   sessionTimestampSchema,
@@ -54,7 +55,6 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
         },
       },
       async (context, request, response) => {
-        const client = (await context.core).elasticsearch.client.asCurrentUser;
         const {
           index,
           sessionEntityId,
@@ -62,6 +62,10 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
           cursor,
           pageSize = IO_EVENTS_PER_PAGE,
         } = request.query;
+        // The Detonate sandbox stream is plugin-owned (see process_events_route):
+        // read it with the internal client instead of the user's.
+        const { asCurrentUser, asInternalUser } = (await context.core).elasticsearch.client;
+        const client = isDetonateSandboxStream(index) ? asInternalUser : asCurrentUser;
 
         try {
           const search = await client.search({

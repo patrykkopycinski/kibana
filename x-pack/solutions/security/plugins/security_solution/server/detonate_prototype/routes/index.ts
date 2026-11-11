@@ -39,6 +39,7 @@ import {
   DETONATE_HEALTHCHECK_PATH,
   DETONATE_MAX_ALERT_DOCS,
   DETONATE_PRIOR_RUNS_PATH,
+  DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
@@ -48,9 +49,11 @@ import {
   detonateSandboxStreamName,
 } from '../../../common/detonate_prototype';
 import type {
+  DetonateAlertDoc,
   DetonateFileRequest,
   DetonateHandoffList,
   DetonateHandoffUpdate,
+  DetonateRunSessionResult,
   DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
   DetonateTask,
@@ -70,7 +73,13 @@ import {
   submitInSpace,
 } from '../space_scope';
 import { toDetonationRecord } from '../detonation_record';
-import { IOC_ALERT_READ_LIMIT, readTaskAlerts, readTaskIocs } from '../ioc_extraction';
+import {
+  IOC_ALERT_READ_LIMIT,
+  alertDocSource,
+  readField,
+  readTaskAlerts,
+  readTaskIocs,
+} from '../ioc_extraction';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import {
   assertReadableAlertTags,
@@ -621,6 +630,97 @@ export const registerDetonatePrototypeRoutes = ({
 
           return response.ok<DetonateSandboxIngestResult>({
             body: { task_id: task.id, stream, ...counts, unread_kinds: failedKinds },
+          });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * Session View config for one run (N1). Copies the run's process events
+   * into the space's sandbox stream (idempotent) and returns the config the
+   * detonation flyout's Session tab renders: the stream as the index, the
+   * run's entry leader as the tree root, and the earliest event as the
+   * time-range floor. A run without recorded events is a null-shaped result,
+   * not an error — the tab renders its empty state.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: `${DETONATE_RUNS_PATH}/{id}/session`,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          if (!(await hasDetonatePrivilege(request, 'read'))) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Viewing a run session requires the Security Solution read privilege or the Detonate privilege.',
+              },
+            });
+          }
+
+          const client = getClient(request);
+          const spaceId = spaceIdFromRequest(request);
+          const task = await getTaskInSpace(client, request.params.id, spaceId);
+          const stream = detonateSandboxStreamName(spaceId);
+
+          // Events ride the same read as the alert kinds; a 404 until the
+          // agent enrolls means "not yet", same as alerts.
+          let events: Array<Record<string, unknown>> = [];
+          try {
+            events = await client.getTaskProcessEvents(task.id, DETONATE_MAX_ALERT_DOCS);
+          } catch (error) {
+            logger.debug(`Detonation ${task.id}: could not read process events: ${error}`);
+          }
+
+          const counts = { ingested: 0, duplicates: 0, dropped: 0, failed: 0 };
+          if (events.length > 0) {
+            const esClient = await getInternalEsClient();
+            await ensureSandboxTemplate(esClient);
+            const result = await ingestSandboxDocs(
+              esClient,
+              stream,
+              task,
+              events.map((doc) => ({ kind: DETONATE_PROCESS_EVENTS_KIND, doc }))
+            );
+            Object.assign(counts, result);
+          }
+
+          // The tree root is the entry leader shared by the run's events;
+          // the time floor is the earliest event of the run.
+          const firstStringField = (
+            docs: Array<Record<string, unknown>>,
+            path: string
+          ): string | undefined => {
+            for (const doc of docs) {
+              const value = readField(alertDocSource(doc as DetonateAlertDoc), path)[0];
+              if (typeof value === 'string') return value;
+            }
+            return undefined;
+          };
+          const sessionEntityId = firstStringField(events, 'process.entry_leader.entity_id');
+          const sessionStartTime = firstStringField(events, '@timestamp');
+
+          return response.ok<DetonateRunSessionResult>({
+            body: {
+              task_id: task.id,
+              index: stream,
+              ...(sessionEntityId ? { session_entity_id: sessionEntityId } : {}),
+              ...(sessionStartTime ? { session_start_time: sessionStartTime } : {}),
+              ...counts,
+            },
           });
         } catch (error) {
           return toErrorResponse(error, response);

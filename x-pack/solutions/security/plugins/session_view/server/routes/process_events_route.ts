@@ -37,6 +37,29 @@ import {
 } from './validation';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
+/**
+ * The Detonate prototype's sandbox stream is written by the security
+ * solution plugin's internal ES client into a hidden dot-index no user role
+ * grants, so a user query against it always 403s (and the 403 handling below
+ * would return an empty tree — a silent lie). Those docs are plugin-owned
+ * telemetry, not user data: when the queried index is that stream, the route
+ * reads them back with the same internal client. The prefix mirrors
+ * `DETONATE_SANDBOX_STREAM_PREFIX` in security_solution's contract — this
+ * plugin cannot depend on that plugin, so the string is duplicated and must
+ * be kept in sync.
+ */
+const DETONATE_SANDBOX_STREAM_PREFIX = '.kibana-detonate-sandbox-';
+
+/**
+ * Only a concrete stream name (`.kibana-detonate-sandbox-<space>`), never a
+ * pattern: the internal client must not be handed a wildcard that widens the
+ * read to every space's streams.
+ */
+const isDetonateSandboxStream = (index: string): boolean =>
+  index.startsWith(DETONATE_SANDBOX_STREAM_PREFIX) &&
+  !index.includes('*') &&
+  index.length > DETONATE_SANDBOX_STREAM_PREFIX.length;
+
 export const registerProcessEventsRoute = (
   router: IRouter,
   logger: Logger,
@@ -70,10 +93,13 @@ export const registerProcessEventsRoute = (
         },
       },
       async (context, request, response) => {
-        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const { asCurrentUser: userClient, asInternalUser: internalClient } = (
+          await context.core
+        ).elasticsearch.client;
         const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
         const { index, sessionEntityId, sessionStartTime, cursor, forward, pageSize } =
           request.query;
+        const client = isDetonateSandboxStream(index) ? internalClient : userClient;
 
         try {
           const body = await fetchEventsAndScopedAlerts(

@@ -6,6 +6,7 @@ import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
+import { isDetonateSandboxStream } from './process_events_route';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
   TOTAL_BYTES_CAPTURED_PROPERTY,
@@ -44,8 +45,11 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         },
       },
       async (context, request, response) => {
-        const client = (await context.core).elasticsearch.client.asCurrentUser;
         const { index, sessionEntityId, sessionStartTime } = request.query;
+        // The Detonate sandbox stream is plugin-owned (see process_events_route):
+        // read it with the internal client instead of the user's.
+        const { asCurrentUser, asInternalUser } = (await context.core).elasticsearch.client;
+        const client = isDetonateSandboxStream(index) ? asInternalUser : asCurrentUser;
 
         try {
           const search = await client.search({

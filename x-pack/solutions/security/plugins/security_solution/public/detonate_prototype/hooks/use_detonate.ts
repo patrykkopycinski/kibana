@@ -26,6 +26,7 @@ import {
 } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
+  DetonateRunSessionResult,
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
@@ -51,6 +52,7 @@ export interface DetonateListQuery {
 const taskKey = (taskId: string) => [DETONATE_QUERY_KEY, 'task', taskId] as const;
 const updatesKey = (taskId: string) => [DETONATE_QUERY_KEY, 'updates', taskId] as const;
 const listKey = (query: DetonateListQuery) => [DETONATE_QUERY_KEY, 'tasks', query] as const;
+const sessionKey = (taskId: string) => [DETONATE_QUERY_KEY, 'session', taskId] as const;
 
 /** Is the detonation service reachable and configured? */
 export const useDetonateHealthcheck = () => {
@@ -110,6 +112,22 @@ export const useDetonationTasks = (query: DetonateListQuery) => {
     // Keeps the table populated while the next page loads, instead of
     // flashing an empty state between pages.
     keepPreviousData: true,
+  });
+};
+
+/**
+ * Session View config for a run (N1). One fetch per run: the route's copy of
+ * the run's events into the sandbox stream is idempotent, so re-mounting the
+ * tab re-copies nothing new and never mutates beyond the first call.
+ */
+export const useRunSession = (taskId: string | undefined) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonateRunSessionResult>({
+    queryKey: sessionKey(taskId ?? ''),
+    enabled: Boolean(taskId),
+    queryFn: ({ signal }) => detonateApi.getRunSession(http, taskId as string, signal),
+    staleTime: 60_000,
   });
 };
 

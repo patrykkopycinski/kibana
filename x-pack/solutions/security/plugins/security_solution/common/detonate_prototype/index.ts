@@ -150,6 +150,14 @@ export type DetonateDetectionSeverity = (typeof DETONATE_DETECTION_SEVERITIES)[n
 /** Raw alert documents are ES documents; the contract does not narrow them. */
 export type DetonateAlertDoc = Record<string, unknown>;
 
+/**
+ * A process (or other behavioral) event recorded in the sandbox, as ECS docs.
+ * Kept as a loose record like `DetonateAlertDoc`: the mapper projects a
+ * bounded field set into the sandbox stream, and Session View's server route
+ * queries it through its own typed pipeline.
+ */
+export type DetonateSandboxEventDoc = Record<string, unknown>;
+
 /** The service's per-task alert reads. Each 404s until the sandbox agent enrolls. */
 export const DETONATE_ALERT_KINDS = [
   'production-endpoint-alerts',
@@ -157,6 +165,16 @@ export const DETONATE_ALERT_KINDS = [
   'production-detection-alerts',
 ] as const;
 export type DetonateAlertKind = (typeof DETONATE_ALERT_KINDS)[number];
+
+/**
+ * The service's per-task process-event read: the sandbox's behavioral
+ * telemetry (`event.kind: 'event'` docs), Session View's raw material. Same
+ * read shape as the alert kinds — count on the task, docs through the route —
+ * but not an alert kind: it must never reach IOC extraction, which reads only
+ * {@link DETONATE_ALERT_KINDS}.
+ */
+export const DETONATE_PROCESS_EVENTS_KIND = 'process-events' as const;
+export type DetonateProcessEventsKind = typeof DETONATE_PROCESS_EVENTS_KIND;
 
 /** The service defaults an alert read to 5000 documents; nothing here needs that many. */
 export const DETONATE_MAX_ALERT_DOCS = 1000;
@@ -244,6 +262,15 @@ export interface DetonateTask {
   diagnostic_endpoint_alert_groups: DetonateEndpointAlertsGroup[];
   production_detection_alerts_count?: number;
   production_detection_alert_groups: DetonateDetectionAlertsGroup[];
+
+  /**
+   * Process events recorded for the run (`event.kind: 'event'` docs), the raw
+   * material Session View renders in the detonation flyout. Detail-read only:
+   * the service strips this array from list responses, where the count below
+   * is what the list rows show.
+   */
+  process_events?: DetonateSandboxEventDoc[];
+  process_events_count?: number;
 }
 
 /** The task without fields Kibana must never surface. */
@@ -632,6 +659,31 @@ export const detonateSandboxStreamName = (spaceId: string): string => {
 /** Copy a run's sandbox alerts into this space's sandbox stream. */
 export const detonateRunIngestPath = (taskId: string) =>
   `${DETONATE_RUNS_PATH}/${encodeURIComponent(taskId)}/ingest` as const;
+
+/** Copy a run's process events into the stream and get the Session View config. */
+export const detonateRunSessionPath = (taskId: string) =>
+  `${DETONATE_RUNS_PATH}/${encodeURIComponent(taskId)}/session` as const;
+
+/**
+ * Everything the Session View tab needs for one run. Null-shaped (no
+ * `session_entity_id`) when the run recorded no process events: the tab
+ * renders its empty state rather than an error, because a run with no
+ * recorded behavior is a fact about the run, not a failure.
+ */
+export interface DetonateRunSessionResult {
+  task_id: string;
+  /** The space's sandbox stream — the index Session View queries. */
+  index: string;
+  /** The run's entry leader: Session View's tree root. Absent when no events. */
+  session_entity_id?: string;
+  /** Earliest recorded event; lower-bounds Session View's time range. */
+  session_start_time?: string;
+  /** Process events copied into the stream by this call (idempotent re-copy). */
+  ingested: number;
+  duplicates: number;
+  dropped: number;
+  failed: number;
+}
 
 export interface DetonateSandboxIngestResult {
   task_id: string;

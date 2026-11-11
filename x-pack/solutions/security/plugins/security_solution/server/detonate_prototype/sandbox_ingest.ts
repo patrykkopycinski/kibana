@@ -20,6 +20,7 @@ import type {
   DetonateAlertDoc,
   DetonateAlertKind,
   DetonateTask,
+  DETONATE_PROCESS_EVENTS_KIND,
 } from '../../common/detonate_prototype';
 import {
   DETONATE_SANDBOX_RETENTION,
@@ -65,10 +66,17 @@ const SANDBOX_FIELDS: Readonly<Record<string, SandboxFieldType>> = {
   'process.Ext.ancestry': 'keyword',
   'process.entry_leader.entity_id': 'keyword',
   'process.entry_leader.start': 'date',
+  'process.entry_leader.pid': 'long',
+  'process.entry_leader.name': 'keyword',
   'process.session_leader.entity_id': 'keyword',
   'process.session_leader.start': 'date',
+  'process.session_leader.pid': 'long',
+  'process.session_leader.name': 'keyword',
   'process.group_leader.entity_id': 'keyword',
   'process.group_leader.start': 'date',
+  'process.group_leader.pid': 'long',
+  'process.group_leader.name': 'keyword',
+  'process.tty': 'long',
   'file.name': 'keyword',
   'file.path': 'keyword',
   'file.directory': 'keyword',
@@ -161,13 +169,15 @@ export interface SandboxDoc {
 }
 
 /**
- * One sandbox alert as an allow-listed copy, or `undefined` when it has no
- * `@timestamp`. The `_id` is stable per run and alert, so re-copying a run
- * creates no duplicates.
+ * One sandbox doc as an allow-listed copy, or `undefined` when it has no
+ * `@timestamp`. The `_id` is stable per run and doc, so re-copying a run
+ * creates no duplicates. `kind` tags the doc (`detonate.alert_kind`): an
+ * alert kind, or `process-events` for the behavioral telemetry Session View
+ * reads — the tag keeps events queryable apart from alerts in the stream.
  */
 export const toSandboxDoc = (
   task: DetonateTask,
-  kind: DetonateAlertKind,
+  kind: DetonateAlertKind | typeof DETONATE_PROCESS_EVENTS_KIND,
   alertDoc: DetonateAlertDoc
 ): SandboxDoc | undefined => {
   const source = alertDocSource(alertDoc);
@@ -208,7 +218,10 @@ export const ingestSandboxDocs = async (
   esClient: ElasticsearchClient,
   stream: string,
   task: DetonateTask,
-  alerts: Array<{ kind: DetonateAlertKind; doc: DetonateAlertDoc }>
+  alerts: Array<{
+    kind: DetonateAlertKind | typeof DETONATE_PROCESS_EVENTS_KIND;
+    doc: DetonateAlertDoc;
+  }>
 ): Promise<SandboxIngestCounts> => {
   const docs = alerts.flatMap(({ kind, doc }) => toSandboxDoc(task, kind, doc) ?? []);
   const counts: SandboxIngestCounts = {

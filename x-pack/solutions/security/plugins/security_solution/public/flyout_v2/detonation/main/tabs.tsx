@@ -11,14 +11,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { DetonationResult } from '../../../detonate_prototype/components/detonation_result';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
+import { SessionTab } from './session_tab';
 import {
   DETONATION_DETAILS_JSON_TAB_TEST_ID,
   DETONATION_DETAILS_OVERVIEW_TAB_TEST_ID,
+  DETONATION_DETAILS_SESSION_TAB_TEST_ID,
 } from './test_ids';
 
-export type DetonationPanelPaths = 'overview' | 'json';
+export type DetonationPanelPaths = 'overview' | 'session' | 'json';
 
-export const validTabIds: DetonationPanelPaths[] = ['overview', 'json'];
+export const validTabIds: DetonationPanelPaths[] = ['overview', 'session', 'json'];
 
 export interface DetonationPanelTabType {
   id: DetonationPanelPaths;
@@ -55,6 +57,17 @@ export const getTabsDisplayed = ({
       />
     ),
     content: <DetonationResult taskId={taskId} />,
+  },
+  {
+    id: 'session',
+    'data-test-subj': DETONATION_DETAILS_SESSION_TAB_TEST_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.detonation.header.sessionTabLabel"
+        defaultMessage="Session"
+      />
+    ),
+    content: <SessionTab taskId={taskId} />,
   },
   {
     id: 'json',

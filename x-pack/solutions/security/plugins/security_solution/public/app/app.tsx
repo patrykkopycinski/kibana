@@ -40,6 +40,8 @@ import {
   consumePreserveAgentBuilderSessionGate,
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../common/agent_builder_navigation_gate';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
+import { DetonationNotifier } from '../detonate_prototype/components/detonation_notifier';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -57,6 +59,10 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
   } = services;
 
   const darkMode = useDarkMode();
+  // Detonate runs are submitted from anywhere in Security (alert action
+  // flyouts included) and outlive the page they started on; the notifier
+  // must therefore mount above every route, not just the prototype's.
+  const isDetonatePrototypeEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
 
   return (
     <KibanaRenderContextProvider {...services}>
@@ -79,6 +85,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                                   <AssistantProvider>{children}</AssistantProvider>
                                   <TrialCompanion />
                                 </PageRouter>
+                                {isDetonatePrototypeEnabled ? <DetonationNotifier /> : null}
                               </DiscoverInTimelineContextProvider>
                             </UpsellingProvider>
                           </CellActionsProvider>

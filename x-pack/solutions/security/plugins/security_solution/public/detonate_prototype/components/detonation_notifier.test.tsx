@@ -9,20 +9,23 @@
  * Completion-notification tests.
  *
  * The acceptance criteria: a tracked run toasts exactly once when it completes
- * away from its own page; the page the analyst has open suppresses its toast;
- * a failed run warns rather than celebrates. Mutation checks: delete the
+ * away from the flyout showing it; the visible run suppresses its toast; a
+ * failed run warns rather than celebrates. Mutation checks: delete the
  * `notified` guard and the second-render case goes red; delete the
- * `activeTaskId` comparison and the open-page case goes red.
+ * `visibleTaskId` comparison and the open-flyout case goes red.
  */
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import * as useDetonate from '../hooks/use_detonate';
 import { useToasts } from '../../common/lib/kibana';
-import { DetonationNotifier, useTrackDetonation } from './detonation_notifier';
+import {
+  detonationTrackerStore,
+  DetonationNotifier,
+  useTrackDetonation,
+} from './detonation_notifier';
 
 const mockOpenDetonationFlyout = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
@@ -70,11 +73,9 @@ const mountTracked = (taskId: string) => {
     return null;
   };
   return render(
-    <MemoryRouter>
-      <DetonationNotifier>
-        <Registrar />
-      </DetonationNotifier>
-    </MemoryRouter>
+    <DetonationNotifier>
+      <Registrar />
+    </DetonationNotifier>
   );
 };
 
@@ -85,6 +86,7 @@ describe('DetonationNotifier', () => {
   beforeEach(() => {
     successToast.mockClear();
     warningToast.mockClear();
+    detonationTrackerStore.__resetForTests();
     jest.mocked(useToasts).mockReturnValue({
       addSuccess: successToast,
       addWarning: warningToast,
@@ -137,25 +139,30 @@ describe('DetonationNotifier', () => {
     expect(warningToast).not.toHaveBeenCalled();
   });
 
-  it('does not toast about the run whose page is open', async () => {
+  it('does not toast about the run whose flyout is open, before or after it closes', async () => {
     jest.spyOn(useDetonate, 'useDetonationTask').mockReturnValue({ data: completeTask } as never);
-
-    const Registrar = () => {
-      const track = useTrackDetonation();
-      React.useEffect(() => {
-        track('task-5');
-      }, [track]);
-      return null;
-    };
-    render(
-      <MemoryRouter initialEntries={['/detonate_prototype/task-5']}>
-        <DetonationNotifier>
-          <Registrar />
-        </DetonationNotifier>
-      </MemoryRouter>
-    );
+    // The result flyout opens the run (registers it visible) before the run
+    // completes: the flyout the analyst is looking at IS the notification.
+    detonationTrackerStore.setVisible('task-5');
+    mountTracked('task-5');
 
     await waitFor(() => expect(successToast).not.toHaveBeenCalled());
     expect(warningToast).not.toHaveBeenCalled();
+
+    // A run that completed while visible consumed its notification silently;
+    // closing the flyout afterwards must not replay it as a toast.
+    detonationTrackerStore.clearVisible('task-5');
+    await waitFor(() => {
+      expect(detonationTrackerStore.getSnapshot().visibleTaskId).toBeUndefined();
+    });
+    expect(successToast).not.toHaveBeenCalled();
+  });
+
+  it('tracks a run submitted from outside the notifier tree (flyout overlay root)', () => {
+    // The alert action's submit form renders in the flyout overlay's React
+    // root, a sibling of the app root that mounts the notifier. Submit hooks
+    // there reach the tracker through the module store, not React context.
+    detonationTrackerStore.track('task-6');
+    expect(detonationTrackerStore.getSnapshot().trackedTaskIds).toContain('task-6');
   });
 });

@@ -8,64 +8,121 @@
 /**
  * Detonate prototype — completion notification.
  *
- * A detonation runs for minutes. The analyst who started it leaves the page
- * (the whole point of an async submit), and without this there is no signal
- * when the run finishes — they have to remember to come back and refresh.
+ * A detonation runs for minutes, and the analyst who started it leaves the
+ * page (the whole point of an async submit); without this there is no signal
+ * when the run finishes.
  *
- * Design: the submit hooks register the new task id with the tracker, and the
- * `DetonationNotifier` (mounted once, above the routes) renders one hidden
- * watcher per tracked id. The watcher is `useDetonationTask` — the same hook
- * the result flyout uses — so the poll rule ("stop when the run reaches its
- * terminal worker, never before") stays written once, and the notifier adds no
- * second opinion about when a run is done.
+ * Design: submit hooks register the new task id in a module-level store, and
+ * the `DetonationNotifier` (mounted once, inside the Security app root)
+ * renders one hidden watcher per tracked id. The store is module state, not
+ * React context, because detonations are submitted from two React roots: this
+ * app and the flyout overlay root where the alert action's submit form
+ * renders — a context in one root can never reach a provider in the other.
+ * The watcher reuses `useDetonationTask`, so the poll rule ("stop when the
+ * run reaches its terminal worker, never before") is written once.
+ *
+ * Which run the analyst is looking at is also store state: the detonation
+ * flyout registers its task id while visible, so an open run does not toast
+ * about itself — the flyout the analyst is looking at IS the notification.
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useRef, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { useToasts } from '../../common/lib/kibana';
 import { useDetonationFlyoutApi } from '../../flyout_v2/detonation/use_detonation_flyout_api';
 import { useDetonationTask } from '../hooks/use_detonate';
-import {
-  DETONATE_PROTOTYPE_APP_PATH,
-  isDetonationComplete,
-  isDetonationFailed,
-} from '../../../common/detonate_prototype';
+import { isDetonationComplete, isDetonationFailed } from '../../../common/detonate_prototype';
 import * as i18n from '../translations';
 
 export const DETONATION_NOTIFIER_TEST_ID = 'detonatePrototypeNotifier';
 
-interface TrackerContextValue {
-  /** Remember an in-flight run so its completion can be surfaced. */
-  track: (taskId: string) => void;
+interface DetonationTrackerSnapshot {
+  /** Every in-flight run submitted this session, oldest first. */
+  readonly trackedTaskIds: readonly string[];
+  /** Task id of the detonation flyout currently visible, if any. */
+  readonly visibleTaskId?: string;
 }
 
-const TrackerContext = createContext<TrackerContextValue>({ track: () => undefined });
+type Listener = () => void;
+
+const listeners = new Set<Listener>();
+
+let snapshot: DetonationTrackerSnapshot = { trackedTaskIds: [] };
+
+const emit = (): void => {
+  for (const listener of listeners) listener();
+};
+
+/**
+ * Cross-root tracking state for detonation runs. Kept module-level: the
+ * submit form can render in the flyout overlay root while the notifier (and
+ * its watchers) mount in the Security app root.
+ */
+export const detonationTrackerStore = {
+  /** Remember an in-flight run so its completion can be surfaced. */
+  track: (taskId: string): void => {
+    if (snapshot.trackedTaskIds.includes(taskId)) return;
+    snapshot = { ...snapshot, trackedTaskIds: [...snapshot.trackedTaskIds, taskId] };
+    emit();
+  },
+  /** Mark a run as the one on screen (flyout mounted). */
+  setVisible: (taskId: string): void => {
+    if (snapshot.visibleTaskId === taskId) return;
+    snapshot = { ...snapshot, visibleTaskId: taskId };
+    emit();
+  },
+  /** Drop the on-screen mark (flyout unmounted). */
+  clearVisible: (taskId: string): void => {
+    if (snapshot.visibleTaskId !== taskId) return;
+    snapshot = { ...snapshot, visibleTaskId: undefined };
+    emit();
+  },
+  subscribe: (listener: Listener): (() => void) => {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  },
+  getSnapshot: (): DetonationTrackerSnapshot => snapshot,
+  /** Test-only: module state would otherwise leak between test cases. */
+  __resetForTests: (): void => {
+    snapshot = { trackedTaskIds: [] };
+    emit();
+  },
+};
 
 /** Register a submitted task id; the notifier picks it up and polls it. */
-export const useTrackDetonation = () => useContext(TrackerContext).track;
+export const useTrackDetonation = () => detonationTrackerStore.track;
+
+const useDetonationTracker = (): DetonationTrackerSnapshot =>
+  useSyncExternalStore(detonationTrackerStore.subscribe, detonationTrackerStore.getSnapshot);
 
 /** One in-flight run. Renders nothing; its job is the poll and the toast. */
-const DetonationWatcher = ({ taskId, activeTaskId }: { taskId: string; activeTaskId?: string }) => {
+const DetonationWatcher = ({
+  taskId,
+  visibleTaskId,
+}: {
+  taskId: string;
+  visibleTaskId?: string;
+}) => {
   const { data: task } = useDetonationTask(taskId);
   const toasts = useToasts();
   const { openDetonationFlyout } = useDetonationFlyoutApi();
-  /** Toasts fire from an effect, once per run, never for the open page. */
+  /** Toasts fire from an effect, once per run, never for the open flyout. */
   const notified = useRef(false);
 
-  const done = task !== undefined && isDetonationComplete(task) && taskId !== activeTaskId;
+  const done = task !== undefined && isDetonationComplete(task);
 
   useEffect(() => {
     if (!done || notified.current || !task) return;
+    // A run whose flyout is open completes in front of the analyst: the
+    // flyout is the notification. Consume the completion silently so closing
+    // the flyout afterwards does not replay it as a toast.
+    if (taskId === visibleTaskId) {
+      notified.current = true;
+      return;
+    }
     notified.current = true;
 
     const sample = task.sample_filename ?? task.sample_hash ?? taskId;
@@ -88,44 +145,26 @@ const DetonationWatcher = ({ taskId, activeTaskId }: { taskId: string; activeTas
       onClick: () => openDetonationFlyout({ taskId }),
       'data-test-subj': `${DETONATION_NOTIFIER_TEST_ID}-success-${taskId}`,
     });
-  }, [done, openDetonationFlyout, task, taskId, toasts]);
+  }, [done, openDetonationFlyout, task, taskId, toasts, visibleTaskId]);
 
   return null;
 };
 
 /**
- * The task page currently open (from the URL), so an open run does not toast
- * about itself — the page the analyst is looking at IS the notification.
- */
-const useActiveTaskId = (): string | undefined => {
-  const { pathname } = useLocation();
-  const prefix = `${DETONATE_PROTOTYPE_APP_PATH}/`;
-  return pathname.startsWith(prefix) ? pathname.slice(prefix.length) : undefined;
-};
-
-/**
- * Mounts watchers for every tracked in-flight run. Task ids live in state (not
- * a ref) so adding a watcher is a render, not an effect race. The set only
- * grows within a session, bounded by how many runs the analyst starts; the
- * watcher for a completed run stops polling on its own (`useDetonationTask`
- * returns `false` from `refetchInterval` at the terminal worker).
+ * Mounts watchers for every tracked in-flight run. Mounted once inside the
+ * Security app root (alive across route changes and while any flyout is
+ * open). Run ids live in the module store, so submissions from the flyout
+ * overlay root reach these watchers without sharing a React tree.
  */
 export const DetonationNotifier = ({ children }: { children?: ReactNode }) => {
-  const [taskIds, setTaskIds] = useState<readonly string[]>([]);
-  const activeTaskId = useActiveTaskId();
-
-  const track = useCallback((taskId: string) => {
-    setTaskIds((ids) => (ids.includes(taskId) ? ids : [...ids, taskId]));
-  }, []);
-
-  const tracker = useMemo(() => ({ track }), [track]);
+  const { trackedTaskIds, visibleTaskId } = useDetonationTracker();
 
   return (
-    <TrackerContext.Provider value={tracker}>
-      {taskIds.map((id) => (
-        <DetonationWatcher key={id} taskId={id} activeTaskId={activeTaskId} />
+    <>
+      {trackedTaskIds.map((id) => (
+        <DetonationWatcher key={id} taskId={id} visibleTaskId={visibleTaskId} />
       ))}
       {children}
-    </TrackerContext.Provider>
+    </>
   );
 };

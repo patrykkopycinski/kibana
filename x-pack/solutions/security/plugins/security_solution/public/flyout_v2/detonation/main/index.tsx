@@ -6,10 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDetonationTask } from '../../../detonate_prototype/hooks/use_detonate';
+import {
+  detonationTrackerStore,
+  useTrackDetonation,
+} from '../../../detonate_prototype/components/detonation_notifier';
 import { FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { useTabs } from '../../shared/hooks/use_tabs';
 import { Header } from './header';
@@ -44,6 +48,19 @@ export interface DetonationDetailsProps {
  */
 export const DetonationDetails: FC<DetonationDetailsProps> = memo(({ taskId }) => {
   const { data: task } = useDetonationTask(taskId);
+  // The flyout is the notification for the run it shows: register it visible
+  // so the notifier stays silent while it is open.
+  useEffect(() => {
+    detonationTrackerStore.setVisible(taskId);
+    return () => detonationTrackerStore.clearVisible(taskId);
+  }, [taskId]);
+
+  // A run opened from the runs table or a deep link can finish while open;
+  // track it so completion is polled and reflected in the shared list state.
+  const track = useTrackDetonation();
+  useEffect(() => {
+    track(taskId);
+  }, [track, taskId]);
 
   const { selectedTabId, setSelectedTabId } = useTabs<DetonationPanelPaths>({
     validTabIds,

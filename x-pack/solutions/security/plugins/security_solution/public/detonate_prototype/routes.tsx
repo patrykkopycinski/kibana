@@ -16,7 +16,6 @@ import { DETONATE_PROTOTYPE_APP_PATH } from '../../common/detonate_prototype';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { DetonationNotifier } from './components/detonation_notifier';
 
 const DetonateListPageLazy = lazy(() => import('./pages/list_page'));
 
@@ -26,24 +25,24 @@ const DetonateListPageLazy = lazy(() => import('./pages/list_page'));
  */
 const queryClient = new QueryClient();
 
+// The completion notifier is mounted once in the app root (app/app.tsx):
+// runs are submitted from alert-action flyouts anywhere in Security, and a
+// route-scoped mount dies when the analyst navigates away or never mounts
+// for submissions from other pages.
 export const DetonatePrototypeRoutes = () => (
   <QueryClientProvider client={queryClient}>
-    {/* Above the routes so a submitted run keeps its completion watcher while
-        the analyst moves between runs. */}
-    <DetonationNotifier>
-      <PluginTemplateWrapper>
-        <SecuritySolutionPageWrapper>
-          <Suspense fallback={<EuiLoadingElastic />}>
-            <Routes>
-              <Route
-                path={[`${DETONATE_PROTOTYPE_APP_PATH}/:taskId`, DETONATE_PROTOTYPE_APP_PATH]}
-                component={DetonateListPageLazy}
-              />
-            </Routes>
-          </Suspense>
-        </SecuritySolutionPageWrapper>
-      </PluginTemplateWrapper>
-    </DetonationNotifier>
+    <PluginTemplateWrapper>
+      <SecuritySolutionPageWrapper>
+        <Suspense fallback={<EuiLoadingElastic />}>
+          <Routes>
+            <Route
+              path={[`${DETONATE_PROTOTYPE_APP_PATH}/:taskId`, DETONATE_PROTOTYPE_APP_PATH]}
+              component={DetonateListPageLazy}
+            />
+          </Routes>
+        </Suspense>
+      </SecuritySolutionPageWrapper>
+    </PluginTemplateWrapper>
   </QueryClientProvider>
 );
 

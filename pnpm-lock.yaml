@@ -5572,9 +5572,15 @@ importers:
       '@kbn/evals-suite-alerts-rag':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag
+<<<<<<< HEAD
       '@kbn/evals-suite-alertzero-worker-chain':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain
+=======
+      '@kbn/evals-suite-alertzero-hunt-watch':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch
+>>>>>>> origin/pr/296665
       '@kbn/evals-suite-attack-discovery':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
@@ -9836,7 +9842,11 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag: {}
 
+<<<<<<< HEAD
   x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain: {}
+=======
+  x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch: {}
+>>>>>>> origin/pr/296665
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery: {}
 

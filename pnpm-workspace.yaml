@@ -1662,7 +1662,11 @@ packages:
   - 'x-pack/solutions/security/packages/kbn-discoveries-schemas'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag'
+<<<<<<< HEAD
   - 'x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain'
+=======
+  - 'x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch'
+>>>>>>> origin/pr/296665
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp'

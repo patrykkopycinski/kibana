@@ -50,6 +50,15 @@ interface StartAppComponent {
   theme$: AppMountParameters['theme$'];
 }
 
+// Detonate runs are submitted from anywhere in Security (alert action flyouts
+// included) and outlive the page they started on; the notifier must therefore
+// mount above every route, not just the prototype's. This wrapper renders
+// inside ReduxStoreProvider so its useSelector has access to the store.
+const DetonationNotifierRoot: FC = () => {
+  const isDetonatePrototypeEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
+  return isDetonatePrototypeEnabled ? <DetonationNotifier /> : null;
+};
+
 const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, theme$ }) => {
   const services = useKibana().services;
   const {
@@ -59,10 +68,6 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
   } = services;
 
   const darkMode = useDarkMode();
-  // Detonate runs are submitted from anywhere in Security (alert action
-  // flyouts included) and outlive the page they started on; the notifier
-  // must therefore mount above every route, not just the prototype's.
-  const isDetonatePrototypeEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
 
   return (
     <KibanaRenderContextProvider {...services}>
@@ -85,7 +90,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                                   <AssistantProvider>{children}</AssistantProvider>
                                   <TrialCompanion />
                                 </PageRouter>
-                                {isDetonatePrototypeEnabled ? <DetonationNotifier /> : null}
+                                <DetonationNotifierRoot />
                               </DiscoverInTimelineContextProvider>
                             </UpsellingProvider>
                           </CellActionsProvider>

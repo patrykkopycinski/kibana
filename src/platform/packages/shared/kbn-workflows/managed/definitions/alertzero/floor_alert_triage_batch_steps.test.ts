@@ -1966,6 +1966,7 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
         alert('a3', 'h3', ['az:triage_pending']),
         alert('a4', 'h4', ['detonate:malicious', 'other']),
         alert('a5', 'h5', ['detonate:inconclusive']),
+        alert('a6', 'h6', ['detonate:quiet']),
       ])
     ).toEqual(['h3']);
   });

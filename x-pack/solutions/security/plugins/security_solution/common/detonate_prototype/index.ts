@@ -461,6 +461,9 @@ export const DETONATE_TAG_PREFIX = 'detonate:' as const;
 export const detonateVerdictTag = (verdict: DetonateVerdictName): string =>
   `${DETONATE_TAG_PREFIX}${verdict}`;
 
+/** Verdict tags written by earlier versions; still present on already-tagged alerts, so they stay stale-removable and non-re-pickable. */
+export const DETONATE_LEGACY_VERDICT_TAGS = ['detonate:quiet'] as const;
+
 /** Prefix of the tag that ties a run back to the alert it was started from
  * (`alert:<alert_id>`). Written by the alert action; read by the verdict
  * derivation and by run-list filters.

@@ -69,6 +69,7 @@ const stepByName = (name: string): YamlStep | undefined => {
 const VERDICT_TAGS = [
   'detonate:malicious',
   'detonate:benign',
+  'detonate:quiet',
   'detonate:inconclusive',
   'detonate:known-malicious',
 ];
@@ -111,6 +112,15 @@ describe('Detonate sample worker (Forensics Watch)', () => {
 
     it('orders columns alert-first, so map: first in mark_queued yields alert ids', () => {
       expect(query).toContain('KEEP first_alert, file.hash.sha256');
+    });
+  });
+
+  describe('malicious sibling lookup', () => {
+    it('skips siblings already carrying any verdict tag, including the legacy quiet tag', () => {
+      const mustNot = JSON.stringify(stepByName('open_hash_alerts')?.with?.query);
+      VERDICT_TAGS.forEach((tag) => {
+        expect(mustNot).toContain(`"${tag}"`);
+      });
     });
   });
 

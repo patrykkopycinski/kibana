@@ -106,6 +106,7 @@ steps:
           | WHERE kibana.alert.workflow_status == "open"
           | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:benign")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
           | STATS first_alert = MIN(_id) BY file.hash.sha256
@@ -133,6 +134,7 @@ steps:
           | WHERE kibana.alert.severity IN ("high", "critical")
           | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:benign")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
           | STATS first_alert = MIN(_id) BY file.hash.sha256
@@ -589,6 +591,7 @@ steps:
                           kibana.alert.workflow_tags:
                             - "detonate:malicious"
                             - "detonate:benign"
+                            - "detonate:quiet"
                             - "detonate:inconclusive"
                             - "detonate:known-malicious"
               minimum_should_match: 1

@@ -19,6 +19,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import {
+  DETONATE_LEGACY_VERDICT_TAGS,
   DETONATE_NOTE_MARKER,
   DETONATE_PROTOTYPE_APP_PATH,
   DETONATE_VERDICTS,
@@ -37,7 +38,10 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
     const tag = detonateVerdictTag(verdict as DetonateVerdictName);
     // A re-run can reach a different verdict; drop the stale one so the alert
     // never carries two contradicting outcomes.
-    const staleTags = DETONATE_VERDICTS.map(detonateVerdictTag).filter((t) => t !== tag);
+    const staleTags = [
+      ...DETONATE_VERDICTS.map(detonateVerdictTag),
+      ...DETONATE_LEGACY_VERDICT_TAGS,
+    ].filter((t) => t !== tag);
     const note = `${DETONATE_NOTE_MARKER}${evidence} (run: ${DETONATE_PROTOTYPE_APP_PATH}/${taskId})`;
 
     try {

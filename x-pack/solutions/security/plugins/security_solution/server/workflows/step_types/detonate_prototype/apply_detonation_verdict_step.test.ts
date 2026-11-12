@@ -43,7 +43,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
         ids: ['alert-9'],
         tags: {
           tags_to_add: ['detonate:benign'],
-          tags_to_remove: ['detonate:malicious', 'detonate:inconclusive'],
+          tags_to_remove: ['detonate:malicious', 'detonate:inconclusive', 'detonate:quiet'],
         },
       },
     });

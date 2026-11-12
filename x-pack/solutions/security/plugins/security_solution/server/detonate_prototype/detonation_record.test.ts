@@ -6,7 +6,6 @@
  */
 
 import type { DetonateTask } from '../../common/detonate_prototype';
-import { DETONATE_ESCALATED_TAG } from '../../common/detonate_prototype';
 import { toDetonationRecord } from './detonation_record';
 
 const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
@@ -86,16 +85,16 @@ describe('toDetonationRecord', () => {
     expect(record['detonate.evidence']).toContain('malicious_file');
   });
 
-  it('gives a quiet run medium confidence', () => {
+  it('gives a benign run medium confidence', () => {
     expect(toDetonationRecord(createTask())).toMatchObject({
       'detonate.state': 'complete',
-      'detonate.verdict': 'quiet',
+      'detonate.verdict': 'benign',
       'detonate.confidence': 'medium',
       'detonate.alerts.total': 0,
     });
   });
 
-  it('marks a run with only diagnostic alerts inconclusive', () => {
+  it('gives a complete run with only diagnostic alerts the inconclusive verdict', () => {
     const record = toDetonationRecord(
       createTask({
         diagnostic_endpoint_alerts_count: 1,
@@ -104,29 +103,30 @@ describe('toDetonationRecord', () => {
     );
 
     expect(record).toMatchObject({
-      'detonate.state': 'inconclusive',
+      'detonate.state': 'complete',
       'detonate.verdict': 'inconclusive',
       'detonate.confidence': 'low',
       'detonate.detections_to_review': ['behavior'],
     });
   });
 
-  it('marks a failed run failed and keeps the service detail', () => {
-    expect(
-      toDetonationRecord(
-        createTask({
-          last_worker_name: 'detonate.workers.start_vm',
-          last_worker_status: 'failure',
-          last_worker_status_details: 'VM did not boot',
-        })
-      )
-    ).toMatchObject({
+  it('marks a failed run failed with its evidence and the service detail, but no verdict', () => {
+    const record = toDetonationRecord(
+      createTask({
+        last_worker_name: 'detonate.workers.start_vm',
+        last_worker_status: 'failure',
+        last_worker_status_details: 'VM did not boot',
+      })
+    );
+
+    expect(record).toMatchObject({
       'detonate.state': 'failed',
-      'detonate.verdict': 'inconclusive',
-      'detonate.confidence': 'low',
       'detonate.step.number': 2,
       'detonate.step.details': 'VM did not boot',
     });
+    expect(record['detonate.evidence']).toContain('VM did not boot');
+    expect(record).not.toHaveProperty(['detonate.verdict']);
+    expect(record).not.toHaveProperty(['detonate.confidence']);
   });
 
   it('gives a running run a step but no verdict, confidence, evidence or duration', () => {
@@ -150,21 +150,6 @@ describe('toDetonationRecord', () => {
     ]) {
       expect(record).not.toHaveProperty([field]);
     }
-  });
-
-  it('keeps the verdict of a run escalated to a partner sandbox', () => {
-    const record = toDetonationRecord(
-      createTask({
-        tags: ['space:default', DETONATE_ESCALATED_TAG],
-        diagnostic_endpoint_alerts_count: 1,
-      })
-    );
-
-    expect(record).toMatchObject({
-      'detonate.state': 'escalated',
-      'detonate.verdict': 'inconclusive',
-      'detonate.confidence': 'low',
-    });
   });
 
   it('takes the duration from the last update of a finished run', () => {

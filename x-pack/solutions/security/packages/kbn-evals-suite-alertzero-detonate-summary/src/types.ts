@@ -9,7 +9,7 @@ import type { Example } from '@kbn/evals';
 
 /** Label of a corpus entry: what the ground truth says about the sample. */
 export type DetonateCorpusLabel =
-  /** Known-good: completed quiet run, zero alerts anywhere. */
+  /** Known-good: completed benign run, zero alerts anywhere. */
   | 'known_good_quiet'
   /** Known-malware: completed run with production endpoint/detection alerts. */
   | 'known_malicious'

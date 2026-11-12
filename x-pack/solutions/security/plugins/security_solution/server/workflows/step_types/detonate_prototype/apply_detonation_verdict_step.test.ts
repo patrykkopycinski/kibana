@@ -23,7 +23,7 @@ const createMockContext = (input: Record<string, unknown>) =>
   } as unknown as HandlerContext);
 
 const INPUT = {
-  verdict: 'quiet',
+  verdict: 'benign',
   alert_id: 'alert-9',
   task_id: 'task-1',
   evidence: 'Detonation completed and raised no alerts.',
@@ -42,7 +42,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
       body: {
         ids: ['alert-9'],
         tags: {
-          tags_to_add: ['detonate:quiet'],
+          tags_to_add: ['detonate:benign'],
           tags_to_remove: ['detonate:malicious', 'detonate:inconclusive'],
         },
       },
@@ -60,7 +60,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
     });
     expect(result.output).toMatchObject({
       success: true,
-      tag: 'detonate:quiet',
+      tag: 'detonate:benign',
       note_id: 'note-7',
     });
   });
@@ -84,7 +84,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
       .mockResolvedValueOnce({ status: 200, body: {} });
 
     const result = await applyDetonationVerdictStepDefinition.handler(context);
-    expect(result.output).toMatchObject({ success: true, tag: 'detonate:quiet' });
+    expect(result.output).toMatchObject({ success: true, tag: 'detonate:benign' });
   });
 
   it('wraps failures in an execution error', async () => {

@@ -28,8 +28,9 @@ evidence: production endpoint alerts (Defend prevented something) or detection
 rule hits. In every other case — zero alerts, diagnostic-only alerts, or a
 failed run — the summary must use "suspicious" or say "no malicious behavior
 was observed" and add that this is not proof the sample is benign. A summary
-must NEVER conclude or imply the sample is "benign", "safe", or "clean"; quiet
-runs are absence-of-evidence, not evidence of safety.`;
+must NEVER conclude or imply the sample is "safe" or "clean". A benign
+verdict means only that no malicious behavior was observed in the sandbox:
+absence of evidence, not evidence of safety.`;
 
 const renderAlertGroups = (
   groups: DetonateCorpusEntry['task']['production_endpoint_alert_groups']
@@ -65,7 +66,7 @@ export const renderTaskForPrompt = (entry: DetonateCorpusEntry): string => {
   const failed = t.last_worker_status === 'failure';
   const complete =
     t.last_worker_name === 'detonate.workers.make_summary' && t.last_worker_status === 'success';
-  const quiet =
+  const benign =
     complete &&
     (t.production_endpoint_alerts_count ?? 0) === 0 &&
     (t.diagnostic_endpoint_alerts_count ?? 0) === 0 &&
@@ -81,7 +82,7 @@ export const renderTaskForPrompt = (entry: DetonateCorpusEntry): string => {
       : []),
     `complete: ${complete}`,
     `failed: ${failed}`,
-    `quiet: ${quiet}`,
+    `benign: ${benign}`,
     '',
     "production endpoint alerts (what a customer's Defend would have raised):",
     renderAlertGroups(t.production_endpoint_alert_groups),
@@ -103,7 +104,7 @@ export const buildSummarySystemPrompt = ({
     '',
     '## Reporting rules',
     '',
-    '- `complete: true, failed: false, quiet: true` — the run worked and produced no alerts. That is a **finding**, not a failure. Say the sample ran without raising anything, and name the possibilities honestly: the sample may be harmless, it may have detected the sandbox, or nothing detected it (a detection gap). Do not say the detonation "did not work".',
+    '- `complete: true, failed: false, benign: true` — the run worked and produced no alerts. That is a **finding**, not a failure. Say the sample ran without raising anything, and name the possibilities honestly: the sample may be harmless, it may have detected the sandbox, or nothing detected it (a detection gap). Do not say the detonation "did not work".',
     '- `failed: true` — the detonation itself failed. There is no verdict about the sample.',
     '- Production endpoint alerts answer "would a customer\'s Defend have caught this". Diagnostic alerts answer "did Defend observe the behaviour at all". When diagnostic alerts exist but production alerts do not, say so explicitly.',
     '',

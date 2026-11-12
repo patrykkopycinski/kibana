@@ -19,7 +19,7 @@ node --experimental-strip-types \
   --out ../x-pack/solutions/security/packages/kbn-evals-suite-alertzero-detonate-summary/evals/fixtures
 ```
 
-- **≥300 known-good** — completed quiet runs (the replay pipeline's negative
+- **≥300 known-good** — completed benign runs (the replay pipeline's negative
   control is itself a real recording of a run that raised nothing), each with
   a distinct hash/filename so the corpus is not 300 copies of one string.
 - **known-malware** — the recorded EICAR detonations (production endpoint +
@@ -47,7 +47,7 @@ node scripts/evals run --suite alertzero-detonate-summary \
 - unhedged false-"benign": 0 anywhere.
 - The LLM judge scores per-label criteria; its failure count is reported,
   not gated.
-- Mutation check: a 40-entry quiet slice with the evidence rule dropped from
+- Mutation check: a 40-entry benign slice with the evidence rule dropped from
   the prompt must produce at least one CODE-gate violation or judge failure.
   A green mutation run fails the spec: the suite cannot detect the
   regression it exists to catch.

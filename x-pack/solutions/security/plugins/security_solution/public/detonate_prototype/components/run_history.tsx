@@ -9,7 +9,7 @@
  * Detonate prototype — run history for one sample hash.
  *
  * The learning tier's read surface: every completed run of the same sample,
- * newest first, with the quiet-run streak made explicit. Three quiets in a
+ * newest first, with the benign-run streak made explicit. Three benign runs in a
  * row is the evidence bar an exception/trusted-app proposal cites — the
  * button copies that evidence as a comment and nothing more. The write stays
  * an analyst action in the Artifacts UI, where authz and audit live.
@@ -35,9 +35,9 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
 import {
-  PROPOSAL_QUIET_STREAK_THRESHOLD,
+  PROPOSAL_BENIGN_STREAK_THRESHOLD,
   exceptionProposalComment,
-  quietRunStreak,
+  benignRunStreak,
 } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { DetonateVerdictBadge } from './verdict_badge';
@@ -86,10 +86,10 @@ export const RunHistory = React.memo<RunHistoryProps>(({ runs, hash }) => {
     [openDetonationFlyout]
   );
 
-  const streak = useMemo(() => quietRunStreak(runs), [runs]);
+  const streak = useMemo(() => benignRunStreak(runs), [runs]);
   const columns = useMemo(() => historyColumns(goToTask), [goToTask]);
 
-  const eligible = streak >= PROPOSAL_QUIET_STREAK_THRESHOLD;
+  const eligible = streak >= PROPOSAL_BENIGN_STREAK_THRESHOLD;
 
   return (
     <EuiPanel hasBorder data-test-subj={RUN_HISTORY_TEST_ID}>
@@ -103,7 +103,7 @@ export const RunHistory = React.memo<RunHistoryProps>(({ runs, hash }) => {
           <EuiFlexItem grow={false}>
             <EuiBadge
               color={eligible ? 'success' : 'hollow'}
-            >{`${streak} quiet in a row`}</EuiBadge>
+            >{`${streak} benign in a row`}</EuiBadge>
           </EuiFlexItem>
         )}
         {eligible && (

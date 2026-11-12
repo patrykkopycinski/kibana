@@ -354,7 +354,7 @@ export const totalDetonationAlerts = (task: DetonateTask): number =>
  * not proof the sample is benign; possibly a detection gap) — it is not an
  * error, and surfaces must not present it as one.
  */
-export const detonationWasQuiet = (task: DetonateTask): boolean =>
+export const detonationWasBenign = (task: DetonateTask): boolean =>
   isDetonationComplete(task) && !isDetonationFailed(task) && totalDetonationAlerts(task) === 0;
 
 /**
@@ -382,14 +382,14 @@ export const diagnosticOnlyEventCodes = (task: DetonateTask): string[] => {
 /* -------------------------------------------------------------------------- */
 
 /**
- * How many consecutive runs — newest first — were quiet. The proposal
+ * How many consecutive runs — newest first — were benign. The proposal
  * threshold reads this, so the derivation lives here where it is unit-tested,
  * not in the component that renders the button.
  */
-export const quietRunStreak = (runs: readonly DetonateTask[]): number => {
+export const benignRunStreak = (runs: readonly DetonateTask[]): number => {
   let streak = 0;
   for (const run of runs) {
-    if (!detonationWasQuiet(run)) break;
+    if (!detonationWasBenign(run)) break;
     streak += 1;
   }
   return streak;
@@ -413,7 +413,7 @@ export const runHistoryIncluding = (
 };
 
 /** The evidence bar an exception/trusted-app proposal must clear. */
-export const PROPOSAL_QUIET_STREAK_THRESHOLD = 3;
+export const PROPOSAL_BENIGN_STREAK_THRESHOLD = 3;
 
 /**
  * The proposal text an analyst pastes into an exception or trusted-app
@@ -427,15 +427,15 @@ export const exceptionProposalComment = (
   appPath: string = DETONATE_PROTOTYPE_APP_PATH
 ): string =>
   [
-    `Detonate proposal: ${quietRunStreak(
+    `Detonate proposal: ${benignRunStreak(
       runs
-    )} consecutive detonation(s) of this sample completed quiet (no alerts, no malicious behavior observed).`,
+    )} consecutive detonation(s) of this sample completed benign (no alerts, no malicious behavior observed in the sandbox).`,
     `Sample: ${hash}`,
     `Runs (newest first): ${runs
-      .slice(0, PROPOSAL_QUIET_STREAK_THRESHOLD)
+      .slice(0, PROPOSAL_BENIGN_STREAK_THRESHOLD)
       .map((run) => `${run.created_at} — ${run.id} (${appPath}/${run.id})`)
       .join('; ')}`,
-    'A quiet detonation is not proof the sample is benign — treat this as evidence toward an exception or trusted-application entry, to be reviewed before anything is enforced.',
+    'A benign verdict only means no malicious behavior was observed in the sandbox, not that the sample is safe — treat this as evidence toward an exception or trusted-application entry, to be reviewed before anything is enforced.',
   ].join('\n');
 
 /* -------------------------------------------------------------------------- */
@@ -443,13 +443,15 @@ export const exceptionProposalComment = (
 /* -------------------------------------------------------------------------- */
 
 /**
- * What a finished detonation says about the sample. `malicious` (production
- * endpoint alerts or detection rule hits) and `quiet` (no alerts) are
- * statements about the sample's behaviour in the sandbox; `inconclusive` means
- * the run cannot support either (it failed, has not finished, or raised only
- * diagnostic alerts) and must never be read as "benign".
+ * What a complete detonation says about the sample. `malicious` (production
+ * endpoint alerts or detection rule hits) and `benign` (no alerts) are
+ * statements about the sample's behaviour in the sandbox — `benign` means no
+ * malicious behaviour was observed, not that the sample is safe.
+ * `inconclusive` means a run that completed but raised only diagnostic alerts.
+ * A run that failed or has not finished has no verdict at all: see
+ * `DetonationRunStatus`.
  */
-export const DETONATE_VERDICTS = ['malicious', 'quiet', 'inconclusive'] as const;
+export const DETONATE_VERDICTS = ['malicious', 'benign', 'inconclusive'] as const;
 export type DetonateVerdictName = (typeof DETONATE_VERDICTS)[number];
 
 /** Prefix the prototype uses on the tags it writes to alerts and runs. */
@@ -511,12 +513,12 @@ export const runBelongsToSpace = (tags: string[], spaceId: string): boolean =>
   tags.includes(spaceRunTag(spaceId));
 
 /**
- * The sample the demo seeds a guaranteed-quiet run for. Its digest matches
+ * The sample the demo seeds a guaranteed-benign run for. Its digest matches
  * no recording, so the replay executor resolves it to the negative control —
- * a real run that raised nothing — which makes `detonate:quiet` reproducible
+ * a real run that raised nothing — which makes `detonate:benign` reproducible
  * on camera. The simulator's contract-parity suite pins this exact value.
  */
-export const DETONATE_QUIET_SEED_SHA256 =
+export const DETONATE_BENIGN_SEED_SHA256 =
   '9e098f5b65ccb4ecfc0b3a2c790b3f6c3b41fbf561e6bd2d7782d0b8c7f2cf1e' as const;
 
 /** Prefix every detonate-written alert note carries, so it can be found. */
@@ -726,7 +728,8 @@ export interface DetonateCategoryCount {
 /** One run's side of the diff: what was measured, not how it compares. */
 export interface DetonateRunDiffSide {
   task_id: string;
-  verdict: DetonateVerdictName;
+  /** Absent when the run failed or has not finished. */
+  verdict?: DetonateVerdictName;
   /** Per-category doc counts, sorted by category name. */
   categories: DetonateCategoryCount[];
 }
@@ -851,9 +854,21 @@ export const spaceTaskQuery = (
     ...(filters.alertId ? [`tags:${quoteQueryValue(alertRunTag(filters.alertId))}`] : []),
   ].join(' AND ');
 
-/** One detonation's conclusion, shaped for workflows, notes and tags. */
-export interface DetonateVerdict {
-  verdict: DetonateVerdictName;
+/**
+ * Where a run is, independent of what it found. Only a `complete` run has a
+ * verdict. `queued` is a run the service accepted but no worker has picked up;
+ * an alert a Worker marked for detonation without submitting it reads the same.
+ */
+export const DETONATION_RUN_STATUSES = ['queued', 'running', 'complete', 'failed'] as const;
+export type DetonationRunStatus = (typeof DETONATION_RUN_STATUSES)[number];
+
+/** Run status read off a task. A failed run is terminal but never `complete`. */
+export const deriveDetonationRunStatus = (task: DetonateTask): DetonationRunStatus => {
+  if (isDetonationFailed(task)) return 'failed';
+  return isDetonationComplete(task) ? 'complete' : 'running';
+};
+
+interface DetonateConclusionBase {
   task_id: string;
   /** The alert this run was started from, parsed off its `alert:<id>` tag. */
   alert_id?: string;
@@ -865,11 +880,29 @@ export interface DetonateVerdict {
    * step writes, so it must stand alone without the surrounding UI.
    */
   evidence: string;
-  /** The tag the apply step puts on the alert — `detonate:<verdict>`. */
-  suggested_tag: string;
   /** The sandbox OS this verdict's artifacts target, when the task recorded one. */
   vm_os_family?: DetonateVmOsFamily;
 }
+
+/**
+ * One detonation's conclusion, shaped for workflows, notes and tags. A verdict
+ * (and the tag derived from it) exists only on a `complete` run; a failed or
+ * unfinished run carries evidence describing what happened and nothing else.
+ */
+export type DetonateVerdict = DetonateConclusionBase &
+  (
+    | {
+        status: 'complete';
+        verdict: DetonateVerdictName;
+        /** The tag the apply step puts on the alert — `detonate:<verdict>`. */
+        suggested_tag: string;
+      }
+    | {
+        status: Exclude<DetonationRunStatus, 'complete'>;
+        verdict?: undefined;
+        suggested_tag?: undefined;
+      }
+  );
 
 /**
  * Derive the verdict from a task. Pure: no IO, no clock, no randomness —
@@ -891,24 +924,45 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
   const hardEvidence =
     (task.production_endpoint_alerts_count ?? 0) + (task.production_detection_alerts_count ?? 0);
 
+  const base: DetonateConclusionBase = {
+    task_id: task.id,
+    ...(parseAlertTag(task.tags) ? { alert_id: parseAlertTag(task.tags) } : {}),
+    // Passed through for consumers that need the sandbox OS — e.g. an
+    // endpoint blocklist artifact is compiled per OS and accepts exactly one.
+    ...(task.vm_os_family ? { vm_os_family: task.vm_os_family } : {}),
+    total_alerts_count: total,
+    endpoint_alert_event_codes: eventCodes,
+    detection_rule_names: ruleNames,
+    evidence: '',
+  };
+
+  const status = deriveDetonationRunStatus(task);
+  if (status === 'failed') {
+    return {
+      ...base,
+      status,
+      evidence: `Detonation failed at ${task.last_worker_name}${
+        task.last_worker_status_details
+          ? ` (${task.last_worker_status_details})`
+          : ' — the sandbox never finished, so this says nothing about the sample.'
+      }`,
+    };
+  }
+  if (status !== 'complete') {
+    return {
+      ...base,
+      status,
+      evidence: `Detonation has not completed (last: ${task.last_worker_name}/${task.last_worker_status}).`,
+    };
+  }
+
   let verdict: DetonateVerdictName;
   let evidence: string;
-
-  if (isDetonationFailed(task)) {
-    verdict = 'inconclusive';
-    evidence = `Detonation failed at ${task.last_worker_name}${
-      task.last_worker_status_details
-        ? ` (${task.last_worker_status_details})`
-        : ' — the sandbox never finished, so this says nothing about the sample.'
-    }`;
-  } else if (!isDetonationComplete(task)) {
-    verdict = 'inconclusive';
-    evidence = `Detonation has not completed (last: ${task.last_worker_name}/${task.last_worker_status}).`;
-  } else if (total === 0) {
-    verdict = 'quiet';
+  if (total === 0) {
+    verdict = 'benign';
     evidence =
       'Detonation completed and raised no alerts — no malicious behavior was observed in the ' +
-      'sandbox, which is not proof the sample is benign (nothing may have detected it). ' +
+      'sandbox, which is not proof the sample is safe (nothing may have detected it). ' +
       'Suggest reviewing before closing the alert.';
   } else if (hardEvidence === 0) {
     // Diagnostic alerts alone show Defend observed the behavior, not that a
@@ -927,19 +981,7 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
     evidence = `Detonation raised ${total} alert(s): ${codes} (detection rules: ${rules}).`;
   }
 
-  return {
-    verdict,
-    task_id: task.id,
-    ...(parseAlertTag(task.tags) ? { alert_id: parseAlertTag(task.tags) } : {}),
-    // Passed through for consumers that need the sandbox OS — e.g. an
-    // endpoint blocklist artifact is compiled per OS and accepts exactly one.
-    ...(task.vm_os_family ? { vm_os_family: task.vm_os_family } : {}),
-    total_alerts_count: total,
-    endpoint_alert_event_codes: eventCodes,
-    detection_rule_names: ruleNames,
-    evidence,
-    suggested_tag: detonateVerdictTag(verdict),
-  };
+  return { ...base, status, verdict, evidence, suggested_tag: detonateVerdictTag(verdict) };
 };
 
 export const DETONATE_CONFIDENCE_LEVELS = ['high', 'medium', 'low'] as const;
@@ -947,14 +989,14 @@ export type DetonateConfidence = (typeof DETONATE_CONFIDENCE_LEVELS)[number];
 
 /**
  * How much weight a verdict carries. `malicious` rests on production alerts or
- * rule hits, so it is high; `quiet` is a real observation that proves nothing
+ * rule hits, so it is high; `benign` is a real observation that proves nothing
  * about what was not detected, so it is medium; `inconclusive` is low.
  */
 export const detonationConfidence = (verdict: DetonateVerdictName): DetonateConfidence => {
   switch (verdict) {
     case 'malicious':
       return 'high';
-    case 'quiet':
+    case 'benign':
       return 'medium';
     default:
       return 'low';
@@ -965,43 +1007,19 @@ export const detonationConfidence = (verdict: DetonateVerdictName): DetonateConf
 /* State                                                                       */
 /* -------------------------------------------------------------------------- */
 
-/** States read off a run. */
-export const DETONATION_RUN_STATES = [
-  'running',
-  'complete',
-  'failed',
-  'inconclusive',
-  'escalated',
-] as const;
-export type DetonationRunState = (typeof DETONATION_RUN_STATES)[number];
-
-/** States of an alert that has no run to read them from. */
+/** States of an alert that has no run to read them from (it may still read `queued`). */
 export const DETONATION_ALERT_STATES = [
-  'queued',
   'not_analyzed',
   'allowance_reached',
   'unsupported_os',
 ] as const;
 export type DetonationAlertState = (typeof DETONATION_ALERT_STATES)[number];
 
-export const DETONATION_STATES = [...DETONATION_RUN_STATES, ...DETONATION_ALERT_STATES] as const;
+export const DETONATION_STATES = [...DETONATION_RUN_STATUSES, ...DETONATION_ALERT_STATES] as const;
 export type DetonationState = (typeof DETONATION_STATES)[number];
-
-/**
- * Run tag for a run handed to a partner sandbox. No partner integration exists,
- * so only fixtures carry it.
- */
-export const DETONATE_ESCALATED_TAG = `${DETONATE_TAG_PREFIX}escalated` as const;
 
 /** Alert tag a Worker writes when it chose to detonate an alert but has not submitted it yet. */
 export const DETONATE_QUEUED_TAG = `${DETONATE_TAG_PREFIX}queued` as const;
-
-export const deriveDetonationRunState = (task: DetonateTask): DetonationRunState => {
-  if (!isDetonationComplete(task)) return 'running';
-  if (task.tags.includes(DETONATE_ESCALATED_TAG)) return 'escalated';
-  if (isDetonationFailed(task)) return 'failed';
-  return deriveDetonateVerdict(task).verdict === 'inconclusive' ? 'inconclusive' : 'complete';
-};
 
 /** ECS `host.os.type` to the service's OS family; `undefined` for one it has no VM for. */
 export const detonateOsFamilyFromHostOsType = (
@@ -1041,7 +1059,7 @@ export const deriveDetonationState = ({
   allowanceExhausted = false,
   supportedOsFamilies = DETONATE_VM_OS_FAMILIES,
 }: DetonationStateInput): DetonationState => {
-  if (run) return deriveDetonationRunState(run);
+  if (run) return deriveDetonationRunStatus(run);
   if (hostOsType) {
     const family = detonateOsFamilyFromHostOsType(hostOsType);
     if (!family || !supportedOsFamilies.includes(family)) return 'unsupported_os';
@@ -1065,7 +1083,7 @@ export const derivePriorRunLookup = (
     (task) =>
       runBelongsToSpace(task.tags, spaceId) &&
       task.sample_hash?.toLowerCase() === sha256 &&
-      isDetonationComplete(task)
+      deriveDetonationRunStatus(task) === 'complete'
   );
   if (!lastCompleted) {
     return { sha256, status: 'unknown', source: DETONATE_PRIOR_RUN_SOURCE };

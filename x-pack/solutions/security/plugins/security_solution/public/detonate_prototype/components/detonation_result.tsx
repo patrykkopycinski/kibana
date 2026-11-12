@@ -31,7 +31,7 @@ import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import {
-  detonationWasQuiet,
+  detonationWasBenign,
   diagnosticOnlyEventCodes,
   isDetonationComplete,
   isDetonationFailed,
@@ -47,7 +47,7 @@ import * as i18n from '../translations';
 
 export const DETAIL_PAGE_TEST_ID = 'detonatePrototypeDetailPage';
 export const DETAIL_FAILURE_TEST_ID = 'detonatePrototypeDetailFailure';
-export const DETAIL_QUIET_TEST_ID = 'detonatePrototypeDetailQuiet';
+export const DETAIL_BENIGN_TEST_ID = 'detonatePrototypeDetailBenign';
 export const DETAIL_COVERAGE_GAP_TEST_ID = 'detonatePrototypeDetailCoverageGap';
 
 const details = (task: DetonateTask): EuiDescriptionListProps['listItems'] => {
@@ -118,10 +118,10 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
 
   const failed = isDetonationFailed(task);
   const complete = isDetonationComplete(task);
-  const quiet = detonationWasQuiet(task);
+  const benign = detonationWasBenign(task);
   const coverageGap = complete && !failed ? diagnosticOnlyEventCodes(task) : [];
 
-  // The viewed run counts toward the streak: three quiets in a row includes
+  // The viewed run counts toward the streak: three benign runs in a row includes
   // the one on screen.
   const historyRuns = runHistoryIncluding(task, historyByHash.completedRuns ?? []);
 
@@ -139,20 +139,20 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
         </>
       )}
 
-      {quiet && (
+      {benign && (
         <>
           <KbnInfoCallout
             announceOnMount
-            title={i18n.QUIET_RUN_TITLE}
-            text={i18n.QUIET_RUN_BODY}
-            data-test-subj={DETAIL_QUIET_TEST_ID}
+            title={i18n.BENIGN_RUN_TITLE}
+            text={i18n.BENIGN_RUN_BODY}
+            data-test-subj={DETAIL_BENIGN_TEST_ID}
           />
           <EuiSpacer size="l" />
         </>
       )}
 
       {/* The gap panel only appears when there is a gap: a run production
-          covered fully needs no "potential coverage gap" hedging, and a quiet
+          covered fully needs no "potential coverage gap" hedging, and a benign
           run already has its own callout above. */}
       {coverageGap.length > 0 && (
         <>

@@ -6,9 +6,8 @@
  */
 
 import {
-  DETONATE_ESCALATED_TAG,
   DETONATE_QUEUED_TAG,
-  deriveDetonationRunState,
+  deriveDetonationRunStatus,
   deriveDetonationState,
   detonateOsFamilyFromHostOsType,
 } from '.';
@@ -41,38 +40,33 @@ const failed = {
   last_worker_status: 'failure',
 } as const;
 
-describe('deriveDetonationRunState', () => {
-  it('is complete for a finished run with a verdict', () => {
-    expect(deriveDetonationRunState(createTask({ production_endpoint_alerts_count: 1 }))).toBe(
+describe('deriveDetonationRunStatus', () => {
+  it('is complete for a finished run', () => {
+    expect(deriveDetonationRunStatus(createTask({ production_endpoint_alerts_count: 1 }))).toBe(
       'complete'
     );
-    expect(deriveDetonationRunState(createTask())).toBe('complete');
+    expect(deriveDetonationRunStatus(createTask())).toBe('complete');
   });
 
   it('is running until the terminal worker succeeds', () => {
-    expect(deriveDetonationRunState(createTask(running))).toBe('running');
+    expect(deriveDetonationRunStatus(createTask(running))).toBe('running');
   });
 
   it('is failed when a worker failed', () => {
-    expect(deriveDetonationRunState(createTask(failed))).toBe('failed');
+    expect(deriveDetonationRunStatus(createTask(failed))).toBe('failed');
   });
 
-  it('is inconclusive when only diagnostic alerts fired', () => {
-    expect(deriveDetonationRunState(createTask({ diagnostic_endpoint_alerts_count: 2 }))).toBe(
-      'inconclusive'
+  it('is complete, not a separate state, when only diagnostic alerts fired', () => {
+    expect(deriveDetonationRunStatus(createTask({ diagnostic_endpoint_alerts_count: 2 }))).toBe(
+      'complete'
     );
   });
 
-  it('is escalated for a finished or failed run carrying the escalation tag', () => {
-    const tags = [DETONATE_ESCALATED_TAG];
-    expect(deriveDetonationRunState(createTask({ tags }))).toBe('escalated');
-    expect(deriveDetonationRunState(createTask({ tags, ...failed }))).toBe('escalated');
-  });
-
-  it('never shows a run that is still going as escalated', () => {
-    expect(
-      deriveDetonationRunState(createTask({ tags: [DETONATE_ESCALATED_TAG], ...running }))
-    ).toBe('running');
+  it('ignores a legacy escalation tag', () => {
+    const tags = ['detonate:escalated'];
+    expect(deriveDetonationRunStatus(createTask({ tags }))).toBe('complete');
+    expect(deriveDetonationRunStatus(createTask({ tags, ...failed }))).toBe('failed');
+    expect(deriveDetonationRunStatus(createTask({ tags, ...running }))).toBe('running');
   });
 });
 

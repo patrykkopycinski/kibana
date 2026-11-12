@@ -326,14 +326,14 @@ describe('detonate sample worker (managed workflow, per-run mode)', () => {
       expect(byName('propose_close')?.if).toContain('variables.close_alert_count > 0');
     });
 
-    it('keys the exception proposal on a quiet verdict and the close proposal on a malicious one', () => {
-      expect(byName('run_history')?.if).toContain("steps.verdict.output.verdict == 'quiet'");
+    it('keys the exception proposal on a benign verdict and the close proposal on a malicious one', () => {
+      expect(byName('run_history')?.if).toContain("steps.verdict.output.verdict == 'benign'");
       expect(byName('open_hash_alerts')?.if).toContain(
         "steps.verdict.output.verdict == 'malicious'"
       );
       // Negative control: neither guard admits the other verdict.
       expect(byName('run_history')?.if).not.toContain("'malicious'");
-      expect(byName('open_hash_alerts')?.if).not.toContain("'quiet'");
+      expect(byName('open_hash_alerts')?.if).not.toContain("'benign'");
     });
 
     it('proposes a single-hash exception on the rule that raised the alert', () => {
@@ -392,7 +392,7 @@ describe('detonate sample worker (managed workflow, per-run mode)', () => {
                 terms: {
                   'kibana.alert.workflow_tags': [
                     'detonate:malicious',
-                    'detonate:quiet',
+                    'detonate:benign',
                     'detonate:inconclusive',
                     'detonate:known-malicious',
                   ],

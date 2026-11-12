@@ -223,7 +223,7 @@ steps:
   - name: compute_detonate_candidates
     type: data.set
     with:
-      detonate_hashes: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | reject_exp: 'alert', \"alert.kibana.alert.workflow_tags contains 'detonate:malicious' or alert.kibana.alert.workflow_tags contains 'detonate:quiet' or alert.kibana.alert.workflow_tags contains 'detonate:inconclusive' or alert.kibana.alert.workflow_tags contains 'detonate:known-malicious'\" | map: 'file.hash.sha256' | uniq | slice: 0, 20 }}"
+      detonate_hashes: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | reject_exp: 'alert', \"alert.kibana.alert.workflow_tags contains 'detonate:malicious' or alert.kibana.alert.workflow_tags contains 'detonate:benign' or alert.kibana.alert.workflow_tags contains 'detonate:inconclusive' or alert.kibana.alert.workflow_tags contains 'detonate:known-malicious'\" | map: 'file.hash.sha256' | uniq | slice: 0, 20 }}"
 
   - name: count_detonate_candidates
     type: data.set

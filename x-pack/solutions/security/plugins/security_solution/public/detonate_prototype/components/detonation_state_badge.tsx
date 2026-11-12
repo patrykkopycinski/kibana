@@ -26,12 +26,6 @@ const STATE_DISPLAY: Readonly<
   running: { label: i18n.STATUS_RUNNING, color: 'hollow' },
   complete: { label: i18n.STATUS_COMPLETE, color: 'success' },
   failed: { label: i18n.STATUS_FAILED, color: 'danger' },
-  inconclusive: { label: i18n.STATUS_INCONCLUSIVE, color: 'warning' },
-  escalated: {
-    label: i18n.STATUS_ESCALATED,
-    color: 'accent',
-    description: i18n.STATUS_ESCALATED_DESCRIPTION,
-  },
   queued: {
     label: i18n.STATUS_QUEUED,
     color: 'hollow',

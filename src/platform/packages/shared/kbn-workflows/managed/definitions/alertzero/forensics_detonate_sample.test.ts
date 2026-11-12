@@ -68,7 +68,7 @@ const stepByName = (name: string): YamlStep | undefined => {
 
 const VERDICT_TAGS = [
   'detonate:malicious',
-  'detonate:quiet',
+  'detonate:benign',
   'detonate:inconclusive',
   'detonate:known-malicious',
 ];

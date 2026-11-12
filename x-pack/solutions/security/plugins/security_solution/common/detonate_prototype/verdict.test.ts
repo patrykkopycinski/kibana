@@ -6,12 +6,12 @@
  */
 
 import {
-  DETONATE_QUIET_SEED_SHA256,
+  DETONATE_BENIGN_SEED_SHA256,
   deriveDetonateVerdict,
   parseAlertTag,
   detonateVerdictTag,
   diagnosticOnlyEventCodes,
-  quietRunStreak,
+  benignRunStreak,
   exceptionProposalComment,
   runHistoryIncluding,
 } from '.';
@@ -63,28 +63,27 @@ describe('deriveDetonateVerdict', () => {
     expect(verdict.evidence).toContain('5 alert(s)');
   });
 
-  it('derives quiet from a completed run with zero alerts', () => {
-    const verdict = deriveDetonateVerdict(createTask({ sample_hash: DETONATE_QUIET_SEED_SHA256 }));
+  it('derives benign from a completed run with zero alerts', () => {
+    const verdict = deriveDetonateVerdict(createTask({ sample_hash: DETONATE_BENIGN_SEED_SHA256 }));
 
-    expect(verdict.verdict).toBe('quiet');
+    expect(verdict.verdict).toBe('benign');
     expect(verdict.total_alerts_count).toBe(0);
-    expect(verdict.suggested_tag).toBe('detonate:quiet');
+    expect(verdict.suggested_tag).toBe('detonate:benign');
     expect(verdict.evidence).toContain('no alerts');
   });
 
-  it('never asserts a quiet run is benign (D9/O10 conservative-summary rule)', () => {
-    const verdict = deriveDetonateVerdict(createTask({ sample_hash: DETONATE_QUIET_SEED_SHA256 }));
+  it('never asserts a benign run is safe (D9/O10 conservative-summary rule)', () => {
+    const verdict = deriveDetonateVerdict(createTask({ sample_hash: DETONATE_BENIGN_SEED_SHA256 }));
     const evidence = verdict.evidence.toLowerCase();
 
-    // The rule: quiet evidence says what was observed, flags the detection-gap
-    // possibility, and never asserts the sample itself is benign. "benign" may
-    // appear only inside an explicit negation ("not proof the sample is benign").
+    // The rule: benign evidence says what was observed, flags the detection-gap
+    // possibility, and never asserts the sample itself is safe.
     expect(evidence).toContain('no malicious behavior was observed');
     expect(evidence).toContain('not proof');
-    expect(evidence).not.toMatch(/(?<!not proof the sample is )benign/);
+    expect(evidence).not.toMatch(/(?<!not proof the )sample is (benign|safe)/);
   });
 
-  it('derives inconclusive from a failed run — never benign', () => {
+  it('gives a failed run status failed and no verdict, tag or confidence input', () => {
     const verdict = deriveDetonateVerdict(
       createTask({
         last_worker_name: 'detonate.workers.start_vm',
@@ -93,8 +92,9 @@ describe('deriveDetonateVerdict', () => {
       })
     );
 
-    expect(verdict.verdict).toBe('inconclusive');
-    expect(verdict.suggested_tag).toBe('detonate:inconclusive');
+    expect(verdict.status).toBe('failed');
+    expect(verdict.verdict).toBeUndefined();
+    expect(verdict.suggested_tag).toBeUndefined();
     expect(verdict.evidence).toContain('start_vm');
     expect(verdict.evidence).toContain('vm boot failed');
   });
@@ -107,6 +107,7 @@ describe('deriveDetonateVerdict', () => {
       })
     );
 
+    expect(verdict.status).toBe('complete');
     expect(verdict.verdict).toBe('inconclusive');
     expect(verdict.suggested_tag).toBe('detonate:inconclusive');
     expect(verdict.total_alerts_count).toBe(2);
@@ -132,12 +133,15 @@ describe('deriveDetonateVerdict', () => {
     expect(verdict.verdict).toBe('malicious');
   });
 
-  it('derives inconclusive from an unfinished run', () => {
+  it('gives an unfinished run status running and no verdict', () => {
     const verdict = deriveDetonateVerdict(
-      createTask({ last_worker_name: 'detonate.workers.stop_vm', last_worker_status: 'success' })
+      createTask({ last_worker_name: 'detonate.workers.stop_vm', last_worker_status: 'started' })
     );
 
-    expect(verdict.verdict).toBe('inconclusive');
+    expect(verdict.status).toBe('running');
+    expect(verdict.verdict).toBeUndefined();
+    expect(verdict.suggested_tag).toBeUndefined();
+    expect(verdict.evidence).toContain('has not completed');
   });
 
   it('carries the alert id parsed off the alert:<id> tag', () => {
@@ -176,7 +180,7 @@ describe('alert tag helpers', () => {
 
   it('ignores a bare alert: prefix and non-alert tags', () => {
     expect(parseAlertTag(['alert:'])).toBeUndefined();
-    expect(parseAlertTag(['detonate:quiet'])).toBeUndefined();
+    expect(parseAlertTag(['detonate:benign'])).toBeUndefined();
   });
 });
 
@@ -221,13 +225,13 @@ describe('diagnosticOnlyEventCodes', () => {
     ).toEqual([]);
   });
 
-  it('is empty for a quiet run — no gap to show', () => {
+  it('is empty for a benign run — no gap to show', () => {
     expect(diagnosticOnlyEventCodes(createTask())).toEqual([]);
   });
 });
 
-describe('quietRunStreak', () => {
-  const quiet = (id: string): DetonateTask => createTask({ id });
+describe('benignRunStreak', () => {
+  const benign = (id: string): DetonateTask => createTask({ id });
   const malicious = (id: string): DetonateTask =>
     createTask({
       id,
@@ -235,45 +239,45 @@ describe('quietRunStreak', () => {
       production_endpoint_alert_groups: [{ alerts_count: 1, event_code: 'malicious_file' }],
     });
 
-  it('counts consecutive quiet runs from the newest', () => {
-    expect(quietRunStreak([quiet('a'), quiet('b'), malicious('c')])).toBe(2);
+  it('counts consecutive benign runs from the newest', () => {
+    expect(benignRunStreak([benign('a'), benign('b'), malicious('c')])).toBe(2);
   });
 
-  it('stops at the first non-quiet run — older quiets are not evidence', () => {
-    expect(quietRunStreak([quiet('a'), malicious('b'), quiet('c')])).toBe(1);
+  it('stops at the first non-benign run — older benign runs are not evidence', () => {
+    expect(benignRunStreak([benign('a'), malicious('b'), benign('c')])).toBe(1);
   });
 
-  it('is zero when the newest run was not quiet', () => {
-    expect(quietRunStreak([malicious('a'), quiet('b'), quiet('c')])).toBe(0);
+  it('is zero when the newest run was not benign', () => {
+    expect(benignRunStreak([malicious('a'), benign('b'), benign('c')])).toBe(0);
   });
 });
 
 describe('runHistoryIncluding', () => {
-  const quiet = (id: string, createdAt: string): DetonateTask =>
+  const benign = (id: string, createdAt: string): DetonateTask =>
     createTask({ id, created_at: createdAt });
 
   it('counts the viewed run toward the streak', () => {
-    const current = quiet('run-3', '2026-01-03T00:00:00.000Z');
+    const current = benign('run-3', '2026-01-03T00:00:00.000Z');
     const runs = runHistoryIncluding(current, [
-      quiet('run-2', '2026-01-02T00:00:00.000Z'),
-      quiet('run-1', '2026-01-01T00:00:00.000Z'),
+      benign('run-2', '2026-01-02T00:00:00.000Z'),
+      benign('run-1', '2026-01-01T00:00:00.000Z'),
     ]);
     expect(runs.map(({ id }) => id)).toEqual(['run-3', 'run-2', 'run-1']);
-    expect(quietRunStreak(runs)).toBe(3);
+    expect(benignRunStreak(runs)).toBe(3);
   });
 
   it('does not double-count a viewed run the history already holds', () => {
-    const current = quiet('run-2', '2026-01-02T00:00:00.000Z');
+    const current = benign('run-2', '2026-01-02T00:00:00.000Z');
     const runs = runHistoryIncluding(current, [
-      quiet('run-3', '2026-01-03T00:00:00.000Z'),
+      benign('run-3', '2026-01-03T00:00:00.000Z'),
       current,
-      quiet('run-1', '2026-01-01T00:00:00.000Z'),
+      benign('run-1', '2026-01-01T00:00:00.000Z'),
     ]);
     expect(runs.map(({ id }) => id)).toEqual(['run-3', 'run-2', 'run-1']);
   });
 
   it('leaves out a viewed run that failed or is still running', () => {
-    const history = [quiet('run-1', '2026-01-01T00:00:00.000Z')];
+    const history = [benign('run-1', '2026-01-01T00:00:00.000Z')];
     const failed = createTask({ id: 'run-2', last_worker_status: 'failure' });
     const running = createTask({
       id: 'run-3',
@@ -286,14 +290,14 @@ describe('runHistoryIncluding', () => {
 });
 
 describe('exceptionProposalComment', () => {
-  const quiet = (id: string, createdAt: string): DetonateTask =>
+  const benign = (id: string, createdAt: string): DetonateTask =>
     createTask({ id, created_at: createdAt });
 
   it('cites the streak, the hash, and links the runs it counts', () => {
     const comment = exceptionProposalComment('ab'.repeat(32), [
-      quiet('run-3', '2026-01-03T00:00:00.000Z'),
-      quiet('run-2', '2026-01-02T00:00:00.000Z'),
-      quiet('run-1', '2026-01-01T00:00:00.000Z'),
+      benign('run-3', '2026-01-03T00:00:00.000Z'),
+      benign('run-2', '2026-01-02T00:00:00.000Z'),
+      benign('run-1', '2026-01-01T00:00:00.000Z'),
     ]);
     expect(comment).toContain('3 consecutive detonation(s)');
     expect(comment).toContain('ab'.repeat(32));
@@ -303,7 +307,7 @@ describe('exceptionProposalComment', () => {
   });
 
   it('caps the cited runs at the proposal threshold', () => {
-    const runs = [1, 2, 3, 4, 5].map((n) => quiet(`run-${n}`, `2026-01-0${n}T00:00:00.000Z`));
+    const runs = [1, 2, 3, 4, 5].map((n) => benign(`run-${n}`, `2026-01-0${n}T00:00:00.000Z`));
     const comment = exceptionProposalComment('ab'.repeat(32), runs);
     expect(comment).toContain('run-3');
     expect(comment).not.toContain('run-4');
@@ -313,7 +317,7 @@ describe('exceptionProposalComment', () => {
 describe('verdict tags', () => {
   it('uses the detonate: prefix for every verdict', () => {
     expect(detonateVerdictTag('malicious')).toBe('detonate:malicious');
-    expect(detonateVerdictTag('quiet')).toBe('detonate:quiet');
+    expect(detonateVerdictTag('benign')).toBe('detonate:benign');
     expect(detonateVerdictTag('inconclusive')).toBe('detonate:inconclusive');
   });
 });

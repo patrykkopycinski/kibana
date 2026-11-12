@@ -10,7 +10,7 @@
  *
  * The writing half of the verdict: tags the alert (`detonate:<verdict>`),
  * writes the evidence as an alert note, and never touches alert status. The
- * status decision stays with a human — closing on `quiet` is a suggestion
+ * status decision stays with a human — closing on `benign` is a suggestion
  * surfaces can render, not an action the step takes.
  */
 
@@ -70,7 +70,7 @@ export const applyDetonationVerdictStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.applyDetonationVerdict.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Writes exactly two things to the alert: the `detonate:VERDICT` tag and a note carrying the evidence and a link to the run. Closing the alert on a `quiet` verdict stays a human decision — the step never sets status.',
+          'Prototype step. Writes exactly two things to the alert: the `detonate:VERDICT` tag and a note carrying the evidence and a link to the run. Closing the alert on a `benign` verdict stays a human decision — the step never sets status.',
       }
     ),
     examples: [

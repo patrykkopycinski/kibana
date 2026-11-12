@@ -105,7 +105,7 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
     'xpack.alertzero.watches.workers.forensicsDetonateSample.description',
     {
       defaultMessage:
-        'Detonates a file sample in a sandbox and records each verdict in an Investigation. Proposes closing alerts on a malicious verdict and a rule exception for samples that stay quiet.',
+        'Detonates a file sample in a sandbox and records each verdict in an Investigation. Proposes closing alerts on a malicious verdict and a rule exception for samples with a benign verdict.',
     }
   ),
 };

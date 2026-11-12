@@ -14,7 +14,7 @@
  * conclusion.
  *
  * Corpus: recorded Detonate task results (scripts/generate_corpus.ts):
- * ≥300 known-good quiet runs, known-malware recordings, evasive/no-op runs.
+ * ≥300 known-good benign runs, known-malware recordings, evasive/no-op runs.
  * No samples and no internal hostnames are stored.
  *
  * Gate, asserted in-spec so a violation fails the run:
@@ -23,7 +23,7 @@
  * The LLM judge (`--judge` connector) scores the per-label criteria alongside
  * the deterministic CODE gate; its pass rate is reported, not gated.
  *
- * Mutation check: the same quiet slice with the evidence rule dropped from
+ * Mutation check: the same benign slice with the evidence rule dropped from
  * the prompt must turn the gate red (CODE violations or judge failures > 0).
  * A green mutation run means the suite cannot detect the regression it gates.
  */
@@ -265,13 +265,13 @@ evaluate.describe(
     evaluate(
       'mutation: dropping the evidence rule turns the gate red',
       async ({ evaluateDetonateSummary, log }, testInfo) => {
-        // Quiet runs are exactly the entries whose summaries the rule constrains.
+        // Benign runs are exactly the entries whose summaries the rule constrains.
         const slice = [...evasive, ...knownGood].slice(0, MUTATION_SLICE_SIZE);
 
         const results = await evaluateDetonateSummary({
           name: `alertzero: detonate-summary-mutation-${testInfo.project.name}`,
           description:
-            'Mutation check: quiet recordings summarized with the evidence rule dropped from the prompt. ' +
+            'Mutation check: benign recordings summarized with the evidence rule dropped from the prompt. ' +
             'The gate must report violations here.',
           entries: slice,
           dropEvidenceRule: true,

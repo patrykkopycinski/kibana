@@ -67,13 +67,14 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
 
 ## Reporting rules
 
-- \`complete: true, failed: false, quiet: true\` — the run worked and produced no
+- \`status: complete\` with \`verdict: benign\` (\`benign: true\`) — the run worked and produced no
   alerts. That is a **finding**, not a failure. Say the sample ran without
   raising anything, and name the possibilities honestly: the sample may be
   harmless, it may have detected the sandbox, or nothing detected it (a
   detection gap). Do not say the detonation "did not work".
-- \`failed: true\` — the detonation itself failed. There is no verdict about the
-  sample. Say what stage it failed at (\`last_worker_name\`) and give the details
+- \`status: failed\` (\`failed: true\`) — the detonation itself failed. There is no
+  verdict about the sample; the result carries none. The same goes for
+  \`status: running\`: no verdict until the run is \`complete\`. Say what stage it failed at (\`last_worker_name\`) and give the details
   field if present.
 - Production endpoint alerts answer "would a customer's Defend have caught
   this". Diagnostic alerts answer "did Defend observe the behaviour at all".
@@ -87,25 +88,26 @@ evidence: production endpoint alerts (Defend prevented something) or detection
 rule hits. In every other case — zero alerts, diagnostic-only alerts, or a
 failed run — the summary must use "suspicious" or say "no malicious behavior
 was observed" and add that this is not proof the sample is benign. A summary
-must NEVER conclude or imply the sample is "benign", "safe", or "clean"; quiet
-runs are absence-of-evidence, not evidence of safety.
+must NEVER conclude or imply the sample is "safe" or "clean". A benign
+verdict means only that no malicious behavior was observed in the sandbox:
+absence of evidence, not evidence of safety.
 
-## False-positive check before reporting quiet
+## False-positive check before reporting benign
 
-A quiet run is the weakest verdict. Before reporting one, check the run's
+A benign run is the weakest verdict. Before reporting one, check the run's
 history for prior verdicts that disagree:
 
 1. Call \`list_detonations\` for the hash. If an earlier run of the same hash
-   raised alerts, the quiet run is a suspect outlier, not the answer — say so,
-   and do not report "benign".
+   raised alerts, the benign run is a suspect outlier, not the answer — say so,
+   and do not present it as proof of safety.
 2. Ask the analyst whether this alert fired for the same behaviour before. A
-   first-seen quiet result on an alerting rule means either a new file version
+   first-seen benign result on an alerting rule means either a new file version
    or a detection gap; both are worth escalating, neither is "safe".
 3. If the analyst confirms the alert is a false positive, submit the
-   confirmation as a \`detonate:quiet\` tag candidate — but the tag goes on only
+   confirmation as a \`detonate:benign\` tag candidate — but the tag goes on only
    via the verdict-apply path, never by direct mutation.
 
-A quiet verdict never closes an alert by itself. It is evidence for the human
+A benign verdict never closes an alert by itself. It is evidence for the human
 who decides.
 
 ## Boundaries
@@ -126,7 +128,7 @@ export const createDetonateSampleSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Detonate a file sample by hash in an instrumented sandbox VM running Elastic Defend, and report the alerts it produced: which `event.code` values Defend raised, which detection rules fired, and whether the run was quiet. Use when an analyst asks what an unknown file actually does, or wants behavioural evidence for a hash that reputation sources do not resolve. Runs take several minutes. This never touches a real host — for live response actions use endpoint-response-actions.',
+      'Detonate a file sample by hash in an instrumented sandbox VM running Elastic Defend, and report the alerts it produced: which `event.code` values Defend raised, which detection rules fired, and whether the run was benign. Use when an analyst asks what an unknown file actually does, or wants behavioural evidence for a hash that reputation sources do not resolve. Runs take several minutes. This never touches a real host — for live response actions use endpoint-response-actions.',
     content: SYSTEM_INSTRUCTIONS,
     referencedContent: [
       {

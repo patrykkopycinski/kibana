@@ -20,8 +20,9 @@ import type { DetonateTask } from '../../../../common/detonate_prototype';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { DetonateClient, HasDetonatePrivilege } from '../../../detonate_prototype';
 import {
+  deriveDetonateVerdict,
   detonationProgress,
-  detonationWasQuiet,
+  detonationWasBenign,
   isDetonationComplete,
   isDetonationFailed,
   totalDetonationAlerts,
@@ -144,6 +145,7 @@ const summarizeDetectionGroups = (
 export const summarizeDetonationTask = (task: DetonateTask) => {
   const complete = isDetonationComplete(task);
   const failed = isDetonationFailed(task);
+  const conclusion = deriveDetonateVerdict(task);
 
   return {
     kind: 'detonation_task' as const,
@@ -154,13 +156,16 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
     // State, in the three forms a caller actually branches on. `complete` and
     // `failed` are independent: a run can fail at any worker, and a completed
     // run is not necessarily a successful one.
+    // `status` is the run's own axis; `verdict` exists only once it is `complete`.
+    status: conclusion.status,
+    ...(conclusion.verdict ? { verdict: conclusion.verdict } : {}),
     complete,
     failed,
     // Zero alerts on a completed run is a real result — no malicious behavior
     // was observed, which is not proof the sample is harmless (it may be a
     // detection gap) — and the flag exists so the agent reports it as a finding
     // rather than as "something went wrong".
-    quiet: detonationWasQuiet(task),
+    benign: detonationWasBenign(task),
     progress: detonationProgress(task),
     last_worker_name: task.last_worker_name,
     last_worker_status: task.last_worker_status,

@@ -121,7 +121,7 @@ describe('the enrollment token and sandbox identifiers', () => {
       handlerContext<VerdictContext>({ task_id: TASK.id, alert_id: 'alert-9' }, TASK)
     );
     expectClean(verdict);
-    if (!verdict) throw new Error('the verdict step returned no output');
+    if (verdict?.status !== 'complete') throw new Error('the verdict step did not complete');
 
     const apply = handlerContext<ApplyContext>(
       {
@@ -145,13 +145,16 @@ describe('the enrollment token and sandbox identifiers', () => {
   });
 
   it('stay out of the run history and its exception proposal comment', async () => {
-    const quiet = { ...TASK, production_endpoint_alerts_count: 0 };
-    const quietRuns = [quiet, { ...quiet, id: 'task-2' }, { ...quiet, id: 'task-3' }];
+    const benign = { ...TASK, production_endpoint_alerts_count: 0 };
+    const benignRuns = [benign, { ...benign, id: 'task-2' }, { ...benign, id: 'task-3' }];
 
-    expectClean(exceptionProposalComment(HASH, quietRuns));
+    expectClean(exceptionProposalComment(HASH, benignRuns));
     expectClean(
       await detonateRunHistoryStepDefinition.handler(
-        handlerContext<HistoryContext>({ sha256: HASH }, { offset: 0, size: 200, tasks: quietRuns })
+        handlerContext<HistoryContext>(
+          { sha256: HASH },
+          { offset: 0, size: 200, tasks: benignRuns }
+        )
       )
     );
   });

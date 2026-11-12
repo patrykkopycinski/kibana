@@ -11,11 +11,10 @@ import type {
   DetonateTask,
   DetonateTaskUpdate,
   DetonateVerdictName,
-  DetonationRunState,
+  DetonationRunStatus,
 } from '../../common/detonate_prototype';
 import {
   deriveDetonateVerdict,
-  deriveDetonationRunState,
   detonationConfidence,
   detonationStep,
   diagnosticOnlyEventCodes,
@@ -38,7 +37,7 @@ export interface DetonationRecord {
   'event.duration'?: number;
   'detonate.task_id': string;
   'detonate.alert_id'?: string;
-  'detonate.state': DetonationRunState;
+  'detonate.state': DetonationRunStatus;
   'detonate.verdict'?: DetonateVerdictName;
   'detonate.confidence'?: DetonateConfidence;
   'detonate.evidence'?: string;
@@ -82,9 +81,7 @@ export const toDetonationRecord = (
   }: { iocs?: DetonateExtractedIocs; updates?: readonly DetonateTaskUpdate[] } = {}
 ): DetonationRecord => {
   const derived = deriveDetonateVerdict(task);
-  const state = deriveDetonationRunState(task);
-  // A running run has no verdict yet, only the placeholder the derivation returns.
-  const verdict = state === 'running' ? undefined : derived.verdict;
+  const state = derived.status;
   const step = detonationStep(task);
   const alertId = parseAlertTag(task.tags);
   const started = Date.parse(task.created_at);
@@ -103,12 +100,15 @@ export const toDetonationRecord = (
     'detonate.task_id': task.id,
     ...(alertId ? { 'detonate.alert_id': alertId } : {}),
     'detonate.state': state,
-    ...(verdict
+    ...(derived.status === 'complete'
       ? {
-          'detonate.verdict': verdict,
-          'detonate.confidence': detonationConfidence(verdict),
-          'detonate.evidence': derived.evidence,
+          'detonate.verdict': derived.verdict,
+          'detonate.confidence': detonationConfidence(derived.verdict),
         }
+      : {}),
+    // A failed run's evidence says what happened; a running run has nothing to say yet.
+    ...(derived.status === 'complete' || derived.status === 'failed'
+      ? { 'detonate.evidence': derived.evidence }
       : {}),
     'detonate.step.number': step.step,
     'detonate.step.of': step.of,

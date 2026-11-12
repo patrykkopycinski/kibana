@@ -9,12 +9,11 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import {
   DETONATE_TASKS_PATH,
-  PROPOSAL_QUIET_STREAK_THRESHOLD,
+  PROPOSAL_BENIGN_STREAK_THRESHOLD,
+  benignRunStreak,
   deriveDetonateVerdict,
   exceptionProposalComment,
-  isDetonationComplete,
-  isDetonationFailed,
-  quietRunStreak,
+  deriveDetonationRunStatus,
 } from '../../../../common/detonate_prototype';
 import type { DetonateTaskSearchResponse } from '../../../../common/detonate_prototype';
 import { detonateRunHistoryStepCommonDefinition } from '../../../../common/workflows/step_types/detonate_prototype/detonate_run_history_step_common';
@@ -26,7 +25,7 @@ const MAX_RUNS = 200;
 /**
  * Reads the run history through the plugin's tasks route (same privilege
  * check as the UI's run-history panel) and filters it the same way that panel
- * does: an exact hash match, completed and not failed, newest first.
+ * does: an exact hash match, complete (failed and unfinished runs excluded), newest first.
  */
 export const detonateRunHistoryStepDefinition = createServerStepDefinition({
   ...detonateRunHistoryStepCommonDefinition,
@@ -48,24 +47,24 @@ export const detonateRunHistoryStepDefinition = createServerStepDefinition({
     // can match; only an exact hash counts toward this sample's evidence.
     const completed = page.tasks
       .filter(
-        (task) =>
-          task.sample_hash === sha256 && isDetonationComplete(task) && !isDetonationFailed(task)
+        (task) => task.sample_hash === sha256 && deriveDetonationRunStatus(task) === 'complete'
       )
       .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-    const quietStreak = quietRunStreak(completed);
+    const benignStreak = benignRunStreak(completed);
 
     return {
       output: {
         sha256,
         completed_runs: completed.length,
-        quiet_streak: quietStreak,
-        proposal_eligible: quietStreak >= PROPOSAL_QUIET_STREAK_THRESHOLD,
-        runs: completed.map((task) => ({
-          task_id: task.id,
-          created_at: task.created_at,
-          verdict: deriveDetonateVerdict(task).verdict,
-        })),
+        benign_streak: benignStreak,
+        proposal_eligible: benignStreak >= PROPOSAL_BENIGN_STREAK_THRESHOLD,
+        runs: completed.flatMap((task) => {
+          const conclusion = deriveDetonateVerdict(task);
+          return conclusion.status === 'complete'
+            ? [{ task_id: task.id, created_at: task.created_at, verdict: conclusion.verdict }]
+            : [];
+        }),
         evidence_comment: exceptionProposalComment(sha256, completed),
       },
     };

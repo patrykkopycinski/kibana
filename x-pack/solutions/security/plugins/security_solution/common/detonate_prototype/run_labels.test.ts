@@ -51,7 +51,7 @@ describe('detonationConfidence', () => {
   it('maps each verdict to a fixed confidence', () => {
     expect(Object.fromEntries(DETONATE_VERDICTS.map((v) => [v, detonationConfidence(v)]))).toEqual({
       malicious: 'high',
-      quiet: 'medium',
+      benign: 'medium',
       inconclusive: 'low',
     });
   });

@@ -8,20 +8,16 @@
 /**
  * Detonate prototype — verdict badge.
  *
- * Renders the derived verdict (malicious / quiet / inconclusive) for one run,
- * using the same pure derivation every other surface uses. Shown only once the
- * run is over: a verdict while workers are still running would read as a
- * conclusion the sandbox has not reached, and `inconclusive` mid-run is noise.
+ * Renders the derived verdict (malicious / benign / inconclusive) for one run,
+ * using the same pure derivation every other surface uses. Shown only for a
+ * complete run: a failed or unfinished run has no verdict, and the status badge
+ * already says where it stands.
  */
 
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import {
-  deriveDetonateVerdict,
-  isDetonationComplete,
-  isDetonationFailed,
-} from '../../../common/detonate_prototype';
+import { deriveDetonateVerdict } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import * as i18n from '../translations';
 
@@ -29,7 +25,7 @@ export const VERDICT_BADGE_TEST_ID = 'detonatePrototypeVerdictBadge';
 
 const VERDICT_COLOR: Record<string, string> = {
   malicious: 'danger',
-  quiet: 'success',
+  benign: 'success',
   inconclusive: 'warning',
 };
 
@@ -38,15 +34,14 @@ interface DetonateVerdictBadgeProps {
 }
 
 export const DetonateVerdictBadge = React.memo<DetonateVerdictBadgeProps>(({ task }) => {
-  const complete = isDetonationComplete(task) || isDetonationFailed(task);
-  if (!complete) return null;
-
   const { verdict, evidence } = deriveDetonateVerdict(task);
+  if (!verdict) return null;
+
   const label =
     verdict === 'malicious'
       ? i18n.VERDICT_MALICIOUS
-      : verdict === 'quiet'
-      ? i18n.VERDICT_QUIET
+      : verdict === 'benign'
+      ? i18n.VERDICT_BENIGN
       : i18n.VERDICT_INCONCLUSIVE;
 
   return (

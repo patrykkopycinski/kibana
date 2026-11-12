@@ -138,21 +138,6 @@ export const STATUS_FAILED = i18n.translate(
   { defaultMessage: 'Failed' }
 );
 
-export const STATUS_INCONCLUSIVE = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.status.inconclusive',
-  { defaultMessage: 'Inconclusive' }
-);
-
-export const STATUS_ESCALATED = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.status.escalated',
-  { defaultMessage: 'Escalated' }
-);
-
-export const STATUS_ESCALATED_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.status.escalatedDescription',
-  { defaultMessage: 'Sent to a partner sandbox for a second analysis.' }
-);
-
 export const STATUS_QUEUED = i18n.translate(
   'xpack.securitySolution.detonatePrototype.status.queued',
   { defaultMessage: 'Queued' }
@@ -218,16 +203,16 @@ export const DETONATION_NOT_FOUND = i18n.translate(
   { defaultMessage: 'Detonation not found' }
 );
 
-export const QUIET_RUN_TITLE = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.detail.quietRunTitle',
+export const BENIGN_RUN_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.benignRunTitle',
   { defaultMessage: 'This detonation produced no alerts' }
 );
 
-export const QUIET_RUN_BODY = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.detail.quietRunBody',
+export const BENIGN_RUN_BODY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.benignRunBody',
   {
     defaultMessage:
-      'The run completed successfully and no malicious behavior was observed. That is not proof the sample is benign — it may be a detection gap worth investigating.',
+      'The run completed successfully and no malicious behavior was observed. That is not proof the sample is safe — it may be a detection gap worth investigating.',
   }
 );
 
@@ -298,7 +283,7 @@ export const PROPOSAL_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.proposalTooltip',
   {
     defaultMessage:
-      'Copy a comment citing the quiet-run streak as evidence for an exception or trusted-application entry. Review before enforcing — a quiet run is not proof the sample is benign.',
+      'Copy a comment citing the benign-run streak as evidence for an exception or trusted-application entry. Review before enforcing — a benign run only means no malicious behavior was observed in the sandbox, not that the sample is safe.',
   }
 );
 
@@ -307,9 +292,9 @@ export const VERDICT_MALICIOUS = i18n.translate(
   { defaultMessage: 'Detonate: malicious' }
 );
 
-export const VERDICT_QUIET = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.verdict.quiet',
-  { defaultMessage: 'Detonate: quiet' }
+export const VERDICT_BENIGN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.verdict.benign',
+  { defaultMessage: 'Detonate: benign' }
 );
 
 export const VERDICT_INCONCLUSIVE = i18n.translate(

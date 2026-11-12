@@ -3,8 +3,8 @@ name: Detonate FP validation
 description: >
   Detonate prototype: detonate a sample hash and write the verdict back to
   the alert it came from — tag `detonate:<verdict>` plus an evidence note.
-  Validates false positives the honest way: a quiet run is recorded as
-  quiet, the alert is never closed by the workflow, and prior runs of the
+  Validates false positives the honest way: a benign run is recorded as
+  benign, the alert is never closed by the workflow, and prior runs of the
   same hash are surfaced for the analyst. Experimental: installed only
   while the Detonate prototype feature flag is on.
 enabled: true
@@ -57,8 +57,10 @@ steps:
       task_id: "{{ steps.detonate.output.task_id }}"
       alert_id: "{{ inputs.alert_id }}"
 
+  # Only a complete run has a verdict to write back.
   - name: apply
     type: detonate.prototype.applyDetonationVerdict
+    if: "${{ steps.verdict.output.status == 'complete' }}"
     with:
       verdict: "{{ steps.verdict.output.verdict }}"
       alert_id: "{{ inputs.alert_id }}"
@@ -78,4 +80,4 @@ steps:
           continue: true
         with:
           case_id: "{{ inputs.case_id }}"
-          comment: "Detonation verdict: {{ steps.verdict.output.verdict }} — {{ steps.verdict.output.evidence }}"
+          comment: "Detonation {% if steps.verdict.output.status == 'complete' %}verdict: {{ steps.verdict.output.verdict }}{% else %}run {{ steps.verdict.output.status }}, no verdict{% endif %} — {{ steps.verdict.output.evidence }}"

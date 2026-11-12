@@ -80,7 +80,7 @@ steps:
   # ---------------------------------------------------------------------------
   # 1. Find untriaged hashes. An alert qualifies when it carries a
   #    file.hash.sha256 and none of the detonate outcome tags — the verdict
-  #    set is closed (detonate:malicious / quiet / inconclusive from a run,
+  #    set is closed (detonate:malicious / benign / inconclusive from a run,
   #    detonate:known-malicious from the reputation gate), so one MV_CONTAINS
   #    per tag excludes every already-triaged alert. MV_CONTAINS is false on a
   #    missing field, where NOT (tags IN (...)) would be null and drop the
@@ -105,7 +105,7 @@ steps:
           | WHERE file.hash.sha256 IS NOT NULL
           | WHERE kibana.alert.workflow_status == "open"
           | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:benign")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
           | STATS first_alert = MIN(_id) BY file.hash.sha256
@@ -132,7 +132,7 @@ steps:
           | WHERE kibana.alert.workflow_status == "open"
           | WHERE kibana.alert.severity IN ("high", "critical")
           | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
+            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:benign")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
             AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
           | STATS first_alert = MIN(_id) BY file.hash.sha256
@@ -399,8 +399,12 @@ steps:
           task_id: "{{ steps.detonate.output.task_id }}"
           alert_id: "{{ inputs.alert_id }}"
 
+      # Only a complete run has a verdict. A failed or unfinished run leaves the
+      # alert without a `detonate:` verdict tag; `clear_running` below still
+      # drops the transient tag so the alert does not read as underway.
       - name: apply
         type: detonate.prototype.applyDetonationVerdict
+        if: "${{ steps.verdict.output.status == 'complete' }}"
         with:
           verdict: "{{ steps.verdict.output.verdict }}"
           alert_id: "{{ inputs.alert_id }}"
@@ -431,8 +435,8 @@ steps:
         with:
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            File detonation verdict for alert {{ inputs.alert_id }}:
-            {{ steps.verdict.output.verdict | upcase }} —
+            File detonation {% if steps.verdict.output.status == 'complete' %}verdict{% else %}run {{ steps.verdict.output.status }}, no verdict{% endif %} for alert {{ inputs.alert_id }}:
+            {{ steps.verdict.output.verdict | default: steps.verdict.output.status | upcase }} —
             {{ steps.verdict.output.evidence }}
             (task {{ steps.verdict.output.task_id }}, hash {{ inputs.sha256 | slice: 0, 12 }}…)
 
@@ -525,11 +529,11 @@ steps:
       # on an analyst's decision. Each one is `on-failure: continue`: the verdict
       # is already on the alert, and a failed proposal must not fail the run.
       #
-      # Quiet: the sample's run history decides. Enough consecutive quiet runs
+      # Benign: the sample's run history decides. Enough consecutive benign runs
       # earn an exception proposal on the rule that raised the alert.
       - name: run_history
         type: detonate.prototype.detonateRunHistory
-        if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'quiet' }}"
+        if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'benign' }}"
         on-failure:
           continue: true
         with:
@@ -584,7 +588,7 @@ steps:
                       - terms:
                           kibana.alert.workflow_tags:
                             - "detonate:malicious"
-                            - "detonate:quiet"
+                            - "detonate:benign"
                             - "detonate:inconclusive"
                             - "detonate:known-malicious"
               minimum_should_match: 1
@@ -609,7 +613,7 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ inputs.conversation_id }}"
-            title: "Add a rule exception for a quiet sample ({{ inputs.sha256 | slice: 0, 12 }}…)"
+            title: "Add a rule exception for a benign sample ({{ inputs.sha256 | slice: 0, 12 }}…)"
             comment: |-
               **Exclude this file hash from "{{ variables.exception_rule_name }}"?**
 
@@ -619,10 +623,10 @@ steps:
             actionWorkflowId: system-alertzero-action-add-rule-exception
             actionInput:
               rule_id: "{{ variables.exception_rule_uuid }}"
-              name: "Detonate: quiet sample {{ inputs.sha256 | slice: 0, 12 }}…"
+              name: "Detonate: benign sample {{ inputs.sha256 | slice: 0, 12 }}…"
               description: >-
-                Added after {{ steps.run_history.output.quiet_streak }} consecutive
-                quiet sandbox detonations of this sample (latest task
+                Added after {{ steps.run_history.output.benign_streak }} consecutive
+                benign sandbox detonations of this sample (latest task
                 {{ steps.verdict.output.task_id }}).
               entries:
                 - field: file.hash.sha256
@@ -758,7 +762,7 @@ steps:
           comments:
             - "Blocklisted by {{ variables.blocklist_responded_by }} after detonation task {{ steps.verdict.output.task_id }}."
 
-      # A confirmed-malicious detonation is worth a case comment; a quiet or
+      # A confirmed-malicious detonation is worth a case comment; a benign or
       # inconclusive run stays on the alert, where the analyst already is.
       # Failing to comment on the case must not fail the run — the alert
       # already carries the verdict.

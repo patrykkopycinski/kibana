@@ -40,7 +40,7 @@ describe('DetonateVerdictBadge', () => {
 
   it.each([
     ['malicious', 2, 0],
-    ['quiet', 0, 0],
+    ['benign', 0, 0],
   ] as const)(
     'renders the %s verdict from the run outcome',
     (verdict, endpointAlerts, detectionAlerts) => {
@@ -75,20 +75,20 @@ describe('DetonateVerdictBadge', () => {
       expect(badge).toHaveTextContent(
         verdict === 'malicious'
           ? i18n.VERDICT_MALICIOUS
-          : verdict === 'quiet'
-          ? i18n.VERDICT_QUIET
+          : verdict === 'benign'
+          ? i18n.VERDICT_BENIGN
           : i18n.VERDICT_INCONCLUSIVE
       );
     }
   );
 
-  it('renders inconclusive when the run failed', () => {
+  it('renders nothing when the run failed: a failed run has no verdict', () => {
     const task = makeTask({
       last_worker_name: 'detonate.workers.start_vm',
       last_worker_status: 'failure',
     });
 
-    render(<DetonateVerdictBadge task={task} />);
-    expect(screen.getByTestId(`${VERDICT_BADGE_TEST_ID}-inconclusive`)).toBeInTheDocument();
+    const { container } = render(<DetonateVerdictBadge task={task} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

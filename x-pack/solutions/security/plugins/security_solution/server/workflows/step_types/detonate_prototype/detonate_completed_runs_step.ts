@@ -12,8 +12,7 @@ import {
   DETONATE_TAG_PREFIX,
   DETONATE_TASKS_PATH,
   deriveDetonateVerdict,
-  isDetonationComplete,
-  isDetonationFailed,
+  deriveDetonationRunStatus,
   parseAlertTag,
 } from '../../../../common/detonate_prototype';
 import type {
@@ -56,7 +55,7 @@ export const detonateCompletedRunsStepDefinition = createServerStepDefinition({
     }
 
     const completed = page.tasks
-      .filter((task) => isDetonationComplete(task) && !isDetonationFailed(task))
+      .filter((task) => deriveDetonationRunStatus(task) === 'complete')
       .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
     // A re-detonated alert has several runs; the newest one is the verdict
@@ -126,17 +125,21 @@ export const detonateCompletedRunsStepDefinition = createServerStepDefinition({
         missing_alerts: missingAlerts,
         deferred: pending.length - selected.length,
         pending_count: selected.length,
-        pending: selected.map((task) => {
-          const { verdict, evidence, suggested_tag: suggestedTag } = deriveDetonateVerdict(task);
-          return {
-            task_id: task.id,
-            alert_id: parseAlertTag(task.tags) as string,
-            ...(task.sample_hash ? { sample_hash: task.sample_hash } : {}),
-            created_at: task.created_at,
-            verdict,
-            evidence,
-            suggested_tag: suggestedTag,
-          };
+        pending: selected.flatMap((task) => {
+          const conclusion = deriveDetonateVerdict(task);
+          // `completed` already holds complete runs only; this narrows the type.
+          if (conclusion.status !== 'complete') return [];
+          return [
+            {
+              task_id: task.id,
+              alert_id: parseAlertTag(task.tags) as string,
+              ...(task.sample_hash ? { sample_hash: task.sample_hash } : {}),
+              created_at: task.created_at,
+              verdict: conclusion.verdict,
+              evidence: conclusion.evidence,
+              suggested_tag: conclusion.suggested_tag,
+            },
+          ];
         }),
       },
     };

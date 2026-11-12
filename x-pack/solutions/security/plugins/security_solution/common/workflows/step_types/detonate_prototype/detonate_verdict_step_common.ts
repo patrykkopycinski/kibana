@@ -21,10 +21,11 @@ import { i18n } from '@kbn/i18n';
 
 import {
   DETONATE_PROTOTYPE_NAMESPACE,
+  DETONATION_RUN_STATUSES,
   DETONATE_VERDICTS,
   DETONATE_VM_OS_FAMILIES,
 } from '../../../detonate_prototype';
-import type { DetonateVmOsFamily } from '../../../detonate_prototype';
+import type { DetonateVerdict } from '../../../detonate_prototype';
 
 export const DetonateVerdictStepId = `${DETONATE_PROTOTYPE_NAMESPACE}.detonateVerdict` as const;
 
@@ -43,7 +44,9 @@ export const detonateVerdictInputSchema = lazySchema(() =>
 
 export const detonateVerdictOutputSchema = lazySchema(() =>
   z.object({
-    verdict: z.enum(DETONATE_VERDICTS),
+    status: z.enum(DETONATION_RUN_STATUSES),
+    /** Present only when `status` is `complete`. */
+    verdict: z.enum(DETONATE_VERDICTS).optional(),
     task_id: z.string(),
     alert_id: z.string().optional(),
     /** Sandbox OS, when the run recorded one — endpoint artifacts are per-OS. */
@@ -52,21 +55,11 @@ export const detonateVerdictOutputSchema = lazySchema(() =>
     endpoint_alert_event_codes: z.array(z.string()),
     detection_rule_names: z.array(z.string()),
     evidence: z.string(),
-    suggested_tag: z.string(),
+    suggested_tag: z.string().optional(),
   })
 );
 
-export interface DetonateVerdictStepOutput {
-  verdict: (typeof DETONATE_VERDICTS)[number];
-  task_id: string;
-  alert_id?: string;
-  vm_os_family?: DetonateVmOsFamily;
-  total_alerts_count: number;
-  endpoint_alert_event_codes: string[];
-  detection_rule_names: string[];
-  evidence: string;
-  suggested_tag: string;
-}
+export type DetonateVerdictStepOutput = DetonateVerdict;
 
 export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
   typeof detonateVerdictInputSchema,
@@ -81,7 +74,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
     'xpack.securitySolution.workflows.steps.detonateVerdict.description',
     {
       defaultMessage:
-        'Derives a verdict (malicious, quiet or inconclusive) from a finished detonation run. Writes nothing.',
+        'Derives a verdict (malicious, benign or inconclusive) from a complete detonation run; a failed or unfinished run reports its status and no verdict. Writes nothing.',
     }
   ),
   inputSchema: detonateVerdictInputSchema,
@@ -91,7 +84,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateVerdict.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Reads the detonation task and derives the verdict with the same rule the Detonate page uses: failed, unfinished or diagnostic-only runs are `inconclusive` (never benign), a completed run with zero alerts is `quiet`, and a run with production endpoint alerts or detection rule hits is `malicious`. Pure — the writing half is `detonate.prototype.applyDetonationVerdict`.',
+          'Prototype step. Reads the detonation task and derives the verdict with the same rule the Detonate page uses: a run that failed or has not finished has `status` `failed` or `running` and no verdict; a complete run with diagnostic-only alerts is `inconclusive`, a complete run with zero alerts is `benign` (no malicious behavior observed in the sandbox, not proof the sample is safe), and a run with production endpoint alerts or detection rule hits is `malicious`. Pure — the writing half is `detonate.prototype.applyDetonationVerdict`.',
       }
     ),
     examples: [
@@ -104,6 +97,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
 
 - name: tag_alert
   type: detonate.prototype.applyDetonationVerdict
+  if: "\${{ steps.verdict.output.status == 'complete' }}"
   with:
     verdict: "{{ steps.verdict.output.verdict }}"
     alert_id: "{{ steps.verdict.output.alert_id }}"

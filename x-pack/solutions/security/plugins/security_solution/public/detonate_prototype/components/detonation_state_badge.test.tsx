@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { DETONATE_ESCALATED_TAG, DETONATION_STATES } from '../../../common/detonate_prototype';
+import { DETONATE_TAG_PREFIX, DETONATION_STATES } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import {
   DETONATE_STATUS_TEST_ID,
@@ -97,16 +97,18 @@ describe('DetonationStatusBadge', () => {
     expect(screen.getByTestId(`${DETONATE_STATUS_TEST_ID}-running`)).toBeInTheDocument();
   });
 
-  it('shows a diagnostic-only run as inconclusive, not complete', () => {
+  it('shows a diagnostic-only run as complete: the verdict is a separate axis', () => {
     render(<DetonationStatusBadge task={createTask({ diagnostic_endpoint_alerts_count: 1 })} />);
 
-    expect(screen.getByTestId(`${DETONATE_STATUS_TEST_ID}-inconclusive`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${DETONATE_STATUS_TEST_ID}-complete`)).toBeInTheDocument();
   });
 
-  it('shows an escalated run as escalated', () => {
-    render(<DetonationStatusBadge task={createTask({ tags: [DETONATE_ESCALATED_TAG] })} />);
+  it('ignores the retired escalated tag', () => {
+    render(
+      <DetonationStatusBadge task={createTask({ tags: [`${DETONATE_TAG_PREFIX}escalated`] })} />
+    );
 
-    expect(screen.getByTestId(`${DETONATE_STATUS_TEST_ID}-escalated`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${DETONATE_STATUS_TEST_ID}-complete`)).toBeInTheDocument();
   });
 
   it('shows the step only when asked', () => {

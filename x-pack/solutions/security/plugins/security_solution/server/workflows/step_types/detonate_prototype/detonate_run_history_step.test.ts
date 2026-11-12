@@ -32,7 +32,7 @@ const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
   ...overrides,
 });
 
-const quiet = (id: string, day: number) =>
+const benign = (id: string, day: number) =>
   createTask({ id, created_at: `2026-01-0${day}T00:00:00.000Z` });
 
 const malicious = (id: string, day: number) =>
@@ -68,35 +68,35 @@ describe('detonateRunHistoryStepDefinition', () => {
     });
   });
 
-  it('is proposal-eligible once three runs in a row completed quiet', async () => {
+  it('is proposal-eligible once three runs in a row completed benign', async () => {
     // Deliberately out of order: the step sorts newest-first itself.
-    const context = createMockContext([quiet('t2', 2), quiet('t3', 3), quiet('t1', 1)]);
+    const context = createMockContext([benign('t2', 2), benign('t3', 3), benign('t1', 1)]);
 
     const { output } = await detonateRunHistoryStepDefinition.handler(context);
 
     expect(output).toMatchObject({
       completed_runs: 3,
-      quiet_streak: 3,
+      benign_streak: 3,
       proposal_eligible: true,
     });
     expect(output?.runs.map((run) => run.task_id)).toEqual(['t3', 't2', 't1']);
     expect(output?.evidence_comment).toContain('3 consecutive detonation(s)');
   });
 
-  it('breaks the streak at the newest non-quiet run', async () => {
-    const context = createMockContext([quiet('t1', 1), quiet('t2', 2), malicious('t3', 3)]);
+  it('breaks the streak at the newest non-benign run', async () => {
+    const context = createMockContext([benign('t1', 1), benign('t2', 2), malicious('t3', 3)]);
 
     const { output } = await detonateRunHistoryStepDefinition.handler(context);
 
-    expect(output?.quiet_streak).toBe(0);
+    expect(output?.benign_streak).toBe(0);
     expect(output?.proposal_eligible).toBe(false);
     expect(output?.runs[0]).toMatchObject({ task_id: 't3', verdict: 'malicious' });
   });
 
   it('ignores failed, unfinished and other-sample runs', async () => {
     const context = createMockContext([
-      quiet('t1', 1),
-      quiet('t2', 2),
+      benign('t1', 1),
+      benign('t2', 2),
       createTask({
         id: 'failed',
         created_at: '2026-01-03T00:00:00.000Z',
@@ -118,7 +118,7 @@ describe('detonateRunHistoryStepDefinition', () => {
     const { output } = await detonateRunHistoryStepDefinition.handler(context);
 
     expect(output?.runs.map((run) => run.task_id)).toEqual(['t2', 't1']);
-    expect(output?.quiet_streak).toBe(2);
+    expect(output?.benign_streak).toBe(2);
     expect(output?.proposal_eligible).toBe(false);
   });
 

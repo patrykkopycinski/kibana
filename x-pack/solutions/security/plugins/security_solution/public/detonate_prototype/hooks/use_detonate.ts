@@ -197,7 +197,7 @@ export const useCompletedDetonationByHash = (hash: string | undefined) => {
 
 /**
  * F7: every completed run for one sample hash, newest first — the run history
- * the learning tier reads. Three quiet runs in a row is the evidence an
+ * the learning tier reads. Three benign runs in a row is the evidence an
  * exception/trusted-app proposal cites, so the shape is exactly "the runs that
  * count toward that decision", pre-filtered the same way
  * `useCompletedDetonationByHash` filters.

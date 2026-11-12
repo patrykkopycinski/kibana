@@ -92,14 +92,16 @@ describe('space scope', () => {
       );
     });
 
-    it('answers unknown when the newest completed run was quiet', async () => {
+    it('answers unknown when the newest completed run was benign', async () => {
       const result = await lookupPriorRunsInSpace(
         clientWith([completed('run-2', ['space:team-a'], 0), completed('r1', ['space:team-a'], 3)]),
         sha,
         'team-a'
       );
 
-      expect(result).toEqual(expect.objectContaining({ status: 'unknown', last_verdict: 'quiet' }));
+      expect(result).toEqual(
+        expect.objectContaining({ status: 'unknown', last_verdict: 'benign' })
+      );
     });
 
     it('ignores a run from another space even if the service returned it', async () => {

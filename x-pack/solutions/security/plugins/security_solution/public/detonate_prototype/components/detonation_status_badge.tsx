@@ -15,7 +15,7 @@
 
 import React from 'react';
 
-import { deriveDetonationRunState, detonationStep } from '../../../common/detonate_prototype';
+import { deriveDetonationRunStatus, detonationStep } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { DetonationStateBadge } from './detonation_state_badge';
 
@@ -29,7 +29,7 @@ interface Props {
 
 export const DetonationStatusBadge = React.memo<Props>(({ task, showProgress = false }) => (
   <DetonationStateBadge
-    state={deriveDetonationRunState(task)}
+    state={deriveDetonationRunStatus(task)}
     step={showProgress ? detonationStep(task) : undefined}
   />
 ));

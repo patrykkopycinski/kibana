@@ -26,19 +26,21 @@ Minutes, not seconds. Submitting and polling are separate tools for that reason.
 ## Reading the state
 
 A task carries a worker name and a worker status, not a "done" flag. The tools
-derive three booleans from them:
+derive a run \`status\` (\`queued\`, \`running\`, \`complete\` or \`failed\`) and three
+booleans from them. Only a \`complete\` run carries a \`verdict\`
+(\`malicious\`, \`benign\` or \`inconclusive\`); a failed or running run has none:
 
-- \`complete\` — the run reached its terminal worker, or failed. Stop polling.
-- \`failed\` — the run ended badly: the VM never came up, the sample could not be
+- \`complete\` — the run reached its terminal worker and has a verdict. Stop polling.
+- \`failed\` — the run ended badly (stop polling): the VM never came up, the sample could not be
   fetched, the agent never enrolled. There is no behavioural verdict.
-- \`quiet\` — the run finished cleanly and produced **zero** alerts.
+- \`benign\` — the run finished cleanly and produced **zero** alerts.
 
 \`progress\` reports the stage as \`step\`/\`of\` plus the worker's short name, which
 is what to tell an analyst who asks how far along a run is.
 
 ## What zero alerts means
 
-A quiet run is a result, not a failure. It means one of:
+A benign run is a result, not a failure. It means one of:
 
 1. The sample did nothing malicious in the time it was given — though this is
    not proof the sample is harmless (no behavior was observed ≠ safe).
@@ -46,7 +48,7 @@ A quiet run is a result, not a failure. It means one of:
 3. Elastic Defend has a gap for this behaviour.
 
 Report it as a finding and say which of those you can and cannot rule out.
-Never report a quiet run as "the detonation did not work" — that is \`failed\`,
+Never report a benign run as "the detonation did not work" — that is \`failed\`,
 which is a different field.
 
 ## The three telemetry buckets
@@ -76,7 +78,7 @@ fresh run, or when the recorded run failed.
 
 - It cannot detonate a file the analyst has in hand — submission is by hash, and
   the service fetches the sample from its sources. A hash no source holds cannot
-  be detonated; that comes back as a failed run, not a quiet one.
+  be detonated; that comes back as a failed run, not a benign one.
 - It cannot cancel a run in flight.
 - It does not return raw alert documents. For those, open the run in the
   Detonate page in the Security UI.

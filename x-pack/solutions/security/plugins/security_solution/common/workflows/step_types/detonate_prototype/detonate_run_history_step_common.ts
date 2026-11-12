@@ -7,7 +7,7 @@
 
 /**
  * Read-only: summarizes every completed detonation of one sample, newest
- * first, into the evidence the proposal logic acts on — the quiet streak,
+ * first, into the evidence the proposal logic acts on — the benign streak,
  * whether it clears the proposal threshold, and the proposal text. The step
  * proposes nothing itself; the workflow decides what to raise.
  */
@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import {
   DETONATE_PROTOTYPE_NAMESPACE,
   DETONATE_VERDICTS,
-  PROPOSAL_QUIET_STREAK_THRESHOLD,
+  PROPOSAL_BENIGN_STREAK_THRESHOLD,
 } from '../../../detonate_prototype';
 
 export const DetonateRunHistoryStepId =
@@ -39,7 +39,7 @@ export const detonateRunHistoryOutputSchema = lazySchema(() =>
   z.object({
     sha256: z.string(),
     completed_runs: z.number(),
-    quiet_streak: z.number(),
+    benign_streak: z.number(),
     proposal_eligible: z.boolean(),
     runs: z.array(
       z.object({
@@ -65,8 +65,8 @@ export const detonateRunHistoryStepCommonDefinition: BaseStepDefinition<
     'xpack.securitySolution.workflows.steps.detonateRunHistory.description',
     {
       defaultMessage:
-        'Summarizes every completed detonation of one sha256, newest first: the consecutive quiet-run streak and whether it clears the {threshold}-run exception-proposal bar.',
-      values: { threshold: PROPOSAL_QUIET_STREAK_THRESHOLD },
+        'Summarizes every completed detonation of one sha256, newest first: the consecutive benign-run streak and whether it clears the {threshold}-run exception-proposal bar.',
+      values: { threshold: PROPOSAL_BENIGN_STREAK_THRESHOLD },
     }
   ),
   inputSchema: detonateRunHistoryInputSchema,
@@ -76,11 +76,11 @@ export const detonateRunHistoryStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateRunHistory.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Read-only. Failed and unfinished runs are excluded, so they neither extend nor break the streak. A quiet streak is evidence toward an exception, never proof the sample is benign — gate anything it feeds behind an analyst.',
+          'Prototype step. Read-only. Failed and unfinished runs are excluded, so they neither extend nor break the streak. A benign streak means no malicious behavior was observed in the sandbox, which is evidence toward an exception, never proof the sample is safe — gate anything it feeds behind an analyst.',
       }
     ),
     examples: [
-      `## Propose an exception once a sample has run quiet enough times
+      `## Propose an exception once a sample has come back benign enough times
 \`\`\`yaml
 - name: history
   type: ${DetonateRunHistoryStepId}

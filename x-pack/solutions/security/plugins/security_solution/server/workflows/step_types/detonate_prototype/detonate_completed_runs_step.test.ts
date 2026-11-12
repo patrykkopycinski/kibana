@@ -164,7 +164,7 @@ describe('detonateCompletedRunsStepDefinition', () => {
   it('skips alerts that already carry a verdict and counts alerts not found', async () => {
     const context = createMockContext(
       [run('t1', 'tagged', 1), run('t2', 'gone', 2), run('t3', 'open', 3)],
-      [alertHit('tagged', ['detonate:quiet']), alertHit('open', ['triaged'])]
+      [alertHit('tagged', ['detonate:benign']), alertHit('open', ['triaged'])]
     );
 
     const output = await sweep(context);

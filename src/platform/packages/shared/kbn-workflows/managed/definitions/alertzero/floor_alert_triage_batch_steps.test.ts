@@ -166,7 +166,9 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
     const withBlock = stepByName('build_fp_threshold_expr')?.with as Record<string, string>;
     const scope = {
       inputs: { confidence_floor: 0.85 },
-      steps: { find_detonate_confirmed_fp: { output: { hits: { hits: [{ _id: 'fp-detonated' }] } } } },
+      steps: {
+        find_detonate_confirmed_fp: { output: { hits: { hits: [{ _id: 'fp-detonated' }] } } },
+      },
     };
     const variables = {
       fp_threshold_expr: renderString(withBlock.fp_threshold_expr, scope).trim(),
@@ -176,7 +178,10 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
     const context = { steps: { classify_alerts: { output: { verdicts } } }, variables };
 
     expect(
-      evalExpr(stepByName('compute_below_floor_fp_ids')?.with?.az_below_floor_fp_ids as string, context)
+      evalExpr(
+        stepByName('compute_below_floor_fp_ids')?.with?.az_below_floor_fp_ids as string,
+        context
+      )
     ).toEqual(['fp-detonated']);
     expect(
       evalExpr(stepByName('compute_az_tag_ids')?.with?.az_false_positive_ids as string, context)
@@ -1956,7 +1961,7 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
   it('skips alerts that already carry any detonate verdict tag', () => {
     expect(
       candidates([
-        alert('a1', 'h1', ['detonate:quiet']),
+        alert('a1', 'h1', ['detonate:benign']),
         alert('a2', 'h2', ['detonate:known-malicious']),
         alert('a3', 'h3', ['az:triage_pending']),
         alert('a4', 'h4', ['detonate:malicious', 'other']),

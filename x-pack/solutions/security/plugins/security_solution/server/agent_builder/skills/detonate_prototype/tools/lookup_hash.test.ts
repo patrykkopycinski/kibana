@@ -91,7 +91,7 @@ describe('lookupHashTool', () => {
       status: 'unknown',
       source: 'prior-detonation',
       last_task_id: 'task-2',
-      last_verdict: 'quiet',
+      last_verdict: 'benign',
       last_seen: '2026-11-02T10:00:00.000Z',
     });
 
@@ -101,7 +101,7 @@ describe('lookupHashTool', () => {
       status: 'unknown',
       has_completed_run: true,
       last_task_id: 'task-2',
-      last_verdict: 'quiet',
+      last_verdict: 'benign',
     });
   });
 

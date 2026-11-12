@@ -38,6 +38,7 @@ import {
   DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
   DETONATE_MAX_ALERT_DOCS,
+  DETONATE_PRIOR_RUNS_LOOKBACK,
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
@@ -47,12 +48,19 @@ import {
   DETONATE_USAGE_PATH,
   detonateAllowanceWindow,
   detonateSandboxStreamName,
+  deriveDetonateVerdict,
+  diffCategoryCounts,
+  isDetonationComplete,
+  runBelongsToSpace,
+  spaceTaskQuery,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateAlertDoc,
   DetonateFileRequest,
   DetonateHandoffList,
   DetonateHandoffUpdate,
+  DetonateRunDiffEmpty,
+  DetonateRunDiffResult,
   DetonateRunSessionResult,
   DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
@@ -80,6 +88,7 @@ import {
   readTaskAlerts,
   readTaskIocs,
 } from '../ioc_extraction';
+import { categoryCountsForRun, countsByCategory } from '../behavior_diff';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import {
   assertReadableAlertTags,
@@ -720,6 +729,151 @@ export const registerDetonatePrototypeRoutes = ({
               ...(sessionEntityId ? { session_entity_id: sessionEntityId } : {}),
               ...(sessionStartTime ? { session_start_time: sessionStartTime } : {}),
               ...counts,
+            },
+          });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * Behavior diff between two runs of the same sample (N2). Copies both runs'
+   * alerts and events into the space's sandbox stream (idempotent, same as
+   * /session and /ingest), then answers one ES|QL per run: per-category doc
+   * counts, union-diffed server-side. `against` omitted: the most recent
+   * earlier completed run of the same hash in this space; a first run answers
+   * a null-shaped `{ reason: 'no-prior-run' }`, not a zero-delta fabrication.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: `${DETONATE_RUNS_PATH}/{id}/diff`,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+            query: schema.object({
+              against: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          if (!(await hasDetonatePrivilege(request, 'read'))) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Viewing a run diff requires the Security Solution read privilege or the Detonate privilege.',
+              },
+            });
+          }
+
+          const client = getClient(request);
+          const spaceId = spaceIdFromRequest(request);
+          const task = await getTaskInSpace(client, request.params.id, spaceId);
+          const hash = task.sample_hash?.toLowerCase();
+
+          // Default baseline: the newest earlier completed run of the same
+          // hash in this space. Caller-chosen `against` wins, and its fitness
+          // is reported through `comparable`, not silently swapped.
+          let againstTask: DetonateTask | undefined;
+          let comparable = true;
+          if (request.query.against) {
+            againstTask = await getTaskInSpace(client, request.query.against, spaceId);
+            comparable =
+              hash !== undefined &&
+              againstTask.sample_hash?.toLowerCase() === hash &&
+              againstTask.id !== task.id;
+          } else if (hash) {
+            const { tasks } = await client.listTasks({
+              query_string: spaceTaskQuery(spaceId, { sampleHash: hash }),
+              size: DETONATE_PRIOR_RUNS_LOOKBACK,
+              order: 'desc',
+            });
+            // "Previous run" means earlier: a same-hash run submitted after
+            // this one must not become the baseline. Equal timestamps still
+            // count (the service clock and submit order can tie).
+            const createdAt = Date.parse(task.created_at);
+            againstTask = tasks.find(
+              (prior) =>
+                prior.id !== task.id &&
+                runBelongsToSpace(prior.tags, spaceId) &&
+                prior.sample_hash?.toLowerCase() === hash &&
+                isDetonationComplete(prior) &&
+                Date.parse(prior.created_at) <= createdAt
+            );
+          }
+
+          if (!againstTask) {
+            return response.ok<DetonateRunDiffEmpty>({
+              body: { task_id: task.id, reason: 'no-prior-run' },
+            });
+          }
+
+          // Both runs' telemetry must be in the stream or the diff answers
+          // against absence: copy first, idempotently, exactly like /session.
+          const stream = detonateSandboxStreamName(spaceId);
+          const esClient = await getInternalEsClient();
+          await ensureSandboxTemplate(esClient);
+          for (const run of [task, againstTask]) {
+            const { docs } = await readTaskAlerts(
+              run,
+              (kind) => client.getTaskAlerts(run.id, kind, DETONATE_MAX_ALERT_DOCS),
+              (kind, reason) =>
+                logger.debug(`Detonation ${run.id}: could not read ${kind}: ${reason}`)
+            );
+            let events: Array<Record<string, unknown>> = [];
+            try {
+              events = await client.getTaskProcessEvents(run.id, DETONATE_MAX_ALERT_DOCS);
+            } catch (error) {
+              logger.debug(`Detonation ${run.id}: could not read process events: ${error}`);
+            }
+            await ingestSandboxDocs(esClient, stream, run, [
+              ...docs,
+              ...events.map((doc) => ({ kind: DETONATE_PROCESS_EVENTS_KIND, doc })),
+            ]);
+          }
+
+          // The copies above land in bulk's refresh interval, but the ES|QL
+          // below must see them in this same request: a run diffed seconds
+          // after completing would otherwise answer zero categories for its
+          // own just-copied telemetry. Refresh is idempotent and cheap; a
+          // failure is the stream's failure and flows to the same error path.
+          try {
+            await esClient.indices.refresh({ index: stream });
+          } catch (error) {
+            logger.debug(`Detonate stream ${stream}: refresh before diff: ${error}`);
+          }
+
+          const [currentCounts, priorCounts] = await Promise.all([
+            categoryCountsForRun(esClient, stream, task.id),
+            categoryCountsForRun(esClient, stream, againstTask.id),
+          ]);
+          const current = countsByCategory(currentCounts);
+          const prior = countsByCategory(priorCounts);
+
+          return response.ok<DetonateRunDiffResult>({
+            body: {
+              task_id: task.id,
+              against_task_id: againstTask.id,
+              comparable,
+              current: {
+                task_id: task.id,
+                verdict: deriveDetonateVerdict(task).verdict,
+                categories: currentCounts,
+              },
+              prior: {
+                task_id: againstTask.id,
+                verdict: deriveDetonateVerdict(againstTask).verdict,
+                categories: priorCounts,
+              },
+              delta: diffCategoryCounts(current, prior),
             },
           });
         } catch (error) {

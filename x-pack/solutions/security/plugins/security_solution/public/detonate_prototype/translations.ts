@@ -254,6 +254,39 @@ export const RUN_HISTORY_EMPTY = i18n.translate(
   { defaultMessage: 'No other completed runs for this sample.' }
 );
 
+export const BEHAVIOR_DIFF_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.behaviorDiffTitle',
+  { defaultMessage: 'Behavior vs previous run' }
+);
+
+export const BEHAVIOR_DIFF_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.behaviorDiffEmpty',
+  {
+    defaultMessage: 'First run of this sample — nothing to compare against yet.',
+  }
+);
+
+export const BEHAVIOR_DIFF_NO_CHANGE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.behaviorDiffNoChange',
+  {
+    defaultMessage: 'Same categories and counts as the previous run.',
+  }
+);
+
+export const BEHAVIOR_DIFF_NOT_COMPARABLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.detail.behaviorDiffNotComparable',
+  {
+    defaultMessage:
+      'The compared run is not an earlier run of this sample — read the diff as a side-by-side, not a change over time.',
+  }
+);
+
+export const BEHAVIOR_DIFF_PRIOR_LINK = (shortId: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.detail.behaviorDiffPriorLink', {
+    defaultMessage: 'vs run {shortId}',
+    values: { shortId },
+  });
+
 export const PROPOSAL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.proposalButtonLabel',
   {

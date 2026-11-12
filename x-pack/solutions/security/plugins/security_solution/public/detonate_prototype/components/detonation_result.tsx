@@ -41,6 +41,7 @@ import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonationTask, useCompletedDetonationHistoryByHash } from '../hooks/use_detonate';
 import { WorkerTimeline } from './worker_timeline';
 import { RunHistory } from './run_history';
+import { BehaviorDiffCard } from './behavior_diff_card';
 import { DetectionAlertGroups, EndpointAlertGroups } from './alert_groups';
 import * as i18n from '../translations';
 
@@ -205,7 +206,16 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
           Rendered for every run — a single-run history is honest too — but
           only after completion, when the streak the proposal cites can
           actually exist. */}
-      {complete && task.sample_hash && <RunHistory runs={historyRuns} hash={task.sample_hash} />}
+      {complete && task.sample_hash && (
+        <EuiFlexGroup gutterSize="l" responsive={false}>
+          <EuiFlexItem>
+            <RunHistory runs={historyRuns} hash={task.sample_hash} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <BehaviorDiffCard taskId={task.id} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>

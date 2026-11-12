@@ -703,6 +703,89 @@ export interface DetonateSandboxCountResult {
   count: number;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Behavior diff between two runs of the same sample (N2)                      */
+/* -------------------------------------------------------------------------- */
+
+/** Copy a run's alerts and events, then answer how its behavior differs from a prior run's. */
+export const detonateRunDiffPath = (taskId: string) =>
+  `${DETONATE_RUNS_PATH}/${encodeURIComponent(taskId)}/diff` as const;
+
+/**
+ * ES|QL groups docs without an `event.category` under null; the diff keeps
+ * them as an explicit class rather than dropping them, because diagnostic
+ * telemetry legitimately carries no category.
+ */
+export const DETONATE_UNCATEGORIZED = 'uncategorized' as const;
+
+export interface DetonateCategoryCount {
+  category: string;
+  count: number;
+}
+
+/** One run's side of the diff: what was measured, not how it compares. */
+export interface DetonateRunDiffSide {
+  task_id: string;
+  verdict: DetonateVerdictName;
+  /** Per-category doc counts, sorted by category name. */
+  categories: DetonateCategoryCount[];
+}
+
+/** One category's comparison, current run against the prior one. */
+export interface DetonateCategoryDelta {
+  category: string;
+  current: number;
+  prior: number;
+  /** current - prior; a category present on one side only diffs its whole count. */
+  delta: number;
+}
+
+export interface DetonateRunDiffResult {
+  task_id: string;
+  /** The run `current` was compared against. */
+  against_task_id: string;
+  /**
+   * False when `against` was caller-chosen but is not an earlier completed
+   * run of the same sample in this space; the diff still answers (against an
+   * unrelated run is a valid question) but the UI must not present it as
+   * "previous run of this sample".
+   */
+  comparable: boolean;
+  current: DetonateRunDiffSide;
+  prior: DetonateRunDiffSide;
+  /** Union of both sides' categories, largest absolute delta first. */
+  delta: DetonateCategoryDelta[];
+}
+
+/**
+ * A first run of a sample has no earlier run to diff against. The shape says
+ * exactly that, so the card renders its empty state instead of a zero-delta
+ * table that would read as "behavior unchanged".
+ */
+export interface DetonateRunDiffEmpty {
+  task_id: string;
+  reason: 'no-prior-run';
+}
+
+/**
+ * Union diff of two per-category count maps, sorted most-changed first. Pure:
+ * the route computes it once server-side, and the tests pin the ordering and
+ * the null-category naming (`uncategorized`) here.
+ */
+export const diffCategoryCounts = (
+  current: Readonly<Record<string, number>>,
+  prior: Readonly<Record<string, number>>
+): DetonateCategoryDelta[] => {
+  const categories = new Set([...Object.keys(current), ...Object.keys(prior)]);
+  return [...categories]
+    .map((category) => {
+      const c = current[category] ?? 0;
+      const p = prior[category] ?? 0;
+      return { category, current: c, prior: p, delta: c - p };
+    })
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta) || a.category.localeCompare(b.category));
+};
+
 export interface DetonateUsage {
   /** Runs submitted from this space since `since`. Every submission counts. */
   used: number;

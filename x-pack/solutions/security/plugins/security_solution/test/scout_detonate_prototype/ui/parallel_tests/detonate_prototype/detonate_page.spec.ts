@@ -62,6 +62,9 @@ const DETECTION_ALERTS_COUNT = 'detonatePrototypeProductionDetectionAlerts-count
 // Session View's own test subjects, reused as-is: the tree container and a node.
 const PROCESS_TREE = 'sessionView:sessionViewProcessTree';
 const PROCESS_NODE = 'sessionView:processTreeNode';
+// The behavior-diff card on the Overview tab (N2).
+const BEHAVIOR_DIFF_CARD = 'detonatePrototypeBehaviorDiff';
+const BEHAVIOR_DIFF_CHIP = (category: string) => `${BEHAVIOR_DIFF_CARD}-chip-${category}`;
 
 /** `/internal/detonate_prototype/healthcheck` — the page's readiness probe. */
 const HEALTHCHECK_URL = '/internal/detonate_prototype/healthcheck';
@@ -176,37 +179,34 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(flyoutTitle);
   });
 
-  spaceTest(
-    'shows the run\'s process lineage in the Session tab',
-    async ({ page }) => {
-      await page.gotoApp(DETONATE_APP);
-      await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
+  spaceTest("shows the run's process lineage in the Session tab", async ({ page }) => {
+    await page.gotoApp(DETONATE_APP);
+    await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-      await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
-      await page.testSubj.click(SUBMIT_BUTTON);
-      await page.testSubj.click(CONFIRM_BUTTON);
+    await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
+    await page.testSubj.click(SUBMIT_BUTTON);
+    await page.testSubj.click(CONFIRM_BUTTON);
 
-      await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
-      await expect(
-        page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
-      ).toBeVisible({ timeout: RUN_COMPLETION_TIMEOUT_MS });
+    await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
+    await expect(
+      page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
+    ).toBeVisible({ timeout: RUN_COMPLETION_TIMEOUT_MS });
 
-      // Session View renders the run's process events: the recorded lineage
-      // from the entry leader down to the payload process. A bare "renders"
-      // check would pass on an empty tree, so the tab must show the lineage
-      // expanded — more than the root node — the way an interactive session
-      // auto-expands (the session/group leader markers the service emits).
-      await page.testSubj.click(DETONATION_SESSION_TAB);
-      await expect(page.testSubj.locator(PROCESS_TREE)).toBeVisible();
+    // Session View renders the run's process events: the recorded lineage
+    // from the entry leader down to the payload process. A bare "renders"
+    // check would pass on an empty tree, so the tab must show the lineage
+    // expanded — more than the root node — the way an interactive session
+    // auto-expands (the session/group leader markers the service emits).
+    await page.testSubj.click(DETONATION_SESSION_TAB);
+    await expect(page.testSubj.locator(PROCESS_TREE)).toBeVisible();
 
-      const processNodes = page.testSubj.locator(PROCESS_NODE);
-      await expect(processNodes.first()).toBeVisible();
-      expect(
-        await processNodes.count(),
-        'the session tree must show the lineage, not just the entry leader'
-      ).toBeGreaterThan(1);
-    }
-  );
+    const processNodes = page.testSubj.locator(PROCESS_NODE);
+    await expect(processNodes).not.toHaveCount(0);
+    expect(
+      await processNodes.count(),
+      'the session tree must show the lineage, not just the entry leader'
+    ).toBeGreaterThan(1);
+  });
 
   spaceTest('pre-fills the form the way the alert action does', async ({ page }) => {
     // What the "Detonate file" alert action builds: the hash it extracted from
@@ -218,5 +218,46 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
     await expect(page.testSubj.locator(SAMPLE_HASH_INPUT)).toHaveValue(SAMPLE_SHA256);
     await expect(page.testSubj.locator(TAGS_INPUT)).toContainText(tag);
+  });
+
+  spaceTest('diffs the second run of the same sample against the first', async ({ page }) => {
+    // One submit, two runs' worth of evidence: the earlier tests in this
+    // spec complete seed-default runs of this same hash (they assert it),
+    // and tests in a file run in order, so a completed baseline always
+    // exists by the time this test runs. This test submits only the second
+    // run — pinned by submit tag to the same sample's other recording,
+    // which replays without the seed default's synthesized process lineage.
+    // Same sample, different recorded behavior: exactly the case the diff
+    // exists for. A zero-delta answer here would mean the diff is broken,
+    // not that the sample behaved identically.
+    //
+    // Every earlier run of this hash replays the seed default (process
+    // lineage present), so the assertions below hold whichever of those
+    // runs is the baseline.
+    await page.gotoApp(DETONATE_APP, {
+      params: { sample_hash: SAMPLE_SHA256, tags: 'fixture:eicar-linux-reenrolled' },
+    });
+    await expect(page.testSubj.locator(SAMPLE_HASH_INPUT)).toHaveValue(SAMPLE_SHA256);
+    // The tag is what pins the recording this run replays; without it the
+    // run replays the seed default and the diff below is zero-delta.
+    await expect(page.testSubj.locator(TAGS_INPUT)).toContainText('fixture:eicar-linux-reenrolled');
+    await page.testSubj.click(SUBMIT_BUTTON);
+    await page.testSubj.click(CONFIRM_BUTTON);
+    await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
+    await expect(
+      page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_COMPLETE}"]`)
+    ).toBeVisible({ timeout: RUN_COMPLETION_TIMEOUT_MS });
+    // The card renders for a completed run against an earlier same-hash run:
+    // the honest empty state is not expected here, a diff is.
+    await expect(page.testSubj.locator(BEHAVIOR_DIFF_CARD)).toBeVisible();
+
+    // The re-enrolled recording replays without the overlaid process
+    // lineage, so whatever seed-default run is the baseline, the process
+    // count drops by its whole size. A zero-delta answer means the diff is
+    // broken.
+    await expect(page.testSubj.locator(BEHAVIOR_DIFF_CHIP('process'))).toBeVisible();
+    await expect(page.testSubj.locator(BEHAVIOR_DIFF_CHIP('process'))).toHaveText(
+      /^process\s+-\d+$/
+    );
   });
 });

@@ -43,7 +43,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   };
   let hasDetonatePrivilege: jest.Mock;
   let esClient: {
-    indices: { putIndexTemplate: jest.Mock };
+    indices: { putIndexTemplate: jest.Mock; refresh: jest.Mock };
     bulk: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
@@ -139,7 +139,10 @@ describe('registerDetonatePrototypeRoutes', () => {
     };
     hasDetonatePrivilege = jest.fn().mockResolvedValue(canWrite);
     esClient = {
-      indices: { putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }) },
+      indices: {
+        putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+        refresh: jest.fn().mockResolvedValue({ _shards: { successful: 1 } }),
+      },
       bulk: jest.fn(),
       search: jest.fn(),
       updateByQuery: jest.fn(),
@@ -1568,6 +1571,254 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       expect(() => body.validate({ rule_query: 'a'.repeat(10_001) })).toThrow();
       expect(() => body.validate({ rule_query: 'FROM logs-*' })).not.toThrow();
+    });
+  });
+
+  describe('behavior diff', () => {
+    const DIFF_PATH = `${DETONATE_RUNS_PATH}/{id}/diff`;
+    const diffHandler = () => router.versioned.getRoute('get', DIFF_PATH).versions['1'].handler;
+    const diffRequest = (id: string, against?: string) =>
+      httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: `${DETONATE_RUNS_PATH}/${id}/diff`,
+        ...(against ? { query: { against } } : {}),
+        params: { id },
+      });
+
+    /** A completed run of `sha-a` in this space, submitted at the given minute. */
+    const run = (
+      id: string,
+      createdAt = '2026-11-01T00:00:00.000Z',
+      worker = 'detonate.workers.make_summary'
+    ) => ({
+      id,
+      created_at: createdAt,
+      tags: ['space:team-a'],
+      last_worker_name: worker,
+      last_worker_status: 'success',
+      sample_hash: 'SHA-A',
+      production_endpoint_alerts_count: 2,
+      production_endpoint_alert_groups: [],
+      diagnostic_endpoint_alerts_count: 0,
+      diagnostic_endpoint_alert_groups: [],
+      production_detection_alerts_count: 0,
+      production_detection_alert_groups: [],
+    });
+    const alert = (eventId: string, timestamp = '2026-11-01T00:01:00.000Z') => ({
+      '@timestamp': timestamp,
+      event: { id: eventId, kind: 'alert' },
+      host: { name: 'sandbox-host-secret-name', os: { type: 'linux' } },
+    });
+    /** ES|QL `STATS COUNT(*) BY event.category` rows for one run. */
+    const countsRows = (rows: Array<[number, string | null]>) =>
+      rows.map((row) => (row[1] === null ? [row[0], null] : row));
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+      client.getTaskAlerts.mockResolvedValue([]);
+      client.getTaskProcessEvents.mockResolvedValue([]);
+      esClient.bulk.mockResolvedValue({ items: [] });
+    });
+
+    const okBody = () => {
+      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
+        [{ body: Record<string, unknown> }]
+      >;
+      return body;
+    };
+
+    it('diffs against the most recent earlier completed run of the same hash', async () => {
+      client.getTask.mockResolvedValue(run('run-2', '2026-11-02T00:00:00.000Z') as never);
+      client.listTasks.mockResolvedValue({
+        tasks: [
+          run('run-2', '2026-11-02T00:00:00.000Z'),
+          run('run-1', '2026-11-01T00:00:00.000Z'),
+          run('run-0', '2026-10-31T00:00:00.000Z'),
+        ],
+      } as never);
+      client.getTaskAlerts.mockResolvedValue([alert('e-1')]);
+      esClient.esql.query
+        .mockResolvedValueOnce({
+          values: countsRows([
+            [9, 'process'],
+            [3, null],
+          ]),
+        })
+        .mockResolvedValueOnce({
+          values: countsRows([
+            [2, 'process'],
+            [1, 'file'],
+          ]),
+        });
+
+      await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
+
+      // Both runs' telemetry is copied into the stream before the diff, and
+      // the stream is refreshed so the ES|QL below sees this request's own
+      // copies (bulk's default refresh interval would hide them for seconds).
+      expect(client.getTaskAlerts).toHaveBeenCalledWith(
+        'run-2',
+        'production-endpoint-alerts',
+        expect.anything()
+      );
+      expect(client.getTaskAlerts).toHaveBeenCalledWith(
+        'run-1',
+        'production-endpoint-alerts',
+        expect.anything()
+      );
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({
+        index: '.kibana-detonate-sandbox-team-a',
+      });
+      expect(okBody()).toEqual({
+        task_id: 'run-2',
+        against_task_id: 'run-1',
+        comparable: true,
+        current: {
+          task_id: 'run-2',
+          verdict: expect.any(String),
+          categories: [
+            { category: 'process', count: 9 },
+            { category: 'uncategorized', count: 3 },
+          ],
+        },
+        prior: {
+          task_id: 'run-1',
+          verdict: expect.any(String),
+          categories: [
+            { category: 'file', count: 1 },
+            { category: 'process', count: 2 },
+          ],
+        },
+        delta: [
+          { category: 'process', current: 9, prior: 2, delta: 7 },
+          { category: 'uncategorized', current: 3, prior: 0, delta: 3 },
+          { category: 'file', current: 0, prior: 1, delta: -1 },
+        ],
+      });
+    });
+
+    it('answers the null shape when the hash has no earlier completed run', async () => {
+      client.getTask.mockResolvedValue(run('run-0', '2026-10-31T00:00:00.000Z') as never);
+      client.listTasks.mockResolvedValue({
+        tasks: [run('run-0', '2026-10-31T00:00:00.000Z')],
+      } as never);
+
+      await diffHandler()(createContext(), diffRequest('run-0'), mockResponse);
+
+      expect(okBody()).toEqual({ task_id: 'run-0', reason: 'no-prior-run' });
+      // Nothing copied: there is nothing to diff against.
+      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('never picks a later run of the same hash as the baseline', async () => {
+      client.getTask.mockResolvedValue(run('run-1', '2026-11-01T00:00:00.000Z') as never);
+      client.listTasks.mockResolvedValue({
+        tasks: [run('run-2', '2026-11-02T00:00:00.000Z'), run('run-1', '2026-11-01T00:00:00.000Z')],
+      } as never);
+
+      await diffHandler()(createContext(), diffRequest('run-1'), mockResponse);
+
+      // run-2 is newer than run-1, so it cannot be "previous"; nothing
+      // earlier exists → the honest null shape.
+      expect(okBody()).toEqual({ task_id: 'run-1', reason: 'no-prior-run' });
+    });
+
+    it('skips incomplete earlier runs of the same hash', async () => {
+      client.getTask.mockResolvedValue(run('run-2', '2026-11-02T00:00:00.000Z') as never);
+      client.listTasks.mockResolvedValue({
+        tasks: [
+          run('run-2', '2026-11-02T00:00:00.000Z'),
+          run('run-1', '2026-11-01T00:00:00.000Z', 'detonate.workers.detonate_sample'),
+        ],
+      } as never);
+
+      await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
+
+      expect(okBody()).toEqual({ task_id: 'run-2', reason: 'no-prior-run' });
+    });
+
+    it('diffs a caller-chosen against, flagged not comparable across samples', async () => {
+      client.getTask.mockImplementation(async (id: string) =>
+        id === 'run-2'
+          ? (run('run-2', '2026-11-02T00:00:00.000Z') as never)
+          : ({ ...run('run-9'), sample_hash: 'SHA-B' } as never)
+      );
+      esClient.esql.query
+        .mockResolvedValueOnce({ values: countsRows([[9, 'process']]) })
+        .mockResolvedValueOnce({ values: countsRows([[2, 'process']]) });
+
+      await diffHandler()(createContext(), diffRequest('run-2', 'run-9'), mockResponse);
+
+      expect(okBody()).toMatchObject({
+        against_task_id: 'run-9',
+        comparable: false,
+        delta: [{ category: 'process', current: 9, prior: 2, delta: 7 }],
+      });
+    });
+
+    it('treats a missing sandbox stream as an empty side, not a failure', async () => {
+      const { errors } = jest.requireActual<{
+        errors: typeof import('@elastic/elasticsearch').errors;
+      }>('@elastic/elasticsearch');
+      client.getTask.mockResolvedValue(run('run-2', '2026-11-02T00:00:00.000Z') as never);
+      client.listTasks.mockResolvedValue({
+        tasks: [run('run-2', '2026-11-02T00:00:00.000Z'), run('run-1', '2026-11-01T00:00:00.000Z')],
+      } as never);
+      esClient.esql.query
+        .mockRejectedValueOnce(
+          new errors.ResponseError({
+            body: {
+              error: {
+                type: 'verification_exception',
+                reason: 'Unknown index [.kibana-detonate-sandbox-team-a]',
+                root_cause: [
+                  {
+                    type: 'verification_exception',
+                    reason: 'Unknown index [.kibana-detonate-sandbox-team-a]',
+                  },
+                ],
+              },
+            },
+            statusCode: 400,
+            headers: {},
+            warnings: [],
+            meta: {} as never,
+          })
+        )
+        .mockResolvedValueOnce({ values: countsRows([[2, 'process']]) });
+
+      await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(okBody()).toMatchObject({
+        current: { categories: [] },
+        delta: [{ category: 'process', current: 0, prior: 2, delta: -2 }],
+      });
+    });
+
+    it('rejects a read-only analyst before any copy', async () => {
+      register({ canWrite: false });
+
+      await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+      expect(client.getTask).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it("answers 404 for another space's run", async () => {
+      client.getTask.mockResolvedValue({
+        ...run('run-2', '2026-11-02T00:00:00.000Z'),
+        tags: ['space:team-b'],
+      } as never);
+
+      await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
+      );
+      expect(esClient.esql.query).not.toHaveBeenCalled();
     });
   });
 });

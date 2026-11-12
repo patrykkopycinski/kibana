@@ -24,10 +24,13 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
+  detonateRunDiffPath,
   detonateRunSessionPath,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
+  DetonateRunDiffEmpty,
+  DetonateRunDiffResult,
   DetonateRunSessionResult,
   DetonateTask,
   DetonateTaskSearchResponse,
@@ -123,6 +126,19 @@ export const detonateApi = {
   getRunSession: (http: HttpSetup, taskId: string, signal?: AbortSignal) =>
     http.get<DetonateRunSessionResult>(detonateRunSessionPath(taskId), {
       version: VERSION.version,
+      signal,
+    }),
+
+  /**
+   * Behavior diff for a run against a prior run of the same sample (N2).
+   * `against` omitted: the route picks the most recent earlier completed run
+   * of the same hash in this space, and answers a null-shaped result when
+   * there is none (a first run diffed against nothing).
+   */
+  getRunDiff: (http: HttpSetup, taskId: string, against?: string, signal?: AbortSignal) =>
+    http.get<DetonateRunDiffResult | DetonateRunDiffEmpty>(detonateRunDiffPath(taskId), {
+      version: VERSION.version,
+      ...(against ? { query: { against } } : {}),
       signal,
     }),
 };

@@ -26,6 +26,8 @@ import {
 } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
+  DetonateRunDiffEmpty,
+  DetonateRunDiffResult,
   DetonateRunSessionResult,
   DetonateTask,
   DetonateTaskSearchResponse,
@@ -53,6 +55,7 @@ const taskKey = (taskId: string) => [DETONATE_QUERY_KEY, 'task', taskId] as cons
 const updatesKey = (taskId: string) => [DETONATE_QUERY_KEY, 'updates', taskId] as const;
 const listKey = (query: DetonateListQuery) => [DETONATE_QUERY_KEY, 'tasks', query] as const;
 const sessionKey = (taskId: string) => [DETONATE_QUERY_KEY, 'session', taskId] as const;
+const diffKey = (taskId: string) => [DETONATE_QUERY_KEY, 'diff', taskId] as const;
 
 /** Is the detonation service reachable and configured? */
 export const useDetonateHealthcheck = () => {
@@ -127,6 +130,23 @@ export const useRunSession = (taskId: string | undefined) => {
     queryKey: sessionKey(taskId ?? ''),
     enabled: Boolean(taskId),
     queryFn: ({ signal }) => detonateApi.getRunSession(http, taskId as string, signal),
+    staleTime: 60_000,
+  });
+};
+
+/**
+ * Behavior diff against the previous run of the same sample (N2). Like the
+ * session fetch: one per run, idempotent server-side (the route copies both
+ * runs' telemetry before diffing), so re-mounting re-answers, it does not
+ * re-mutate. The result is null-shaped when this is the sample's first run.
+ */
+export const useRunDiff = (taskId: string | undefined) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonateRunDiffResult | DetonateRunDiffEmpty>({
+    queryKey: diffKey(taskId ?? ''),
+    enabled: Boolean(taskId),
+    queryFn: ({ signal }) => detonateApi.getRunDiff(http, taskId as string, undefined, signal),
     staleTime: 60_000,
   });
 };

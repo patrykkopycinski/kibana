@@ -60,7 +60,7 @@ export const BehaviorDiffCard = React.memo<BehaviorDiffCardProps>(({ taskId }) =
     );
   }
 
-  const { current, prior, delta, against_task_id: againstTaskId, comparable } = data;
+  const { delta, against_task_id: againstTaskId, comparable } = data;
 
   return (
     <EuiPanel hasBorder data-test-subj={BEHAVIOR_DIFF_TEST_ID}>

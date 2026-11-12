@@ -55,7 +55,7 @@ const DETONATE_SANDBOX_STREAM_PREFIX = '.kibana-detonate-sandbox-';
  * pattern: the internal client must not be handed a wildcard that widens the
  * read to every space's streams.
  */
-const isDetonateSandboxStream = (index: string): boolean =>
+export const isDetonateSandboxStream = (index: string): boolean =>
   index.startsWith(DETONATE_SANDBOX_STREAM_PREFIX) &&
   !index.includes('*') &&
   index.length > DETONATE_SANDBOX_STREAM_PREFIX.length;

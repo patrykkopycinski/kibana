@@ -18,4 +18,15 @@ import { withEvalsTracing } from '../shared';
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_tracing
  */
-export const servers: ScoutServerConfig = withEvalsTracing(defaultConfig);
+const evalsTracing = withEvalsTracing(defaultConfig);
+
+export const servers: ScoutServerConfig = {
+  ...evalsTracing,
+  kbnTestServer: {
+    ...evalsTracing.kbnTestServer,
+    serverArgs: [
+      ...evalsTracing.kbnTestServer.serverArgs,
+      '--uiSettings.overrides.contextEngine:enabled=true',
+    ],
+  },
+};

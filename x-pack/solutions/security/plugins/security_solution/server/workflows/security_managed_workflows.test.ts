@@ -9,14 +9,17 @@ import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
+  DETONATE_IOC_RULE_WORKFLOW_ID,
   DETONATE_RULE_CREATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
+  getManagedWorkflowDefinitions,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
+  DETONATE_PROTOTYPE_WORKFLOW_IDS,
   installSecurityManagedWorkflowsAndMarkReady,
   installThreatIntelManagedWorkflowsForSpaces,
 } from './security_managed_workflows';
@@ -168,6 +171,37 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
+  it('installs every detonate prototype definition the registry holds, callees before the coverage sweep', async () => {
+    const managed = createManagedClient();
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+      detonatePrototypeEnabled: true,
+    });
+
+    // A definition added to the registry but not to the install list ships
+    // uninstalled: the sweep then dispatches to a workflow that does not exist.
+    const registryIds = getManagedWorkflowDefinitions()
+      .filter(({ id, pluginId }) => pluginId === 'securitySolution' && id.includes('-detonate-'))
+      .map(({ id }) => id)
+      .sort();
+    expect([...DETONATE_PROTOTYPE_WORKFLOW_IDS].sort()).toEqual(registryIds);
+
+    const installed = managed.install.mock.calls.map(([id]) => id);
+    for (const id of registryIds) {
+      expect(installed).toContain(id);
+    }
+    expect(installed.indexOf(DETONATE_IOC_RULE_WORKFLOW_ID)).toBeLessThan(
+      installed.indexOf(DETONATE_COVERAGE_GAP_WORKFLOW_ID)
+    );
   });
 
   it('uninstalls previously installed detonate workflows when the prototype flag is off', async () => {

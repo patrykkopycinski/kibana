@@ -7,9 +7,11 @@
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
+  DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW_ID,
   DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   DETONATE_FP_VALIDATION_WORKFLOW_ID,
   DETONATE_IOC_HUNT_WORKFLOW_ID,
+  DETONATE_IOC_RULE_WORKFLOW_ID,
   DETONATE_RULE_CREATION_WORKFLOW_ID,
   DETONATE_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -26,6 +28,20 @@ import {
   uninstallThreatIntelManagedWorkflows,
 } from './threat_intel_workflow/install';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
+
+/**
+ * The detonate prototype workflows the prototype flag installs and uninstalls. Callees come
+ * before the coverage sweep that dispatches to them.
+ */
+export const DETONATE_PROTOTYPE_WORKFLOW_IDS = [
+  DETONATE_FP_VALIDATION_WORKFLOW_ID,
+  DETONATE_TRIAGE_WORKFLOW_ID,
+  DETONATE_RULE_CREATION_WORKFLOW_ID,
+  DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW_ID,
+  DETONATE_IOC_RULE_WORKFLOW_ID,
+  DETONATE_COVERAGE_GAP_WORKFLOW_ID,
+  DETONATE_IOC_HUNT_WORKFLOW_ID,
+] as const;
 
 /**
  * Single plugin-start entry for securitySolution managed workflows: install alert
@@ -76,37 +92,13 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     // Prototype workflows: install/uninstall is flag-driven like threat intel,
     // but unconditional within the flag (no bootstrap dependency).
     if (detonatePrototypeEnabled) {
-      await managedWorkflowsClient.install(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.install(DETONATE_TRIAGE_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.install(DETONATE_RULE_CREATION_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.install(DETONATE_COVERAGE_GAP_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.install(DETONATE_IOC_HUNT_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
+      for (const workflowId of DETONATE_PROTOTYPE_WORKFLOW_IDS) {
+        await managedWorkflowsClient.install(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+      }
     } else {
-      await managedWorkflowsClient.uninstall(DETONATE_FP_VALIDATION_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.uninstall(DETONATE_TRIAGE_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.uninstall(DETONATE_RULE_CREATION_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.uninstall(DETONATE_COVERAGE_GAP_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      await managedWorkflowsClient.uninstall(DETONATE_IOC_HUNT_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
+      for (const workflowId of DETONATE_PROTOTYPE_WORKFLOW_IDS) {
+        await managedWorkflowsClient.uninstall(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+      }
     }
   } catch (error) {
     logger.warn('Failed to install or uninstall the detonate prototype workflows', { error });

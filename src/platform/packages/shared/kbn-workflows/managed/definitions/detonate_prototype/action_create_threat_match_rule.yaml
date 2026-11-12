@@ -1,11 +1,15 @@
 version: "1"
 name: Create indicator match rule (Detonate prototype)
 description: >
-  Detonate prototype action: creates an indicator match (threat_match) rule
-  over a value list of IOCs a detonation extracted, and enables it. Executed
-  by the investigation proposal gate once an analyst approves, so the rule is
-  attributed to the approver. A separate action from the AlertZero create-rule
-  action because that one accepts ES|QL bodies only.
+  Detonate prototype action: loads the IOCs a detonation extracted into one
+  value list per family, then creates an indicator match (threat_match) rule
+  over those lists and enables it. Executed by the investigation proposal gate
+  once an analyst approves, so the lists and the rule are written under the
+  approver's identity: the worker that proposes it may not write list indices.
+  A load that does not verify, or a rule that cannot be created, deletes the
+  lists and fails, so the gate offers the proposal again. A separate action
+  from the AlertZero create-rule action because that one accepts ES|QL bodies
+  only.
 enabled: true
 tags:
   - action
@@ -13,7 +17,7 @@ tags:
 consts:
   actionMetadata:
     name: Create indicator match rule
-    description: Creates an indicator match rule over a Detonate IOC value list and enables it.
+    description: Loads Detonate IOCs into value lists and enables an indicator match rule over them.
     category: configure
     impact: low
     reversible: true
@@ -25,85 +29,122 @@ triggers:
         actionInput:
           type: object
           description: >
-            The create-rule request body as the Detonate IOC rule worker drafts
-            it, passed through to the API as is.
+            The IOCs to load and the rule to create, as the Detonate IOC rule
+            worker drafts them. The action names the lists from the candidate
+            id and scopes the rule to them itself, so the input cannot point
+            the rule at any other list.
           properties:
-            type:
+            candidate_id:
               type: string
-              enum: ["threat_match"]
-            language:
-              type: string
-              enum: ["kuery"]
-            name:
+              pattern: "^[A-Za-z0-9-]{1,64}$"
+              description: Proposing execution id; the list ids derive from it.
+            sample_label:
               type: string
               minLength: 1
-            description:
+              maxLength: 128
+              description: Short sample identifier for the list names.
+            task_id:
               type: string
               minLength: 1
-            query:
-              type: string
-              minLength: 1
-              description: KQL query over the source documents; `*:*` matches all.
-            index:
-              type: array
-              minItems: 1
-              items:
-                type: string
-                minLength: 1
-            threat_index:
-              type: array
-              minItems: 1
-              items:
-                type: string
-                minLength: 1
-              description: Indicator indices; the value list items index for list-backed rules.
-            threat_query:
-              type: string
-              minLength: 1
-            threat_language:
-              type: string
-              enum: ["kuery"]
-            # Scopes the indicator search to one value list; without it every
-            # list in the space would act as indicators.
-            threat_filters:
-              type: array
-              items:
-                type: object
-                additionalProperties: true
-            threat_mapping:
-              type: array
-              minItems: 1
-              items:
-                type: object
-                additionalProperties: true
-            interval:
-              type: string
-            from:
-              type: string
-            severity:
-              type: string
-              enum: ["low", "medium", "high", "critical"]
-            risk_score:
-              type: integer
-              minimum: 0
-              maximum: 100
-            tags:
-              type: array
-              items:
-                type: string
-          required:
-            - type
-            - language
-            - name
-            - description
-            - query
-            - index
-            - threat_index
-            - threat_query
-            - threat_filters
-            - threat_mapping
-            - severity
-            - risk_score
+              maxLength: 128
+              description: Detonate run id, quoted in the list descriptions.
+            # Sanitized at extraction (at most 100 per family); the patterns
+            # re-check the shape, and the lists API re-checks IPs by type.
+            iocs:
+              type: object
+              properties:
+                domains:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 253
+                    pattern: "^[a-z0-9_.-]+$"
+                ips:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 2
+                    maxLength: 45
+                    pattern: "^[0-9a-fA-F:.]+$"
+                hashes:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    pattern: "^[a-f0-9]{32,128}$"
+              required: [domains, ips, hashes]
+              additionalProperties: false
+            rule:
+              type: object
+              description: >
+                The create-rule body minus the indicator index and filter,
+                which this action sets.
+              properties:
+                type:
+                  type: string
+                  enum: ["threat_match"]
+                language:
+                  type: string
+                  enum: ["kuery"]
+                name:
+                  type: string
+                  minLength: 1
+                description:
+                  type: string
+                  minLength: 1
+                query:
+                  type: string
+                  minLength: 1
+                  description: KQL query over the source documents; `*:*` matches all.
+                index:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    minLength: 1
+                threat_query:
+                  type: string
+                  minLength: 1
+                threat_language:
+                  type: string
+                  enum: ["kuery"]
+                threat_mapping:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    additionalProperties: true
+                interval:
+                  type: string
+                from:
+                  type: string
+                severity:
+                  type: string
+                  enum: ["low", "medium", "high", "critical"]
+                risk_score:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                tags:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - type
+                - language
+                - name
+                - description
+                - query
+                - index
+                - threat_query
+                - threat_mapping
+                - severity
+                - risk_score
+              additionalProperties: false
+          required: [candidate_id, sample_label, task_id, iocs, rule]
           additionalProperties: false
       required:
         - actionInput
@@ -116,28 +157,304 @@ outputs:
   - name: enabled
     type: boolean
 steps:
+  - name: lists
+    type: data.set
+    with:
+      domain_list_id: "detonate-ioc-domains-{{ inputs.actionInput.candidate_id }}"
+      ip_list_id: "detonate-ioc-ips-{{ inputs.actionInput.candidate_id }}"
+      hash_list_id: "detonate-ioc-hashes-{{ inputs.actionInput.candidate_id }}"
+      domain_count: "${{ inputs.actionInput.iocs.domains | size }}"
+      ip_count: "${{ inputs.actionInput.iocs.ips | size }}"
+      hash_count: "${{ inputs.actionInput.iocs.hashes | size }}"
+
+  # ----------------------------------------------------------------------
+  # Load the lists. One list per non-empty family; the list type decides the
+  # item field (`keyword` or `ip`) the rule's mapping reads, so the IP list
+  # must be typed ip: a keyword value mapped to destination.ip fails the rule
+  # with "is not an IP string literal". Items go one per request with
+  # deterministic ids; only the last item waits for a refresh, which makes
+  # every earlier one searchable too. Every write tolerates failure: the
+  # count check below is the gate, so a re-offered attempt whose 409s hit
+  # items already there still counts as loaded, and a real failure fails it.
+  # ----------------------------------------------------------------------
+  - name: create_domain_list
+    type: kibana.request
+    if: "${{ steps.lists.output.domain_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/lists"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.lists.output.domain_list_id }}"
+        name: "Detonate IOCs: domains ({{ inputs.actionInput.sample_label | slice: 0, 12 }})"
+        description: "Domains the detonation of run {{ inputs.actionInput.task_id }} contacted."
+        type: keyword
+
+  - name: load_domains
+    type: foreach
+    if: "${{ steps.lists.output.domain_count > 0 }}"
+    foreach: "${{ inputs.actionInput.iocs.domains }}"
+    steps:
+      - name: add_domain
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/lists/items"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ steps.lists.output.domain_list_id }}-{{ foreach.index }}"
+            list_id: "{{ steps.lists.output.domain_list_id }}"
+            value: "{{ foreach.item }}"
+            refresh: >-
+              {%- assign last = foreach.total | minus: 1 -%}{%- if foreach.index == last -%}wait_for{%- else -%}false{%- endif -%}
+
+  - name: count_domains
+    type: kibana.request
+    if: "${{ steps.lists.output.domain_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/lists/items/_find?per_page=1&list_id={{ steps.lists.output.domain_list_id | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  - name: create_ip_list
+    type: kibana.request
+    if: "${{ steps.lists.output.ip_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/lists"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.lists.output.ip_list_id }}"
+        name: "Detonate IOCs: IPs ({{ inputs.actionInput.sample_label | slice: 0, 12 }})"
+        description: "Destination IPs the detonation of run {{ inputs.actionInput.task_id }} contacted."
+        type: ip
+
+  - name: load_ips
+    type: foreach
+    if: "${{ steps.lists.output.ip_count > 0 }}"
+    foreach: "${{ inputs.actionInput.iocs.ips }}"
+    steps:
+      - name: add_ip
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/lists/items"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ steps.lists.output.ip_list_id }}-{{ foreach.index }}"
+            list_id: "{{ steps.lists.output.ip_list_id }}"
+            value: "{{ foreach.item }}"
+            refresh: >-
+              {%- assign last = foreach.total | minus: 1 -%}{%- if foreach.index == last -%}wait_for{%- else -%}false{%- endif -%}
+
+  - name: count_ips
+    type: kibana.request
+    if: "${{ steps.lists.output.ip_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/lists/items/_find?per_page=1&list_id={{ steps.lists.output.ip_list_id | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  - name: create_hash_list
+    type: kibana.request
+    if: "${{ steps.lists.output.hash_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/lists"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.lists.output.hash_list_id }}"
+        name: "Detonate IOCs: file hashes ({{ inputs.actionInput.sample_label | slice: 0, 12 }})"
+        description: "Hashes of the files the detonation of run {{ inputs.actionInput.task_id }} dropped."
+        type: keyword
+
+  - name: load_hashes
+    type: foreach
+    if: "${{ steps.lists.output.hash_count > 0 }}"
+    foreach: "${{ inputs.actionInput.iocs.hashes }}"
+    steps:
+      - name: add_hash
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/lists/items"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ steps.lists.output.hash_list_id }}-{{ foreach.index }}"
+            list_id: "{{ steps.lists.output.hash_list_id }}"
+            value: "{{ foreach.item }}"
+            refresh: >-
+              {%- assign last = foreach.total | minus: 1 -%}{%- if foreach.index == last -%}wait_for{%- else -%}false{%- endif -%}
+
+  - name: count_hashes
+    type: kibana.request
+    if: "${{ steps.lists.output.hash_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/lists/items/_find?per_page=1&list_id={{ steps.lists.output.hash_list_id | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  # Every non-empty family must hold exactly its IOC count, and at least one
+  # family must be non-empty: a rule over no indicators is never created.
+  - name: lists_loaded
+    type: data.set
+    with:
+      any: >-
+        ${{ steps.lists.output.domain_count > 0
+          or steps.lists.output.ip_count > 0
+          or steps.lists.output.hash_count > 0 }}
+      domains_ok: >-
+        ${{ steps.lists.output.domain_count == 0
+          or steps.count_domains.output.total == steps.lists.output.domain_count }}
+      ips_ok: >-
+        ${{ steps.lists.output.ip_count == 0
+          or steps.count_ips.output.total == steps.lists.output.ip_count }}
+      hashes_ok: >-
+        ${{ steps.lists.output.hash_count == 0
+          or steps.count_hashes.output.total == steps.lists.output.hash_count }}
+
+  - name: abort_incomplete_load
+    type: if
+    condition: >-
+      ${{ steps.lists_loaded.output.any != true
+        or steps.lists_loaded.output.domains_ok != true
+        or steps.lists_loaded.output.ips_ok != true
+        or steps.lists_loaded.output.hashes_ok != true }}
+    steps:
+      - name: discard_lists_after_load
+        type: foreach
+        # A delete of a list that was never created is a tolerated 404.
+        foreach:
+          - "{{ steps.lists.output.domain_list_id }}"
+          - "{{ steps.lists.output.ip_list_id }}"
+          - "{{ steps.lists.output.hash_list_id }}"
+        steps:
+          - name: delete_list_after_load
+            type: kibana.request
+            timeout: "30s"
+            on-failure:
+              continue: true
+            with:
+              method: DELETE
+              path: "/s/{{ workflow.spaceId }}/api/lists?id={{ foreach.item | url_encode }}"
+              headers:
+                kbn-xsrf: "true"
+                elastic-api-version: "2023-10-31"
+
+      - name: fail_incomplete_load
+        type: workflow.fail
+        with:
+          message: >-
+            The IOC value lists did not load completely (domains
+            {{ steps.count_domains.output.total | default: 0 }}/{{ steps.lists.output.domain_count }},
+            IPs {{ steps.count_ips.output.total | default: 0 }}/{{ steps.lists.output.ip_count }},
+            hashes {{ steps.count_hashes.output.total | default: 0 }}/{{ steps.lists.output.hash_count }}).
+            Approving needs write access to value lists. The lists were deleted.
+          reason: ioc_lists_incomplete
+
   # Created enabled in one call, as the AlertZero create-rule action does, so
-  # an approver who may not enable rules gets one error and no rule.
+  # an approver who may not enable rules gets one error and no rule. The
+  # indicator index and filter come from here, never from the input: the
+  # filter scopes the indicator search to this candidate's lists, without it
+  # every list in the space would act as indicators. An empty family has no
+  # list; its id in the filter matches nothing.
   - name: create_rule
     type: security.createRule
+    on-failure:
+      # The rule never existed, so nothing reads the lists: delete them. The
+      # run still fails after this, which re-offers the proposal.
+      fallback:
+        - name: discard_lists_after_create
+          type: foreach
+          foreach:
+            - "{{ steps.lists.output.domain_list_id }}"
+            - "{{ steps.lists.output.ip_list_id }}"
+            - "{{ steps.lists.output.hash_list_id }}"
+          steps:
+            - name: delete_list_after_create
+              type: kibana.request
+              timeout: "30s"
+              on-failure:
+                continue: true
+              with:
+                method: DELETE
+                path: "/s/{{ workflow.spaceId }}/api/lists?id={{ foreach.item | url_encode }}"
+                headers:
+                  kbn-xsrf: "true"
+                  elastic-api-version: "2023-10-31"
     with:
       rule:
-        type: "${{ inputs.actionInput.type }}"
-        language: "${{ inputs.actionInput.language }}"
-        name: "${{ inputs.actionInput.name }}"
-        description: "${{ inputs.actionInput.description }}"
-        query: "${{ inputs.actionInput.query }}"
-        index: "${{ inputs.actionInput.index }}"
-        threat_index: "${{ inputs.actionInput.threat_index }}"
-        threat_query: "${{ inputs.actionInput.threat_query }}"
-        threat_language: "${{ inputs.actionInput.threat_language }}"
-        threat_filters: "${{ inputs.actionInput.threat_filters }}"
-        threat_mapping: "${{ inputs.actionInput.threat_mapping }}"
-        interval: "${{ inputs.actionInput.interval }}"
-        from: "${{ inputs.actionInput.from }}"
-        severity: "${{ inputs.actionInput.severity }}"
-        risk_score: "${{ inputs.actionInput.risk_score }}"
-        tags: "${{ inputs.actionInput.tags }}"
+        type: "${{ inputs.actionInput.rule.type }}"
+        language: "${{ inputs.actionInput.rule.language }}"
+        name: "${{ inputs.actionInput.rule.name }}"
+        description: "${{ inputs.actionInput.rule.description }}"
+        query: "${{ inputs.actionInput.rule.query }}"
+        index: "${{ inputs.actionInput.rule.index }}"
+        threat_index:
+          - ".items-{{ workflow.spaceId }}"
+        threat_query: "${{ inputs.actionInput.rule.threat_query }}"
+        threat_language: "${{ inputs.actionInput.rule.threat_language }}"
+        threat_filters:
+          - query:
+              terms:
+                list_id:
+                  - "{{ steps.lists.output.domain_list_id }}"
+                  - "{{ steps.lists.output.ip_list_id }}"
+                  - "{{ steps.lists.output.hash_list_id }}"
+        threat_mapping: "${{ inputs.actionInput.rule.threat_mapping }}"
+        interval: "${{ inputs.actionInput.rule.interval }}"
+        from: "${{ inputs.actionInput.rule.from }}"
+        severity: "${{ inputs.actionInput.rule.severity }}"
+        risk_score: "${{ inputs.actionInput.rule.risk_score }}"
+        tags: "${{ inputs.actionInput.rule.tags }}"
         enabled: true
 
   - name: emit_result

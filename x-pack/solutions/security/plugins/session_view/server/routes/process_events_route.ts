@@ -93,9 +93,8 @@ export const registerProcessEventsRoute = (
         },
       },
       async (context, request, response) => {
-        const { asCurrentUser: userClient, asInternalUser: internalClient } = (
-          await context.core
-        ).elasticsearch.client;
+        const { asCurrentUser: userClient, asInternalUser: internalClient } = (await context.core)
+          .elasticsearch.client;
         const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
         const { index, sessionEntityId, sessionStartTime, cursor, forward, pageSize } =
           request.query;

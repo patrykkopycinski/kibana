@@ -6,8 +6,9 @@ description: >
   coverage-reviewed, or an explicit coverage-requested marker. For each run
   (oldest first, at most 5) it reads the run record, opens an Investigation
   for the gap, marks the run coverage-reviewed before dispatch so the next
-  tick does not pick the same run again, and starts one Detonate Detection
-  Rule Creation copy with inputs built from the record. A failed dispatch
+  tick does not pick the same run again, and starts one worker with inputs
+  built from the record: the Detonate IOC Rule Worker when the record carries
+  extracted IOCs, the Detonate Detection Rule Creation copy otherwise. A failed dispatch
   rolls the markers back so the next tick retries the run. Does not write to
   alerts directly; all marker writes go through the handoff route.
 enabled: true
@@ -205,11 +206,44 @@ steps:
             remove:
               - detonate:coverage-requested
 
-      # Fire and forget. The copy parks for up to two 72h decision windows;
+      # A run whose record carries extracted IOCs gets the IOC rule worker (an
+      # indicator match rule over value lists); any other run gets the ES|QL
+      # rule-creation copy. Exactly one of the two is dispatched: both hold the
+      # same per-task drop key, so dispatching both would drop one anyway.
+      - name: ioc_counts
+        type: data.set
+        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        with:
+          domains: "${{ steps.read_record.output['detonate.iocs.domains'] | default: consts.no_rows | size }}"
+          ips: "${{ steps.read_record.output['detonate.iocs.ips'] | default: consts.no_rows | size }}"
+          file_hashes: "${{ steps.read_record.output['detonate.iocs.file_hashes'] | default: consts.no_rows | size }}"
+
+      - name: has_iocs
+        type: data.set
+        if: "${{ steps.ioc_counts.output != null }}"
+        with:
+          ok: >-
+            ${{ steps.ioc_counts.output.domains > 0
+              or steps.ioc_counts.output.ips > 0
+              or steps.ioc_counts.output.file_hashes > 0 }}
+
+      # Fire and forget. Each copy parks for days on its decision windows;
       # waiting for it here would hold this sweep's concurrency slot for days.
+      - name: dispatch_ioc_rule
+        type: workflow.executeAsync
+        if: "${{ steps.has_iocs.output.ok == true }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-security-detonate-ioc-rule
+          run-as-mode: inherit
+          inputs:
+            task_id: "{{ foreach.item.task_id }}"
+            investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
       - name: dispatch_rule_creation
         type: workflow.executeAsync
-        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        if: "${{ steps.has_iocs.output.ok == false }}"
         on-failure:
           continue: true
         with:
@@ -221,14 +255,24 @@ steps:
             gap_description: "{{ steps.gap_text.output.gap_description }}"
             evidence: "{{ steps.gap_text.output.evidence }}"
 
+      # A step `if` cannot group with parentheses, so whichever dispatch ran
+      # and failed is folded into one flag. A skipped dispatch has no error.
+      - name: dispatch_failed
+        type: data.set
+        if: "${{ steps.has_iocs.output != null }}"
+        with:
+          ok: >-
+            ${{ steps.dispatch_ioc_rule.error != null
+              or steps.dispatch_rule_creation.error != null }}
+
       # Rollback: a dispatch that failed to start leaves the run marked
       # reviewed, which would hide it forever. Restore the requested marker so
-      # the next tick retries it. Reached only when the dispatch actually ran
-      # (a skipped dispatch has no error), and only after the marker was set.
+      # the next tick retries it. Reached only when a dispatch actually ran
+      # and failed, and only after the marker was set.
       - name: rollback_reviewed
         type: kibana.request
         if: >-
-          ${{ steps.dispatch_rule_creation.error != null
+          ${{ steps.dispatch_failed.output.ok == true
           and steps.set_reviewed.output != null }}
         on-failure:
           continue: true

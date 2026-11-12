@@ -48,7 +48,8 @@ const sweep = parse(DETONATE_COVERAGE_GAP_WORKFLOW.yaml) as YamlWorkflow;
 const stepByName = (name: string) =>
   sweep.steps
     .flatMap((step) => (step.type === 'foreach' ? (step.steps as YamlStep[]) : [step]))
-    .find((step) => step.name === name);const inputsOf = (step: YamlStep | undefined) =>
+    .find((step) => step.name === name);
+const inputsOf = (step: YamlStep | undefined) =>
   (step?.with?.inputs ?? {}) as Record<string, unknown>;
 const pathOf = (step: YamlStep | undefined) => String(step?.with?.path);
 
@@ -158,6 +159,8 @@ describe('Detonate Coverage Gap sweep', () => {
       remove: ['detonate:coverage-requested'],
     });
 
+    expect(names.indexOf('set_reviewed')).toBeLessThan(names.indexOf('dispatch_ioc_rule'));
+
     const dispatch = stepByName('dispatch_rule_creation');
     expect(dispatch?.type).toBe('workflow.executeAsync');
     expect(dispatch?.with?.['workflow-id']).toBe('system-security-detonate-rule-creation');
@@ -169,13 +172,52 @@ describe('Detonate Coverage Gap sweep', () => {
     );
   });
 
+  // Both workers hold the same per-task drop key, so exactly one is
+  // dispatched: the IOC rule worker when the record carries IOCs, the ES|QL
+  // copy otherwise. A record read failure dispatches neither.
+  it('dispatches the IOC rule worker for a run with IOCs and the ES|QL copy otherwise', () => {
+    const counts = stepByName('ioc_counts');
+    expect(counts?.if).toBe('${{ steps.create_investigation.output.conversation_id != null }}');
+    const countsWith = counts?.with as Record<string, string>;
+    expect(countsWith.domains).toContain("steps.read_record.output['detonate.iocs.domains']");
+    expect(countsWith.ips).toContain("steps.read_record.output['detonate.iocs.ips']");
+    expect(countsWith.file_hashes).toContain(
+      "steps.read_record.output['detonate.iocs.file_hashes']"
+    );
+
+    const hasIocs = String((stepByName('has_iocs')?.with ?? {}).ok);
+    for (const family of ['domains', 'ips', 'file_hashes']) {
+      expect(hasIocs).toContain(`steps.ioc_counts.output.${family} > 0`);
+    }
+
+    const ioc = stepByName('dispatch_ioc_rule');
+    expect(ioc?.type).toBe('workflow.executeAsync');
+    expect(ioc?.if).toBe('${{ steps.has_iocs.output.ok == true }}');
+    expect(ioc?.with?.['workflow-id']).toBe('system-security-detonate-ioc-rule');
+    expect(ioc?.with?.['run-as-mode']).toBe('inherit');
+    expect(ioc?.['on-failure']?.continue).toBe(true);
+    // The IOC worker reads the IOCs from the record itself; it takes no gap text.
+    expect(inputsOf(ioc)).toEqual({
+      task_id: '{{ foreach.item.task_id }}',
+      investigation_id: '{{ steps.create_investigation.output.conversation_id }}',
+    });
+
+    expect(stepByName('dispatch_rule_creation')?.if).toBe(
+      '${{ steps.has_iocs.output.ok == false }}'
+    );
+  });
+
   // A failed dispatch must not strand the run in coverage-reviewed, or the
   // next tick would never pick it again. The rollback restores the requested
   // marker, and only runs when the dispatch actually ran and failed.
   it('rolls the reviewed marker back when the dispatch fails', () => {
+    const failed = String((stepByName('dispatch_failed')?.with ?? {}).ok);
+    expect(failed).toContain('steps.dispatch_ioc_rule.error != null');
+    expect(failed).toContain('steps.dispatch_rule_creation.error != null');
+
     const rollback = stepByName('rollback_reviewed');
     expect(rollback?.if).toBe(
-      '${{ steps.dispatch_rule_creation.error != null and steps.set_reviewed.output != null }}'
+      '${{ steps.dispatch_failed.output.ok == true and steps.set_reviewed.output != null }}'
     );
     expect(rollback?.with?.body).toEqual({
       remove: ['detonate:coverage-reviewed', 'detonate:coverage-in-progress'],

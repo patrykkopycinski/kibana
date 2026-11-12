@@ -1,0 +1,149 @@
+version: "1"
+name: Create indicator match rule (Detonate prototype)
+description: >
+  Detonate prototype action: creates an indicator match (threat_match) rule
+  over a value list of IOCs a detonation extracted, and enables it. Executed
+  by the investigation proposal gate once an analyst approves, so the rule is
+  attributed to the approver. A separate action from the AlertZero create-rule
+  action because that one accepts ES|QL bodies only.
+enabled: true
+tags:
+  - action
+  - detonate_prototype
+consts:
+  actionMetadata:
+    name: Create indicator match rule
+    description: Creates an indicator match rule over a Detonate IOC value list and enables it.
+    category: configure
+    impact: low
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            The create-rule request body as the Detonate IOC rule worker drafts
+            it, passed through to the API as is.
+          properties:
+            type:
+              type: string
+              enum: ["threat_match"]
+            language:
+              type: string
+              enum: ["kuery"]
+            name:
+              type: string
+              minLength: 1
+            description:
+              type: string
+              minLength: 1
+            query:
+              type: string
+              minLength: 1
+              description: KQL query over the source documents; `*:*` matches all.
+            index:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                minLength: 1
+            threat_index:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                minLength: 1
+              description: Indicator indices; the value list items index for list-backed rules.
+            threat_query:
+              type: string
+              minLength: 1
+            threat_language:
+              type: string
+              enum: ["kuery"]
+            # Scopes the indicator search to one value list; without it every
+            # list in the space would act as indicators.
+            threat_filters:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            threat_mapping:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: true
+            interval:
+              type: string
+            from:
+              type: string
+            severity:
+              type: string
+              enum: ["low", "medium", "high", "critical"]
+            risk_score:
+              type: integer
+              minimum: 0
+              maximum: 100
+            tags:
+              type: array
+              items:
+                type: string
+          required:
+            - type
+            - language
+            - name
+            - description
+            - query
+            - index
+            - threat_index
+            - threat_query
+            - threat_filters
+            - threat_mapping
+            - severity
+            - risk_score
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: ruleId
+    type: string
+  - name: ruleName
+    type: string
+  - name: enabled
+    type: boolean
+steps:
+  # Created enabled in one call, as the AlertZero create-rule action does, so
+  # an approver who may not enable rules gets one error and no rule.
+  - name: create_rule
+    type: security.createRule
+    with:
+      rule:
+        type: "${{ inputs.actionInput.type }}"
+        language: "${{ inputs.actionInput.language }}"
+        name: "${{ inputs.actionInput.name }}"
+        description: "${{ inputs.actionInput.description }}"
+        query: "${{ inputs.actionInput.query }}"
+        index: "${{ inputs.actionInput.index }}"
+        threat_index: "${{ inputs.actionInput.threat_index }}"
+        threat_query: "${{ inputs.actionInput.threat_query }}"
+        threat_language: "${{ inputs.actionInput.threat_language }}"
+        threat_filters: "${{ inputs.actionInput.threat_filters }}"
+        threat_mapping: "${{ inputs.actionInput.threat_mapping }}"
+        interval: "${{ inputs.actionInput.interval }}"
+        from: "${{ inputs.actionInput.from }}"
+        severity: "${{ inputs.actionInput.severity }}"
+        risk_score: "${{ inputs.actionInput.risk_score }}"
+        tags: "${{ inputs.actionInput.tags }}"
+        enabled: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      ruleId: "{{ steps.create_rule.output.id }}"
+      ruleName: "{{ steps.create_rule.output.name }}"
+      enabled: "${{ steps.create_rule.output.enabled }}"

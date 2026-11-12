@@ -20,6 +20,7 @@ import { parse } from 'yaml';
 import {
   DETONATE_COVERAGE_GAP_WORKFLOW,
   DETONATE_IOC_HUNT_WORKFLOW,
+  DETONATE_IOC_RULE_WORKFLOW,
   DETONATE_RULE_CREATION_WORKFLOW,
 } from '.';
 import { WorkflowExecuteStepInputSchema } from '../../../spec/schema';
@@ -52,6 +53,7 @@ const flatten = (steps: YamlStep[] = []): YamlStep[] =>
 const CHAIN_DEFINITIONS = [
   DETONATE_COVERAGE_GAP_WORKFLOW,
   DETONATE_IOC_HUNT_WORKFLOW,
+  DETONATE_IOC_RULE_WORKFLOW,
   DETONATE_RULE_CREATION_WORKFLOW,
 ] as const;
 
@@ -65,8 +67,8 @@ const childCalls = CHAIN_DEFINITIONS.flatMap((definition) =>
 // Worker's tick, a copy started by a sweep. Every child in the chain must
 // name the child and inherit, or it silently runs as the original caller.
 describe('Detonate service account inheritance', () => {
-  // The two dispatching chains and the leaf: the coverage sweep and the
-  // rule-creation copy start children, while the ioc-hunt sweep is a leaf
+  // The dispatching chains and the leaf: the coverage sweep, the
+  // rule-creation copy and the IOC rule worker start children, while the ioc-hunt sweep is a leaf
   // (its only write back is a handoff marker), so it must stay one.
   const owners = () => new Set(childCalls.map(({ owner }) => owner));
 
@@ -74,6 +76,7 @@ describe('Detonate service account inheritance', () => {
     expect(childCalls.length).toBeGreaterThan(0);
     expect(owners()).toContain(DETONATE_COVERAGE_GAP_WORKFLOW.id);
     expect(owners()).toContain(DETONATE_RULE_CREATION_WORKFLOW.id);
+    expect(owners()).toContain(DETONATE_IOC_RULE_WORKFLOW.id);
     expect(owners()).not.toContain(DETONATE_IOC_HUNT_WORKFLOW.id);
   });
 

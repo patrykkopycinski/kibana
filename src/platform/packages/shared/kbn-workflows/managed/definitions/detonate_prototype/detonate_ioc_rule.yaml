@@ -1,0 +1,680 @@
+version: "1"
+name: Detonate IOC Rule Worker (prototype)
+description: >
+  Detonate prototype: the IOC-backed sibling of the Detonate Detection Rule
+  Creation Worker, for a run whose record carries extracted IOCs. Loads them
+  into one value list per family (domains and file hashes as keyword, IPs as
+  ip), previews one indicator match rule over the three lists, and records it
+  as a proposal on the run's investigation. The rule is created, enabled, only
+  once an analyst approves, under the approver's identity; a re-check of the
+  stored rule then queues the Hunt Worker or disables the rule. A dismissed,
+  expired or skipped candidate deletes its lists.
+enabled: true
+tags:
+  - security
+  - detection-rule-creation
+  - detonate_prototype
+settings:
+  # Same key as the rule-creation copy: one candidate per detonation run at a
+  # time, whichever of the two the sweep dispatched.
+  concurrency:
+    key: "detonate-coverage-{{ inputs.task_id }}"
+    strategy: drop
+    max: 1
+  # This run parks in WAITING_FOR_CHILD while the proposal gate holds the
+  # decision. Budget: a 72h create decision, a re-park margin, plus the list
+  # loads and the verify steps. A test pins the relationship.
+  timeout: "96h"
+  # A step that fails the run never reaches clear_in_progress, and the sweep
+  # skips a run while its lock is set. This fallback releases the lock on that
+  # path; the run still fails. It does not run on a timeout or cancellation.
+  on-failure:
+    fallback:
+      - name: release_coverage_lock
+        type: kibana.request
+        timeout: "30s"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            remove:
+              - detonate:coverage-in-progress
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        task_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >-
+            Detonate run id whose record carries the IOCs. Tags the rule with
+            the run and keys the concurrency lock.
+        preview_invocation_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+          description: Days of history the preview covers, one 24h rule execution per day.
+        investigation_id:
+          type: string
+          maxLength: 512
+          description: >-
+            Investigation the proposal is recorded on. The detonation's own
+            conversation, so the analyst sees a single record for the run.
+      required: [task_id, investigation_id]
+      additionalProperties: false
+outputs:
+  - name: created
+    type: boolean
+  - name: reviewed
+    type: boolean
+  - name: decision
+    type: string
+  - name: rule_name
+    type: string
+  - name: skip_reason
+    type: string
+consts:
+  no_rows: []
+steps:
+  # The record's IOCs are sanitized at extraction (domain pattern, IP parse,
+  # hex digest, at most 100 per family), so every value is valid for its list
+  # type. A failed read skips everything below up to the lock release.
+  - name: read_record
+    type: kibana.request
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/record"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  # The candidate id is this execution's id: list ids, item ids and the rule's
+  # candidate tag all derive from it, so a step retry hits the same ids (a 409
+  # is tolerated) and two candidates for one run never share a list.
+  - name: resolve_iocs
+    type: data.set
+    if: "${{ steps.read_record.error == null }}"
+    with:
+      # The kibana.request step's output IS the response body (no wrapper);
+      # the record route returns the detonation record flat.
+      domains: "${{ steps.read_record.output['detonate.iocs.domains'] | default: consts.no_rows }}"
+      ips: "${{ steps.read_record.output['detonate.iocs.ips'] | default: consts.no_rows }}"
+      file_hashes: "${{ steps.read_record.output['detonate.iocs.file_hashes'] | default: consts.no_rows }}"
+      domain_count: "${{ steps.read_record.output['detonate.iocs.domains'] | default: consts.no_rows | size }}"
+      ip_count: "${{ steps.read_record.output['detonate.iocs.ips'] | default: consts.no_rows | size }}"
+      hash_count: "${{ steps.read_record.output['detonate.iocs.file_hashes'] | default: consts.no_rows | size }}"
+      sample: "{{ steps.read_record.output['file.hash.sha256'] | default: inputs.task_id }}"
+      candidate_tag: "detonate:candidate:{{ execution.id }}"
+      domain_list_id: "detonate-ioc-domains-{{ execution.id }}"
+      ip_list_id: "detonate-ioc-ips-{{ execution.id }}"
+      hash_list_id: "detonate-ioc-hashes-{{ execution.id }}"
+
+  - name: has_iocs
+    type: data.set
+    if: "${{ steps.resolve_iocs.output != null }}"
+    with:
+      ok: >-
+        ${{ steps.resolve_iocs.output.domain_count > 0
+          or steps.resolve_iocs.output.ip_count > 0
+          or steps.resolve_iocs.output.hash_count > 0 }}
+
+  # ----------------------------------------------------------------------
+  # Load the lists. One list per non-empty family; the list type decides the
+  # item field (`keyword` or `ip`) the rule's mapping reads, so the IP list
+  # must be typed ip: a keyword value mapped to destination.ip fails the rule
+  # with "is not an IP string literal". Items go one per request with
+  # deterministic ids; only the last item waits for a refresh, which makes
+  # every earlier one searchable too. Every write tolerates failure: the
+  # count check below is the gate, so a retried 409 counts as loaded and a
+  # real failure fails the check.
+  # ----------------------------------------------------------------------
+  - name: create_domain_list
+    type: kibana.request
+    if: "${{ steps.resolve_iocs.output.domain_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/lists"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.resolve_iocs.output.domain_list_id }}"
+        name: "Detonate IOCs: domains ({{ steps.resolve_iocs.output.sample | slice: 0, 12 }})"
+        description: "Domains the detonation of run {{ inputs.task_id }} contacted."
+        type: keyword
+
+  - name: load_domains
+    type: foreach
+    if: "${{ steps.resolve_iocs.output.domain_count > 0 }}"
+    foreach: "${{ steps.resolve_iocs.output.domains }}"
+    steps:
+      - name: add_domain
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/lists/items"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ steps.resolve_iocs.output.domain_list_id }}-{{ foreach.index }}"
+            list_id: "{{ steps.resolve_iocs.output.domain_list_id }}"
+            value: "{{ foreach.item }}"
+            refresh: >-
+              {%- assign last = foreach.total | minus: 1 -%}{%- if foreach.index == last -%}wait_for{%- else -%}false{%- endif -%}
+
+  - name: count_domains
+    type: kibana.request
+    if: "${{ steps.resolve_iocs.output.domain_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/lists/items/_find?per_page=1&list_id={{ steps.resolve_iocs.output.domain_list_id | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  - name: create_ip_list
+    type: kibana.request
+    if: "${{ steps.resolve_iocs.output.ip_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/lists"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.resolve_iocs.output.ip_list_id }}"
+        name: "Detonate IOCs: IPs ({{ steps.resolve_iocs.output.sample | slice: 0, 12 }})"
+        description: "Destination IPs the detonation of run {{ inputs.task_id }} contacted."
+        type: ip
+
+  - name: load_ips
+    type: foreach
+    if: "${{ steps.resolve_iocs.output.ip_count > 0 }}"
+    foreach: "${{ steps.resolve_iocs.output.ips }}"
+    steps:
+      - name: add_ip
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/lists/items"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ steps.resolve_iocs.output.ip_list_id }}-{{ foreach.index }}"
+            list_id: "{{ steps.resolve_iocs.output.ip_list_id }}"
+            value: "{{ foreach.item }}"
+            refresh: >-
+              {%- assign last = foreach.total | minus: 1 -%}{%- if foreach.index == last -%}wait_for{%- else -%}false{%- endif -%}
+
+  - name: count_ips
+    type: kibana.request
+    if: "${{ steps.resolve_iocs.output.ip_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/lists/items/_find?per_page=1&list_id={{ steps.resolve_iocs.output.ip_list_id | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  - name: create_hash_list
+    type: kibana.request
+    if: "${{ steps.resolve_iocs.output.hash_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/lists"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.resolve_iocs.output.hash_list_id }}"
+        name: "Detonate IOCs: file hashes ({{ steps.resolve_iocs.output.sample | slice: 0, 12 }})"
+        description: "Hashes of the files the detonation of run {{ inputs.task_id }} dropped."
+        type: keyword
+
+  - name: load_hashes
+    type: foreach
+    if: "${{ steps.resolve_iocs.output.hash_count > 0 }}"
+    foreach: "${{ steps.resolve_iocs.output.file_hashes }}"
+    steps:
+      - name: add_hash
+        type: kibana.request
+        timeout: "30s"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/lists/items"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ steps.resolve_iocs.output.hash_list_id }}-{{ foreach.index }}"
+            list_id: "{{ steps.resolve_iocs.output.hash_list_id }}"
+            value: "{{ foreach.item }}"
+            refresh: >-
+              {%- assign last = foreach.total | minus: 1 -%}{%- if foreach.index == last -%}wait_for{%- else -%}false{%- endif -%}
+
+  - name: count_hashes
+    type: kibana.request
+    if: "${{ steps.resolve_iocs.output.hash_count > 0 }}"
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/lists/items/_find?per_page=1&list_id={{ steps.resolve_iocs.output.hash_list_id | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  # Every non-empty family must hold exactly its IOC count. An empty family
+  # has no list; the rule's filter still names its id, which matches nothing.
+  - name: lists_loaded
+    type: data.set
+    if: "${{ steps.has_iocs.output.ok == true }}"
+    with:
+      domains_ok: >-
+        ${{ steps.resolve_iocs.output.domain_count == 0
+          or steps.count_domains.output.total == steps.resolve_iocs.output.domain_count }}
+      ips_ok: >-
+        ${{ steps.resolve_iocs.output.ip_count == 0
+          or steps.count_ips.output.total == steps.resolve_iocs.output.ip_count }}
+      hashes_ok: >-
+        ${{ steps.resolve_iocs.output.hash_count == 0
+          or steps.count_hashes.output.total == steps.resolve_iocs.output.hash_count }}
+
+  # The candidate rule, built once and read everywhere below: preview,
+  # attachment, proposal and the post-create check. One indicator match rule
+  # over the three lists; the threat filter scopes the indicator search to
+  # this candidate's lists, without it every list in the space would act as
+  # indicators. The mapping entries are ORed: any one family matching alerts.
+  - name: candidate
+    type: data.set
+    if: >-
+      ${{ steps.lists_loaded.output.domains_ok == true
+        and steps.lists_loaded.output.ips_ok == true
+        and steps.lists_loaded.output.hashes_ok == true }}
+    with:
+      ok: true
+      rule:
+        type: threat_match
+        language: kuery
+        name: "Detonate IOC match: sample {{ steps.resolve_iocs.output.sample | slice: 0, 12 }}"
+        description: >-
+          Matches production events against the indicators the detonation of
+          run {{ inputs.task_id }} extracted: {{ steps.resolve_iocs.output.domain_count }} domains,
+          {{ steps.resolve_iocs.output.ip_count }} IPs and {{ steps.resolve_iocs.output.hash_count }} file hashes.
+        query: "*:*"
+        index:
+          - logs-*
+        threat_index:
+          - ".items-{{ workflow.spaceId }}"
+        threat_query: "*:*"
+        threat_language: kuery
+        threat_filters:
+          - query:
+              terms:
+                list_id:
+                  - "{{ steps.resolve_iocs.output.domain_list_id }}"
+                  - "{{ steps.resolve_iocs.output.ip_list_id }}"
+                  - "{{ steps.resolve_iocs.output.hash_list_id }}"
+        threat_mapping:
+          - entries:
+              - field: dns.question.name
+                type: mapping
+                value: keyword
+          - entries:
+              - field: destination.ip
+                type: mapping
+                value: ip
+          - entries:
+              - field: file.hash.sha256
+                type: mapping
+                value: keyword
+        interval: 5m
+        from: now-6m
+        severity: medium
+        risk_score: 47
+        tags:
+          - detonate:trial
+          - "detonate:{{ inputs.task_id }}"
+          - "{{ steps.resolve_iocs.output.candidate_tag }}"
+
+  # ----------------------------------------------------------------------
+  # Preview, attach, propose. The preview runs the candidate with a 24h
+  # schedule so it covers whole days of history; the proposed rule keeps
+  # its 5m trial schedule.
+  # ----------------------------------------------------------------------
+  - name: preview_creation
+    type: workflow.execute
+    if: "${{ steps.candidate.output.ok == true }}"
+    with:
+      workflow-id: system-security-rule-preview
+      run-as-mode: inherit
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        indices:
+          - logs-*
+        preview_body:
+          type: threat_match
+          language: kuery
+          name: "{{ steps.candidate.output.rule.name }}"
+          description: "{{ steps.candidate.output.rule.description }}"
+          query: "{{ steps.candidate.output.rule.query }}"
+          index: "${{ steps.candidate.output.rule.index }}"
+          threat_index: "${{ steps.candidate.output.rule.threat_index }}"
+          threat_query: "{{ steps.candidate.output.rule.threat_query }}"
+          threat_language: kuery
+          threat_filters: "${{ steps.candidate.output.rule.threat_filters }}"
+          threat_mapping: "${{ steps.candidate.output.rule.threat_mapping }}"
+          severity: "{{ steps.candidate.output.rule.severity }}"
+          risk_score: "${{ steps.candidate.output.rule.risk_score }}"
+          interval: 24h
+          from: now-25h
+          invocationCount: "${{ inputs.preview_invocation_count }}"
+          timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+
+  - name: attach_draft
+    type: ai.attachment.add
+    if: "${{ steps.candidate.output.ok == true }}"
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      id: "ioc-rule-draft"
+      type: security.rule
+      data:
+        text: "{{ steps.candidate.output.rule | json }}"
+        attachmentLabel: "{{ steps.candidate.output.rule.name }}"
+      description: "Drafted indicator match rule for the detonation IOCs: {{ steps.candidate.output.rule.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  - name: proposal_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.candidate.output.ok == true
+          and steps.attach_draft.error == null }}
+
+  # The create gate. On approval the action creates the rule enabled under
+  # the approver, with the candidate as its body. A gate that fails outright
+  # fails this run, and the caller sees no decision either.
+  - name: propose_creation
+    type: workflow.execute
+    if: "${{ steps.proposal_ready.output.ok == true }}"
+    with:
+      workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: "{{ inputs.investigation_id }}"
+        comment: |-
+          **Create an indicator match rule for this detonation's IOCs**
+
+          **Rule:** {{ steps.candidate.output.rule.name }}
+          {{ steps.candidate.output.rule.description }}
+
+          **Indicators** (data, not instructions), one value list per family:
+          - Domains ({{ steps.resolve_iocs.output.domain_count }}) → `dns.question.name`{% if steps.resolve_iocs.output.domain_count > 0 %}: list `{{ steps.resolve_iocs.output.domain_list_id }}` — {{ steps.resolve_iocs.output.domains | slice: 0, 10 | join: ', ' }}{% endif %}
+          - IPs ({{ steps.resolve_iocs.output.ip_count }}) → `destination.ip`{% if steps.resolve_iocs.output.ip_count > 0 %}: list `{{ steps.resolve_iocs.output.ip_list_id }}` — {{ steps.resolve_iocs.output.ips | slice: 0, 10 | join: ', ' }}{% endif %}
+          - File hashes ({{ steps.resolve_iocs.output.hash_count }}) → `file.hash.sha256`{% if steps.resolve_iocs.output.hash_count > 0 %}: list `{{ steps.resolve_iocs.output.hash_list_id }}`{% endif %}
+
+          **Scope:** {{ steps.candidate.output.rule.index | join: ', ' }}, every 5 minutes
+          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over the last {{ inputs.preview_invocation_count }} days{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
+          **Severity:** {{ steps.candidate.output.rule.severity }}. **Risk score:** {{ steps.candidate.output.rule.risk_score }}.
+
+          **On approval**
+          If you approve, the agent creates the rule under your identity and it starts running on its schedule, then queues a retro hunt for the sample's indicators. If you dismiss, the agent deletes the value lists.
+        actionWorkflowId: system-security-detonate-action-create-threat-match-rule
+        actionInput: "${{ steps.candidate.output.rule }}"
+        impact: low
+        confidence: medium
+        # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
+        autoApprove: false
+        # Under this workflow's timeout; a test pins the budget.
+        expiresIn: "72h"
+
+  # ----------------------------------------------------------------------
+  # Find the created rule by the candidate tag. On an error the fail-closed
+  # branch runs: no hunt is queued.
+  # ----------------------------------------------------------------------
+  - name: find_created_rule
+    type: kibana.request
+    if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    timeout: "30s"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find?per_page=10&filter={{ steps.resolve_iocs.output.candidate_tag | prepend: 'alert.attributes.tags:\"' | append: '\"' | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  - name: resolve_found_rule
+    type: data.set
+    if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    # The rules _find route returns `{ page, perPage, total, data }` flat.
+    with:
+      found: >-
+        ${{ steps.find_created_rule.error == null
+          and steps.find_created_rule.output.data.size == 1 }}
+      rule_id: "${{ steps.find_created_rule.output.data[0].id | default: '' }}"
+      rule_name_found: "${{ steps.find_created_rule.output.data[0].name | default: '' }}"
+      type_found: "${{ steps.find_created_rule.output.data[0].type | default: '' }}"
+      language_found: "${{ steps.find_created_rule.output.data[0].language | default: '' }}"
+      query_found: "${{ steps.find_created_rule.output.data[0].query | default: '' }}"
+      lists_found: "{{ steps.find_created_rule.output.data[0].threat_filters[0].query.terms.list_id | join: ',' }}"
+      lists_proposed: "{{ steps.candidate.output.rule.threat_filters[0].query.terms.list_id | join: ',' }}"
+
+  # Re-guard the created rule as stored: exactly one rule by the candidate
+  # tag, still an indicator match over this candidate's lists only. A rule
+  # whose list filter was edited away would match every list in the space.
+  # On any mismatch: disable it and note why.
+  - name: verify_ok
+    type: data.set
+    if: "${{ steps.propose_creation.output.decision == 'approved' }}"
+    with:
+      ok: >-
+        ${{ steps.resolve_found_rule.output.found == true
+          and steps.resolve_found_rule.output.type_found == 'threat_match'
+          and steps.resolve_found_rule.output.language_found == 'kuery'
+          and steps.resolve_found_rule.output.query_found == steps.candidate.output.rule.query
+          and steps.resolve_found_rule.output.lists_found == steps.resolve_found_rule.output.lists_proposed }}
+      reason: >-
+        {% if steps.resolve_found_rule.output.found != true %}the created rule could not be found by its candidate tag (it may have been deleted, or edited so the tag was removed){% elsif steps.resolve_found_rule.output.type_found != 'threat_match' or steps.resolve_found_rule.output.language_found != 'kuery' %}rule is no longer an indicator match rule{% elsif steps.resolve_found_rule.output.query_found != steps.candidate.output.rule.query %}query changed after review{% elsif steps.resolve_found_rule.output.lists_found != steps.resolve_found_rule.output.lists_proposed %}indicator list filter changed after review{% else %}{% endif %}
+
+  - name: disable_changed_rule
+    type: kibana.request
+    if: >-
+      ${{ steps.verify_ok.output.ok == false
+        and steps.resolve_found_rule.output.found == true }}
+    timeout: "30s"
+    with:
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.resolve_found_rule.output.rule_id }}"
+        enabled: false
+    on-failure:
+      continue: true
+
+  - name: note_verification_failure
+    type: ai.conversation.add_user_message
+    if: "${{ steps.verify_ok.output.ok == false }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: >-
+        {%- if steps.resolve_found_rule.output.found != true -%}
+        Hunt sweep not queued: {{ steps.verify_ok.output.reason }}.
+        {%- elsif steps.disable_changed_rule.error == null -%}
+        Trial rule disabled: {{ steps.verify_ok.output.reason }}. [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }})
+        {%- else -%}
+        Disable failed, rule still enabled, disable manually: {{ steps.verify_ok.output.reason }} — [{{ steps.resolve_found_rule.output.rule_name_found }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_found_rule.output.rule_id }})
+        {%- endif -%}
+
+  # On a verified create, hand the run to the Hunt Worker through the handoff
+  # route. Runs as this copy's caller (inherit), which holds alertzero_write.
+  - name: queue_hunt
+    type: kibana.request
+    if: "${{ steps.verify_ok.output.ok == true }}"
+    timeout: "30s"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        add:
+          - detonate:hunt-requested
+    on-failure:
+      continue: true
+
+  - name: note_hunt_queue_failure
+    type: ai.conversation.add_user_message
+    if: "${{ steps.queue_hunt.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: "Hunt sweep not queued: {{ steps.queue_hunt.error.message }}. Queue it from the detonation result flyout."
+
+  # ----------------------------------------------------------------------
+  # Discard the lists when no rule references them: dismissed, expired, or
+  # never proposed (a failed load or attach). An approved candidate keeps
+  # them, even when its rule was disabled, because the rule reads them.
+  # ----------------------------------------------------------------------
+  - name: discard_lists
+    type: data.set
+    if: "${{ steps.has_iocs.output.ok == true }}"
+    with:
+      ok: "${{ steps.propose_creation.output.decision != 'approved' }}"
+
+  - name: delete_domain_list
+    type: kibana.request
+    if: >-
+      ${{ steps.discard_lists.output.ok == true
+        and steps.resolve_iocs.output.domain_count > 0 }}
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: DELETE
+      path: "/s/{{ workflow.spaceId }}/api/lists?id={{ steps.resolve_iocs.output.domain_list_id | url_encode }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  - name: delete_ip_list
+    type: kibana.request
+    if: >-
+      ${{ steps.discard_lists.output.ok == true
+        and steps.resolve_iocs.output.ip_count > 0 }}
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: DELETE
+      path: "/s/{{ workflow.spaceId }}/api/lists?id={{ steps.resolve_iocs.output.ip_list_id | url_encode }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  - name: delete_hash_list
+    type: kibana.request
+    if: >-
+      ${{ steps.discard_lists.output.ok == true
+        and steps.resolve_iocs.output.hash_count > 0 }}
+    timeout: "30s"
+    on-failure:
+      continue: true
+    with:
+      method: DELETE
+      path: "/s/{{ workflow.spaceId }}/api/lists?id={{ steps.resolve_iocs.output.hash_list_id | url_encode }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  # ----------------------------------------------------------------------
+  # Release the coverage lock the sweep took on dispatch. Always runs and
+  # always clears, whatever path this copy took.
+  # ----------------------------------------------------------------------
+  - name: clear_in_progress
+    type: kibana.request
+    timeout: "30s"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/runs/{{ inputs.task_id }}/handoff"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        remove:
+          - detonate:coverage-in-progress
+    on-failure:
+      continue: true
+
+  - name: note_clear_failure
+    type: ai.conversation.add_user_message
+    if: "${{ steps.clear_in_progress.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: "Coverage lock not released: {{ steps.clear_in_progress.error.message }}. The run stays hidden from the Detection Worker until the marker is cleared."
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      created: "${{ steps.propose_creation.output.status == 'succeeded' }}"
+      reviewed: >-
+        ${{ steps.propose_creation.output.decision == 'approved'
+          or steps.propose_creation.output.decision == 'dismissed' }}
+      decision: "{{ steps.propose_creation.output.decision }}"
+      rule_name: "{{ steps.candidate.output.rule.name }}"
+      skip_reason: >-
+        {% if steps.read_record.error != null %}The run record could not be read: {{ steps.read_record.error.message }}{% elsif steps.has_iocs.output.ok != true %}The run record carries no IOCs.{% elsif steps.candidate.output.ok != true %}The value lists did not load completely (domains {{ steps.count_domains.output.total | default: 0 }}/{{ steps.resolve_iocs.output.domain_count }}, IPs {{ steps.count_ips.output.total | default: 0 }}/{{ steps.resolve_iocs.output.ip_count }}, hashes {{ steps.count_hashes.output.total | default: 0 }}/{{ steps.resolve_iocs.output.hash_count }}).{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

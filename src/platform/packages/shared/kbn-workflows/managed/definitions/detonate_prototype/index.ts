@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_YAML from './action_create_threat_match_rule.yaml';
 import DETONATE_COVERAGE_GAP_YAML from './detonate_coverage_gap.yaml';
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
 import DETONATE_IOC_HUNT_YAML from './detonate_ioc_hunt.yaml';
+import DETONATE_IOC_RULE_YAML from './detonate_ioc_rule.yaml';
 import DETONATE_RULE_CREATION_YAML from './detonate_rule_creation.yaml';
 import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
@@ -34,7 +36,7 @@ export const DETONATE_IOC_HUNT_WORKFLOW_ID = 'system-security-detonate-ioc-hunt'
 export const DETONATE_COVERAGE_GAP_WORKFLOW = {
   id: DETONATE_COVERAGE_GAP_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 7,
+  version: 8,
   billable: false,
   yaml: DETONATE_COVERAGE_GAP_YAML,
   management: {
@@ -122,6 +124,50 @@ export const DETONATE_IOC_HUNT_WORKFLOW = {
   version: 3,
   billable: false,
   yaml: DETONATE_IOC_HUNT_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const DETONATE_IOC_RULE_WORKFLOW_ID = 'system-security-detonate-ioc-rule';
+
+/**
+ * Detonate prototype: the IOC-backed sibling of the rule-creation copy, for a
+ * run whose record carries extracted IOCs. Loads them into one value list per
+ * family (domains and hashes as keyword, IPs as ip), previews one indicator
+ * match rule over the three lists, and proposes creation on the run's
+ * Investigation. Approval creates the rule enabled; a re-check of the stored
+ * rule then queues the Hunt Worker or disables the rule.
+ */
+export const DETONATE_IOC_RULE_WORKFLOW = {
+  id: DETONATE_IOC_RULE_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_IOC_RULE_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW_ID =
+  'system-security-detonate-action-create-threat-match-rule';
+
+/**
+ * Detonate prototype action: creates an enabled indicator match rule once an
+ * analyst approves the IOC rule proposal. Separate from the AlertZero
+ * create-rule action, which accepts ES|QL bodies only.
+ */
+export const DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW = {
+  id: DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

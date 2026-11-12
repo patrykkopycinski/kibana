@@ -27,7 +27,7 @@ The word "malicious" may appear in a summary ONLY when the run produced hard
 evidence: production endpoint alerts (Defend prevented something) or detection
 rule hits. In every other case — zero alerts, diagnostic-only alerts, or a
 failed run — the summary must use "suspicious" or say "no malicious behavior
-was observed" and add that this is not proof the sample is benign. A summary
+was observed" and add that this is not proof the sample is safe. A summary
 must NEVER conclude or imply the sample is "safe" or "clean". A benign
 verdict means only that no malicious behavior was observed in the sandbox:
 absence of evidence, not evidence of safety.`;

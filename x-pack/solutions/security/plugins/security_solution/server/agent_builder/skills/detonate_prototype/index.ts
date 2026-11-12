@@ -60,8 +60,10 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
    run on a fresh VM — the service never reuses an earlier report, which is
    why step 1 matters. Tell the analyst the run has started, how long it takes
    (several minutes), and give them the task ID.
-3. **Poll.** Call \`get_detonation\` until \`complete\` is true. Do not guess at
-   completion from elapsed time; \`complete\` is the only correct signal.
+3. **Poll.** Call \`get_detonation\` until \`finished\` is true. Do not guess at
+   completion from elapsed time; \`finished\` is the only correct stop signal.
+   \`complete\` means a verdict exists; a failed run is \`finished\` but not
+   \`complete\`.
 4. **Report.** Say what Elastic Defend saw, by \`event.code\` and by detection
    rule name.
 
@@ -87,7 +89,7 @@ The word "malicious" may appear in a summary ONLY when the run produced hard
 evidence: production endpoint alerts (Defend prevented something) or detection
 rule hits. In every other case — zero alerts, diagnostic-only alerts, or a
 failed run — the summary must use "suspicious" or say "no malicious behavior
-was observed" and add that this is not proof the sample is benign. A summary
+was observed" and add that this is not proof the sample is safe. A summary
 must NEVER conclude or imply the sample is "safe" or "clean". A benign
 verdict means only that no malicious behavior was observed in the sandbox:
 absence of evidence, not evidence of safety.

@@ -351,7 +351,7 @@ export const totalDetonationAlerts = (task: DetonateTask): number =>
 /**
  * Whether a detonation saw anything at all. A run that completes with zero
  * alerts is a real and meaningful result (no malicious behavior was observed —
- * not proof the sample is benign; possibly a detection gap) — it is not an
+ * not proof the sample is safe; possibly a detection gap) — it is not an
  * error, and surfaces must not present it as one.
  */
 export const detonationWasBenign = (task: DetonateTask): boolean =>
@@ -856,8 +856,10 @@ export const spaceTaskQuery = (
 
 /**
  * Where a run is, independent of what it found. Only a `complete` run has a
- * verdict. `queued` is a run the service accepted but no worker has picked up;
- * an alert a Worker marked for detonation without submitting it reads the same.
+ * verdict. `queued` is never derived from a task: `DetonateTask` requires a last
+ * worker and a worker status, so nothing marks "accepted, no worker started".
+ * It only appears as an alert state (a Worker marked the alert for detonation
+ * without submitting it).
  */
 export const DETONATION_RUN_STATUSES = ['queued', 'running', 'complete', 'failed'] as const;
 export type DetonationRunStatus = (typeof DETONATION_RUN_STATUSES)[number];

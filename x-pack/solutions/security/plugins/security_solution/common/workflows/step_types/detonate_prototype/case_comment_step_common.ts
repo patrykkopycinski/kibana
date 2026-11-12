@@ -74,11 +74,19 @@ export const caseCommentStepCommonDefinition: BaseStepDefinition<
     examples: [
       `## Carry a detonation verdict into the case the alert belongs to
 \`\`\`yaml
-- name: case_comment
+- name: case_comment_verdict
   type: ${CaseCommentStepId}
+  if: "\${{ steps.verdict.output.status == 'complete' }}"
   with:
     case_id: "{{ variables.case_id }}"
     comment: "Detonation verdict: {{ steps.verdict.output.verdict }} — {{ steps.verdict.output.evidence }}"
+
+- name: case_comment_no_verdict
+  type: ${CaseCommentStepId}
+  if: "\${{ steps.verdict.output.status != 'complete' }}"
+  with:
+    case_id: "{{ variables.case_id }}"
+    comment: "Detonation: no verdict — run {{ steps.verdict.output.status }}"
 \`\`\``,
     ],
   },

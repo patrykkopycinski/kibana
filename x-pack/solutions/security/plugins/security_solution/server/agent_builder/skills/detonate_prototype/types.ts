@@ -143,7 +143,6 @@ const summarizeDetectionGroups = (
  * open the run in the UI.
  */
 export const summarizeDetonationTask = (task: DetonateTask) => {
-  const complete = isDetonationComplete(task);
   const failed = isDetonationFailed(task);
   const conclusion = deriveDetonateVerdict(task);
 
@@ -153,16 +152,16 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
     created_at: task.created_at,
     tags: task.tags,
 
-    // State, in the three forms a caller actually branches on. `complete` and
-    // `failed` are independent: a run can fail at any worker, and a completed
-    // run is not necessarily a successful one.
     // `status` is the run's own axis; `verdict` exists only once it is `complete`.
+    // `finished` is the terminal flag a poller stops on: a failed run is
+    // finished but never `complete`, so it has no verdict.
     status: conclusion.status,
     ...(conclusion.verdict ? { verdict: conclusion.verdict } : {}),
-    complete,
+    complete: conclusion.status === 'complete',
+    finished: isDetonationComplete(task),
     failed,
     // Zero alerts on a completed run is a real result — no malicious behavior
-    // was observed, which is not proof the sample is harmless (it may be a
+    // was observed, which is not proof the sample is safe (it may be a
     // detection gap) — and the flag exists so the agent reports it as a finding
     // rather than as "something went wrong".
     benign: detonationWasBenign(task),

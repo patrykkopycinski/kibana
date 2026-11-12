@@ -145,7 +145,7 @@ const main = async () => {
       tags: ['corpus:known-good'],
     });
     const final = await runPipeline({ store, executor, taskId: task.id, stepDelayMs: 0 });
-    entries.push({ id: `kg-${i}`, label: 'known_good_quiet', task: recorded(final) });
+    entries.push({ id: `kg-${i}`, label: 'known_good_benign', task: recorded(final) });
   }
 
   // ---- known-malware (every recorded malicious fixture) --------------------
@@ -210,7 +210,7 @@ const main = async () => {
 
   process.stdout.write(`wrote ${entries.length} entries to ${file}\n`);
   process.stdout.write(`label counts: ${JSON.stringify(counts)}\n`);
-  if ((counts.known_good_quiet ?? 0) < 300) {
+  if ((counts.known_good_benign ?? 0) < 300) {
     throw new Error(`known-good corpus below 300 — regenerate with --count 300`);
   }
 };

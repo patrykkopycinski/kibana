@@ -14,8 +14,13 @@ interface CorpusFile {
   generatedAt: string;
   note: string;
   counts: Record<string, number>;
-  entries: Array<{ id: string; label: DetonateCorpusLabel; task: DetonateCorpusTask }>;
+  entries: Array<{ id: string; label: DetonateCorpusLabel | string; task: DetonateCorpusTask }>;
 }
+
+// The committed fixture predates the quiet→benign rename and is regenerated, not hand-edited.
+const LEGACY_LABELS: Readonly<Record<string, DetonateCorpusLabel>> = {
+  known_good_quiet: 'known_good_benign',
+};
 
 const totalAlerts = (t: DetonateCorpusTask): number =>
   (t.production_endpoint_alerts_count ??
@@ -45,10 +50,10 @@ const assertLabelMatchesTask = (entry: DetonateCorpusEntry): void => {
   const { label, task, id } = entry;
   const alerts = totalAlerts(task);
 
-  if (label === 'known_good_quiet') {
+  if (label === 'known_good_benign') {
     if (!isComplete(task) || alerts !== 0) {
       throw new Error(
-        `corpus entry ${id} labelled known_good_quiet is not a completed zero-alert run ` +
+        `corpus entry ${id} labelled known_good_benign is not a completed zero-alert run ` +
           `(complete=${isComplete(task)}, alerts=${alerts})`
       );
     }
@@ -84,9 +89,13 @@ export const loadDetonateCorpus = (fixturePath?: string): DetonateCorpusEntry[] 
   if (!Array.isArray(parsed.entries) || parsed.entries.length === 0) {
     throw new Error(`corpus at ${path} has no entries`);
   }
-  for (const entry of parsed.entries) assertLabelMatchesTask(entry);
+  const entries = parsed.entries.map((entry) => ({
+    ...entry,
+    label: LEGACY_LABELS[entry.label] ?? (entry.label as DetonateCorpusLabel),
+  }));
+  for (const entry of entries) assertLabelMatchesTask(entry);
 
-  return parsed.entries;
+  return entries;
 };
 
 /**

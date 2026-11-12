@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { loadDetonateCorpus, upperBound95 } from './corpus';
 
 describe('upperBound95', () => {
@@ -26,10 +30,28 @@ describe('loadDetonateCorpus', () => {
   it('loads the committed corpus with ≥300 known-good entries and valid labels', () => {
     const corpus = loadDetonateCorpus();
     const count = (label: string) => corpus.filter((e) => e.label === label).length;
-    expect(count('known_good_quiet')).toBeGreaterThanOrEqual(300);
+    expect(count('known_good_benign')).toBeGreaterThanOrEqual(300);
     expect(count('known_malicious')).toBeGreaterThan(0);
     expect(count('evasive_no_alerts')).toBeGreaterThan(0);
     expect(new Set(corpus.map((e) => e.id)).size).toBe(corpus.length);
+  });
+
+  it('loads a legacy known_good_quiet entry as known_good_benign', () => {
+    const benign = loadDetonateCorpus().find((e) => e.label === 'known_good_benign');
+    if (!benign) throw new Error('committed corpus has no known_good_benign entry');
+    const dir = mkdtempSync(join(tmpdir(), 'detonate-corpus-'));
+    const path = join(dir, 'legacy.json');
+    writeFileSync(
+      path,
+      JSON.stringify({
+        generatedAt: 'legacy',
+        note: 'legacy label',
+        counts: {},
+        entries: [{ id: 'legacy-1', label: 'known_good_quiet', task: benign.task }],
+      })
+    );
+
+    expect(loadDetonateCorpus(path).map((e) => e.label)).toEqual(['known_good_benign']);
   });
 
   it('names only the neutral sandbox host and policy in recorded alert docs', () => {

@@ -175,7 +175,7 @@ const sumGate = (results: DatasetRunResult[]): GateCounts => {
             summary: '',
           });
         } else {
-          if (meta.label === 'known_good_quiet') counts.knownGood += 1;
+          if (meta.label === 'known_good_benign') counts.knownGood += 1;
           if (meta.falseMalicious) counts.falseMalicious += 1;
           if (meta.falseBenign) counts.falseBenign += 1;
         }
@@ -233,7 +233,7 @@ evaluate.describe(
   { tag: [...tags.serverless.security.complete] },
   () => {
     const corpus = loadDetonateCorpus();
-    const knownGood = corpus.filter((e) => e.label === 'known_good_quiet');
+    const knownGood = corpus.filter((e) => e.label === 'known_good_benign');
     const evasive = corpus.filter((e) => e.label === 'evasive_no_alerts');
     const malicious = corpus.filter((e) => e.label === 'known_malicious');
 

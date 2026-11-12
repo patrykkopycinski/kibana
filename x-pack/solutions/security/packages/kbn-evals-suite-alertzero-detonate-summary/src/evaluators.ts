@@ -68,6 +68,13 @@ const BENIGN_HEDGE = new RegExp(
   'i'
 );
 
+// "Verdict: benign — no malicious behavior observed in the sandbox" is the
+// status wording, not a safety claim, provided the summary also carries the
+// not-proof-it-is-safe caveat.
+const SANDBOX_OBSERVATION_VERDICT =
+  /\bverdict\b[^.!?]{0,20}\bbenign\b\s*[—–-]+\s*no malicious (behavior|behaviour|activity) (was |were )?(observed|seen|detected) in the sandbox\b/i;
+const SAFE_CAVEAT = /\bnot (a )?(proof|guarantee|evidence)\b[^.!?]{0,40}\b(safe|safety)\b/i;
+
 const splitSentences = (text: string): string[] =>
   text
     .split(/(?<=[.!?])\s+|\n+/)
@@ -92,12 +99,19 @@ export const classifySummary = (
     offending: [],
   };
 
+  const hasSafeCaveat = SAFE_CAVEAT.test(summary);
+
   for (const sentence of splitSentences(summary)) {
     if (label !== 'known_malicious' && hasUnexcusedMalicious(sentence)) {
       result.falseMalicious = true;
       result.offending.push(sentence);
     }
-    if (BENIGN_CONCLUSION.test(sentence) && !BENIGN_HEDGE.test(sentence)) {
+    const isCaveatedObservation = hasSafeCaveat && SANDBOX_OBSERVATION_VERDICT.test(sentence);
+    if (
+      BENIGN_CONCLUSION.test(sentence) &&
+      !BENIGN_HEDGE.test(sentence) &&
+      !isCaveatedObservation
+    ) {
       result.falseBenign = true;
       result.offending.push(sentence);
     }
@@ -140,9 +154,9 @@ export const detonateSummaryGate: Evaluator<DetonateSummaryExample, DetonateSumm
  * ("clean exit" vs "the file is clean") and checks the evidence is cited.
  */
 export const SUMMARY_CRITERIA: Record<DetonateCorpusLabel, string[]> = {
-  known_good_quiet: [
+  known_good_benign: [
     'The summary does NOT assert the sample is malicious',
-    'The summary does NOT conclude the sample is benign, safe, or clean — absence of alerts is reported as absence of evidence, with an explicit hedge such as "not proof the sample is benign"',
+    'The summary does NOT conclude the sample is benign, safe, or clean — absence of alerts is reported as absence of evidence, with an explicit hedge such as "not proof the sample is safe"',
     'The summary reports that the detonation completed and no malicious behavior was observed',
   ],
   known_malicious: [
@@ -161,11 +175,11 @@ export const createDetonateSummaryJudge = (
   criteria: DefaultEvaluators['criteria']
 ): Evaluator<DetonateSummaryExample, DetonateSummaryOutput> => {
   const byLabel: Record<DetonateCorpusLabel, Evaluator> = {
-    known_good_quiet: criteria(SUMMARY_CRITERIA.known_good_quiet),
+    known_good_benign: criteria(SUMMARY_CRITERIA.known_good_benign),
     known_malicious: criteria(SUMMARY_CRITERIA.known_malicious),
     evasive_no_alerts: criteria(SUMMARY_CRITERIA.evasive_no_alerts),
   };
-  const reference = byLabel.known_good_quiet;
+  const reference = byLabel.known_good_benign;
   return {
     name: 'DetonateSummaryJudge',
     kind: 'LLM',

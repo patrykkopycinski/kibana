@@ -90,6 +90,7 @@ export const applyDetonationVerdictStepCommonDefinition: BaseStepDefinition<
 
 - name: apply
   type: ${ApplyDetonationVerdictStepId}
+  if: "\${{ steps.verdict.output.status == 'complete' }}"
   with:
     verdict: "{{ steps.verdict.output.verdict }}"
     alert_id: "{{ steps.verdict.output.alert_id }}"

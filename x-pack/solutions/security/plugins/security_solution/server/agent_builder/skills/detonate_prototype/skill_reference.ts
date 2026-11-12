@@ -26,12 +26,13 @@ Minutes, not seconds. Submitting and polling are separate tools for that reason.
 ## Reading the state
 
 A task carries a worker name and a worker status, not a "done" flag. The tools
-derive a run \`status\` (\`queued\`, \`running\`, \`complete\` or \`failed\`) and three
+derive a run \`status\` (\`running\`, \`complete\` or \`failed\`) and four
 booleans from them. Only a \`complete\` run carries a \`verdict\`
 (\`malicious\`, \`benign\` or \`inconclusive\`); a failed or running run has none:
 
-- \`complete\` — the run reached its terminal worker and has a verdict. Stop polling.
-- \`failed\` — the run ended badly (stop polling): the VM never came up, the sample could not be
+- \`finished\` — the run is terminal, complete or failed. Stop polling when it is true.
+- \`complete\` — the run reached its terminal worker and a verdict exists.
+- \`failed\` — the run ended badly: the VM never came up, the sample could not be
   fetched, the agent never enrolled. There is no behavioural verdict.
 - \`benign\` — the run finished cleanly and produced **zero** alerts.
 
@@ -43,7 +44,7 @@ is what to tell an analyst who asks how far along a run is.
 A benign run is a result, not a failure. It means one of:
 
 1. The sample did nothing malicious in the time it was given — though this is
-   not proof the sample is harmless (no behavior was observed ≠ safe).
+   not proof the sample is safe (no behavior was observed ≠ safe).
 2. The sample detected the sandbox and declined to run.
 3. Elastic Defend has a gap for this behaviour.
 

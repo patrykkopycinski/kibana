@@ -32,16 +32,20 @@ const setAttackStatusStepCommonDefinition = {
   category: StepCategory.KibanaSecurity,
   label: 'Set Attack Status',
   description: 'Change the status of one or multiple attacks to open, acknowledged, or closed.',
-  inputSchema: z.object({
-    ids: z.union([z.string().min(1).max(256), z.array(z.string().min(1).max(256)).min(1)]),
-    status: z.enum(['open', 'acknowledged', 'closed']),
-    reason: z.string().min(1).max(1024).optional(),
-    update_related_alerts: z.boolean().optional().default(false),
-  }),
-  outputSchema: z.object({
-    success: z.boolean(),
-    message: z.string().max(1000).optional(),
-  }),
+  inputSchema: lazySchema(() =>
+    z.object({
+      ids: z.union([z.string().min(1).max(256), z.array(z.string().min(1).max(256)).min(1)]),
+      status: z.enum(['open', 'acknowledged', 'closed']),
+      reason: z.string().min(1).max(1024).optional(),
+      update_related_alerts: z.boolean().optional().default(false),
+    })
+  ),
+  outputSchema: lazySchema(() =>
+    z.object({
+      success: z.boolean(),
+      message: z.string().max(1000).optional(),
+    })
+  ),
 };
 
 /**

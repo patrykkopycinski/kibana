@@ -205,6 +205,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
     logger: loggerMock.create(),
     getWorkflowsApi: () => workflowsApi as never,
     getAttachmentsClient: async () => ({ create: jest.fn() } as never),
+    resolveUser: async () => undefined,
   });
 
   const privileges: ProposalPrivilegesChecker = {

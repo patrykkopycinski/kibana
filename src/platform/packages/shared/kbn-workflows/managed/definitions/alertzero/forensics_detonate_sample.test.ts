@@ -17,6 +17,7 @@
 
 import { parse } from 'yaml';
 import { ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW } from './forensics_detonate_sample';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../../../spec/schema';
 import { DETONATE_TRIAGE_WORKFLOW_ID } from '../detonate_prototype';
@@ -39,6 +40,8 @@ interface YamlStep {
   cases?: (YamlStep & { match: string })[];
   default?: YamlStep[];
 }
+
+const engine = createWorkflowLiquidEngine();
 
 const worker = parse(
   ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW.yamlTemplate({
@@ -105,9 +108,33 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       expect(filter?.with?.method).toBe('POST');
       expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
       expect(filter?.with?.body).toEqual({
-        alert_ids: "${{ steps.find_candidates.output.values | map: 'first' }}",
+        alerts: '${{ variables.candidate_lookup_json | json_parse }}',
       });
       expect(filter?.['on-failure']).toEqual({ retry: { 'max-attempts': 3, delay: '5s' } });
+    });
+
+    it.each([
+      ['build_candidate_lookup', 'candidate_lookup_json', 'find_candidates'],
+      ['build_auto_candidate_lookup', 'auto_candidate_lookup_json', 'find_auto_candidates'],
+    ])('%s sends each row sample hash with its alert id', (name, variable, source) => {
+      const build = stepByName(name);
+      expect(build?.type).toBe('data.set');
+      const json = engine.parseAndRenderSync(String(build?.with?.[variable]), {
+        steps: {
+          [source]: {
+            output: {
+              values: [
+                ['alert-1', 'a'.repeat(64)],
+                ['alert-2', 'b'.repeat(64)],
+              ],
+            },
+          },
+        },
+      });
+      expect(JSON.parse(json)).toEqual([
+        { alert_id: 'alert-1', sha256: 'a'.repeat(64) },
+        { alert_id: 'alert-2', sha256: 'b'.repeat(64) },
+      ]);
     });
 
     it('only picks up open alerts, so a closed or acknowledged one is never re-detonated', () => {
@@ -234,11 +261,11 @@ describe('Detonate sample worker (Forensics Watch)', () => {
   });
 
   describe('per-run mode', () => {
-    it('marks the alert running before any VM is spent, and never fails the run for it', () => {
+    it('marks the alert running before any VM is spent, and fails the run when it cannot', () => {
       const running = stepByName('mark_running');
       expect(running?.type).toBe('kibana.request');
       expect(running?.if).toBe('${{ inputs.sha256 != blank }}');
-      expect(running?.['on-failure']).toEqual({ continue: true });
+      expect(running?.['on-failure']).toBeUndefined();
       expect(running?.with?.path).toBe(DECISIONS_PATH);
       expect(decisionsOf(running)).toEqual([
         {

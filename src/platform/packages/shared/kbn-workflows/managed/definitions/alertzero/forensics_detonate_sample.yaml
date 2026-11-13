@@ -105,6 +105,21 @@ steps:
           | KEEP first_alert, file.hash.sha256
           | LIMIT 200
 
+  # The lookups send each row's sample hash with its alert id: without it the
+  # store cannot tell that a sibling alert's sample already ran to completion.
+  # Liquid has no object literal, hence the JSON template.
+  - name: build_candidate_lookup
+    type: data.set
+    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
+    with:
+      candidate_lookup_json: |-
+        [
+        {%- for row in steps.find_candidates.output.values -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {"alert_id":{{ row[0] | json }},"sha256":{{ row[1] | json }}}
+        {%- endfor -%}
+        ]
+
   # Which of the rows the decisions store already covers: a terminal decision, a
   # claim still in flight, a run that already completed for the alert or its
   # sample, or an alert that failed too often. The route answers only for the ids
@@ -124,7 +139,7 @@ steps:
         kbn-xsrf: "true"
         elastic-api-version: "1"
       body:
-        alert_ids: "${{ steps.find_candidates.output.values | map: 'first' }}"
+        alerts: "${{ variables.candidate_lookup_json | json_parse }}"
 
   # The Supervised subset: same alert contract plus the severity the deck
   # names ("High or Critical file alerts with no verdict"). A separate query
@@ -149,6 +164,18 @@ steps:
           | KEEP first_alert, file.hash.sha256
           | LIMIT 200
 
+  - name: build_auto_candidate_lookup
+    type: data.set
+    if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 }}"
+    with:
+      auto_candidate_lookup_json: |-
+        [
+        {%- for row in steps.find_auto_candidates.output.values -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {"alert_id":{{ row[0] | json }},"sha256":{{ row[1] | json }}}
+        {%- endfor -%}
+        ]
+
   - name: filter_auto_candidates
     type: kibana.request
     if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 }}"
@@ -163,7 +190,7 @@ steps:
         kbn-xsrf: "true"
         elastic-api-version: "1"
       body:
-        alert_ids: "${{ steps.find_auto_candidates.output.values | map: 'first' }}"
+        alerts: "${{ variables.auto_candidate_lookup_json | json_parse }}"
 
   # The kibana.request output IS the response body, so the excluded alert ids are
   # the keys of `outcomes`; a skipped lookup leaves none. `if` conditions and the
@@ -251,7 +278,8 @@ steps:
 
   # Over the allowance nothing is dispatched; the auto-candidates get a queued
   # decision so the alert state badge shows why, and the Investigation says
-  # when detonation resumes. (Manual mode never dispatches, so never queues;
+  # when detonation resumes. The queued decision is display-only: nothing relies
+  # on it for correctness, so a failed write is tolerated. (Manual mode never dispatches, so never queues;
   # the manual journal message says detonation is a person's decision.) Nothing
   # clears the claim here: it expires on its own, and the next sweep that runs
   # under the allowance simply dispatches. The decisions route takes an array,
@@ -355,15 +383,15 @@ steps:
   # dialog. Everything below is gated on the sha256 input being present.
   # ===========================================================================
 
-  # A running decision says a detonation is underway before any VM is spent, so
-  # an analyst landing on the alert between sweep and verdict sees state, not
-  # silence. A verdict replaces it; a run that dies leaves it, and it expires
+  # A running decision is the claim that keeps the next sweep from picking the
+  # same alert while this run is in flight, and it says so to an analyst landing
+  # on the alert between sweep and verdict. It is not best-effort: if it cannot
+  # be written the run fails here, before any VM is spent, like tag_known and the
+  # apply step. A verdict replaces it; a run that dies leaves it, and it expires
   # on its own so the next sweep retries the hash.
   - name: mark_running
     type: kibana.request
     if: "${{ inputs.sha256 != blank }}"
-    on-failure:
-      continue: true
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"

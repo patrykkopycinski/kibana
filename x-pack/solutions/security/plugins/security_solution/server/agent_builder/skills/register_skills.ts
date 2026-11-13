@@ -169,6 +169,7 @@ export const registerSkills = async ({
         endpointAppContextService: options.endpointAppContextService,
         getClient: (request) => detonatePrototype.getClient(request),
         hasDetonatePrivilege: detonatePrototype.hasDetonatePrivilege,
+        recordRun: detonatePrototype.recordRun,
       })
     );
   }

@@ -35,7 +35,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import { DETONATE_VM_OS_FAMILIES } from '../../../common/detonate_prototype';
-import type { DetonateTask, DetonateVmOsFamily } from '../../../common/detonate_prototype';
+import type {
+  DetonateSubmitSource,
+  DetonateTask,
+  DetonateVmOsFamily,
+} from '../../../common/detonate_prototype';
 import { useSubmitFile, useSubmitHash } from '../hooks/use_detonate';
 import { useCanSubmitDetonation } from '../hooks/use_can_submit_detonation';
 import * as i18n from '../translations';
@@ -77,10 +81,12 @@ interface Props {
   initialHash?: string;
   /** Pre-filled by the alert action so the run is findable afterwards. */
   initialTags?: string[];
+  /** Which surface the form sits in; recorded with the run. */
+  source: DetonateSubmitSource;
   onSubmitted: (task: DetonateTask) => void;
 }
 
-export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmitted }) => {
+export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, source, onSubmitted }) => {
   const modalTitleId = useGeneratedHtmlId();
   const [mode, setMode] = useState<SubmitMode>('hash');
   const [hash, setHash] = useState(initialHash ?? '');
@@ -102,8 +108,9 @@ export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, onSubmi
     () => ({
       ...(tagValues.length ? { tags: tagValues } : {}),
       ...(osFamily ? { vm_os_family: osFamily } : {}),
+      origin: { source },
     }),
-    [tagValues, osFamily]
+    [tagValues, osFamily, source]
   );
 
   const hasSubmitPrivilege = useCanSubmitDetonation();

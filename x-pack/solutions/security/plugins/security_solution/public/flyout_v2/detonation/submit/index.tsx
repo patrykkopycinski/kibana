@@ -47,7 +47,12 @@ export const DetonationSubmit: FC<DetonationSubmitProps> = memo(
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={DETONATION_SUBMIT_BODY_TEST_ID}>
-        <SubmitForm initialHash={initialHash} initialTags={initialTags} onSubmitted={onSubmitted} />
+        <SubmitForm
+          initialHash={initialHash}
+          initialTags={initialTags}
+          source="alert_flyout"
+          onSubmitted={onSubmitted}
+        />
       </EuiFlyoutBody>
     </>
   )

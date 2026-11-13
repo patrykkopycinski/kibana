@@ -123,6 +123,7 @@ describe('registerSkills - detonate sample', () => {
         buildDetonateOpts(agentBuilder, {
           getClient: jest.fn(),
           hasDetonatePrivilege: jest.fn(),
+          recordRun: jest.fn(),
         }) as Parameters<typeof registerSkills>[0]
       )
     ).resolves.toBeUndefined();

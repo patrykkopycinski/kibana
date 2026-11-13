@@ -68,7 +68,7 @@ const submit = async () => {
 
 describe('SubmitForm', () => {
   it('does not submit until the confirm modal is confirmed', async () => {
-    render(<SubmitForm onSubmitted={jest.fn()} />);
+    render(<SubmitForm source="detonate_page" onSubmitted={jest.fn()} />);
 
     await submit();
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe('SubmitForm', () => {
   });
 
   it('submits nothing when the modal is cancelled', async () => {
-    render(<SubmitForm onSubmitted={jest.fn()} />);
+    render(<SubmitForm source="detonate_page" onSubmitted={jest.fn()} />);
 
     await submit();
     fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
@@ -87,17 +87,30 @@ describe('SubmitForm', () => {
     expect(screen.queryByTestId('confirmModalConfirmButton')).toBeNull();
   });
 
-  it('sends only the hash when no option was chosen', async () => {
-    render(<SubmitForm onSubmitted={jest.fn()} />);
+  it('sends only the hash and the surface it was submitted from when no option was chosen', async () => {
+    render(<SubmitForm source="detonate_page" onSubmitted={jest.fn()} />);
 
     await submit();
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    expect(mutateAsync).toHaveBeenCalledWith({ sample_hash: 'a'.repeat(64) });
+    expect(mutateAsync).toHaveBeenCalledWith({
+      sample_hash: 'a'.repeat(64),
+      origin: { source: 'detonate_page' },
+    });
+  });
+
+  it('records the alert flyout as the origin when it hosts the form', async () => {
+    render(<SubmitForm source="alert_flyout" onSubmitted={jest.fn()} />);
+
+    await submit();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: { source: 'alert_flyout' } })
+    );
   });
 
   it('calls onSubmitted with the task the service answered', async () => {
     const onSubmitted = jest.fn();
-    render(<SubmitForm onSubmitted={onSubmitted} />);
+    render(<SubmitForm source="detonate_page" onSubmitted={onSubmitted} />);
 
     await submit();
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -112,7 +125,7 @@ describe('SubmitForm', () => {
 
     it('disables submit and explains why for a read-only role', () => {
       mockCapabilities({ show: true, crud: false });
-      render(<SubmitForm onSubmitted={jest.fn()} />);
+      render(<SubmitForm source="detonate_page" onSubmitted={jest.fn()} />);
       typeHash();
 
       expect(screen.getByTestId(SUBMIT_BUTTON_TEST_ID)).toBeDisabled();
@@ -121,7 +134,7 @@ describe('SubmitForm', () => {
 
     it('allows submit for a role holding only the Detonate sub-feature', () => {
       mockCapabilities({ show: true, crud: false, detonateAll: true });
-      render(<SubmitForm onSubmitted={jest.fn()} />);
+      render(<SubmitForm source="detonate_page" onSubmitted={jest.fn()} />);
       typeHash();
 
       expect(screen.getByTestId(SUBMIT_BUTTON_TEST_ID)).toBeEnabled();

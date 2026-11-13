@@ -19,6 +19,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { DetonateClient, HasDetonatePrivilege } from '../../../detonate_prototype';
+import type { RecordRun } from '../../../detonate_prototype/results_store';
 import {
   deriveDetonateVerdict,
   detonationProgress,
@@ -90,6 +91,7 @@ export interface DetonateSkillDeps {
   endpointAppContextService: EndpointAppContextService;
   getClient: (request: KibanaRequest) => DetonateClient;
   hasDetonatePrivilege: HasDetonatePrivilege;
+  recordRun: RecordRun;
 }
 
 export const insufficientPrivilegesResult = (privilege: string) =>

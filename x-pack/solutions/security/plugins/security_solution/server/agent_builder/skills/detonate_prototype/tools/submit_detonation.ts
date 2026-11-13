@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
@@ -15,6 +16,7 @@ import { SUBMIT_DETONATION_TOOL_ID } from '..';
 import { submitInSpace } from '../../../../detonate_prototype/space_scope';
 import { assertReadableAlertTags } from '../../../../detonate_prototype/handoffs';
 import { DetonateServiceError } from '../../../../detonate_prototype/client';
+import { toDetonationRecord } from '../../../../detonate_prototype/detonation_record';
 import {
   DETONATE_TOOL_MAX_RESULT_TOKENS,
   detonateErrorResult,
@@ -64,6 +66,7 @@ export const submitDetonationTool = ({
   endpointAppContextService,
   getClient,
   hasDetonatePrivilege,
+  recordRun,
 }: DetonateSkillDeps): BuiltinSkillBoundedTool<typeof submitDetonationSchema> => ({
   id: SUBMIT_DETONATION_TOOL_ID,
   type: ToolType.builtin,
@@ -84,7 +87,7 @@ export const submitDetonationTool = ({
       color: 'danger',
     }),
   },
-  handler: async (params, { request, logger, esClient }) => {
+  handler: async (params, { request, logger, esClient, runContext }) => {
     // A detonation boots a VM and runs live malware. That is a write action in
     // every sense that matters, so it requires the write privilege even though
     // it mutates nothing inside Kibana.
@@ -121,6 +124,17 @@ export const submitDetonationTool = ({
       );
 
       logger.info(`Submitted detonation ${task.id} for sample ${sampleHash}`);
+
+      await recordRun(spaceId, () =>
+        toDetonationRecord(task, {
+          spaceId,
+          origin: {
+            source: 'agent',
+            conversation_id: getAgentFromRunContext(runContext)?.conversationId,
+            submitter: endpointAppContextService.getCurrentUsername(request),
+          },
+        })
+      );
 
       return {
         results: [

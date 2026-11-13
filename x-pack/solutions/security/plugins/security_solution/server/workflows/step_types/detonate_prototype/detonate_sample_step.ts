@@ -143,6 +143,10 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
           ...(tags ? { tags } : {}),
           ...(vmOsFamily ? { vm_os_family: vmOsFamily } : {}),
           ...(execWaitSecs !== undefined ? { exec_wait_secs: execWaitSecs } : {}),
+          origin: {
+            source: 'workflow',
+            workflow_execution_id: contextManager.getContext().execution.id,
+          },
         },
       });
 

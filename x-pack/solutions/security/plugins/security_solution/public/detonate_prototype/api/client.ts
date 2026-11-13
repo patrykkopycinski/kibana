@@ -29,6 +29,7 @@ import {
 } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
+  DetonateSubmitOrigin,
   DetonateRunDiffEmpty,
   DetonateRunDiffResult,
   DetonateRunSessionResult,
@@ -45,13 +46,16 @@ export interface SubmitFileParams {
   /** Same optional fields the hash path sends; omitted ones use service defaults. */
   tags?: string[];
   vm_os_family?: string;
+  origin?: DetonateSubmitOrigin;
 }
+
+export type SubmitHashParams = DetonateHashRequest & { origin?: DetonateSubmitOrigin };
 
 export const detonateApi = {
   healthcheck: (http: HttpSetup, signal?: AbortSignal) =>
     http.get<{ status: string }>(DETONATE_HEALTHCHECK_PATH, { version: VERSION.version, signal }),
 
-  submitHash: (http: HttpSetup, request: DetonateHashRequest, signal?: AbortSignal) =>
+  submitHash: (http: HttpSetup, request: SubmitHashParams, signal?: AbortSignal) =>
     http.post<DetonateTask>(DETONATE_SUBMIT_HASH_PATH, {
       version: VERSION.version,
       body: JSON.stringify(request),

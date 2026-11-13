@@ -181,6 +181,7 @@ export const DetonateListPage = React.memo(() => {
         key={locationSearch}
         initialHash={prefill.hash}
         initialTags={prefill.tags}
+        source="detonate_page"
         onSubmitted={(task) => goToTask(task.id)}
       />
       <EuiSpacer size="l" />

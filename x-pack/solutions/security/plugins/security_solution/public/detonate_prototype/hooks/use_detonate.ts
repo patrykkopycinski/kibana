@@ -25,7 +25,6 @@ import {
   quoteQueryValue,
 } from '../../../common/detonate_prototype';
 import type {
-  DetonateHashRequest,
   DetonateRunDiffEmpty,
   DetonateRunDiffResult,
   DetonateRunSessionResult,
@@ -34,7 +33,7 @@ import type {
   DetonateTaskUpdate,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
-import type { SubmitFileParams } from '../api/client';
+import type { SubmitFileParams, SubmitHashParams } from '../api/client';
 import { useTrackDetonation } from '../components/detonation_notifier';
 
 /**
@@ -243,7 +242,7 @@ export const useSubmitHash = () => {
   const invalidate = useInvalidateTaskList();
   const track = useTrackDetonation();
 
-  return useMutation<DetonateTask, Error, DetonateHashRequest>({
+  return useMutation<DetonateTask, Error, SubmitHashParams>({
     mutationFn: (request) => detonateApi.submitHash(http, request),
     onSuccess: (result) => {
       invalidate();

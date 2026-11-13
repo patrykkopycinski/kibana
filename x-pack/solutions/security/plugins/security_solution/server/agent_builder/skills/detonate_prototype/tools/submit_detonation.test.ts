@@ -40,6 +40,7 @@ const results = (result: unknown) => {
 describe('submitDetonationTool', () => {
   const client = {} as DetonateClient;
   let hasDetonatePrivilege: jest.Mock;
+  let recordRun: jest.Mock;
   let callerSearch: jest.Mock;
   let context: ToolHandlerContext;
   let tool: ReturnType<typeof submitDetonationTool>;
@@ -50,11 +51,19 @@ describe('submitDetonationTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     hasDetonatePrivilege = jest.fn().mockResolvedValue(true);
+    recordRun = jest.fn().mockResolvedValue(undefined);
     callerSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     context = {
       request,
       logger: loggerMock.create(),
       esClient: { asCurrentUser: { search: callerSearch } },
+      runContext: {
+        runId: 'run-1',
+        stack: [
+          { type: 'agent', agentId: 'elastic-ai-agent', conversationId: 'conv-1' },
+          { type: 'tool', toolId: 'submit_detonation' },
+        ],
+      },
     } as unknown as ToolHandlerContext;
     mockSubmit.mockResolvedValue({
       id: 'task-1',
@@ -69,9 +78,11 @@ describe('submitDetonationTool', () => {
     tool = submitDetonationTool({
       endpointAppContextService: {
         getActiveSpaceId: () => 'team-a',
+        getCurrentUsername: () => 'analyst',
       } as unknown as EndpointAppContextService,
       getClient: () => client,
       hasDetonatePrivilege,
+      recordRun,
     } as DetonateSkillDeps);
   });
 
@@ -92,6 +103,34 @@ describe('submitDetonationTool', () => {
     );
     expect(result.data).toMatchObject({ task_id: 'task-1', submitted: true });
     expect(result.type).toBe(ToolResultType.other);
+  });
+
+  it('records the run with the agent origin, the conversation and the authenticated user', async () => {
+    callerCanRead(['alert-1']);
+
+    await tool.handler({ sampleHash: SHA256, tags: ['alert:alert-1'] }, context);
+
+    expect(recordRun).toHaveBeenCalledTimes(1);
+    expect(recordRun).toHaveBeenCalledWith('team-a', expect.any(Function));
+    expect(recordRun.mock.calls[0][1]()).toEqual(
+      expect.objectContaining({
+        'detonate.task_id': 'task-1',
+        'detonate.space_id': 'team-a',
+        'detonate.source': 'agent',
+        'detonate.conversation_id': 'conv-1',
+        'detonate.submitter': 'analyst',
+        'detonate.origin.alert_ids': ['alert-1'],
+      })
+    );
+  });
+
+  it('writes nothing for a submit the service refused', async () => {
+    callerCanRead(['alert-1']);
+    mockSubmit.mockRejectedValue(new Error('boom'));
+
+    await tool.handler({ sampleHash: SHA256, tags: ['alert:alert-1'] }, context);
+
+    expect(recordRun).not.toHaveBeenCalled();
   });
 
   it('refuses an alert tag the caller cannot read without submitting', async () => {

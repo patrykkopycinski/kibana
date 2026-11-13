@@ -52,6 +52,7 @@ describe('lookupHashTool', () => {
       endpointAppContextService: { getActiveSpaceId } as unknown as EndpointAppContextService,
       getClient: () => client,
       hasDetonatePrivilege,
+      recordRun: jest.fn(),
     } as DetonateSkillDeps);
   });
 

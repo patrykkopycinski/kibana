@@ -25,7 +25,7 @@ const createMockContext = (input: Record<string, unknown>) =>
     config: {},
     rawInput: input,
     contextManager: {
-      getContext: jest.fn(),
+      getContext: jest.fn(() => ({ execution: { id: 'exec-1' } })),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn(),
       getFakeRequest: jest.fn(),
@@ -79,7 +79,10 @@ describe('detonateSampleStepDefinition', () => {
         method: 'POST',
         path: DETONATE_SUBMIT_HASH_PATH,
         headers: { 'elastic-api-version': '1' },
-        body: { sample_hash: 'a'.repeat(64) },
+        body: {
+          sample_hash: 'a'.repeat(64),
+          origin: { source: 'workflow', workflow_execution_id: 'exec-1' },
+        },
       });
     });
 
@@ -349,7 +352,12 @@ describe('detonateSampleStepDefinition', () => {
       await detonateSampleStepDefinition.start!(context);
 
       expect(context.contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { sample_hash: 'a'.repeat(64) } })
+        expect.objectContaining({
+          body: {
+            sample_hash: 'a'.repeat(64),
+            origin: { source: 'workflow', workflow_execution_id: 'exec-1' },
+          },
+        })
       );
     });
 

@@ -57,7 +57,7 @@ export const detonateVerdictOutputSchema = lazySchema(() =>
   })
 );
 
-export type DetonateVerdictStepOutput = z.infer<ReturnType<typeof detonateVerdictOutputSchema>>;
+export type DetonateVerdictStepOutput = z.infer<typeof detonateVerdictOutputSchema>;
 
 export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
   typeof detonateVerdictInputSchema,

@@ -59,7 +59,7 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
       return {
         output: {
           success: true,
-          decision: 'verdict_applied',
+          decision: 'verdict_applied' as const,
           ...(noteBody?.note?.noteId ? { note_id: noteBody.note.noteId } : {}),
           message: `Recorded the ${verdict} verdict for alert ${alertId} and added the detonation evidence note`,
         },

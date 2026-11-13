@@ -219,7 +219,10 @@ export const writeAlertDecisions = async (
   if (decisions.length === 0) return 0;
   const index = detonateResultsIndexName(spaceId);
 
-  const operations = decisions.flatMap((decision) => {
+  const operations = decisions.flatMap<
+    | estypes.BulkOperationContainer
+    | estypes.BulkUpdateAction<AlertDecisionRecord, AlertDecisionRecord>
+  >((decision) => {
     const doc = toAlertDecisionRecord(spaceId, decision, now);
     const action = { update: { _index: index, _id: decision.alertId } };
     return decision.state === 'released'

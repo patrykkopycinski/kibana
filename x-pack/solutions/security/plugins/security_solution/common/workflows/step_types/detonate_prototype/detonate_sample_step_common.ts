@@ -150,7 +150,7 @@ export const detonateSampleStepCommonDefinition: BaseStepDefinition<
       }
     ),
     examples: [
-      `## Detonate the file on an alert and tag the alert with what it did
+      `## Detonate the file on an alert and record what it did as a decision
 \`\`\`yaml
 - name: detonate
   type: ${DetonateSampleStepId}
@@ -159,13 +159,20 @@ export const detonateSampleStepCommonDefinition: BaseStepDefinition<
     tags:
       - "workflow"
 
-- name: tag_alert
-  type: security.setAlertTags
+- name: record_decision
+  type: kibana.request
   if: "{{ steps.detonate.output.total_alerts_count > 0 }}"
   with:
-    alert_ids: "{{ event.alert_id }}"
-    tags_to_add:
-      - "detonation-confirmed-malicious"
+    method: POST
+    path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+    headers:
+      kbn-xsrf: "true"
+      elastic-api-version: "1"
+    body:
+      decisions:
+        - alert_id: "{{ event.alert_id }}"
+          state: verdict_applied
+          verdict: malicious
 \`\`\``,
     ],
   },

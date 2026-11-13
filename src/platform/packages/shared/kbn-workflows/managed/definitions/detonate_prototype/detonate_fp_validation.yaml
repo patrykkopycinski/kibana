@@ -1,8 +1,9 @@
 version: "1"
 name: Detonate FP validation
 description: >
-  Detonate prototype: detonate a sample hash and write the verdict back to
-  the alert it came from — tag `detonate:<verdict>` plus an evidence note.
+  Detonate prototype: detonate a sample hash and record the verdict in the
+  Detonate results index; the alert document is never modified. An evidence
+  note is added to the alert.
   Validates false positives the honest way: a benign run is recorded as
   benign, the alert is never closed by the workflow, and prior runs of the
   same hash are surfaced for the analyst. Experimental: installed only

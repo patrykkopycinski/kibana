@@ -57,7 +57,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   };
   let hasDetonatePrivilege: jest.Mock;
   let esClient: {
-    indices: { putIndexTemplate: jest.Mock; refresh: jest.Mock };
+    indices: { putIndexTemplate: jest.Mock; putMapping: jest.Mock; refresh: jest.Mock };
     bulk: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
@@ -157,6 +157,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     esClient = {
       indices: {
         putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+        putMapping: jest.fn().mockResolvedValue({ acknowledged: true }),
         refresh: jest.fn().mockResolvedValue({ _shards: { successful: 1 } }),
       },
       bulk: jest.fn(),

@@ -7,6 +7,7 @@
 
 import type {
   DetonateConfidence,
+  DetonateDecisionState,
   DetonateExtractedIocs,
   DetonateSubmitOrigin,
   DetonateTask,
@@ -33,6 +34,7 @@ import {
  */
 export interface DetonationRecord {
   '@timestamp': string;
+  'detonate.doc_kind': 'run';
   'event.start': string;
   'event.end'?: string;
   /** Nanoseconds, as in ECS. */
@@ -83,13 +85,51 @@ export interface DetonationRecord {
   tags?: string[];
 }
 
+/**
+ * What a sweep decided about one alert, keyed by the alert's id. It reuses the
+ * run fields that mean the same thing (`detonate.verdict`, `file.hash.sha256`);
+ * `detonate.task_id` is the run whose verdict was applied, never the `_id`.
+ */
+export interface AlertDecisionRecord {
+  /** The last write; it ages `queued` and `running` decisions out. */
+  '@timestamp': string;
+  'detonate.doc_kind': 'alert_decision';
+  'detonate.alert_id': string;
+  'detonate.decision.state': DetonateDecisionState;
+  'detonate.decision.reason'?: string;
+  'detonate.verdict'?: DetonateVerdictName;
+  'detonate.task_id'?: string;
+  'file.hash.sha256'?: string;
+  'detonate.workflow.execution_id'?: string;
+  'detonate.space_id'?: string;
+}
+
+/**
+ * Worker handoff state on a run document. Only the handoff update writes it, so
+ * a late run write (a partial merge) can never clobber it and vice versa.
+ */
+export interface DetonationHandoffFields {
+  /** Subset of `requested`, `done`. */
+  'detonate.handoff.hunt'?: string[];
+  /** Subset of `requested`, `reviewed`, `in_progress`. */
+  'detonate.handoff.coverage'?: string[];
+}
+
+/** Every field either kind of document can carry. */
+type ResultsDocFields = DetonationRecord & AlertDecisionRecord & DetonationHandoffFields;
+
 export type DetonationRecordFieldType = 'keyword' | 'date' | 'long' | 'boolean';
 
-/** Every record field and its Elasticsearch type; the results index mapping is built from it. */
+/** Every results-index field and its Elasticsearch type; the index mapping is built from it. */
 export const DETONATION_RECORD_FIELDS: Readonly<
-  Record<keyof DetonationRecord, DetonationRecordFieldType>
+  Record<keyof ResultsDocFields, DetonationRecordFieldType>
 > = {
   '@timestamp': 'date',
+  'detonate.doc_kind': 'keyword',
+  'detonate.decision.state': 'keyword',
+  'detonate.decision.reason': 'keyword',
+  'detonate.handoff.hunt': 'keyword',
+  'detonate.handoff.coverage': 'keyword',
   'event.start': 'date',
   'event.end': 'date',
   'event.duration': 'long',
@@ -200,6 +240,7 @@ export const toDetonationRecord = (
 
   return {
     '@timestamp': task.created_at,
+    'detonate.doc_kind': 'run',
     'event.start': task.created_at,
     ...(hasDuration
       ? {

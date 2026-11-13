@@ -694,6 +694,52 @@ export const detonateResultsIndexName = (spaceId: string): string => {
   return `${DETONATE_RESULTS_INDEX_PREFIX}${spaceId}`;
 };
 
+/**
+ * The two kinds of document in the results index. A run is keyed by task id; an
+ * alert decision is keyed by alert id and records what a sweep decided about
+ * that alert, so production alerts are never written to.
+ */
+export const DETONATE_DOC_KINDS = ['run', 'alert_decision'] as const;
+export type DetonateDocKind = (typeof DETONATE_DOC_KINDS)[number];
+
+/** `queued` and `running` are transient; `released` clears a claim and never excludes. */
+export const DETONATE_DECISION_STATES = [
+  'queued',
+  'running',
+  'released',
+  'verdict_applied',
+  'known_malicious',
+  'skipped',
+  'not_eligible',
+] as const;
+export type DetonateDecisionState = (typeof DETONATE_DECISION_STATES)[number];
+
+/** Decisions a sweep must not revisit. */
+export const DETONATE_TERMINAL_DECISION_STATES = [
+  'verdict_applied',
+  'known_malicious',
+  'skipped',
+  'not_eligible',
+] as const satisfies readonly DetonateDecisionState[];
+
+/**
+ * A `queued` or `running` decision older than this no longer excludes its alert,
+ * so a claim whose release step never ran cannot hide the alert forever.
+ */
+export const DETONATE_TRANSIENT_DECISION_TTL_MS = 2 * 60 * 60 * 1000;
+
+/** Failed runs after which a sweep stops re-picking the same alert. */
+export const DETONATE_MAX_FAILED_RUNS = 3;
+
+/** Why a sweep leaves an alert alone: a terminal or fresh decision, a finished run, or the failure cap. */
+export type DetonateAlertOutcomeState = DetonateDecisionState | 'completed' | 'retry_capped';
+
+export interface DetonateAlertOutcome {
+  state: DetonateAlertOutcomeState;
+  verdict?: DetonateVerdictName;
+  task_id?: string;
+}
+
 /** Copy a run's sandbox alerts into this space's sandbox stream. */
 export const detonateRunIngestPath = (taskId: string) =>
   `${DETONATE_RUNS_PATH}/${encodeURIComponent(taskId)}/ingest` as const;

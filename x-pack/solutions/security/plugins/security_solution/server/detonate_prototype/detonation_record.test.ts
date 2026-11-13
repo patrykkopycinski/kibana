@@ -245,7 +245,11 @@ describe('toDetonationRecord', () => {
       }
     );
 
-    expect(Object.keys(record).sort()).toEqual(Object.keys(DETONATION_RECORD_FIELDS).sort());
+    // Decision and handoff fields belong to other documents; a run write never carries them.
+    const runFields = Object.keys(DETONATION_RECORD_FIELDS).filter(
+      (field) => !field.startsWith('detonate.decision.') && !field.startsWith('detonate.handoff.')
+    );
+    expect(Object.keys(record).sort()).toEqual(runFields.sort());
   });
 
   it('distinguishes IOCs that were not read from IOCs that were read and empty', () => {

@@ -465,6 +465,19 @@ describe('getAlertOutcomes', () => {
     }
   );
 
+  it.each(['queued', 'running'] as const)(
+    'lets a %s decision exactly one TTL old through',
+    async (state) => {
+      const esClient = setup({
+        decisions: [decisionDoc('a1', state, ago(DETONATE_TRANSIENT_DECISION_TTL_MS))],
+      });
+
+      const outcomes = await getAlertOutcomes(esClient, 'team-a', [{ alertId: 'a1' }], NOW);
+
+      expect(outcomes.has('a1')).toBe(false);
+    }
+  );
+
   it('does not exclude a released alert', async () => {
     const esClient = setup({ decisions: [decisionDoc('a1', 'released', ago(1000))] });
 

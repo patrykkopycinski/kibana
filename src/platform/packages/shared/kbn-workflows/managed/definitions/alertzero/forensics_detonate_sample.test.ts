@@ -192,7 +192,7 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       const filter = stepByName('filter_auto_candidates');
       expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
       expect(filter?.with?.body).toEqual({
-        alert_ids: "${{ steps.find_auto_candidates.output.values | map: 'first' }}",
+        alerts: '${{ variables.auto_candidate_lookup_json | json_parse }}',
       });
     });
 

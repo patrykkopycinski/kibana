@@ -229,6 +229,21 @@ steps:
     with:
       detonate_alert_ids: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | map: '_id' }}"
 
+  # The lookup sends each alert's sample hash with its id: without it the store
+  # cannot tell that a sibling alert's sample already ran to completion. Liquid
+  # has no object literal, hence the JSON template.
+  - name: build_detonate_lookup
+    type: data.set
+    with:
+      detonate_lookup_json: |-
+        {%- assign hashed = steps.load_alerts.output.alerts | where: 'file.hash.sha256' -%}
+        [
+        {%- for alert in hashed -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {"alert_id":{{ alert._id | json }},"sha256":{{ alert.file.hash.sha256 | json }}}
+        {%- endfor -%}
+        ]
+
   - name: count_detonate_alert_ids
     type: data.set
     with:
@@ -246,7 +261,7 @@ steps:
         kbn-xsrf: "true"
         elastic-api-version: "1"
       body:
-        alert_ids: "${{ variables.detonate_alert_ids }}"
+        alerts: "${{ variables.detonate_lookup_json | json_parse }}"
 
   # A failed lookup detonates nothing: without it a decided sample cannot be told
   # from an undecided one, and picking blind would spend a VM per hash again.

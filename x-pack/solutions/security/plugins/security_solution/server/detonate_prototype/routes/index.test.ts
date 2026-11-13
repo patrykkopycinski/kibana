@@ -33,6 +33,7 @@ const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
 /** The only routes AlertZero read also opens. */
 const ALERTZERO_READ_PATHS: string[] = [RECORD_PATH, DETONATE_USAGE_PATH];
 const HANDOFF_PATH = `${DETONATE_RUNS_PATH}/{id}/handoff`;
+const HASH_A = 'a'.repeat(64);
 /** Write-tier worker routes without the `securitySolution` read tag. */
 const WORKER_WRITE_PATHS: string[] = [
   HANDOFF_PATH,
@@ -1555,8 +1556,96 @@ describe('registerDetonatePrototypeRoutes', () => {
       ['no ids', { alert_ids: [] }],
       ['too many ids', { alert_ids: Array.from({ length: 201 }, (_, i) => `a-${i}`) }],
       ['an oversized id', { alert_ids: ['a'.repeat(129)] }],
+      ['an empty body', {}],
+      ['empty alerts', { alerts: [] }],
+      [
+        'too many alerts',
+        { alerts: Array.from({ length: 201 }, (_, i) => ({ alert_id: `a-${i}` })) },
+      ],
+      [
+        'too many entries across both forms',
+        {
+          alert_ids: Array.from({ length: 100 }, (_, i) => `a-${i}`),
+          alerts: Array.from({ length: 101 }, (_, i) => ({ alert_id: `b-${i}` })),
+        },
+      ],
+      ['an alert without an id', { alerts: [{ sha256: HASH_A }] }],
+      ['a non-hex hash', { alerts: [{ alert_id: 'a', sha256: 'z'.repeat(64) }] }],
+      ['an oversized hash', { alerts: [{ alert_id: 'a', sha256: 'a'.repeat(65) }] }],
     ])('rejects an outcomes body with %s', (_name, body) => {
       expect(() => bodySchema(DETONATE_ALERT_OUTCOMES_PATH).validate(body)).toThrow();
+    });
+
+    it('accepts alerts with and without a hash', () => {
+      expect(() =>
+        bodySchema(DETONATE_ALERT_OUTCOMES_PATH).validate({
+          alerts: [{ alert_id: 'a', sha256: HASH_A }, { alert_id: 'b' }],
+        })
+      ).not.toThrow();
+    });
+
+    it('lets a finished run of a sibling alert with the same hash cover the alert', async () => {
+      esClient.mget.mockResolvedValue({ docs: [{ _id: 'sibling', found: false }] });
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          by_alert: { buckets: [] },
+          by_hash: {
+            buckets: [
+              {
+                key: HASH_A,
+                completed: {
+                  doc_count: 1,
+                  latest: {
+                    hits: {
+                      hits: [
+                        { _source: { 'detonate.verdict': 'malicious', 'detonate.task_id': 't-1' } },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      await outcomesHandler()(
+        createContext(),
+        createRequest('post', DETONATE_ALERT_OUTCOMES_PATH, {
+          alerts: [{ alert_id: 'sibling', sha256: HASH_A.toUpperCase() }],
+        }),
+        mockResponse
+      );
+
+      const [[searchRequest]] = esClient.search.mock.calls;
+      expect(searchRequest.aggs?.by_hash).toEqual(
+        expect.objectContaining({
+          terms: expect.objectContaining({ field: 'file.hash.sha256', include: [HASH_A] }),
+        })
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          outcomes: { sibling: { state: 'completed', verdict: 'malicious', task_id: 't-1' } },
+        },
+      });
+    });
+
+    it('queries no hash when the body carries ids only', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+      esClient.search.mockResolvedValue({
+        aggregations: { by_alert: { buckets: [] }, by_hash: { buckets: [] } },
+      });
+
+      await outcomesHandler()(
+        createContext(),
+        createRequest('post', DETONATE_ALERT_OUTCOMES_PATH, { alert_ids: ['alert-1'] }),
+        mockResponse
+      );
+
+      const [[searchRequest]] = esClient.search.mock.calls;
+      expect(searchRequest.aggs?.by_hash).toEqual(
+        expect.objectContaining({ terms: expect.objectContaining({ include: [] }) })
+      );
     });
 
     it('reports outcomes as an object keyed by alert id', async () => {
@@ -1888,6 +1977,25 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: { handoffs: [{ task_id: 'run-1', sha256: 'hash-run-1', alert_ids: ['a-1'] }] },
       });
+    });
+
+    it('keeps a run no alert started when the newest-run filter drops a stale alert run', async () => {
+      serveRuns(
+        [
+          runHit('run-origin-only', undefined, { origin: ['a-9'] }),
+          runHit('run-stale', 'a-1'),
+          runHit('run-current', 'a-2'),
+        ],
+        [
+          ['a-1', 'run-newer'],
+          ['a-2', 'run-current'],
+        ]
+      );
+
+      await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(handoffIds()).toEqual(['run-origin-only', 'run-current']);
     });
 
     it('returns at most five runs', async () => {

@@ -2006,7 +2006,9 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     expect(filter?.with?.path).toBe(
       '/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes'
     );
-    expect(filter?.with?.body).toEqual({ alert_ids: '${{ variables.detonate_alert_ids }}' });
+    expect(filter?.with?.body).toEqual({
+      alerts: '${{ variables.detonate_lookup_json | json_parse }}',
+    });
     expect(filter?.['on-failure']?.continue).toBe(true);
     expect(
       evalExpr(stepByName('collect_detonate_alert_ids')?.with?.detonate_alert_ids as string, {
@@ -2015,6 +2017,32 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
         },
       })
     ).toEqual(['a1', 'a3']);
+  });
+
+  it('sends the sample hash of each file-hash alert with its id', () => {
+    const json = renderString(
+      (stepByName('build_detonate_lookup')?.with as Record<string, string>).detonate_lookup_json,
+      {
+        steps: {
+          load_alerts: {
+            output: { alerts: [alert('a1', 'H1'), alert('a2'), alert('a3', 'H3')] },
+          },
+        },
+      }
+    );
+    expect(JSON.parse(json)).toEqual([
+      { alert_id: 'a1', sha256: 'H1' },
+      { alert_id: 'a3', sha256: 'H3' },
+    ]);
+    expect(
+      JSON.parse(
+        renderString(
+          (stepByName('build_detonate_lookup')?.with as Record<string, string>)
+            .detonate_lookup_json,
+          { steps: { load_alerts: { output: { alerts: [alert('a2')] } } } }
+        )
+      )
+    ).toEqual([]);
   });
 
   it('reads the decided ids and the lookup health off the response', () => {

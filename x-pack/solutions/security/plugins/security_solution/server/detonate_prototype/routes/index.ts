@@ -1172,12 +1172,39 @@ export const registerDetonatePrototypeRoutes = ({
         version: '1',
         validate: {
           request: {
-            body: schema.object({
-              alert_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
-                minSize: 1,
-                maxSize: 200,
-              }),
-            }),
+            body: schema.object(
+              {
+                // Ids alone cannot match a finished run of a sibling alert; the
+                // sweeps that know each alert's sample hash send `alerts`.
+                alert_ids: schema.maybe(
+                  schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
+                    minSize: 1,
+                    maxSize: 200,
+                  })
+                ),
+                alerts: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      alert_id: schema.string({ minLength: 1, maxLength: 128 }),
+                      sha256: schema.maybe(
+                        schema.string({
+                          maxLength: 64,
+                          validate: (value) =>
+                            /^[a-fA-F0-9]{64}$/.test(value) ? undefined : 'must be a hex sha256',
+                        })
+                      ),
+                    }),
+                    { minSize: 1, maxSize: 200 }
+                  )
+                ),
+              },
+              {
+                validate: ({ alert_ids: alertIds = [], alerts = [] }) =>
+                  alertIds.length + alerts.length === 0 || alertIds.length + alerts.length > 200
+                    ? 'expected between 1 and 200 alerts across alert_ids and alerts'
+                    : undefined,
+              }
+            ),
           },
         },
       },
@@ -1186,7 +1213,13 @@ export const registerDetonatePrototypeRoutes = ({
           const outcomes = await getAlertOutcomes(
             await getInternalEsClient(),
             spaceIdFromRequest(request),
-            request.body.alert_ids.map((alertId) => ({ alertId })),
+            [
+              ...(request.body.alert_ids ?? []).map((alertId) => ({ alertId })),
+              ...(request.body.alerts ?? []).map(({ alert_id: alertId, sha256 }) => ({
+                alertId,
+                sha256,
+              })),
+            ],
             now().getTime()
           );
           return response.ok<DetonateAlertOutcomes>({

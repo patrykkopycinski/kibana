@@ -453,6 +453,37 @@ describe('decisions lookups in the managed workflows', () => {
     expect(text).toContain('/internal/detonate_prototype/alert_outcomes');
   });
 
+  // The route can only match a finished run of a sibling alert by sample hash,
+  // so the sweeps that know each alert's hash must send it.
+  it.each([
+    ['floor batch: filter_detonate_candidates', floorSteps, 'filter_detonate_candidates'],
+    ['worker: filter_candidates', workerSteps, 'filter_candidates'],
+    ['worker: filter_auto_candidates', workerSteps, 'filter_auto_candidates'],
+  ])('%s sends the sample hash with each alert id', (_label, steps, name) => {
+    const body = (steps.find((step) => step.name === name)?.with as { body: object }).body;
+    expect(Object.keys(body)).toEqual(['alerts']);
+  });
+
+  it.each([
+    ['floor batch', floorSteps, 'build_detonate_lookup', 'detonate_lookup_json'],
+    ['worker', workerSteps, 'build_candidate_lookup', 'candidate_lookup_json'],
+    ['worker', workerSteps, 'build_auto_candidate_lookup', 'auto_candidate_lookup_json'],
+  ])('%s: %s builds {alert_id, sha256} pairs', (_label, steps, name, variable) => {
+    const template = String(
+      (steps.find((step) => step.name === name)?.with as Record<string, unknown>)[variable]
+    );
+    expect(template).toContain('"alert_id"');
+    expect(template).toContain('"sha256"');
+  });
+
+  it('keeps the hash-sibling lookup on ids only: its open_hash_alerts all share the hash', () => {
+    const body = (
+      workerSteps.find((step) => step.name === 'filter_hash_siblings')?.with as { body: object }
+    ).body;
+    expect(Object.keys(body)).toEqual(['alert_ids']);
+    expect(withOf(workerSteps, 'filter_hash_siblings')).not.toContain('sha256');
+  });
+
   it.each([
     ['floor batch', floorYaml ?? ''],
     ['worker', WORKER_YAML],

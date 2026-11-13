@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { DEFAULT_INDEX_PATTERN } from '../../common/constants';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_INDEX_PATTERN } from '../../common/constants';
 import type { DetonateTask } from '../../common/detonate_prototype';
 import { detonateSandboxStreamName } from '../../common/detonate_prototype';
 import {
@@ -55,6 +55,13 @@ const endpointAlert = (overrides: Record<string, unknown> = {}) => ({
   user: { name: 'root' },
   ...overrides,
 });
+
+const createEsClient = (statuses: number[]) => {
+  const bulk = jest
+    .fn()
+    .mockResolvedValue({ items: statuses.map((status) => ({ create: { status } })) });
+  return { client: { bulk } as unknown as ElasticsearchClient, bulk };
+};
 
 describe('toSandboxDoc', () => {
   it('copies only allow-listed fields and replaces the sandbox host and agent', () => {
@@ -128,13 +135,6 @@ describe('toSandboxDoc', () => {
 });
 
 describe('ingestSandboxDocs', () => {
-  const createEsClient = (statuses: number[]) => {
-    const bulk = jest
-      .fn()
-      .mockResolvedValue({ items: statuses.map((status) => ({ create: { status } })) });
-    return { client: { bulk } as unknown as ElasticsearchClient, bulk };
-  };
-
   it('counts created, duplicate, failed and dropped docs', async () => {
     const { client, bulk } = createEsClient([201, 409, 500]);
     const alerts = ['e-1', 'e-2', 'e-3'].map((id) => ({
@@ -178,12 +178,12 @@ describe('sandbox alerts as signals', () => {
     new RegExp(`^${glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
 
   // Exclusion entries ('-*elastic-cloud-logs-*') are patterns too: the stream must not match them either.
-  const siemPatterns = ['.alerts-security.alerts-*', ...DEFAULT_INDEX_PATTERN].map((pattern) =>
+  const siemPatterns = [`${DEFAULT_ALERTS_INDEX}-*`, ...DEFAULT_INDEX_PATTERN].map((pattern) =>
     globToRegExp(pattern.replace(/^-/, ''))
   );
 
-  // Detection alerts arrive flat with `event.kind: signal` (the recorded corpus shape);
-  // the mapper copies it, so the stream's detection alerts stay signals without a rewrite.
+  // Corpus detection docs carry a flat `event.kind: signal` beside a nested `event` without
+  // `kind`; the flat key must win. The process-event row is synthetic: the corpus has none.
   it.each([
     [
       'production-detection-alerts' as const,
@@ -192,6 +192,22 @@ describe('sandbox alerts as signals', () => {
         '@timestamp': '2026-11-01T10:00:00.000Z',
         'kibana.alert.uuid': 'uuid-1',
         'kibana.alert.rule.name': 'Rule A',
+        event: {
+          action: 'modification',
+          agent_id_status: 'verified',
+          category: ['malware', 'intrusion_detection', 'file'],
+          code: 'malicious_file',
+          created: '2026-10-20T06:00:19.840Z',
+          dataset: 'endpoint.alerts',
+          id: 'OhQ0jhJTgp2wB7rf++++++f6',
+          ingested: '2026-10-20T06:00:27Z',
+          module: 'endpoint',
+          outcome: 'success',
+          risk_score: 73,
+          sequence: 2486,
+          severity: 73,
+          type: ['info', 'change', 'denied'],
+        },
         'event.kind': 'signal',
         'kibana.alert.original_event.kind': 'alert',
       },
@@ -206,12 +222,10 @@ describe('sandbox alerts as signals', () => {
   ])(
     'keeps %s docs tagged, attributed and out of SIEM index patterns (event.kind %s)',
     async (kind, eventKind, source) => {
-      const bulk = jest.fn().mockResolvedValue({ items: [{ create: { status: 201 } }] });
+      const { client, bulk } = createEsClient([201]);
       const stream = detonateSandboxStreamName('default');
 
-      await ingestSandboxDocs({ bulk } as unknown as ElasticsearchClient, stream, TASK, [
-        { kind, doc: source },
-      ]);
+      await ingestSandboxDocs(client, stream, TASK, [{ kind, doc: source }]);
 
       const [[{ operations }]] = bulk.mock.calls;
       const [{ create }, doc] = operations;

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  DETONATE_QUEUED_TAG,
-  deriveDetonationRunStatus,
-  deriveDetonationState,
-  detonateOsFamilyFromHostOsType,
-} from '.';
+import { deriveDetonationRunStatus, detonateOsFamilyFromHostOsType } from '.';
 import type { DetonateTask } from '.';
 
 const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
@@ -76,50 +71,5 @@ describe('detonateOsFamilyFromHostOsType', () => {
     expect(detonateOsFamilyFromHostOsType('Windows')).toBe('windows');
     expect(detonateOsFamilyFromHostOsType('macos')).toBe('darwin');
     expect(detonateOsFamilyFromHostOsType('ios')).toBeUndefined();
-  });
-});
-
-describe('deriveDetonationState', () => {
-  it('lets a run win over every alert-only signal', () => {
-    expect(
-      deriveDetonationState({
-        run: createTask(running),
-        alertTags: [DETONATE_QUEUED_TAG],
-        hostOsType: 'ios',
-        allowanceExhausted: true,
-      })
-    ).toBe('running');
-  });
-
-  it('puts an unsupported OS ahead of the allowance', () => {
-    expect(deriveDetonationState({ hostOsType: 'ios', allowanceExhausted: true })).toBe(
-      'unsupported_os'
-    );
-  });
-
-  it('puts the allowance ahead of the queue marker', () => {
-    expect(
-      deriveDetonationState({ allowanceExhausted: true, alertTags: [DETONATE_QUEUED_TAG] })
-    ).toBe('allowance_reached');
-  });
-
-  it('is queued when a Worker marked the alert', () => {
-    expect(deriveDetonationState({ alertTags: [DETONATE_QUEUED_TAG] })).toBe('queued');
-  });
-
-  it('is not analyzed otherwise', () => {
-    expect(deriveDetonationState({})).toBe('not_analyzed');
-    expect(deriveDetonationState({ hostOsType: 'linux' })).toBe('not_analyzed');
-  });
-
-  it('does not treat a missing OS as unsupported', () => {
-    expect(deriveDetonationState({ allowanceExhausted: true })).toBe('allowance_reached');
-  });
-
-  it('honours a configured OS list', () => {
-    expect(deriveDetonationState({ hostOsType: 'macos', supportedOsFamilies: ['linux'] })).toBe(
-      'unsupported_os'
-    );
-    expect(deriveDetonationState({ hostOsType: 'macos' })).toBe('not_analyzed');
   });
 });

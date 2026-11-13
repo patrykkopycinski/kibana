@@ -114,7 +114,6 @@ export const detonateCompletedRunsStepDefinition = createServerStepDefinition({
               created_at: task.created_at,
               verdict: conclusion.verdict,
               evidence: conclusion.evidence,
-              suggested_tag: conclusion.suggested_tag,
             },
           ];
         }),

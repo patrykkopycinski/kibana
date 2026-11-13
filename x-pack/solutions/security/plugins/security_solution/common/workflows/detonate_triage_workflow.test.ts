@@ -22,11 +22,6 @@ import {
 import { parse } from 'yaml';
 import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
 import { toApiEntries } from '../detection_engine/rule_exceptions/to_api_entries';
-import {
-  DETONATE_LEGACY_VERDICT_TAGS,
-  DETONATE_VERDICTS,
-  detonateVerdictTag,
-} from '../detonate_prototype';
 import { createExceptionListItemInputSchema } from './step_types/create_exception_list_item_step/create_exception_list_item_step_common';
 
 /**
@@ -388,39 +383,37 @@ describe('detonate sample worker (managed workflow, per-run mode)', () => {
         { term: { 'file.hash.sha256': '{{ inputs.sha256 }}' } },
         { term: { 'kibana.alert.workflow_status': 'open' } },
       ]);
-      // A sibling another run already gave a verdict is that run's proposal.
-      expect(search.query.bool.minimum_should_match).toBe(1);
-      expect(search.query.bool.should).toEqual([
-        { ids: { values: ['{{ inputs.alert_id }}'] } },
-        {
-          bool: {
-            must_not: [
-              {
-                terms: {
-                  'kibana.alert.workflow_tags': [
-                    'detonate:malicious',
-                    'detonate:benign',
-                    'detonate:quiet',
-                    'detonate:inconclusive',
-                    'detonate:known-malicious',
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      ]);
+      // A sibling the decisions store covers is that run's proposal: the alert
+      // query stays plain and the decisions lookup narrows it.
+      expect(search.query.bool).not.toHaveProperty('should');
+      expect(search.query.bool).not.toHaveProperty('must_not');
+      const lookup = byName('filter_hash_siblings');
+      expect(lookup?.type).toBe('kibana.request');
+      expect(lookup?.with).toEqual(
+        expect.objectContaining({
+          method: 'POST',
+          path: '/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes',
+          body: { alert_ids: "${{ steps.open_hash_alerts.output.hits.hits | map: '_id' }}" },
+        })
+      );
     });
 
-    it('tags every sibling in the close proposal so a later sweep skips the sample', () => {
-      const tag = byName('tag_hash_siblings');
-      expect(tag?.type).toBe('security.setAlertTags');
-      expect(tag?.if).toBe(byName('propose_close')?.if);
-      expect(tag?.with).toEqual({
-        alert_ids: '${{ variables.close_alert_ids }}',
-        tags_to_add: ['detonate:malicious'],
-      });
-      expect(tag?.['on-failure']).toEqual({ continue: true });
+    it('records a decision for every sibling in the close proposal so a later sweep skips the sample', () => {
+      const decisions = byName('tag_hash_siblings');
+      expect(decisions?.type).toBe('kibana.request');
+      expect(decisions?.if).toBe(byName('propose_close')?.if);
+      expect(decisions?.with).toEqual(
+        expect.objectContaining({
+          method: 'POST',
+          path: '/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions',
+          body: { decisions: '${{ variables.sibling_decisions_json | json_parse }}' },
+        })
+      );
+      expect(decisions?.['on-failure']).toEqual({ continue: true });
+      const template = (byName('count_close_alerts')?.with as { sibling_decisions_json: string })
+        .sibling_decisions_json;
+      expect(template).toContain('"state":"verdict_applied"');
+      expect(template).toContain('"verdict":"malicious"');
     });
 
     it('raises proposals before the blocklist approval gate can hold the run', () => {
@@ -432,15 +425,10 @@ describe('detonate sample worker (managed workflow, per-run mode)', () => {
   });
 });
 
-describe('verdict tag lists in the managed workflows', () => {
-  // These YAML lists are hand-written copies of the verdict set: a tag missing from one
-  // re-detonates an already-judged sample, or lets a stale verdict tag survive.
-  const REQUIRED_TAGS = [
-    ...DETONATE_VERDICTS.map(detonateVerdictTag),
-    ...DETONATE_LEGACY_VERDICT_TAGS,
-  ];
-  const tagsIn = (text: string) => text.match(/detonate:[a-z-]+/g) ?? [];
-
+describe('decisions lookups in the managed workflows', () => {
+  // Detonate state lives in the results index, not on the alert: every
+  // candidate-selecting step must ask the decisions store, or an already-judged
+  // sample is detonated again.
   const floorYaml = getManagedWorkflowDefinition(
     ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID
   )?.yaml;
@@ -454,14 +442,23 @@ describe('verdict tag lists in the managed workflows', () => {
   });
 
   it.each([
-    ['floor batch: compute_detonate_candidates', floorSteps, 'compute_detonate_candidates'],
-    ['worker: find_candidates', workerSteps, 'find_candidates'],
-    ['worker: find_auto_candidates', workerSteps, 'find_auto_candidates'],
-    ['worker: open_hash_alerts', workerSteps, 'open_hash_alerts'],
-  ])('%s excludes every verdict tag, current and legacy', (_label, steps, name) => {
+    ['floor batch: filter_detonate_candidates', floorSteps, 'filter_detonate_candidates'],
+    ['floor batch: find_detonate_confirmed_fp', floorSteps, 'find_detonate_confirmed_fp'],
+    ['worker: filter_candidates', workerSteps, 'filter_candidates'],
+    ['worker: filter_auto_candidates', workerSteps, 'filter_auto_candidates'],
+    ['worker: filter_hash_siblings', workerSteps, 'filter_hash_siblings'],
+  ])('%s asks the alert_outcomes route', (_label, steps, name) => {
     const text = withOf(steps, name);
     expect(text).not.toBe('null');
-    expect(tagsIn(text)).toEqual(expect.arrayContaining(REQUIRED_TAGS));
+    expect(text).toContain('/internal/detonate_prototype/alert_outcomes');
+  });
+
+  it.each([
+    ['floor batch', floorYaml ?? ''],
+    ['worker', WORKER_YAML],
+  ])('%s never reads or writes a detonate verdict tag on an alert', (_label, text) => {
+    expect(text).not.toMatch(/detonate:(malicious|benign|quiet|inconclusive|queued|running|known)/);
+    expect(text).not.toContain('security.setAlertTags');
   });
 });
 

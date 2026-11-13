@@ -472,15 +472,8 @@ export const exceptionProposalComment = (
 export const DETONATE_VERDICTS = ['malicious', 'benign', 'inconclusive'] as const;
 export type DetonateVerdictName = (typeof DETONATE_VERDICTS)[number];
 
-/** Prefix the prototype uses on the tags it writes to alerts and runs. */
+/** Prefix the prototype uses on the tags it writes to rules and runs (never to production alerts). */
 export const DETONATE_TAG_PREFIX = 'detonate:' as const;
-
-/** Tag an alert carries once a detonation verdict has been applied to it. */
-export const detonateVerdictTag = (verdict: DetonateVerdictName): string =>
-  `${DETONATE_TAG_PREFIX}${verdict}`;
-
-/** Verdict tags written by earlier versions; still present on already-tagged alerts, so they stay stale-removable and non-re-pickable. */
-export const DETONATE_LEGACY_VERDICT_TAGS = ['detonate:quiet'] as const;
 
 /** Prefix of the tag that ties a run back to the alert it was started from
  * (`alert:<alert_id>`). Written by the alert action; read by the verdict
@@ -536,7 +529,7 @@ export const runBelongsToSpace = (tags: string[], spaceId: string): boolean =>
 /**
  * The sample the demo seeds a guaranteed-benign run for. Its digest matches
  * no recording, so the replay executor resolves it to the negative control —
- * a real run that raised nothing — which makes `detonate:benign` reproducible
+ * a real run that raised nothing — which makes a benign verdict reproducible
  * on camera. The simulator's contract-parity suite pins this exact value.
  */
 export const DETONATE_BENIGN_SEED_SHA256 =
@@ -943,22 +936,19 @@ interface DetonateConclusionBase {
 }
 
 /**
- * One detonation's conclusion, shaped for workflows, notes and tags. A verdict
- * (and the tag derived from it) exists only on a `complete` run; a failed or
- * unfinished run carries evidence describing what happened and nothing else.
+ * One detonation's conclusion, shaped for workflows and notes. A verdict
+ * exists only on a `complete` run; a failed or unfinished run carries evidence
+ * describing what happened and nothing else.
  */
 export type DetonateVerdict = DetonateConclusionBase &
   (
     | {
         status: 'complete';
         verdict: DetonateVerdictName;
-        /** The tag the apply step puts on the alert — `detonate:<verdict>`. */
-        suggested_tag: string;
       }
     | {
         status: Exclude<DetonationRunStatus, 'complete'>;
         verdict?: undefined;
-        suggested_tag?: undefined;
       }
   );
 
@@ -1039,7 +1029,7 @@ export const deriveDetonateVerdict = (task: DetonateTask): DetonateVerdict => {
     evidence = `Detonation raised ${total} alert(s): ${codes} (detection rules: ${rules}).`;
   }
 
-  return { ...base, status, verdict, evidence, suggested_tag: detonateVerdictTag(verdict) };
+  return { ...base, status, verdict, evidence };
 };
 
 export const DETONATE_CONFIDENCE_LEVELS = ['high', 'medium', 'low'] as const;
@@ -1077,9 +1067,6 @@ export type DetonationAlertState = (typeof DETONATION_ALERT_STATES)[number];
 export const DETONATION_STATES = [...DETONATION_RUN_STATUSES, ...DETONATION_ALERT_STATES] as const;
 export type DetonationState = (typeof DETONATION_STATES)[number];
 
-/** Alert tag a Worker writes when it chose to detonate an alert but has not submitted it yet. */
-export const DETONATE_QUEUED_TAG = `${DETONATE_TAG_PREFIX}queued` as const;
-
 /** ECS `host.os.type` to the service's OS family; `undefined` for one it has no VM for. */
 export const detonateOsFamilyFromHostOsType = (
   hostOsType: string
@@ -1094,38 +1081,6 @@ export const detonateOsFamilyFromHostOsType = (
     default:
       return undefined;
   }
-};
-
-export interface DetonationStateInput {
-  /** The alert's latest run, if it has one. */
-  run?: DetonateTask;
-  alertTags?: readonly string[];
-  /** ECS `host.os.type` of the alert. Missing means "cannot tell", not "unsupported". */
-  hostOsType?: string;
-  allowanceExhausted?: boolean;
-  supportedOsFamilies?: readonly DetonateVmOsFamily[];
-}
-
-/**
- * The one state every surface shows for a run or an alert. A run always wins;
- * without one, an OS the sandbox cannot run blocks everything else, then the
- * monthly allowance, then a Worker's queue marker.
- */
-export const deriveDetonationState = ({
-  run,
-  alertTags = [],
-  hostOsType,
-  allowanceExhausted = false,
-  supportedOsFamilies = DETONATE_VM_OS_FAMILIES,
-}: DetonationStateInput): DetonationState => {
-  if (run) return deriveDetonationRunStatus(run);
-  if (hostOsType) {
-    const family = detonateOsFamilyFromHostOsType(hostOsType);
-    if (!family || !supportedOsFamilies.includes(family)) return 'unsupported_os';
-  }
-  if (allowanceExhausted) return 'allowance_reached';
-  if (alertTags.includes(DETONATE_QUEUED_TAG)) return 'queued';
-  return 'not_analyzed';
 };
 
 /**

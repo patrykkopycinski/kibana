@@ -7,7 +7,7 @@
 
 /**
  * Detonate prototype — the one state badge every surface shows, for a run or
- * for an alert that has none. Derive the state with `deriveDetonationState`.
+ * for an alert that has none.
  */
 
 import React from 'react';

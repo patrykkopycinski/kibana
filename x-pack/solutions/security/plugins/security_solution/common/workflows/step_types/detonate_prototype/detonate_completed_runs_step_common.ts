@@ -51,7 +51,6 @@ export const detonateCompletedRunsOutputSchema = lazySchema(() =>
         created_at: z.string(),
         verdict: z.enum(DETONATE_VERDICTS),
         evidence: z.string(),
-        suggested_tag: z.string(),
       })
     ),
   })

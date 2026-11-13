@@ -9,7 +9,6 @@ import {
   DETONATE_BENIGN_SEED_SHA256,
   deriveDetonateVerdict,
   parseAlertTag,
-  detonateVerdictTag,
   diagnosticOnlyEventCodes,
   benignRunStreak,
   exceptionProposalComment,
@@ -59,7 +58,6 @@ describe('deriveDetonateVerdict', () => {
     expect(verdict.total_alerts_count).toBe(5);
     expect(verdict.endpoint_alert_event_codes).toEqual(['malicious_file']);
     expect(verdict.detection_rule_names).toEqual(['Malware Prevention Alert']);
-    expect(verdict.suggested_tag).toBe('detonate:malicious');
     expect(verdict.evidence).toContain('5 alert(s)');
   });
 
@@ -68,7 +66,6 @@ describe('deriveDetonateVerdict', () => {
 
     expect(verdict.verdict).toBe('benign');
     expect(verdict.total_alerts_count).toBe(0);
-    expect(verdict.suggested_tag).toBe('detonate:benign');
     expect(verdict.evidence).toContain('no alerts');
   });
 
@@ -94,7 +91,6 @@ describe('deriveDetonateVerdict', () => {
 
     expect(verdict.status).toBe('failed');
     expect(verdict.verdict).toBeUndefined();
-    expect(verdict.suggested_tag).toBeUndefined();
     expect(verdict.evidence).toContain('start_vm');
     expect(verdict.evidence).toContain('vm boot failed');
   });
@@ -109,7 +105,6 @@ describe('deriveDetonateVerdict', () => {
 
     expect(verdict.status).toBe('complete');
     expect(verdict.verdict).toBe('inconclusive');
-    expect(verdict.suggested_tag).toBe('detonate:inconclusive');
     expect(verdict.total_alerts_count).toBe(2);
     expect(verdict.endpoint_alert_event_codes).toEqual(['behavior']);
     expect(verdict.evidence).toContain('diagnostic alert(s) only');
@@ -140,7 +135,6 @@ describe('deriveDetonateVerdict', () => {
 
     expect(verdict.status).toBe('running');
     expect(verdict.verdict).toBeUndefined();
-    expect(verdict.suggested_tag).toBeUndefined();
     expect(verdict.evidence).toContain('has not completed');
   });
 
@@ -311,13 +305,5 @@ describe('exceptionProposalComment', () => {
     const comment = exceptionProposalComment('ab'.repeat(32), runs);
     expect(comment).toContain('run-3');
     expect(comment).not.toContain('run-4');
-  });
-});
-
-describe('verdict tags', () => {
-  it('uses the detonate: prefix for every verdict', () => {
-    expect(detonateVerdictTag('malicious')).toBe('detonate:malicious');
-    expect(detonateVerdictTag('benign')).toBe('detonate:benign');
-    expect(detonateVerdictTag('inconclusive')).toBe('detonate:inconclusive');
   });
 });

@@ -54,7 +54,6 @@ export const detonateVerdictOutputSchema = lazySchema(() =>
     endpoint_alert_event_codes: z.array(z.string()),
     detection_rule_names: z.array(z.string()),
     evidence: z.string(),
-    suggested_tag: z.string().optional(),
   })
 );
 

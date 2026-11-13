@@ -106,8 +106,9 @@ history for prior verdicts that disagree:
    first-seen benign result on an alerting rule means either a new file version
    or a detection gap; both are worth escalating, neither is "safe".
 3. If the analyst confirms the alert is a false positive, submit the
-   confirmation as a \`detonate:benign\` tag candidate — but the tag goes on only
-   via the verdict-apply path, never by direct mutation.
+   confirmation as a benign decision — but it is recorded only via the
+   verdict-apply path, never by direct mutation, and the alert itself is not
+   modified.
 
 A benign verdict never closes an alert by itself. It is evidence for the human
 who decides.

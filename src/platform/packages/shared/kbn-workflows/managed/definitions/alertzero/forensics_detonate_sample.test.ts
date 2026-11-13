@@ -141,6 +141,18 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       expect(query).toContain('WHERE kibana.alert.workflow_status == "open"');
     });
 
+    it('drops a hash that is not one 64-character value, so the lookup never 400s on it', () => {
+      // LENGTH of a multi-value field is null (the row is dropped), so one
+      // predicate also covers an alert carrying several hashes.
+      expect(query).toContain('WHERE LENGTH(file.hash.sha256) == 64');
+      expect(query.indexOf('WHERE file.hash.sha256 IS NOT NULL')).toBeLessThan(
+        query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')
+      );
+      expect(query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')).toBeLessThan(
+        query.indexOf('STATS first_alert')
+      );
+    });
+
     it('orders columns alert-first, so map: first in mark_queued yields alert ids', () => {
       expect(query).toContain('KEEP first_alert, file.hash.sha256');
     });
@@ -179,6 +191,13 @@ describe('Detonate sample worker (Forensics Watch)', () => {
     it('only runs on a scheduled sweep with supervised autonomy', () => {
       expect(gate?.if).toBe(
         "${{ inputs.sha256 == blank and execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' }}"
+      );
+    });
+
+    it('drops a hash that is not one 64-character value, like the reporting query', () => {
+      expect(query).toContain('WHERE LENGTH(file.hash.sha256) == 64');
+      expect(query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')).toBeLessThan(
+        query.indexOf('STATS first_alert')
       );
     });
 

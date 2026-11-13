@@ -230,8 +230,10 @@ steps:
       detonate_alert_ids: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | map: '_id' }}"
 
   # The lookup sends each alert's sample hash with its id: without it the store
-  # cannot tell that a sibling alert's sample already ran to completion. Liquid
-  # has no object literal, hence the JSON template.
+  # cannot tell that a sibling alert's sample already ran to completion. The field
+  # is a keyword a rule can fill with an array or any text, so only a single
+  # 64-character string is sent; the rest go id-only. Liquid has no object
+  # literal, hence the JSON template.
   - name: build_detonate_lookup
     type: data.set
     with:
@@ -240,7 +242,13 @@ steps:
         [
         {%- for alert in hashed -%}
         {%- unless forloop.first -%},{%- endunless -%}
-        {"alert_id":{{ alert._id | json }},"sha256":{{ alert.file.hash.sha256 | json }}}
+        {%- assign raw = alert.file.hash.sha256 -%}
+        {%- assign lead = raw | json | slice: 0, 1 -%}
+        {%- if lead == '"' and raw.size == 64 -%}
+        {"alert_id":{{ alert._id | json }},"sha256":{{ raw | json }}}
+        {%- else -%}
+        {"alert_id":{{ alert._id | json }}}
+        {%- endif -%}
         {%- endfor -%}
         ]
 

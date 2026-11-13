@@ -100,6 +100,7 @@ steps:
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE file.hash.sha256 IS NOT NULL
+          | WHERE LENGTH(file.hash.sha256) == 64
           | WHERE kibana.alert.workflow_status == "open"
           | STATS first_alert = MIN(_id) BY file.hash.sha256
           | KEEP first_alert, file.hash.sha256
@@ -158,6 +159,7 @@ steps:
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE file.hash.sha256 IS NOT NULL
+          | WHERE LENGTH(file.hash.sha256) == 64
           | WHERE kibana.alert.workflow_status == "open"
           | WHERE kibana.alert.severity IN ("high", "critical")
           | STATS first_alert = MIN(_id) BY file.hash.sha256

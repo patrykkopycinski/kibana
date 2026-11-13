@@ -34,6 +34,7 @@ const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
 const ALERTZERO_READ_PATHS: string[] = [RECORD_PATH, DETONATE_USAGE_PATH];
 const HANDOFF_PATH = `${DETONATE_RUNS_PATH}/{id}/handoff`;
 const HASH_A = 'a'.repeat(64);
+const HASH_B = 'b'.repeat(64);
 /** Write-tier worker routes without the `securitySolution` read tag. */
 const WORKER_WRITE_PATHS: string[] = [
   HANDOFF_PATH,
@@ -1570,8 +1571,8 @@ describe('registerDetonatePrototypeRoutes', () => {
         },
       ],
       ['an alert without an id', { alerts: [{ sha256: HASH_A }] }],
-      ['a non-hex hash', { alerts: [{ alert_id: 'a', sha256: 'z'.repeat(64) }] }],
-      ['an oversized hash', { alerts: [{ alert_id: 'a', sha256: 'a'.repeat(65) }] }],
+      ['an unbounded hash', { alerts: [{ alert_id: 'a', sha256: 'a'.repeat(257) }] }],
+      ['a hash that is not a string', { alerts: [{ alert_id: 'a', sha256: [HASH_A] }] }],
     ])('rejects an outcomes body with %s', (_name, body) => {
       expect(() => bodySchema(DETONATE_ALERT_OUTCOMES_PATH).validate(body)).toThrow();
     });
@@ -1628,6 +1629,45 @@ describe('registerDetonatePrototypeRoutes', () => {
           outcomes: { sibling: { state: 'completed', verdict: 'malicious', task_id: 't-1' } },
         },
       });
+    });
+
+    it('drops a malformed hash and keeps its alert id-only, without failing the batch', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+      esClient.search.mockResolvedValue({
+        aggregations: { by_alert: { buckets: [] }, by_hash: { buckets: [] } },
+      });
+      const body = {
+        alerts: [
+          { alert_id: 'not-hex', sha256: 'z'.repeat(64) },
+          { alert_id: 'too-short', sha256: HASH_A.slice(1) },
+          { alert_id: 'too-long', sha256: `${HASH_A}a` },
+          { alert_id: 'list-like', sha256: `${HASH_A},${HASH_B}` },
+          { alert_id: 'empty', sha256: '' },
+          { alert_id: 'valid', sha256: HASH_A.toUpperCase() },
+        ],
+      };
+
+      expect(() => bodySchema(DETONATE_ALERT_OUTCOMES_PATH).validate(body)).not.toThrow();
+      await outcomesHandler()(
+        createContext(),
+        createRequest('post', DETONATE_ALERT_OUTCOMES_PATH, body),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(esClient.mget).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ids: ['not-hex', 'too-short', 'too-long', 'list-like', 'empty', 'valid'],
+        }),
+        expect.anything()
+      );
+      const [[searchRequest]] = esClient.search.mock.calls;
+      expect(searchRequest.aggs?.by_hash).toEqual(
+        expect.objectContaining({
+          terms: expect.objectContaining({ include: [HASH_A] }),
+        })
+      );
     });
 
     it('queries no hash when the body carries ids only', async () => {

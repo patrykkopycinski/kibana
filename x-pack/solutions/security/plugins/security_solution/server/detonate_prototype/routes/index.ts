@@ -269,6 +269,7 @@ const tagsWithOriginAlerts = (
 
 const MAX_MIME_TYPE_LENGTH = 255;
 const MIME_TYPE_SHAPE = /^[\w!#$&^.+-]+\/[\w!#$&^.+-]+$/;
+const SHA256_PATTERN = /^[a-fA-F0-9]{64}$/;
 
 /**
  * The part's own `Content-Type`, which hapi keeps on the stream it hands over.
@@ -1175,7 +1176,10 @@ export const registerDetonatePrototypeRoutes = ({
             body: schema.object(
               {
                 // Ids alone cannot match a finished run of a sibling alert; the
-                // sweeps that know each alert's sample hash send `alerts`.
+                // sweeps that know each alert's sample hash send `alerts`. The
+                // hash is read off a keyword field a rule or a third party can
+                // fill with anything, so it is checked in the handler: a bad one
+                // costs that alert its hash, never the whole batch.
                 alert_ids: schema.maybe(
                   schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
                     minSize: 1,
@@ -1186,13 +1190,7 @@ export const registerDetonatePrototypeRoutes = ({
                   schema.arrayOf(
                     schema.object({
                       alert_id: schema.string({ minLength: 1, maxLength: 128 }),
-                      sha256: schema.maybe(
-                        schema.string({
-                          maxLength: 64,
-                          validate: (value) =>
-                            /^[a-fA-F0-9]{64}$/.test(value) ? undefined : 'must be a hex sha256',
-                        })
-                      ),
+                      sha256: schema.maybe(schema.string({ maxLength: 256 })),
                     }),
                     { minSize: 1, maxSize: 200 }
                   )
@@ -1217,7 +1215,7 @@ export const registerDetonatePrototypeRoutes = ({
               ...(request.body.alert_ids ?? []).map((alertId) => ({ alertId })),
               ...(request.body.alerts ?? []).map(({ alert_id: alertId, sha256 }) => ({
                 alertId,
-                sha256,
+                sha256: sha256 !== undefined && SHA256_PATTERN.test(sha256) ? sha256 : undefined,
               })),
             ],
             now().getTime()

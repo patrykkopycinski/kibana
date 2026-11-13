@@ -1964,6 +1964,10 @@ describe('floor_alert_triage_batch — compute_other_alerts', () => {
 // ---------------------------------------------------------------------------
 
 describe('floor_alert_triage_batch — detonation enrichment', () => {
+  const H1 = 'a'.repeat(64);
+  const H2 = 'b'.repeat(64);
+  const H3 = 'c'.repeat(64);
+  const H4 = 'd'.repeat(64);
   const candidatesExpr = stepByName('compute_detonate_candidates')?.with?.detonate_hashes as string;
   const branch = stepByName('detonate_hash');
   const alertIdTemplate = (branch?.with?.inputs as Record<string, string>)?.alert_id;
@@ -1983,21 +1987,22 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     });
 
   it('keeps each untriaged hash once, skipping alerts with no file hash', () => {
-    expect(
-      candidates([alert('a1', 'h1'), alert('a2', 'h1'), alert('a3'), alert('a4', 'h2')])
-    ).toEqual(['h1', 'h2']);
+    expect(candidates([alert('a1', H1), alert('a2', H1), alert('a3'), alert('a4', H2)])).toEqual([
+      H1,
+      H2,
+    ]);
   });
 
   it('skips alerts the decisions store already covers', () => {
     expect(
-      candidates([alert('a1', 'h1'), alert('a2', 'h2'), alert('a3', 'h3'), alert('a4', 'h4')], {
+      candidates([alert('a1', H1), alert('a2', H2), alert('a3', H3), alert('a4', H4)], {
         decidedIds: ['a1', 'a2', 'a4'],
       })
-    ).toEqual(['h3']);
+    ).toEqual([H3]);
   });
 
   it('detonates nothing when the decisions lookup failed', () => {
-    expect(candidates([alert('a1', 'h1'), alert('a2', 'h2')], { lookupOk: false })).toEqual([]);
+    expect(candidates([alert('a1', H1), alert('a2', H2)], { lookupOk: false })).toEqual([]);
   });
 
   it('asks the decisions store about the batch file-hash alerts, and tolerates its failure', () => {
@@ -2013,7 +2018,7 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     expect(
       evalExpr(stepByName('collect_detonate_alert_ids')?.with?.detonate_alert_ids as string, {
         steps: {
-          load_alerts: { output: { alerts: [alert('a1', 'h1'), alert('a2'), alert('a3', 'h3')] } },
+          load_alerts: { output: { alerts: [alert('a1', H1), alert('a2'), alert('a3', H3)] } },
         },
       })
     ).toEqual(['a1', 'a3']);
@@ -2025,14 +2030,14 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
       {
         steps: {
           load_alerts: {
-            output: { alerts: [alert('a1', 'H1'), alert('a2'), alert('a3', 'H3')] },
+            output: { alerts: [alert('a1', H1.toUpperCase()), alert('a2'), alert('a3', H3)] },
           },
         },
       }
     );
     expect(JSON.parse(json)).toEqual([
-      { alert_id: 'a1', sha256: 'H1' },
-      { alert_id: 'a3', sha256: 'H3' },
+      { alert_id: 'a1', sha256: H1.toUpperCase() },
+      { alert_id: 'a3', sha256: H3 },
     ]);
     expect(
       JSON.parse(
@@ -2043,6 +2048,29 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
         )
       )
     ).toEqual([]);
+  });
+
+  it('sends an alert whose hash is not one 64-character string id-only, never the bad value', () => {
+    const lookup = (hash: unknown) =>
+      JSON.parse(
+        renderString(
+          (stepByName('build_detonate_lookup')?.with as Record<string, string>)
+            .detonate_lookup_json,
+          {
+            steps: {
+              load_alerts: {
+                output: { alerts: [{ _id: 'bad', file: { hash: { sha256: hash } } }] },
+              },
+            },
+          }
+        )
+      );
+
+    expect(lookup('not-a-hash')).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup(`${H1}a`)).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup([H1, H2])).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup([H1])).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup(H1)).toEqual([{ alert_id: 'bad', sha256: H1 }]);
   });
 
   it('reads the decided ids and the lookup health off the response', () => {
@@ -2060,16 +2088,18 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
   });
 
   it('caps one batch at 20 hashes; the sweep picks up the rest', () => {
-    const alerts = Array.from({ length: 25 }, (_, i) => alert(`a${i}`, `h${i}`));
+    const alerts = Array.from({ length: 25 }, (_, i) =>
+      alert(`a${i}`, i.toString(16).padStart(64, '0'))
+    );
     expect(candidates(alerts)).toHaveLength(20);
   });
 
   it('passes the first alert carrying the hash as the verdict target', () => {
     const rendered = renderString(alertIdTemplate, {
-      foreach: { item: 'h2' },
+      foreach: { item: H2 },
       steps: {
         load_alerts: {
-          output: { alerts: [alert('a1', 'h1'), alert('a2', 'h2'), alert('a3', 'h2')] },
+          output: { alerts: [alert('a1', H1), alert('a2', H2), alert('a3', H2)] },
         },
       },
     });

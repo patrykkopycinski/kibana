@@ -9,74 +9,82 @@
  * Detonate prototype — Worker handoffs.
  *
  * The Hunt and Detection Workers run under service accounts that can neither
- * read nor tag Security alerts. These two operations are all they get instead:
- * list the runs whose alerts are waiting for them, and set or clear the four
- * handoff markers on one run's own alerts. Both run as Kibana's internal user
- * against this space's alerts index only. The alerts a run names come from its
- * `alert:<id>` tags, which `assertReadableAlertTags` checks at submit time.
+ * read nor tag Security alerts, and nothing here touches an alert either. Both
+ * operations work on the run's own document in the results index: list the
+ * runs waiting for a Worker, and set or clear the handoff markers on one run.
+ * Both run as Kibana's internal user against this space's results index only.
+ * The alerts a run names come from its `alert:<id>` tags, which
+ * `assertReadableAlertTags` checks at submit time.
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { ALERT_WORKFLOW_TAGS, SPACE_IDS } from '@kbn/rule-data-utils';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
 
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
 import type {
   DetonateHandoff,
   DetonateHandoffKind,
   DetonateHandoffMarker,
-  DetonateTask,
 } from '../../common/detonate_prototype';
 import {
-  DETONATE_COVERAGE_IN_PROGRESS_MARKER,
   DETONATE_HANDOFF_MAX_TASKS,
-  detonateHandoffMarkers,
-  detonateVerdictTag,
-  needsDetonateHandoff,
+  detonateResultsIndexName,
   parseAlertTags,
 } from '../../common/detonate_prototype';
-import type { DetonateClient } from './client';
 import { DetonateServiceError } from './client';
-import { getTaskInSpace, listTasksInSpace } from './space_scope';
 import { readField } from './ioc_extraction';
-
-const SHA256_FIELD = 'file.hash.sha256';
-
-/** Alerts read per list call, oldest first, before run-less ones are dropped. */
-export const HANDOFF_ALERT_SCAN_SIZE = 100;
-
-/** Run lookups issued at once; the service is a single gateway. */
-const RUN_LOOKUP_CONCURRENCY = 10;
+import { setHandoffMarkers } from './results_store';
 
 const alertsIndex = (spaceId: string) => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
+/** Candidates read per list call, before runs that are not their alert's newest are dropped. */
+const HANDOFF_CANDIDATE_FACTOR = 4;
+
+const DOC_KIND_FIELD = 'detonate.doc_kind';
+const ALERT_ID_FIELD = 'detonate.alert_id';
+const ORIGIN_ALERTS_FIELD = 'detonate.origin.alert_ids';
+const SHA256_FIELD = 'file.hash.sha256';
+
+const handoffField = (kind: DetonateHandoffKind) => `detonate.handoff.${kind}`;
+
+/**
+ * An explicit `requested` is its own clause without the `done` exclusion, so a
+ * re-request beats an earlier `done`. A malicious run is waiting until its Worker
+ * marks it done (or, for coverage, reviewed). A run with a parked rule-creation
+ * copy is excluded in the query itself, so in-progress runs never consume the
+ * candidate window and hide a valid handoff behind them.
+ */
 const handoffSelector = (kind: DetonateHandoffKind): estypes.QueryDslQueryContainer => {
-  const { requested, done } = detonateHandoffMarkers(kind);
-  const waiting = {
+  const field = handoffField(kind);
+  const finished = kind === 'hunt' ? ['done'] : ['done', 'reviewed'];
+  return {
     bool: {
-      should: [
-        { term: { [ALERT_WORKFLOW_TAGS]: requested } },
+      must_not: [
+        { term: { [DOC_KIND_FIELD]: 'alert_decision' } },
+        ...(kind === 'coverage' ? [{ term: { [field]: 'in_progress' } }] : []),
+      ],
+      filter: [
+        { exists: { field: SHA256_FIELD } },
+        // A run no alert started has nothing for a Worker to act on.
+        { exists: { field: ORIGIN_ALERTS_FIELD } },
         {
           bool: {
-            filter: [{ term: { [ALERT_WORKFLOW_TAGS]: detonateVerdictTag('malicious') } }],
-            must_not: [{ term: { [ALERT_WORKFLOW_TAGS]: done } }],
+            minimum_should_match: 1,
+            should: [
+              { term: { [field]: 'requested' } },
+              {
+                bool: {
+                  filter: [{ term: { 'detonate.verdict': 'malicious' } }],
+                  must_not: [{ terms: { [field]: finished } }],
+                },
+              },
+            ],
           },
         },
       ],
-      minimum_should_match: 1,
     },
   };
-  // A run with a parked rule-creation copy is excluded from the scan itself,
-  // not only from the re-check: in-progress alerts must not consume the
-  // scan window and hide a valid handoff behind them.
-  return kind === 'coverage'
-    ? {
-        bool: {
-          filter: [waiting],
-          must_not: [{ term: { [ALERT_WORKFLOW_TAGS]: DETONATE_COVERAGE_IN_PROGRESS_MARKER } }],
-        },
-      }
-    : waiting;
 };
 
 const isForbidden = (error: unknown): boolean =>
@@ -157,137 +165,96 @@ export const assertReadableAlerts = async ({
 const readStrings = (source: unknown, path: string): string[] =>
   readField(source, path).filter((value): value is string => typeof value === 'string');
 
-/** The newest run started from this alert, when it has one in this space. */
-const newestRunForAlert = async (
-  client: DetonateClient,
-  spaceId: string,
-  alertId: string
-): Promise<DetonateTask | undefined> => {
-  const { tasks } = await listTasksInSpace(
-    client,
-    spaceId,
-    { size: 1, order: 'desc' },
-    { alertId }
-  );
-  return tasks.find((task) => parseAlertTags(task.tags).includes(alertId));
-};
-
 /**
- * Runs whose alerts wait for the given Worker, oldest alert first. Alerts no
- * run in this space was started from are dropped before the cut, so a backlog
- * of them never hides a valid handoff behind it.
+ * Runs waiting for the given Worker, oldest first. A run counts only while it is
+ * the newest one for its alert: an older malicious run of an alert that has since
+ * been re-detonated benign is not a handoff.
  */
-export const listDetonateHandoffs = async ({
+export const listHandoffRuns = async ({
   esClient,
-  client,
   spaceId,
   kind,
 }: {
   esClient: ElasticsearchClient;
-  client: DetonateClient;
   spaceId: string;
   kind: DetonateHandoffKind;
 }): Promise<DetonateHandoff[]> => {
+  const index = detonateResultsIndexName(spaceId);
   const { hits } = await esClient.search({
-    index: alertsIndex(spaceId),
+    index,
     ignore_unavailable: true,
     allow_no_indices: true,
-    size: HANDOFF_ALERT_SCAN_SIZE,
+    size: DETONATE_HANDOFF_MAX_TASKS * HANDOFF_CANDIDATE_FACTOR,
     sort: [{ '@timestamp': { order: 'asc', unmapped_type: 'date' } }],
-    _source: [SHA256_FIELD, ALERT_WORKFLOW_TAGS],
-    query: {
-      bool: {
-        filter: [
-          { term: { [SPACE_IDS]: spaceId } },
-          { exists: { field: SHA256_FIELD } },
-          handoffSelector(kind),
-        ],
-      },
-    },
+    _source: [ALERT_ID_FIELD, ORIGIN_ALERTS_FIELD, SHA256_FIELD],
+    query: handoffSelector(kind),
   });
 
-  const waiting = hits.hits.filter(
-    (hit): hit is typeof hit & { _id: string } =>
-      typeof hit._id === 'string' &&
-      needsDetonateHandoff(kind, readStrings(hit._source, ALERT_WORKFLOW_TAGS))
-  );
+  const candidates = hits.hits.flatMap((hit) => {
+    const sha256 = readStrings(hit._source, SHA256_FIELD)[0];
+    if (typeof hit._id !== 'string' || !sha256) return [];
+    const alertId = readStrings(hit._source, ALERT_ID_FIELD)[0];
+    const origin = readStrings(hit._source, ORIGIN_ALERTS_FIELD);
+    return [
+      {
+        taskId: hit._id,
+        sha256,
+        alertId,
+        alertIds: alertId ? [...new Set([alertId, ...origin])] : origin,
+      },
+    ];
+  });
 
-  const byTask = new Map<string, DetonateHandoff>();
-  for (let start = 0; start < waiting.length; start += RUN_LOOKUP_CONCURRENCY) {
-    const chunk = waiting.slice(start, start + RUN_LOOKUP_CONCURRENCY);
-    const runs = await Promise.all(chunk.map((hit) => newestRunForAlert(client, spaceId, hit._id)));
-    chunk.forEach((hit, index) => {
-      const run = runs[index];
-      if (!run) return;
-      const existing = byTask.get(run.id);
-      if (existing) {
-        existing.alert_ids.push(hit._id);
-      } else if (byTask.size < DETONATE_HANDOFF_MAX_TASKS) {
-        const sha256 = run.sample_hash ?? readStrings(hit._source, SHA256_FIELD)[0];
-        if (sha256) byTask.set(run.id, { task_id: run.id, sha256, alert_ids: [hit._id] });
-      }
+  const alertIds = [...new Set(candidates.flatMap(({ alertId }) => (alertId ? [alertId] : [])))];
+  const newestByAlert = new Map<string, string>();
+  if (alertIds.length > 0) {
+    const newest = await esClient.search({
+      index,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          must_not: [{ term: { [DOC_KIND_FIELD]: 'alert_decision' } }],
+          filter: [{ terms: { [ALERT_ID_FIELD]: alertIds } }],
+        },
+      },
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+      collapse: { field: ALERT_ID_FIELD },
+      fields: [ALERT_ID_FIELD],
     });
-    if (byTask.size >= DETONATE_HANDOFF_MAX_TASKS) break;
+    newest.hits.hits.forEach((hit) => {
+      const [alertId] = readStrings(hit.fields, ALERT_ID_FIELD);
+      if (typeof hit._id === 'string' && alertId) newestByAlert.set(alertId, hit._id);
+    });
   }
-  return [...byTask.values()];
+
+  return candidates
+    .filter(({ alertId, taskId }) => !alertId || newestByAlert.get(alertId) === taskId)
+    .slice(0, DETONATE_HANDOFF_MAX_TASKS)
+    .map(({ taskId, sha256, alertIds: ids }) => ({ task_id: taskId, sha256, alert_ids: ids }));
 };
 
-/** Removes, then adds; tolerates alerts that never had workflow tags. */
-const HANDOFF_MARKERS_SCRIPT = `List tags = new ArrayList();
-if (ctx._source["${ALERT_WORKFLOW_TAGS}"] != null) {
-  for (tag in ctx._source["${ALERT_WORKFLOW_TAGS}"]) {
-    if (!params.tagsToRemove.contains(tag)) {
-      tags.add(tag);
-    }
-  }
-}
-for (tag in params.tagsToAdd) {
-  if (!tags.contains(tag)) {
-    tags.add(tag);
-  }
-}
-ctx._source["${ALERT_WORKFLOW_TAGS}"] = tags;`;
-
 /**
- * Rewrites the handoff markers on the alerts one run was started from, and on
- * no other alert: the targets come from the run's own `alert:<id>` tags, and
- * must also sit in this space's alerts index.
+ * Rewrites the handoff markers on one run's document in this space's results
+ * index. A run with no document there (another space, or a lost best-effort
+ * write) answers 404.
  */
-export const setDetonateHandoffMarkers = async ({
+export const setRunHandoffMarkers = async ({
   esClient,
-  client,
   spaceId,
   taskId,
   add,
   remove,
 }: {
   esClient: ElasticsearchClient;
-  client: DetonateClient;
   spaceId: string;
   taskId: string;
   add: readonly DetonateHandoffMarker[];
   remove: readonly DetonateHandoffMarker[];
 }): Promise<number> => {
-  const task = await getTaskInSpace(client, taskId, spaceId);
-  const alertIds = parseAlertTags(task.tags);
-  if (alertIds.length === 0) return 0;
-
-  const response = await esClient.updateByQuery({
-    index: alertsIndex(spaceId),
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    conflicts: 'proceed',
-    refresh: true,
-    query: {
-      bool: {
-        filter: [{ terms: { _id: alertIds } }, { term: { [SPACE_IDS]: spaceId } }],
-      },
-    },
-    script: {
-      lang: 'painless',
-      source: HANDOFF_MARKERS_SCRIPT,
-      params: { tagsToAdd: [...new Set(add)], tagsToRemove: [...new Set(remove)] },
-    },
-  });
-  return response.updated ?? 0;
+  const found = await setHandoffMarkers({ esClient, spaceId, taskId, add, remove });
+  if (!found) throw new DetonateServiceError('The detonation service answered 404.', 404);
+  return 1;
 };

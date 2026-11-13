@@ -1651,30 +1651,37 @@ describe('registerDetonatePrototypeRoutes', () => {
     const setRequest = (id: string, body: unknown) =>
       createRequest('post', HANDOFF_PATH, body, { id });
 
-    const run = (id: string, alertIds: string[], space = 'default') => ({
-      id,
-      created_at: '2026-12-01T00:00:00.000Z',
-      sample_hash: `hash-${id}`,
-      tags: [`space:${space}`, ...alertIds.map((alertId) => `alert:${alertId}`)],
-    });
-    const alertHit = (id: string, tags: string[]) => ({
+    const runHit = (
+      id: string,
+      alertId: string | undefined,
+      extra: { origin?: string[]; sha256?: string } = {}
+    ) => ({
       _id: id,
       _source: {
-        file: { hash: { sha256: `alert-hash-${id}` } },
-        kibana: { alert: { workflow_tags: tags } },
+        ...(alertId ? { detonate: { alert_id: alertId } } : {}),
+        'detonate.origin.alert_ids': extra.origin ?? (alertId ? [alertId] : []),
+        file: { hash: { sha256: extra.sha256 ?? `hash-${id}` } },
       },
     });
-    /** Answers each `tags:"alert:<id>"` lookup with the runs carrying that tag. */
-    const serveRuns = (runs: unknown[]) =>
-      client.listTasks.mockImplementation(async ({ query_string: queryString = '' } = {}) => {
-        const alertTag = /tags:"(alert:[^"]+)"/.exec(queryString)?.[1];
-        return {
-          tasks: (runs as Array<{ tags: string[] }>).filter((r) => r.tags.includes(alertTag ?? '')),
-          offset: 0,
-          size: 1,
-          order: 'desc',
-        } as never;
-      });
+    /** The candidate search first, then the collapsed newest-run-per-alert search. */
+    const serveRuns = (candidates: unknown[], newest: Array<[alertId: string, runId: string]>) =>
+      esClient.search.mockImplementation((async (request: { collapse?: unknown }) =>
+        request.collapse
+          ? {
+              hits: {
+                hits: newest.map(([alertId, runId]) => ({
+                  _id: runId,
+                  fields: { 'detonate.alert_id': [alertId] },
+                })),
+              },
+            }
+          : { hits: { hits: candidates } }) as never);
+    const handoffIds = () => {
+      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
+        [{ body: { handoffs: Array<{ task_id: string }> } }]
+      >;
+      return body.handoffs.map(({ task_id: taskId }) => taskId);
+    };
     const bodySchema = () => {
       const { config } = router.versioned.getRoute('post', HANDOFF_PATH).versions['1'];
       const validation =
@@ -1718,72 +1725,99 @@ describe('registerDetonatePrototypeRoutes', () => {
       });
     });
 
-    it('lists only from this space, oldest first, by the hunt selector', async () => {
+    it("lists from this space's results index, oldest first, by the hunt selector", async () => {
       esClient.search.mockResolvedValue({ hits: { hits: [] } });
 
       await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
       const [[searchRequest]] = esClient.search.mock.calls;
-      expect(searchRequest.index).toBe('.alerts-security.alerts-default');
-      expect(searchRequest.size).toBe(100);
+      expect(searchRequest.index).toBe('.kibana-detonate-results-default');
+      expect(searchRequest.size).toBe(20);
       expect(searchRequest.sort).toEqual([
         { '@timestamp': { order: 'asc', unmapped_type: 'date' } },
       ]);
-      expect(searchRequest._source).toEqual(['file.hash.sha256', 'kibana.alert.workflow_tags']);
-      expect(searchRequest.query.bool.filter).toEqual([
-        { term: { 'kibana.space_ids': 'default' } },
-        { exists: { field: 'file.hash.sha256' } },
-        {
-          bool: {
-            should: [
-              { term: { 'kibana.alert.workflow_tags': 'detonate:hunt-requested' } },
-              {
-                bool: {
-                  filter: [{ term: { 'kibana.alert.workflow_tags': 'detonate:malicious' } }],
-                  must_not: [{ term: { 'kibana.alert.workflow_tags': 'detonate:hunt-done' } }],
-                },
+      expect(searchRequest.query).toEqual({
+        bool: {
+          must_not: [{ term: { 'detonate.doc_kind': 'alert_decision' } }],
+          filter: [
+            { exists: { field: 'file.hash.sha256' } },
+            { exists: { field: 'detonate.origin.alert_ids' } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  { term: { 'detonate.handoff.hunt': 'requested' } },
+                  {
+                    bool: {
+                      filter: [{ term: { 'detonate.verdict': 'malicious' } }],
+                      must_not: [{ terms: { 'detonate.handoff.hunt': ['done'] } }],
+                    },
+                  },
+                ],
               },
-            ],
-            minimum_should_match: 1,
-          },
+            },
+          ],
         },
-      ]);
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { handoffs: [] } });
     });
 
-    it('selects the coverage markers for the Detection Worker', async () => {
+    it('never reads the alerts index', async () => {
+      esClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await listHandler()(createContext(), listRequest('coverage'), mockResponse);
+
+      const indices = esClient.search.mock.calls.map(([request]) => String(request.index));
+      expect(indices.filter((index) => index.includes('.alerts-'))).toEqual([]);
+    });
+
+    it('selects the coverage fields for the Detection Worker', async () => {
       esClient.search.mockResolvedValue({ hits: { hits: [] } });
 
       await listHandler()(createContext(), listRequest('coverage'), mockResponse);
 
       const selector = JSON.stringify(esClient.search.mock.calls[0][0].query);
-      expect(selector).toContain('detonate:coverage-requested');
-      expect(selector).toContain('detonate:coverage-reviewed');
-      expect(selector).not.toContain('detonate:hunt-');
+      expect(selector).toContain('"detonate.handoff.coverage":"requested"');
+      expect(selector).toContain('"detonate.handoff.coverage":["done","reviewed"]');
+      expect(selector).not.toContain('detonate.handoff.hunt');
     });
 
-    // A run whose rule-creation copy is parked carries coverage-in-progress;
-    // the sweep skips it. It must be excluded from the scan itself, not only
-    // from the re-check, or in-progress alerts would consume the scan window
-    // and hide a valid handoff behind them.
-    it('excludes runs with a parked rule-creation copy from the coverage scan', async () => {
+    // A run whose rule-creation copy is parked is in progress; the sweep skips it.
+    // It must be excluded from the search itself, or in-progress runs would
+    // consume the candidate window and hide a valid handoff behind them.
+    it('excludes runs with a parked rule-creation copy from the coverage search', async () => {
       esClient.search.mockResolvedValue({ hits: { hits: [] } });
 
       await listHandler()(createContext(), listRequest('coverage'), mockResponse);
 
-      const selector = JSON.stringify(esClient.search.mock.calls[0][0].query);
-      expect(selector).toContain('detonate:coverage-in-progress');
-      expect(selector).toContain('must_not');
+      expect(esClient.search.mock.calls[0][0].query.bool.must_not).toContainEqual({
+        term: { 'detonate.handoff.coverage': 'in_progress' },
+      });
     });
 
-    it('keeps the hunt scan free of the coverage lock', async () => {
+    it('keeps the hunt search free of the coverage lock', async () => {
       esClient.search.mockResolvedValue({ hits: { hits: [] } });
 
       await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
-      const selector = JSON.stringify(esClient.search.mock.calls[0][0].query);
-      expect(selector).not.toContain('detonate:coverage-in-progress');
+      expect(JSON.stringify(esClient.search.mock.calls[0][0].query)).not.toContain('in_progress');
     });
+
+    // An explicit request is its own clause: the done exclusion sits only on the
+    // malicious clause, so a re-request beats an earlier done.
+    it.each([['hunt'], ['coverage']] as const)(
+      'lets a %s request win over a done marker',
+      async (kind) => {
+        esClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+        await listHandler()(createContext(), listRequest(kind), mockResponse);
+
+        const [requested, malicious] =
+          esClient.search.mock.calls[0][0].query.bool.filter[2].bool.should;
+        expect(requested).toEqual({ term: { [`detonate.handoff.${kind}`]: 'requested' } });
+        expect(malicious.bool.must_not).toHaveLength(1);
+      }
+    );
 
     it('accepts only the two Worker kinds', () => {
       expect(querySchema().validate({ marker: 'hunt' })).toEqual({ marker: 'hunt' });
@@ -1791,78 +1825,85 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(() => querySchema().validate({})).toThrow();
     });
 
-    it('groups alerts by their run and drops alerts with no run in this space', async () => {
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            alertHit('a-1', ['detonate:malicious']),
-            alertHit('a-orphan', ['detonate:malicious']),
-            alertHit('a-foreign', ['detonate:malicious']),
-            alertHit('a-2', ['detonate:hunt-requested']),
+    it('returns each run with its alerts and hash', async () => {
+      serveRuns(
+        [runHit('run-1', 'a-1', { origin: ['a-2'] }), runHit('run-2', 'a-3')],
+        [
+          ['a-1', 'run-1'],
+          ['a-3', 'run-2'],
+        ]
+      );
+
+      await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          handoffs: [
+            { task_id: 'run-1', sha256: 'hash-run-1', alert_ids: ['a-1', 'a-2'] },
+            { task_id: 'run-2', sha256: 'hash-run-2', alert_ids: ['a-3'] },
           ],
         },
       });
-      serveRuns([run('run-1', ['a-1', 'a-2']), run('run-x', ['a-foreign'], 'team-b')]);
+    });
+
+    it('asks for the newest run of the candidate alerts only, collapsed per alert', async () => {
+      serveRuns([runHit('run-1', 'a-1')], [['a-1', 'run-1']]);
 
       await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: { handoffs: [{ task_id: 'run-1', sha256: 'hash-run-1', alert_ids: ['a-1', 'a-2'] }] },
-      });
+      const [, [newestRequest]] = esClient.search.mock.calls;
+      expect(newestRequest.index).toBe('.kibana-detonate-results-default');
+      expect(newestRequest.collapse).toEqual({ field: 'detonate.alert_id' });
+      expect(newestRequest.sort).toEqual([
+        { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+      ]);
+      expect(newestRequest.query.bool.filter).toEqual([
+        { terms: { 'detonate.alert_id': ['a-1'] } },
+      ]);
+      expect(newestRequest.query.bool.must_not).toEqual([
+        { term: { 'detonate.doc_kind': 'alert_decision' } },
+      ]);
     });
 
-    it('re-checks the selector on what Elasticsearch returned', async () => {
-      esClient.search.mockResolvedValue({
-        hits: { hits: [alertHit('a-1', ['detonate:malicious', 'detonate:hunt-done'])] },
-      });
-      serveRuns([run('run-1', ['a-1'])]);
-
-      await listHandler()(createContext(), listRequest('hunt'), mockResponse);
-
-      expect(client.listTasks).not.toHaveBeenCalled();
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { handoffs: [] } });
-    });
-
-    it('finds a valid handoff behind a backlog of run-less alerts', async () => {
-      const orphans = Array.from({ length: 10 }, (_, i) =>
-        alertHit(`orphan-${i}`, ['detonate:malicious'])
+    it('drops an older malicious run whose alert has a newer run', async () => {
+      serveRuns(
+        [runHit('run-old', 'a-1'), runHit('run-other', 'a-2')],
+        [
+          ['a-1', 'run-new'],
+          ['a-2', 'run-other'],
+        ]
       );
-      esClient.search.mockResolvedValue({
-        hits: { hits: [...orphans, alertHit('a-new', ['detonate:malicious'])] },
-      });
-      serveRuns([run('run-new', ['a-new'])]);
 
       await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
+      expect(handoffIds()).toEqual(['run-other']);
+    });
+
+    it('skips the newest-run search when no candidate names an alert', async () => {
+      serveRuns([runHit('run-1', undefined, { origin: ['a-1'] })], []);
+
+      await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: { handoffs: [{ task_id: 'run-new', sha256: 'hash-run-new', alert_ids: ['a-new'] }] },
+        body: { handoffs: [{ task_id: 'run-1', sha256: 'hash-run-1', alert_ids: ['a-1'] }] },
       });
     });
 
     it('returns at most five runs', async () => {
       const ids = Array.from({ length: 8 }, (_, i) => `a-${i}`);
-      esClient.search.mockResolvedValue({
-        hits: { hits: ids.map((id) => alertHit(id, ['detonate:malicious'])) },
-      });
-      serveRuns(ids.map((id) => run(`run-${id}`, [id])));
+      serveRuns(
+        ids.map((id) => runHit(`run-${id}`, id)),
+        ids.map((id) => [id, `run-${id}`] as [string, string])
+      );
 
       await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
-      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
-        [{ body: { handoffs: Array<{ task_id: string }> } }]
-      >;
-      expect(body.handoffs.map(({ task_id: taskId }) => taskId)).toEqual([
-        'run-a-0',
-        'run-a-1',
-        'run-a-2',
-        'run-a-3',
-        'run-a-4',
-      ]);
+      expect(handoffIds()).toEqual(['run-a-0', 'run-a-1', 'run-a-2', 'run-a-3', 'run-a-4']);
     });
 
-    it("rewrites markers on the run's own alerts in this space only", async () => {
-      client.getTask.mockResolvedValue(run('run-1', ['a-1', 'a-2', 'a-1']) as never);
-      esClient.updateByQuery.mockResolvedValue({ updated: 2 });
+    it("rewrites the markers on the run's own results document", async () => {
+      esClient.update.mockResolvedValue({ result: 'updated' });
 
       await setHandler()(
         createContext(),
@@ -1870,25 +1911,61 @@ describe('registerDetonatePrototypeRoutes', () => {
         mockResponse
       );
 
-      const [[update]] = esClient.updateByQuery.mock.calls;
-      expect(update.index).toBe('.alerts-security.alerts-default');
-      expect(update.conflicts).toBe('proceed');
+      const [[update]] = esClient.update.mock.calls;
+      expect(update.index).toBe('.kibana-detonate-results-default');
+      expect(update.id).toBe('run-1');
       expect(update.refresh).toBe(true);
-      expect(update.query).toEqual({
-        bool: {
-          filter: [{ terms: { _id: ['a-1', 'a-2'] } }, { term: { 'kibana.space_ids': 'default' } }],
-        },
-      });
       expect(update.script.params).toEqual({
-        tagsToAdd: ['detonate:hunt-done'],
-        tagsToRemove: ['detonate:hunt-requested'],
+        add: [{ field: 'detonate.handoff.hunt', value: 'done' }],
+        remove: [{ field: 'detonate.handoff.hunt', value: 'requested' }],
       });
       expect(update.script.source).not.toContain('detonate:');
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { updated: 2 } });
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { updated: 1 } });
     });
 
-    it("answers 404 for another space's run and updates nothing", async () => {
-      client.getTask.mockResolvedValue(run('run-1', ['a-1'], 'team-b') as never);
+    it('turns a re-request into a remove of done and an add of requested', async () => {
+      esClient.update.mockResolvedValue({ result: 'updated' });
+
+      await setHandler()(
+        createContext(),
+        setRequest('run-1', { add: ['detonate:hunt-requested'], remove: ['detonate:hunt-done'] }),
+        mockResponse
+      );
+
+      expect(esClient.update.mock.calls[0][0].script.params).toEqual({
+        add: [{ field: 'detonate.handoff.hunt', value: 'requested' }],
+        remove: [{ field: 'detonate.handoff.hunt', value: 'done' }],
+      });
+    });
+
+    it('never writes to the alerts index', async () => {
+      esClient.update.mockResolvedValue({ result: 'updated' });
+
+      await setHandler()(
+        createContext(),
+        setRequest('run-1', { add: ['detonate:coverage-in-progress'] }),
+        mockResponse
+      );
+
+      expect(esClient.updateByQuery).not.toHaveBeenCalled();
+      expect(esClient.update.mock.calls.map(([request]) => request.index)).toEqual([
+        '.kibana-detonate-results-default',
+      ]);
+    });
+
+    it('answers 404 when the run has no document in this space', async () => {
+      const { errors } = jest.requireActual<{
+        errors: typeof import('@elastic/elasticsearch').errors;
+      }>('@elastic/elasticsearch');
+      esClient.update.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'document_missing_exception', reason: 'missing' } },
+          headers: {},
+          meta: {},
+          warnings: [],
+        } as unknown as ConstructorParameters<typeof errors.ResponseError>[0])
+      );
 
       await setHandler()(
         createContext(),
@@ -1899,20 +1976,6 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 404 })
       );
-      expect(esClient.updateByQuery).not.toHaveBeenCalled();
-    });
-
-    it('updates nothing for a run started from no alert', async () => {
-      client.getTask.mockResolvedValue(run('run-1', []) as never);
-
-      await setHandler()(
-        createContext(),
-        setRequest('run-1', { add: ['detonate:coverage-reviewed'] }),
-        mockResponse
-      );
-
-      expect(esClient.updateByQuery).not.toHaveBeenCalled();
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { updated: 0 } });
     });
 
     it('accepts only the five handoff markers, and at least one', () => {

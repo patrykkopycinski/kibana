@@ -597,52 +597,11 @@ export const DETONATE_HANDOFF_MARKERS = [
 ] as const;
 export type DetonateHandoffMarker = (typeof DETONATE_HANDOFF_MARKERS)[number];
 
-/**
- * The fifth marker is coverage-only: it spans the window between a sweep
- * dispatching the rule-creation copy and that copy's always-run terminal
- * step clearing it. While it is set, the coverage sweep leaves the run
- * alone — a parked copy owns it, and its per-task drop key would silently
- * discard any second copy anyway. A re-request that lands inside the window
- * stays queued (`coverage-requested` remains set) and is picked up by the
- * first sweep after the copy finishes.
- */
-export const DETONATE_COVERAGE_IN_PROGRESS_MARKER: DetonateHandoffMarker =
-  'detonate:coverage-in-progress';
-
 export const DETONATE_HANDOFF_KINDS = ['hunt', 'coverage'] as const;
 export type DetonateHandoffKind = (typeof DETONATE_HANDOFF_KINDS)[number];
 
 /** Runs returned per list call; a Worker tick handles at most this many. */
 export const DETONATE_HANDOFF_MAX_TASKS = 5;
-
-export const detonateHandoffMarkers = (
-  kind: DetonateHandoffKind
-): { requested: DetonateHandoffMarker; done: DetonateHandoffMarker } =>
-  kind === 'hunt'
-    ? { requested: 'detonate:hunt-requested', done: 'detonate:hunt-done' }
-    : { requested: 'detonate:coverage-requested', done: 'detonate:coverage-reviewed' };
-
-/**
- * An alert is waiting for a Worker when the Worker was asked for explicitly,
- * or when the alert is malicious and the Worker has not marked it done. An
- * explicit request wins over an earlier done marker. A coverage copy parked
- * on the run suspends the coverage handoff for as long as the copy lives:
- * the sweep must not dispatch a second copy the parked one's drop key would
- * silently discard, and a re-request that lands meanwhile stays queued.
- */
-export const needsDetonateHandoff = (
-  kind: DetonateHandoffKind,
-  workflowTags: readonly string[]
-): boolean => {
-  if (kind === 'coverage' && workflowTags.includes(DETONATE_COVERAGE_IN_PROGRESS_MARKER)) {
-    return false;
-  }
-  const { requested, done } = detonateHandoffMarkers(kind);
-  return (
-    workflowTags.includes(requested) ||
-    (workflowTags.includes(detonateVerdictTag('malicious')) && !workflowTags.includes(done))
-  );
-};
 
 export interface DetonateHandoff {
   task_id: string;
@@ -656,7 +615,7 @@ export interface DetonateHandoffList {
 }
 
 export interface DetonateHandoffUpdate {
-  /** Alerts whose markers were rewritten. */
+  /** Runs whose markers were rewritten: one, or the call answers 404. */
   updated: number;
 }
 

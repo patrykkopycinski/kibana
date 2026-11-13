@@ -101,8 +101,8 @@ import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import {
   assertReadableAlertTags,
   assertReadableAlerts,
-  listDetonateHandoffs,
-  setDetonateHandoffMarkers,
+  listHandoffRuns,
+  setRunHandoffMarkers,
 } from '../handoffs';
 import { buildDetonateCountQueries, validateSandboxCountRuleQuery } from '../esql_draft_guard';
 import type { DetonationRecord } from '../detonation_record';
@@ -1037,9 +1037,8 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          const handoffs = await listDetonateHandoffs({
+          const handoffs = await listHandoffRuns({
             esClient: await getInternalEsClient(),
-            client: getClient(request),
             spaceId: spaceIdFromRequest(request),
             kind: request.query.marker,
           });
@@ -1050,7 +1049,7 @@ export const registerDetonatePrototypeRoutes = ({
       }
     );
 
-  /** Sets or clears the handoff markers on the alerts this run was started from. */
+  /** Sets or clears the handoff markers on this run's results document. */
   router.versioned
     .post({
       access: 'internal',
@@ -1077,9 +1076,8 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          const updated = await setDetonateHandoffMarkers({
+          const updated = await setRunHandoffMarkers({
             esClient: await getInternalEsClient(),
-            client: getClient(request),
             spaceId: spaceIdFromRequest(request),
             taskId: request.params.id,
             add: request.body.add ?? [],

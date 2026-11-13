@@ -577,6 +577,11 @@ export const DETONATE_MAX_MONTHLY_ALLOWANCE = DETONATE_USAGE_PAGE_SIZE * DETONAT
 /* Worker handoffs                                                             */
 /* -------------------------------------------------------------------------- */
 
+/** Workflows record per-alert decisions here; the internal user writes them. */
+export const DETONATE_DECISIONS_PATH = `${DETONATE_PROTOTYPE_API}/decisions` as const;
+/** Workflows read which of a batch of alerts a sweep must leave alone. */
+export const DETONATE_ALERT_OUTCOMES_PATH = `${DETONATE_PROTOTYPE_API}/alert_outcomes` as const;
+
 /** Where the Hunt and Detection Workers pick up detonated alerts (server `handoffs.ts`). */
 export const DETONATE_HANDOFFS_PATH = `${DETONATE_PROTOTYPE_API}/handoffs` as const;
 
@@ -653,6 +658,16 @@ export interface DetonateHandoffList {
 export interface DetonateHandoffUpdate {
   /** Alerts whose markers were rewritten. */
   updated: number;
+}
+
+export interface DetonateDecisionWrite {
+  /** Decisions stored. */
+  written: number;
+}
+
+export interface DetonateAlertOutcomes {
+  /** Only the alerts a sweep must leave alone; an absent alert is free to pick. */
+  outcomes: Record<string, DetonateAlertOutcome>;
 }
 
 /* -------------------------------------------------------------------------- */

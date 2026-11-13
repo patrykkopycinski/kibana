@@ -97,14 +97,38 @@ export const assertReadableAlertTags = async ({
   esClient: ElasticsearchClient;
   spaceId: string;
   tags: readonly string[] | undefined;
+}): Promise<void> =>
+  assertReadableAlerts({
+    esClient,
+    spaceId,
+    alertIds: parseAlertTags(tags ?? []),
+    statusCode: 400,
+    subject: 'The run names',
+  });
+
+/**
+ * Rejects alert ids the caller cannot read in this space. `esClient` must be the
+ * caller's own client: the check is that their privileges reach the alert.
+ */
+export const assertReadableAlerts = async ({
+  esClient,
+  spaceId,
+  alertIds,
+  statusCode = 403,
+  subject = 'The request names',
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  alertIds: readonly string[];
+  statusCode?: 400 | 403;
+  subject?: string;
 }): Promise<void> => {
-  const alertIds = parseAlertTags(tags ?? []);
   if (alertIds.length === 0) return;
 
-  const rejected = (ids: string[]) =>
+  const rejected = (ids: readonly string[]) =>
     new DetonateServiceError(
-      `The run names alerts you cannot read in this space: ${ids.join(', ')}.`,
-      400
+      `${subject} alerts you cannot read in this space: ${ids.join(', ')}.`,
+      statusCode
     );
 
   let readable: Set<string>;
@@ -115,7 +139,9 @@ export const assertReadableAlertTags = async ({
       size: alertIds.length,
       _source: false,
       query: {
-        bool: { filter: [{ ids: { values: alertIds } }, { term: { [SPACE_IDS]: spaceId } }] },
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }, { term: { [SPACE_IDS]: spaceId } }],
+        },
       },
     });
     readable = new Set(hits.hits.map((hit) => hit._id).filter((id): id is string => id != null));

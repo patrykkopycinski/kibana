@@ -47,6 +47,8 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
+  DETONATE_ALERT_OUTCOMES_PATH,
+  DETONATE_DECISIONS_PATH,
   DETONATE_USAGE_PATH,
   detonateAllowanceWindow,
   detonateSandboxStreamName,
@@ -58,6 +60,8 @@ import {
 } from '../../../common/detonate_prototype';
 import type {
   DetonateAlertDoc,
+  DetonateAlertOutcomes,
+  DetonateDecisionWrite,
   DetonateFileRequest,
   DetonateHandoffList,
   DetonateHandoffUpdate,
@@ -83,7 +87,8 @@ import {
   submitInSpace,
 } from '../space_scope';
 import { toDetonationRecord } from '../detonation_record';
-import type { RecordRun } from '../results_store';
+import type { EnsureResultsIndex, RecordRun } from '../results_store';
+import { createResultsIndexEnsurer, getAlertOutcomes, writeAlertDecisions } from '../results_store';
 import {
   IOC_ALERT_READ_LIMIT,
   alertDocSource,
@@ -95,6 +100,7 @@ import { categoryCountsForRun, countsByCategory } from '../behavior_diff';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import {
   assertReadableAlertTags,
+  assertReadableAlerts,
   listDetonateHandoffs,
   setDetonateHandoffMarkers,
 } from '../handoffs';
@@ -148,6 +154,24 @@ const handoffMarkerSchema = schema.oneOf([
   schema.literal('detonate:coverage-requested'),
   schema.literal('detonate:coverage-reviewed'),
   schema.literal('detonate:coverage-in-progress'),
+]);
+
+/** `DETONATE_DECISION_STATES`, spelled out so the body type stays the state union. */
+const decisionStateSchema = schema.oneOf([
+  schema.literal('queued'),
+  schema.literal('running'),
+  schema.literal('released'),
+  schema.literal('verdict_applied'),
+  schema.literal('known_malicious'),
+  schema.literal('skipped'),
+  schema.literal('not_eligible'),
+]);
+
+/** `DETONATE_VERDICTS`, spelled out for the same reason. */
+const verdictSchema = schema.oneOf([
+  schema.literal('malicious'),
+  schema.literal('benign'),
+  schema.literal('inconclusive'),
 ]);
 
 const handoffMarkerListSchema = schema.maybe(
@@ -228,6 +252,8 @@ export interface DetonateRoutesDeps {
    * that analysts cannot write to, and the route checks the run's space first.
    */
   getInternalEsClient: () => Promise<ElasticsearchClient>;
+  /** Installs the results template and mapping before a decision write; one per process by default. */
+  ensureResultsIndex?: EnsureResultsIndex;
   /** Injected so tests can pin the month. */
   now?: () => Date;
 }
@@ -288,6 +314,7 @@ export const registerDetonatePrototypeRoutes = ({
   hasDetonatePrivilege,
   monthlyAllowance,
   getInternalEsClient,
+  ensureResultsIndex = createResultsIndexEnsurer(),
   now = () => new Date(),
 }: DetonateRoutesDeps) => {
   let sandboxTemplate: Promise<void> | undefined;
@@ -1059,6 +1086,114 @@ export const registerDetonatePrototypeRoutes = ({
             remove: request.body.remove ?? [],
           });
           return response.ok<DetonateHandoffUpdate>({ body: { updated } });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * Records per-alert decisions in the results index. The internal user writes
+   * them, so the caller must already be able to read every alert named: the
+   * production alert itself is never touched.
+   */
+  router.versioned
+    .post({
+      access: 'internal',
+      path: DETONATE_DECISIONS_PATH,
+      security: DETONATE_HANDOFF_WRITE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              decisions: schema.arrayOf(
+                schema.object({
+                  alert_id: schema.string({ minLength: 1, maxLength: 128 }),
+                  state: decisionStateSchema,
+                  verdict: schema.maybe(verdictSchema),
+                  task_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+                  execution_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+                  sha256: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+                  reason: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+                }),
+                { minSize: 1, maxSize: 100 }
+              ),
+            }),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const spaceId = spaceIdFromRequest(request);
+          const { decisions } = request.body;
+          await assertReadableAlerts({
+            esClient: (await context.core).elasticsearch.client.asCurrentUser,
+            spaceId,
+            alertIds: [...new Set(decisions.map(({ alert_id: alertId }) => alertId))],
+          });
+
+          const esClient = await getInternalEsClient();
+          await ensureResultsIndex(esClient, spaceId);
+          const written = await writeAlertDecisions(
+            esClient,
+            spaceId,
+            decisions.map((decision) => ({
+              alertId: decision.alert_id,
+              state: decision.state,
+              verdict: decision.verdict,
+              taskId: decision.task_id,
+              executionId: decision.execution_id,
+              sha256: decision.sha256,
+              reason: decision.reason,
+            })),
+            now()
+          );
+          return response.ok<DetonateDecisionWrite>({ body: { written } });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * Which of a batch of alerts a sweep must leave alone, and why. Read-only; it
+   * sits behind the write-tier privilege because it exposes per-alert verdicts
+   * and only workflows call it.
+   */
+  router.versioned
+    .post({
+      access: 'internal',
+      path: DETONATE_ALERT_OUTCOMES_PATH,
+      security: DETONATE_HANDOFF_WRITE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              alert_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
+                minSize: 1,
+                maxSize: 200,
+              }),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const outcomes = await getAlertOutcomes(
+            await getInternalEsClient(),
+            spaceIdFromRequest(request),
+            request.body.alert_ids.map((alertId) => ({ alertId })),
+            now().getTime()
+          );
+          return response.ok<DetonateAlertOutcomes>({
+            body: { outcomes: Object.fromEntries(outcomes) },
+          });
         } catch (error) {
           return toErrorResponse(error, response);
         }

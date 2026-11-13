@@ -12,6 +12,8 @@ import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import {
+  DETONATE_ALERT_OUTCOMES_PATH,
+  DETONATE_DECISIONS_PATH,
   DETONATE_HANDOFFS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
@@ -35,6 +37,8 @@ const HANDOFF_PATH = `${DETONATE_RUNS_PATH}/{id}/handoff`;
 const WORKER_WRITE_PATHS: string[] = [
   HANDOFF_PATH,
   DETONATE_HANDOFFS_PATH,
+  DETONATE_DECISIONS_PATH,
+  DETONATE_ALERT_OUTCOMES_PATH,
   `${DETONATE_RUNS_PATH}/{id}/sandbox_count`,
 ];
 
@@ -59,6 +63,7 @@ describe('registerDetonatePrototypeRoutes', () => {
   let esClient: {
     indices: { putIndexTemplate: jest.Mock; putMapping: jest.Mock; refresh: jest.Mock };
     bulk: jest.Mock;
+    mget: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
@@ -161,6 +166,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         refresh: jest.fn().mockResolvedValue({ _shards: { successful: 1 } }),
       },
       bulk: jest.fn(),
+      mget: jest.fn(),
       update: jest.fn().mockResolvedValue({ result: 'created' }),
       search: jest.fn(),
       updateByQuery: jest.fn(),
@@ -1388,6 +1394,247 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 404 })
       );
+    });
+  });
+
+  describe('alert decisions', () => {
+    const decisionsHandler = () =>
+      router.versioned.getRoute('post', DETONATE_DECISIONS_PATH).versions['1'].handler;
+    const outcomesHandler = () =>
+      router.versioned.getRoute('post', DETONATE_ALERT_OUTCOMES_PATH).versions['1'].handler;
+    const bodySchema = (path: string) => {
+      const { config } = router.versioned.getRoute('post', path).versions['1'];
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      if (!validation || !validation.request) {
+        throw new Error('route registered without request validation');
+      }
+      return validation.request.body as { validate(body: unknown): unknown };
+    };
+    const decision = (overrides: Record<string, unknown> = {}) => ({
+      alert_id: 'alert-1',
+      state: 'verdict_applied',
+      verdict: 'malicious',
+      task_id: 'task-1',
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      register({ canWrite: true });
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] });
+    });
+
+    it('writes the decisions into the space results index as the internal user', async () => {
+      callerCanRead(['alert-1']);
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, { decisions: [decision()] }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { written: 1 } });
+      const [[{ operations }]] = esClient.bulk.mock.calls;
+      expect(operations[0]).toEqual({
+        update: { _index: '.kibana-detonate-results-default', _id: 'alert-1' },
+      });
+      expect(operations[1].doc).toEqual(
+        expect.objectContaining({
+          'detonate.doc_kind': 'alert_decision',
+          'detonate.decision.state': 'verdict_applied',
+          'detonate.verdict': 'malicious',
+        })
+      );
+      expect(esClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    it('takes the space from the request path, never from the body', async () => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-b');
+      callerCanRead(['alert-1']);
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, { decisions: [decision()] }),
+        mockResponse
+      );
+
+      const [[{ operations }]] = esClient.bulk.mock.calls;
+      expect(operations[0].update._index).toBe('.kibana-detonate-results-team-b');
+      expect(callerSearch).toHaveBeenCalledWith(
+        expect.objectContaining({ index: expect.stringContaining('team-b') })
+      );
+    });
+
+    it('rejects an alert the caller cannot read with 403 and writes nothing', async () => {
+      callerCanRead(['alert-1']);
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, {
+          decisions: [decision(), decision({ alert_id: 'alert-hidden' })],
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 403,
+          body: { message: expect.stringContaining('alert-hidden') },
+        })
+      );
+      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+    });
+
+    it('fails the request when the bulk write reports an item error', async () => {
+      callerCanRead(['alert-1']);
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ update: { _id: 'alert-1', error: { type: 'mapper_exception', reason: 'x' } } }],
+      });
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, { decisions: [decision()] }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
+    it('ensures the results mapping before it writes', async () => {
+      callerCanRead(['alert-1']);
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, { decisions: [decision()] }),
+        mockResponse
+      );
+
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.kibana-detonate-results-default' }),
+        expect.anything()
+      );
+    });
+
+    it.each([
+      ['no decisions', { decisions: [] }],
+      ['too many decisions', { decisions: Array.from({ length: 101 }, () => decision()) }],
+      ['an unknown state', { decisions: [decision({ state: 'noted_quiet' })] }],
+      ['an unknown verdict', { decisions: [decision({ verdict: 'safe' })] }],
+      ['an empty alert id', { decisions: [decision({ alert_id: '' })] }],
+      ['an oversized alert id', { decisions: [decision({ alert_id: 'a'.repeat(129) })] }],
+      ['an oversized task id', { decisions: [decision({ task_id: 't'.repeat(129) })] }],
+      ['an oversized execution id', { decisions: [decision({ execution_id: 'e'.repeat(129) })] }],
+      ['an oversized hash', { decisions: [decision({ sha256: 'a'.repeat(65) })] }],
+      ['an oversized reason', { decisions: [decision({ reason: 'r'.repeat(257) })] }],
+    ])('rejects a decisions body with %s', (_name, body) => {
+      expect(() => bodySchema(DETONATE_DECISIONS_PATH).validate(body)).toThrow();
+    });
+
+    it('accepts every decision state', () => {
+      for (const state of [
+        'queued',
+        'running',
+        'released',
+        'verdict_applied',
+        'known_malicious',
+        'skipped',
+        'not_eligible',
+      ]) {
+        expect(() =>
+          bodySchema(DETONATE_DECISIONS_PATH).validate({ decisions: [decision({ state })] })
+        ).not.toThrow();
+      }
+    });
+
+    it.each([
+      ['no ids', { alert_ids: [] }],
+      ['too many ids', { alert_ids: Array.from({ length: 201 }, (_, i) => `a-${i}`) }],
+      ['an oversized id', { alert_ids: ['a'.repeat(129)] }],
+    ])('rejects an outcomes body with %s', (_name, body) => {
+      expect(() => bodySchema(DETONATE_ALERT_OUTCOMES_PATH).validate(body)).toThrow();
+    });
+
+    it('reports outcomes as an object keyed by alert id', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'alert-1',
+            found: true,
+            _source: {
+              'detonate.doc_kind': 'alert_decision',
+              'detonate.decision.state': 'skipped',
+              '@timestamp': '2026-12-15T09:00:00.000Z',
+            },
+          },
+          { _id: 'alert-2', found: false },
+        ],
+      });
+      esClient.search.mockResolvedValue({
+        aggregations: { by_alert: { buckets: [] }, by_hash: { buckets: [] } },
+      });
+
+      await outcomesHandler()(
+        createContext(),
+        createRequest('post', DETONATE_ALERT_OUTCOMES_PATH, { alert_ids: ['alert-1', 'alert-2'] }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { outcomes: { 'alert-1': { state: 'skipped' } } },
+      });
+      expect(esClient.mget).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.kibana-detonate-results-default' }),
+        expect.anything()
+      );
+    });
+
+    it('does not run the alert-readability check on the read route', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+      esClient.search.mockResolvedValue({
+        aggregations: { by_alert: { buckets: [] }, by_hash: { buckets: [] } },
+      });
+
+      await outcomesHandler()(
+        createContext(),
+        createRequest('post', DETONATE_ALERT_OUTCOMES_PATH, { alert_ids: ['alert-1'] }),
+        mockResponse
+      );
+
+      expect(callerSearch).not.toHaveBeenCalled();
+    });
+
+    it('answers 500 when the outcomes read fails', async () => {
+      esClient.mget.mockRejectedValue(new Error('cluster down'));
+      esClient.search.mockResolvedValue({});
+
+      await outcomesHandler()(
+        createContext(),
+        createRequest('post', DETONATE_ALERT_OUTCOMES_PATH, { alert_ids: ['alert-1'] }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+    });
+
+    it('opens both routes to the write tier only', () => {
+      const security = {
+        authz: {
+          requiredPrivileges: [
+            { anyRequired: ['securitySolution-detonateAll', 'alertzero_write'] },
+          ],
+        },
+      };
+      for (const path of [DETONATE_DECISIONS_PATH, DETONATE_ALERT_OUTCOMES_PATH]) {
+        const config = router.versioned.post.mock.calls.find(([c]) => c.path === path)?.[0];
+        expect(config?.security).toEqual(security);
+      }
     });
   });
 

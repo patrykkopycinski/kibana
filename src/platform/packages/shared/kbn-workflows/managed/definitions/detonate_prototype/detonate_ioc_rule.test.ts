@@ -474,4 +474,11 @@ describe('Create indicator match rule action', () => {
     expect(JSON.stringify(body)).not.toContain('actionInput.rule.threat_filters');
     expect(body.enabled).toBe(true);
   });
+
+  // The input schema leaves these optional; a bare expression would render a
+  // missing one as null and override the rule defaults.
+  it.each(['interval', 'from', 'tags'])('defaults the optional rule %s', (key) => {
+    const body = actionStep('create_rule')?.with?.rule as Record<string, unknown>;
+    expect(String(body[key])).toContain(`inputs.actionInput.rule.${key} | default: consts.`);
+  });
 });

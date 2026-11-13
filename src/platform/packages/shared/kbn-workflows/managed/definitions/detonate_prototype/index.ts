@@ -135,11 +135,13 @@ export const DETONATE_IOC_RULE_WORKFLOW_ID = 'system-security-detonate-ioc-rule'
 
 /**
  * Detonate prototype: the IOC-backed sibling of the rule-creation copy, for a
- * run whose record carries extracted IOCs. Loads them into one value list per
- * family (domains and hashes as keyword, IPs as ip), previews one indicator
- * match rule over the three lists, and proposes creation on the run's
- * Investigation. Approval creates the rule enabled; a re-check of the stored
- * rule then queues the Hunt Worker or disables the rule.
+ * run whose record carries extracted IOCs. Writes nothing before approval:
+ * it estimates, with a read-only search, how many recent events the IOCs match,
+ * drafts one indicator match rule over one value list per family (domains and
+ * hashes as keyword, IPs as ip), and proposes creation on the run's
+ * Investigation. On approval the create action loads the lists and creates the
+ * rule enabled, under the approver's identity; a re-check of the stored rule
+ * then queues the Hunt Worker or disables the rule.
  */
 export const DETONATE_IOC_RULE_WORKFLOW = {
   id: DETONATE_IOC_RULE_WORKFLOW_ID,
@@ -165,7 +167,7 @@ export const DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW_ID =
 export const DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW = {
   id: DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_YAML,
   management: {

@@ -69,15 +69,15 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
 
 ## Reporting rules
 
-- \`status: complete\` with \`verdict: benign\` (\`benign: true\`) — the run worked and produced no
+- \`status: complete\` with \`verdict: benign\` (\`no_alerts_observed: true\`) — the run worked and produced no
   alerts. That is a **finding**, not a failure. Say the sample ran without
   raising anything, and name the possibilities honestly: the sample may be
   harmless, it may have detected the sandbox, or nothing detected it (a
   detection gap). Do not say the detonation "did not work".
 - \`status: failed\` (\`failed: true\`) — the detonation itself failed. There is no
-  verdict about the sample; the result carries none. The same goes for
-  \`status: running\`: no verdict until the run is \`complete\`. Say what stage it failed at (\`last_worker_name\`) and give the details
-  field if present.
+  verdict about the sample; the result carries none. Say what stage it failed
+  at (\`last_worker_name\`) and give the details field if present.
+- \`status: running\` — no verdict until the run is \`complete\`. Keep polling.
 - Production endpoint alerts answer "would a customer's Defend have caught
   this". Diagnostic alerts answer "did Defend observe the behaviour at all".
   When diagnostic alerts exist but production alerts do not, say so explicitly —

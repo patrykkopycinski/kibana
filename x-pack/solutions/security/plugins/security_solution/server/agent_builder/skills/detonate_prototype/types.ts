@@ -166,7 +166,7 @@ export const summarizeDetonationTask = (task: DetonateTask) => {
     // was observed, which is not proof the sample is safe (it may be a
     // detection gap) — and the flag exists so the agent reports it as a finding
     // rather than as "something went wrong".
-    benign: detonationWasBenign(task),
+    no_alerts_observed: detonationWasBenign(task),
     progress: detonationProgress(task),
     last_worker_name: task.last_worker_name,
     last_worker_status: task.last_worker_status,

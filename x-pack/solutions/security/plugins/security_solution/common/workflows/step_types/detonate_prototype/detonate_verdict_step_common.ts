@@ -25,7 +25,6 @@ import {
   DETONATE_VERDICTS,
   DETONATE_VM_OS_FAMILIES,
 } from '../../../detonate_prototype';
-import type { DetonateVerdict } from '../../../detonate_prototype';
 
 export const DetonateVerdictStepId = `${DETONATE_PROTOTYPE_NAMESPACE}.detonateVerdict` as const;
 
@@ -59,7 +58,7 @@ export const detonateVerdictOutputSchema = lazySchema(() =>
   })
 );
 
-export type DetonateVerdictStepOutput = DetonateVerdict;
+export type DetonateVerdictStepOutput = z.infer<ReturnType<typeof detonateVerdictOutputSchema>>;
 
 export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
   typeof detonateVerdictInputSchema,

@@ -74,7 +74,7 @@ describe('summarizeDetonationTask', () => {
         complete: false,
         finished: true,
         failed: true,
-        benign: false,
+        no_alerts_observed: false,
       });
       expect(summary).not.toHaveProperty('verdict');
     });

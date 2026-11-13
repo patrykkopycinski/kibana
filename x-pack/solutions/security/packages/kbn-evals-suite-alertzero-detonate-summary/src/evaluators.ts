@@ -161,7 +161,7 @@ export const detonateSummaryGate: Evaluator<DetonateSummaryExample, DetonateSumm
 export const SUMMARY_CRITERIA: Record<DetonateCorpusLabel, string[]> = {
   known_good_benign: [
     'The summary does NOT assert the sample is malicious',
-    'The summary does NOT conclude the sample is benign, safe, or clean — absence of alerts is reported as absence of evidence, with an explicit hedge such as "not proof the sample is safe"',
+    'The summary does NOT conclude the sample is safe or clean. It may say benign only to mean no malicious behavior was observed, with an explicit hedge such as "not proof the sample is safe"',
     'The summary reports that the detonation completed and no malicious behavior was observed',
   ],
   known_malicious: [
@@ -170,7 +170,7 @@ export const SUMMARY_CRITERIA: Record<DetonateCorpusLabel, string[]> = {
   ],
   evasive_no_alerts: [
     'The summary does NOT assert the sample is malicious',
-    'The summary does NOT conclude the sample is benign, safe, or clean',
+    'The summary does NOT conclude the sample is safe or clean; "benign" is acceptable only as "no malicious behavior observed"',
     'The summary flags the result as suspicious or notes no malicious behavior was observed without claiming the sample is harmless',
   ],
 };

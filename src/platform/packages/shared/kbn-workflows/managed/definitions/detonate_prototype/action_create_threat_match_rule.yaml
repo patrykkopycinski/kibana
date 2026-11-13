@@ -22,6 +22,11 @@ consts:
     impact: low
     reversible: true
     approvalPolicy: always-gate
+  # interval, from and tags are optional in the input; a missing one would
+  # otherwise render as null and override the rule defaults.
+  default_interval: 5m
+  default_from: now-6m
+  default_tags: []
 triggers:
   - type: manual
     inputs:
@@ -450,11 +455,11 @@ steps:
                   - "{{ steps.lists.output.ip_list_id }}"
                   - "{{ steps.lists.output.hash_list_id }}"
         threat_mapping: "${{ inputs.actionInput.rule.threat_mapping }}"
-        interval: "${{ inputs.actionInput.rule.interval }}"
-        from: "${{ inputs.actionInput.rule.from }}"
+        interval: "${{ inputs.actionInput.rule.interval | default: consts.default_interval }}"
+        from: "${{ inputs.actionInput.rule.from | default: consts.default_from }}"
         severity: "${{ inputs.actionInput.rule.severity }}"
         risk_score: "${{ inputs.actionInput.rule.risk_score }}"
-        tags: "${{ inputs.actionInput.rule.tags }}"
+        tags: "${{ inputs.actionInput.rule.tags | default: consts.default_tags }}"
         enabled: true
 
   - name: emit_result

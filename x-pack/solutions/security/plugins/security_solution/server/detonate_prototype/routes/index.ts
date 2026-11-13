@@ -19,6 +19,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   ElasticsearchClient,
   IKibanaResponse,
@@ -81,6 +82,7 @@ import {
   submitInSpace,
 } from '../space_scope';
 import { toDetonationRecord } from '../detonation_record';
+import { createRunRecorder } from '../results_store';
 import {
   IOC_ALERT_READ_LIMIT,
   alertDocSource,
@@ -158,6 +160,27 @@ const handoffMarkerListSchema = schema.maybe(
  */
 const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
 
+/**
+ * Where the submit came from. Kept in Kibana's results index and stripped before
+ * the service call. The submitter is the authenticated user, never a field here.
+ */
+const originSchema = schema.object({
+  source: schema.maybe(
+    schema.oneOf([
+      schema.literal('alert_flyout'),
+      schema.literal('detonate_page'),
+      schema.literal('workflow'),
+      schema.literal('agent'),
+    ])
+  ),
+  alert_ids: schema.maybe(schema.arrayOf(schema.string({ maxLength: 128 }), { maxSize: 32 })),
+  host_name: schema.maybe(schema.string({ maxLength: 256 })),
+  user_name: schema.maybe(schema.string({ maxLength: 256 })),
+  file_path: schema.maybe(schema.string({ maxLength: 4096 })),
+  workflow_execution_id: schema.maybe(schema.string({ maxLength: 128 })),
+  conversation_id: schema.maybe(schema.string({ maxLength: 128 })),
+});
+
 /** Mirrors the service's optional submit fields. Everything is bounded. */
 const submitOptionsSchema = {
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 32 })),
@@ -172,7 +195,10 @@ const submitOptionsSchema = {
   ),
   vm_disk_image: schema.maybe(schema.string({ maxLength: 512 })),
   vm_has_internet: schema.maybe(schema.boolean()),
+  origin: schema.maybe(originSchema),
 };
+
+const submitOptionsObjectSchema = schema.object(submitOptionsSchema);
 
 export interface DetonateRoutesDeps {
   router: SecuritySolutionPluginRouter;
@@ -202,6 +228,13 @@ export interface DetonateRoutesDeps {
   /** Injected so tests can pin the month. */
   now?: () => Date;
 }
+
+/** The part's own `Content-Type`, which hapi keeps on the stream it hands over. */
+const sampleMimeType = (sampleFile: unknown): string | undefined => {
+  const contentType = (sampleFile as { hapi?: { headers?: Record<string, unknown> } }).hapi
+    ?.headers?.['content-type'];
+  return typeof contentType === 'string' && contentType !== '' ? contentType : undefined;
+};
 
 /** Collect a streamed upload, refusing anything over the cap mid-stream. */
 const readSample = async (stream: Readable, maxBytes: number): Promise<Buffer> => {
@@ -235,7 +268,6 @@ export const registerDetonatePrototypeRoutes = ({
   getInternalEsClient,
   now = () => new Date(),
 }: DetonateRoutesDeps) => {
-  // Installed once per process; a failed install is retried on the next call.
   let sandboxTemplate: Promise<void> | undefined;
   const ensureSandboxTemplate = (esClient: ElasticsearchClient) => {
     sandboxTemplate =
@@ -271,6 +303,8 @@ export const registerDetonatePrototypeRoutes = ({
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
   const spaceIdFromRequest = (request: KibanaRequest): string =>
     endpointAppContextService.getActiveSpaceId(request);
+
+  const recordRun = createRunRecorder({ getInternalEsClient, logger });
 
   /**
    * ES|QL's "unknown index" failure for exactly this space's sandbox stream:
@@ -400,7 +434,7 @@ export const registerDetonatePrototypeRoutes = ({
 
           const { sample_file: sampleFile, sample_filename: sampleFilename } = request.body;
 
-          let options: { tags?: string[] } = {};
+          let options: TypeOf<typeof submitOptionsObjectSchema> = {};
           if (request.body.request_json) {
             try {
               options = JSON.parse(request.body.request_json);
@@ -410,7 +444,7 @@ export const registerDetonatePrototypeRoutes = ({
               });
             }
             try {
-              options = schema.object(submitOptionsSchema).validate(options);
+              options = submitOptionsObjectSchema.validate(options);
             } catch {
               // `validate` throws rather than returning errors, and without
               // this branch a malformed option would surface as a 500.
@@ -433,13 +467,27 @@ export const registerDetonatePrototypeRoutes = ({
             tags: options.tags,
           });
 
+          const { origin, ...serviceOptions } = options;
           const client = getClient(request);
           const task = await submitInSpace<DetonateFileRequest>(
             (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }),
-            { ...options, sample_filename: sampleFilename },
+            { ...serviceOptions, sample_filename: sampleFilename },
             spaceId
           );
 
+          await recordRun(spaceId, () =>
+            toDetonationRecord(task, {
+              spaceId,
+              origin: {
+                ...origin,
+                submitter: endpointAppContextService.getCurrentUsername(request),
+                file: {
+                  size: body.length,
+                  mime_type: sampleMimeType(sampleFile),
+                },
+              },
+            })
+          );
           return response.ok<DetonateTask>({ body: task });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -485,11 +533,21 @@ export const registerDetonatePrototypeRoutes = ({
             tags: request.body.tags,
           });
 
+          const { origin, ...serviceBody } = request.body;
           const client = getClient(request);
           const task = await submitInSpace(
             (scoped) => client.submitHash(scoped),
-            request.body,
+            serviceBody,
             spaceId
+          );
+          await recordRun(spaceId, () =>
+            toDetonationRecord(task, {
+              spaceId,
+              origin: {
+                ...origin,
+                submitter: endpointAppContextService.getCurrentUsername(request),
+              },
+            })
           );
           return response.ok<DetonateTask>({ body: task });
         } catch (error) {
@@ -515,13 +573,12 @@ export const registerDetonatePrototypeRoutes = ({
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
-          return response.ok<DetonateTask>({
-            body: await getTaskInSpace(
-              getClient(request),
-              request.params.taskId,
-              spaceIdFromRequest(request)
-            ),
-          });
+          const spaceId = spaceIdFromRequest(request);
+          const task = await getTaskInSpace(getClient(request), request.params.taskId, spaceId);
+          // Every poll writes: the UI and the workflow poll until the run ends, and
+          // Elasticsearch skips the write when the document did not change.
+          await recordRun(spaceId, () => toDetonationRecord(task, { spaceId }));
+          return response.ok<DetonateTask>({ body: task });
         } catch (error) {
           return toErrorResponse(error, response);
         }
@@ -572,7 +629,8 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           const client = getClient(request);
-          const task = await getTaskInSpace(client, request.params.id, spaceIdFromRequest(request));
+          const spaceId = spaceIdFromRequest(request);
+          const task = await getTaskInSpace(client, request.params.id, spaceId);
           // Both reads are best-effort: the record stays useful without a duration or IOCs.
           const [updates, iocs] = await Promise.all([
             client.getTaskUpdates(task.id).catch((error) => {
@@ -586,9 +644,9 @@ export const registerDetonatePrototypeRoutes = ({
                 logger.debug(`Detonation ${task.id}: could not read ${kind}: ${reason}`)
             ),
           ]);
-          return response.ok<DetonationRecord>({
-            body: toDetonationRecord(task, { updates, iocs }),
-          });
+          const record = toDetonationRecord(task, { updates, iocs });
+          await recordRun(spaceId, () => toDetonationRecord(task, { updates, iocs, spaceId }));
+          return response.ok<DetonationRecord>({ body: record });
         } catch (error) {
           return toErrorResponse(error, response);
         }

@@ -303,6 +303,24 @@ export interface DetonateBaseRequest {
   vm_has_internet?: boolean;
 }
 
+/** Where a submit came from. */
+export type DetonateSubmitSource = 'alert_flyout' | 'detonate_page' | 'workflow' | 'agent';
+
+/**
+ * Where a submit came from, for the results index. Kibana-side only: the routes
+ * strip it before the service call, so the service never sees an analyst's
+ * alert, host or user.
+ */
+export interface DetonateSubmitOrigin {
+  source?: DetonateSubmitSource;
+  alert_ids?: string[];
+  host_name?: string;
+  user_name?: string;
+  file_path?: string;
+  workflow_execution_id?: string;
+  conversation_id?: string;
+}
+
 export interface DetonateHashRequest extends DetonateBaseRequest {
   sample_hash: string;
 }
@@ -659,6 +677,21 @@ export const detonateSandboxStreamName = (spaceId: string): string => {
     throw new Error(`Space id "${spaceId}" cannot name a sandbox data stream.`);
   }
   return `${DETONATE_SANDBOX_STREAM_PREFIX}${spaceId}`;
+};
+
+/**
+ * One plain hidden index per space holding a document per run, upserted by task
+ * id. Interim name: it becomes `logs-detonate.results-*` once the service
+ * writes its own results.
+ */
+export const DETONATE_RESULTS_INDEX_PREFIX = '.kibana-detonate-results-' as const;
+export const DETONATE_RESULTS_TEMPLATE_NAME = 'kibana-detonate-results' as const;
+
+export const detonateResultsIndexName = (spaceId: string): string => {
+  if (!SANDBOX_SPACE_ID_PATTERN.test(spaceId)) {
+    throw new Error(`Space id "${spaceId}" cannot name a results index.`);
+  }
+  return `${DETONATE_RESULTS_INDEX_PREFIX}${spaceId}`;
 };
 
 /** Copy a run's sandbox alerts into this space's sandbox stream. */

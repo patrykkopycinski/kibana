@@ -8,6 +8,7 @@
 import type {
   DetonateConfidence,
   DetonateExtractedIocs,
+  DetonateSubmitOrigin,
   DetonateTask,
   DetonateTaskUpdate,
   DetonateVerdictName,
@@ -19,6 +20,7 @@ import {
   detonationStep,
   diagnosticOnlyEventCodes,
   isDetonationComplete,
+  SPACE_TAG_PREFIX,
   parseAlertTag,
   totalDetonationAlerts,
 } from '../../common/detonate_prototype';
@@ -64,6 +66,78 @@ export interface DetonationRecord {
   'detonate.iocs.domains'?: string[];
   'detonate.iocs.ips'?: string[];
   'detonate.iocs.file_hashes'?: string[];
+  /** The space the run belongs to; the results index is per space. */
+  'detonate.space_id'?: string;
+  'detonate.source'?: DetonateSubmitOrigin['source'];
+  'detonate.submitter'?: string;
+  /** The `alert:` tag's alert plus any the caller named. */
+  'detonate.origin.alert_ids'?: string[];
+  'host.name'?: string;
+  'user.name'?: string;
+  'file.path'?: string;
+  'file.size'?: number;
+  'file.mime_type'?: string;
+  'detonate.workflow.execution_id'?: string;
+  'detonate.conversation_id'?: string;
+  /** The run's tags without its space tags. */
+  tags?: string[];
+}
+
+export type DetonationRecordFieldType = 'keyword' | 'date' | 'long' | 'boolean';
+
+/** Every record field and its Elasticsearch type; the results index mapping is built from it. */
+export const DETONATION_RECORD_FIELDS: Readonly<
+  Record<keyof DetonationRecord, DetonationRecordFieldType>
+> = {
+  '@timestamp': 'date',
+  'event.start': 'date',
+  'event.end': 'date',
+  'event.duration': 'long',
+  'detonate.task_id': 'keyword',
+  'detonate.alert_id': 'keyword',
+  'detonate.state': 'keyword',
+  'detonate.verdict': 'keyword',
+  'detonate.confidence': 'keyword',
+  'detonate.evidence': 'keyword',
+  'detonate.step.number': 'long',
+  'detonate.step.of': 'long',
+  'detonate.step.label': 'keyword',
+  'detonate.step.worker': 'keyword',
+  'detonate.step.status': 'keyword',
+  'detonate.step.details': 'keyword',
+  'file.hash.sha256': 'keyword',
+  'file.name': 'keyword',
+  'detonate.sample.source': 'keyword',
+  'detonate.vm.os_family': 'keyword',
+  'detonate.vm.has_internet': 'boolean',
+  'detonate.alerts.total': 'long',
+  'detonate.alerts.production_endpoint': 'long',
+  'detonate.alerts.diagnostic_endpoint': 'long',
+  'detonate.alerts.production_detection': 'long',
+  'detonate.endpoint_event_codes': 'keyword',
+  'detonate.detection_rule_names': 'keyword',
+  'detonate.detections_to_review': 'keyword',
+  'detonate.iocs.domains': 'keyword',
+  'detonate.iocs.ips': 'keyword',
+  'detonate.iocs.file_hashes': 'keyword',
+  'detonate.space_id': 'keyword',
+  'detonate.source': 'keyword',
+  'detonate.submitter': 'keyword',
+  'detonate.origin.alert_ids': 'keyword',
+  'host.name': 'keyword',
+  'user.name': 'keyword',
+  'file.path': 'keyword',
+  'file.size': 'long',
+  'file.mime_type': 'keyword',
+  'detonate.workflow.execution_id': 'keyword',
+  'detonate.conversation_id': 'keyword',
+  tags: 'keyword',
+};
+
+/** What only the submit knows; it is written once and never re-derived from the task. */
+export interface DetonationOrigin extends DetonateSubmitOrigin {
+  submitter?: string;
+  file?: { size: number; mime_type?: string };
 }
 
 /** When the run reached its last update, if it has finished. */
@@ -73,12 +147,48 @@ const finishedAt = (task: DetonateTask, updates: readonly DetonateTaskUpdate[]) 
   return times.length > 0 ? Math.max(...times) : undefined;
 };
 
+const originFields = (
+  origin: DetonationOrigin,
+  taggedAlertId: string | undefined
+): Partial<DetonationRecord> => {
+  const alertIds = [
+    ...new Set([...(taggedAlertId ? [taggedAlertId] : []), ...(origin.alert_ids ?? [])]),
+  ];
+  return {
+    ...(origin.source ? { 'detonate.source': origin.source } : {}),
+    ...(origin.submitter ? { 'detonate.submitter': origin.submitter } : {}),
+    ...(alertIds.length > 0 ? { 'detonate.origin.alert_ids': alertIds } : {}),
+    ...(origin.host_name ? { 'host.name': origin.host_name } : {}),
+    ...(origin.user_name ? { 'user.name': origin.user_name } : {}),
+    ...(origin.file_path ? { 'file.path': origin.file_path } : {}),
+    ...(origin.workflow_execution_id
+      ? { 'detonate.workflow.execution_id': origin.workflow_execution_id }
+      : {}),
+    ...(origin.conversation_id ? { 'detonate.conversation_id': origin.conversation_id } : {}),
+    ...(origin.file
+      ? {
+          'file.size': origin.file.size,
+          ...(origin.file.mime_type ? { 'file.mime_type': origin.file.mime_type } : {}),
+        }
+      : {}),
+  };
+};
+
 export const toDetonationRecord = (
   task: DetonateTask,
   {
     iocs,
     updates = [],
-  }: { iocs?: DetonateExtractedIocs; updates?: readonly DetonateTaskUpdate[] } = {}
+    spaceId,
+    origin,
+  }: {
+    iocs?: DetonateExtractedIocs;
+    updates?: readonly DetonateTaskUpdate[];
+    /** Adds the space and the run's tags without its space tags. */
+    spaceId?: string;
+    /** Passed on the submit write only, so later writes never overwrite it. */
+    origin?: DetonationOrigin;
+  } = {}
 ): DetonationRecord => {
   const derived = deriveDetonateVerdict(task);
   const state = derived.status;
@@ -137,5 +247,12 @@ export const toDetonationRecord = (
           'detonate.iocs.file_hashes': iocs.file_hashes,
         }
       : {}),
+    ...(spaceId
+      ? {
+          'detonate.space_id': spaceId,
+          tags: task.tags.filter((tag) => !tag.startsWith(SPACE_TAG_PREFIX)),
+        }
+      : {}),
+    ...(origin ? originFields(origin, alertId) : {}),
   };
 };

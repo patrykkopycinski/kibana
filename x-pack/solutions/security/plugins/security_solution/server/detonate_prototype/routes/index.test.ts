@@ -34,17 +34,28 @@ const WORKER_WRITE_PATHS: string[] = [
   `${DETONATE_RUNS_PATH}/{id}/sandbox_count`,
 ];
 
+/** What the record mapper reads from every task the service returns. */
+const NO_ALERT_GROUPS = {
+  last_worker_name: 'detonate.workers.make_summary',
+  last_worker_status: 'success',
+  production_endpoint_alert_groups: [],
+  diagnostic_endpoint_alert_groups: [],
+  production_detection_alert_groups: [],
+};
+
 describe('registerDetonatePrototypeRoutes', () => {
   let router: RouterMock;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let client: jest.Mocked<DetonateClient>;
   let endpointAppContextService: {
     getActiveSpaceId: jest.Mock;
+    getCurrentUsername: jest.Mock;
   };
   let hasDetonatePrivilege: jest.Mock;
   let esClient: {
     indices: { putIndexTemplate: jest.Mock; refresh: jest.Mock };
     bulk: jest.Mock;
+    update: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
     esql: { query: jest.Mock };
@@ -136,6 +147,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = {
       getActiveSpaceId: jest.fn().mockReturnValue('default'),
+      getCurrentUsername: jest.fn().mockReturnValue('analyst'),
     };
     hasDetonatePrivilege = jest.fn().mockResolvedValue(canWrite);
     esClient = {
@@ -144,6 +156,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         refresh: jest.fn().mockResolvedValue({ _shards: { successful: 1 } }),
       },
       bulk: jest.fn(),
+      update: jest.fn().mockResolvedValue({ result: 'created' }),
       search: jest.fn(),
       updateByQuery: jest.fn(),
       esql: { query: jest.fn() },
@@ -294,6 +307,94 @@ describe('registerDetonatePrototypeRoutes', () => {
         tags: ['space:default'],
       });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+    });
+
+    describe('results store', () => {
+      const submit = (origin?: unknown) =>
+        submitHashHandler()(
+          createContext(),
+          createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+            sample_hash: 'a'.repeat(64),
+            tags: ['alert:alert-1'],
+            ...(origin ? { origin } : {}),
+          }),
+          mockResponse
+        );
+
+      beforeEach(() => {
+        callerCanRead(['alert-1']);
+        client.submitHash.mockResolvedValue({
+          id: 'task-1',
+          created_at: '2026-12-15T10:00:00.000Z',
+          tags: ['space:default', 'alert:alert-1'],
+          ...NO_ALERT_GROUPS,
+        } as never);
+      });
+
+      it('strips the origin before the service call and writes it with the submit', async () => {
+        await submit({ source: 'alert_flyout', host_name: 'host-1' });
+
+        expect(client.submitHash).toHaveBeenCalledWith({
+          sample_hash: 'a'.repeat(64),
+          tags: ['alert:alert-1', 'space:default'],
+        });
+        expect(esClient.update).toHaveBeenCalledTimes(1);
+        expect(esClient.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: '.kibana-detonate-results-default',
+            id: 'task-1',
+            doc_as_upsert: true,
+            doc: expect.objectContaining({
+              'detonate.space_id': 'default',
+              'detonate.source': 'alert_flyout',
+              'detonate.submitter': 'analyst',
+              'detonate.origin.alert_ids': ['alert-1'],
+              'host.name': 'host-1',
+            }),
+          })
+        );
+      });
+
+      it('still answers with the task when the write fails', async () => {
+        esClient.update.mockRejectedValue(new Error('es down'));
+
+        await submit({ source: 'detonate_page' });
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: expect.objectContaining({ id: 'task-1' }),
+        });
+        expect(mockResponse.customError).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['an unknown source', { source: 'somewhere' }],
+        ['too many alert ids', { alert_ids: Array.from({ length: 33 }, (_, i) => `a${i}`) }],
+        ['an oversized alert id', { alert_ids: ['a'.repeat(129)] }],
+        ['an oversized host name', { host_name: 'h'.repeat(257) }],
+        ['an oversized file path', { file_path: 'p'.repeat(4097) }],
+        ['an oversized conversation id', { conversation_id: 'c'.repeat(129) }],
+      ])('rejects %s in the origin', (_name, origin) => {
+        expect(() =>
+          submitHashBodySchema().validate({ sample_hash: 'a'.repeat(64), origin })
+        ).toThrow();
+      });
+
+      it('accepts a full, in-bounds origin', () => {
+        expect(() =>
+          submitHashBodySchema().validate({
+            sample_hash: 'a'.repeat(64),
+            origin: {
+              source: 'workflow',
+              alert_ids: ['alert-1'],
+              host_name: 'host-1',
+              user_name: 'user-1',
+              file_path: '/tmp/x',
+              workflow_execution_id: 'exec-1',
+              conversation_id: 'conv-1',
+            },
+          })
+        ).not.toThrow();
+      });
     });
 
     it('passes a service quota rejection (429) through to the analyst', async () => {
@@ -495,6 +596,34 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(client.submitFile).not.toHaveBeenCalled();
     });
 
+    it('writes the file facts with the origin, and strips the origin from the service call', async () => {
+      client.submitFile.mockResolvedValue({
+        id: 'task-3',
+        created_at: '2026-12-15T10:00:00.000Z',
+        tags: ['space:default'],
+        ...NO_ALERT_GROUPS,
+      } as never);
+
+      await submitFileHandler()(
+        createContext(),
+        createFileRequest('{"origin":{"source":"detonate_page"}}'),
+        mockResponse
+      );
+
+      expect(client.submitFile).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(client.submitFile.mock.calls)).not.toContain('detonate_page');
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'task-3',
+          doc: expect.objectContaining({
+            'detonate.source': 'detonate_page',
+            'detonate.submitter': 'analyst',
+            'file.size': 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR'.length,
+          }),
+        })
+      );
+    });
+
     it('submits valid options parsed from request_json', async () => {
       const task = { id: 'task-2' };
       client.submitFile.mockResolvedValue(task as never);
@@ -607,6 +736,47 @@ describe('registerDetonatePrototypeRoutes', () => {
     it('returns a run from the active space', async () => {
       const task = { id: 'task-1', tags: ['space:team-a'] };
       client.getTask.mockResolvedValue(task as never);
+
+      await getTaskHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/task-1`, undefined, { taskId: 'task-1' }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: task });
+    });
+
+    it("records the run it read, without origin, and does not record another space's run", async () => {
+      const task = {
+        id: 'task-1',
+        created_at: '2026-12-15T10:00:00.000Z',
+        tags: ['space:team-a'],
+        ...NO_ALERT_GROUPS,
+      };
+      client.getTask.mockResolvedValue(task as never);
+      const request = createRequest('get', `${DETONATE_TASKS_PATH}/task-1`, undefined, {
+        taskId: 'task-1',
+      });
+
+      await getTaskHandler()(createContext(), request, mockResponse);
+
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      const [[{ index, doc }]] = esClient.update.mock.calls;
+      expect(index).toBe('.kibana-detonate-results-team-a');
+      expect(doc).toMatchObject({ 'detonate.space_id': 'team-a', 'detonate.task_id': 'task-1' });
+      expect(doc).not.toHaveProperty(['detonate.source']);
+      expect(doc).not.toHaveProperty(['detonate.submitter']);
+
+      esClient.update.mockClear();
+      client.getTask.mockResolvedValue({ id: 'task-2', tags: ['space:team-b'] } as never);
+      await getTaskHandler()(createContext(), request, mockResponse);
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('still returns the run when recording it fails', async () => {
+      const task = { id: 'task-1', created_at: '2026-12-15T10:00:00.000Z', tags: ['space:team-a'] };
+      client.getTask.mockResolvedValue(task as never);
+      esClient.update.mockRejectedValue(new Error('es down'));
 
       await getTaskHandler()(
         createContext(),
@@ -790,6 +960,27 @@ describe('registerDetonatePrototypeRoutes', () => {
           ],
         },
       });
+    });
+
+    it('records the run with its space, but the response carries no space or origin', async () => {
+      client.getTask.mockResolvedValue(run as never);
+      client.getTaskUpdates.mockResolvedValue([] as never);
+      client.getTaskAlerts.mockResolvedValue([] as never);
+
+      await recordHandler()(createContext(), recordRequest('run-1'), mockResponse);
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.kibana-detonate-results-team-a',
+          id: 'run-1',
+          doc: expect.objectContaining({ 'detonate.space_id': 'team-a' }),
+        })
+      );
+      const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
+        [{ body: Record<string, unknown> }]
+      >;
+      expect(body).not.toHaveProperty(['detonate.space_id']);
+      expect(body).not.toHaveProperty(['detonate.source']);
     });
 
     it("answers 404 for another space's run without reading its timeline or alerts", async () => {

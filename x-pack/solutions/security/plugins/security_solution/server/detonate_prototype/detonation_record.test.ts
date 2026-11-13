@@ -169,6 +169,61 @@ describe('toDetonationRecord', () => {
     expect(toDetonationRecord(createTask())).not.toHaveProperty(['event.duration']);
   });
 
+  it('adds the space and the tags without the space tags when given a space', () => {
+    const record = toDetonationRecord(
+      createTask({ tags: ['space:team-a', 'alert:alert-1', 'demo'] }),
+      {
+        spaceId: 'team-a',
+      }
+    );
+
+    expect(record).toMatchObject({
+      'detonate.space_id': 'team-a',
+      tags: ['alert:alert-1', 'demo'],
+    });
+    expect(record).not.toHaveProperty(['detonate.source']);
+  });
+
+  it('records the origin, merging the tagged alert with the ones the caller named', () => {
+    const record = toDetonationRecord(createTask(), {
+      spaceId: 'default',
+      origin: {
+        source: 'agent',
+        submitter: 'analyst',
+        alert_ids: ['alert-2', 'alert-1'],
+        host_name: 'host-1',
+        user_name: 'user-1',
+        file_path: '/tmp/x',
+        conversation_id: 'conv-1',
+        workflow_execution_id: 'exec-1',
+        file: { size: 12, mime_type: 'text/plain' },
+      },
+    });
+
+    expect(record).toMatchObject({
+      'detonate.source': 'agent',
+      'detonate.submitter': 'analyst',
+      'detonate.origin.alert_ids': ['alert-1', 'alert-2'],
+      'host.name': 'host-1',
+      'user.name': 'user-1',
+      'file.path': '/tmp/x',
+      'detonate.conversation_id': 'conv-1',
+      'detonate.workflow.execution_id': 'exec-1',
+      'file.size': 12,
+      'file.mime_type': 'text/plain',
+    });
+  });
+
+  it('leaves out origin fields the caller did not know', () => {
+    const record = toDetonationRecord(createTask({ tags: ['space:default'] }), {
+      origin: { source: 'detonate_page', file: { size: 0 } },
+    });
+
+    expect(record).not.toHaveProperty(['detonate.origin.alert_ids']);
+    expect(record).not.toHaveProperty(['host.name']);
+    expect(record).not.toHaveProperty(['file.mime_type']);
+  });
+
   it('distinguishes IOCs that were not read from IOCs that were read and empty', () => {
     expect(toDetonationRecord(createTask())).not.toHaveProperty(['detonate.iocs.domains']);
     expect(

@@ -25,6 +25,8 @@ import type { DetonateClient } from './client';
 import { createDetonateClient } from './client';
 import { createConnectorDetonateClient } from './connector_client';
 import { registerDetonatePrototypeRoutes } from './routes';
+import { createRunRecorder } from './results_store';
+import type { RecordRun } from './results_store';
 import type { HasDetonatePrivilege } from './authz';
 import { createDetonatePrivilegeChecker } from './authz';
 
@@ -74,6 +76,8 @@ export interface DetonatePrototype {
   getClient: GetDetonateClient;
   /** Shared by the routes and the Agent Builder tools, so both gate identically. */
   hasDetonatePrivilege: HasDetonatePrivilege;
+  /** Writes a run into the space's results index; never throws. */
+  recordRun: RecordRun;
 }
 
 /**
@@ -143,5 +147,9 @@ export const setupDetonatePrototype = ({
     getInternalEsClient,
   });
 
-  return { getClient, hasDetonatePrivilege };
+  return {
+    getClient,
+    hasDetonatePrivilege,
+    recordRun: createRunRecorder({ getInternalEsClient, logger: scopedLogger }),
+  };
 };

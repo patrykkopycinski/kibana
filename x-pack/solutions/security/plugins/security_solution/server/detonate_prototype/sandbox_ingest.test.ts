@@ -7,7 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { DEFAULT_INDEX_PATTERN } from '../../common/constants';
 import type { DetonateTask } from '../../common/detonate_prototype';
+import { detonateSandboxStreamName } from '../../common/detonate_prototype';
 import {
   ingestSandboxDocs,
   installSandboxTemplate,
@@ -168,6 +170,68 @@ describe('ingestSandboxDocs', () => {
 
     expect(counts).toEqual({ ingested: 0, duplicates: 0, dropped: 1, failed: 0 });
     expect(bulk).not.toHaveBeenCalled();
+  });
+});
+
+describe('sandbox alerts as signals', () => {
+  const globToRegExp = (glob: string) =>
+    new RegExp(`^${glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
+
+  // Exclusion entries ('-*elastic-cloud-logs-*') are patterns too: the stream must not match them either.
+  const siemPatterns = ['.alerts-security.alerts-*', ...DEFAULT_INDEX_PATTERN].map((pattern) =>
+    globToRegExp(pattern.replace(/^-/, ''))
+  );
+
+  // Detection alerts arrive flat with `event.kind: signal` (the recorded corpus shape);
+  // the mapper copies it, so the stream's detection alerts stay signals without a rewrite.
+  it.each([
+    [
+      'production-detection-alerts' as const,
+      'signal',
+      {
+        '@timestamp': '2026-11-01T10:00:00.000Z',
+        'kibana.alert.uuid': 'uuid-1',
+        'kibana.alert.rule.name': 'Rule A',
+        'event.kind': 'signal',
+        'kibana.alert.original_event.kind': 'alert',
+      },
+    ],
+    ['production-endpoint-alerts' as const, 'alert', endpointAlert()],
+    ['diagnostic-endpoint-alerts' as const, 'alert', endpointAlert()],
+    [
+      'process-events' as const,
+      'event',
+      { '@timestamp': '2026-11-01T10:00:00.000Z', event: { id: 'proc-event-1', kind: 'event' } },
+    ],
+  ])(
+    'keeps %s docs tagged, attributed and out of SIEM index patterns (event.kind %s)',
+    async (kind, eventKind, source) => {
+      const bulk = jest.fn().mockResolvedValue({ items: [{ create: { status: 201 } }] });
+      const stream = detonateSandboxStreamName('default');
+
+      await ingestSandboxDocs({ bulk } as unknown as ElasticsearchClient, stream, TASK, [
+        { kind, doc: source },
+      ]);
+
+      const [[{ operations }]] = bulk.mock.calls;
+      const [{ create }, doc] = operations;
+      expect(doc).toMatchObject({
+        event: { kind: eventKind },
+        tags: ['sandbox'],
+        detonate: { task_id: 'task-1', alert_kind: kind },
+      });
+      expect(siemPatterns.some((pattern) => pattern.test(create._index))).toBe(false);
+      expect(create._index).toBe(stream);
+    }
+  );
+
+  it('matches SIEM index names with the wildcard helper', () => {
+    expect(siemPatterns.some((pattern) => pattern.test('.alerts-security.alerts-default'))).toBe(
+      true
+    );
+    expect(siemPatterns.some((pattern) => pattern.test('logs-endpoint.events.process-x'))).toBe(
+      true
+    );
   });
 });
 

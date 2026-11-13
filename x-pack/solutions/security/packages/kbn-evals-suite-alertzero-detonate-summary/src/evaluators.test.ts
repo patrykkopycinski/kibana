@@ -29,6 +29,10 @@ describe('classifySummary', () => {
       'Verdict: benign — no malicious behavior observed in the sandbox; not proof the sample is safe.',
       'Verdict: benign — no malicious behavior observed in the sandbox. This is not proof the sample is safe.',
       '**Verdict: No malicious behavior observed (inconclusive — this does not mean the sample is safe).**',
+      // Sentence break and markdown emphasis around the observation wording.
+      'Verdict: benign. No malicious behavior was observed in the sandbox; this is not proof the sample is safe.',
+      '**Verdict: benign** — no malicious behavior observed in the sandbox; this is not proof the sample is safe.',
+      '**Verdict: benign.** No malicious behavior was observed in the sandbox. This is not proof the sample is safe.',
     ])('%s', (summary) => {
       expect(classifySummary(summary, 'known_good_benign')).toMatchObject({
         falseMalicious: false,
@@ -73,6 +77,10 @@ describe('classifySummary', () => {
       'Verdict: benign — no alerts were raised.',
       'The sample is safe.',
       'Verdict: benign — no malicious behavior observed in the sandbox.',
+      // A safety conclusion is flagged even when a caveat appears elsewhere.
+      'Verdict: benign — no malicious behavior observed in the sandbox, so it is safe to run. This is not proof the sample is safe.',
+      '**Verdict: benign** — no malicious behavior observed in the sandbox, so the file is clean. This is not proof the sample is safe.',
+      'This is not proof the sample is safe. Verdict: benign. The file is safe to open.',
     ])('%s', (summary) => {
       expect(classifySummary(summary, 'known_good_benign').falseBenign).toBe(true);
     });

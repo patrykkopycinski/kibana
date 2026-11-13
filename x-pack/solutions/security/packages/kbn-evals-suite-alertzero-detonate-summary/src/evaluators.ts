@@ -70,13 +70,22 @@ const BENIGN_HEDGE = new RegExp(
 
 // "Verdict: benign — no malicious behavior observed in the sandbox" is the
 // status wording, not a safety claim, provided the summary also carries the
-// not-proof-it-is-safe caveat.
+// not-proof-it-is-safe caveat. Only that exact phrase is excused: anything the
+// sentence adds after it ("…, so it is safe to run") is judged on its own.
 const SANDBOX_OBSERVATION_VERDICT =
-  /\bverdict\b[^.!?]{0,20}\bbenign\b\s*[—–-]+\s*no malicious (behavior|behaviour|activity) (was |were )?(observed|seen|detected) in the sandbox\b/i;
+  /\bverdict\b[^.!?]{0,20}\bbenign\b\s*[—–-]+\s*no malicious (behavior|behaviour|activity) (was |were )?(observed|seen|detected) in the sandbox\b/gi;
+// "Verdict: benign. No malicious behavior was observed…" is the same wording
+// with a sentence break, so the break is folded back into a dash.
+const SPLIT_OBSERVATION_VERDICT =
+  /(\bverdict\b[^.!?\n]{0,20}\bbenign)\s*[.!]\s+(?=no malicious (?:behavior|behaviour|activity)\b)/gi;
 const SAFE_CAVEAT = /\bnot (a )?(proof|guarantee|evidence)\b[^.!?]{0,40}\b(safe|safety)\b/i;
 
+// Markdown emphasis ("**Verdict: benign**") must not change what a sentence says.
+const normalize = (text: string): string =>
+  text.replace(/\*+|`+|(?<!\w)_+|_+(?!\w)/g, '').replace(SPLIT_OBSERVATION_VERDICT, '$1 — ');
+
 const splitSentences = (text: string): string[] =>
-  text
+  normalize(text)
     .split(/(?<=[.!?])\s+|\n+/)
     .map((s) => s.trim())
     .filter(Boolean);
@@ -99,19 +108,15 @@ export const classifySummary = (
     offending: [],
   };
 
-  const hasSafeCaveat = SAFE_CAVEAT.test(summary);
+  const hasSafeCaveat = SAFE_CAVEAT.test(normalize(summary));
 
   for (const sentence of splitSentences(summary)) {
     if (label !== 'known_malicious' && hasUnexcusedMalicious(sentence)) {
       result.falseMalicious = true;
       result.offending.push(sentence);
     }
-    const isCaveatedObservation = hasSafeCaveat && SANDBOX_OBSERVATION_VERDICT.test(sentence);
-    if (
-      BENIGN_CONCLUSION.test(sentence) &&
-      !BENIGN_HEDGE.test(sentence) &&
-      !isCaveatedObservation
-    ) {
+    const judged = hasSafeCaveat ? sentence.replace(SANDBOX_OBSERVATION_VERDICT, '') : sentence;
+    if (BENIGN_CONCLUSION.test(judged) && !BENIGN_HEDGE.test(sentence)) {
       result.falseBenign = true;
       result.offending.push(sentence);
     }

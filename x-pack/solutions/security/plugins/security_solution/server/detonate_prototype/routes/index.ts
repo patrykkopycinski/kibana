@@ -35,6 +35,7 @@ import {
 } from '@kbn/alertzero-plugin/common/constants';
 
 import {
+  alertRunTag,
   DETONATE_HANDOFF_MARKERS,
   DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
@@ -82,7 +83,7 @@ import {
   submitInSpace,
 } from '../space_scope';
 import { toDetonationRecord } from '../detonation_record';
-import { createRunRecorder } from '../results_store';
+import type { RecordRun } from '../results_store';
 import {
   IOC_ALERT_READ_LIMIT,
   alertDocSource,
@@ -212,6 +213,8 @@ export interface DetonateRoutesDeps {
   getClient: (request: KibanaRequest) => DetonateClient;
   /** Resolves the active space, which scopes every run. */
   endpointAppContextService: EndpointAppContextService;
+  /** Writes each run's results document; shared with the agent tool so one process has one template cache. */
+  recordRun: RecordRun;
   /**
    * Submission is a write: it boots a VM and runs the sample as live malware.
    * The route-level privilege is read-level, so write access is asserted in the
@@ -229,11 +232,29 @@ export interface DetonateRoutesDeps {
   now?: () => Date;
 }
 
-/** The part's own `Content-Type`, which hapi keeps on the stream it hands over. */
+/**
+ * `origin.alert_ids` is stored on the run and later drives alert tagging just
+ * like `alert:<id>` tags, so it gets the same readable-alert check.
+ */
+const tagsWithOriginAlerts = (
+  tags: readonly string[] | undefined,
+  origin: { alert_ids?: readonly string[] } | undefined
+): string[] => [...(tags ?? []), ...(origin?.alert_ids ?? []).map(alertRunTag)];
+
+const MAX_MIME_TYPE_LENGTH = 255;
+const MIME_TYPE_SHAPE = /^[\w!#$&^.+-]+\/[\w!#$&^.+-]+$/;
+
+/**
+ * The part's own `Content-Type`, which hapi keeps on the stream it hands over.
+ * It is client-supplied and stored, so only a bounded `type/subtype` survives;
+ * parameters such as `; charset=` are dropped.
+ */
 const sampleMimeType = (sampleFile: unknown): string | undefined => {
   const contentType = (sampleFile as { hapi?: { headers?: Record<string, unknown> } }).hapi
     ?.headers?.['content-type'];
-  return typeof contentType === 'string' && contentType !== '' ? contentType : undefined;
+  if (typeof contentType !== 'string') return undefined;
+  const mimeType = contentType.split(';')[0].trim().slice(0, MAX_MIME_TYPE_LENGTH);
+  return MIME_TYPE_SHAPE.test(mimeType) ? mimeType : undefined;
 };
 
 /** Collect a streamed upload, refusing anything over the cap mid-stream. */
@@ -263,6 +284,7 @@ export const registerDetonatePrototypeRoutes = ({
   logger,
   getClient,
   endpointAppContextService,
+  recordRun,
   hasDetonatePrivilege,
   monthlyAllowance,
   getInternalEsClient,
@@ -303,8 +325,6 @@ export const registerDetonatePrototypeRoutes = ({
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
   const spaceIdFromRequest = (request: KibanaRequest): string =>
     endpointAppContextService.getActiveSpaceId(request);
-
-  const recordRun = createRunRecorder({ getInternalEsClient, logger });
 
   /**
    * ES|QL's "unknown index" failure for exactly this space's sandbox stream:
@@ -464,7 +484,7 @@ export const registerDetonatePrototypeRoutes = ({
           await assertReadableAlertTags({
             esClient: (await context.core).elasticsearch.client.asCurrentUser,
             spaceId,
-            tags: options.tags,
+            tags: tagsWithOriginAlerts(options.tags, options.origin),
           });
 
           const { origin, ...serviceOptions } = options;
@@ -475,7 +495,9 @@ export const registerDetonatePrototypeRoutes = ({
             spaceId
           );
 
-          await recordRun(spaceId, () =>
+          // Not awaited: every later write merges into the same document, so
+          // nothing a caller does next depends on this one having landed.
+          void recordRun(spaceId, () =>
             toDetonationRecord(task, {
               spaceId,
               origin: {
@@ -530,7 +552,7 @@ export const registerDetonatePrototypeRoutes = ({
           await assertReadableAlertTags({
             esClient: (await context.core).elasticsearch.client.asCurrentUser,
             spaceId,
-            tags: request.body.tags,
+            tags: tagsWithOriginAlerts(request.body.tags, request.body.origin),
           });
 
           const { origin, ...serviceBody } = request.body;
@@ -540,7 +562,7 @@ export const registerDetonatePrototypeRoutes = ({
             serviceBody,
             spaceId
           );
-          await recordRun(spaceId, () =>
+          void recordRun(spaceId, () =>
             toDetonationRecord(task, {
               spaceId,
               origin: {
@@ -577,7 +599,7 @@ export const registerDetonatePrototypeRoutes = ({
           const task = await getTaskInSpace(getClient(request), request.params.taskId, spaceId);
           // Every poll writes: the UI and the workflow poll until the run ends, and
           // Elasticsearch skips the write when the document did not change.
-          await recordRun(spaceId, () => toDetonationRecord(task, { spaceId }));
+          void recordRun(spaceId, () => toDetonationRecord(task, { spaceId }));
           return response.ok<DetonateTask>({ body: task });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -645,7 +667,7 @@ export const registerDetonatePrototypeRoutes = ({
             ),
           ]);
           const record = toDetonationRecord(task, { updates, iocs });
-          await recordRun(spaceId, () => toDetonationRecord(task, { updates, iocs, spaceId }));
+          void recordRun(spaceId, () => toDetonationRecord(task, { updates, iocs, spaceId }));
           return response.ok<DetonationRecord>({ body: record });
         } catch (error) {
           return toErrorResponse(error, response);

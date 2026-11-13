@@ -6,7 +6,7 @@
  */
 
 import type { DetonateTask } from '../../common/detonate_prototype';
-import { toDetonationRecord } from './detonation_record';
+import { DETONATION_RECORD_FIELDS, toDetonationRecord } from './detonation_record';
 
 const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
   id: 'task-1',
@@ -222,6 +222,30 @@ describe('toDetonationRecord', () => {
     expect(record).not.toHaveProperty(['detonate.origin.alert_ids']);
     expect(record).not.toHaveProperty(['host.name']);
     expect(record).not.toHaveProperty(['file.mime_type']);
+  });
+
+  it('lists every record field in DETONATION_RECORD_FIELDS, which the index mapping is built from', () => {
+    const record = toDetonationRecord(
+      maliciousTask({ last_worker_status_details: 'details', sample_hash: 'ABCDEF' }),
+      {
+        spaceId: 'default',
+        iocs: { domains: ['evil.test'], ips: ['192.0.2.1'], file_hashes: ['abc'] },
+        updates: [{ task: createTask(), timestamp: '2026-01-01T00:04:00.000Z' }],
+        origin: {
+          source: 'agent',
+          submitter: 'analyst',
+          alert_ids: ['alert-2'],
+          host_name: 'host-1',
+          user_name: 'user-1',
+          file_path: '/tmp/x',
+          conversation_id: 'conv-1',
+          workflow_execution_id: 'exec-1',
+          file: { size: 12, mime_type: 'text/plain' },
+        },
+      }
+    );
+
+    expect(Object.keys(record).sort()).toEqual(Object.keys(DETONATION_RECORD_FIELDS).sort());
   });
 
   it('distinguishes IOCs that were not read from IOCs that were read and empty', () => {

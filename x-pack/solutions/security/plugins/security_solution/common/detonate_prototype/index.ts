@@ -892,12 +892,12 @@ export const spaceTaskQuery = (
 
 /**
  * Where a run is, independent of what it found. Only a `complete` run has a
- * verdict. `queued` is never derived from a task: `DetonateTask` requires a last
- * worker and a worker status, so nothing marks "accepted, no worker started".
- * It only appears as an alert state (a Worker marked the alert for detonation
- * without submitting it).
+ * verdict. There is no `queued` run status: `DetonateTask` requires a last worker
+ * and a worker status, so nothing marks "accepted, no worker started". `queued`
+ * is only an alert state (a Worker marked the alert for detonation without
+ * submitting it).
  */
-export const DETONATION_RUN_STATUSES = ['queued', 'running', 'complete', 'failed'] as const;
+export const DETONATION_RUN_STATUSES = ['running', 'complete', 'failed'] as const;
 export type DetonationRunStatus = (typeof DETONATION_RUN_STATUSES)[number];
 
 /** Run status read off a task. A failed run is terminal but never `complete`. */
@@ -1045,8 +1045,9 @@ export const detonationConfidence = (verdict: DetonateVerdictName): DetonateConf
 /* State                                                                       */
 /* -------------------------------------------------------------------------- */
 
-/** States of an alert that has no run to read them from (it may still read `queued`). */
+/** States of an alert that has no run to read them from. */
 export const DETONATION_ALERT_STATES = [
+  'queued',
   'not_analyzed',
   'allowance_reached',
   'unsupported_os',

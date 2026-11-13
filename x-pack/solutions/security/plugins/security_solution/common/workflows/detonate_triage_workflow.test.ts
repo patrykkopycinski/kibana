@@ -13,13 +13,20 @@
  */
 
 import {
+  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW,
   DETONATE_FP_VALIDATION_WORKFLOW,
   DETONATE_TRIAGE_WORKFLOW,
+  getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
 import { toApiEntries } from '../detection_engine/rule_exceptions/to_api_entries';
+import {
+  DETONATE_LEGACY_VERDICT_TAGS,
+  DETONATE_VERDICTS,
+  detonateVerdictTag,
+} from '../detonate_prototype';
 import { createExceptionListItemInputSchema } from './step_types/create_exception_list_item_step/create_exception_list_item_step_common';
 
 /**
@@ -393,6 +400,7 @@ describe('detonate sample worker (managed workflow, per-run mode)', () => {
                   'kibana.alert.workflow_tags': [
                     'detonate:malicious',
                     'detonate:benign',
+                    'detonate:quiet',
                     'detonate:inconclusive',
                     'detonate:known-malicious',
                   ],
@@ -421,6 +429,39 @@ describe('detonate sample worker (managed workflow, per-run mode)', () => {
         expect(steps.findIndex((step) => step.name === name)).toBeLessThan(gateIndex);
       }
     });
+  });
+});
+
+describe('verdict tag lists in the managed workflows', () => {
+  // These YAML lists are hand-written copies of the verdict set: a tag missing from one
+  // re-detonates an already-judged sample, or lets a stale verdict tag survive.
+  const REQUIRED_TAGS = [
+    ...DETONATE_VERDICTS.map(detonateVerdictTag),
+    ...DETONATE_LEGACY_VERDICT_TAGS,
+  ];
+  const tagsIn = (text: string) => text.match(/detonate:[a-z-]+/g) ?? [];
+
+  const floorYaml = getManagedWorkflowDefinition(
+    ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID
+  )?.yaml;
+  const floorSteps = collectSteps((parse(floorYaml ?? '') as ParsedWorkflow).steps);
+  const workerSteps = collectSteps((parse(WORKER_YAML) as ParsedWorkflow).steps);
+  const withOf = (steps: WorkflowStep[], name: string) =>
+    JSON.stringify(steps.find((step) => step.name === name)?.with ?? null);
+
+  it('reads the floor batch workflow yaml', () => {
+    expect(floorYaml).toEqual(expect.any(String));
+  });
+
+  it.each([
+    ['floor batch: compute_detonate_candidates', floorSteps, 'compute_detonate_candidates'],
+    ['worker: find_candidates', workerSteps, 'find_candidates'],
+    ['worker: find_auto_candidates', workerSteps, 'find_auto_candidates'],
+    ['worker: open_hash_alerts', workerSteps, 'open_hash_alerts'],
+  ])('%s excludes every verdict tag, current and legacy', (_label, steps, name) => {
+    const text = withOf(steps, name);
+    expect(text).not.toBe('null');
+    expect(tagsIn(text)).toEqual(expect.arrayContaining(REQUIRED_TAGS));
   });
 });
 

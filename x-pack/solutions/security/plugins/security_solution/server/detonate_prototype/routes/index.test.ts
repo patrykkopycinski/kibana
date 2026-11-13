@@ -21,7 +21,11 @@ import {
   DETONATE_USAGE_PATH,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
+import { createRunRecorder } from '../results_store';
 import { registerDetonatePrototypeRoutes } from '.';
+
+/** The results writes are fire-and-forget, so a test waits for them to settle before asserting. */
+const flushWrites = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 const RECORD_PATH = `${DETONATE_RUNS_PATH}/{id}/record`;
 /** The only routes AlertZero read also opens. */
@@ -161,11 +165,13 @@ describe('registerDetonatePrototypeRoutes', () => {
       updateByQuery: jest.fn(),
       esql: { query: jest.fn() },
     };
+    const logger = loggerMock.create();
     registerDetonatePrototypeRoutes({
       router: router as never,
-      logger: loggerMock.create(),
+      logger,
       getClient: () => client,
       endpointAppContextService: endpointAppContextService as never,
+      recordRun: createRunRecorder({ getInternalEsClient: async () => esClient as never, logger }),
       hasDetonatePrivilege,
       monthlyAllowance,
       getInternalEsClient: async () => esClient as never,
@@ -333,6 +339,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       it('strips the origin before the service call and writes it with the submit', async () => {
         await submit({ source: 'alert_flyout', host_name: 'host-1' });
+        await flushWrites();
 
         expect(client.submitHash).toHaveBeenCalledWith({
           sample_hash: 'a'.repeat(64),
@@ -351,7 +358,8 @@ describe('registerDetonatePrototypeRoutes', () => {
               'detonate.origin.alert_ids': ['alert-1'],
               'host.name': 'host-1',
             }),
-          })
+          }),
+          { requestTimeout: 2000, maxRetries: 0 }
         );
       });
 
@@ -364,6 +372,46 @@ describe('registerDetonatePrototypeRoutes', () => {
           body: expect.objectContaining({ id: 'task-1' }),
         });
         expect(mockResponse.customError).not.toHaveBeenCalled();
+      });
+
+      it('answers without waiting for a write that never completes', async () => {
+        esClient.update.mockReturnValue(new Promise(() => {}));
+
+        await submit({ source: 'detonate_page' });
+        await flushWrites();
+
+        expect(esClient.update).toHaveBeenCalledTimes(1);
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: expect.objectContaining({ id: 'task-1' }),
+        });
+      });
+
+      it('rejects an origin alert id the caller cannot read, like an alert tag, and does not submit', async () => {
+        callerCanRead(['alert-1']);
+
+        await submit({ source: 'agent', alert_ids: ['alert-foreign'] });
+
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          statusCode: 400,
+          body: { message: expect.stringContaining('alert-foreign') },
+        });
+        expect(client.submitHash).not.toHaveBeenCalled();
+        expect(esClient.update).not.toHaveBeenCalled();
+      });
+
+      it('checks origin alert ids with the tagged alerts, and sends the service only the tags', async () => {
+        callerCanRead(['alert-1', 'alert-2']);
+
+        await submit({ source: 'agent', alert_ids: ['alert-2'] });
+
+        const [[searchRequest]] = callerSearch.mock.calls;
+        expect(searchRequest.query.bool.filter[0]).toEqual({
+          ids: { values: ['alert-1', 'alert-2'] },
+        });
+        expect(client.submitHash).toHaveBeenCalledWith({
+          sample_hash: 'a'.repeat(64),
+          tags: ['alert:alert-1', 'space:default'],
+        });
       });
 
       it.each([
@@ -609,6 +657,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         createFileRequest('{"origin":{"source":"detonate_page"}}'),
         mockResponse
       );
+      await flushWrites();
 
       expect(client.submitFile).toHaveBeenCalledTimes(1);
       expect(JSON.stringify(client.submitFile.mock.calls)).not.toContain('detonate_page');
@@ -620,7 +669,8 @@ describe('registerDetonatePrototypeRoutes', () => {
             'detonate.submitter': 'analyst',
             'file.size': 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR'.length,
           }),
-        })
+        }),
+        { requestTimeout: 2000, maxRetries: 0 }
       );
     });
 
@@ -654,6 +704,62 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       expect(callerSearch).toHaveBeenCalledTimes(1);
       expect(client.submitFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an origin alert id in request_json the caller cannot read with 400', async () => {
+      callerCanRead([]);
+
+      await submitFileHandler()(
+        createContext(),
+        createFileRequest('{"origin":{"alert_ids":["alert-foreign"]}}'),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 400 })
+      );
+      expect(client.submitFile).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['keeps a plain type/subtype', 'application/x-dosexec', 'application/x-dosexec'],
+      ['drops parameters', 'text/plain; charset=utf-8', 'text/plain'],
+      ['omits a value that is not a type/subtype', 'not a mime type', undefined],
+      ['omits a value with no subtype', 'text', undefined],
+      [
+        'truncates an oversized type',
+        `application/${'x'.repeat(300)}`,
+        `application/${'x'.repeat(243)}`,
+      ],
+    ])('%s as the stored mime type', async (_name, contentType, expected) => {
+      client.submitFile.mockResolvedValue({
+        id: 'task-4',
+        created_at: '2026-12-15T10:00:00.000Z',
+        tags: ['space:default'],
+        ...NO_ALERT_GROUPS,
+      } as never);
+      const sample = Object.assign(sampleStream('data'), {
+        hapi: { headers: { 'content-type': contentType } },
+      });
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: DETONATE_SUBMIT_FILE_PATH,
+        body: {
+          sample_file: sample,
+          sample_filename: 'sample.bin',
+          request_json: '{"origin":{"source":"detonate_page"}}',
+        },
+      }) as never;
+
+      await submitFileHandler()(createContext(), request, mockResponse);
+      await flushWrites();
+
+      const [[{ doc }]] = esClient.update.mock.calls;
+      if (expected === undefined) {
+        expect(doc).not.toHaveProperty(['file.mime_type']);
+      } else {
+        expect(doc['file.mime_type']).toBe(expected);
+      }
     });
 
     it('rejects an alert tag in request_json the caller cannot read with 400', async () => {
@@ -759,6 +865,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       });
 
       await getTaskHandler()(createContext(), request, mockResponse);
+      await flushWrites();
 
       expect(esClient.update).toHaveBeenCalledTimes(1);
       const [[{ index, doc }]] = esClient.update.mock.calls;
@@ -770,6 +877,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       esClient.update.mockClear();
       client.getTask.mockResolvedValue({ id: 'task-2', tags: ['space:team-b'] } as never);
       await getTaskHandler()(createContext(), request, mockResponse);
+      await flushWrites();
       expect(esClient.update).not.toHaveBeenCalled();
     });
 
@@ -968,13 +1076,15 @@ describe('registerDetonatePrototypeRoutes', () => {
       client.getTaskAlerts.mockResolvedValue([] as never);
 
       await recordHandler()(createContext(), recordRequest('run-1'), mockResponse);
+      await flushWrites();
 
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           index: '.kibana-detonate-results-team-a',
           id: 'run-1',
           doc: expect.objectContaining({ 'detonate.space_id': 'team-a' }),
-        })
+        }),
+        { requestTimeout: 2000, maxRetries: 0 }
       );
       const [[{ body }]] = mockResponse.ok.mock.calls as unknown as Array<
         [{ body: Record<string, unknown> }]

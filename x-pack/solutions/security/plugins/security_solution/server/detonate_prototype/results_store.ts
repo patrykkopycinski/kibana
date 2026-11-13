@@ -55,9 +55,16 @@ export const resultsIndexTemplate = (): estypes.IndicesPutIndexTemplateRequest =
   },
 });
 
+/**
+ * Both results-index writes run on the request path's heels, so a slow or
+ * unreachable cluster must give up quickly instead of holding the connection
+ * through the client's 30s timeout and its retries.
+ */
+const WRITE_TRANSPORT_OPTIONS = { requestTimeout: 2000, maxRetries: 0 } as const;
+
 /** Overwrites rather than create-if-absent, so the template always matches this code. */
 export const installResultsTemplate = async (esClient: ElasticsearchClient): Promise<void> => {
-  await esClient.indices.putIndexTemplate(resultsIndexTemplate());
+  await esClient.indices.putIndexTemplate(resultsIndexTemplate(), WRITE_TRANSPORT_OPTIONS);
 };
 
 /**
@@ -70,42 +77,15 @@ export const upsertDetonationRecord = async (
   spaceId: string,
   record: DetonationRecord
 ): Promise<void> => {
-  await esClient.update({
-    index: detonateResultsIndexName(spaceId),
-    id: record['detonate.task_id'],
-    doc: record,
-    doc_as_upsert: true,
-  });
-};
-
-/**
- * Newest first. A space that has recorded no run yet has no index, which is an
- * empty answer rather than an error.
- */
-export const findDetonationRecords = async (
-  esClient: ElasticsearchClient,
-  spaceId: string,
-  { alertId, sha256, size }: { alertId?: string; sha256?: string; size: number }
-): Promise<DetonationRecord[]> => {
-  const should: estypes.QueryDslQueryContainer[] = [
-    ...(alertId
-      ? [
-          { term: { 'detonate.origin.alert_ids': alertId } },
-          { term: { 'detonate.alert_id': alertId } },
-        ]
-      : []),
-    ...(sha256 ? [{ term: { 'file.hash.sha256': sha256.toLowerCase() } }] : []),
-  ];
-  if (should.length === 0) return [];
-
-  const result = await esClient.search<DetonationRecord>({
-    index: detonateResultsIndexName(spaceId),
-    ignore_unavailable: true,
-    size,
-    sort: [{ '@timestamp': 'desc' }],
-    query: { bool: { should, minimum_should_match: 1 } },
-  });
-  return result.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : []));
+  await esClient.update(
+    {
+      index: detonateResultsIndexName(spaceId),
+      id: record['detonate.task_id'],
+      doc: record,
+      doc_as_upsert: true,
+    },
+    WRITE_TRANSPORT_OPTIONS
+  );
 };
 
 export type RecordRun = (spaceId: string, buildRecord: () => DetonationRecord) => Promise<void>;

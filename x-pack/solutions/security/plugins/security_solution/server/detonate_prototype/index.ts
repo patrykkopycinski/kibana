@@ -137,11 +137,14 @@ export const setupDetonatePrototype = ({
     getSecurityStart,
   });
 
+  const recordRun = createRunRecorder({ getInternalEsClient, logger: scopedLogger });
+
   registerDetonatePrototypeRoutes({
     router,
     logger: scopedLogger,
     getClient,
     endpointAppContextService,
+    recordRun,
     hasDetonatePrivilege,
     monthlyAllowance,
     getInternalEsClient,
@@ -150,6 +153,6 @@ export const setupDetonatePrototype = ({
   return {
     getClient,
     hasDetonatePrivilege,
-    recordRun: createRunRecorder({ getInternalEsClient, logger: scopedLogger }),
+    recordRun,
   };
 };

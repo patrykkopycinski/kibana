@@ -10,12 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import type { DetonationRecord } from './detonation_record';
 import { DETONATION_RECORD_FIELDS } from './detonation_record';
-import {
-  createRunRecorder,
-  findDetonationRecords,
-  resultsIndexTemplate,
-  upsertDetonationRecord,
-} from './results_store';
+import { createRunRecorder, resultsIndexTemplate, upsertDetonationRecord } from './results_store';
 
 const RECORD: DetonationRecord = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -80,12 +75,15 @@ describe('upsertDetonationRecord', () => {
 
     await upsertDetonationRecord(esClient, 'team-a', RECORD);
 
-    expect(esClient.update).toHaveBeenCalledWith({
-      index: '.kibana-detonate-results-team-a',
-      id: 'task-1',
-      doc: RECORD,
-      doc_as_upsert: true,
-    });
+    expect(esClient.update).toHaveBeenCalledWith(
+      {
+        index: '.kibana-detonate-results-team-a',
+        id: 'task-1',
+        doc: RECORD,
+        doc_as_upsert: true,
+      },
+      { requestTimeout: 2000, maxRetries: 0 }
+    );
   });
 
   it('refuses a space id that cannot name an index', async () => {
@@ -95,44 +93,6 @@ describe('upsertDetonationRecord', () => {
       'cannot name a results index'
     );
     expect(esClient.update).not.toHaveBeenCalled();
-  });
-});
-
-describe('findDetonationRecords', () => {
-  it('matches the alert in either field, or the hash, newest first, tolerating a missing index', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({ hits: { hits: [{ _source: RECORD }, {}] } } as never);
-
-    const found = await findDetonationRecords(esClient, 'team-a', {
-      alertId: 'alert-1',
-      sha256: 'ABC',
-      size: 5,
-    });
-
-    expect(found).toEqual([RECORD]);
-    expect(esClient.search).toHaveBeenCalledWith({
-      index: '.kibana-detonate-results-team-a',
-      ignore_unavailable: true,
-      size: 5,
-      sort: [{ '@timestamp': 'desc' }],
-      query: {
-        bool: {
-          should: [
-            { term: { 'detonate.origin.alert_ids': 'alert-1' } },
-            { term: { 'detonate.alert_id': 'alert-1' } },
-            { term: { 'file.hash.sha256': 'abc' } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    });
-  });
-
-  it('does not search without an alert id or a hash', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    await expect(findDetonationRecords(esClient, 'team-a', { size: 5 })).resolves.toEqual([]);
-    expect(esClient.search).not.toHaveBeenCalled();
   });
 });
 
@@ -154,6 +114,10 @@ describe('createRunRecorder', () => {
     await recordRun('team-a', () => ({ ...RECORD, 'detonate.task_id': 'task-2' }));
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(expect.anything(), {
+      requestTimeout: 2000,
+      maxRetries: 0,
+    });
     expect(esClient.update).toHaveBeenCalledTimes(2);
   });
 

@@ -66,13 +66,12 @@ const stepByName = (name: string): YamlStep | undefined => {
   return walk(worker.steps);
 };
 
-const VERDICT_TAGS = [
-  'detonate:malicious',
-  'detonate:benign',
-  'detonate:quiet',
-  'detonate:inconclusive',
-  'detonate:known-malicious',
-];
+const ALERT_OUTCOMES_PATH = '/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes';
+const DECISIONS_PATH = '/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions';
+
+const decisionsOf = (step: YamlStep | undefined): Array<Record<string, unknown>> =>
+  ((step?.with?.body as { decisions?: Array<Record<string, unknown>> } | undefined)?.decisions ??
+    []) as Array<Record<string, unknown>>;
 
 describe('Detonate sample worker (Forensics Watch)', () => {
   it('compiles to an execution graph, so both modes are runnable', () => {
@@ -90,20 +89,25 @@ describe('Detonate sample worker (Forensics Watch)', () => {
   describe('candidate query', () => {
     const query = String(stepByName('find_candidates')?.with?.query ?? '');
 
-    it('reads the tags security.setAlertTags writes, not a field the alerts index lacks', () => {
-      expect(query).not.toContain('kibana.alert.tags');
-      VERDICT_TAGS.forEach((tag) => {
-        expect(query).toContain(`NOT MV_CONTAINS(\`kibana.alert.workflow_tags\`, "${tag}")`);
+    it('never reads detonate state off the alert: production alerts carry none', () => {
+      expect(query).not.toContain('MV_CONTAINS');
+      expect(query).not.toContain('workflow_tags');
+      expect(query).not.toContain('detonate:');
+    });
+
+    it('over-fetches 200 hashes, so the decisions filter still leaves a full sweep', () => {
+      expect(query).toContain('LIMIT 200');
+    });
+
+    it('asks the decisions store which rows to leave alone, and fails the sweep without it', () => {
+      const filter = stepByName('filter_candidates');
+      expect(filter?.type).toBe('kibana.request');
+      expect(filter?.with?.method).toBe('POST');
+      expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
+      expect(filter?.with?.body).toEqual({
+        alert_ids: "${{ steps.find_candidates.output.values | map: 'first' }}",
       });
-    });
-
-    it('never uses IN on the tags, which is null on an untagged alert and drops it', () => {
-      expect(query).not.toMatch(/workflow_tags`?\s+IN\s*\(/);
-    });
-
-    it('does not exclude the running tag, so a run that died mid-flight is retried', () => {
-      expect(query).not.toContain('detonate:running');
-      expect(query).not.toContain('detonate:queued');
+      expect(filter?.['on-failure']).toEqual({ retry: { 'max-attempts': 3, delay: '5s' } });
     });
 
     it('only picks up open alerts, so a closed or acknowledged one is never re-detonated', () => {
@@ -116,11 +120,28 @@ describe('Detonate sample worker (Forensics Watch)', () => {
   });
 
   describe('malicious sibling lookup', () => {
-    it('skips siblings already carrying any verdict tag, including the legacy quiet tag', () => {
-      const mustNot = JSON.stringify(stepByName('open_hash_alerts')?.with?.query);
-      VERDICT_TAGS.forEach((tag) => {
-        expect(mustNot).toContain(`"${tag}"`);
-      });
+    it('does not filter siblings on alert tags', () => {
+      expect(JSON.stringify(stepByName('open_hash_alerts')?.with?.query)).not.toContain(
+        'detonate:'
+      );
+    });
+
+    it('drops the siblings the decisions store covers, and degrades to this run when it fails', () => {
+      const filter = stepByName('filter_hash_siblings');
+      expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
+      expect(filter?.['on-failure']).toEqual({ continue: true });
+      expect(String(stepByName('resolve_proposals')?.with?.close_alert_ids)).toContain(
+        'id != inputs.alert_id and (variables.sibling_lookup_ok != true'
+      );
+    });
+
+    it('records the verdict for every sibling in the close proposal', () => {
+      const tag = stepByName('tag_hash_siblings');
+      expect(tag?.type).toBe('kibana.request');
+      expect(tag?.with?.path).toBe(DECISIONS_PATH);
+      expect(String((tag?.with?.body as { decisions: string }).decisions)).toContain(
+        'sibling_decisions_json'
+      );
     });
   });
 
@@ -138,10 +159,18 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       expect(query).toContain('WHERE kibana.alert.severity IN ("high", "critical")');
     });
 
-    it('keeps the same closed verdict-tag exclusion as the reporting query', () => {
-      VERDICT_TAGS.forEach((tag) => {
-        expect(query).toContain(`NOT MV_CONTAINS(\`kibana.alert.workflow_tags\`, "${tag}")`);
+    it('reads no alert tags, and goes through the same decisions filter as the reporting query', () => {
+      expect(query).not.toContain('MV_CONTAINS');
+      expect(query).toContain('LIMIT 200');
+      const filter = stepByName('filter_auto_candidates');
+      expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
+      expect(filter?.with?.body).toEqual({
+        alert_ids: "${{ steps.find_auto_candidates.output.values | map: 'first' }}",
       });
+    });
+
+    it('caps the dispatch at 20 samples after the filter', () => {
+      expect(String(stepByName('resolve_candidates')?.with?.auto_rows)).toContain('| slice: 0, 20');
     });
   });
 
@@ -156,10 +185,16 @@ describe('Detonate sample worker (Forensics Watch)', () => {
 
     it('marks only the auto-candidates queued, never the manual-mode backlog', () => {
       const queued = stepByName('mark_queued');
-      expect(String(queued?.if)).toContain('steps.find_auto_candidates.output.values.size > 0');
+      expect(queued?.type).toBe('kibana.request');
+      expect(String(queued?.if)).toContain('variables.auto_count > 0');
       expect(String(queued?.if)).toContain('variables.allowance_exhausted == true');
-      expect(String(queued?.with?.alert_ids)).toBe(
-        "${{ steps.find_auto_candidates.output.values | map: 'first' }}"
+      expect(queued?.with?.path).toBe(DECISIONS_PATH);
+      expect(queued?.['on-failure']).toEqual({ continue: true });
+      expect(queued?.with?.body).toEqual({
+        decisions: '${{ variables.queued_decisions_json | json_parse }}',
+      });
+      expect(String(stepByName('count_candidates')?.with?.queued_decisions_json)).toContain(
+        '"state":"queued"'
       );
     });
   });
@@ -174,9 +209,9 @@ describe('Detonate sample worker (Forensics Watch)', () => {
     });
 
     it('dispatches from the auto-candidate set only when the allowance holds', () => {
-      expect(String(fanOut?.if)).toContain('steps.find_auto_candidates.output.values.size > 0');
+      expect(String(fanOut?.if)).toContain('variables.auto_count > 0');
       expect(String(fanOut?.if)).toContain('variables.allowance_exhausted != true');
-      expect(String(fanOut?.foreach)).toBe('${{ steps.find_auto_candidates.output.values }}');
+      expect(String(fanOut?.foreach)).toBe('${{ variables.auto_rows }}');
     });
 
     it('keeps the branch body free of on-failure, which a parallel branch cannot drive', () => {
@@ -201,9 +236,26 @@ describe('Detonate sample worker (Forensics Watch)', () => {
   describe('per-run mode', () => {
     it('marks the alert running before any VM is spent, and never fails the run for it', () => {
       const running = stepByName('mark_running');
+      expect(running?.type).toBe('kibana.request');
       expect(running?.if).toBe('${{ inputs.sha256 != blank }}');
       expect(running?.['on-failure']).toEqual({ continue: true });
-      expect(running?.with?.tags_to_add).toEqual(['detonate:running']);
+      expect(running?.with?.path).toBe(DECISIONS_PATH);
+      expect(decisionsOf(running)).toEqual([
+        {
+          alert_id: '{{ inputs.alert_id }}',
+          state: 'running',
+          sha256: '{{ inputs.sha256 }}',
+          execution_id: '{{ execution.id }}',
+        },
+      ]);
+    });
+
+    it('records a known-malicious decision from the reputation gate', () => {
+      const known = stepByName('tag_known');
+      expect(known?.with?.path).toBe(DECISIONS_PATH);
+      expect(decisionsOf(known)).toEqual([
+        expect.objectContaining({ state: 'known_malicious', verdict: 'malicious' }),
+      ]);
     });
 
     it('gates the reputation lookup and its switch to per-run mode', () => {
@@ -221,10 +273,11 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       expect(detonate?.type).toBe('detonate.prototype.detonateSample');
     });
 
-    it('clears the transient running tag once a verdict lands', () => {
+    it('releases the running claim once a verdict lands', () => {
       const clear = stepByName('clear_running');
-      expect(clear?.with?.tags_to_remove).toEqual(['detonate:running']);
-      expect(clear?.with?.tags_to_add).toBeUndefined();
+      expect(clear?.with?.path).toBe(DECISIONS_PATH);
+      expect(clear?.['on-failure']).toEqual({ continue: true });
+      expect(decisionsOf(clear)).toEqual([expect.objectContaining({ state: 'released' })]);
     });
 
     it('keeps the blocklist behind the approval gate, never on the verdict alone', () => {

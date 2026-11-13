@@ -21,8 +21,9 @@ settings:
   # sweep renders no inputs, so its key collapses to "detonate-" — every sweep
   # shares it. A per-hash run parked at the blocklist gate keeps its slot, so
   # a later alert on the same hash waits for the next sweep, which still finds
-  # it untagged. An execution that died mid-run leaves only the transient
-  # running tag, and the next sweep retries the hash: the slot is free again.
+  # it undecided. An execution that died mid-run leaves only a transient
+  # running decision, which expires on its own, and the next sweep retries the
+  # hash: the slot is free again.
   concurrency:
     key: "detonate-{{ inputs.sha256 }}"
     strategy: drop
@@ -78,19 +79,15 @@ steps:
   # ===========================================================================
 
   # ---------------------------------------------------------------------------
-  # 1. Find untriaged hashes. An alert qualifies when it carries a
-  #    file.hash.sha256 and none of the detonate outcome tags — the verdict
-  #    set is closed (detonate:malicious / benign / inconclusive from a run,
-  #    detonate:known-malicious from the reputation gate), so one MV_CONTAINS
-  #    per tag excludes every already-triaged alert. MV_CONTAINS is false on a
-  #    missing field, where NOT (tags IN (...)) would be null and drop the
-  #    untagged alerts this query exists to find. The running tag is
-  #    deliberately not excluded: an execution that died mid-run must be found
-  #    again, and an in-flight duplicate is dropped by the per-hash
-  #    concurrency key. The STATS dedupes by hash: the detonation is per
-  #    sample, not per alert, and one representative alert carries the
-  #    verdict write-back. Columns are ordered alert-first so `map: 'first'`
-  #    (the only positional map key the Liquid engine ships) yields alert ids.
+  # 1. Find undecided hashes. An alert qualifies when it carries a
+  #    file.hash.sha256 and is open. Detonate state does not live on the alert
+  #    (production alerts are never modified), so the query cannot exclude
+  #    what a detonation already decided: it over-fetches up to 200 hashes and
+  #    the filter step below asks the decisions store which of them to leave
+  #    alone. The STATS dedupes by hash: the detonation is per sample, not per
+  #    alert, and one representative alert carries the verdict write-back.
+  #    Columns are ordered alert-first so `map: 'first'` (the only positional
+  #    map key the Liquid engine ships) yields alert ids.
   # ---------------------------------------------------------------------------
   - name: find_candidates
     type: elasticsearch.esql.query
@@ -104,14 +101,30 @@ steps:
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE file.hash.sha256 IS NOT NULL
           | WHERE kibana.alert.workflow_status == "open"
-          | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:benign")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
           | STATS first_alert = MIN(_id) BY file.hash.sha256
           | KEEP first_alert, file.hash.sha256
-          | LIMIT 20
+          | LIMIT 200
+
+  # Which of the rows the decisions store already covers: a terminal decision, a
+  # claim still in flight, a run that already completed for the alert or its
+  # sample, or an alert that failed too often. The route answers only for the ids
+  # it holds a decision or run for, so an absent id is free to pick. A failed
+  # lookup fails the sweep: picking blind would re-detonate decided samples.
+  - name: filter_candidates
+    type: kibana.request
+    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        alert_ids: "${{ steps.find_candidates.output.values | map: 'first' }}"
 
   # The Supervised subset: same alert contract plus the severity the deck
   # names ("High or Critical file alerts with no verdict"). A separate query
@@ -132,14 +145,57 @@ steps:
           | WHERE file.hash.sha256 IS NOT NULL
           | WHERE kibana.alert.workflow_status == "open"
           | WHERE kibana.alert.severity IN ("high", "critical")
-          | WHERE NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:malicious")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:benign")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:quiet")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:inconclusive")
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detonate:known-malicious")
           | STATS first_alert = MIN(_id) BY file.hash.sha256
           | KEEP first_alert, file.hash.sha256
-          | LIMIT 20
+          | LIMIT 200
+
+  - name: filter_auto_candidates
+    type: kibana.request
+    if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        alert_ids: "${{ steps.find_auto_candidates.output.values | map: 'first' }}"
+
+  # The kibana.request output IS the response body, so the excluded alert ids are
+  # the keys of `outcomes`; a skipped lookup leaves none. `if` conditions and the
+  # row predicates take no filters, hence the id lists are resolved first. The
+  # dispatch is capped at 20 samples per sweep, as the query limit used to do.
+  - name: resolve_exclusions
+    type: data.set
+    if: "${{ inputs.sha256 == blank }}"
+    with:
+      excluded_ids: "${{ steps.filter_candidates.output.outcomes | entries | map: 'key' }}"
+      auto_excluded_ids: "${{ steps.filter_auto_candidates.output.outcomes | entries | map: 'key' }}"
+
+  - name: resolve_candidates
+    type: data.set
+    if: "${{ inputs.sha256 == blank }}"
+    with:
+      candidate_rows: "${{ steps.find_candidates.output.values | reject_exp: 'row', \"variables.excluded_ids contains row[0]\" }}"
+      auto_rows: "${{ steps.find_auto_candidates.output.values | default: consts.no_rows | reject_exp: 'row', \"variables.auto_excluded_ids contains row[0]\" | slice: 0, 20 }}"
+
+  - name: count_candidates
+    type: data.set
+    if: "${{ inputs.sha256 == blank }}"
+    with:
+      candidate_count: "${{ variables.candidate_rows | size }}"
+      auto_count: "${{ variables.auto_rows | size }}"
+      queued_decisions_json: |-
+        [
+        {%- for row in variables.auto_rows -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {"alert_id":{{ row[0] | json }},"state":"queued","sha256":{{ row[1] | json }},"execution_id":{{ execution.id | json }}}
+        {%- endfor -%}
+        ]
 
   # ---------------------------------------------------------------------------
   # 2. Open the sweep's Investigation. Every detonation verdict of this sweep
@@ -152,7 +208,7 @@ steps:
   # ---------------------------------------------------------------------------
   - name: create_investigation
     type: ai.conversation.create
-    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
+    if: "${{ inputs.sha256 == blank and variables.candidate_count > 0 }}"
     with:
       template_id: investigation
       title: "Detonate sample — sweep {{ execution.id }}"
@@ -162,7 +218,7 @@ steps:
         status: open
         severity: low
         description: >-
-          Automated detonation sweep over open alerts with untriaged file
+          Automated detonation sweep over open alerts with undecided file
           hashes.
 
   # ---------------------------------------------------------------------------
@@ -175,7 +231,7 @@ steps:
   # ---------------------------------------------------------------------------
   - name: check_allowance
     type: kibana.request
-    if: "${{ inputs.sha256 == blank and execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' and steps.find_candidates.output.values.size > 0 }}"
+    if: "${{ inputs.sha256 == blank and execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' and variables.candidate_count > 0 }}"
     on-failure:
       continue: true
     with:
@@ -193,22 +249,26 @@ steps:
     with:
       allowance_exhausted: '${{ steps.check_allowance.output.used >= steps.check_allowance.output.allowance }}'
 
-  # Over the allowance nothing is dispatched; the auto-candidates are marked
-  # queued so the alert state badge shows why, and the Investigation says
+  # Over the allowance nothing is dispatched; the auto-candidates get a queued
+  # decision so the alert state badge shows why, and the Investigation says
   # when detonation resumes. (Manual mode never dispatches, so never queues;
-  # the manual journal message says detonation is a person's decision.) The
-  # tag is removed by nothing here: the next sweep that runs under the
-  # allowance simply dispatches, and the verdict tags the run writes are what
-  # the sweep query excludes on.
+  # the manual journal message says detonation is a person's decision.) Nothing
+  # clears the claim here: it expires on its own, and the next sweep that runs
+  # under the allowance simply dispatches. The decisions route takes an array,
+  # which Liquid cannot build, so the body is a JSON string parsed back.
   - name: mark_queued
-    type: security.setAlertTags
-    if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 and variables.allowance_exhausted == true }}"
+    type: kibana.request
+    if: "${{ variables.auto_count > 0 and variables.allowance_exhausted == true }}"
     on-failure:
       continue: true
     with:
-      alert_ids: "${{ steps.find_auto_candidates.output.values | map: 'first' }}"
-      tags_to_add:
-        - "detonate:queued"
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        decisions: "${{ variables.queued_decisions_json | json_parse }}"
 
   # One message stating the sweep's plan, whatever the autonomy decided —
   # the Investigation is where "detonation shows up as work to do". The
@@ -216,24 +276,23 @@ steps:
   # the Liquid engine has no `plural` filter.
   - name: journal_plan
     type: ai.conversation.add_user_message
-    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
+    if: "${{ inputs.sha256 == blank and variables.candidate_count > 0 }}"
     on-failure:
       continue: true
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
-        {%- assign candidate_count = steps.find_candidates.output.values | size -%}
-        {%- assign auto_count = steps.find_auto_candidates.output.values
-          | default: consts.no_rows | size -%}
+        {%- assign candidate_count = variables.candidate_count -%}
+        {%- assign auto_count = variables.auto_count -%}
         {%- if variables.allowance_exhausted == true -%}
         Monthly detonation allowance reached ({{ steps.check_allowance.output.used }}/{{ steps.check_allowance.output.allowance }}):
-        {{ auto_count }} high/critical sample hash{% if auto_count != 1 %}es{% endif %} of {{ candidate_count }} untriaged marked queued, detonation resumes after
+        {{ auto_count }} high/critical sample hash{% if auto_count != 1 %}es{% endif %} of {{ candidate_count }} undecided marked queued, detonation resumes after
         {{ steps.check_allowance.output.resetsAt | slice: 0, 10 }}.
         {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}
         {{ auto_count }} high/critical sample hash{% if auto_count != 1 %}es{% endif %}
-        of {{ candidate_count }} untriaged queued for detonation (autonomy Supervised).
+        of {{ candidate_count }} undecided queued for detonation (autonomy Supervised).
         {%- else -%}
-        {{ candidate_count }} untriaged sample hash{% if candidate_count != 1 %}es{% endif %} found (autonomy Manual):
+        {{ candidate_count }} undecided sample hash{% if candidate_count != 1 %}es{% endif %} found (autonomy Manual):
         detonation is a person's decision here — start one from an alert's
         Detonate action or an Attack Discovery proposal.
         {%- endif -%}
@@ -251,8 +310,8 @@ steps:
   - name: detonate_fan_out
     type: parallel
     mode: settled
-    if: "${{ inputs.sha256 == blank and steps.find_auto_candidates.output.values.size > 0 and variables.allowance_exhausted != true }}"
-    foreach: "${{ steps.find_auto_candidates.output.values }}"
+    if: "${{ inputs.sha256 == blank and variables.auto_count > 0 and variables.allowance_exhausted != true }}"
+    foreach: "${{ variables.auto_rows }}"
     steps:
       - name: detonate_hash
         type: workflow.executeAsync
@@ -269,24 +328,24 @@ steps:
   # --------------------------------------------------------------------------- 
   # No `.size` here: workflow.output renders against a context narrowed to the
   # referenced paths, and `values.size` is not a real key of the array, so the
-  # narrowing drops it and the count reads as empty. `| size` and `values[0]`
-  # reference paths that exist. `find_auto_candidates` is skipped on every
-  # Manual sweep and its output evicted, so its count is read through
-  # `| default:` (nil-navigation is safe, but a bare `.size` on nothing
-  # renders empty — the same fallback the endpoint-analysis worker uses).
+  # narrowing drops it and the count reads as empty. The counts come from
+  # variables, which exist on every sweep; `values[0]` references a path that
+  # exists. `candidates_exhausted` means the query found hashes and the
+  # decisions store covered every one.
   - name: emit_result
     type: workflow.output
     if: "${{ inputs.sha256 == blank }}"
     status: completed
     with:
       skip_reason: >-
-        {%- if steps.find_candidates.output.values[0] -%}
+        {%- if variables.candidate_count > 0 -%}
         {%- if variables.allowance_exhausted == true -%}allowance_reached
         {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}dispatched
         {%- else -%}manual_autonomy{%- endif -%}
+        {%- elsif steps.find_candidates.output.values[0] -%}candidates_exhausted
         {%- else -%}no_candidates{%- endif -%}
-      candidates: "${{ steps.find_candidates.output.values | size }}"
-      auto_dispatched: "${{ steps.find_auto_candidates.output.values | default: consts.no_rows | size }}"
+      candidates: "${{ variables.candidate_count }}"
+      auto_dispatched: "${{ variables.auto_count }}"
       allowance_exhausted: "${{ variables.allowance_exhausted | default: false }}"
       investigation_conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
 
@@ -296,19 +355,27 @@ steps:
   # dialog. Everything below is gated on the sha256 input being present.
   # ===========================================================================
 
-  # The alert says a detonation is underway before any VM is spent, so an
-  # analyst landing on the alert between sweep and verdict sees state, not
-  # silence. Cleared once a verdict tag lands; a run that dies leaves it, and
-  # the next sweep retries the hash.
+  # A running decision says a detonation is underway before any VM is spent, so
+  # an analyst landing on the alert between sweep and verdict sees state, not
+  # silence. A verdict replaces it; a run that dies leaves it, and it expires
+  # on its own so the next sweep retries the hash.
   - name: mark_running
-    type: security.setAlertTags
+    type: kibana.request
     if: "${{ inputs.sha256 != blank }}"
     on-failure:
       continue: true
     with:
-      alert_ids: "{{ inputs.alert_id }}"
-      tags_to_add:
-        - "detonate:running"
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        decisions:
+          - alert_id: "{{ inputs.alert_id }}"
+            state: running
+            sha256: "{{ inputs.sha256 }}"
+            execution_id: "{{ execution.id }}"
 
   # The gate only answers `known-malicious` or `unknown`. `unknown` is honest
   # uncertainty — no benign answer exists — and it is what earns a detonation.
@@ -345,13 +412,20 @@ steps:
       - match: known-malicious
         steps:
           - name: tag_known
-            type: security.setAlertTags
+            type: kibana.request
             with:
-              alert_ids: "{{ inputs.alert_id }}"
-              tags_to_add:
-                - "detonate:known-malicious"
-              tags_to_remove:
-                - "detonate:running"
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+              headers:
+                kbn-xsrf: "true"
+                elastic-api-version: "1"
+              body:
+                decisions:
+                  - alert_id: "{{ inputs.alert_id }}"
+                    state: known_malicious
+                    verdict: malicious
+                    sha256: "{{ inputs.sha256 }}"
+                    execution_id: "{{ execution.id }}"
 
           - name: note_known
             type: security.createNote
@@ -401,9 +475,9 @@ steps:
           task_id: "{{ steps.detonate.output.task_id }}"
           alert_id: "{{ inputs.alert_id }}"
 
-      # Only a complete run has a verdict. A failed or unfinished run leaves the
-      # alert without a `detonate:` verdict tag; `clear_running` below still
-      # drops the transient tag so the alert does not read as underway.
+      # Only a complete run has a verdict. A failed or unfinished run records
+      # none; `clear_running` below still releases the claim so the alert does
+      # not read as underway.
       - name: apply
         type: detonate.prototype.applyDetonationVerdict
         if: "${{ steps.verdict.output.status == 'complete' }}"
@@ -413,21 +487,29 @@ steps:
           task_id: "{{ steps.verdict.output.task_id }}"
           evidence: "{{ steps.verdict.output.evidence }}"
 
-      # The verdict tag replaces the transient running tag; the pair on one
-      # alert would otherwise read as both underway and concluded.
+      # Releases the running claim. The store ignores a release once a verdict
+      # decision is recorded, so after a complete run this is a no-op and the
+      # alert never reads as both underway and concluded.
       - name: clear_running
-        type: security.setAlertTags
+        type: kibana.request
         on-failure:
           continue: true
         with:
-          alert_ids: "{{ inputs.alert_id }}"
-          tags_to_remove:
-            - "detonate:running"
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+          body:
+            decisions:
+              - alert_id: "{{ inputs.alert_id }}"
+                state: released
+                execution_id: "{{ execution.id }}"
 
       # F9 journal leg: when an AlertZero Watch passed its Investigation's
       # conversation, the verdict is posted there too, so the sweep's whole
       # evidence trail is readable in one place. Runs after `apply` — the
-      # alert write-back is the primary contract; the journal is additive and
+      # decision write-back is the primary contract; the journal is additive and
       # must never fail a run whose verdict already landed.
       - name: journal_verdict
         type: ai.conversation.add_user_message
@@ -462,7 +544,7 @@ steps:
       # data (the common lab case) fails the FROM clause at
       # verification — "Unknown column [dns.question.name]" — and a
       # missing hunt must not fail a triage run whose verdict is already
-      # on the alert.
+      # recorded.
       - name: hunt_domains
         type: elasticsearch.esql.query
         if: "${{ steps.detonate.output.extracted_iocs != blank and steps.detonate.output.extracted_iocs.domains.size > 0 }}"
@@ -529,7 +611,7 @@ steps:
       # They sit before the blocklist gate so a pending approval there (up to an
       # hour) never delays them, and are started async so this run never parks
       # on an analyst's decision. Each one is `on-failure: continue`: the verdict
-      # is already on the alert, and a failed proposal must not fail the run.
+      # is already recorded, and a failed proposal must not fail the run.
       #
       # Benign: the sample's run history decides. Enough consecutive benign runs
       # earn an exception proposal on the rule that raised the alert.
@@ -562,8 +644,8 @@ steps:
 
       # Malicious: every alert still open on the same sample is a confirmed
       # true positive, not just the one this run was started for. A sibling
-      # that already carries a detonate verdict was covered by its own run's
-      # proposal, so only this run's alert and untagged siblings are taken.
+      # the decisions store already covers was handled by its own run's
+      # proposal, so only this run's alert and undecided siblings are taken.
       - name: open_hash_alerts
         type: elasticsearch.search
         if: "${{ inputs.conversation_id != blank and steps.verdict.output.verdict == 'malicious' }}"
@@ -581,20 +663,30 @@ steps:
                     file.hash.sha256: "{{ inputs.sha256 }}"
                 - term:
                     kibana.alert.workflow_status: open
-              should:
-                - ids:
-                    values:
-                      - "{{ inputs.alert_id }}"
-                - bool:
-                    must_not:
-                      - terms:
-                          kibana.alert.workflow_tags:
-                            - "detonate:malicious"
-                            - "detonate:benign"
-                            - "detonate:quiet"
-                            - "detonate:inconclusive"
-                            - "detonate:known-malicious"
-              minimum_should_match: 1
+
+      # Which of those siblings the decisions store covers. This run's own alert
+      # just received its verdict decision, so it is kept explicitly below.
+      - name: filter_hash_siblings
+        type: kibana.request
+        if: "${{ steps.open_hash_alerts.output.hits.hits.size > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+          body:
+            alert_ids: "${{ steps.open_hash_alerts.output.hits.hits | map: '_id' }}"
+
+      # A failed lookup narrows the close proposal to this run's own alert: the
+      # siblings cannot be told apart from ones already proposed.
+      - name: resolve_sibling_lookup
+        type: data.set
+        with:
+          covered_sibling_ids: "${{ steps.filter_hash_siblings.output.outcomes | entries | map: 'key' }}"
+          sibling_lookup_ok: '${{ steps.filter_hash_siblings.output != blank and steps.filter_hash_siblings.error == blank }}'
 
       # `if` conditions take no filters, so the proposal guards and the
       # values they need are resolved here first.
@@ -603,8 +695,19 @@ steps:
         with:
           exception_rule_uuid: "{{ steps.source_alert.output.hits.hits[0]._source['kibana.alert.rule.uuid'] }}"
           exception_rule_name: "{{ steps.source_alert.output.hits.hits[0]._source['kibana.alert.rule.name'] }}"
-          close_alert_ids: "${{ steps.open_hash_alerts.output.hits.hits | map: '_id' }}"
-          close_alert_count: "${{ steps.open_hash_alerts.output.hits.hits | size }}"
+          close_alert_ids: "${{ steps.open_hash_alerts.output.hits.hits | map: '_id' | reject_exp: 'id', \"id != inputs.alert_id and (variables.sibling_lookup_ok != true or variables.covered_sibling_ids contains id)\" }}"
+
+      - name: count_close_alerts
+        type: data.set
+        with:
+          close_alert_count: "${{ variables.close_alert_ids | size }}"
+          sibling_decisions_json: |-
+            [
+            {%- for id in variables.close_alert_ids -%}
+            {%- unless forloop.first -%},{%- endunless -%}
+            {"alert_id":{{ id | json }},"state":"verdict_applied","verdict":"malicious","task_id":{{ steps.verdict.output.task_id | json }},"sha256":{{ inputs.sha256 | json }},"execution_id":{{ execution.id | json }}}
+            {%- endfor -%}
+            ]
 
       - name: propose_exception
         type: workflow.executeAsync
@@ -643,18 +746,22 @@ steps:
             confidence: medium
             autoApprove: false
 
-      # The verdict is per sample, so the siblings in the close proposal get
-      # the tag too. Otherwise the next sweep finds them untagged, detonates
+      # The verdict is per sample, so the siblings in the close proposal get the
+      # decision too. Otherwise the next sweep finds them undecided, detonates
       # the same hash again and proposes closing them a second time.
       - name: tag_hash_siblings
-        type: security.setAlertTags
+        type: kibana.request
         if: "${{ variables.close_alert_count > 0 }}"
         on-failure:
           continue: true
         with:
-          alert_ids: "${{ variables.close_alert_ids }}"
-          tags_to_add:
-            - "detonate:malicious"
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+          body:
+            decisions: "${{ variables.sibling_decisions_json | json_parse }}"
 
       - name: propose_close
         type: workflow.executeAsync
@@ -687,7 +794,7 @@ steps:
 
       # F6: a blocklist write is a fleet-wide enforcement action, so it never
       # rides on a sandbox verdict alone — an analyst confirms it first. The
-      # gate sits after `apply` (the verdict is already on the alert either
+      # gate sits after `apply` (the verdict is already recorded either
       # way) and before any blocklist write. A timeout reads as no answer and
       # skips the blocklist: the run stays honest rather than failing loudly
       # over a decision nobody made. The failure travels as an error on the
@@ -722,7 +829,7 @@ steps:
       # stacking duplicate entries. `on-failure: continue` because a stack
       # without the blocklist list (it is created by the Artifacts UI, not
       # provisioned) must not fail the whole triage run — the verdict is
-      # already recorded on the alert.
+      # already recorded.
       - name: blocklist
         type: security.createExceptionListItem
         if: "${{ variables.blocklist_approved == true }}"
@@ -766,9 +873,9 @@ steps:
             - "Blocklisted by {{ variables.blocklist_responded_by }} after detonation task {{ steps.verdict.output.task_id }}."
 
       # A confirmed-malicious detonation is worth a case comment; a benign or
-      # inconclusive run stays on the alert, where the analyst already is.
-      # Failing to comment on the case must not fail the run — the alert
-      # already carries the verdict.
+      # inconclusive run stays with the alert, where the analyst already is.
+      # Failing to comment on the case must not fail the run — the verdict is
+      # already recorded.
       - name: case_comment_on_malicious
         type: if
         condition: "${{ steps.verdict.output.verdict == 'malicious' and inputs.case_id != blank }}"

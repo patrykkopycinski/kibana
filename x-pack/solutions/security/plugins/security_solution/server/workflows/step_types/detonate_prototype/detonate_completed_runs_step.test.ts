@@ -6,9 +6,11 @@
  */
 
 import { detonateCompletedRunsStepDefinition } from './detonate_completed_runs_step';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
-import { DETONATE_TASKS_PATH } from '../../../../common/detonate_prototype';
-import type { DetonateTask } from '../../../../common/detonate_prototype';
+import {
+  DETONATE_ALERT_OUTCOMES_PATH,
+  DETONATE_TASKS_PATH,
+} from '../../../../common/detonate_prototype';
+import type { DetonateAlertOutcomes, DetonateTask } from '../../../../common/detonate_prototype';
 
 type HandlerContext = Parameters<typeof detonateCompletedRunsStepDefinition.handler>[0];
 
@@ -45,20 +47,15 @@ const maliciousRun = (id: string, alertId: string, day: number) =>
     production_endpoint_alert_groups: [{ event_code: 'malicious_file', alerts_count: 1 }],
   });
 
-const alertHit = (id: string, tags: string[]) => ({
-  _id: id,
-  fields: { 'kibana.alert.workflow_tags': tags },
-});
-
 const createMockContext = (
   tasks: DetonateTask[],
-  hits: Array<ReturnType<typeof alertHit>> = [],
+  outcomes: DetonateAlertOutcomes['outcomes'] = {},
   maxPending = 20
 ) => {
   const callKibanaApi = jest
     .fn()
     .mockResolvedValueOnce({ status: 200, body: { offset: 0, size: 200, tasks } })
-    .mockResolvedValueOnce({ status: 200, body: { hits: { hits } } });
+    .mockResolvedValueOnce({ status: 200, body: { outcomes } });
   return {
     input: { max_pending: maxPending },
     contextManager: { callKibanaApi },
@@ -98,42 +95,30 @@ describe('detonateCompletedRunsStepDefinition', () => {
       completed_runs: 1,
       unlinked_runs: 1,
       already_applied: 0,
-      missing_alerts: 0,
       deferred: 0,
       pending_count: 0,
       pending: [],
     });
   });
 
-  it('reads the source alerts verdict tags through the alerts search route', async () => {
-    const context = createMockContext(
-      [run('t1', 'alert-1', 1), run('t2', 'alert-2', 2)],
-      [alertHit('alert-1', []), alertHit('alert-2', [])]
-    );
+  it('reads the source alerts decisions through the outcomes route, not the alerts', async () => {
+    const context = createMockContext([run('t1', 'alert-1', 1), run('t2', 'alert-2', 2)]);
 
     await detonateCompletedRunsStepDefinition.handler(context);
 
     expect(calls(context)[1]).toEqual({
       method: 'POST',
-      path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-      headers: { 'elastic-api-version': '2023-10-31' },
-      body: {
-        query: { ids: { values: ['alert-2', 'alert-1'] } },
-        fields: ['kibana.alert.workflow_tags'],
-        _source: false,
-        size: 2,
-      },
+      path: DETONATE_ALERT_OUTCOMES_PATH,
+      headers: { 'elastic-api-version': '1' },
+      body: { alert_ids: ['alert-2', 'alert-1'] },
     });
   });
 
   it('ignores failed and unfinished runs', async () => {
-    const context = createMockContext(
-      [
-        run('failed', 'alert-1', 1, { last_worker_status: 'failure' }),
-        run('running', 'alert-2', 2, { last_worker_name: 'detonate.workers.exec_sample' }),
-      ],
-      []
-    );
+    const context = createMockContext([
+      run('failed', 'alert-1', 1, { last_worker_status: 'failure' }),
+      run('running', 'alert-2', 2, { last_worker_name: 'detonate.workers.exec_sample' }),
+    ]);
 
     const output = await sweep(context);
 
@@ -144,7 +129,7 @@ describe('detonateCompletedRunsStepDefinition', () => {
   it('writes back the newest run of a re-detonated alert, with its verdict', async () => {
     const context = createMockContext(
       [run('older', 'alert-1', 1), maliciousRun('newer', 'alert-1', 3)],
-      [alertHit('alert-1', ['triaged'])]
+      { 'alert-1': { state: 'completed', verdict: 'benign', task_id: 'older' } }
     );
 
     const output = await sweep(context);
@@ -156,15 +141,17 @@ describe('detonateCompletedRunsStepDefinition', () => {
       sample_hash: 'a'.repeat(64),
       created_at: '2026-01-03T00:00:00.000Z',
       verdict: 'malicious',
-      suggested_tag: 'detonate:malicious',
     });
     expect(output.pending[0].evidence).toEqual(expect.any(String));
   });
 
-  it('skips alerts that already carry a verdict and counts alerts not found', async () => {
+  it('skips alerts whose verdict is already recorded', async () => {
     const context = createMockContext(
-      [run('t1', 'tagged', 1), run('t2', 'gone', 2), run('t3', 'open', 3)],
-      [alertHit('tagged', ['detonate:benign']), alertHit('open', ['triaged'])]
+      [run('t1', 'applied', 1), run('t2', 'unseen', 2), run('t3', 'open', 3)],
+      {
+        applied: { state: 'verdict_applied', verdict: 'benign', task_id: 't1' },
+        open: { state: 'completed', verdict: 'benign', task_id: 't3' },
+      }
     );
 
     const output = await sweep(context);
@@ -172,16 +159,15 @@ describe('detonateCompletedRunsStepDefinition', () => {
     expect(output).toMatchObject({
       completed_runs: 3,
       already_applied: 1,
-      missing_alerts: 1,
-      pending_count: 1,
+      pending_count: 2,
     });
-    expect(output.pending.map(({ alert_id: alertId }) => alertId)).toEqual(['open']);
+    expect(output.pending.map(({ alert_id: alertId }) => alertId)).toEqual(['open', 'unseen']);
   });
 
   it('defers write-backs beyond max_pending to the next sweep, newest first', async () => {
     const context = createMockContext(
       [run('t1', 'alert-1', 1), run('t2', 'alert-2', 2), run('t3', 'alert-3', 3)],
-      [alertHit('alert-1', []), alertHit('alert-2', []), alertHit('alert-3', [])],
+      {},
       2
     );
 
@@ -202,7 +188,7 @@ describe('detonateCompletedRunsStepDefinition', () => {
     );
   });
 
-  it('propagates a failed alert read rather than treating every alert as missing', async () => {
+  it('propagates a failed outcomes read rather than treating every alert as undecided', async () => {
     const context = createMockContext([run('t1', 'alert-1', 1)]);
     (context.contextManager.callKibanaApi as jest.Mock)
       .mockReset()
@@ -210,10 +196,10 @@ describe('detonateCompletedRunsStepDefinition', () => {
         status: 200,
         body: { offset: 0, size: 200, tasks: [run('t1', 'alert-1', 1)] },
       })
-      .mockRejectedValueOnce(new Error('alerts unavailable'));
+      .mockRejectedValueOnce(new Error('outcomes unavailable'));
 
     await expect(detonateCompletedRunsStepDefinition.handler(context)).rejects.toThrow(
-      'alerts unavailable'
+      'outcomes unavailable'
     );
   });
 });

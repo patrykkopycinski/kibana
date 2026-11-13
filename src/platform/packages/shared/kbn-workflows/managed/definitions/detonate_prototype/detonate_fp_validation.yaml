@@ -68,8 +68,8 @@ steps:
       evidence: "{{ steps.verdict.output.evidence }}"
 
   # Optional: mirror the evidence into the case the alert belongs to. Failing
-  # to comment on the case must not fail the run — the alert already carries
-  # the verdict.
+  # to comment on the case must not fail the run — the verdict is already
+  # recorded against the alert.
   - name: case_comment
     type: if
     condition: "${{ inputs.case_id != blank }}"

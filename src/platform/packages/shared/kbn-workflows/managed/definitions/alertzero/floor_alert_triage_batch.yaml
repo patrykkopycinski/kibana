@@ -206,24 +206,62 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 3b. Detonation enrichment (detonate prototype). Every distinct file hash in
-  #     the batch that carries no detonate verdict yet is handed to the detonate
-  #     triage workflow, which runs the reputation gate (a known-malicious hash
-  #     never spends a VM), detonates the rest and tags the alert. Fire-and-forget:
-  #     classification does not wait for a sandbox run. At most 20 hashes per
-  #     batch; any left over are still untagged, so the File Detonation sweep
-  #     picks them up. No Investigation exists yet at this point (they are created
-  #     after grouping), so the child runs journal nothing; the verdict is the tag.
+  #     the batch that the decisions store holds no decision for yet is handed to
+  #     the detonate triage workflow, which runs the reputation gate (a
+  #     known-malicious hash never spends a VM), detonates the rest and records
+  #     the verdict. Fire-and-forget: classification does not wait for a sandbox
+  #     run. At most 20 hashes per batch; any left over are still undecided, so
+  #     the File Detonation sweep picks them up. No Investigation exists yet at
+  #     this point (they are created after grouping), so the child runs journal
+  #     nothing; the verdict is the decision.
   #
   #     The probe gates the whole stage: the detonate route only exists when the
   #     prototype is enabled and answers only when the sandbox service is up, so
   #     a space without the prototype starts no child run that is bound to fail.
   # ---------------------------------------------------------------------------
+  # Detonate state does not live on the alert, so the decisions store is asked
+  # which of the batch's file-hash alerts it already covers: a terminal decision,
+  # a claim in flight, a completed run or too many failed ones. The route answers
+  # only for ids it holds something for. `if` conditions take no filters, hence
+  # the id list and its count come first.
+  - name: collect_detonate_alert_ids
+    type: data.set
+    with:
+      detonate_alert_ids: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | map: '_id' }}"
+
+  - name: count_detonate_alert_ids
+    type: data.set
+    with:
+      detonate_alert_id_count: "${{ variables.detonate_alert_ids | size }}"
+
+  - name: filter_detonate_candidates
+    type: kibana.request
+    if: "${{ variables.detonate_alert_id_count > 0 }}"
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        alert_ids: "${{ variables.detonate_alert_ids }}"
+
+  # A failed lookup detonates nothing: without it a decided sample cannot be told
+  # from an undecided one, and picking blind would spend a VM per hash again.
+  - name: resolve_detonate_lookup
+    type: data.set
+    with:
+      detonate_decided_ids: "${{ steps.filter_detonate_candidates.output.outcomes | entries | map: 'key' }}"
+      detonate_lookup_ok: '${{ steps.filter_detonate_candidates.output != blank and steps.filter_detonate_candidates.error == blank }}'
+
   # Hashes only, not alert documents: variables persist with the execution, and
   # a 100-alert batch of full documents would bloat every state write.
   - name: compute_detonate_candidates
     type: data.set
     with:
-      detonate_hashes: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | reject_exp: 'alert', \"alert.kibana.alert.workflow_tags contains 'detonate:malicious' or alert.kibana.alert.workflow_tags contains 'detonate:benign' or alert.kibana.alert.workflow_tags contains 'detonate:quiet' or alert.kibana.alert.workflow_tags contains 'detonate:inconclusive' or alert.kibana.alert.workflow_tags contains 'detonate:known-malicious'\" | map: 'file.hash.sha256' | uniq | slice: 0, 20 }}"
+      detonate_hashes: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | reject_exp: 'alert', \"variables.detonate_lookup_ok != true or variables.detonate_decided_ids contains alert._id\" | map: 'file.hash.sha256' | uniq | slice: 0, 20 }}"
 
   - name: count_detonate_candidates
     type: data.set
@@ -388,43 +426,54 @@ steps:
   # pre-rendered predicate, matching `reject_exp` usage in alert_analysis_workflow.yaml.
   #
   # A sandbox or reputation verdict outranks the classifier: an alert the detonation stage (3b)
-  # already tagged malicious or known-malicious is never proposed for closure as a false positive.
+  # already decided malicious or known-malicious is never proposed for closure as a false positive.
   # It is left out of all three predicates' "confident false positive" side, so it is tagged
   # `az:inconclusive`, lands with the alerts in no proposal and stays open for review. Only a
-  # detonated-malicious verdict raises its own true-positive proposal. The lookup re-reads the tags
-  # because they land while the batch is classified; a failed lookup leaves the floor as the only
-  # condition. A verdict that lands after this read is not seen here, but a detonation's
+  # detonated-malicious verdict raises its own true-positive proposal. The lookup re-reads the
+  # decisions because they land while the batch is classified; a failed lookup leaves the floor as
+  # the only condition. A verdict that lands after this read is not seen here, but a detonation's
   # true-positive proposal still names the alert.
+  - name: collect_fp_lookup_ids
+    type: data.set
+    with:
+      fp_lookup_ids: "${{ steps.classify_alerts.output.verdicts | where: 'classification', 'false_positive' | map: 'alert_id' }}"
+
+  - name: count_fp_lookup_ids
+    type: data.set
+    with:
+      fp_lookup_count: "${{ variables.fp_lookup_ids | size }}"
+
   - name: find_detonate_confirmed_fp
-    type: elasticsearch.search
+    type: kibana.request
+    if: "${{ variables.fp_lookup_count > 0 }}"
     on-failure:
       continue: true
     with:
-      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
-      ignore_unavailable: true
-      size: 1000
-      _source: false
-      query:
-        bool:
-          filter:
-            - terms:
-                _id: "${{ steps.classify_alerts.output.verdicts | where: 'classification', 'false_positive' | map: 'alert_id' }}"
-            - terms:
-                kibana.alert.workflow_tags:
-                  - "detonate:malicious"
-                  - "detonate:known-malicious"
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        alert_ids: "${{ variables.fp_lookup_ids }}"
+
+  # `outcomes` is keyed by alert id; `entries` turns it into key/value pairs to filter on.
+  - name: resolve_detonate_confirmed_fp
+    type: data.set
+    with:
+      detonate_confirmed_fp_ids: "${{ steps.find_detonate_confirmed_fp.output.outcomes | entries | where_exp: 'e', \"e.value.verdict == 'malicious' or e.value.state == 'known_malicious'\" | map: 'key' }}"
 
   - name: count_detonate_confirmed_fp
     type: data.set
     with:
-      detonate_confirmed_fp_count: "${{ steps.find_detonate_confirmed_fp.output.hits.hits | size }}"
+      detonate_confirmed_fp_count: "${{ variables.detonate_confirmed_fp_ids | size }}"
 
   - name: build_fp_threshold_expr
     type: data.set
     with:
-      fp_threshold_expr: "v.confidence_score >= {{ inputs.confidence_floor }}{% for hit in steps.find_detonate_confirmed_fp.output.hits.hits %} and v.alert_id != '{{ hit._id }}'{% endfor %}"
-      fp_below_floor_expr: "v.confidence_score < {{ inputs.confidence_floor }}{% for hit in steps.find_detonate_confirmed_fp.output.hits.hits %} or v.alert_id == '{{ hit._id }}'{% endfor %}"
-      fp_candidate_expr: "v.classification == 'false_positive' and v.confidence_score >= {{ inputs.confidence_floor }}{% for hit in steps.find_detonate_confirmed_fp.output.hits.hits %} and v.alert_id != '{{ hit._id }}'{% endfor %}"
+      fp_threshold_expr: "v.confidence_score >= {{ inputs.confidence_floor }}{% for id in variables.detonate_confirmed_fp_ids %} and v.alert_id != '{{ id }}'{% endfor %}"
+      fp_below_floor_expr: "v.confidence_score < {{ inputs.confidence_floor }}{% for id in variables.detonate_confirmed_fp_ids %} or v.alert_id == '{{ id }}'{% endfor %}"
+      fp_candidate_expr: "v.classification == 'false_positive' and v.confidence_score >= {{ inputs.confidence_floor }}{% for id in variables.detonate_confirmed_fp_ids %} and v.alert_id != '{{ id }}'{% endfor %}"
 
   - name: compute_fp_candidates
     type: data.set
@@ -1297,7 +1346,7 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ variables.home_conversation_id }}"
       message: |-
-        Sent {{ variables.detonate_hash_count }} file hash{% if variables.detonate_hash_count != 1 %}es{% endif %} from this batch to detonation. Known-malicious hashes are tagged from reputation without a sandbox run; each verdict lands as a `detonate:` tag on the alert.
+        Sent {{ variables.detonate_hash_count }} file hash{% if variables.detonate_hash_count != 1 %}es{% endif %} from this batch to detonation. Known-malicious hashes are tagged from reputation without a sandbox run; each verdict is recorded against the alert without changing it.
 
   - name: post_comment_detonate_overrides
     type: ai.conversation.add_user_message

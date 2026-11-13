@@ -8,8 +8,9 @@
 /**
  * Detonate prototype — apply-verdict step, shared definition.
  *
- * The writing half of the verdict: tags the alert (`detonate:<verdict>`),
- * writes the evidence as an alert note, and never touches alert status. The
+ * The writing half of the verdict: records it as a decision in the results
+ * index, writes the evidence as an alert note, and never modifies the alert
+ * document or its status. The
  * status decision stays with a human — closing on `benign` is a suggestion
  * surfaces can render, not an action the step takes.
  */
@@ -41,7 +42,7 @@ export const applyDetonationVerdictInputSchema = lazySchema(() =>
 export const applyDetonationVerdictOutputSchema = lazySchema(() =>
   z.object({
     success: z.boolean(),
-    tag: z.string(),
+    decision: z.literal('verdict_applied'),
     note_id: z.string().optional(),
     message: z.string(),
   })
@@ -60,7 +61,7 @@ export const applyDetonationVerdictStepCommonDefinition: BaseStepDefinition<
     'xpack.securitySolution.workflows.steps.applyDetonationVerdict.description',
     {
       defaultMessage:
-        'Tags the alert `detonate:VERDICT` and adds the detonation evidence as an alert note. Never changes alert status.',
+        'Records the detonation verdict for the alert in the results index and adds the evidence as an alert note. Never modifies the alert or its status.',
     }
   ),
   inputSchema: applyDetonationVerdictInputSchema,
@@ -70,7 +71,7 @@ export const applyDetonationVerdictStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.applyDetonationVerdict.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Writes exactly two things to the alert: the `detonate:VERDICT` tag and a note carrying the evidence and a link to the run. Closing the alert on a `benign` verdict stays a human decision — the step never sets status.',
+          'Prototype step. Writes a verdict decision to the results index and a note on the alert carrying the evidence and a link to the run; the alert document is not modified. Closing the alert on a `benign` verdict stays a human decision — the step never sets status.',
       }
     ),
     examples: [

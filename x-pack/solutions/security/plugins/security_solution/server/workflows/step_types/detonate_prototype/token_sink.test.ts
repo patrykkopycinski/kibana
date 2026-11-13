@@ -164,7 +164,7 @@ describe('the enrollment token and sandbox identifiers', () => {
       handlerContext<CompletedContext>(
         { max_pending: 20 },
         { offset: 0, size: 200, tasks: [TASK] },
-        { hits: { hits: [{ _id: 'alert-9', fields: { 'kibana.alert.workflow_tags': [] } }] } }
+        { outcomes: {} }
       )
     );
 

@@ -55,7 +55,7 @@ export const DETONATE_COVERAGE_GAP_WORKFLOW = {
 export const DETONATE_FP_VALIDATION_WORKFLOW = {
   id: DETONATE_FP_VALIDATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 4,
+  version: 5,
   billable: false,
   yaml: DETONATE_FP_VALIDATION_YAML,
   management: {

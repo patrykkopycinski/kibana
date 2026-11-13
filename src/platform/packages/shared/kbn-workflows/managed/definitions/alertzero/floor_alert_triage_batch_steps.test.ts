@@ -123,10 +123,10 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
     { alert_id: 'tp', classification: 'true_positive', confidence_score: 0.95 },
   ];
 
-  const candidatesWith = (hits: Array<{ _id: string }>): unknown => {
+  const candidatesWith = (confirmedIds: string[]): unknown => {
     const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
       inputs: { confidence_floor: 0.85 },
-      steps: { find_detonate_confirmed_fp: { output: { hits: { hits } } } },
+      variables: { detonate_confirmed_fp_ids: confirmedIds },
     }).trim();
     return evalExpr(fpCandidateIdsExpr, {
       steps: { classify_alerts: { output: { verdicts } } },
@@ -134,30 +134,57 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
     });
   };
 
-  it('looks up only the false-positive verdicts carrying a malicious detonate tag', () => {
-    const filter = (
-      lookup?.with?.query as { bool: { filter: Array<Record<string, Record<string, unknown>>> } }
-    ).bool.filter;
+  it('asks the decisions store about the false-positive verdicts only', () => {
+    expect(lookup?.type).toBe('kibana.request');
+    expect(lookup?.with?.method).toBe('POST');
+    expect(lookup?.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes'
+    );
     expect(
-      evalExpr(filter[0].terms._id as string, {
+      evalExpr(stepByName('collect_fp_lookup_ids')?.with?.fp_lookup_ids as string, {
         steps: { classify_alerts: { output: { verdicts } } },
       })
     ).toEqual(['fp-clean', 'fp-detonated']);
-    expect(filter[1].terms['kibana.alert.workflow_tags']).toEqual([
-      'detonate:malicious',
-      'detonate:known-malicious',
-    ]);
+    expect(lookup?.with?.body).toEqual({ alert_ids: '${{ variables.fp_lookup_ids }}' });
+  });
+
+  it('flags a malicious verdict or a known-malicious decision, and nothing else', () => {
+    const outcomes = {
+      'fp-detonated': { state: 'verdict_applied', verdict: 'malicious' },
+      'fp-known': { state: 'known_malicious' },
+      'fp-benign': { state: 'verdict_applied', verdict: 'benign' },
+      'fp-queued': { state: 'queued' },
+    };
+    expect(
+      evalExpr(
+        stepByName('resolve_detonate_confirmed_fp')?.with?.detonate_confirmed_fp_ids as string,
+        {
+          steps: { find_detonate_confirmed_fp: { output: { outcomes } } },
+        }
+      )
+    ).toEqual(['fp-detonated', 'fp-known']);
+  });
+
+  it('flags nothing when the lookup was skipped or failed', () => {
+    expect(
+      evalExpr(
+        stepByName('resolve_detonate_confirmed_fp')?.with?.detonate_confirmed_fp_ids as string,
+        {
+          steps: { find_detonate_confirmed_fp: { error: { message: 'boom' } } },
+        }
+      )
+    ).toEqual([]);
   });
 
   it('drops a detonated-malicious alert from the close candidates', () => {
-    expect(candidatesWith([{ _id: 'fp-detonated' }])).toEqual(['fp-clean']);
+    expect(candidatesWith(['fp-detonated'])).toEqual(['fp-clean']);
   });
 
   it('keeps the floor as the only condition when nothing was detonated or the lookup failed', () => {
     expect(candidatesWith([])).toEqual(['fp-clean', 'fp-detonated']);
     const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
       inputs: { confidence_floor: 0.85 },
-      steps: { find_detonate_confirmed_fp: { error: { message: 'boom' } } },
+      variables: { detonate_confirmed_fp_ids: [] },
     }).trim();
     expect(fpThresholdExpr).toBe('v.confidence_score >= 0.85');
   });
@@ -166,9 +193,7 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
     const withBlock = stepByName('build_fp_threshold_expr')?.with as Record<string, string>;
     const scope = {
       inputs: { confidence_floor: 0.85 },
-      steps: {
-        find_detonate_confirmed_fp: { output: { hits: { hits: [{ _id: 'fp-detonated' }] } } },
-      },
+      variables: { detonate_confirmed_fp_ids: ['fp-detonated'] },
     };
     const variables = {
       fp_threshold_expr: renderString(withBlock.fp_threshold_expr, scope).trim(),
@@ -207,7 +232,7 @@ describe('floor_alert_triage_batch — detonation verdict outranks the classifie
   });
 
   it('does not fail the batch when the lookup fails', () => {
-    expect(lookup?.type).toBe('elasticsearch.search');
+    expect(lookup?.type).toBe('kibana.request');
     expect(lookup?.['on-failure']?.continue).toBe(true);
   });
 
@@ -1943,14 +1968,19 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
   const branch = stepByName('detonate_hash');
   const alertIdTemplate = (branch?.with?.inputs as Record<string, string>)?.alert_id;
 
-  const alert = (id: string, sha256?: string, tags?: string[]) => ({
+  const alert = (id: string, sha256?: string) => ({
     _id: id,
     ...(sha256 ? { file: { hash: { sha256 } } } : {}),
-    ...(tags ? { kibana: { alert: { workflow_tags: tags } } } : {}),
   });
 
-  const candidates = (alerts: unknown[]): unknown =>
-    evalExpr(candidatesExpr, { steps: { load_alerts: { output: { alerts } } } });
+  const candidates = (
+    alerts: unknown[],
+    { decidedIds = [], lookupOk = true }: { decidedIds?: string[]; lookupOk?: boolean } = {}
+  ): unknown =>
+    evalExpr(candidatesExpr, {
+      steps: { load_alerts: { output: { alerts } } },
+      variables: { detonate_decided_ids: decidedIds, detonate_lookup_ok: lookupOk },
+    });
 
   it('keeps each untriaged hash once, skipping alerts with no file hash', () => {
     expect(
@@ -1958,17 +1988,47 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     ).toEqual(['h1', 'h2']);
   });
 
-  it('skips alerts that already carry any detonate verdict tag', () => {
+  it('skips alerts the decisions store already covers', () => {
     expect(
-      candidates([
-        alert('a1', 'h1', ['detonate:benign']),
-        alert('a2', 'h2', ['detonate:known-malicious']),
-        alert('a3', 'h3', ['az:triage_pending']),
-        alert('a4', 'h4', ['detonate:malicious', 'other']),
-        alert('a5', 'h5', ['detonate:inconclusive']),
-        alert('a6', 'h6', ['detonate:quiet']),
-      ])
+      candidates([alert('a1', 'h1'), alert('a2', 'h2'), alert('a3', 'h3'), alert('a4', 'h4')], {
+        decidedIds: ['a1', 'a2', 'a4'],
+      })
     ).toEqual(['h3']);
+  });
+
+  it('detonates nothing when the decisions lookup failed', () => {
+    expect(candidates([alert('a1', 'h1'), alert('a2', 'h2')], { lookupOk: false })).toEqual([]);
+  });
+
+  it('asks the decisions store about the batch file-hash alerts, and tolerates its failure', () => {
+    const filter = stepByName('filter_detonate_candidates');
+    expect(filter?.type).toBe('kibana.request');
+    expect(filter?.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes'
+    );
+    expect(filter?.with?.body).toEqual({ alert_ids: '${{ variables.detonate_alert_ids }}' });
+    expect(filter?.['on-failure']?.continue).toBe(true);
+    expect(
+      evalExpr(stepByName('collect_detonate_alert_ids')?.with?.detonate_alert_ids as string, {
+        steps: {
+          load_alerts: { output: { alerts: [alert('a1', 'h1'), alert('a2'), alert('a3', 'h3')] } },
+        },
+      })
+    ).toEqual(['a1', 'a3']);
+  });
+
+  it('reads the decided ids and the lookup health off the response', () => {
+    const withBlock = stepByName('resolve_detonate_lookup')?.with as Record<string, string>;
+    const ok = {
+      steps: { filter_detonate_candidates: { output: { outcomes: { a1: { state: 'queued' } } } } },
+    };
+    expect(evalExpr(withBlock.detonate_decided_ids, ok)).toEqual(['a1']);
+    expect(evalExpr(withBlock.detonate_lookup_ok, ok)).toBe(true);
+    expect(
+      evalExpr(withBlock.detonate_lookup_ok, {
+        steps: { filter_detonate_candidates: { error: { message: 'boom' } } },
+      })
+    ).toBe(false);
   });
 
   it('caps one batch at 20 hashes; the sweep picks up the rest', () => {

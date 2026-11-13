@@ -9,24 +9,22 @@
  * Detonate prototype — apply-verdict step, server implementation.
  *
  * Two writes through the same internal APIs the sibling steps use: the
- * `detonate:<verdict>` tag via the detection-engine tags route, and the
- * evidence as a note on the alert document (`eventId` = alert `_id`), which
- * is the surface the alert flyout renders notes from. Alert status is
- * deliberately out of scope: "close it" is a suggestion for the analyst, not
- * an action an automated tier takes on a sandbox verdict alone.
+ * verdict as a decision document in the results index (the alert itself is
+ * never modified), and the evidence as a note on the alert document
+ * (`eventId` = alert `_id`), which is the surface the alert flyout renders
+ * notes from. Alert status is deliberately out of scope: "close it" is a
+ * suggestion for the analyst, not an action an automated tier takes on a
+ * sandbox verdict alone.
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import {
-  DETONATE_LEGACY_VERDICT_TAGS,
+  DETONATE_DECISIONS_PATH,
   DETONATE_NOTE_MARKER,
   DETONATE_PROTOTYPE_APP_PATH,
-  DETONATE_VERDICTS,
-  detonateVerdictTag,
 } from '../../../../common/detonate_prototype';
-import type { DetonateVerdictName } from '../../../../common/detonate_prototype';
-import { DETECTION_ENGINE_ALERT_TAGS_URL, NOTE_URL } from '../../../../common/constants';
+import { NOTE_URL } from '../../../../common/constants';
 import { applyDetonationVerdictStepCommonDefinition } from '../../../../common/workflows/step_types/detonate_prototype/apply_detonation_verdict_step_common';
 import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
@@ -35,22 +33,19 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     const { verdict, alert_id: alertId, task_id: taskId, evidence } = context.input;
 
-    const tag = detonateVerdictTag(verdict as DetonateVerdictName);
-    // A re-run can reach a different verdict; drop the stale one so the alert
-    // never carries two contradicting outcomes.
-    const staleTags = [
-      ...DETONATE_VERDICTS.map(detonateVerdictTag),
-      ...DETONATE_LEGACY_VERDICT_TAGS,
-    ].filter((t) => t !== tag);
     const note = `${DETONATE_NOTE_MARKER}${evidence} (run: ${DETONATE_PROTOTYPE_APP_PATH}/${taskId})`;
 
     try {
-      // Tag first: if the note write fails the alert still carries the
-      // outcome, which is the half a triage queue filters on.
+      // Decision first: if the note write fails the outcome is still recorded,
+      // which is the half a sweep filters on. A re-run that reaches a different
+      // verdict overwrites the same document, so two verdicts never coexist.
       await context.contextManager.callKibanaApi({
         method: 'POST',
-        path: DETECTION_ENGINE_ALERT_TAGS_URL,
-        body: { ids: [alertId], tags: { tags_to_add: [tag], tags_to_remove: staleTags } },
+        path: DETONATE_DECISIONS_PATH,
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          decisions: [{ alert_id: alertId, state: 'verdict_applied', verdict, task_id: taskId }],
+        },
       });
 
       const { body: noteBody } = await context.contextManager.callKibanaApi<{
@@ -64,9 +59,9 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
       return {
         output: {
           success: true,
-          tag,
+          decision: 'verdict_applied',
           ...(noteBody?.note?.noteId ? { note_id: noteBody.note.noteId } : {}),
-          message: `Tagged alert ${alertId} ${tag} and added the detonation evidence note`,
+          message: `Recorded the ${verdict} verdict for alert ${alertId} and added the detonation evidence note`,
         },
       };
     } catch (error) {

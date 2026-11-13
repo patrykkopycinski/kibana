@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { readdirSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { applyDetonationVerdictStepDefinition } from './apply_detonation_verdict_step';
-import { DETECTION_ENGINE_ALERT_TAGS_URL, NOTE_URL } from '../../../../common/constants';
+import { NOTE_URL } from '../../../../common/constants';
+import { DETONATE_DECISIONS_PATH } from '../../../../common/detonate_prototype';
 
 type HandlerContext = Parameters<typeof applyDetonationVerdictStepDefinition.handler>[0];
 
@@ -30,7 +33,7 @@ const INPUT = {
 };
 
 describe('applyDetonationVerdictStepDefinition', () => {
-  it('writes the detonate:<verdict> tag and the evidence note', async () => {
+  it('records the verdict as a decision and writes the evidence note', async () => {
     const context = createMockContext(INPUT);
 
     const result = await applyDetonationVerdictStepDefinition.handler(context);
@@ -38,13 +41,12 @@ describe('applyDetonationVerdictStepDefinition', () => {
 
     expect(calls[0][0]).toStrictEqual({
       method: 'POST',
-      path: DETECTION_ENGINE_ALERT_TAGS_URL,
+      path: DETONATE_DECISIONS_PATH,
+      headers: { 'elastic-api-version': '1' },
       body: {
-        ids: ['alert-9'],
-        tags: {
-          tags_to_add: ['detonate:benign'],
-          tags_to_remove: ['detonate:malicious', 'detonate:inconclusive', 'detonate:quiet'],
-        },
+        decisions: [
+          { alert_id: 'alert-9', state: 'verdict_applied', verdict: 'benign', task_id: 'task-1' },
+        ],
       },
     });
     expect(calls[1][0]).toEqual({
@@ -60,7 +62,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
     });
     expect(result.output).toMatchObject({
       success: true,
-      tag: 'detonate:benign',
+      decision: 'verdict_applied',
       note_id: 'note-7',
     });
   });
@@ -76,6 +78,25 @@ describe('applyDetonationVerdictStepDefinition', () => {
     expect(paths.some((p) => /status|close|open/i.test(p))).toBe(false);
   });
 
+  it('never modifies the alert document through the detection-engine tags route', async () => {
+    const context = createMockContext(INPUT);
+
+    await applyDetonationVerdictStepDefinition.handler(context);
+
+    const paths = (context.contextManager.callKibanaApi as jest.Mock).mock.calls.map(
+      (call) => call[0].path as string
+    );
+    expect(paths.some((p) => /signals\/tags|alert_tags/.test(p))).toBe(false);
+    // Negative control for the check above: the source must not name the route at all.
+    const dir = __dirname;
+    const offenders = readdirSync(dir)
+      .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .filter((file) =>
+        readFileSync(join(dir, file), 'utf8').includes('DETECTION_ENGINE_ALERT_TAGS_URL')
+      );
+    expect(offenders).toEqual([]);
+  });
+
   it('still succeeds when the note write returns no noteId', async () => {
     const context = createMockContext(INPUT);
     (context.contextManager.callKibanaApi as jest.Mock)
@@ -84,7 +105,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
       .mockResolvedValueOnce({ status: 200, body: {} });
 
     const result = await applyDetonationVerdictStepDefinition.handler(context);
-    expect(result.output).toMatchObject({ success: true, tag: 'detonate:benign' });
+    expect(result.output).toMatchObject({ success: true, decision: 'verdict_applied' });
   });
 
   it('wraps failures in an execution error', async () => {

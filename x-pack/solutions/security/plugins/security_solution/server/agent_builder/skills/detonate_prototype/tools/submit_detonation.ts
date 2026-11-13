@@ -125,7 +125,7 @@ export const submitDetonationTool = ({
 
       logger.info(`Submitted detonation ${task.id} for sample ${sampleHash}`);
 
-      await recordRun(spaceId, () =>
+      void recordRun(spaceId, () =>
         toDetonationRecord(task, {
           spaceId,
           origin: {

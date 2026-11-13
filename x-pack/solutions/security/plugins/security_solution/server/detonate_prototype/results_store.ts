@@ -88,6 +88,10 @@ export const upsertDetonationRecord = async (
   );
 };
 
+/**
+ * Best-effort and at-most-once per call: a failed or timed-out write is not retried,
+ * and the origin fields live only on the submit write, so losing it loses them for good.
+ */
 export type RecordRun = (spaceId: string, buildRecord: () => DetonationRecord) => Promise<void>;
 
 /**

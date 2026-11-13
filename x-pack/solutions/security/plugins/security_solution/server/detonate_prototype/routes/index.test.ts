@@ -374,18 +374,6 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(mockResponse.customError).not.toHaveBeenCalled();
       });
 
-      it('answers without waiting for a write that never completes', async () => {
-        esClient.update.mockReturnValue(new Promise(() => {}));
-
-        await submit({ source: 'detonate_page' });
-        await flushWrites();
-
-        expect(esClient.update).toHaveBeenCalledTimes(1);
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({ id: 'task-1' }),
-        });
-      });
-
       it('rejects an origin alert id the caller cannot read, like an alert tag, and does not submit', async () => {
         callerCanRead(['alert-1']);
 
@@ -2120,6 +2108,71 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect.objectContaining({ statusCode: 404 })
       );
       expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('results writes never block the answer', () => {
+    const task = {
+      id: 'task-1',
+      created_at: '2026-12-15T10:00:00.000Z',
+      tags: ['space:default', 'alert:alert-1'],
+      ...NO_ALERT_GROUPS,
+    };
+
+    const taskRequest = () =>
+      createRequest('get', `${DETONATE_TASKS_PATH}/task-1`, undefined, { taskId: 'task-1' });
+
+    const fileRequest = () =>
+      httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: DETONATE_SUBMIT_FILE_PATH,
+        body: {
+          sample_file: Readable.from([Buffer.from('X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR')]),
+          sample_filename: 'sample.txt',
+        },
+      }) as never;
+
+    it.each([
+      [
+        'submit-hash',
+        () =>
+          submitHashHandler()(
+            createContext(),
+            createRequest('post', DETONATE_SUBMIT_HASH_PATH, {
+              sample_hash: 'a'.repeat(64),
+              tags: ['alert:alert-1'],
+            }),
+            mockResponse
+          ),
+      ],
+      ['submit-file', () => submitFileHandler()(createContext(), fileRequest(), mockResponse)],
+      ['poll', () => getTaskHandler()(createContext(), taskRequest(), mockResponse)],
+      [
+        'record',
+        () =>
+          recordHandler()(
+            createContext(),
+            createRequest('get', `${DETONATE_RUNS_PATH}/task-1/record`, undefined, {
+              id: 'task-1',
+            }),
+            mockResponse
+          ),
+      ],
+    ])('%s answers without waiting for a write that never completes', async (_name, call) => {
+      callerCanRead(['alert-1']);
+      client.submitHash.mockResolvedValue(task as never);
+      client.submitFile.mockResolvedValue(task as never);
+      client.getTask.mockResolvedValue(task as never);
+      client.getTaskUpdates.mockResolvedValue([] as never);
+      client.getTaskAlerts.mockResolvedValue([] as never);
+      esClient.update.mockReturnValue(new Promise(() => {}));
+
+      await call();
+      await flushWrites();
+
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+      expect(mockResponse.customError).not.toHaveBeenCalled();
     });
   });
 });

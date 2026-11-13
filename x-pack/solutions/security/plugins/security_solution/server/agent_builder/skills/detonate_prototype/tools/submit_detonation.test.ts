@@ -124,6 +124,18 @@ describe('submitDetonationTool', () => {
     );
   });
 
+  it('returns the result without waiting for a record write that never completes', async () => {
+    callerCanRead(['alert-1']);
+    recordRun.mockReturnValue(new Promise(() => {}));
+
+    const [result] = results(
+      await tool.handler({ sampleHash: SHA256, tags: ['alert:alert-1'] }, context)
+    );
+
+    expect(recordRun).toHaveBeenCalledTimes(1);
+    expect(result.data).toMatchObject({ task_id: 'task-1', submitted: true });
+  });
+
   it('writes nothing for a submit the service refused', async () => {
     callerCanRead(['alert-1']);
     mockSubmit.mockRejectedValue(new Error('boom'));

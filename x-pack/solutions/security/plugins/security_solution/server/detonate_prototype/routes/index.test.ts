@@ -1529,6 +1529,23 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(esClient.indices.putMapping).not.toHaveBeenCalled();
     });
 
+    it('fails the request without writing when the results mapping cannot be updated', async () => {
+      scopedCanRead(['alert-1']);
+      esClient.indices.putMapping.mockRejectedValue(new Error('mapping update refused'));
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, { decisions: [decision()] }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
     it('fails the request when the bulk write reports an item error', async () => {
       scopedCanRead(['alert-1']);
       esClient.bulk.mockResolvedValue({

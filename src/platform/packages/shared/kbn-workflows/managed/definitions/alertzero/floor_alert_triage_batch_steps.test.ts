@@ -2086,6 +2086,9 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     expect(lookup(`${H1}a`)).toEqual([{ alert_id: 'bad' }]);
     expect(lookup('g'.repeat(64))).toEqual([{ alert_id: 'bad' }]);
     expect(lookup(`${H1.slice(0, 63)}-`)).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup(` ${H1.slice(0, 63)}`)).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup('')).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup(12345)).toEqual([{ alert_id: 'bad' }]);
     expect(lookup([H1, H2])).toEqual([{ alert_id: 'bad' }]);
     expect(lookup([H1])).toEqual([{ alert_id: 'bad' }]);
     expect(lookup(H1)).toEqual([{ alert_id: 'bad', sha256: H1 }]);

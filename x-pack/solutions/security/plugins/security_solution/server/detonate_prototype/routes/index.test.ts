@@ -14,6 +14,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   DETONATE_ALERT_OUTCOMES_PATH,
   DETONATE_DECISIONS_PATH,
+  DETONATE_SWEEP_CANDIDATES_PATH,
   DETONATE_HANDOFFS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
@@ -41,6 +42,7 @@ const WORKER_WRITE_PATHS: string[] = [
   DETONATE_HANDOFFS_PATH,
   DETONATE_DECISIONS_PATH,
   DETONATE_ALERT_OUTCOMES_PATH,
+  DETONATE_SWEEP_CANDIDATES_PATH,
   `${DETONATE_RUNS_PATH}/{id}/sandbox_count`,
 ];
 
@@ -1845,6 +1847,84 @@ describe('registerDetonatePrototypeRoutes', () => {
         const config = router.versioned.post.mock.calls.find(([c]) => c.path === path)?.[0];
         expect(config?.security).toEqual(security);
       }
+    });
+  });
+
+  describe('sweep candidates', () => {
+    const sweepHandler = () =>
+      router.versioned.getRoute('post', DETONATE_SWEEP_CANDIDATES_PATH).versions['1'].handler;
+    const sweepSchema = () => {
+      const { config } = router.versioned.getRoute('post', DETONATE_SWEEP_CANDIDATES_PATH).versions[
+        '1'
+      ];
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      if (!validation || !validation.request) {
+        throw new Error('route registered without request validation');
+      }
+      return validation.request.body as { validate(body: unknown): unknown };
+    };
+
+    it('reads the alerts as the caller and the results as the internal user', async () => {
+      scopedSearch.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              sort: [1, 'alert-1'],
+              fields: { 'file.hash.sha256': [HASH_A] },
+            },
+          ],
+        },
+      });
+      esClient.mget.mockResolvedValue({ docs: [{ _id: 'alert-1', found: false }] });
+      esClient.search.mockResolvedValue({
+        aggregations: { by_alert: { buckets: [] }, by_hash: { buckets: [] } },
+      });
+
+      await sweepHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SWEEP_CANDIDATES_PATH, { limit: 20 }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { values: [['alert-1', HASH_A]], scanned: 1, truncated: false },
+      });
+      expect(scopedSearch).toHaveBeenCalledTimes(1);
+      expect(callerSearch).not.toHaveBeenCalled();
+    });
+
+    it('answers 403 when the caller cannot read the alerts', async () => {
+      scopedSearch.mockRejectedValue({ statusCode: 403 });
+
+      await sweepHandler()(
+        createContext(),
+        createRequest('post', DETONATE_SWEEP_CANDIDATES_PATH, { limit: 20 }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 403 })
+      );
+    });
+
+    it('defaults the limit and accepts the severity subset', () => {
+      expect(sweepSchema().validate({})).toEqual({ limit: 20 });
+      expect(sweepSchema().validate({ limit: 200, severities: ['high', 'critical'] })).toEqual({
+        limit: 200,
+        severities: ['high', 'critical'],
+      });
+    });
+
+    it.each([
+      ['a zero limit', { limit: 0 }],
+      ['a limit past the page size', { limit: 201 }],
+      ['an unknown severity', { severities: ['urgent'] }],
+      ['an empty severity list', { severities: [] }],
+      ['too many severities', { severities: ['low', 'medium', 'high', 'critical', 'high'] }],
+    ])('rejects %s', (_label, body) => {
+      expect(() => sweepSchema().validate(body)).toThrow();
     });
   });
 

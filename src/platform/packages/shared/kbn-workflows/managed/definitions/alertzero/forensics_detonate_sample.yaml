@@ -81,143 +81,61 @@ steps:
   # ---------------------------------------------------------------------------
   # 1. Find undecided hashes. An alert qualifies when it carries a
   #    file.hash.sha256 and is open. Detonate state does not live on the alert
-  #    (production alerts are never modified), so the query cannot exclude
-  #    what a detonation already decided: it over-fetches up to 200 hashes and
-  #    the filter step below asks the decisions store which of them to leave
-  #    alone. The STATS dedupes by hash: the detonation is per sample, not per
-  #    alert, and one representative alert carries the verdict write-back.
-  #    Known limit: decided alerts stay open, so once the 200 newest open
-  #    hashes are all decided the sweep never reaches older ones. Fixing it
-  #    needs paged lookups (outcomes caps at 200 ids per call), deferred.
-  #    Columns are ordered alert-first so `map: 'first'` (the only positional
-  #    map key the Liquid engine ships) yields alert ids.
+  #    (production alerts are never modified) and decided alerts stay open, so
+  #    the route pages the open alerts newest first and asks the decisions
+  #    store about each page until it has enough undecided hashes, within its
+  #    own page bound. The result is already deduped by hash: the detonation is
+  #    per sample, not per alert, and one representative alert carries the
+  #    verdict write-back. A failed lookup fails the sweep: picking blind would
+  #    re-detonate decided samples. Rows are positional: [0] is the alert id,
+  #    [1] its hash.
   # ---------------------------------------------------------------------------
   - name: find_candidates
-    type: elasticsearch.esql.query
+    type: kibana.request
     if: "${{ inputs.sha256 == blank }}"
     on-failure:
       retry:
         max-attempts: 3
         delay: 5s
     with:
-      query: |-
-        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
-          | WHERE file.hash.sha256 IS NOT NULL
-          | WHERE LENGTH(file.hash.sha256) == 64
-          | WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"
-          | WHERE kibana.alert.workflow_status == "open"
-          | STATS first_alert = MIN(_id), latest = MAX(@timestamp) BY file.hash.sha256
-          | SORT latest DESC
-          | KEEP first_alert, file.hash.sha256
-          | LIMIT 200
-
-  # The lookups send each row's sample hash with its alert id: without it the
-  # store cannot tell that a sibling alert's sample already ran to completion.
-  # Liquid has no object literal, hence the JSON template.
-  - name: build_candidate_lookup
-    type: data.set
-    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
-    with:
-      candidate_lookup_json: |-
-        [
-        {%- for row in steps.find_candidates.output.values -%}
-        {%- unless forloop.first -%},{%- endunless -%}
-        {"alert_id":{{ row[0] | json }},"sha256":{{ row[1] | json }}}
-        {%- endfor -%}
-        ]
-
-  # Which of the rows the decisions store already covers: a terminal decision, a
-  # claim still in flight, a run that already completed for the alert or its
-  # sample, or an alert that failed too often. The route answers only for the ids
-  # it holds a decision or run for, so an absent id is free to pick. A failed
-  # lookup fails the sweep: picking blind would re-detonate decided samples.
-  - name: filter_candidates
-    type: kibana.request
-    if: "${{ inputs.sha256 == blank and steps.find_candidates.output.values.size > 0 }}"
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
-    with:
       method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/sweep_candidates"
       headers:
         kbn-xsrf: "true"
         elastic-api-version: "1"
       body:
-        alerts: "${{ variables.candidate_lookup_json | json_parse }}"
+        limit: 200
 
-  # The Supervised subset: same alert contract plus the severity the deck
-  # names ("High or Critical file alerts with no verdict"). A separate query
-  # rather than a per-branch condition — typed `if` expressions have no
-  # shipped precedent over positional foreach rows, and the two candidate
-  # sets are both needed anyway: Manual mode still reports every untriaged
-  # hash, only Supervised acts on the high-severity ones.
+  # The Supervised subset: same contract plus the severity the deck names
+  # ("High or Critical file alerts with no verdict"). A separate scan rather
+  # than a per-branch condition: Manual mode still reports every untriaged
+  # hash, only Supervised acts on the high-severity ones. Capped at 20 samples
+  # per sweep.
   - name: find_auto_candidates
-    type: elasticsearch.esql.query
+    type: kibana.request
     if: "${{ inputs.sha256 == blank and execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' }}"
     on-failure:
       retry:
         max-attempts: 3
         delay: 5s
     with:
-      query: |-
-        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
-          | WHERE file.hash.sha256 IS NOT NULL
-          | WHERE LENGTH(file.hash.sha256) == 64
-          | WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"
-          | WHERE kibana.alert.workflow_status == "open"
-          | WHERE kibana.alert.severity IN ("high", "critical")
-          | STATS first_alert = MIN(_id), latest = MAX(@timestamp) BY file.hash.sha256
-          | SORT latest DESC
-          | KEEP first_alert, file.hash.sha256
-          | LIMIT 200
-
-  - name: build_auto_candidate_lookup
-    type: data.set
-    if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 }}"
-    with:
-      auto_candidate_lookup_json: |-
-        [
-        {%- for row in steps.find_auto_candidates.output.values -%}
-        {%- unless forloop.first -%},{%- endunless -%}
-        {"alert_id":{{ row[0] | json }},"sha256":{{ row[1] | json }}}
-        {%- endfor -%}
-        ]
-
-  - name: filter_auto_candidates
-    type: kibana.request
-    if: "${{ steps.find_auto_candidates.output != blank and steps.find_auto_candidates.output.values.size > 0 }}"
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
-    with:
       method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes"
+      path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/sweep_candidates"
       headers:
         kbn-xsrf: "true"
         elastic-api-version: "1"
       body:
-        alerts: "${{ variables.auto_candidate_lookup_json | json_parse }}"
-
-  # The kibana.request output IS the response body, so the excluded alert ids are
-  # the keys of `outcomes`; a skipped lookup leaves none. `if` conditions and the
-  # row predicates take no filters, hence the id lists are resolved first. The
-  # dispatch is capped at 20 samples per sweep, as the query limit used to do.
-  - name: resolve_exclusions
-    type: data.set
-    if: "${{ inputs.sha256 == blank }}"
-    with:
-      excluded_ids: "${{ steps.filter_candidates.output.outcomes | entries | map: 'key' }}"
-      auto_excluded_ids: "${{ steps.filter_auto_candidates.output.outcomes | entries | map: 'key' }}"
+        limit: 20
+        severities:
+          - high
+          - critical
 
   - name: resolve_candidates
     type: data.set
     if: "${{ inputs.sha256 == blank }}"
     with:
-      candidate_rows: "${{ steps.find_candidates.output.values | reject_exp: 'row', \"variables.excluded_ids contains row[0]\" }}"
-      auto_rows: "${{ steps.find_auto_candidates.output.values | default: consts.no_rows | reject_exp: 'row', \"variables.auto_excluded_ids contains row[0]\" | slice: 0, 20 }}"
+      candidate_rows: "${{ steps.find_candidates.output.values }}"
+      auto_rows: "${{ steps.find_auto_candidates.output.values | default: consts.no_rows }}"
 
   - name: count_candidates
     type: data.set
@@ -369,9 +287,8 @@ steps:
   # No `.size` here: workflow.output renders against a context narrowed to the
   # referenced paths, and `values.size` is not a real key of the array, so the
   # narrowing drops it and the count reads as empty. The counts come from
-  # variables, which exist on every sweep; `values[0]` references a path that
-  # exists. `candidates_exhausted` means the query found hashes and the
-  # decisions store covered every one.
+  # variables, which exist on every sweep. `candidates_exhausted` means the scan
+  # examined hashes and the decisions store covered every one.
   - name: emit_result
     type: workflow.output
     if: "${{ inputs.sha256 == blank }}"
@@ -382,7 +299,7 @@ steps:
         {%- if variables.allowance_exhausted == true -%}allowance_reached
         {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}dispatched
         {%- else -%}manual_autonomy{%- endif -%}
-        {%- elsif steps.find_candidates.output.values[0] -%}candidates_exhausted
+        {%- elsif steps.find_candidates.output.scanned > 0 -%}candidates_exhausted
         {%- else -%}no_candidates{%- endif -%}
       candidates: "${{ variables.candidate_count }}"
       auto_dispatched: "${{ variables.auto_count }}"

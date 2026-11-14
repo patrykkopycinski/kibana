@@ -48,6 +48,8 @@ import {
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
   DETONATE_ALERT_OUTCOMES_PATH,
+  DETONATE_SWEEP_CANDIDATES_PATH,
+  DETONATE_SWEEP_PAGE_SIZE,
   DETONATE_DECISIONS_PATH,
   DETONATE_USAGE_PATH,
   detonateAllowanceWindow,
@@ -61,6 +63,7 @@ import {
 import type {
   DetonateAlertDoc,
   DetonateAlertOutcomes,
+  DetonateSweepCandidates,
   DetonateDecisionWrite,
   DetonateFileRequest,
   DetonateHandoffList,
@@ -88,6 +91,7 @@ import {
 } from '../space_scope';
 import { toDetonationRecord } from '../detonation_record';
 import type { EnsureResultsIndex, RecordRun } from '../results_store';
+import { listSweepCandidates } from '../sweep_candidates';
 import { createResultsIndexEnsurer, getAlertOutcomes, writeAlertDecisions } from '../results_store';
 import {
   IOC_ALERT_READ_LIMIT,
@@ -1249,6 +1253,57 @@ export const registerDetonatePrototypeRoutes = ({
           return response.ok<DetonateAlertOutcomes>({
             body: { outcomes: Object.fromEntries(outcomes) },
           });
+        } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * The open-alert sample hashes no detonation has covered, newest first: the
+   * sweep's candidate list. It pages the alerts until it has `limit` undecided
+   * hashes, so a backlog of decided newer alerts cannot hide older ones. Alerts
+   * are read as the caller, results as the internal user, like the decisions route.
+   */
+  router.versioned
+    .post({
+      access: 'internal',
+      path: DETONATE_SWEEP_CANDIDATES_PATH,
+      security: DETONATE_HANDOFF_WRITE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              limit: schema.number({ min: 1, max: DETONATE_SWEEP_PAGE_SIZE, defaultValue: 20 }),
+              severities: schema.maybe(
+                schema.arrayOf(
+                  schema.oneOf([
+                    schema.literal('low'),
+                    schema.literal('medium'),
+                    schema.literal('high'),
+                    schema.literal('critical'),
+                  ]),
+                  { minSize: 1, maxSize: 4 }
+                )
+              ),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const candidates = await listSweepCandidates({
+            alertsClient: await getScopedEsClient(request),
+            resultsClient: await getInternalEsClient(),
+            spaceId: spaceIdFromRequest(request),
+            severities: request.body.severities,
+            limit: request.body.limit,
+            now: now().getTime(),
+          });
+          return response.ok<DetonateSweepCandidates>({ body: candidates });
         } catch (error) {
           return toErrorResponse(error, response);
         }

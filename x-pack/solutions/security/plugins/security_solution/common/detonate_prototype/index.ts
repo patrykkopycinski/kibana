@@ -622,6 +622,26 @@ export interface DetonateAlertOutcomes {
   outcomes: Record<string, DetonateAlertOutcome>;
 }
 
+/** Workflows read the open-alert hashes no detonation has covered yet. */
+export const DETONATE_SWEEP_CANDIDATES_PATH = `${DETONATE_PROTOTYPE_API}/sweep_candidates` as const;
+
+/** Hashes per page of the sweep's scan; the outcomes lookup caps at the same 200. */
+export const DETONATE_SWEEP_PAGE_SIZE = 200;
+
+/** The scan reads at most this many pages, so a space with a huge backlog cannot make one sweep unbounded. */
+export const DETONATE_SWEEP_MAX_PAGES = 25;
+
+export const DETONATE_SWEEP_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+export interface DetonateSweepCandidates {
+  /** Positional rows `[alert_id, sha256]`, newest hash first; one representative alert per hash. */
+  values: Array<[string, string]>;
+  /** Distinct open hashes the scan examined, decided or not. */
+  scanned: number;
+  /** The page bound stopped the scan before every hash was examined. */
+  truncated: boolean;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Sandbox telemetry                                                           */
 /* -------------------------------------------------------------------------- */

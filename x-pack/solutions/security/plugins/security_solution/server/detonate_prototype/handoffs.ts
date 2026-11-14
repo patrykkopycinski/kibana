@@ -36,7 +36,7 @@ import { DetonateServiceError } from './client';
 import { readField } from './ioc_extraction';
 import { setHandoffMarkers } from './results_store';
 
-const alertsIndex = (spaceId: string) => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+export const alertsIndex = (spaceId: string) => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
 /** Candidates read per page, before runs that are not their alert's newest are dropped. */
 const HANDOFF_CANDIDATE_FACTOR = 4;
@@ -90,7 +90,7 @@ const handoffSelector = (kind: DetonateHandoffKind): estypes.QueryDslQueryContai
   };
 };
 
-const isForbidden = (error: unknown): boolean =>
+export const isForbidden = (error: unknown): boolean =>
   typeof error === 'object' &&
   error !== null &&
   (error as { statusCode?: unknown }).statusCode === 403;

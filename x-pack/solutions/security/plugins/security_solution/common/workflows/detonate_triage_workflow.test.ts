@@ -444,8 +444,6 @@ describe('decisions lookups in the managed workflows', () => {
   it.each([
     ['floor batch: filter_detonate_candidates', floorSteps, 'filter_detonate_candidates'],
     ['floor batch: find_detonate_confirmed_fp', floorSteps, 'find_detonate_confirmed_fp'],
-    ['worker: filter_candidates', workerSteps, 'filter_candidates'],
-    ['worker: filter_auto_candidates', workerSteps, 'filter_auto_candidates'],
     ['worker: filter_hash_siblings', workerSteps, 'filter_hash_siblings'],
   ])('%s asks the alert_outcomes route', (_label, steps, name) => {
     const text = withOf(steps, name);
@@ -455,27 +453,35 @@ describe('decisions lookups in the managed workflows', () => {
 
   // The route can only match a finished run of a sibling alert by sample hash,
   // so the sweeps that know each alert's hash must send it.
-  it.each([
-    ['floor batch: filter_detonate_candidates', floorSteps, 'filter_detonate_candidates'],
-    ['worker: filter_candidates', workerSteps, 'filter_candidates'],
-    ['worker: filter_auto_candidates', workerSteps, 'filter_auto_candidates'],
-  ])('%s sends the sample hash with each alert id', (_label, steps, name) => {
-    const body = (steps.find((step) => step.name === name)?.with as { body: object }).body;
-    expect(Object.keys(body)).toEqual(['alerts']);
-    expect((body as { alerts: string }).alerts).toMatch(/variables\.\w+_lookup_json \| json_parse/);
-  });
+  it.each([['floor batch: filter_detonate_candidates', floorSteps, 'filter_detonate_candidates']])(
+    '%s sends the sample hash with each alert id',
+    (_label, steps, name) => {
+      const body = (steps.find((step) => step.name === name)?.with as { body: object }).body;
+      expect(Object.keys(body)).toEqual(['alerts']);
+      expect((body as { alerts: string }).alerts).toMatch(
+        /variables\.\w+_lookup_json \| json_parse/
+      );
+    }
+  );
 
-  it.each([
-    ['floor batch', 'build_detonate_lookup', floorSteps, 'detonate_lookup_json'],
-    ['worker', 'build_candidate_lookup', workerSteps, 'candidate_lookup_json'],
-    ['worker', 'build_auto_candidate_lookup', workerSteps, 'auto_candidate_lookup_json'],
-  ])('%s: %s builds {alert_id, sha256} pairs', (_label, name, steps, variable) => {
-    const template = String(
-      (steps.find((step) => step.name === name)?.with as Record<string, unknown>)[variable]
-    );
-    expect(template).toContain('"alert_id"');
-    expect(template).toContain('"sha256"');
-  });
+  it.each([['floor batch', 'build_detonate_lookup', floorSteps, 'detonate_lookup_json']])(
+    '%s: %s builds {alert_id, sha256} pairs',
+    (_label, name, steps, variable) => {
+      const template = String(
+        (steps.find((step) => step.name === name)?.with as Record<string, unknown>)[variable]
+      );
+      expect(template).toContain('"alert_id"');
+      expect(template).toContain('"sha256"');
+    }
+  );
+
+  // The worker's candidate scans run server-side, where the route asks the decisions store itself.
+  it.each(['find_candidates', 'find_auto_candidates'])(
+    'worker: %s reads the sweep_candidates route',
+    (name) => {
+      expect(withOf(workerSteps, name)).toContain('/internal/detonate_prototype/sweep_candidates');
+    }
+  );
 
   it('keeps the hash-sibling lookup on ids only: its open_hash_alerts all share the hash', () => {
     const body = (

@@ -17,7 +17,6 @@
 
 import { parse } from 'yaml';
 import { ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW } from './forensics_detonate_sample';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../../../spec/schema';
 import { DETONATE_TRIAGE_WORKFLOW_ID } from '../detonate_prototype';
@@ -40,8 +39,6 @@ interface YamlStep {
   cases?: (YamlStep & { match: string })[];
   default?: YamlStep[];
 }
-
-const engine = createWorkflowLiquidEngine();
 
 const worker = parse(
   ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW.yamlTemplate({
@@ -70,6 +67,8 @@ const stepByName = (name: string): YamlStep | undefined => {
 };
 
 const ALERT_OUTCOMES_PATH = '/s/{{ workflow.spaceId }}/internal/detonate_prototype/alert_outcomes';
+const SWEEP_CANDIDATES_PATH =
+  '/s/{{ workflow.spaceId }}/internal/detonate_prototype/sweep_candidates';
 const DECISIONS_PATH = '/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions';
 
 const decisionsOf = (step: YamlStep | undefined): Array<Record<string, unknown>> =>
@@ -89,86 +88,30 @@ describe('Detonate sample worker (Forensics Watch)', () => {
     });
   });
 
-  describe('candidate query', () => {
-    const query = String(stepByName('find_candidates')?.with?.query ?? '');
+  describe('candidate scan', () => {
+    const find = stepByName('find_candidates');
 
-    it('never reads detonate state off the alert: production alerts carry none', () => {
-      expect(query).not.toContain('MV_CONTAINS');
-      expect(query).not.toContain('workflow_tags');
-      expect(query).not.toContain('detonate:');
+    it('reads the candidates from the paged scan route, not an ES|QL query the 200-row cap stalls', () => {
+      expect(find?.type).toBe('kibana.request');
+      expect(find?.with?.method).toBe('POST');
+      expect(find?.with?.path).toBe(SWEEP_CANDIDATES_PATH);
+      expect(find?.with?.query).toBeUndefined();
     });
 
-    it('over-fetches 200 hashes, so the decisions filter still leaves a full sweep', () => {
-      expect(query).toContain('LIMIT 200');
+    it('asks for 200 hashes and fails the sweep without the answer', () => {
+      expect(find?.with?.body).toEqual({ limit: 200 });
+      expect(find?.['on-failure']).toEqual({ retry: { 'max-attempts': 3, delay: '5s' } });
     });
 
-    it('asks the decisions store which rows to leave alone, and fails the sweep without it', () => {
-      const filter = stepByName('filter_candidates');
-      expect(filter?.type).toBe('kibana.request');
-      expect(filter?.with?.method).toBe('POST');
-      expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
-      expect(filter?.with?.body).toEqual({
-        alerts: '${{ variables.candidate_lookup_json | json_parse }}',
-      });
-      expect(filter?.['on-failure']).toEqual({ retry: { 'max-attempts': 3, delay: '5s' } });
+    it('no longer filters rows through a separate outcomes step', () => {
+      expect(stepByName('filter_candidates')).toBeUndefined();
+      expect(stepByName('build_candidate_lookup')).toBeUndefined();
     });
 
-    it.each([
-      ['build_candidate_lookup', 'candidate_lookup_json', 'find_candidates'],
-      ['build_auto_candidate_lookup', 'auto_candidate_lookup_json', 'find_auto_candidates'],
-    ])('%s sends each row sample hash with its alert id', (name, variable, source) => {
-      const build = stepByName(name);
-      expect(build?.type).toBe('data.set');
-      const json = engine.parseAndRenderSync(String(build?.with?.[variable]), {
-        steps: {
-          [source]: {
-            output: {
-              values: [
-                ['alert-1', 'a'.repeat(64)],
-                ['alert-2', 'b'.repeat(64)],
-              ],
-            },
-          },
-        },
-      });
-      expect(JSON.parse(json)).toEqual([
-        { alert_id: 'alert-1', sha256: 'a'.repeat(64) },
-        { alert_id: 'alert-2', sha256: 'b'.repeat(64) },
-      ]);
-    });
-
-    it('only picks up open alerts, so a closed or acknowledged one is never re-detonated', () => {
-      expect(query).toContain('WHERE kibana.alert.workflow_status == "open"');
-    });
-
-    it('drops a hash that is not one 64-character value, so the lookup never 400s on it', () => {
-      // LENGTH of a multi-value field is null (the row is dropped), so one
-      // predicate also covers an alert carrying several hashes.
-      expect(query).toContain('WHERE LENGTH(file.hash.sha256) == 64');
-      expect(query.indexOf('WHERE file.hash.sha256 IS NOT NULL')).toBeLessThan(
-        query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')
+    it('passes the positional rows through, so map: first in mark_queued yields alert ids', () => {
+      expect(String(stepByName('resolve_candidates')?.with?.candidate_rows)).toBe(
+        '${{ steps.find_candidates.output.values }}'
       );
-      expect(query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')).toBeLessThan(
-        query.indexOf('STATS first_alert')
-      );
-    });
-
-    it('drops a 64-character value that is not hex, which the outcomes route would also reject', () => {
-      expect(query).toContain('WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"');
-      expect(query.indexOf('RLIKE "[0-9a-fA-F]{64}"')).toBeLessThan(
-        query.indexOf('STATS first_alert')
-      );
-    });
-
-    it('orders columns alert-first, so map: first in mark_queued yields alert ids', () => {
-      expect(query).toContain('KEEP first_alert, file.hash.sha256');
-    });
-
-    it('keeps the most recently seen hashes when more than 200 are open', () => {
-      expect(query).toContain('latest = MAX(@timestamp) BY file.hash.sha256');
-      expect(query.indexOf('SORT latest DESC')).toBeGreaterThan(query.indexOf('STATS'));
-      expect(query.indexOf('SORT latest DESC')).toBeLessThan(query.indexOf('KEEP first_alert'));
-      expect(query.indexOf('KEEP first_alert')).toBeLessThan(query.indexOf('LIMIT 200'));
     });
   });
 
@@ -200,7 +143,6 @@ describe('Detonate sample worker (Forensics Watch)', () => {
 
   describe('supervised auto-candidates', () => {
     const gate = stepByName('find_auto_candidates');
-    const query = String(gate?.with?.query ?? '');
 
     it('only runs on a scheduled sweep with supervised autonomy', () => {
       expect(gate?.if).toBe(
@@ -208,42 +150,17 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       );
     });
 
-    it('drops a hash that is not one 64-character value, like the reporting query', () => {
-      expect(query).toContain('WHERE LENGTH(file.hash.sha256) == 64');
-      expect(query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')).toBeLessThan(
-        query.indexOf('STATS first_alert')
+    it('uses the same scan, narrowed to the severity the deck names and capped at 20', () => {
+      expect(gate?.type).toBe('kibana.request');
+      expect(gate?.with?.path).toBe(SWEEP_CANDIDATES_PATH);
+      expect(gate?.with?.body).toEqual({ limit: 20, severities: ['high', 'critical'] });
+      expect(gate?.['on-failure']).toEqual({ retry: { 'max-attempts': 3, delay: '5s' } });
+    });
+
+    it('falls back to no rows when the gate skipped the scan', () => {
+      expect(String(stepByName('resolve_candidates')?.with?.auto_rows)).toBe(
+        '${{ steps.find_auto_candidates.output.values | default: consts.no_rows }}'
       );
-    });
-
-    it('drops a 64-character value that is not hex, which the outcomes route would also reject', () => {
-      expect(query).toContain('WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"');
-      expect(query.indexOf('RLIKE "[0-9a-fA-F]{64}"')).toBeLessThan(
-        query.indexOf('STATS first_alert')
-      );
-    });
-
-    it('keeps the most recently seen hashes when more than 200 are open', () => {
-      expect(query).toContain('latest = MAX(@timestamp) BY file.hash.sha256');
-      expect(query.indexOf('SORT latest DESC')).toBeGreaterThan(query.indexOf('STATS'));
-      expect(query.indexOf('SORT latest DESC')).toBeLessThan(query.indexOf('KEEP first_alert'));
-    });
-
-    it('narrows to the severity the deck names', () => {
-      expect(query).toContain('WHERE kibana.alert.severity IN ("high", "critical")');
-    });
-
-    it('reads no alert tags, and goes through the same decisions filter as the reporting query', () => {
-      expect(query).not.toContain('MV_CONTAINS');
-      expect(query).toContain('LIMIT 200');
-      const filter = stepByName('filter_auto_candidates');
-      expect(filter?.with?.path).toBe(ALERT_OUTCOMES_PATH);
-      expect(filter?.with?.body).toEqual({
-        alerts: '${{ variables.auto_candidate_lookup_json | json_parse }}',
-      });
-    });
-
-    it('caps the dispatch at 20 samples after the filter', () => {
-      expect(String(stepByName('resolve_candidates')?.with?.auto_rows)).toContain('| slice: 0, 20');
     });
   });
 

@@ -17,6 +17,7 @@
 
 import { parse } from 'yaml';
 import { ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW } from './forensics_detonate_sample';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../../../spec/schema';
 import { DETONATE_TRIAGE_WORKFLOW_ID } from '../detonate_prototype';
@@ -297,6 +298,47 @@ describe('Detonate sample worker (Forensics Watch)', () => {
 
     it('writes a global blocklist entry, so the approved hash is blocked on every endpoint', () => {
       expect(stepByName('blocklist')?.with?.tags).toEqual(['policy:all']);
+    });
+  });
+
+  describe('sweep report', () => {
+    const skipReason = (variables: Record<string, unknown>, scan: Record<string, unknown>) =>
+      createWorkflowLiquidEngine()
+        .parseAndRenderSync(String(stepByName('emit_result')?.with?.skip_reason), {
+          variables: { candidate_count: 0, ...variables },
+          execution: { triggeredBy: 'scheduled' },
+          consts: { worker_settings: { autonomy: 'manual' } },
+          steps: { find_candidates: { output: { values: [], ...scan } } },
+        })
+        .trim();
+
+    it.each([
+      ['an empty scan', { scanned: 0, truncated: false }, 'no_candidates'],
+      [
+        'a scan the decisions store fully covers',
+        { scanned: 12, truncated: false },
+        'candidates_exhausted',
+      ],
+      ['a scan that stopped at the page bound', { scanned: 12, truncated: true }, 'scan_truncated'],
+      ['a page-bound scan that saw nothing', { scanned: 0, truncated: true }, 'scan_truncated'],
+    ])('reports %s with no candidates as the expected state', (_scenario, scan, expected) => {
+      expect(skipReason({}, scan)).toBe(expected);
+    });
+
+    it('never claims coverage for a truncated scan', () => {
+      expect(skipReason({}, { scanned: 12, truncated: true })).not.toBe('candidates_exhausted');
+    });
+
+    it('keeps reporting what happened to the candidates it did find, truncated or not', () => {
+      expect(skipReason({ candidate_count: 3 }, { scanned: 12, truncated: true })).toBe(
+        'manual_autonomy'
+      );
+      expect(
+        skipReason(
+          { candidate_count: 3, allowance_exhausted: true },
+          { scanned: 12, truncated: true }
+        )
+      ).toBe('allowance_reached');
     });
   });
 

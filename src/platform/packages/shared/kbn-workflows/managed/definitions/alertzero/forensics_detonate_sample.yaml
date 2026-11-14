@@ -288,7 +288,9 @@ steps:
   # referenced paths, and `values.size` is not a real key of the array, so the
   # narrowing drops it and the count reads as empty. The counts come from
   # variables, which exist on every sweep. `candidates_exhausted` means the scan
-  # examined hashes and the decisions store covered every one.
+  # examined hashes and the decisions store covered every one. `scan_truncated`
+  # means the scan stopped at its page bound with no undecided hash found, so
+  # the hashes past the last page were never examined and nothing is covered.
   - name: emit_result
     type: workflow.output
     if: "${{ inputs.sha256 == blank }}"
@@ -299,6 +301,7 @@ steps:
         {%- if variables.allowance_exhausted == true -%}allowance_reached
         {%- elsif execution.triggeredBy == 'scheduled' and consts.worker_settings.autonomy == 'supervised' -%}dispatched
         {%- else -%}manual_autonomy{%- endif -%}
+        {%- elsif steps.find_candidates.output.truncated == true -%}scan_truncated
         {%- elsif steps.find_candidates.output.scanned > 0 -%}candidates_exhausted
         {%- else -%}no_candidates{%- endif -%}
       candidates: "${{ variables.candidate_count }}"

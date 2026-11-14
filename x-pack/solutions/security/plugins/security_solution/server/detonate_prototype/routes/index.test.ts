@@ -2014,6 +2014,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     it.each([
       ['a zero limit', { limit: 0 }],
       ['a limit past the page size', { limit: 201 }],
+      ['a fractional limit', { limit: 2.5 }],
       ['an unknown severity', { severities: ['urgent'] }],
       ['an empty severity list', { severities: [] }],
       ['too many severities', { severities: ['low', 'medium', 'high', 'critical', 'high'] }],

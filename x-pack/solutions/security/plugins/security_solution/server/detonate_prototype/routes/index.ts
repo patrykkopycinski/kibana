@@ -1305,7 +1305,13 @@ export const registerDetonatePrototypeRoutes = ({
         validate: {
           request: {
             body: schema.object({
-              limit: schema.number({ min: 1, max: DETONATE_SWEEP_PAGE_SIZE, defaultValue: 20 }),
+              limit: schema.number({
+                min: 1,
+                max: DETONATE_SWEEP_PAGE_SIZE,
+                defaultValue: 20,
+                validate: (value) =>
+                  Number.isInteger(value) ? undefined : 'Expected a whole number of hashes',
+              }),
               severities: schema.maybe(
                 schema.arrayOf(
                   schema.oneOf([

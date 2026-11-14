@@ -1830,6 +1830,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       extra: { origin?: string[]; sha256?: string } = {}
     ) => ({
       _id: id,
+      sort: ['2026-01-01T00:00:00.000Z', id],
       _source: {
         ...(alertId ? { detonate: { alert_id: alertId } } : {}),
         'detonate.origin.alert_ids': extra.origin ?? (alertId ? [alertId] : []),
@@ -1908,6 +1909,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(searchRequest.size).toBe(20);
       expect(searchRequest.sort).toEqual([
         { '@timestamp': { order: 'asc', unmapped_type: 'date' } },
+        { 'detonate.task_id': 'asc' },
       ]);
       expect(searchRequest.query).toEqual({
         bool: {
@@ -2097,14 +2099,23 @@ describe('registerDetonatePrototypeRoutes', () => {
     describe('when superseded runs fill the oldest pages', () => {
       const pageOf = (prefix: string, count: number) =>
         Array.from({ length: count }, (_, i) => runHit(`${prefix}-${i}`, `${prefix}-alert-${i}`));
-      /** Candidate pages by `from`; every alert's newest run is `current` unless named in `superseded`. */
-      const servePages = (pages: unknown[][], supersededPrefix: string) =>
+      /** Candidate pages, each requested with the last sort values of the one before; every alert's newest run is `current` unless named in `superseded`. */
+      const servePages = (
+        pages: Array<Array<ReturnType<typeof runHit>>>,
+        supersededPrefix: string
+      ) =>
         esClient.search.mockImplementation((async (request: {
           collapse?: unknown;
-          from?: number;
+          search_after?: unknown[];
           query: { bool: { filter: Array<{ terms: { 'detonate.alert_id': string[] } }> } };
         }) => {
-          if (!request.collapse) return { hits: { hits: pages[(request.from ?? 0) / 20] ?? [] } };
+          if (!request.collapse) {
+            const { search_after: after } = request;
+            const page = after
+              ? pages.findIndex((hits) => hits[hits.length - 1]?.sort?.[1] === after[1]) + 1
+              : 0;
+            return { hits: { hits: (after && page === 0 ? [] : pages[page]) ?? [] } };
+          }
           const alertIds = request.query.bool.filter[0].terms['detonate.alert_id'];
           return {
             hits: {
@@ -2126,7 +2137,23 @@ describe('registerDetonatePrototypeRoutes', () => {
         await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
         expect(handoffIds()).toEqual(['cur-0', 'cur-1', 'cur-2']);
-        expect(candidateSearches().map(([request]) => request.from)).toEqual([0, 20]);
+        expect(candidateSearches()).toHaveLength(2);
+      });
+
+      it('pages past runs that share a timestamp by the last hit’s sort values', async () => {
+        const tied = (id: string) => ({
+          ...runHit(id, id.replace('-', '-alert-')),
+          sort: ['2026-02-02T00:00:00.000Z', id],
+        });
+        servePages([pageOf('old', 19).concat(tied('tie-a')), [tied('tie-b')]], 'old');
+
+        await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+        expect(handoffIds()).toEqual(['tie-a', 'tie-b']);
+        const [first, second] = candidateSearches().map(([request]) => request);
+        expect(first).not.toHaveProperty('search_after');
+        expect(second.search_after).toEqual(['2026-02-02T00:00:00.000Z', 'tie-a']);
+        expect(second).not.toHaveProperty('from');
       });
 
       it('gives up after five pages instead of paging without bound', async () => {
@@ -2137,7 +2164,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
         await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
-        expect(candidateSearches().map(([request]) => request.from)).toEqual([0, 20, 40, 60, 80]);
+        expect(candidateSearches()).toHaveLength(5);
         expect(mockResponse.ok).toHaveBeenCalledWith({ body: { handoffs: [] } });
       });
 

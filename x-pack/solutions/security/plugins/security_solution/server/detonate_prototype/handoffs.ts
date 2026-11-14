@@ -186,6 +186,7 @@ export const listHandoffRuns = async ({
   const index = detonateResultsIndexName(spaceId);
   const pageSize = DETONATE_HANDOFF_MAX_TASKS * HANDOFF_CANDIDATE_FACTOR;
   const current = new Map<string, DetonateHandoff>();
+  let searchAfter: estypes.SortResults | undefined;
 
   for (
     let page = 0;
@@ -196,9 +197,15 @@ export const listHandoffRuns = async ({
       index,
       ignore_unavailable: true,
       allow_no_indices: true,
-      from: page * pageSize,
       size: pageSize,
-      sort: [{ '@timestamp': { order: 'asc', unmapped_type: 'date' } }],
+      // `@timestamp` alone is not unique (claims, releases and batch writes share or
+      // refresh it), so the run id breaks ties and `search_after` keeps the pages
+      // stable while writes land between them.
+      sort: [
+        { '@timestamp': { order: 'asc', unmapped_type: 'date' } },
+        { 'detonate.task_id': 'asc' },
+      ],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
       _source: [ALERT_ID_FIELD, ORIGIN_ALERTS_FIELD, SHA256_FIELD],
       query: handoffSelector(kind),
     });
@@ -226,6 +233,8 @@ export const listHandoffRuns = async ({
       });
 
     if (hits.hits.length < pageSize) break;
+    searchAfter = hits.hits[hits.hits.length - 1]?.sort;
+    if (!searchAfter) break;
   }
 
   return [...current.values()].slice(0, DETONATE_HANDOFF_MAX_TASKS);

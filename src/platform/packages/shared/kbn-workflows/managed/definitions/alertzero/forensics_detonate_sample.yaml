@@ -21,9 +21,9 @@ settings:
   # sweep renders no inputs, so its key collapses to "detonate-" — every sweep
   # shares it. A per-hash run parked at the blocklist gate keeps its slot, so
   # a later alert on the same hash waits for the next sweep, which still finds
-  # it undecided. An execution that died mid-run leaves only a transient
-  # running decision, which expires on its own, and the next sweep retries the
-  # hash: the slot is free again.
+  # it undecided. A step that fails mid-run releases its running decision; one
+  # that dies without running its fallback leaves it to expire on its own, and
+  # the next sweep retries the hash: the slot is free again.
   concurrency:
     key: "detonate-{{ inputs.sha256 }}"
     strategy: drop
@@ -316,8 +316,10 @@ steps:
   # same alert while this run is in flight, and it says so to an analyst landing
   # on the alert between sweep and verdict. It is not best-effort: if it cannot
   # be written the run fails here, before any VM is spent, like tag_known and the
-  # apply step. A verdict replaces it; a run that dies leaves it, and it expires
-  # on its own so the next sweep retries the hash.
+  # apply step. A verdict replaces it. The steps that can throw while it is held
+  # (reputation, detonate, verdict, apply) release it from an on-failure
+  # fallback; the fallback re-throws, so the run still fails. A run that dies
+  # outright leaves it, and it expires on its own so the next sweep retries.
   - name: mark_running
     type: kibana.request
     if: "${{ inputs.sha256 != blank }}"
@@ -343,6 +345,23 @@ steps:
   # path that spends a VM.
   - name: reputation
     type: detonate.prototype.detonateReputation
+    on-failure:
+      fallback:
+        - name: reputation_release_claim
+          type: kibana.request
+          on-failure:
+            continue: true
+          with:
+            method: POST
+            path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+            headers:
+              kbn-xsrf: "true"
+              elastic-api-version: "1"
+            body:
+              decisions:
+                - alert_id: "{{ inputs.alert_id }}"
+                  state: released
+                  execution_id: "{{ execution.id }}"
     if: "${{ inputs.sha256 != blank }}"
     with:
       sha256: "{{ inputs.sha256 }}"
@@ -415,6 +434,23 @@ steps:
     default:
       - name: detonate
         type: detonate.prototype.detonateSample
+        on-failure:
+          fallback:
+            - name: detonate_release_claim
+              type: kibana.request
+              on-failure:
+                continue: true
+              with:
+                method: POST
+                path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+                headers:
+                  kbn-xsrf: "true"
+                  elastic-api-version: "1"
+                body:
+                  decisions:
+                    - alert_id: "{{ inputs.alert_id }}"
+                      state: released
+                      execution_id: "{{ execution.id }}"
         with:
           sample_hash: "{{ inputs.sha256 }}"
           # The sandbox OS is recorded on the task and surfaces in the verdict
@@ -428,6 +464,23 @@ steps:
 
       - name: verdict
         type: detonate.prototype.detonateVerdict
+        on-failure:
+          fallback:
+            - name: verdict_release_claim
+              type: kibana.request
+              on-failure:
+                continue: true
+              with:
+                method: POST
+                path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+                headers:
+                  kbn-xsrf: "true"
+                  elastic-api-version: "1"
+                body:
+                  decisions:
+                    - alert_id: "{{ inputs.alert_id }}"
+                      state: released
+                      execution_id: "{{ execution.id }}"
         with:
           task_id: "{{ steps.detonate.output.task_id }}"
           alert_id: "{{ inputs.alert_id }}"
@@ -437,6 +490,23 @@ steps:
       # not read as underway.
       - name: apply
         type: detonate.prototype.applyDetonationVerdict
+        on-failure:
+          fallback:
+            - name: apply_release_claim
+              type: kibana.request
+              on-failure:
+                continue: true
+              with:
+                method: POST
+                path: "/s/{{ workflow.spaceId }}/internal/detonate_prototype/decisions"
+                headers:
+                  kbn-xsrf: "true"
+                  elastic-api-version: "1"
+                body:
+                  decisions:
+                    - alert_id: "{{ inputs.alert_id }}"
+                      state: released
+                      execution_id: "{{ execution.id }}"
         if: "${{ steps.verdict.output.status == 'complete' }}"
         with:
           verdict: "{{ steps.verdict.output.verdict }}"

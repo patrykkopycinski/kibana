@@ -270,6 +270,24 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       expect(decisionsOf(clear)).toEqual([expect.objectContaining({ state: 'released' })]);
     });
 
+    it.each(['reputation', 'detonate', 'verdict', 'apply'])(
+      'releases the running claim from a fallback when %s throws',
+      (name) => {
+        const onFailure = stepByName(name)?.['on-failure'] as { fallback?: YamlStep[] } | undefined;
+        const [release] = onFailure?.fallback ?? [];
+        expect(onFailure?.fallback).toHaveLength(1);
+        expect(release?.with?.path).toBe(DECISIONS_PATH);
+        expect(release?.['on-failure']).toEqual({ continue: true });
+        expect(decisionsOf(release)).toEqual([
+          {
+            alert_id: '{{ inputs.alert_id }}',
+            state: 'released',
+            execution_id: '{{ execution.id }}',
+          },
+        ]);
+      }
+    );
+
     it('keeps the blocklist behind the approval gate, never on the verdict alone', () => {
       expect(stepByName('blocklist_gate')?.type).toBe('waitForApproval');
       expect(String(stepByName('blocklist')?.if)).toBe(

@@ -150,10 +150,37 @@ describe('listSweepCandidates', () => {
       limit: 5,
     });
 
-    expect(alertsClient.search).toHaveBeenCalledTimes(DETONATE_SWEEP_MAX_PAGES);
+    expect(alertsClient.search).toHaveBeenCalledTimes(DETONATE_SWEEP_MAX_PAGES + 1);
+    expect(alertsClient.search.mock.calls[DETONATE_SWEEP_MAX_PAGES][0].size).toBe(1);
     expect(result.values).toEqual([]);
     expect(result.truncated).toBe(true);
     expect(result.scanned).toBe(DETONATE_SWEEP_MAX_PAGES * DETONATE_SWEEP_PAGE_SIZE);
+  });
+
+  it('reports an exhaustive scan when the one-hit probe past the bound is empty', async () => {
+    const decided = new Set<string>();
+    const pages = Array.from({ length: DETONATE_SWEEP_MAX_PAGES }, (_page, i) =>
+      page(
+        Array.from({ length: DETONATE_SWEEP_PAGE_SIZE }, (_, j) => {
+          const hit = alertHit(i * DETONATE_SWEEP_PAGE_SIZE + j + 1);
+          decided.add(hit._id);
+          return hit;
+        })
+      )
+    );
+    const alertsClient = { search: jest.fn() };
+    pages.forEach((p) => alertsClient.search.mockResolvedValueOnce(p));
+    alertsClient.search.mockResolvedValueOnce(page([])); // the probe
+
+    const result = await listSweepCandidates({
+      alertsClient: alertsClient as never,
+      resultsClient: resultsClientDeciding(decided) as never,
+      spaceId: 'default',
+      limit: 5,
+    });
+
+    expect(alertsClient.search).toHaveBeenCalledTimes(DETONATE_SWEEP_MAX_PAGES + 1);
+    expect(result.truncated).toBe(false);
   });
 
   it('never calls the results store with an empty id list when a page yields nothing fresh', async () => {

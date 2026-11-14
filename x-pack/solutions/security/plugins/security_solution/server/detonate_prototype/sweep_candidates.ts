@@ -57,10 +57,9 @@ export const listSweepCandidates = async ({
   let truncated = false;
 
   for (let page = 0; values.length < limit; page++) {
-    if (page === DETONATE_SWEEP_MAX_PAGES) {
-      truncated = true;
-      break;
-    }
+    // The page past the bound is a one-hit probe: any hit proves older alerts
+    // went unexamined; an empty probe means the scan was exhaustive.
+    const atBound = page === DETONATE_SWEEP_MAX_PAGES;
 
     let hits: estypes.SearchHit[];
     try {
@@ -70,7 +69,7 @@ export const listSweepCandidates = async ({
         index: alertsIndex(spaceId),
         ignore_unavailable: true,
         allow_no_indices: true,
-        size: DETONATE_SWEEP_PAGE_SIZE,
+        size: atBound ? 1 : DETONATE_SWEEP_PAGE_SIZE,
         // `@timestamp` is not unique, so the alert uuid breaks ties and the pages stay stable.
         sort: [
           { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
@@ -97,6 +96,11 @@ export const listSweepCandidates = async ({
         throw new DetonateServiceError('You cannot read the alerts of this space.', 403);
       }
       throw error;
+    }
+
+    if (atBound) {
+      truncated = hits.length > 0;
+      break;
     }
 
     // One representative alert per hash: the detonation is per sample, and that alert

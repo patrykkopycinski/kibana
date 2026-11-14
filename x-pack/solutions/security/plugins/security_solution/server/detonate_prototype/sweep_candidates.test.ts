@@ -156,6 +156,29 @@ describe('listSweepCandidates', () => {
     expect(result.scanned).toBe(DETONATE_SWEEP_MAX_PAGES * DETONATE_SWEEP_PAGE_SIZE);
   });
 
+  it('never calls the results store with an empty id list when a page yields nothing fresh', async () => {
+    // No hash on this page is a valid sha256, so `fresh` is empty and
+    // `getAlertOutcomes` must skip its mget rather than hand ES an empty ids
+    // array.
+    const alertsClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(page([alertHit(1, 'not-a-hash'), alertHit(2, 'also-not-a-hash')])),
+    };
+    const resultsClient = resultsClientDeciding(new Set());
+
+    const result = await listSweepCandidates({
+      alertsClient: alertsClient as never,
+      resultsClient: resultsClient as never,
+      spaceId: 'default',
+      limit: 10,
+    });
+
+    expect(result).toEqual({ values: [], scanned: 0, truncated: false });
+    expect(resultsClient.mget).not.toHaveBeenCalled();
+    expect(resultsClient.search).not.toHaveBeenCalled();
+  });
+
   it('filters on the space, open status and requested severities', async () => {
     const alertsClient = { search: jest.fn().mockResolvedValue(page([])) };
 

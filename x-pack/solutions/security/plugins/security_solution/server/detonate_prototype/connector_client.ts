@@ -75,6 +75,24 @@ const SERVICE_STATUS_PATTERN = /\(status (\d{3})\)/;
 
 const PARAMS_VALIDATION_PREFIX = 'error validating action params';
 
+/**
+ * The connector reports a service it could not reach, or one that did not answer in
+ * time, in the transport's own words. Misconfiguration and rate limits carry none of
+ * them. The executor stamps every returned error as user-sourced, so `errorSource`
+ * cannot tell these apart and the message shape is what is classified.
+ */
+const UNREACHABLE_PATTERN =
+  /\b(?:ECONNREFUSED|ECONNRESET|ECONNABORTED|ENOTFOUND|EAI_AGAIN|EHOSTUNREACH|ENETUNREACH|ETIMEDOUT)\b|socket hang up|timeout of \d+ms exceeded|timed out|getaddrinfo/i;
+
+const isAbortOrTimeout = (error: unknown): boolean =>
+  error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError');
+
+const unavailable = () =>
+  new DetonateServiceError(
+    'The detonation sandbox is unavailable: the Detonate connector could not reach the service.',
+    DETONATE_SANDBOX_UNAVAILABLE_STATUS
+  );
+
 export interface ConnectorDetonateClientOptions {
   /** Resolves an actions client scoped to the requesting user. */
   getActionsClient: () => Promise<ActionsClient>;
@@ -165,6 +183,9 @@ export const createConnectorDetonateClient = ({
           403
         );
       }
+      if (isAbortOrTimeout(error) || UNREACHABLE_PATTERN.test(String((error as Error)?.message))) {
+        throw unavailable();
+      }
       throw new DetonateServiceError('The Detonate connector could not be run.', 502);
     }
 
@@ -188,10 +209,10 @@ export const createConnectorDetonateClient = ({
         toDetonateStatusCode(Number(status))
       );
     }
-    throw new DetonateServiceError(
-      'The detonation sandbox is unavailable: the Detonate connector could not reach the service.',
-      DETONATE_SANDBOX_UNAVAILABLE_STATUS
-    );
+    if (UNREACHABLE_PATTERN.test(`${message} ${result.serviceMessage ?? ''}`)) {
+      throw unavailable();
+    }
+    throw new DetonateServiceError('The Detonate connector failed to run the action.', 502);
   };
 
   const unexpected = (subAction: string): never => {

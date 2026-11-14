@@ -291,14 +291,55 @@ describe('createConnectorDetonateClient', () => {
       expect(error.message).toBe(`The detonation service answered ${serviceStatus}.`);
     });
 
-    it('turns a failure without a service status into an unavailable sandbox (503) and logs the detail', async () => {
-      execute.mockResolvedValue(failed('an error occurred while running the action', SERVICE_BODY));
+    it.each([
+      [
+        'a misconfigured connector',
+        'the Detonate connector is missing the required URL configuration field',
+      ],
+      ['an actions rate limit', 'Action execution rate limit exceeded for connector: .detonate'],
+      ['an unrecognised connector error', 'an error occurred while running the action'],
+    ])('keeps %s a 502 and logs the detail', async (_name, message) => {
+      execute.mockResolvedValue(failed(message, SERVICE_BODY));
+
+      const error = await expectServiceError(client().getTask('task-1'), 502);
+
+      expect(error.message).not.toContain('unavailable');
+      expect(error.message).not.toContain(SERVICE_BODY);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(SERVICE_BODY));
+    });
+
+    it.each([
+      ['a refused connection', 'connect ECONNREFUSED 10.0.0.4:8080'],
+      ['an unresolvable host', 'getaddrinfo ENOTFOUND detonate.internal'],
+      ['a request timeout', 'timeout of 30000ms exceeded'],
+    ])('turns %s into an unavailable sandbox (503) and logs the detail', async (_name, detail) => {
+      execute.mockResolvedValue(
+        failed('an error occurred while running the action', `${detail} ${SERVICE_BODY}`)
+      );
 
       const error = await expectServiceError(client().getTask('task-1'), 503);
 
       expect(error.message).toContain('sandbox is unavailable');
       expect(error.message).not.toContain(SERVICE_BODY);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(SERVICE_BODY));
+    });
+
+    it('lets a numeric service status win over a transport word in its body', async () => {
+      execute.mockResolvedValue(failed(`Detonate getTask failed (status 500): ECONNREFUSED`));
+
+      await expectServiceError(client().getTask('task-1'), 502);
+    });
+
+    it.each([
+      ['an aborted call', new DOMException('This operation was aborted', 'AbortError')],
+      ['a timed-out call', new DOMException('The operation timed out', 'TimeoutError')],
+      ['a refused connection', new Error('connect ECONNREFUSED 10.0.0.4:8080')],
+    ])('turns %s thrown by the actions client into a 503', async (_name, thrown) => {
+      execute.mockRejectedValue(thrown);
+
+      const error = await expectServiceError(client().getTask('task-1'), 503);
+
+      expect(error.message).toContain('sandbox is unavailable');
     });
 
     it('rejects an answer of the wrong shape', async () => {

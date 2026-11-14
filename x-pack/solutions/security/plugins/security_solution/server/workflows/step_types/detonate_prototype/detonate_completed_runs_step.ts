@@ -26,12 +26,10 @@ import { toApiExecutionError } from '../../utils/to_api_execution_error';
 const MAX_RUNS = 200;
 
 /**
- * The sweep's read half. Lists this space's runs through the plugin's tasks
- * route, keeps the newest completed run per source alert, and drops every
- * alert whose verdict is already recorded. That read goes through the
- * plugin's outcomes route over the results index, so it is space-scoped and
- * privilege-checked like the other plugin routes and never touches the alert
- * documents.
+ * The sweep's read half: the newest completed run per source alert whose
+ * verdict is not yet recorded. Decisions come from the plugin's outcomes route
+ * over the results index, so the read is space-scoped and privilege-checked and
+ * never touches the alert documents.
  */
 export const detonateCompletedRunsStepDefinition = createServerStepDefinition({
   ...detonateCompletedRunsStepCommonDefinition,
@@ -53,8 +51,7 @@ export const detonateCompletedRunsStepDefinition = createServerStepDefinition({
       .filter((task) => deriveDetonationRunStatus(task) === 'complete')
       .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-    // A re-detonated alert has several runs; the newest one is the verdict
-    // the alert should carry.
+    // A re-detonated alert has several runs; the newest carries the verdict.
     const newestByAlert = new Map<string, DetonateTask>();
     let unlinkedRuns = 0;
     for (const task of completed) {

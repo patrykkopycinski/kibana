@@ -115,7 +115,8 @@ export const DETONATE_RULE_CREATION_WORKFLOW = {
  * Worker. Reads the hunt handoff list (oldest first, at most five tasks),
  * hunts each run record's extracted IOCs across production logs, and opens
  * one Investigation per run whose hunt found exposure on other hosts, then
- * requests a coverage review from the Detection Worker via a handoff marker. The AlertZero Hunt Worker's tick calls this sweep when the detonate
+ * requests a coverage review from the Detection Worker via a handoff marker.
+ * The AlertZero Hunt Worker's tick calls this sweep when the detonate
  * prototype dev setting is on.
  */
 export const DETONATE_IOC_HUNT_WORKFLOW = {

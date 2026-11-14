@@ -27,10 +27,9 @@ import {
 } from '../../common/detonate_prototype';
 
 /**
- * A run as one flat, ECS-style document: what the result flyout's Table and
- * JSON tabs show and what other surfaces copy from. Every field is listed
- * here; nothing is spread from the task, so a field the service adds later
- * (or one it should never have returned) cannot reach a reader.
+ * A run as one flat, ECS-style document, the source for the result flyout's
+ * Table and JSON tabs. Every field is listed explicitly and nothing is spread
+ * from the task, so a field the service adds later cannot reach a reader.
  */
 export interface DetonationRecord {
   '@timestamp': string;
@@ -116,9 +115,8 @@ export interface DetonationHandoffFields {
 }
 
 /**
- * Every field either kind of document can carry. A union of key sets, not an
- * intersection of the shapes: the two `doc_kind` literals are disjoint, so the
- * intersection is `never` and its `keyof` accepts any key.
+ * A union of key sets, not an intersection of the shapes: the two `doc_kind`
+ * literals are disjoint, so the intersection is `never` and its `keyof` accepts any key.
  */
 type ResultsDocField =
   | keyof DetonationRecord

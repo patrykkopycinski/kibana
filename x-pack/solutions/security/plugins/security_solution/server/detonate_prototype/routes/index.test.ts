@@ -1450,7 +1450,7 @@ describe('registerDetonatePrototypeRoutes', () => {
           retry_on_conflict: 3,
         },
       });
-      expect(operations[1].doc).toEqual(
+      expect(operations[1].upsert).toEqual(
         expect.objectContaining({
           'detonate.doc_kind': 'alert_decision',
           'detonate.decision.state': 'verdict_applied',
@@ -1458,6 +1458,23 @@ describe('registerDetonatePrototypeRoutes', () => {
         })
       );
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    it('writes one document per alert when a batch repeats an id, the last decision winning', async () => {
+      scopedCanRead(['alert-1']);
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, {
+          decisions: [decision({ verdict: 'benign' }), decision({ verdict: 'malicious' })],
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { written: 1 } });
+      const [[{ operations }]] = esClient.bulk.mock.calls;
+      expect(operations).toHaveLength(2);
+      expect(operations[1].upsert['detonate.verdict']).toBe('malicious');
     });
 
     it('checks readability through the scoped client, never the origin-only context client', async () => {
@@ -1543,6 +1560,9 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(esClient.indices.putMapping).toHaveBeenCalledWith(
         expect.objectContaining({ index: '.kibana-detonate-results-default' }),
         expect.anything()
+      );
+      expect(esClient.indices.putMapping.mock.invocationCallOrder[0]).toBeLessThan(
+        esClient.bulk.mock.invocationCallOrder[0]
       );
     });
 
@@ -2249,9 +2269,10 @@ describe('registerDetonatePrototypeRoutes', () => {
         mockResponse
       );
 
-      expect(mockResponse.customError).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: 404 })
-      );
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: 'No results document for this run in this space.' },
+      });
     });
 
     it('accepts only the five handoff markers, and at least one', () => {

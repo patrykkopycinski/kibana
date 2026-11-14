@@ -291,6 +291,7 @@ export const setRunHandoffMarkers = async ({
   remove: readonly DetonateHandoffMarker[];
 }): Promise<number> => {
   const found = await setHandoffMarkers({ esClient, spaceId, taskId, add, remove });
-  if (!found) throw new DetonateServiceError('The detonation service answered 404.', 404);
+  if (!found)
+    throw new DetonateServiceError('No results document for this run in this space.', 404);
   return 1;
 };

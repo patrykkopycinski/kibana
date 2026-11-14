@@ -232,8 +232,10 @@ steps:
   # The lookup sends each alert's sample hash with its id: without it the store
   # cannot tell that a sibling alert's sample already ran to completion. The field
   # is a keyword a rule can fill with an array or any text, so only a single
-  # 64-character string is sent; the rest go id-only. Liquid has no object
-  # literal, hence the JSON template.
+  # 64-character hex string (what the route accepts) is sent; the rest go
+  # id-only. Liquid has no regex, so hex is checked by stripping every hex digit
+  # and requiring nothing is left. Liquid has no object literal, hence the JSON
+  # template.
   - name: build_detonate_lookup
     type: data.set
     with:
@@ -244,7 +246,11 @@ steps:
         {%- unless forloop.first -%},{%- endunless -%}
         {%- assign raw = alert.file.hash.sha256 -%}
         {%- assign lead = raw | json | slice: 0, 1 -%}
+        {%- assign nonhex = 'x' -%}
         {%- if lead == '"' and raw.size == 64 -%}
+        {%- assign nonhex = raw | downcase | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9' | remove: 'a' | remove: 'b' | remove: 'c' | remove: 'd' | remove: 'e' | remove: 'f' -%}
+        {%- endif -%}
+        {%- if nonhex.size == 0 -%}
         {"alert_id":{{ alert._id | json }},"sha256":{{ raw | json }}}
         {%- else -%}
         {"alert_id":{{ alert._id | json }}}
@@ -281,7 +287,7 @@ steps:
 
   # Hashes only, not alert documents: variables persist with the execution, and
   # a 100-alert batch of full documents would bloat every state write. Read from
-  # the lookup entries, which already drop a hash that is not one 64-character string.
+  # the lookup entries, which already drop a hash that is not one 64-character hex string.
   - name: compute_detonate_candidates
     type: data.set
     with:

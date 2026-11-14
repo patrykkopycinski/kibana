@@ -9,10 +9,9 @@
  * Detonate prototype — apply-verdict step, server implementation.
  *
  * Two writes through the same internal APIs the sibling steps use: the
- * verdict as a decision document in the results index (the alert itself is
- * never modified), and the evidence as a note on the alert document
- * (`eventId` = alert `_id`), which is the surface the alert flyout renders
- * notes from. Alert status is deliberately out of scope: "close it" is a
+ * evidence as a note on the alert document (`eventId` = alert `_id`), which is
+ * the surface the alert flyout renders notes from, then the verdict as a
+ * decision document in the results index (the alert itself is never modified). Alert status is deliberately out of scope: "close it" is a
  * suggestion for the analyst, not an action an automated tier takes on a
  * sandbox verdict alone.
  */
@@ -36,9 +35,20 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
     const note = `${DETONATE_NOTE_MARKER}${evidence} (run: ${DETONATE_PROTOTYPE_APP_PATH}/${taskId})`;
 
     try {
-      // Decision first: if the note write fails the outcome is still recorded,
-      // which is the half a sweep filters on. A re-run that reaches a different
-      // verdict overwrites the same document, so two verdicts never coexist.
+      // Note first: the decision is what a sweep filters on, so a failed note
+      // after it would leave the alert `verdict_applied` with no evidence and
+      // no retry. This way a failure of either write leaves the alert pending
+      // and the step throws, at the cost of a duplicate note when the decision
+      // write fails and the step is retried. A re-run that reaches a different
+      // verdict overwrites the same decision document, so two never coexist.
+      const { body: noteBody } = await context.contextManager.callKibanaApi<{
+        note?: { noteId?: string };
+      }>({
+        method: 'PATCH',
+        path: NOTE_URL,
+        body: { note: { note, eventId: alertId, timelineId: '' } },
+      });
+
       await context.contextManager.callKibanaApi({
         method: 'POST',
         path: DETONATE_DECISIONS_PATH,
@@ -46,14 +56,6 @@ export const applyDetonationVerdictStepDefinition = createServerStepDefinition({
         body: {
           decisions: [{ alert_id: alertId, state: 'verdict_applied', verdict, task_id: taskId }],
         },
-      });
-
-      const { body: noteBody } = await context.contextManager.callKibanaApi<{
-        note?: { noteId?: string };
-      }>({
-        method: 'PATCH',
-        path: NOTE_URL,
-        body: { note: { note, eventId: alertId, timelineId: '' } },
       });
 
       return {

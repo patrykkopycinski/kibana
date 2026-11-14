@@ -1162,15 +1162,18 @@ export const registerDetonatePrototypeRoutes = ({
           const written = await writeAlertDecisions(
             esClient,
             spaceId,
-            decisions.map((decision) => ({
-              alertId: decision.alert_id,
-              state: decision.state,
-              verdict: decision.verdict,
-              taskId: decision.task_id,
-              executionId: decision.execution_id,
-              sha256: decision.sha256,
-              reason: decision.reason,
-            })),
+            // One document per alert: a repeated id would be written twice and counted twice.
+            [...new Map(decisions.map((decision) => [decision.alert_id, decision])).values()].map(
+              (decision) => ({
+                alertId: decision.alert_id,
+                state: decision.state,
+                verdict: decision.verdict,
+                taskId: decision.task_id,
+                executionId: decision.execution_id,
+                sha256: decision.sha256,
+                reason: decision.reason,
+              })
+            ),
             now()
           );
           return response.ok<DetonateDecisionWrite>({ body: { written } });

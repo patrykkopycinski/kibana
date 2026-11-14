@@ -42,7 +42,7 @@ export const ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW = {
   id: ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 8,
+  version: 9,
   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
     renderScheduledWorkerYaml(
       FORENSICS_DETONATE_SAMPLE_YAML,

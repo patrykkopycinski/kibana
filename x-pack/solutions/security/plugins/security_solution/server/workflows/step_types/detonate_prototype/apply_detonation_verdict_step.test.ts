@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readdirSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 import { applyDetonationVerdictStepDefinition } from './apply_detonation_verdict_step';
 import { NOTE_URL } from '../../../../common/constants';
@@ -19,8 +19,8 @@ const createMockContext = (input: Record<string, unknown>) =>
     contextManager: {
       callKibanaApi: jest
         .fn()
-        .mockResolvedValueOnce({ status: 200 })
-        .mockResolvedValueOnce({ status: 200, body: { note: { noteId: 'note-7' } } }),
+        .mockResolvedValueOnce({ status: 200, body: { note: { noteId: 'note-7' } } })
+        .mockResolvedValueOnce({ status: 200 }),
     },
     logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as unknown as HandlerContext);
@@ -33,23 +33,13 @@ const INPUT = {
 };
 
 describe('applyDetonationVerdictStepDefinition', () => {
-  it('records the verdict as a decision and writes the evidence note', async () => {
+  it('writes the evidence note, then records the verdict as a decision', async () => {
     const context = createMockContext(INPUT);
 
     const result = await applyDetonationVerdictStepDefinition.handler(context);
     const calls = (context.contextManager.callKibanaApi as jest.Mock).mock.calls;
 
-    expect(calls[0][0]).toStrictEqual({
-      method: 'POST',
-      path: DETONATE_DECISIONS_PATH,
-      headers: { 'elastic-api-version': '1' },
-      body: {
-        decisions: [
-          { alert_id: 'alert-9', state: 'verdict_applied', verdict: 'benign', task_id: 'task-1' },
-        ],
-      },
-    });
-    expect(calls[1][0]).toEqual({
+    expect(calls[0][0]).toEqual({
       method: 'PATCH',
       path: NOTE_URL,
       body: {
@@ -58,6 +48,16 @@ describe('applyDetonationVerdictStepDefinition', () => {
           eventId: 'alert-9',
           timelineId: '',
         },
+      },
+    });
+    expect(calls[1][0]).toStrictEqual({
+      method: 'POST',
+      path: DETONATE_DECISIONS_PATH,
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        decisions: [
+          { alert_id: 'alert-9', state: 'verdict_applied', verdict: 'benign', task_id: 'task-1' },
+        ],
       },
     });
     expect(result.output).toMatchObject({
@@ -88,12 +88,10 @@ describe('applyDetonationVerdictStepDefinition', () => {
     );
     expect(paths.some((p) => /signals\/tags|alert_tags/.test(p))).toBe(false);
     // The runtime paths above only cover this input; the source scan catches a call on any branch.
-    const dir = __dirname;
-    const offenders = readdirSync(dir)
-      .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))
-      .filter((file) =>
-        readFileSync(join(dir, file), 'utf8').includes('DETECTION_ENGINE_ALERT_TAGS_URL')
-      );
+    const source = readFileSync(join(__dirname, 'apply_detonation_verdict_step.ts'), 'utf8');
+    const offenders = [/DETECTION_ENGINE_ALERT_TAGS_URL/, /signals\/tags|alert_tags/].filter(
+      (pattern) => pattern.test(source)
+    );
     expect(offenders).toEqual([]);
   });
 
@@ -101,11 +99,39 @@ describe('applyDetonationVerdictStepDefinition', () => {
     const context = createMockContext(INPUT);
     (context.contextManager.callKibanaApi as jest.Mock)
       .mockReset()
-      .mockResolvedValueOnce({ status: 200 })
-      .mockResolvedValueOnce({ status: 200, body: {} });
+      .mockResolvedValueOnce({ status: 200, body: {} })
+      .mockResolvedValueOnce({ status: 200 });
 
     const result = await applyDetonationVerdictStepDefinition.handler(context);
     expect(result.output).toMatchObject({ success: true, decision: 'verdict_applied' });
+  });
+
+  it('does not record the decision when the note write fails, so the alert stays pending', async () => {
+    const context = createMockContext(INPUT);
+    (context.contextManager.callKibanaApi as jest.Mock)
+      .mockReset()
+      .mockRejectedValueOnce(new Error('note failed'));
+
+    await expect(applyDetonationVerdictStepDefinition.handler(context)).rejects.toThrow(
+      /note failed/
+    );
+    const calls = (context.contextManager.callKibanaApi as jest.Mock).mock.calls;
+    expect(calls).toHaveLength(1);
+    expect(calls[0][0].path).toBe(NOTE_URL);
+  });
+
+  it('throws when the decision write fails after the note', async () => {
+    const context = createMockContext(INPUT);
+    (context.contextManager.callKibanaApi as jest.Mock)
+      .mockReset()
+      .mockResolvedValueOnce({ status: 200, body: { note: { noteId: 'note-7' } } })
+      .mockRejectedValueOnce(new Error('decision failed'));
+
+    await expect(applyDetonationVerdictStepDefinition.handler(context)).rejects.toThrow(
+      /decision failed/
+    );
+    const calls = (context.contextManager.callKibanaApi as jest.Mock).mock.calls;
+    expect(calls.map((call) => call[0].path)).toEqual([NOTE_URL, DETONATE_DECISIONS_PATH]);
   });
 
   it('wraps failures in an execution error', async () => {

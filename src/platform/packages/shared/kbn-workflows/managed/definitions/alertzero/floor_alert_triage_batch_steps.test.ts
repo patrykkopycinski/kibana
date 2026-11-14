@@ -2066,7 +2066,7 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     ).toEqual([]);
   });
 
-  it('sends an alert whose hash is not one 64-character string id-only, never the bad value', () => {
+  it('sends an alert whose hash is not one 64-character hex string id-only, never the bad value', () => {
     const lookup = (hash: unknown) =>
       JSON.parse(
         renderString(
@@ -2084,9 +2084,14 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
 
     expect(lookup('not-a-hash')).toEqual([{ alert_id: 'bad' }]);
     expect(lookup(`${H1}a`)).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup('g'.repeat(64))).toEqual([{ alert_id: 'bad' }]);
+    expect(lookup(`${H1.slice(0, 63)}-`)).toEqual([{ alert_id: 'bad' }]);
     expect(lookup([H1, H2])).toEqual([{ alert_id: 'bad' }]);
     expect(lookup([H1])).toEqual([{ alert_id: 'bad' }]);
     expect(lookup(H1)).toEqual([{ alert_id: 'bad', sha256: H1 }]);
+    expect(lookup('0123456789abcdef'.repeat(4))).toEqual([
+      { alert_id: 'bad', sha256: '0123456789abcdef'.repeat(4) },
+    ]);
   });
 
   it('reads the decided ids and the lookup health off the response', () => {

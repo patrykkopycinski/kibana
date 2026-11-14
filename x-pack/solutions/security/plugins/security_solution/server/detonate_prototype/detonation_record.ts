@@ -115,14 +115,21 @@ export interface DetonationHandoffFields {
   'detonate.handoff.coverage'?: string[];
 }
 
-/** Every field either kind of document can carry. */
-type ResultsDocFields = DetonationRecord & AlertDecisionRecord & DetonationHandoffFields;
+/**
+ * Every field either kind of document can carry. A union of key sets, not an
+ * intersection of the shapes: the two `doc_kind` literals are disjoint, so the
+ * intersection is `never` and its `keyof` accepts any key.
+ */
+type ResultsDocField =
+  | keyof DetonationRecord
+  | keyof AlertDecisionRecord
+  | keyof DetonationHandoffFields;
 
 export type DetonationRecordFieldType = 'keyword' | 'date' | 'long' | 'boolean';
 
 /** Every results-index field and its Elasticsearch type; the index mapping is built from it. */
 export const DETONATION_RECORD_FIELDS: Readonly<
-  Record<keyof ResultsDocFields, DetonationRecordFieldType>
+  Record<ResultsDocField, DetonationRecordFieldType>
 > = {
   '@timestamp': 'date',
   'detonate.doc_kind': 'keyword',

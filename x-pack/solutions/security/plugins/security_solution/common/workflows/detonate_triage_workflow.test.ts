@@ -462,6 +462,7 @@ describe('decisions lookups in the managed workflows', () => {
   ])('%s sends the sample hash with each alert id', (_label, steps, name) => {
     const body = (steps.find((step) => step.name === name)?.with as { body: object }).body;
     expect(Object.keys(body)).toEqual(['alerts']);
+    expect((body as { alerts: string }).alerts).toMatch(/variables\.\w+_lookup_json \| json_parse/);
   });
 
   it.each([

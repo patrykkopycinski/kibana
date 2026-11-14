@@ -86,6 +86,9 @@ steps:
   #    the filter step below asks the decisions store which of them to leave
   #    alone. The STATS dedupes by hash: the detonation is per sample, not per
   #    alert, and one representative alert carries the verdict write-back.
+  #    Known limit: decided alerts stay open, so once the 200 newest open
+  #    hashes are all decided the sweep never reaches older ones. Fixing it
+  #    needs paged lookups (outcomes caps at 200 ids per call), deferred.
   #    Columns are ordered alert-first so `map: 'first'` (the only positional
   #    map key the Liquid engine ships) yields alert ids.
   # ---------------------------------------------------------------------------
@@ -101,6 +104,7 @@ steps:
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE file.hash.sha256 IS NOT NULL
           | WHERE LENGTH(file.hash.sha256) == 64
+          | WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"
           | WHERE kibana.alert.workflow_status == "open"
           | STATS first_alert = MIN(_id), latest = MAX(@timestamp) BY file.hash.sha256
           | SORT latest DESC
@@ -161,6 +165,7 @@ steps:
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE file.hash.sha256 IS NOT NULL
           | WHERE LENGTH(file.hash.sha256) == 64
+          | WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"
           | WHERE kibana.alert.workflow_status == "open"
           | WHERE kibana.alert.severity IN ("high", "critical")
           | STATS first_alert = MIN(_id), latest = MAX(@timestamp) BY file.hash.sha256
@@ -282,11 +287,14 @@ steps:
 
   # Over the allowance nothing is dispatched; the auto-candidates get a queued
   # decision so the alert state badge shows why, and the Investigation says
-  # when detonation resumes. The queued decision is display-only: nothing relies
-  # on it for correctness, so a failed write is tolerated. (Manual mode never dispatches, so never queues;
-  # the manual journal message says detonation is a person's decision.) Nothing
-  # clears the claim here: it expires on its own, and the next sweep that runs
-  # under the allowance simply dispatches. The decisions route takes an array,
+  # when detonation resumes. A fresh queued decision keeps the alert out of the
+  # next sweeps until it expires (DETONATE_TRANSIENT_DECISION_TTL_MS), which is
+  # the intent: the allowance is exhausted, so re-picking it would only
+  # re-queue. A failed write is tolerated: the alert is simply picked again
+  # next sweep. (Manual mode never dispatches, so never queues; the manual
+  # journal message says detonation is a person's decision.) Nothing clears the
+  # claim here: it expires on its own, and the first sweep after that under the
+  # allowance dispatches. The decisions route takes an array,
   # which Liquid cannot build, so the body is a JSON string parsed back.
   - name: mark_queued
     type: kibana.request

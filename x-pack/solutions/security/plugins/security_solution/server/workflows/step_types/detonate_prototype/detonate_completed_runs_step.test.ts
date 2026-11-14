@@ -177,6 +177,22 @@ describe('detonateCompletedRunsStepDefinition', () => {
     expect(output.pending.map(({ task_id: taskId }) => taskId)).toEqual(['t3', 't2']);
   });
 
+  it('treats an outcomes answer without an outcomes map as nothing decided', async () => {
+    const context = createMockContext([maliciousRun('t1', 'alert-1', 1)]);
+    (context.contextManager.callKibanaApi as jest.Mock)
+      .mockReset()
+      .mockResolvedValueOnce({
+        status: 200,
+        body: { offset: 0, size: 200, tasks: [maliciousRun('t1', 'alert-1', 1)] },
+      })
+      .mockResolvedValueOnce({ status: 200, body: {} });
+
+    const output = await sweep(context);
+
+    expect(output.already_applied).toBe(0);
+    expect(output.pending_count).toBe(1);
+  });
+
   it('propagates a failed run listing as an execution error', async () => {
     const context = createMockContext([]);
     (context.contextManager.callKibanaApi as jest.Mock)

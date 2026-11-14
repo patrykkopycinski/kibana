@@ -153,6 +153,13 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       );
     });
 
+    it('drops a 64-character value that is not hex, which the outcomes route would also reject', () => {
+      expect(query).toContain('WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"');
+      expect(query.indexOf('RLIKE "[0-9a-fA-F]{64}"')).toBeLessThan(
+        query.indexOf('STATS first_alert')
+      );
+    });
+
     it('orders columns alert-first, so map: first in mark_queued yields alert ids', () => {
       expect(query).toContain('KEEP first_alert, file.hash.sha256');
     });
@@ -204,6 +211,13 @@ describe('Detonate sample worker (Forensics Watch)', () => {
     it('drops a hash that is not one 64-character value, like the reporting query', () => {
       expect(query).toContain('WHERE LENGTH(file.hash.sha256) == 64');
       expect(query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')).toBeLessThan(
+        query.indexOf('STATS first_alert')
+      );
+    });
+
+    it('drops a 64-character value that is not hex, which the outcomes route would also reject', () => {
+      expect(query).toContain('WHERE file.hash.sha256 RLIKE "[0-9a-fA-F]{64}"');
+      expect(query.indexOf('RLIKE "[0-9a-fA-F]{64}"')).toBeLessThan(
         query.indexOf('STATS first_alert')
       );
     });

@@ -134,17 +134,24 @@ export const ensureResultsMapping = async (
   }
 };
 
-export type EnsureResultsIndex = (esClient: ElasticsearchClient, spaceId: string) => Promise<void>;
+export type EnsureResultsIndex = (
+  esClient: ElasticsearchClient,
+  spaceId: string,
+  onMappingError?: (error: unknown) => void
+) => Promise<void>;
 
 /**
  * Installs the template once per process and updates each space's mapping once.
- * A failed step is forgotten so the next call retries it.
+ * A failed step is forgotten so the next call retries it. With `onMappingError`
+ * a failed mapping update is reported there instead of thrown, for a caller
+ * whose write does not depend on it; a template failure always throws, because
+ * an index created without the template would be stuck on dynamic mappings.
  */
 export const createResultsIndexEnsurer = (): EnsureResultsIndex => {
   let template: Promise<void> | undefined;
   const mappings = new Map<string, Promise<void>>();
 
-  return async (esClient, spaceId) => {
+  return async (esClient, spaceId, onMappingError) => {
     template =
       template ??
       installResultsTemplate(esClient).catch((error) => {
@@ -160,7 +167,12 @@ export const createResultsIndexEnsurer = (): EnsureResultsIndex => {
         throw error;
       });
     mappings.set(spaceId, mapping);
-    await mapping;
+    try {
+      await mapping;
+    } catch (error) {
+      if (!onMappingError) throw error;
+      onMappingError(error);
+    }
   };
 };
 
@@ -191,6 +203,8 @@ const toAlertDecisionRecord = (
   ...(decision.executionId ? { 'detonate.workflow.execution_id': decision.executionId } : {}),
 });
 
+const DECISION_RETRY_ON_CONFLICT = 3;
+
 /**
  * A terminal decision is only replaced by another terminal one. A claim (`queued`,
  * `running`) written over it would turn a failed re-run of a decided alert into
@@ -198,11 +212,17 @@ const toAlertDecisionRecord = (
  * A release is bound by the same rule, because the always-run release step fires
  * after the verdict is applied.
  */
-const DECISION_RETRY_ON_CONFLICT = 3;
-
 const KEEP_TERMINAL = `if (params.terminal.contains(ctx._source['detonate.decision.state'])) {
   ctx.op = 'noop';
 } else {`;
+
+/**
+ * A terminal decision replaces the whole document: a merge would keep the
+ * previous decision's optional fields (an old verdict, reason or task) on a
+ * decision that carries none.
+ */
+const TERMINAL_SCRIPT = `ctx._source.clear();
+ctx._source.putAll(params.doc);`;
 
 const CLAIM_SCRIPT = `${KEEP_TERMINAL}
   ctx._source.putAll(params.doc);
@@ -256,7 +276,10 @@ export const writeAlertDecisions = async (
     ];
     if (decision.state === 'released') return guarded(RELEASE_SCRIPT);
     if (decision.state === 'queued' || decision.state === 'running') return guarded(CLAIM_SCRIPT);
-    return [action, { doc, doc_as_upsert: true }];
+    return [
+      action,
+      { script: { lang: 'painless', source: TERMINAL_SCRIPT, params: { doc } }, upsert: doc },
+    ];
   });
 
   const response = await esClient.bulk({ operations }, AWAITED_TRANSPORT_OPTIONS);
@@ -570,7 +593,14 @@ export const createRunRecorder = ({
       const record = buildRecord();
       taskId = record['detonate.task_id'];
       const esClient = await getInternalEsClient();
-      await ensureResultsIndex(esClient, spaceId);
+      // The upsert targets an existing index or creates one from the template, so a
+      // failed mapping update (slow, or a conflict on an older space index) costs
+      // only search on the newer fields, not the run record.
+      await ensureResultsIndex(esClient, spaceId, (error) =>
+        logger.warn(
+          `Detonation ${taskId}: could not update the results mapping, writing anyway: ${error}`
+        )
+      );
       await upsertDetonationRecord(esClient, spaceId, record);
     } catch (error) {
       logger.warn(

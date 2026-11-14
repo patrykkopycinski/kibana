@@ -70,14 +70,13 @@ export const detonateCompletedRunsStepDefinition = createServerStepDefinition({
     let outcomes: DetonateAlertOutcomes['outcomes'] = {};
     if (alertIds.length > 0) {
       try {
-        ({
-          body: { outcomes },
-        } = await contextManager.callKibanaApi<DetonateAlertOutcomes>({
+        const { body } = await contextManager.callKibanaApi<DetonateAlertOutcomes>({
           method: 'POST',
           path: DETONATE_ALERT_OUTCOMES_PATH,
           headers: { 'elastic-api-version': '1' },
           body: { alert_ids: alertIds },
-        }));
+        });
+        outcomes = body?.outcomes ?? {};
       } catch (error) {
         throw toApiExecutionError(error, 'read detonation verdict decisions');
       }

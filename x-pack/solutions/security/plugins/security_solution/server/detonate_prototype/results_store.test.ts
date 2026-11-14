@@ -145,19 +145,20 @@ describe('createRunRecorder', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('task-1'));
   });
 
-  it('logs and skips the write when the mapping update fails, then retries the mapping', async () => {
+  it('warns and still writes when the mapping update fails, then retries the mapping', async () => {
     const { esClient, logger, recordRun } = setup();
     esClient.indices.putMapping
       .mockRejectedValueOnce(responseError(403, 'security_exception'))
       .mockResolvedValue({ acknowledged: true });
 
     await expect(recordRun('team-a', () => RECORD)).resolves.toBeUndefined();
-    expect(esClient.update).not.toHaveBeenCalled();
+    expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('writing anyway'));
 
     await recordRun('team-a', () => RECORD);
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
-    expect(esClient.update).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledTimes(2);
   });
 
   it('retries the template install after it failed, and does not write in between', async () => {
@@ -186,6 +187,28 @@ const responseError = (statusCode: number, type: string) =>
   } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
 
 describe('createResultsIndexEnsurer', () => {
+  it('reports a failed mapping update to the callback instead of throwing, and throws without one', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.putMapping.mockRejectedValue(responseError(403, 'security_exception'));
+    const onMappingError = jest.fn();
+    const ensure = createResultsIndexEnsurer();
+
+    await expect(ensure(esClient, 'team-a', onMappingError)).resolves.toBeUndefined();
+    expect(onMappingError).toHaveBeenCalledTimes(1);
+    await expect(ensure(esClient, 'team-a')).rejects.toThrow();
+  });
+
+  it('still throws a template failure when a mapping callback is given', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.putIndexTemplate.mockRejectedValue(new Error('no privileges'));
+    const onMappingError = jest.fn();
+
+    await expect(createResultsIndexEnsurer()(esClient, 'team-a', onMappingError)).rejects.toThrow(
+      'no privileges'
+    );
+    expect(onMappingError).not.toHaveBeenCalled();
+  });
+
   it('updates the mapping of an existing index once per space', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const ensure = createResultsIndexEnsurer();
@@ -282,7 +305,8 @@ describe('writeAlertDecisions', () => {
         update: { _index: '.kibana-detonate-results-team-a', _id: 'alert-1', retry_on_conflict: 3 },
       },
       {
-        doc: {
+        script: expect.objectContaining({ lang: 'painless' }),
+        upsert: {
           '@timestamp': NOW.toISOString(),
           'detonate.doc_kind': 'alert_decision',
           'detonate.alert_id': 'alert-1',
@@ -293,7 +317,6 @@ describe('writeAlertDecisions', () => {
           'file.hash.sha256': 'abcdef',
           'detonate.workflow.execution_id': 'exec-1',
         },
-        doc_as_upsert: true,
       },
       {
         update: { _index: '.kibana-detonate-results-team-a', _id: 'alert-2', retry_on_conflict: 3 },
@@ -324,12 +347,11 @@ describe('writeAlertDecisions', () => {
       expect(claim.script.source).toContain("ctx.op = 'noop'");
       expect(claim.script.source).toContain('putAll(params.doc)');
       expect(claim.upsert['detonate.decision.state']).toBe(state);
-      expect(claim).not.toHaveProperty('doc_as_upsert');
     }
   );
 
   it.each(['verdict_applied', 'known_malicious', 'skipped', 'not_eligible'] as const)(
-    'writes a terminal %s decision unconditionally, so a re-run verdict replaces the old one',
+    'writes a terminal %s decision unconditionally and replaces the whole document',
     async (state) => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
@@ -337,12 +359,31 @@ describe('writeAlertDecisions', () => {
       await writeAlertDecisions(esClient, 'team-a', [{ alertId: 'alert-1', state }], NOW);
 
       const { operations } = esClient.bulk.mock.calls[0][0] as unknown as {
-        operations: [unknown, Record<string, unknown>];
+        operations: [unknown, ReleaseOperation];
       };
-      expect(operations[1]).toHaveProperty('doc_as_upsert', true);
-      expect(operations[1]).not.toHaveProperty('script');
+      const [, terminal] = operations;
+      expect(terminal.script.source).not.toContain('noop');
+      expect(terminal.script.source).toContain('ctx._source.clear()');
+      expect(terminal.script.source).toContain('putAll(params.doc)');
+      expect(terminal.upsert['detonate.decision.state']).toBe(state);
     }
   );
+
+  it("does not carry a previous decision's optional fields into a terminal one", async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+    await writeAlertDecisions(esClient, 'team-a', [{ alertId: 'alert-1', state: 'skipped' }], NOW);
+
+    const { operations } = esClient.bulk.mock.calls[0][0] as unknown as {
+      operations: [unknown, ReleaseOperation];
+    };
+    const [, terminal] = operations;
+    expect(terminal.script.source.indexOf('clear()')).toBeLessThan(
+      terminal.script.source.indexOf('putAll')
+    );
+    expect(terminal.upsert).not.toHaveProperty('detonate.verdict');
+  });
 
   it('writes nothing for an empty list', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();

@@ -36,6 +36,7 @@ import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import { DETONATE_VM_OS_FAMILIES } from '../../../common/detonate_prototype';
 import type {
+  DetonateSubmitOrigin,
   DetonateSubmitSource,
   DetonateTask,
   DetonateVmOsFamily,
@@ -83,188 +84,192 @@ interface Props {
   initialTags?: string[];
   /** Which surface the form sits in; recorded with the run. */
   source: DetonateSubmitSource;
+  /** Context the surface already knows (alert, host, user, path); recorded with the run. */
+  initialOrigin?: Omit<DetonateSubmitOrigin, 'source'>;
   onSubmitted: (task: DetonateTask) => void;
 }
 
-export const SubmitForm = React.memo<Props>(({ initialHash, initialTags, source, onSubmitted }) => {
-  const modalTitleId = useGeneratedHtmlId();
-  const [mode, setMode] = useState<SubmitMode>('hash');
-  const [hash, setHash] = useState(initialHash ?? '');
-  const [file, setFile] = useState<File | undefined>();
-  const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    (initialTags ?? []).map((label) => ({ label }))
-  );
-  const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(UNSET);
-  /** The button arms the run; the modal's confirm is what actually submits. */
-  const [isConfirming, setIsConfirming] = useState(false);
+export const SubmitForm = React.memo<Props>(
+  ({ initialHash, initialTags, source, initialOrigin, onSubmitted }) => {
+    const modalTitleId = useGeneratedHtmlId();
+    const [mode, setMode] = useState<SubmitMode>('hash');
+    const [hash, setHash] = useState(initialHash ?? '');
+    const [file, setFile] = useState<File | undefined>();
+    const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>(
+      (initialTags ?? []).map((label) => ({ label }))
+    );
+    const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(UNSET);
+    /** The button arms the run; the modal's confirm is what actually submits. */
+    const [isConfirming, setIsConfirming] = useState(false);
 
-  const submitHash = useSubmitHash();
-  const submitFile = useSubmitFile();
-  const active = mode === 'hash' ? submitHash : submitFile;
+    const submitHash = useSubmitHash();
+    const submitFile = useSubmitFile();
+    const active = mode === 'hash' ? submitHash : submitFile;
 
-  const tagValues = useMemo(() => tags.map(({ label }) => label), [tags]);
+    const tagValues = useMemo(() => tags.map(({ label }) => label), [tags]);
 
-  const options = useMemo(
-    () => ({
-      ...(tagValues.length ? { tags: tagValues } : {}),
-      ...(osFamily ? { vm_os_family: osFamily } : {}),
-      origin: { source },
-    }),
-    [tagValues, osFamily, source]
-  );
+    const options = useMemo(
+      () => ({
+        ...(tagValues.length ? { tags: tagValues } : {}),
+        ...(osFamily ? { vm_os_family: osFamily } : {}),
+        origin: { ...initialOrigin, source },
+      }),
+      [tagValues, osFamily, source, initialOrigin]
+    );
 
-  const hasSubmitPrivilege = useCanSubmitDetonation();
-  const hasSample = mode === 'hash' ? hash.trim().length > 0 : file !== undefined;
-  const canSubmit = hasSubmitPrivilege && hasSample;
+    const hasSubmitPrivilege = useCanSubmitDetonation();
+    const hasSample = mode === 'hash' ? hash.trim().length > 0 : file !== undefined;
+    const canSubmit = hasSubmitPrivilege && hasSample;
 
-  const doSubmit = useCallback(async () => {
-    // Errors are surfaced by the mutation state (the error callout below), but
-    // the discarded promise would still be an unhandled rejection — catch here
-    // so a failed submit is not also a console error.
-    const submit = async () => {
-      if (mode === 'hash') {
-        const task = await submitHash.mutateAsync({ sample_hash: hash.trim(), ...options });
-        onSubmitted(task);
-        return;
+    const doSubmit = useCallback(async () => {
+      // Errors are surfaced by the mutation state (the error callout below), but
+      // the discarded promise would still be an unhandled rejection — catch here
+      // so a failed submit is not also a console error.
+      const submit = async () => {
+        if (mode === 'hash') {
+          const task = await submitHash.mutateAsync({ sample_hash: hash.trim(), ...options });
+          onSubmitted(task);
+          return;
+        }
+        if (file) {
+          const task = await submitFile.mutateAsync({ file, ...options });
+          onSubmitted(task);
+        }
+      };
+      await submit().catch(() => undefined);
+    }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
+
+    const onConfirm = useCallback(() => {
+      setIsConfirming(false);
+      void doSubmit();
+    }, [doSubmit]);
+
+    const onCreateTag = useCallback((label: string) => {
+      const trimmed = label.trim();
+      if (trimmed) {
+        setTags((current) => [...current, { label: trimmed }]);
       }
-      if (file) {
-        const task = await submitFile.mutateAsync({ file, ...options });
-        onSubmitted(task);
-      }
-    };
-    await submit().catch(() => undefined);
-  }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
+    }, []);
 
-  const onConfirm = useCallback(() => {
-    setIsConfirming(false);
-    void doSubmit();
-  }, [doSubmit]);
+    const onFileChange = useCallback((files: FileList | null) => {
+      setFile(files?.[0]);
+    }, []);
 
-  const onCreateTag = useCallback((label: string) => {
-    const trimmed = label.trim();
-    if (trimmed) {
-      setTags((current) => [...current, { label: trimmed }]);
-    }
-  }, []);
-
-  const onFileChange = useCallback((files: FileList | null) => {
-    setFile(files?.[0]);
-  }, []);
-
-  return (
-    <EuiPanel hasBorder data-test-subj={SUBMIT_FORM_TEST_ID}>
-      <EuiTitle size="s">
-        <h2>{i18n.SUBMIT_PANEL_TITLE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-
-      <EuiTabs size="s">
-        <EuiTab isSelected={mode === 'hash'} onClick={() => setMode('hash')}>
-          {i18n.SUBMIT_BY_HASH}
-        </EuiTab>
-        <EuiTab isSelected={mode === 'file'} onClick={() => setMode('file')}>
-          {i18n.SUBMIT_BY_FILE}
-        </EuiTab>
-      </EuiTabs>
-      <EuiSpacer size="m" />
-
-      <EuiForm component="form" onSubmit={(event) => event.preventDefault()}>
-        {mode === 'hash' ? (
-          <EuiFormRow label={i18n.SAMPLE_HASH_LABEL} helpText={i18n.SAMPLE_HASH_HELP} fullWidth>
-            <EuiFieldText
-              fullWidth
-              value={hash}
-              onChange={(event) => setHash(event.target.value)}
-              data-test-subj={SUBMIT_HASH_INPUT_TEST_ID}
-            />
-          </EuiFormRow>
-        ) : (
-          <EuiFormRow label={i18n.SAMPLE_FILE_LABEL} fullWidth>
-            <EuiFilePicker
-              fullWidth
-              initialPromptText={i18n.SAMPLE_FILE_PROMPT}
-              onChange={onFileChange}
-              data-test-subj={SUBMIT_FILE_INPUT_TEST_ID}
-            />
-          </EuiFormRow>
-        )}
-
-        <EuiFormRow label={i18n.TAGS_LABEL} helpText={i18n.TAGS_HELP} fullWidth>
-          <EuiComboBox
-            fullWidth
-            noSuggestions
-            selectedOptions={tags}
-            onChange={setTags}
-            onCreateOption={onCreateTag}
-            data-test-subj="detonatePrototypeTags"
-          />
-        </EuiFormRow>
-
-        <EuiFormRow label={i18n.OS_FAMILY_LABEL} fullWidth>
-          <EuiSelect
-            fullWidth
-            options={osOptions}
-            value={osFamily}
-            onChange={(event) =>
-              setOsFamily(event.target.value as DetonateVmOsFamily | typeof UNSET)
-            }
-            data-test-subj="detonatePrototypeOsFamily"
-          />
-        </EuiFormRow>
-
-        {active.isError && (
-          <>
-            <EuiSpacer size="m" />
-            <KbnDangerCallout
-              announceOnMount
-              title={errorMessage(active.error)}
-              data-test-subj={SUBMIT_ERROR_TEST_ID}
-            />
-          </>
-        )}
-
-        {!hasSubmitPrivilege && (
-          <>
-            <EuiSpacer size="m" />
-            <KbnInfoCallout
-              title={i18n.SUBMIT_READ_ONLY_TITLE}
-              data-test-subj={SUBMIT_READ_ONLY_TEST_ID}
-            >
-              {i18n.SUBMIT_READ_ONLY_DESCRIPTION}
-            </KbnInfoCallout>
-          </>
-        )}
-
+    return (
+      <EuiPanel hasBorder data-test-subj={SUBMIT_FORM_TEST_ID}>
+        <EuiTitle size="s">
+          <h2>{i18n.SUBMIT_PANEL_TITLE}</h2>
+        </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiButton
-          fill
-          type="submit"
-          isDisabled={!canSubmit}
-          isLoading={active.isLoading}
-          onClick={() => setIsConfirming(true)}
-          data-test-subj={SUBMIT_BUTTON_TEST_ID}
-        >
-          {i18n.DETONATE_BUTTON}
-        </EuiButton>
-      </EuiForm>
 
-      {isConfirming && (
-        <EuiConfirmModal
-          aria-labelledby={modalTitleId}
-          title={i18n.SUBMIT_CONFIRM_TITLE}
-          titleProps={{ id: modalTitleId }}
-          onCancel={() => setIsConfirming(false)}
-          onConfirm={onConfirm}
-          cancelButtonText={i18n.SUBMIT_CONFIRM_CANCEL}
-          confirmButtonText={i18n.DETONATE_BUTTON}
-          buttonColor="primary"
-          defaultFocusedButton="confirm"
-          data-test-subj={SUBMIT_CONFIRM_TEST_ID}
-        >
-          <p>{i18n.SUBMIT_CONFIRM_BODY}</p>
-        </EuiConfirmModal>
-      )}
-    </EuiPanel>
-  );
-});
+        <EuiTabs size="s">
+          <EuiTab isSelected={mode === 'hash'} onClick={() => setMode('hash')}>
+            {i18n.SUBMIT_BY_HASH}
+          </EuiTab>
+          <EuiTab isSelected={mode === 'file'} onClick={() => setMode('file')}>
+            {i18n.SUBMIT_BY_FILE}
+          </EuiTab>
+        </EuiTabs>
+        <EuiSpacer size="m" />
+
+        <EuiForm component="form" onSubmit={(event) => event.preventDefault()}>
+          {mode === 'hash' ? (
+            <EuiFormRow label={i18n.SAMPLE_HASH_LABEL} helpText={i18n.SAMPLE_HASH_HELP} fullWidth>
+              <EuiFieldText
+                fullWidth
+                value={hash}
+                onChange={(event) => setHash(event.target.value)}
+                data-test-subj={SUBMIT_HASH_INPUT_TEST_ID}
+              />
+            </EuiFormRow>
+          ) : (
+            <EuiFormRow label={i18n.SAMPLE_FILE_LABEL} fullWidth>
+              <EuiFilePicker
+                fullWidth
+                initialPromptText={i18n.SAMPLE_FILE_PROMPT}
+                onChange={onFileChange}
+                data-test-subj={SUBMIT_FILE_INPUT_TEST_ID}
+              />
+            </EuiFormRow>
+          )}
+
+          <EuiFormRow label={i18n.TAGS_LABEL} helpText={i18n.TAGS_HELP} fullWidth>
+            <EuiComboBox
+              fullWidth
+              noSuggestions
+              selectedOptions={tags}
+              onChange={setTags}
+              onCreateOption={onCreateTag}
+              data-test-subj="detonatePrototypeTags"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow label={i18n.OS_FAMILY_LABEL} fullWidth>
+            <EuiSelect
+              fullWidth
+              options={osOptions}
+              value={osFamily}
+              onChange={(event) =>
+                setOsFamily(event.target.value as DetonateVmOsFamily | typeof UNSET)
+              }
+              data-test-subj="detonatePrototypeOsFamily"
+            />
+          </EuiFormRow>
+
+          {active.isError && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnDangerCallout
+                announceOnMount
+                title={errorMessage(active.error)}
+                data-test-subj={SUBMIT_ERROR_TEST_ID}
+              />
+            </>
+          )}
+
+          {!hasSubmitPrivilege && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnInfoCallout
+                title={i18n.SUBMIT_READ_ONLY_TITLE}
+                data-test-subj={SUBMIT_READ_ONLY_TEST_ID}
+              >
+                {i18n.SUBMIT_READ_ONLY_DESCRIPTION}
+              </KbnInfoCallout>
+            </>
+          )}
+
+          <EuiSpacer size="m" />
+          <EuiButton
+            fill
+            type="submit"
+            isDisabled={!canSubmit}
+            isLoading={active.isLoading}
+            onClick={() => setIsConfirming(true)}
+            data-test-subj={SUBMIT_BUTTON_TEST_ID}
+          >
+            {i18n.DETONATE_BUTTON}
+          </EuiButton>
+        </EuiForm>
+
+        {isConfirming && (
+          <EuiConfirmModal
+            aria-labelledby={modalTitleId}
+            title={i18n.SUBMIT_CONFIRM_TITLE}
+            titleProps={{ id: modalTitleId }}
+            onCancel={() => setIsConfirming(false)}
+            onConfirm={onConfirm}
+            cancelButtonText={i18n.SUBMIT_CONFIRM_CANCEL}
+            confirmButtonText={i18n.DETONATE_BUTTON}
+            buttonColor="primary"
+            defaultFocusedButton="confirm"
+            data-test-subj={SUBMIT_CONFIRM_TEST_ID}
+          >
+            <p>{i18n.SUBMIT_CONFIRM_BODY}</p>
+          </EuiConfirmModal>
+        )}
+      </EuiPanel>
+    );
+  }
+);
 SubmitForm.displayName = 'SubmitForm';

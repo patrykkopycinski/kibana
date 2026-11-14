@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { DetonateSubmitOrigin } from '../../../common/detonate_prototype';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
@@ -46,6 +47,8 @@ export interface OpenDetonationSubmitParams {
   hash?: string;
   /** Tags to prefill in the submit form, e.g. the `alert:<id>` link back to an alert. */
   tags?: string[];
+  /** Origin context to record with the run: the alert, host, user and file path it came from. */
+  submitOrigin?: Omit<DetonateSubmitOrigin, 'source'>;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
 }
@@ -146,11 +149,12 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
   );
 
   const openDetonationSubmitAsChild = useCallback(
-    ({ hash, tags, origin }: OpenDetonationSubmitParams = {}) => {
+    ({ hash, tags, submitOrigin, origin }: OpenDetonationSubmitParams = {}) => {
       open(
         <DetonationSubmit
           initialHash={hash}
           initialTags={tags}
+          initialOrigin={submitOrigin}
           onSubmitted={(task) => openDetonationFlyoutAsChild({ taskId: task.id, origin })}
         />,
         FLYOUT_SESSION_KIND.INHERIT,

@@ -108,6 +108,19 @@ describe('SubmitForm', () => {
     );
   });
 
+  it('merges the origin context the surface prefilled with the source', async () => {
+    const initialOrigin = { alert_ids: ['alert-1'], host_name: 'win-01', user_name: 'alice' };
+    render(
+      <SubmitForm source="alert_flyout" initialOrigin={initialOrigin} onSubmitted={jest.fn()} />
+    );
+
+    await submit();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: { ...initialOrigin, source: 'alert_flyout' } })
+    );
+  });
+
   it('calls onSubmitted with the task the service answered', async () => {
     const onSubmitted = jest.fn();
     render(<SubmitForm source="detonate_page" onSubmitted={onSubmitted} />);

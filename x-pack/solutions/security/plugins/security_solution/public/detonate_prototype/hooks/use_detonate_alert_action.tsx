@@ -63,6 +63,11 @@ export const getDetonatableHash = (hit: DataTableRecord): string | undefined => 
   return undefined;
 };
 
+const getStringField = (hit: DataTableRecord, field: string): string | undefined => {
+  const value = getFieldValue(hit, field);
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+};
+
 export interface UseDetonateAlertActionParams {
   /** The document the flyout is showing. */
   hit: DataTableRecord;
@@ -83,6 +88,9 @@ export const useDetonateAlertAction = ({
 
   const hash = useMemo(() => getDetonatableHash(hit), [hit]);
   const documentId = hit.raw._id ?? '';
+  const hostName = getStringField(hit, 'host.name');
+  const userName = getStringField(hit, 'user.name');
+  const filePath = getStringField(hit, 'file.path') ?? getStringField(hit, 'process.executable');
 
   // Rung 1: a completed report for this hash already on record.
   const { completedRun } = useCompletedDetonationByHash(isEnabled ? hash : undefined);
@@ -96,8 +104,14 @@ export const useDetonateAlertAction = ({
       hash,
       // The tag is what makes the run findable from the alert it came from.
       tags: documentId ? [`alert:${documentId}`] : [],
+      submitOrigin: {
+        ...(documentId ? { alert_ids: [documentId] } : {}),
+        ...(hostName ? { host_name: hostName } : {}),
+        ...(userName ? { user_name: userName } : {}),
+        ...(filePath ? { file_path: filePath } : {}),
+      },
     });
-  }, [closePopover, documentId, hash, openDetonationSubmitAsChild]);
+  }, [closePopover, documentId, filePath, hash, hostName, openDetonationSubmitAsChild, userName]);
 
   const viewReport = useCallback(() => {
     if (!completedRun) {

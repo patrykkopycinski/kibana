@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import type { DetonateTask } from '../../../../common/detonate_prototype';
+import type { DetonateSubmitOrigin, DetonateTask } from '../../../../common/detonate_prototype';
 import { SubmitForm } from '../../../detonate_prototype/components/submit_form';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
@@ -28,6 +28,10 @@ export interface DetonationSubmitProps {
    */
   initialTags?: string[];
   /**
+   * Origin context to record with the run, e.g. the alert's id, host, user and file path
+   */
+  initialOrigin?: Omit<DetonateSubmitOrigin, 'source'>;
+  /**
    * Called with the created run once the submission was accepted
    */
   onSubmitted: (task: DetonateTask) => void;
@@ -37,7 +41,7 @@ export interface DetonationSubmitProps {
  * Detonation submit system flyout content: the same submit form the Detonate page uses.
  */
 export const DetonationSubmit: FC<DetonationSubmitProps> = memo(
-  ({ initialHash, initialTags, onSubmitted }) => (
+  ({ initialHash, initialTags, initialOrigin, onSubmitted }) => (
     <>
       <EuiFlyoutHeader>
         <FlyoutHeaderActions />
@@ -50,6 +54,7 @@ export const DetonationSubmit: FC<DetonationSubmitProps> = memo(
         <SubmitForm
           initialHash={initialHash}
           initialTags={initialTags}
+          initialOrigin={initialOrigin}
           source="alert_flyout"
           onSubmitted={onSubmitted}
         />

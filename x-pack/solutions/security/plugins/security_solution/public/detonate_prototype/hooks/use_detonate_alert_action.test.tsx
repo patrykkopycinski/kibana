@@ -106,7 +106,50 @@ describe('useDetonateAlertAction', () => {
     items[0].onClick?.({} as never);
 
     expect(closePopover).toHaveBeenCalledTimes(1);
-    expect(openDetonationSubmitAsChild).toHaveBeenCalledWith({ hash, tags: ['alert:doc-7'] });
+    expect(openDetonationSubmitAsChild).toHaveBeenCalledWith({
+      hash,
+      tags: ['alert:doc-7'],
+      submitOrigin: { alert_ids: ['doc-7'] },
+    });
+  });
+
+  it('passes the alert, host, user and file path as the submit origin', () => {
+    const items = setup(
+      alertHit(
+        {
+          'file.hash.sha256': hash,
+          'host.name': 'win-01',
+          'user.name': 'alice',
+          'file.path': 'C:\\Temp\\bad.exe',
+        },
+        'doc-7'
+      )
+    );
+    items[0].onClick?.({} as never);
+
+    expect(openDetonationSubmitAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        submitOrigin: {
+          alert_ids: ['doc-7'],
+          host_name: 'win-01',
+          user_name: 'alice',
+          file_path: 'C:\\Temp\\bad.exe',
+        },
+      })
+    );
+  });
+
+  it('falls back to the process executable when the alert has no file path', () => {
+    const items = setup(
+      alertHit({ 'process.hash.sha256': hash, 'process.executable': '/tmp/dropper' })
+    );
+    items[0].onClick?.({} as never);
+
+    expect(openDetonationSubmitAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        submitOrigin: expect.objectContaining({ file_path: '/tmp/dropper' }),
+      })
+    );
   });
 
   it('opens the result child for the completed run when one exists', () => {

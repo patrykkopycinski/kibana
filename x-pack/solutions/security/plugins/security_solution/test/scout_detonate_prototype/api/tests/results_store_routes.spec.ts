@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
+import type { ApiClientFixture, EsClient, KibanaRole } from '@kbn/scout-security';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 
@@ -46,6 +46,14 @@ const runDoc = (
   ...(fields.verdict ? { 'detonate.verdict': fields.verdict } : {}),
   ...(fields.sha256 ? { 'file.hash.sha256': fields.sha256 } : {}),
   ...(fields.origin ? { 'detonate.origin.alert_ids': [fields.alertId] } : {}),
+});
+
+type IndexPrivileges = KibanaRole['elasticsearch']['indices'];
+const ALERT_READ: IndexPrivileges = [{ names: [ALERTS_INDEX], privileges: ['read'] }];
+
+const role = (feature: string[], indices: IndexPrivileges): KibanaRole => ({
+  kibana: [{ base: [], feature: { siemV5: feature }, spaces: ['*'] }],
+  elasticsearch: { cluster: [], indices },
 });
 
 /**
@@ -121,6 +129,8 @@ apiTest.describe('Detonate results store routes', { tag: [...tags.stateful.class
   apiTest.afterAll(async ({ esClient }) => {
     const cleanup = async (index: string, ids: string[]) => {
       if (ids.length === 0) return;
+      // Decision writes do not refresh; an unrefreshed doc is invisible to delete-by-query.
+      await esClient.indices.refresh({ index, ignore_unavailable: true });
       await esClient.deleteByQuery(
         { index, query: { ids: { values: ids } }, refresh: true, conflicts: 'proceed' },
         { ignore: [404] }
@@ -357,6 +367,44 @@ apiTest.describe('Detonate results store routes', { tag: [...tags.stateful.class
       });
       expect(stored._source?.['detonate.handoff.hunt']).toStrictEqual(['done', 'requested']);
       expect(stored._source?.['detonate.handoff.coverage']).toStrictEqual(['reviewed']);
+    }
+  );
+
+  apiTest(
+    'needs the Detonate privilege for writes and alert read for decisions',
+    async ({ apiClient, esClient, samlAuth }) => {
+      const alertId = probe('privileges');
+      await seedAlert(esClient, alertId);
+      const decision = { decisions: [{ alert_id: alertId, state: 'skipped' }] };
+      const as = async (kibanaRole: KibanaRole) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(kibanaRole);
+        const roleHeaders = { ...BASE_HEADERS, ...cookieHeader };
+        return (path: string, body: unknown) =>
+          apiClient.post(`${API}/${path}`, { headers: roleHeaders, responseType: 'json', body });
+      };
+
+      // Security read grants the `securitySolution` tag, which no write route accepts.
+      const reader = await as(role(['read'], ALERT_READ));
+      const readerResponses = [
+        await reader('decisions', decision),
+        await reader('alert_outcomes', { alert_ids: [alertId] }),
+        await reader(`runs/${probe('privileges-run')}/handoff`, { add: ['detonate:hunt-done'] }),
+      ];
+      readerResponses.forEach((res) => expect(res).toHaveStatusCode(403));
+
+      const blind = await as(role(['minimal_read', 'detonate_all'], []));
+      const refused = await blind('decisions', decision);
+      expect(refused).toHaveStatusCode(403);
+      expect((refused.body as { message: string }).message).toContain(alertId);
+      expect(await blind('alert_outcomes', { alert_ids: [alertId] })).toHaveStatusCode(200);
+      const stored = await esClient.mget({ index: RESULTS_INDEX, ids: [alertId] });
+      expect(stored.docs.every((doc) => !('found' in doc) || !doc.found)).toBe(true);
+
+      const worker = await as(role(['minimal_read', 'detonate_all'], ALERT_READ));
+      resultIds.push(alertId);
+      const written = await worker('decisions', decision);
+      expect(written).toHaveStatusCode(200);
+      expect(written.body).toStrictEqual({ written: 1 });
     }
   );
 

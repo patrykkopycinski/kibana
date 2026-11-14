@@ -82,10 +82,29 @@ const PARAMS_VALIDATION_PREFIX = 'error validating action params';
  * cannot tell these apart and the message shape is what is classified.
  */
 const UNREACHABLE_PATTERN =
-  /\b(?:ECONNREFUSED|ECONNRESET|ECONNABORTED|ENOTFOUND|EAI_AGAIN|EHOSTUNREACH|ENETUNREACH|ETIMEDOUT)\b|socket hang up|timeout of \d+ms exceeded|timed out|getaddrinfo/i;
+  /\b(?:ECONNREFUSED|ECONNRESET|ECONNABORTED|ENOTFOUND|EAI_AGAIN|EHOSTUNREACH|ENETUNREACH|ETIMEDOUT)\b|socket hang up|timeout of \d+ms exceeded|getaddrinfo/i;
 
-const isAbortOrTimeout = (error: unknown): boolean =>
-  error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError');
+/** Read by name: `instanceof Error` fails for a DOMException from another realm. */
+const errorName = (value: unknown): string | undefined =>
+  typeof value === 'object' && value !== null && 'name' in value && typeof value.name === 'string'
+    ? value.name
+    : undefined;
+
+/**
+ * A `TimeoutError` is the deadline's own error. An `AbortError` is also what the
+ * transport throws when a deadline signal fires, but it is just as much what a
+ * deliberate abort throws, so it only counts as the service not answering when
+ * this call's own deadline signal is the one that fired.
+ */
+const isDeadlineError = (error: unknown, deadline: AbortSignal | undefined): boolean => {
+  const name = errorName(error);
+  return (
+    name === 'TimeoutError' ||
+    (name === 'AbortError' &&
+      deadline?.aborted === true &&
+      errorName(deadline.reason) === 'TimeoutError')
+  );
+};
 
 const unavailable = () =>
   new DetonateServiceError(
@@ -158,8 +177,10 @@ export const createConnectorDetonateClient = ({
     subActionParams: Record<string, unknown>
   ): Promise<unknown> => {
     let result;
+    let deadline: AbortSignal | undefined;
     try {
       const actionsClient = await getActionsClient();
+      deadline = AbortSignal.timeout(requestTimeoutMs);
       result = await actionsClient.execute({
         actionId: connectorId,
         params: {
@@ -167,7 +188,7 @@ export const createConnectorDetonateClient = ({
           subActionParams,
           fetchOptions: { max_content_length: MAX_RESPONSE_BYTES },
         },
-        signal: AbortSignal.timeout(requestTimeoutMs),
+        signal: deadline,
       });
     } catch (error) {
       logger.error(
@@ -183,7 +204,10 @@ export const createConnectorDetonateClient = ({
           403
         );
       }
-      if (isAbortOrTimeout(error) || UNREACHABLE_PATTERN.test(String((error as Error)?.message))) {
+      if (
+        isDeadlineError(error, deadline) ||
+        UNREACHABLE_PATTERN.test(String((error as Error)?.message))
+      ) {
         throw unavailable();
       }
       throw new DetonateServiceError('The Detonate connector could not be run.', 502);

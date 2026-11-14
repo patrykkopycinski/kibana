@@ -298,6 +298,11 @@ describe('createConnectorDetonateClient', () => {
       ],
       ['an actions rate limit', 'Action execution rate limit exceeded for connector: .detonate'],
       ['an unrecognised connector error', 'an error occurred while running the action'],
+      [
+        'an unrelated error that mentions timing out',
+        'the report timed out of its retention window',
+      ],
+      ['an unrelated "timed out" phrase', 'the session timed out waiting for a human'],
     ])('keeps %s a 502 and logs the detail', async (_name, message) => {
       execute.mockResolvedValue(failed(message, SERVICE_BODY));
 
@@ -312,6 +317,7 @@ describe('createConnectorDetonateClient', () => {
       ['a refused connection', 'connect ECONNREFUSED 10.0.0.4:8080'],
       ['an unresolvable host', 'getaddrinfo ENOTFOUND detonate.internal'],
       ['a request timeout', 'timeout of 30000ms exceeded'],
+      ['a socket timeout', 'connect ETIMEDOUT 10.0.0.4:8080'],
     ])('turns %s into an unavailable sandbox (503) and logs the detail', async (_name, detail) => {
       execute.mockResolvedValue(
         failed('an error occurred while running the action', `${detail} ${SERVICE_BODY}`)
@@ -331,15 +337,49 @@ describe('createConnectorDetonateClient', () => {
     });
 
     it.each([
-      ['an aborted call', new DOMException('This operation was aborted', 'AbortError')],
       ['a timed-out call', new DOMException('The operation timed out', 'TimeoutError')],
       ['a refused connection', new Error('connect ECONNREFUSED 10.0.0.4:8080')],
+      ['a socket timeout', new Error('connect ETIMEDOUT 10.0.0.4:8080')],
     ])('turns %s thrown by the actions client into a 503', async (_name, thrown) => {
       execute.mockRejectedValue(thrown);
 
       const error = await expectServiceError(client().getTask('task-1'), 503);
 
       expect(error.message).toContain('sandbox is unavailable');
+    });
+
+    it("turns the transport aborting on the call's own deadline into a 503", async () => {
+      execute.mockImplementation(
+        ({ signal }: { signal: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            signal.addEventListener('abort', () =>
+              reject(new DOMException('This operation was aborted', 'AbortError'))
+            );
+          })
+      );
+
+      const error = await expectServiceError(
+        createConnectorDetonateClient({
+          getActionsClient: async () => ({ execute } as unknown as ActionsClient),
+          connectorId: CONNECTOR_ID,
+          requestTimeoutMs: 5,
+          logger,
+        }).getTask('task-1'),
+        503
+      );
+
+      expect(error.message).toContain('sandbox is unavailable');
+    });
+
+    it.each([
+      ['an abort the call did not time out on', new DOMException('Aborted', 'AbortError')],
+      ['an unrelated error that mentions timing out', new Error('the session timed out')],
+    ])('keeps %s thrown by the actions client a 502', async (_name, thrown) => {
+      execute.mockRejectedValue(thrown);
+
+      const error = await expectServiceError(client().getTask('task-1'), 502);
+
+      expect(error.message).not.toContain('unavailable');
     });
 
     it('rejects an answer of the wrong shape', async () => {

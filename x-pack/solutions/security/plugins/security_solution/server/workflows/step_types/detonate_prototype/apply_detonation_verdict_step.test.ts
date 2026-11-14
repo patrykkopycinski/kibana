@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { applyDetonationVerdictStepDefinition } from './apply_detonation_verdict_step';
 import { NOTE_URL } from '../../../../common/constants';
@@ -87,10 +87,19 @@ describe('applyDetonationVerdictStepDefinition', () => {
       (call) => call[0].path as string
     );
     expect(paths.some((p) => /signals\/tags|alert_tags/.test(p))).toBe(false);
-    // The runtime paths above only cover this input; the source scan catches a call on any branch.
-    const source = readFileSync(join(__dirname, 'apply_detonation_verdict_step.ts'), 'utf8');
-    const offenders = [/DETECTION_ENGINE_ALERT_TAGS_URL/, /signals\/tags|alert_tags/].filter(
-      (pattern) => pattern.test(source)
+  });
+
+  it('has no step in this directory that writes alert tags', () => {
+    // Source scan of every non-test .ts file here, so a tag-writing call on any branch or in a helper fails.
+    const sources = readdirSync(__dirname)
+      .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .map((file) => ({ file, source: readFileSync(join(__dirname, file), 'utf8') }));
+    expect(sources.length).toBeGreaterThan(1);
+
+    const offenders = sources.flatMap(({ file, source }) =>
+      [/DETECTION_ENGINE_ALERT_TAGS_URL/, /signals\/tags|alert_tags/]
+        .filter((pattern) => pattern.test(source))
+        .map((pattern) => `${file}: ${pattern}`)
     );
     expect(offenders).toEqual([]);
   });

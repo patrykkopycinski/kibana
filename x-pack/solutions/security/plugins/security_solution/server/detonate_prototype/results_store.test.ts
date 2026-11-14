@@ -152,7 +152,7 @@ describe('findLatestCompletedRun', () => {
     await findLatestCompletedRun(esClient, 'default', {
       sha256: 'a'.repeat(64),
       notAfter: '2026-11-02T00:00:00Z',
-      excludeTaskId: 'run-9',
+      excludeTaskIds: new Set(['run-9']),
     });
 
     const [params] = esClient.search.mock.calls[0] as [

@@ -40,6 +40,7 @@ import {
   DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
   DETONATE_MAX_ALERT_DOCS,
+  DETONATE_PRIOR_RUNS_LOOKBACK,
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
@@ -942,20 +943,29 @@ export const registerDetonatePrototypeRoutes = ({
               againstTask.id !== task.id;
           } else if (hash) {
             // Equal timestamps still count (the service clock and submit order can tie).
-            const prior = await findLatestCompletedRun(await getInternalEsClient(), spaceId, {
-              sha256: hash,
-              notAfter: task.created_at,
-              excludeTaskId: task.id,
-            });
-            // A run the service has since dropped leaves only its results document.
-            againstTask = prior
-              ? await getTaskInSpace(client, prior.taskId, spaceId).catch((error: unknown) => {
+            // Walk back through the results index until a baseline the service still
+            // holds; the newest few runs are the ones the service prunes first.
+            const excludeTaskIds = new Set<string>([task.id]);
+            const esClient = await getInternalEsClient();
+            for (let tried = 0; tried < DETONATE_PRIOR_RUNS_LOOKBACK; tried++) {
+              const prior = await findLatestCompletedRun(esClient, spaceId, {
+                sha256: hash,
+                notAfter: task.created_at,
+                excludeTaskIds,
+              });
+              // A run the service has since dropped leaves only its results document.
+              if (!prior) break;
+              excludeTaskIds.add(prior.taskId);
+              againstTask = await getTaskInSpace(client, prior.taskId, spaceId).catch(
+                (error: unknown) => {
                   if (error instanceof DetonateServiceError && error.statusCode === 404) {
                     return undefined;
                   }
                   throw error;
-                })
-              : undefined;
+                }
+              );
+              if (againstTask) break;
+            }
           }
 
           if (!againstTask) {

@@ -111,7 +111,7 @@ export interface LatestCompletedRun {
 /**
  * The newest completed run of a sample in this space, read from the space's results
  * index. The index is per space, so the space is the index name rather than a filter.
- * `notAfter` and `excludeTaskId` narrow it to runs earlier than a given one.
+ * `notAfter` and `excludeTaskIds` narrow it to runs earlier than a given one, skipping any task ids already tried.
  *
  * Only this index is read, never the service's task list: a second source of truth
  * would re-couple the read path to the service. The accepted cost is that a run whose
@@ -121,7 +121,11 @@ export interface LatestCompletedRun {
 export const findLatestCompletedRun = async (
   esClient: ElasticsearchClient,
   spaceId: string,
-  { sha256, notAfter, excludeTaskId }: { sha256: string; notAfter?: string; excludeTaskId?: string }
+  {
+    sha256,
+    notAfter,
+    excludeTaskIds,
+  }: { sha256: string; notAfter?: string; excludeTaskIds?: ReadonlySet<string> }
 ): Promise<LatestCompletedRun | undefined> => {
   const result = await esClient.search<Partial<DetonationRecord>>(
     {
@@ -139,7 +143,13 @@ export const findLatestCompletedRun = async (
             { term: { 'detonate.state': 'complete' } },
             ...(notAfter ? [{ range: { '@timestamp': { lte: notAfter } } }] : []),
           ],
-          ...(excludeTaskId ? { must_not: [{ term: { 'detonate.task_id': excludeTaskId } }] } : {}),
+          ...(excludeTaskIds?.size
+            ? {
+                must_not: [...excludeTaskIds].map((taskId) => ({
+                  term: { 'detonate.task_id': taskId },
+                })),
+              }
+            : {}),
         },
       },
     },

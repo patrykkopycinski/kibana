@@ -2827,6 +2827,58 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(params.query.bool.must_not).toEqual([{ term: { 'detonate.task_id': 'run-1' } }]);
     });
 
+    it('falls back to an older baseline run when the newest is gone from the service', async () => {
+      const { DetonateServiceError: Ctor } = jest.requireActual<{
+        DetonateServiceError: typeof DetonateServiceError;
+      }>('../client');
+      client.getTask.mockImplementation(async (id: string) => {
+        if (id === 'run-1') throw new Ctor('The detonation service answered 404.', 404);
+        return run(
+          id,
+          id === 'run-2' ? '2026-11-02T00:00:00.000Z' : '2026-10-31T00:00:00.000Z'
+        ) as never;
+      });
+      // Newest baseline 404s in the service; the next one still exists.
+      esClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: { 'detonate.task_id': 'run-1', '@timestamp': '2026-11-01T00:00:00.000Z' },
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: { 'detonate.task_id': 'run-0', '@timestamp': '2026-10-31T00:00:00.000Z' },
+              },
+            ],
+          },
+        });
+      esClient.esql.query
+        .mockResolvedValueOnce({ values: countsRows([[9, 'process']]) })
+        .mockResolvedValueOnce({ values: countsRows([[2, 'process']]) });
+
+      await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
+
+      expect(okBody()).toMatchObject({
+        task_id: 'run-2',
+        against_task_id: 'run-0',
+        comparable: true,
+      });
+      // The dropped newest baseline was excluded from the retry.
+      const retryParams = esClient.search.mock.calls[1][0] as {
+        query: { bool: { must_not: unknown[] } };
+      };
+      expect(retryParams.query.bool.must_not).toEqual([
+        { term: { 'detonate.task_id': 'run-2' } },
+        { term: { 'detonate.task_id': 'run-1' } },
+      ]);
+    });
+
     it('answers the null shape when the baseline run is gone from the service', async () => {
       const { DetonateServiceError: Ctor } = jest.requireActual<{
         DetonateServiceError: typeof DetonateServiceError;

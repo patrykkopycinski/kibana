@@ -368,10 +368,11 @@ export const registerDetonatePrototypeRoutes = ({
   };
 
   /**
-   * Shape an error for the analyst. The service's own message is passed
-   * through only when it carries an actionable status (404, 429, 503 for an
-   * unreachable sandbox); any other service answer becomes a generic 502 and any
-   * non-service error a generic 500, so that a stack trace cannot reach the browser.
+   * Shape an error for the analyst. A DetonateServiceError carries a status
+   * meant for the caller (403 for a forbidden alerts read, 404 not found, 429
+   * allowance, 502 service error, 503 unreachable sandbox) and passes through
+   * with its message; any non-service error becomes a generic 500, so that a
+   * stack trace cannot reach the browser.
    */
   const toErrorResponse = (error: unknown, response: KibanaResponseFactory): IKibanaResponse => {
     if (error instanceof DetonateServiceError) {

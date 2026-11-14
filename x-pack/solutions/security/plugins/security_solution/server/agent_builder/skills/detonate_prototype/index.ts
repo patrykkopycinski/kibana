@@ -48,7 +48,7 @@ const SYSTEM_INSTRUCTIONS = `You can detonate a file sample in an instrumented s
 
 ## How to run a detonation
 
-1. **Look up first, submit only if unknown.** Call \`lookup_hash\` with the hash.
+1. **Look up first, submit only if unknown.** Call \`lookup_hash\` with the sha256 (it does not accept md5 or sha1).
    - \`known-malicious\`: report the prior run (\`last_task_id\`) and stop.
    - \`unknown\` with \`has_completed_run: true\`: a completed run exists but was
      not malicious. Read it with \`get_detonation\` and report it — do not

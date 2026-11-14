@@ -143,9 +143,10 @@ describe('lookupHashTool', () => {
   });
 
   it.each([
-    ['md5', 'b'.repeat(32), true],
-    ['sha1', 'c'.repeat(40), true],
+    ['md5', 'b'.repeat(32), false],
+    ['sha1', 'c'.repeat(40), false],
     ['sha256', SHA256, true],
+    ['uppercase sha256', SHA256.toUpperCase(), true],
     ['wrong length', 'd'.repeat(50), false],
     ['non-hex', 'z'.repeat(64), false],
     ['query injection', `${'a'.repeat(63)}"`, false],

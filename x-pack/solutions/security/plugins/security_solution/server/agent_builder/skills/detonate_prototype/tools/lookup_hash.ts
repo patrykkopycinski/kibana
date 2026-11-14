@@ -23,12 +23,9 @@ const lookupHashSchema = lazySchema(() =>
   z.object({
     sampleHash: z
       .string()
-      .regex(
-        /^(?:[a-fA-F0-9]{32}|[a-fA-F0-9]{40}|[a-fA-F0-9]{64})$/,
-        'must be a hex md5, sha1 or sha256'
-      )
+      .regex(/^[a-fA-F0-9]{64}$/, 'must be a hex sha256')
       .describe(
-        'Hash of the sample (sha256, sha1 or md5), exactly as it would be submitted. On an alert this is `file.hash.sha256`.'
+        'sha256 of the sample. On an alert this is `file.hash.sha256`. Prior runs are recorded by sha256 only, so an md5 or sha1 can never match one.'
       ),
   })
 );

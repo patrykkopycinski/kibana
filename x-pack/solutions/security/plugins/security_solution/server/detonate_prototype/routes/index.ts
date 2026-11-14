@@ -40,7 +40,6 @@ import {
   DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
   DETONATE_MAX_ALERT_DOCS,
-  DETONATE_PRIOR_RUNS_LOOKBACK,
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
@@ -56,9 +55,6 @@ import {
   detonateSandboxStreamName,
   deriveDetonateVerdict,
   diffCategoryCounts,
-  isDetonationComplete,
-  runBelongsToSpace,
-  spaceTaskQuery,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateAlertDoc,
@@ -92,7 +88,12 @@ import {
 import { toDetonationRecord } from '../detonation_record';
 import type { EnsureResultsIndex, RecordRun } from '../results_store';
 import { listSweepCandidates } from '../sweep_candidates';
-import { createResultsIndexEnsurer, getAlertOutcomes, writeAlertDecisions } from '../results_store';
+import {
+  createResultsIndexEnsurer,
+  findLatestCompletedRun,
+  getAlertOutcomes,
+  writeAlertDecisions,
+} from '../results_store';
 import {
   IOC_ALERT_READ_LIMIT,
   alertDocSource,
@@ -438,7 +439,7 @@ export const registerDetonatePrototypeRoutes = ({
         try {
           return response.ok({
             body: await lookupPriorRunsInSpace(
-              getClient(request),
+              await getInternalEsClient(),
               request.params.sha256,
               spaceIdFromRequest(request)
             ),
@@ -910,23 +911,21 @@ export const registerDetonatePrototypeRoutes = ({
               againstTask.sample_hash?.toLowerCase() === hash &&
               againstTask.id !== task.id;
           } else if (hash) {
-            const { tasks } = await client.listTasks({
-              query_string: spaceTaskQuery(spaceId, { sampleHash: hash }),
-              size: DETONATE_PRIOR_RUNS_LOOKBACK,
-              order: 'desc',
+            // Equal timestamps still count (the service clock and submit order can tie).
+            const prior = await findLatestCompletedRun(await getInternalEsClient(), spaceId, {
+              sha256: hash,
+              notAfter: task.created_at,
+              excludeTaskId: task.id,
             });
-            // "Previous run" means earlier: a same-hash run submitted after
-            // this one must not become the baseline. Equal timestamps still
-            // count (the service clock and submit order can tie).
-            const createdAt = Date.parse(task.created_at);
-            againstTask = tasks.find(
-              (prior) =>
-                prior.id !== task.id &&
-                runBelongsToSpace(prior.tags, spaceId) &&
-                prior.sample_hash?.toLowerCase() === hash &&
-                isDetonationComplete(prior) &&
-                Date.parse(prior.created_at) <= createdAt
-            );
+            // A run the service has since dropped leaves only its results document.
+            againstTask = prior
+              ? await getTaskInSpace(client, prior.taskId, spaceId).catch((error: unknown) => {
+                  if (error instanceof DetonateServiceError && error.statusCode === 404) {
+                    return undefined;
+                  }
+                  throw error;
+                })
+              : undefined;
           }
 
           if (!againstTask) {

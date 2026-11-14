@@ -170,6 +170,7 @@ export const registerSkills = async ({
         getClient: (request) => detonatePrototype.getClient(request),
         hasDetonatePrivilege: detonatePrototype.hasDetonatePrivilege,
         recordRun: detonatePrototype.recordRun,
+        getInternalEsClient: detonatePrototype.getInternalEsClient,
       })
     );
   }

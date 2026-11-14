@@ -102,6 +102,51 @@ export const upsertDetonationRecord = async (
   );
 };
 
+export interface LatestCompletedRun {
+  taskId: string;
+  verdict?: DetonateVerdictName;
+  createdAt: string;
+}
+
+/**
+ * The newest completed run of a sample in this space, read from the space's results
+ * index. The index is per space, so the space is the index name rather than a filter.
+ * `notAfter` and `excludeTaskId` narrow it to runs earlier than a given one.
+ */
+export const findLatestCompletedRun = async (
+  esClient: ElasticsearchClient,
+  spaceId: string,
+  { sha256, notAfter, excludeTaskId }: { sha256: string; notAfter?: string; excludeTaskId?: string }
+): Promise<LatestCompletedRun | undefined> => {
+  const result = await esClient.search<Partial<DetonationRecord>>(
+    {
+      index: detonateResultsIndexName(spaceId),
+      size: 1,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      _source: ['detonate.task_id', 'detonate.verdict', '@timestamp'],
+      sort: [{ '@timestamp': 'desc' }, { 'detonate.task_id': 'desc' }],
+      query: {
+        bool: {
+          filter: [
+            { term: { 'detonate.doc_kind': 'run' } },
+            { term: { 'file.hash.sha256': sha256.toLowerCase() } },
+            { term: { 'detonate.state': 'complete' } },
+            ...(notAfter ? [{ range: { '@timestamp': { lte: notAfter } } }] : []),
+          ],
+          ...(excludeTaskId ? { must_not: [{ term: { 'detonate.task_id': excludeTaskId } }] } : {}),
+        },
+      },
+    },
+    AWAITED_TRANSPORT_OPTIONS
+  );
+  const source = result.hits.hits[0]?._source;
+  const taskId = source?.['detonate.task_id'];
+  const createdAt = source?.['@timestamp'];
+  if (!taskId || !createdAt) return undefined;
+  return { taskId, createdAt, verdict: source['detonate.verdict'] };
+};
+
 /**
  * Writes the workflow steps wait on. A failure fails the step, so these get a
  * longer budget than the best-effort run write, and one retry: every write here
@@ -303,7 +348,7 @@ export interface AlertOutcomeQuery {
   sha256?: string;
 }
 
-interface LatestCompletedRun {
+interface LatestCompletedBucket {
   latest: { hits: { hits: Array<{ _source?: Partial<DetonationRecord> }> } };
 }
 
@@ -311,17 +356,17 @@ interface OutcomeAggregations {
   by_alert: {
     buckets: Array<{
       key: string;
-      completed: { doc_count: number } & LatestCompletedRun;
+      completed: { doc_count: number } & LatestCompletedBucket;
       failed: { doc_count: number };
     }>;
   };
   by_hash: {
-    buckets: Array<{ key: string; completed: { doc_count: number } & LatestCompletedRun }>;
+    buckets: Array<{ key: string; completed: { doc_count: number } & LatestCompletedBucket }>;
   };
 }
 
 const completedOutcome = (
-  completed: { doc_count: number } & LatestCompletedRun
+  completed: { doc_count: number } & LatestCompletedBucket
 ): DetonateAlertOutcome | undefined => {
   if (completed.doc_count === 0) return undefined;
   const run = completed.latest.hits.hits[0]?._source;

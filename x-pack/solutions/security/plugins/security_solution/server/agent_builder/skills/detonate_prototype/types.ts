@@ -12,7 +12,7 @@
  * endpoint skills answer in the same vocabulary.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -92,6 +92,7 @@ export interface DetonateSkillDeps {
   getClient: (request: KibanaRequest) => DetonateClient;
   hasDetonatePrivilege: HasDetonatePrivilege;
   recordRun: RecordRun;
+  getInternalEsClient: () => Promise<ElasticsearchClient>;
 }
 
 export const insufficientPrivilegesResult = (privilege: string) =>

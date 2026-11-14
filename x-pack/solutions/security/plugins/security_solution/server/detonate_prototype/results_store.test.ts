@@ -18,6 +18,7 @@ import { DETONATION_RECORD_FIELDS } from './detonation_record';
 import {
   createResultsIndexEnsurer,
   createRunRecorder,
+  findLatestCompletedRun,
   getAlertOutcomes,
   resultsIndexTemplate,
   setHandoffMarkers,
@@ -107,6 +108,82 @@ describe('upsertDetonationRecord', () => {
       'cannot name a results index'
     );
     expect(esClient.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('findLatestCompletedRun', () => {
+  const searchReturning = (source?: Record<string, unknown>) => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: source ? [{ _source: source }] : [] },
+    } as never);
+    return esClient;
+  };
+
+  it("asks the space's index for the newest completed run of the lowercased hash", async () => {
+    const esClient = searchReturning();
+
+    await findLatestCompletedRun(esClient, 'team-a', { sha256: 'AB'.repeat(32) });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.kibana-detonate-results-team-a',
+        size: 1,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        sort: [{ '@timestamp': 'desc' }, { 'detonate.task_id': 'desc' }],
+        query: {
+          bool: {
+            filter: [
+              { term: { 'detonate.doc_kind': 'run' } },
+              { term: { 'file.hash.sha256': 'ab'.repeat(32) } },
+              { term: { 'detonate.state': 'complete' } },
+            ],
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('narrows to runs not after a given one and excludes that run', async () => {
+    const esClient = searchReturning();
+
+    await findLatestCompletedRun(esClient, 'default', {
+      sha256: 'a'.repeat(64),
+      notAfter: '2026-11-02T00:00:00Z',
+      excludeTaskId: 'run-9',
+    });
+
+    const [params] = esClient.search.mock.calls[0] as [
+      { query: { bool: { filter: unknown[]; must_not: unknown[] } } }
+    ];
+    expect(params.query.bool.filter).toContainEqual({
+      range: { '@timestamp': { lte: '2026-11-02T00:00:00Z' } },
+    });
+    expect(params.query.bool.must_not).toEqual([{ term: { 'detonate.task_id': 'run-9' } }]);
+  });
+
+  it('returns the run reference from the hit', async () => {
+    const esClient = searchReturning({
+      'detonate.task_id': 'run-1',
+      'detonate.verdict': 'malicious',
+      '@timestamp': '2026-11-01T00:00:00Z',
+    });
+
+    await expect(
+      findLatestCompletedRun(esClient, 'default', { sha256: 'a'.repeat(64) })
+    ).resolves.toEqual({
+      taskId: 'run-1',
+      verdict: 'malicious',
+      createdAt: '2026-11-01T00:00:00Z',
+    });
+  });
+
+  it('returns undefined when the space has no such run', async () => {
+    await expect(
+      findLatestCompletedRun(searchReturning(), 'default', { sha256: 'a'.repeat(64) })
+    ).resolves.toBeUndefined();
   });
 });
 

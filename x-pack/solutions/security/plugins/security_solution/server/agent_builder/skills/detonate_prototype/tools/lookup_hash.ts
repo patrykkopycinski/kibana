@@ -40,7 +40,7 @@ const lookupHashSchema = lazySchema(() =>
  */
 export const lookupHashTool = ({
   endpointAppContextService,
-  getClient,
+  getInternalEsClient,
   hasDetonatePrivilege,
 }: DetonateSkillDeps): BuiltinSkillBoundedTool<typeof lookupHashSchema> => ({
   id: LOOKUP_HASH_TOOL_ID,
@@ -61,7 +61,7 @@ export const lookupHashTool = ({
         last_verdict: verdict,
         last_seen: lastSeen,
       } = await lookupPriorRunsInSpace(
-        getClient(request),
+        await getInternalEsClient(),
         sampleHash,
         endpointAppContextService.getActiveSpaceId(request)
       );

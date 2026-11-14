@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
@@ -14,8 +14,8 @@ import {
 } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../../../../detonate_prototype/client';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { lookupPriorRunsInSpace } from '../../../../detonate_prototype/space_scope';
 import { LOOKUP_HASH_TOOL_ID } from '..';
 import type { DetonateSkillDeps } from '../types';
@@ -39,7 +39,7 @@ const results = (result: unknown) => {
 };
 
 describe('lookupHashTool', () => {
-  const client = {} as DetonateClient;
+  const esClient = {} as ElasticsearchClient;
   let hasDetonatePrivilege: jest.Mock;
   let getActiveSpaceId: jest.Mock;
   let tool: ReturnType<typeof lookupHashTool>;
@@ -50,7 +50,8 @@ describe('lookupHashTool', () => {
     getActiveSpaceId = jest.fn().mockReturnValue('team-a');
     tool = lookupHashTool({
       endpointAppContextService: { getActiveSpaceId } as unknown as EndpointAppContextService,
-      getClient: () => client,
+      getClient: () => ({} as DetonateClient),
+      getInternalEsClient: async () => esClient,
       hasDetonatePrivilege,
       recordRun: jest.fn(),
     } as DetonateSkillDeps);
@@ -74,7 +75,7 @@ describe('lookupHashTool', () => {
 
     expect(hasDetonatePrivilege).toHaveBeenCalledWith(request, 'read');
     expect(getActiveSpaceId).toHaveBeenCalledWith(request);
-    expect(mockLookup).toHaveBeenCalledWith(client, SHA256, 'team-a');
+    expect(mockLookup).toHaveBeenCalledWith(esClient, SHA256, 'team-a');
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data).toEqual({
       kind: 'detonation_prior_run',

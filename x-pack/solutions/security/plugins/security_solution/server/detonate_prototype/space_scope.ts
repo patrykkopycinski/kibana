@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
+
 import type {
   DetonateBaseRequest,
   DetonatePriorRunResponse,
@@ -12,17 +14,17 @@ import type {
   DetonateTaskSearchResponse,
 } from '../../common/detonate_prototype';
 import {
-  DETONATE_PRIOR_RUNS_LOOKBACK,
+  DETONATE_PRIOR_RUN_SOURCE,
   DETONATE_USAGE_MAX_PAGES,
   DETONATE_USAGE_PAGE_SIZE,
   SPACE_TAG_PREFIX,
-  derivePriorRunLookup,
   runBelongsToSpace,
   spaceRunTag,
   spaceTaskQuery,
 } from '../../common/detonate_prototype';
 import type { DetonateClient } from './client';
 import { DetonateServiceError } from './client';
+import { findLatestCompletedRun } from './results_store';
 
 /**
  * The run's tags with exactly one space tag, the caller's. A caller-supplied
@@ -106,17 +108,26 @@ export const countRunsInSpaceSince = async (
   return { count, truncated: true };
 };
 
-/** "Have we detonated this sample before" — answered from this space's runs only. */
+/**
+ * "Have we detonated this sample before" — answered from this space's results index,
+ * which holds only this space's runs.
+ */
 export const lookupPriorRunsInSpace = async (
-  client: DetonateClient,
+  esClient: ElasticsearchClient,
   sha256: string,
   spaceId: string
 ): Promise<DetonatePriorRunResponse> => {
   const normalized = sha256.toLowerCase();
-  const { tasks } = await client.listTasks({
-    query_string: spaceTaskQuery(spaceId, { sampleHash: normalized }),
-    size: DETONATE_PRIOR_RUNS_LOOKBACK,
-    order: 'desc',
-  });
-  return derivePriorRunLookup(normalized, tasks, spaceId);
+  const latest = await findLatestCompletedRun(esClient, spaceId, { sha256: normalized });
+  if (!latest) {
+    return { sha256: normalized, status: 'unknown', source: DETONATE_PRIOR_RUN_SOURCE };
+  }
+  return {
+    sha256: normalized,
+    status: latest.verdict === 'malicious' ? 'known-malicious' : 'unknown',
+    source: DETONATE_PRIOR_RUN_SOURCE,
+    last_task_id: latest.taskId,
+    ...(latest.verdict ? { last_verdict: latest.verdict } : {}),
+    last_seen: latest.createdAt,
+  };
 };

@@ -80,6 +80,8 @@ export interface DetonatePrototype {
   hasDetonatePrivilege: HasDetonatePrivilege;
   /** Writes a run into the space's results index; never throws. */
   recordRun: RecordRun;
+  /** Kibana's internal user, which reads the results index the lookups answer from. */
+  getInternalEsClient: () => Promise<ElasticsearchClient>;
 }
 
 /**
@@ -158,5 +160,6 @@ export const setupDetonatePrototype = ({
     getClient,
     hasDetonatePrivilege,
     recordRun,
+    getInternalEsClient,
   };
 };

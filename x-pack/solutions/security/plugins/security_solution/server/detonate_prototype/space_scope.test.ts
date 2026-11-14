@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DetonateClient } from './client';
 import { DetonateServiceError } from './client';
 import {
@@ -46,70 +47,65 @@ describe('space scope', () => {
 
   describe('lookupPriorRunsInSpace', () => {
     const sha = 'A'.repeat(64);
-    const completed = (id: string, tags: string[], alerts: number) => ({
-      id,
-      tags,
-      created_at: `2026-11-0${id.length}T00:00:00Z`,
-      sample_hash: sha.toLowerCase(),
-      last_worker_name: 'detonate.workers.make_summary',
-      last_worker_status: 'success',
-      production_endpoint_alerts_count: alerts,
-      production_endpoint_alert_groups:
-        alerts > 0 ? [{ alerts_count: alerts, event_code: 'malicious_file' }] : [],
-      diagnostic_endpoint_alert_groups: [],
-      production_detection_alert_groups: [],
-    });
-    const clientWith = (tasks: unknown[]) =>
+    const esWith = (source?: Record<string, unknown>) =>
       ({
-        listTasks: jest.fn().mockResolvedValue({ tasks, offset: 0, size: 20, order: 'desc' }),
-      } as unknown as DetonateClient & { listTasks: jest.Mock });
+        search: jest
+          .fn()
+          .mockResolvedValue({ hits: { hits: source ? [{ _source: source }] : [] } }),
+      } as unknown as ElasticsearchClient & { search: jest.Mock });
+    const runDoc = (taskId: string, verdict?: string) => ({
+      'detonate.task_id': taskId,
+      '@timestamp': '2026-11-03T00:00:00Z',
+      ...(verdict ? { 'detonate.verdict': verdict } : {}),
+    });
 
-    it('searches this space by the lowercased hash', async () => {
-      const client = clientWith([]);
+    it("searches this space's results index by the lowercased hash", async () => {
+      const esClient = esWith();
 
-      await lookupPriorRunsInSpace(client, sha, 'team-a');
+      await lookupPriorRunsInSpace(esClient, sha, 'team-a');
 
-      expect(client.listTasks).toHaveBeenCalledWith({
-        query_string: `tags:"space:team-a" AND sample_hash:"${sha.toLowerCase()}"`,
-        size: 20,
-        order: 'desc',
-      });
+      const [params] = esClient.search.mock.calls[0];
+      expect(params.index).toBe('.kibana-detonate-results-team-a');
+      expect(params.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'detonate.doc_kind': 'run' } },
+          { term: { 'file.hash.sha256': sha.toLowerCase() } },
+          { term: { 'detonate.state': 'complete' } },
+        ])
+      );
     });
 
     it('answers known-malicious from the newest completed malicious run', async () => {
       const result = await lookupPriorRunsInSpace(
-        clientWith([completed('run-1', ['space:team-a'], 3)]),
+        esWith(runDoc('run-1', 'malicious')),
         sha,
         'team-a'
       );
 
+      expect(result).toEqual({
+        sha256: sha.toLowerCase(),
+        status: 'known-malicious',
+        source: 'prior-detonation',
+        last_task_id: 'run-1',
+        last_verdict: 'malicious',
+        last_seen: '2026-11-03T00:00:00Z',
+      });
+    });
+
+    it('answers unknown when the newest completed run was benign', async () => {
+      const result = await lookupPriorRunsInSpace(esWith(runDoc('run-2', 'benign')), sha, 'team-a');
+
       expect(result).toEqual(
         expect.objectContaining({
-          status: 'known-malicious',
-          last_task_id: 'run-1',
-          last_verdict: 'malicious',
+          status: 'unknown',
+          last_task_id: 'run-2',
+          last_verdict: 'benign',
         })
       );
     });
 
-    it('answers unknown when the newest completed run was benign', async () => {
-      const result = await lookupPriorRunsInSpace(
-        clientWith([completed('run-2', ['space:team-a'], 0), completed('r1', ['space:team-a'], 3)]),
-        sha,
-        'team-a'
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({ status: 'unknown', last_verdict: 'benign' })
-      );
-    });
-
-    it('ignores a run from another space even if the service returned it', async () => {
-      const result = await lookupPriorRunsInSpace(
-        clientWith([completed('run-1', ['space:team-b'], 3)]),
-        sha,
-        'team-a'
-      );
+    it('answers unknown with no run reference when the space has no completed run', async () => {
+      const result = await lookupPriorRunsInSpace(esWith(), sha, 'team-a');
 
       expect(result).toEqual({
         sha256: sha.toLowerCase(),

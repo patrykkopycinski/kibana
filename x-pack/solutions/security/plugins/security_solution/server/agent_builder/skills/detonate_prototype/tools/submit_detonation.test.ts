@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
@@ -81,6 +81,7 @@ describe('submitDetonationTool', () => {
         getCurrentUsername: () => 'analyst',
       } as unknown as EndpointAppContextService,
       getClient: () => client,
+      getInternalEsClient: async () => ({} as ElasticsearchClient),
       hasDetonatePrivilege,
       recordRun,
     } as DetonateSkillDeps);

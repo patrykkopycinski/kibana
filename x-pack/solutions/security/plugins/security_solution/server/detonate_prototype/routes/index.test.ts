@@ -1339,21 +1339,15 @@ describe('registerDetonatePrototypeRoutes', () => {
 
   describe('prior-run handler', () => {
     const sha = 'a'.repeat(64);
-    const malicious = {
-      id: 'run-1',
-      tags: ['space:default'],
-      created_at: '2026-11-01T00:00:00Z',
-      sample_hash: sha,
-      last_worker_name: 'detonate.workers.make_summary',
-      last_worker_status: 'success',
-      production_endpoint_alerts_count: 2,
-      production_endpoint_alert_groups: [{ alerts_count: 2, event_code: 'malicious_file' }],
-      diagnostic_endpoint_alert_groups: [],
-      production_detection_alert_groups: [],
-    };
+    const searchReturns = (source?: Record<string, unknown>) =>
+      esClient.search.mockResolvedValue({ hits: { hits: source ? [{ _source: source }] : [] } });
 
     it('answers known-malicious from an earlier malicious run in this space', async () => {
-      client.listTasks.mockResolvedValue({ tasks: [malicious] } as never);
+      searchReturns({
+        'detonate.task_id': 'run-1',
+        'detonate.verdict': 'malicious',
+        '@timestamp': '2026-11-01T00:00:00Z',
+      });
 
       await priorRunsHandler()(
         createContext(),
@@ -1361,22 +1355,25 @@ describe('registerDetonatePrototypeRoutes', () => {
         mockResponse
       );
 
-      expect(client.listTasks).toHaveBeenCalledWith({
-        query_string: `tags:"space:default" AND sample_hash:"${sha}"`,
-        size: 20,
-        order: 'desc',
-      });
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.kibana-detonate-results-default' }),
+        expect.anything()
+      );
+      expect(client.listTasks).not.toHaveBeenCalled();
       expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: expect.objectContaining({
+        body: {
           sha256: sha,
           status: 'known-malicious',
+          source: 'prior-detonation',
           last_task_id: 'run-1',
-        }),
+          last_verdict: 'malicious',
+          last_seen: '2026-11-01T00:00:00Z',
+        },
       });
     });
 
     it('answers `unknown` when there is no prior run — never benign', async () => {
-      client.listTasks.mockResolvedValue({ tasks: [] } as never);
+      searchReturns();
 
       await priorRunsHandler()(
         createContext(),
@@ -1389,11 +1386,8 @@ describe('registerDetonatePrototypeRoutes', () => {
       });
     });
 
-    it('shapes a service error with the service status', async () => {
-      const { DetonateServiceError: Ctor } = jest.requireActual<{
-        DetonateServiceError: typeof DetonateServiceError;
-      }>('../client');
-      client.listTasks.mockRejectedValue(new Ctor('The detonation service answered 404.', 404));
+    it('shapes a read failure through the shared error response', async () => {
+      esClient.search.mockRejectedValue(new Error('es down'));
 
       await priorRunsHandler()(
         createContext(),
@@ -1401,8 +1395,9 @@ describe('registerDetonatePrototypeRoutes', () => {
         mockResponse
       );
 
+      expect(mockResponse.ok).not.toHaveBeenCalled();
       expect(mockResponse.customError).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: 404 })
+        expect.objectContaining({ statusCode: 500 })
       );
     });
   });
@@ -2607,6 +2602,20 @@ describe('registerDetonatePrototypeRoutes', () => {
     const countsRows = (rows: Array<[number, string | null]>) =>
       rows.map((row) => (row[1] === null ? [row[0], null] : row));
 
+    /** The results index's answer to "newest earlier completed run of this hash". */
+    const baselineIs = (taskId?: string) =>
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: taskId
+            ? [
+                {
+                  _source: { 'detonate.task_id': taskId, '@timestamp': '2026-11-01T00:00:00.000Z' },
+                },
+              ]
+            : [],
+        },
+      });
+
     beforeEach(() => {
       endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
       client.getTaskAlerts.mockResolvedValue([]);
@@ -2622,14 +2631,11 @@ describe('registerDetonatePrototypeRoutes', () => {
     };
 
     it('diffs against the most recent earlier completed run of the same hash', async () => {
-      client.getTask.mockResolvedValue(run('run-2', '2026-11-02T00:00:00.000Z') as never);
-      client.listTasks.mockResolvedValue({
-        tasks: [
-          run('run-2', '2026-11-02T00:00:00.000Z'),
-          run('run-1', '2026-11-01T00:00:00.000Z'),
-          run('run-0', '2026-10-31T00:00:00.000Z'),
-        ],
-      } as never);
+      client.getTask.mockImplementation(
+        async (id: string) =>
+          run(id, id === 'run-2' ? '2026-11-02T00:00:00.000Z' : '2026-11-01T00:00:00.000Z') as never
+      );
+      baselineIs('run-1');
       client.getTaskAlerts.mockResolvedValue([alert('e-1')]);
       esClient.esql.query
         .mockResolvedValueOnce({
@@ -2693,9 +2699,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
     it('answers the null shape when the hash has no earlier completed run', async () => {
       client.getTask.mockResolvedValue(run('run-0', '2026-10-31T00:00:00.000Z') as never);
-      client.listTasks.mockResolvedValue({
-        tasks: [run('run-0', '2026-10-31T00:00:00.000Z')],
-      } as never);
+      baselineIs();
 
       await diffHandler()(createContext(), diffRequest('run-0'), mockResponse);
 
@@ -2705,27 +2709,33 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(esClient.esql.query).not.toHaveBeenCalled();
     });
 
-    it('never picks a later run of the same hash as the baseline', async () => {
+    it('looks for a completed run no later than this one, excluding itself', async () => {
       client.getTask.mockResolvedValue(run('run-1', '2026-11-01T00:00:00.000Z') as never);
-      client.listTasks.mockResolvedValue({
-        tasks: [run('run-2', '2026-11-02T00:00:00.000Z'), run('run-1', '2026-11-01T00:00:00.000Z')],
-      } as never);
+      baselineIs();
 
       await diffHandler()(createContext(), diffRequest('run-1'), mockResponse);
 
-      // run-2 is newer than run-1, so it cannot be "previous"; nothing
-      // earlier exists → the honest null shape.
-      expect(okBody()).toEqual({ task_id: 'run-1', reason: 'no-prior-run' });
+      const [[params]] = esClient.search.mock.calls;
+      expect(params.index).toBe('.kibana-detonate-results-team-a');
+      expect(params.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'file.hash.sha256': 'sha-a' } },
+          { term: { 'detonate.state': 'complete' } },
+          { range: { '@timestamp': { lte: '2026-11-01T00:00:00.000Z' } } },
+        ])
+      );
+      expect(params.query.bool.must_not).toEqual([{ term: { 'detonate.task_id': 'run-1' } }]);
     });
 
-    it('skips incomplete earlier runs of the same hash', async () => {
-      client.getTask.mockResolvedValue(run('run-2', '2026-11-02T00:00:00.000Z') as never);
-      client.listTasks.mockResolvedValue({
-        tasks: [
-          run('run-2', '2026-11-02T00:00:00.000Z'),
-          run('run-1', '2026-11-01T00:00:00.000Z', 'detonate.workers.detonate_sample'),
-        ],
-      } as never);
+    it('answers the null shape when the baseline run is gone from the service', async () => {
+      const { DetonateServiceError: Ctor } = jest.requireActual<{
+        DetonateServiceError: typeof DetonateServiceError;
+      }>('../client');
+      client.getTask.mockImplementation(async (id: string) => {
+        if (id === 'run-1') throw new Ctor('The detonation service answered 404.', 404);
+        return run('run-2', '2026-11-02T00:00:00.000Z') as never;
+      });
+      baselineIs('run-1');
 
       await diffHandler()(createContext(), diffRequest('run-2'), mockResponse);
 
@@ -2755,10 +2765,11 @@ describe('registerDetonatePrototypeRoutes', () => {
       const { errors } = jest.requireActual<{
         errors: typeof import('@elastic/elasticsearch').errors;
       }>('@elastic/elasticsearch');
-      client.getTask.mockResolvedValue(run('run-2', '2026-11-02T00:00:00.000Z') as never);
-      client.listTasks.mockResolvedValue({
-        tasks: [run('run-2', '2026-11-02T00:00:00.000Z'), run('run-1', '2026-11-01T00:00:00.000Z')],
-      } as never);
+      client.getTask.mockImplementation(
+        async (id: string) =>
+          run(id, id === 'run-2' ? '2026-11-02T00:00:00.000Z' : '2026-11-01T00:00:00.000Z') as never
+      );
+      baselineIs('run-1');
       esClient.esql.query
         .mockRejectedValueOnce(
           new errors.ResponseError({

@@ -638,7 +638,7 @@ export interface DetonateSweepCandidates {
   values: Array<[string, string]>;
   /** Unique valid hashes the scan examined, decided or not — deduplicated per hash, not the number of alerts read. */
   scanned: number;
-  /** The page bound stopped the scan before every hash was examined. */
+  /** The scan hit its page bound before filling the limit, so more hashes may remain unexamined. */
   truncated: boolean;
 }
 

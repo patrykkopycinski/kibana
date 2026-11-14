@@ -149,7 +149,9 @@ export const findLatestCompletedRun = async (
   const taskId = source?.['detonate.task_id'];
   const createdAt = source?.['@timestamp'];
   if (!taskId || !createdAt) return undefined;
-  return { taskId, createdAt, verdict: source['detonate.verdict'] };
+  // TS cannot narrow `source` through the derived consts, so read the verdict
+  // defensively; a missing verdict field is a benign/unknown run.
+  return { taskId, createdAt, verdict: source?.['detonate.verdict'] };
 };
 
 /**

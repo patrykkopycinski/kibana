@@ -343,8 +343,9 @@ export const registerDetonatePrototypeRoutes = ({
 
   /**
    * Shape an error for the analyst. The service's own message is passed
-   * through only when it carries an actionable status; anything else becomes a
-   * generic 502 so that a service-side stack trace cannot reach the browser.
+   * through only when it carries an actionable status (404, 429, 503 for an
+   * unreachable sandbox); any other service answer becomes a generic 502 and any
+   * non-service error a generic 500, so that a stack trace cannot reach the browser.
    */
   const toErrorResponse = (error: unknown, response: KibanaResponseFactory): IKibanaResponse => {
     if (error instanceof DetonateServiceError) {

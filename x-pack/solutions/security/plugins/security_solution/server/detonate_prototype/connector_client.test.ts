@@ -291,11 +291,12 @@ describe('createConnectorDetonateClient', () => {
       expect(error.message).toBe(`The detonation service answered ${serviceStatus}.`);
     });
 
-    it('turns a failure without a service status into a 502 and logs the detail', async () => {
+    it('turns a failure without a service status into an unavailable sandbox (503) and logs the detail', async () => {
       execute.mockResolvedValue(failed('an error occurred while running the action', SERVICE_BODY));
 
-      const error = await expectServiceError(client().getTask('task-1'), 502);
+      const error = await expectServiceError(client().getTask('task-1'), 503);
 
+      expect(error.message).toContain('sandbox is unavailable');
       expect(error.message).not.toContain(SERVICE_BODY);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(SERVICE_BODY));
     });

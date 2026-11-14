@@ -811,6 +811,23 @@ describe('registerDetonatePrototypeRoutes', () => {
       });
     });
 
+    it('answers 503 with a sandbox-unavailable message, not a generic 500, when the sandbox is down', async () => {
+      client.getTask.mockRejectedValue(
+        new Ctor('The detonation sandbox is unavailable: the service is unreachable (x).', 503)
+      );
+
+      await getTaskHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/task-1`, undefined, { taskId: 'task-1' }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: { message: expect.stringContaining('sandbox is unavailable') },
+      });
+    });
+
     it('answers 404 for a run from another space', async () => {
       client.getTask.mockResolvedValue({ id: 'task-foreign', tags: ['space:team-b'] } as never);
 

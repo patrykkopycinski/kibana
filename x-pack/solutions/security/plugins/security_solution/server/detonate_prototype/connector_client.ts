@@ -29,7 +29,11 @@ import type {
 } from '../../common/detonate_prototype';
 import { redactDetonateTask } from '../../common/detonate_prototype';
 import type { DetonateClient, DetonateTaskSearchQuery } from './client';
-import { DetonateServiceError, toDetonateStatusCode } from './client';
+import {
+  DETONATE_SANDBOX_UNAVAILABLE_STATUS,
+  DetonateServiceError,
+  toDetonateStatusCode,
+} from './client';
 
 /** The connector's own submit limits; it refuses anything larger as invalid params. */
 export const CONNECTOR_MAX_SAMPLE_BYTES = 10 * 1024 * 1024;
@@ -184,7 +188,10 @@ export const createConnectorDetonateClient = ({
         toDetonateStatusCode(Number(status))
       );
     }
-    throw new DetonateServiceError('The Detonate connector could not reach the service.', 502);
+    throw new DetonateServiceError(
+      'The detonation sandbox is unavailable: the Detonate connector could not reach the service.',
+      DETONATE_SANDBOX_UNAVAILABLE_STATUS
+    );
   };
 
   const unexpected = (subAction: string): never => {

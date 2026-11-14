@@ -188,7 +188,7 @@ describe('createDetonateClient', () => {
       await expect(client().getTask('task-1')).rejects.toMatchObject({ statusCode: 502 });
     });
 
-    it('reports an unreachable service as 502 without leaking the URL', async () => {
+    it('reports an unreachable service as an unavailable sandbox (503) without leaking the URL', async () => {
       fetchMock.mockRejectedValue(new TypeError('fetch failed'));
 
       const error = await client()
@@ -196,8 +196,20 @@ describe('createDetonateClient', () => {
         .catch((caught: unknown) => caught);
 
       expect(error).toBeInstanceOf(DetonateServiceError);
-      expect((error as DetonateServiceError).statusCode).toBe(502);
+      expect((error as DetonateServiceError).statusCode).toBe(503);
+      expect((error as DetonateServiceError).message).toContain('sandbox is unavailable');
       expect((error as DetonateServiceError).message).not.toContain('localhost');
+    });
+
+    it('reports a timed-out call as an unavailable sandbox too', async () => {
+      const timeout = new Error('timed out');
+      timeout.name = 'TimeoutError';
+      fetchMock.mockRejectedValue(timeout);
+
+      await expect(client().getTask('task-1')).rejects.toMatchObject({
+        statusCode: 503,
+        message: expect.stringContaining('did not respond'),
+      });
     });
   });
 });

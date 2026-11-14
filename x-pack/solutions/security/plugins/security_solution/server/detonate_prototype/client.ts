@@ -30,7 +30,11 @@ import type {
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
 } from '../../common/detonate_prototype';
-import { DETONATE_PROCESS_EVENTS_KIND, quoteQueryValue, redactDetonateTask } from '../../common/detonate_prototype';
+import {
+  DETONATE_PROCESS_EVENTS_KIND,
+  quoteQueryValue,
+  redactDetonateTask,
+} from '../../common/detonate_prototype';
 
 /** Service paths, relative to the configured base URL. */
 const API_PREFIX = '/v1/detonate';
@@ -55,6 +59,13 @@ export class DetonateServiceError extends Error {
     this.name = 'DetonateServiceError';
   }
 }
+
+/**
+ * The service cannot be reached at all (connection refused, DNS, timeout).
+ * Distinct from 502, which means it answered badly: callers and the UI can tell
+ * "the sandbox is down, try later" from "the sandbox misbehaved".
+ */
+export const DETONATE_SANDBOX_UNAVAILABLE_STATUS = 503;
 
 /** Statuses a caller can act on keep their code; anything else is an outage to the analyst. */
 export const toDetonateStatusCode = (status: number): number =>
@@ -129,7 +140,10 @@ export const createDetonateClient = ({
       // The URL is operator-supplied configuration, so it is safe to log for
       // diagnosis, but it never reaches the analyst-facing response body.
       logger.error(`Detonation service at ${target} ${reason}`);
-      throw new DetonateServiceError(`The detonation service ${reason}.`, 502);
+      throw new DetonateServiceError(
+        `The detonation sandbox is unavailable: the service ${reason}.`,
+        DETONATE_SANDBOX_UNAVAILABLE_STATUS
+      );
     }
 
     if (!response.ok) {

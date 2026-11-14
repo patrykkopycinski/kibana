@@ -156,6 +156,13 @@ describe('Detonate sample worker (Forensics Watch)', () => {
     it('orders columns alert-first, so map: first in mark_queued yields alert ids', () => {
       expect(query).toContain('KEEP first_alert, file.hash.sha256');
     });
+
+    it('keeps the most recently seen hashes when more than 200 are open', () => {
+      expect(query).toContain('latest = MAX(@timestamp) BY file.hash.sha256');
+      expect(query.indexOf('SORT latest DESC')).toBeGreaterThan(query.indexOf('STATS'));
+      expect(query.indexOf('SORT latest DESC')).toBeLessThan(query.indexOf('KEEP first_alert'));
+      expect(query.indexOf('KEEP first_alert')).toBeLessThan(query.indexOf('LIMIT 200'));
+    });
   });
 
   describe('malicious sibling lookup', () => {
@@ -199,6 +206,12 @@ describe('Detonate sample worker (Forensics Watch)', () => {
       expect(query.indexOf('WHERE LENGTH(file.hash.sha256) == 64')).toBeLessThan(
         query.indexOf('STATS first_alert')
       );
+    });
+
+    it('keeps the most recently seen hashes when more than 200 are open', () => {
+      expect(query).toContain('latest = MAX(@timestamp) BY file.hash.sha256');
+      expect(query.indexOf('SORT latest DESC')).toBeGreaterThan(query.indexOf('STATS'));
+      expect(query.indexOf('SORT latest DESC')).toBeLessThan(query.indexOf('KEEP first_alert'));
     });
 
     it('narrows to the severity the deck names', () => {

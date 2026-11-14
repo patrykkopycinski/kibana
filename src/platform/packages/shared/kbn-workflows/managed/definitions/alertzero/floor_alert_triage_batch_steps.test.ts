@@ -1982,8 +1982,15 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
     { decidedIds = [], lookupOk = true }: { decidedIds?: string[]; lookupOk?: boolean } = {}
   ): unknown =>
     evalExpr(candidatesExpr, {
-      steps: { load_alerts: { output: { alerts } } },
-      variables: { detonate_decided_ids: decidedIds, detonate_lookup_ok: lookupOk },
+      variables: {
+        detonate_lookup_json: renderString(
+          (stepByName('build_detonate_lookup')?.with as Record<string, string>)
+            .detonate_lookup_json,
+          { steps: { load_alerts: { output: { alerts } } } }
+        ),
+        detonate_decided_ids: decidedIds,
+        detonate_lookup_ok: lookupOk,
+      },
     });
 
   it('keeps each untriaged hash once, skipping alerts with no file hash', () => {
@@ -1991,6 +1998,15 @@ describe('floor_alert_triage_batch — detonation enrichment', () => {
       H1,
       H2,
     ]);
+  });
+
+  it('never detonates a hash that is not one 64-character string', () => {
+    const multi = { _id: 'a2', file: { hash: { sha256: [H2, H3] } } };
+    const short = { _id: 'a3', file: { hash: { sha256: 'not-a-hash' } } };
+    const picked = candidates([alert('a1', H1), multi, short]) as unknown[];
+    // toEqual ignores a trailing undefined, which is what an entry with no hash maps to.
+    expect(picked).toHaveLength(1);
+    expect(picked).toEqual([H1]);
   });
 
   it('skips alerts the decisions store already covers', () => {

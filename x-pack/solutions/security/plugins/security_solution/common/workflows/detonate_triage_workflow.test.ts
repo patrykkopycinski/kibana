@@ -465,10 +465,10 @@ describe('decisions lookups in the managed workflows', () => {
   });
 
   it.each([
-    ['floor batch', floorSteps, 'build_detonate_lookup', 'detonate_lookup_json'],
-    ['worker', workerSteps, 'build_candidate_lookup', 'candidate_lookup_json'],
-    ['worker', workerSteps, 'build_auto_candidate_lookup', 'auto_candidate_lookup_json'],
-  ])('%s: %s builds {alert_id, sha256} pairs', (_label, steps, name, variable) => {
+    ['floor batch', 'build_detonate_lookup', floorSteps, 'detonate_lookup_json'],
+    ['worker', 'build_candidate_lookup', workerSteps, 'candidate_lookup_json'],
+    ['worker', 'build_auto_candidate_lookup', workerSteps, 'auto_candidate_lookup_json'],
+  ])('%s: %s builds {alert_id, sha256} pairs', (_label, name, steps, variable) => {
     const template = String(
       (steps.find((step) => step.name === name)?.with as Record<string, unknown>)[variable]
     );

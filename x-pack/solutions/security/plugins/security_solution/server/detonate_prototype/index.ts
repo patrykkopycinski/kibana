@@ -67,6 +67,8 @@ export interface DetonatePrototypeSetupDeps {
   getActionsStart: () => Promise<ActionsPluginStartContract>;
   /** Kibana's internal user, which writes the hidden sandbox stream. */
   getInternalEsClient: () => Promise<ElasticsearchClient>;
+  /** The caller's own ES client routed across the space's projects. */
+  getScopedEsClient: (request: KibanaRequest) => Promise<ElasticsearchClient>;
 }
 
 /** Hands a surface the client for the request it is serving. */
@@ -96,6 +98,7 @@ export const setupDetonatePrototype = ({
   getSecurityStart,
   getActionsStart,
   getInternalEsClient,
+  getScopedEsClient,
 }: DetonatePrototypeSetupDeps): DetonatePrototype | undefined => {
   if (!enabled) {
     return undefined;
@@ -148,6 +151,7 @@ export const setupDetonatePrototype = ({
     hasDetonatePrivilege,
     monthlyAllowance,
     getInternalEsClient,
+    getScopedEsClient,
   });
 
   return {

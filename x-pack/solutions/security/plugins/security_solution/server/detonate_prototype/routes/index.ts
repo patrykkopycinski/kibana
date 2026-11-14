@@ -252,6 +252,12 @@ export interface DetonateRoutesDeps {
    * that analysts cannot write to, and the route checks the run's space first.
    */
   getInternalEsClient: () => Promise<ElasticsearchClient>;
+  /**
+   * The caller's own client with the space's project routing, so an alert id a
+   * workflow read from a linked project is checked where it lives. Not the
+   * request-context client, which is origin-only under CPS.
+   */
+  getScopedEsClient: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   /** Installs the results template and mapping before a decision write; one per process by default. */
   ensureResultsIndex?: EnsureResultsIndex;
   /** Injected so tests can pin the month. */
@@ -315,6 +321,7 @@ export const registerDetonatePrototypeRoutes = ({
   hasDetonatePrivilege,
   monthlyAllowance,
   getInternalEsClient,
+  getScopedEsClient,
   ensureResultsIndex = createResultsIndexEnsurer(),
   now = () => new Date(),
 }: DetonateRoutesDeps) => {
@@ -1109,15 +1116,31 @@ export const registerDetonatePrototypeRoutes = ({
           request: {
             body: schema.object({
               decisions: schema.arrayOf(
-                schema.object({
-                  alert_id: schema.string({ minLength: 1, maxLength: 128 }),
-                  state: decisionStateSchema,
-                  verdict: schema.maybe(verdictSchema),
-                  task_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
-                  execution_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
-                  sha256: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
-                  reason: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
-                }),
+                schema.object(
+                  {
+                    alert_id: schema.string({ minLength: 1, maxLength: 128 }),
+                    state: decisionStateSchema,
+                    verdict: schema.maybe(verdictSchema),
+                    task_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+                    execution_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+                    sha256: schema.maybe(
+                      schema.string({
+                        maxLength: 64,
+                        validate: (value) =>
+                          SHA256_PATTERN.test(value)
+                            ? undefined
+                            : 'expected a 64-character hexadecimal SHA-256',
+                      })
+                    ),
+                    reason: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+                  },
+                  {
+                    validate: ({ state, verdict }) =>
+                      state === 'verdict_applied' && verdict === undefined
+                        ? 'a verdict_applied decision requires a verdict'
+                        : undefined,
+                  }
+                ),
                 { minSize: 1, maxSize: 100 }
               ),
             }),
@@ -1129,7 +1152,7 @@ export const registerDetonatePrototypeRoutes = ({
           const spaceId = spaceIdFromRequest(request);
           const { decisions } = request.body;
           await assertReadableAlerts({
-            esClient: (await context.core).elasticsearch.client.asCurrentUser,
+            esClient: await getScopedEsClient(request),
             spaceId,
             alertIds: [...new Set(decisions.map(({ alert_id: alertId }) => alertId))],
           });

@@ -137,6 +137,8 @@ describe('registerDetonatePrototypeRoutes', () => {
   let uiSettingsGet: jest.Mock;
   /** The caller's own ES client, kept apart from the internal one to prove whose identity reads. */
   let callerSearch: jest.Mock;
+  /** The caller's own client routed across the space's projects; the decisions route reads through it. */
+  let scopedSearch: jest.Mock;
   const createContext = () =>
     ({
       core: Promise.resolve({
@@ -146,6 +148,8 @@ describe('registerDetonatePrototypeRoutes', () => {
     } as never);
   const callerCanRead = (ids: string[]) =>
     callerSearch.mockResolvedValue({ hits: { hits: ids.map((_id) => ({ _id })) } });
+  const scopedCanRead = (ids: string[]) =>
+    scopedSearch.mockResolvedValue({ hits: { hits: ids.map((_id) => ({ _id })) } });
 
   const register = ({
     canWrite,
@@ -184,6 +188,7 @@ describe('registerDetonatePrototypeRoutes', () => {
       hasDetonatePrivilege,
       monthlyAllowance,
       getInternalEsClient: async () => esClient as never,
+      getScopedEsClient: async () => ({ search: scopedSearch } as never),
       now: () => new Date('2026-12-15T10:00:00.000Z'),
     });
   };
@@ -202,6 +207,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     };
     uiSettingsGet = jest.fn().mockResolvedValue(['logs-*']);
     callerSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    scopedSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     register({ canWrite: true });
   });
 
@@ -1427,7 +1433,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('writes the decisions into the space results index as the internal user', async () => {
-      callerCanRead(['alert-1']);
+      scopedCanRead(['alert-1']);
 
       await decisionsHandler()(
         createContext(),
@@ -1438,7 +1444,11 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { written: 1 } });
       const [[{ operations }]] = esClient.bulk.mock.calls;
       expect(operations[0]).toEqual({
-        update: { _index: '.kibana-detonate-results-default', _id: 'alert-1' },
+        update: {
+          _index: '.kibana-detonate-results-default',
+          _id: 'alert-1',
+          retry_on_conflict: 3,
+        },
       });
       expect(operations[1].doc).toEqual(
         expect.objectContaining({
@@ -1450,9 +1460,23 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
 
+    it('checks readability through the scoped client, never the origin-only context client', async () => {
+      scopedCanRead(['alert-1']);
+
+      await decisionsHandler()(
+        createContext(),
+        createRequest('post', DETONATE_DECISIONS_PATH, { decisions: [decision()] }),
+        mockResponse
+      );
+
+      expect(scopedSearch).toHaveBeenCalledTimes(1);
+      expect(callerSearch).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { written: 1 } });
+    });
+
     it('takes the space from the request path, never from the body', async () => {
       endpointAppContextService.getActiveSpaceId.mockReturnValue('team-b');
-      callerCanRead(['alert-1']);
+      scopedCanRead(['alert-1']);
 
       await decisionsHandler()(
         createContext(),
@@ -1462,13 +1486,13 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       const [[{ operations }]] = esClient.bulk.mock.calls;
       expect(operations[0].update._index).toBe('.kibana-detonate-results-team-b');
-      expect(callerSearch).toHaveBeenCalledWith(
+      expect(scopedSearch).toHaveBeenCalledWith(
         expect.objectContaining({ index: expect.stringContaining('team-b') })
       );
     });
 
     it('rejects an alert the caller cannot read with 403 and writes nothing', async () => {
-      callerCanRead(['alert-1']);
+      scopedCanRead(['alert-1']);
 
       await decisionsHandler()(
         createContext(),
@@ -1489,7 +1513,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('fails the request when the bulk write reports an item error', async () => {
-      callerCanRead(['alert-1']);
+      scopedCanRead(['alert-1']);
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [{ update: { _id: 'alert-1', error: { type: 'mapper_exception', reason: 'x' } } }],
@@ -1508,7 +1532,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('ensures the results mapping before it writes', async () => {
-      callerCanRead(['alert-1']);
+      scopedCanRead(['alert-1']);
 
       await decisionsHandler()(
         createContext(),
@@ -1532,9 +1556,29 @@ describe('registerDetonatePrototypeRoutes', () => {
       ['an oversized task id', { decisions: [decision({ task_id: 't'.repeat(129) })] }],
       ['an oversized execution id', { decisions: [decision({ execution_id: 'e'.repeat(129) })] }],
       ['an oversized hash', { decisions: [decision({ sha256: 'a'.repeat(65) })] }],
+      [
+        'a 64-character hash that is not hexadecimal',
+        { decisions: [decision({ sha256: 'z'.repeat(64) })] },
+      ],
+      ['a short hash', { decisions: [decision({ sha256: 'a'.repeat(63) })] }],
+      [
+        'a verdict_applied decision without a verdict',
+        { decisions: [decision({ verdict: undefined })] },
+      ],
       ['an oversized reason', { decisions: [decision({ reason: 'r'.repeat(257) })] }],
     ])('rejects a decisions body with %s', (_name, body) => {
       expect(() => bodySchema(DETONATE_DECISIONS_PATH).validate(body)).toThrow();
+    });
+
+    it('accepts a hexadecimal hash of either case, and states other than verdict_applied without a verdict', () => {
+      expect(() =>
+        bodySchema(DETONATE_DECISIONS_PATH).validate({
+          decisions: [
+            decision({ sha256: HASH_A.toUpperCase() }),
+            decision({ state: 'released', verdict: undefined }),
+          ],
+        })
+      ).not.toThrow();
     });
 
     it('accepts every decision state', () => {
@@ -2048,6 +2092,63 @@ describe('registerDetonatePrototypeRoutes', () => {
       await listHandler()(createContext(), listRequest('hunt'), mockResponse);
 
       expect(handoffIds()).toEqual(['run-a-0', 'run-a-1', 'run-a-2', 'run-a-3', 'run-a-4']);
+    });
+
+    describe('when superseded runs fill the oldest pages', () => {
+      const pageOf = (prefix: string, count: number) =>
+        Array.from({ length: count }, (_, i) => runHit(`${prefix}-${i}`, `${prefix}-alert-${i}`));
+      /** Candidate pages by `from`; every alert's newest run is `current` unless named in `superseded`. */
+      const servePages = (pages: unknown[][], supersededPrefix: string) =>
+        esClient.search.mockImplementation((async (request: {
+          collapse?: unknown;
+          from?: number;
+          query: { bool: { filter: Array<{ terms: { 'detonate.alert_id': string[] } }> } };
+        }) => {
+          if (!request.collapse) return { hits: { hits: pages[(request.from ?? 0) / 20] ?? [] } };
+          const alertIds = request.query.bool.filter[0].terms['detonate.alert_id'];
+          return {
+            hits: {
+              hits: alertIds.map((alertId) => ({
+                _id: alertId.startsWith(supersededPrefix)
+                  ? `newer-${alertId}`
+                  : alertId.replace('-alert-', '-'),
+                fields: { 'detonate.alert_id': [alertId] },
+              })),
+            },
+          };
+        }) as never);
+      const candidateSearches = () =>
+        esClient.search.mock.calls.filter(([request]) => !request.collapse);
+
+      it('reads the next page when a full page holds only superseded runs', async () => {
+        servePages([pageOf('old', 20), pageOf('cur', 3)], 'old');
+
+        await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+        expect(handoffIds()).toEqual(['cur-0', 'cur-1', 'cur-2']);
+        expect(candidateSearches().map(([request]) => request.from)).toEqual([0, 20]);
+      });
+
+      it('gives up after five pages instead of paging without bound', async () => {
+        servePages(
+          Array.from({ length: 8 }, (_, page) => pageOf(`old${page}`, 20)),
+          'old'
+        );
+
+        await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+        expect(candidateSearches().map(([request]) => request.from)).toEqual([0, 20, 40, 60, 80]);
+        expect(mockResponse.ok).toHaveBeenCalledWith({ body: { handoffs: [] } });
+      });
+
+      it('stops paging once five current runs are in hand', async () => {
+        servePages([pageOf('old', 15).concat(pageOf('cur', 5)), pageOf('cur2', 20)], 'old');
+
+        await listHandler()(createContext(), listRequest('hunt'), mockResponse);
+
+        expect(handoffIds()).toEqual(['cur-0', 'cur-1', 'cur-2', 'cur-3', 'cur-4']);
+        expect(candidateSearches()).toHaveLength(1);
+      });
     });
 
     it("rewrites the markers on the run's own results document", async () => {

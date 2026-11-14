@@ -38,8 +38,11 @@ import { setHandoffMarkers } from './results_store';
 
 const alertsIndex = (spaceId: string) => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-/** Candidates read per list call, before runs that are not their alert's newest are dropped. */
+/** Candidates read per page, before runs that are not their alert's newest are dropped. */
 const HANDOFF_CANDIDATE_FACTOR = 4;
+
+/** Pages of candidates one list call reads at most, so a long run of superseded runs cannot make it unbounded. */
+const HANDOFF_MAX_PAGES = 5;
 
 const DOC_KIND_FIELD = 'detonate.doc_kind';
 const ALERT_ID_FIELD = 'detonate.alert_id';
@@ -111,7 +114,6 @@ export const assertReadableAlertTags = async ({
     spaceId,
     alertIds: parseAlertTags(tags ?? []),
     statusCode: 400,
-    subject: 'The run names',
   });
 
 /**
@@ -123,16 +125,16 @@ export const assertReadableAlerts = async ({
   spaceId,
   alertIds,
   statusCode = 403,
-  subject = 'The request names',
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   alertIds: readonly string[];
   statusCode?: 400 | 403;
-  subject?: string;
 }): Promise<void> => {
   if (alertIds.length === 0) return;
 
+  // A 400 is a submit whose run carries the tags; a 403 is a request naming the ids directly.
+  const subject = statusCode === 400 ? 'The run names' : 'The request names';
   const rejected = (ids: readonly string[]) =>
     new DetonateServiceError(
       `${subject} alerts you cannot read in this space: ${ids.join(', ')}.`,
@@ -168,7 +170,9 @@ const readStrings = (source: unknown, path: string): string[] =>
 /**
  * Runs waiting for the given Worker, oldest first. A run counts only while it is
  * the newest one for its alert: an older malicious run of an alert that has since
- * been re-detonated benign is not a handoff.
+ * been re-detonated benign is not a handoff. Superseded runs are only known after
+ * the newest-run lookup, so the oldest ones can fill a page; the list pages on
+ * until it has enough runs, the candidates run out, or `HANDOFF_MAX_PAGES` pages.
  */
 export const listHandoffRuns = async ({
   esClient,
@@ -180,60 +184,83 @@ export const listHandoffRuns = async ({
   kind: DetonateHandoffKind;
 }): Promise<DetonateHandoff[]> => {
   const index = detonateResultsIndexName(spaceId);
-  const { hits } = await esClient.search({
-    index,
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    size: DETONATE_HANDOFF_MAX_TASKS * HANDOFF_CANDIDATE_FACTOR,
-    sort: [{ '@timestamp': { order: 'asc', unmapped_type: 'date' } }],
-    _source: [ALERT_ID_FIELD, ORIGIN_ALERTS_FIELD, SHA256_FIELD],
-    query: handoffSelector(kind),
-  });
+  const pageSize = DETONATE_HANDOFF_MAX_TASKS * HANDOFF_CANDIDATE_FACTOR;
+  const current = new Map<string, DetonateHandoff>();
 
-  const candidates = hits.hits.flatMap((hit) => {
-    const sha256 = readStrings(hit._source, SHA256_FIELD)[0];
-    if (typeof hit._id !== 'string' || !sha256) return [];
-    const alertId = readStrings(hit._source, ALERT_ID_FIELD)[0];
-    const origin = readStrings(hit._source, ORIGIN_ALERTS_FIELD);
-    return [
-      {
-        taskId: hit._id,
-        sha256,
-        alertId,
-        alertIds: alertId ? [...new Set([alertId, ...origin])] : origin,
-      },
-    ];
-  });
-
-  const alertIds = [...new Set(candidates.flatMap(({ alertId }) => (alertId ? [alertId] : [])))];
-  const newestByAlert = new Map<string, string>();
-  if (alertIds.length > 0) {
-    const newest = await esClient.search({
+  for (
+    let page = 0;
+    page < HANDOFF_MAX_PAGES && current.size < DETONATE_HANDOFF_MAX_TASKS;
+    page++
+  ) {
+    const { hits } = await esClient.search({
       index,
       ignore_unavailable: true,
       allow_no_indices: true,
-      size: alertIds.length,
-      _source: false,
-      query: {
-        bool: {
-          must_not: [{ term: { [DOC_KIND_FIELD]: 'alert_decision' } }],
-          filter: [{ terms: { [ALERT_ID_FIELD]: alertIds } }],
+      from: page * pageSize,
+      size: pageSize,
+      sort: [{ '@timestamp': { order: 'asc', unmapped_type: 'date' } }],
+      _source: [ALERT_ID_FIELD, ORIGIN_ALERTS_FIELD, SHA256_FIELD],
+      query: handoffSelector(kind),
+    });
+
+    const candidates = hits.hits.flatMap((hit) => {
+      const sha256 = readStrings(hit._source, SHA256_FIELD)[0];
+      if (typeof hit._id !== 'string' || !sha256) return [];
+      const alertId = readStrings(hit._source, ALERT_ID_FIELD)[0];
+      const origin = readStrings(hit._source, ORIGIN_ALERTS_FIELD);
+      return [
+        {
+          taskId: hit._id,
+          sha256,
+          alertId,
+          alertIds: alertId ? [...new Set([alertId, ...origin])] : origin,
         },
-      },
-      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-      collapse: { field: ALERT_ID_FIELD },
-      fields: [ALERT_ID_FIELD],
+      ];
     });
-    newest.hits.hits.forEach((hit) => {
-      const [alertId] = readStrings(hit.fields, ALERT_ID_FIELD);
-      if (typeof hit._id === 'string' && alertId) newestByAlert.set(alertId, hit._id);
-    });
+
+    const newestByAlert = await newestRunByAlert(esClient, index, candidates);
+    candidates
+      .filter(({ alertId, taskId }) => !alertId || newestByAlert.get(alertId) === taskId)
+      .forEach(({ taskId, sha256, alertIds }) => {
+        current.set(taskId, { task_id: taskId, sha256, alert_ids: alertIds });
+      });
+
+    if (hits.hits.length < pageSize) break;
   }
 
-  return candidates
-    .filter(({ alertId, taskId }) => !alertId || newestByAlert.get(alertId) === taskId)
-    .slice(0, DETONATE_HANDOFF_MAX_TASKS)
-    .map(({ taskId, sha256, alertIds: ids }) => ({ task_id: taskId, sha256, alert_ids: ids }));
+  return [...current.values()].slice(0, DETONATE_HANDOFF_MAX_TASKS);
+};
+
+const newestRunByAlert = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  candidates: ReadonlyArray<{ alertId?: string }>
+): Promise<Map<string, string>> => {
+  const alertIds = [...new Set(candidates.flatMap(({ alertId }) => (alertId ? [alertId] : [])))];
+  const newestByAlert = new Map<string, string>();
+  if (alertIds.length === 0) return newestByAlert;
+
+  const newest = await esClient.search({
+    index,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: alertIds.length,
+    _source: false,
+    query: {
+      bool: {
+        must_not: [{ term: { [DOC_KIND_FIELD]: 'alert_decision' } }],
+        filter: [{ terms: { [ALERT_ID_FIELD]: alertIds } }],
+      },
+    },
+    sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+    collapse: { field: ALERT_ID_FIELD },
+    fields: [ALERT_ID_FIELD],
+  });
+  newest.hits.hits.forEach((hit) => {
+    const [alertId] = readStrings(hit.fields, ALERT_ID_FIELD);
+    if (typeof hit._id === 'string' && alertId) newestByAlert.set(alertId, hit._id);
+  });
+  return newestByAlert;
 };
 
 /**

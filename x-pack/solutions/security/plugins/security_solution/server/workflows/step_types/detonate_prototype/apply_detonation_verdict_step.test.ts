@@ -87,7 +87,7 @@ describe('applyDetonationVerdictStepDefinition', () => {
       (call) => call[0].path as string
     );
     expect(paths.some((p) => /signals\/tags|alert_tags/.test(p))).toBe(false);
-    // Negative control for the check above: the source must not name the route at all.
+    // The runtime paths above only cover this input; the source scan catches a call on any branch.
     const dir = __dirname;
     const offenders = readdirSync(dir)
       .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))

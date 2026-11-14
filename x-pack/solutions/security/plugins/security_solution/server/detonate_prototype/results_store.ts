@@ -126,7 +126,7 @@ export const ensureResultsMapping = async (
   try {
     await esClient.indices.putMapping(
       { index: detonateResultsIndexName(spaceId), properties: buildMappingProperties() },
-      WRITE_TRANSPORT_OPTIONS
+      AWAITED_TRANSPORT_OPTIONS
     );
   } catch (error) {
     // The first write creates the index from the template, which is already current.
@@ -192,12 +192,23 @@ const toAlertDecisionRecord = (
 });
 
 /**
- * A release clears a claim; it must not undo a decision made while the claim was
- * held, because the always-run release step fires after the verdict is applied.
+ * A terminal decision is only replaced by another terminal one. A claim (`queued`,
+ * `running`) written over it would turn a failed re-run of a decided alert into
+ * `released`, which reads as undecided and sends the alert back to the sweep.
+ * A release is bound by the same rule, because the always-run release step fires
+ * after the verdict is applied.
  */
-const RELEASE_SCRIPT = `if (params.terminal.contains(ctx._source['detonate.decision.state'])) {
+const DECISION_RETRY_ON_CONFLICT = 3;
+
+const KEEP_TERMINAL = `if (params.terminal.contains(ctx._source['detonate.decision.state'])) {
   ctx.op = 'noop';
-} else {
+} else {`;
+
+const CLAIM_SCRIPT = `${KEEP_TERMINAL}
+  ctx._source.putAll(params.doc);
+}`;
+
+const RELEASE_SCRIPT = `${KEEP_TERMINAL}
   ctx._source['detonate.decision.state'] = params.doc['detonate.decision.state'];
   ctx._source['@timestamp'] = params.doc['@timestamp'];
   if (params.doc['detonate.decision.reason'] != null) {
@@ -224,20 +235,28 @@ export const writeAlertDecisions = async (
     | estypes.BulkUpdateAction<AlertDecisionRecord, AlertDecisionRecord>
   >((decision) => {
     const doc = toAlertDecisionRecord(spaceId, decision, now);
-    const action = { update: { _index: index, _id: decision.alertId } };
-    return decision.state === 'released'
-      ? [
-          action,
-          {
-            script: {
-              lang: 'painless',
-              source: RELEASE_SCRIPT,
-              params: { terminal: [...DETONATE_TERMINAL_DECISION_STATES], doc },
-            },
-            upsert: doc,
-          },
-        ]
-      : [action, { doc, doc_as_upsert: true }];
+    // Concurrent writers (a sweep's queued write, a run's claim, a release) share one document per alert.
+    const action = {
+      update: {
+        _index: index,
+        _id: decision.alertId,
+        retry_on_conflict: DECISION_RETRY_ON_CONFLICT,
+      },
+    };
+    const guarded = (source: string) => [
+      action,
+      {
+        script: {
+          lang: 'painless',
+          source,
+          params: { terminal: [...DETONATE_TERMINAL_DECISION_STATES], doc },
+        },
+        upsert: doc,
+      },
+    ];
+    if (decision.state === 'released') return guarded(RELEASE_SCRIPT);
+    if (decision.state === 'queued' || decision.state === 'running') return guarded(CLAIM_SCRIPT);
+    return [action, { doc, doc_as_upsert: true }];
   });
 
   const response = await esClient.bulk({ operations }, AWAITED_TRANSPORT_OPTIONS);
@@ -504,6 +523,7 @@ export const setHandoffMarkers = async ({
         index: detonateResultsIndexName(spaceId),
         id: taskId,
         refresh: true,
+        retry_on_conflict: DECISION_RETRY_ON_CONFLICT,
         script: {
           lang: 'painless',
           source: HANDOFF_MARKERS_SCRIPT,

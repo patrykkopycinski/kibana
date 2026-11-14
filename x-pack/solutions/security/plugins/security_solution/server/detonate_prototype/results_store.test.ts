@@ -145,6 +145,21 @@ describe('createRunRecorder', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('task-1'));
   });
 
+  it('logs and skips the write when the mapping update fails, then retries the mapping', async () => {
+    const { esClient, logger, recordRun } = setup();
+    esClient.indices.putMapping
+      .mockRejectedValueOnce(responseError(403, 'security_exception'))
+      .mockResolvedValue({ acknowledged: true });
+
+    await expect(recordRun('team-a', () => RECORD)).resolves.toBeUndefined();
+    expect(esClient.update).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+
+    await recordRun('team-a', () => RECORD);
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+    expect(esClient.update).toHaveBeenCalledTimes(1);
+  });
+
   it('retries the template install after it failed, and does not write in between', async () => {
     const { esClient, logger, recordRun } = setup();
     esClient.indices.putIndexTemplate
@@ -192,7 +207,7 @@ describe('createResultsIndexEnsurer', () => {
           }),
         }),
       },
-      { requestTimeout: 2000, maxRetries: 0 }
+      { requestTimeout: 10000, maxRetries: 1 }
     );
   });
 
@@ -263,7 +278,9 @@ describe('writeAlertDecisions', () => {
     ];
     expect(options).toEqual({ requestTimeout: 10000, maxRetries: 1 });
     expect(operations).toEqual([
-      { update: { _index: '.kibana-detonate-results-team-a', _id: 'alert-1' } },
+      {
+        update: { _index: '.kibana-detonate-results-team-a', _id: 'alert-1', retry_on_conflict: 3 },
+      },
       {
         doc: {
           '@timestamp': NOW.toISOString(),
@@ -278,16 +295,54 @@ describe('writeAlertDecisions', () => {
         },
         doc_as_upsert: true,
       },
-      { update: { _index: '.kibana-detonate-results-team-a', _id: 'alert-2' } },
       {
-        doc: expect.objectContaining({
+        update: { _index: '.kibana-detonate-results-team-a', _id: 'alert-2', retry_on_conflict: 3 },
+      },
+      {
+        script: expect.objectContaining({ lang: 'painless' }),
+        upsert: expect.objectContaining({
           'detonate.alert_id': 'alert-2',
           'detonate.decision.state': 'queued',
         }),
-        doc_as_upsert: true,
       },
     ]);
   });
+
+  it.each(['queued', 'running'] as const)(
+    'writes a %s claim through a script that leaves a terminal decision alone',
+    async (state) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+      await writeAlertDecisions(esClient, 'team-a', [{ alertId: 'alert-1', state }], NOW);
+
+      const { operations } = esClient.bulk.mock.calls[0][0] as unknown as {
+        operations: [unknown, ReleaseOperation];
+      };
+      const [, claim] = operations;
+      expect(claim.script.params.terminal).toEqual(expect.arrayContaining(['verdict_applied']));
+      expect(claim.script.source).toContain("ctx.op = 'noop'");
+      expect(claim.script.source).toContain('putAll(params.doc)');
+      expect(claim.upsert['detonate.decision.state']).toBe(state);
+      expect(claim).not.toHaveProperty('doc_as_upsert');
+    }
+  );
+
+  it.each(['verdict_applied', 'known_malicious', 'skipped', 'not_eligible'] as const)(
+    'writes a terminal %s decision unconditionally, so a re-run verdict replaces the old one',
+    async (state) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+      await writeAlertDecisions(esClient, 'team-a', [{ alertId: 'alert-1', state }], NOW);
+
+      const { operations } = esClient.bulk.mock.calls[0][0] as unknown as {
+        operations: [unknown, Record<string, unknown>];
+      };
+      expect(operations[1]).toHaveProperty('doc_as_upsert', true);
+      expect(operations[1]).not.toHaveProperty('script');
+    }
+  );
 
   it('writes nothing for an empty list', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -591,6 +646,7 @@ describe('setHandoffMarkers', () => {
         index: '.kibana-detonate-results-team-a',
         id: 'task-1',
         refresh: true,
+        retry_on_conflict: 3,
         script: expect.objectContaining({
           params: {
             add: [{ field: 'detonate.handoff.hunt', value: 'done' }],

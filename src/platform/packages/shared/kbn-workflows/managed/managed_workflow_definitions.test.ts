@@ -62,8 +62,8 @@ import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.
 import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
-import FORENSICS_DETONATE_SAMPLE_YAML from './definitions/alertzero/forensics_detonate_sample.yaml';
 import FORENSICS_CLOSE_INVESTIGATION_GATE_YAML from './definitions/alertzero/forensics_close_investigation_gate.yaml';
+import FORENSICS_DETONATE_SAMPLE_YAML from './definitions/alertzero/forensics_detonate_sample.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
@@ -259,7 +259,7 @@ it.each([
     renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
     '18:1ec301f5',
   ],
-  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '14:8915cee5'],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '18:c631474d'],
   [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '15:a9d8d6ac'],
   [
     ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -269,7 +269,7 @@ it.each([
   [
     ALERTZERO_WORKER_FORENSICS_DETONATE_SAMPLE_WORKFLOW_ID,
     renderInputs(FORENSICS_DETONATE_SAMPLE_YAML, DETONATE_SAMPLE_WORKER_SETTINGS_DEFAULTS),
-    '4:47ae68b3',
+    '8:9099b52c',
   ],
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,

@@ -280,11 +280,12 @@ steps:
       detonate_lookup_ok: '${{ steps.filter_detonate_candidates.output != blank and steps.filter_detonate_candidates.error == blank }}'
 
   # Hashes only, not alert documents: variables persist with the execution, and
-  # a 100-alert batch of full documents would bloat every state write.
+  # a 100-alert batch of full documents would bloat every state write. Read from
+  # the lookup entries, which already drop a hash that is not one 64-character string.
   - name: compute_detonate_candidates
     type: data.set
     with:
-      detonate_hashes: "${{ steps.load_alerts.output.alerts | where: 'file.hash.sha256' | reject_exp: 'alert', \"variables.detonate_lookup_ok != true or variables.detonate_decided_ids contains alert._id\" | map: 'file.hash.sha256' | uniq | slice: 0, 20 }}"
+      detonate_hashes: "${{ variables.detonate_lookup_json | json_parse | where: 'sha256' | reject_exp: 'entry', \"variables.detonate_lookup_ok != true or variables.detonate_decided_ids contains entry.alert_id\" | map: 'sha256' | uniq | slice: 0, 20 }}"
 
   - name: count_detonate_candidates
     type: data.set
@@ -1369,7 +1370,7 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ variables.home_conversation_id }}"
       message: |-
-        Sent {{ variables.detonate_hash_count }} file hash{% if variables.detonate_hash_count != 1 %}es{% endif %} from this batch to detonation. Known-malicious hashes are tagged from reputation without a sandbox run; each verdict is recorded against the alert without changing it.
+        Sent {{ variables.detonate_hash_count }} file hash{% if variables.detonate_hash_count != 1 %}es{% endif %} from this batch to detonation. Known-malicious hashes get a decision recorded from reputation without a sandbox run; each verdict is recorded against the alert without changing it.
 
   - name: post_comment_detonate_overrides
     type: ai.conversation.add_user_message

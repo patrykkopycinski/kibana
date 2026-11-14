@@ -190,12 +190,12 @@ const handoffMarkerListSchema = schema.maybe(
  */
 const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
 
+const ORIGIN_TEXT_MAX_LENGTH = { host_name: 256, user_name: 256, file_path: 4096 } as const;
+
 /**
  * Where the submit came from. Kept in Kibana's results index and stripped before
  * the service call. The submitter is the authenticated user, never a field here.
  */
-const ORIGIN_TEXT_MAX_LENGTH = { host_name: 256, user_name: 256, file_path: 4096 } as const;
-
 const originSchema = schema.object({
   source: schema.maybe(
     schema.oneOf([

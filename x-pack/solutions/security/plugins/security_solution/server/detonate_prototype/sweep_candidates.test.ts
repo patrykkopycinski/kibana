@@ -183,13 +183,14 @@ describe('listSweepCandidates', () => {
       search: jest.fn().mockRejectedValue({ statusCode: 403 }),
     };
 
-    await expect(
-      listSweepCandidates({
-        alertsClient: alertsClient as never,
-        resultsClient: resultsClientDeciding(new Set()) as never,
-        spaceId: 'default',
-        limit: 5,
-      })
-    ).rejects.toEqual(expect.any(DetonateServiceError));
+    const error = await listSweepCandidates({
+      alertsClient: alertsClient as never,
+      resultsClient: resultsClientDeciding(new Set()) as never,
+      spaceId: 'default',
+      limit: 5,
+    }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(DetonateServiceError);
+    expect((error as DetonateServiceError).statusCode).toBe(403);
   });
 });

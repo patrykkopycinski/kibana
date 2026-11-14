@@ -47,15 +47,16 @@ describe('space scope', () => {
 
   describe('lookupPriorRunsInSpace', () => {
     const sha = 'A'.repeat(64);
-    const esWith = (source?: Record<string, unknown>) =>
+    /** The hits are given newest first, the order the query's sort returns them in. */
+    const esWith = (...sources: Array<Record<string, unknown>>) =>
       ({
-        search: jest
-          .fn()
-          .mockResolvedValue({ hits: { hits: source ? [{ _source: source }] : [] } }),
+        search: jest.fn().mockResolvedValue({
+          hits: { hits: sources.map((source) => ({ _source: source })) },
+        }),
       } as unknown as ElasticsearchClient & { search: jest.Mock });
-    const runDoc = (taskId: string, verdict?: string) => ({
+    const runDoc = (taskId: string, verdict?: string, timestamp = '2026-11-03T00:00:00Z') => ({
       'detonate.task_id': taskId,
-      '@timestamp': '2026-11-03T00:00:00Z',
+      '@timestamp': timestamp,
       ...(verdict ? { 'detonate.verdict': verdict } : {}),
     });
 
@@ -93,7 +94,12 @@ describe('space scope', () => {
     });
 
     it('answers unknown when the newest completed run was benign', async () => {
-      const result = await lookupPriorRunsInSpace(esWith(runDoc('run-2', 'benign')), sha, 'team-a');
+      const esClient = esWith(
+        runDoc('run-2', 'benign', '2026-11-04T00:00:00Z'),
+        runDoc('run-1', 'malicious', '2026-11-03T00:00:00Z')
+      );
+
+      const result = await lookupPriorRunsInSpace(esClient, sha, 'team-a');
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -102,6 +108,9 @@ describe('space scope', () => {
           last_verdict: 'benign',
         })
       );
+      const [params] = esClient.search.mock.calls[0];
+      expect(params.size).toBe(1);
+      expect(params.sort).toEqual([{ '@timestamp': 'desc' }, { 'detonate.task_id': 'desc' }]);
     });
 
     it('answers unknown with no run reference when the space has no completed run', async () => {

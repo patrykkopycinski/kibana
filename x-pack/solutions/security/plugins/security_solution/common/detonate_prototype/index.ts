@@ -636,7 +636,7 @@ export const DETONATE_SWEEP_SEVERITIES = ['low', 'medium', 'high', 'critical'] a
 export interface DetonateSweepCandidates {
   /** Positional rows `[alert_id, sha256]`, newest hash first; one representative alert per hash. */
   values: Array<[string, string]>;
-  /** Distinct open hashes the scan examined, decided or not. */
+  /** Unique valid hashes the scan examined, decided or not — deduplicated per hash, not the number of alerts read. */
   scanned: number;
   /** The page bound stopped the scan before every hash was examined. */
   truncated: boolean;

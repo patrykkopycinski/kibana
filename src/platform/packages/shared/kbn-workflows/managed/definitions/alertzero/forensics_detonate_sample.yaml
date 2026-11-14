@@ -287,8 +287,9 @@ steps:
   # No `.size` here: workflow.output renders against a context narrowed to the
   # referenced paths, and `values.size` is not a real key of the array, so the
   # narrowing drops it and the count reads as empty. The counts come from
-  # variables, which exist on every sweep. `candidates_exhausted` means the scan
-  # examined hashes and the decisions store covered every one. `scan_truncated`
+  # variables, which exist on every sweep. `scanned` counts unique valid hashes
+  # examined, not alerts read. `candidates_exhausted` means the scan examined
+  # hashes and the decisions store covered every one. `scan_truncated`
   # means the scan stopped at its page bound with no undecided hash found, so
   # the hashes past the last page were never examined and nothing is covered.
   - name: emit_result

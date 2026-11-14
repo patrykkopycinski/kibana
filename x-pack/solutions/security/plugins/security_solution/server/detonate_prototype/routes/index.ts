@@ -194,6 +194,8 @@ const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
  * Where the submit came from. Kept in Kibana's results index and stripped before
  * the service call. The submitter is the authenticated user, never a field here.
  */
+const ORIGIN_TEXT_MAX_LENGTH = { host_name: 256, user_name: 256, file_path: 4096 } as const;
+
 const originSchema = schema.object({
   source: schema.maybe(
     schema.oneOf([
@@ -204,12 +206,30 @@ const originSchema = schema.object({
     ])
   ),
   alert_ids: schema.maybe(schema.arrayOf(schema.string({ maxLength: 128 }), { maxSize: 32 })),
-  host_name: schema.maybe(schema.string({ maxLength: 256 })),
-  user_name: schema.maybe(schema.string({ maxLength: 256 })),
-  file_path: schema.maybe(schema.string({ maxLength: 4096 })),
+  host_name: schema.maybe(schema.string({ maxLength: ORIGIN_TEXT_MAX_LENGTH.host_name })),
+  user_name: schema.maybe(schema.string({ maxLength: ORIGIN_TEXT_MAX_LENGTH.user_name })),
+  file_path: schema.maybe(schema.string({ maxLength: ORIGIN_TEXT_MAX_LENGTH.file_path })),
   workflow_execution_id: schema.maybe(schema.string({ maxLength: 128 })),
   conversation_id: schema.maybe(schema.string({ maxLength: 128 })),
 });
+
+/**
+ * The host, user and file path are copied from the alert or the sample, so a long
+ * one is possible and says nothing about whether the submit is valid. They are cut to
+ * their bounds before validation so an oversized one never rejects the submit; the
+ * ids stay strict because they are looked up.
+ */
+const fitOriginText = (body: unknown): unknown => {
+  const origin = (body as { origin?: unknown } | null | undefined)?.origin;
+  if (typeof origin !== 'object' || origin === null || Array.isArray(origin)) return body;
+  const fitted = Object.fromEntries(
+    Object.entries(origin).map(([key, value]) => {
+      const max = ORIGIN_TEXT_MAX_LENGTH[key as keyof typeof ORIGIN_TEXT_MAX_LENGTH];
+      return [key, max !== undefined && typeof value === 'string' ? value.slice(0, max) : value];
+    })
+  );
+  return { ...(body as object), origin: fitted };
+};
 
 /** Mirrors the service's optional submit fields. Everything is bounded. */
 const submitOptionsSchema = {
@@ -229,6 +249,12 @@ const submitOptionsSchema = {
 };
 
 const submitOptionsObjectSchema = schema.object(submitOptionsSchema);
+
+const submitHashBodySchema = schema.object({
+  // Accepts the hash lengths the service does; bounded either way.
+  sample_hash: schema.string({ minLength: 32, maxLength: 128 }),
+  ...submitOptionsSchema,
+});
 
 export interface DetonateRoutesDeps {
   router: SecuritySolutionPluginRouter;
@@ -505,7 +531,7 @@ export const registerDetonatePrototypeRoutes = ({
               });
             }
             try {
-              options = submitOptionsObjectSchema.validate(options);
+              options = submitOptionsObjectSchema.validate(fitOriginText(options));
             } catch {
               // `validate` throws rather than returning errors, and without
               // this branch a malformed option would surface as a 500.
@@ -569,11 +595,13 @@ export const registerDetonatePrototypeRoutes = ({
         version: '1',
         validate: {
           request: {
-            body: schema.object({
-              // Accepts the hash lengths the service does; bounded either way.
-              sample_hash: schema.string({ minLength: 32, maxLength: 128 }),
-              ...submitOptionsSchema,
-            }),
+            body: (value, { ok, badRequest }) => {
+              try {
+                return ok(submitHashBodySchema.validate(fitOriginText(value)));
+              } catch (error) {
+                return badRequest(error as Error);
+              }
+            },
           },
         },
       },

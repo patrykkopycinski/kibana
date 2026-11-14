@@ -118,10 +118,9 @@ describe('registerDetonatePrototypeRoutes', () => {
     router.versioned.getRoute('get', `${DETONATE_PRIOR_RUNS_PATH}/{sha256}`).versions['1'].handler;
 
   /**
-   * The submit-hash body validator is a config-schema object (not a route
-   * validation function), so out-of-bounds payloads are exercised by running
-   * the registered schema the way the HTTP router does — `validate` throws on
-   * invalid input, which the router turns into a 400.
+   * The submit-hash body validator is a route validation function, so it is run the
+   * way the HTTP router does: a `{ value }` result is the validated body, an
+   * `{ error }` result is the 400 the router would answer, thrown here.
    */
   const submitHashBodySchema = () => {
     const { config } = router.versioned.getRoute('post', DETONATE_SUBMIT_HASH_PATH).versions['1'];
@@ -129,7 +128,23 @@ describe('registerDetonatePrototypeRoutes', () => {
     if (!validation || !validation.request) {
       throw new Error('submit-hash route registered without request validation');
     }
-    return validation.request.body as { validate(body: unknown): unknown };
+    const validateBody = validation.request.body as (
+      body: unknown,
+      factory: {
+        ok: (value: unknown) => { value: unknown };
+        badRequest: (error: Error) => { error: Error };
+      }
+    ) => { value: unknown } | { error: Error };
+    return {
+      validate: (body: unknown) => {
+        const result = validateBody(body, {
+          ok: (value) => ({ value }),
+          badRequest: (error) => ({ error }),
+        });
+        if ('error' in result) throw result.error;
+        return result.value;
+      },
+    };
   };
 
   /**
@@ -423,13 +438,30 @@ describe('registerDetonatePrototypeRoutes', () => {
         ['an unknown source', { source: 'somewhere' }],
         ['too many alert ids', { alert_ids: Array.from({ length: 33 }, (_, i) => `a${i}`) }],
         ['an oversized alert id', { alert_ids: ['a'.repeat(129)] }],
-        ['an oversized host name', { host_name: 'h'.repeat(257) }],
-        ['an oversized file path', { file_path: 'p'.repeat(4097) }],
         ['an oversized conversation id', { conversation_id: 'c'.repeat(129) }],
       ])('rejects %s in the origin', (_name, origin) => {
         expect(() =>
           submitHashBodySchema().validate({ sample_hash: 'a'.repeat(64), origin })
         ).toThrow();
+      });
+
+      it('cuts an oversized host name, user name and file path to their bounds instead of rejecting', () => {
+        const validated = submitHashBodySchema().validate({
+          sample_hash: 'a'.repeat(64),
+          origin: {
+            source: 'alert_flyout',
+            host_name: 'h'.repeat(300),
+            user_name: 'u'.repeat(300),
+            file_path: 'p'.repeat(5000),
+          },
+        }) as { origin: Record<string, string> };
+
+        expect(validated.origin).toEqual({
+          source: 'alert_flyout',
+          host_name: 'h'.repeat(256),
+          user_name: 'u'.repeat(256),
+          file_path: 'p'.repeat(4096),
+        });
       });
 
       it('accepts a full, in-bounds origin', () => {
@@ -709,6 +741,56 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       expect(callerSearch).toHaveBeenCalledTimes(1);
       expect(client.submitFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('submits with an oversized origin host, user and path cut to their bounds', async () => {
+      client.submitFile.mockResolvedValue({
+        id: 'task-5',
+        created_at: '2026-12-15T10:00:00.000Z',
+        tags: ['space:default'],
+        ...NO_ALERT_GROUPS,
+      } as never);
+
+      await submitFileHandler()(
+        createContext(),
+        createFileRequest(
+          JSON.stringify({
+            origin: {
+              source: 'alert_flyout',
+              host_name: 'h'.repeat(300),
+              user_name: 'u'.repeat(300),
+              file_path: 'p'.repeat(5000),
+            },
+          })
+        ),
+        mockResponse
+      );
+      await flushWrites();
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(client.submitFile).toHaveBeenCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          doc: expect.objectContaining({
+            'host.name': 'h'.repeat(256),
+            'user.name': 'u'.repeat(256),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('still rejects an origin alert id in request_json that is oversized', async () => {
+      await submitFileHandler()(
+        createContext(),
+        createFileRequest(JSON.stringify({ origin: { alert_ids: ['a'.repeat(129)] } })),
+        mockResponse
+      );
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: '`request_json` contains invalid options.' },
+      });
+      expect(client.submitFile).not.toHaveBeenCalled();
     });
 
     it('rejects an origin alert id in request_json the caller cannot read with 400', async () => {

@@ -943,8 +943,9 @@ export const registerDetonatePrototypeRoutes = ({
               againstTask.id !== task.id;
           } else if (hash) {
             // Equal timestamps still count (the service clock and submit order can tie).
-            // Walk back through the results index until a baseline the service still
-            // holds; the newest few runs are the ones the service prunes first.
+            // Walk back through the results index, newest completed run first, until
+            // one the service still holds: dropped runs leave only their results
+            // document, so older baselines may survive a prune of the newest.
             const excludeTaskIds = new Set<string>([task.id]);
             const esClient = await getInternalEsClient();
             for (let tried = 0; tried < DETONATE_PRIOR_RUNS_LOOKBACK; tried++) {
@@ -953,7 +954,6 @@ export const registerDetonatePrototypeRoutes = ({
                 notAfter: task.created_at,
                 excludeTaskIds,
               });
-              // A run the service has since dropped leaves only its results document.
               if (!prior) break;
               excludeTaskIds.add(prior.taskId);
               againstTask = await getTaskInSpace(client, prior.taskId, spaceId).catch(
@@ -1302,13 +1302,14 @@ export const registerDetonatePrototypeRoutes = ({
    * The open-alert sample hashes no detonation has covered, newest first: the
    * sweep's candidate list. It pages the alerts until it has `limit` undecided
    * hashes, so a backlog of decided newer alerts cannot hide older ones. Alerts
-   * are read as the caller, results as the internal user, like the decisions route.
+   * are read as the caller, results as the internal user, like the decisions
+   * route, so it carries the same security.
    */
   router.versioned
     .post({
       access: 'internal',
       path: DETONATE_SWEEP_CANDIDATES_PATH,
-      security: DETONATE_HANDOFF_WRITE_ROUTE_SECURITY,
+      security: DETONATE_ROUTE_SECURITY,
     })
     .addVersion(
       {

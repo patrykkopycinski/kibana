@@ -112,6 +112,11 @@ export interface LatestCompletedRun {
  * The newest completed run of a sample in this space, read from the space's results
  * index. The index is per space, so the space is the index name rather than a filter.
  * `notAfter` and `excludeTaskId` narrow it to runs earlier than a given one.
+ *
+ * Only this index is read, never the service's task list: a second source of truth
+ * would re-couple the read path to the service. The accepted cost is that a run whose
+ * initial best-effort write failed stays invisible here until a later poll writes its
+ * completed state; the worst case is a redundant detonation, bounded by the retry cap.
  */
 export const findLatestCompletedRun = async (
   esClient: ElasticsearchClient,

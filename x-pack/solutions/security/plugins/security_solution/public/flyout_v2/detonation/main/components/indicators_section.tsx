@@ -103,9 +103,10 @@ export const IndicatorsSection = ({
     () => buildStixBundle(taskId, rows, createdAt),
     [taskId, rows, createdAt]
   );
-  const stixEmpty = stixBundle.objects.length === 0;
+  const stixEmpty = !stixBundle;
 
   const onExportStix = useCallback(() => {
+    if (!stixBundle) return;
     downloadBlob(
       new Blob([JSON.stringify(stixBundle, null, 2)], { type: 'application/json' }),
       `detonation-${taskId}-indicators.stix.json`

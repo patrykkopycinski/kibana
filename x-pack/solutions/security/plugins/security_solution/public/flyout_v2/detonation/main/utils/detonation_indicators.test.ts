@@ -111,6 +111,12 @@ describe('toStixPattern', () => {
 });
 
 describe('buildStixBundle', () => {
+  const expectBundle = (...args: Parameters<typeof buildStixBundle>) => {
+    const bundle = buildStixBundle(...args);
+    if (!bundle) throw new Error('expected a bundle');
+    return bundle;
+  };
+
   const rows = [
     { type: 'domain' as const, value: 'evil.example' },
     { type: 'ip' as const, value: '10.0.0.1' },
@@ -118,7 +124,7 @@ describe('buildStixBundle', () => {
   ];
 
   it('builds a STIX 2.1 bundle with one indicator per row', () => {
-    const bundle = buildStixBundle('task-1', rows, NOW);
+    const bundle = expectBundle('task-1', rows, NOW);
     expect(bundle.type).toBe('bundle');
     expect(bundle.id).toMatch(/^bundle--[0-9a-f-]{36}$/);
     expect(bundle.objects.map(({ pattern }) => pattern)).toEqual([
@@ -138,7 +144,7 @@ describe('buildStixBundle', () => {
   });
 
   it('stamps the run creation time and marks every indicator as malicious activity', () => {
-    const bundle = buildStixBundle('task-1', rows, CREATED_AT);
+    const bundle = expectBundle('task-1', rows, CREATED_AT);
     bundle.objects.forEach((indicator) => {
       expect(indicator).toMatchObject({
         created: CREATED_AT,
@@ -150,28 +156,28 @@ describe('buildStixBundle', () => {
   });
 
   it('gives the same indicator a different id in a different run', () => {
-    const first = buildStixBundle('task-1', rows, NOW).objects.map(({ id }) => id);
-    const second = buildStixBundle('task-2', rows, NOW).objects.map(({ id }) => id);
+    const first = expectBundle('task-1', rows, NOW).objects.map(({ id }) => id);
+    const second = expectBundle('task-2', rows, NOW).objects.map(({ id }) => id);
     first.forEach((id, index) => expect(id).not.toBe(second[index]));
   });
 
   it('is deterministic for the same input', () => {
-    expect(buildStixBundle('task-1', rows, NOW)).toEqual(buildStixBundle('task-1', rows, NOW));
+    expect(expectBundle('task-1', rows, NOW)).toEqual(expectBundle('task-1', rows, NOW));
   });
 
   it('gives different indicators different ids', () => {
-    const ids = buildStixBundle('task-1', rows, NOW).objects.map(({ id }) => id);
+    const ids = expectBundle('task-1', rows, NOW).objects.map(({ id }) => id);
     expect(new Set(ids).size).toBe(3);
   });
 
   it('drops duplicate patterns', () => {
-    const bundle = buildStixBundle('task-1', [...rows, rows[0]], NOW);
+    const bundle = expectBundle('task-1', [...rows, rows[0]], NOW);
     expect(bundle.objects).toHaveLength(3);
   });
 
-  it('skips hashes of unknown length', () => {
-    const bundle = buildStixBundle('task-1', [{ type: 'file_hash', value: 'abc' }], NOW);
-    expect(bundle.objects).toEqual([]);
+  it('returns no bundle when no row can be expressed, since STIX 2.1 forbids empty objects', () => {
+    expect(buildStixBundle('task-1', [{ type: 'file_hash', value: 'abc' }], NOW)).toBeUndefined();
+    expect(buildStixBundle('task-1', [], NOW)).toBeUndefined();
   });
 });
 

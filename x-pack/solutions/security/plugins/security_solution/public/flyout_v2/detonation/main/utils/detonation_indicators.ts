@@ -103,7 +103,7 @@ export const buildStixBundle = (
   taskId: string,
   rows: IndicatorRow[],
   createdAt: string
-): StixBundle => {
+): StixBundle | undefined => {
   const seen = new Set<string>();
   const objects: StixIndicator[] = [];
   for (const row of rows) {
@@ -124,6 +124,8 @@ export const buildStixBundle = (
       });
     }
   }
+  // STIX 2.1 requires `objects` to be non-empty when present, so an empty bundle is not valid.
+  if (objects.length === 0) return undefined;
   return {
     type: 'bundle',
     id: `bundle--${uuidv5(

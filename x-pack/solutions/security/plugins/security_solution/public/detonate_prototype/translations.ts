@@ -60,6 +60,17 @@ export const SERVICE_DEFAULT = i18n.translate(
   { defaultMessage: 'Service default' }
 );
 
+export const EXEC_WAIT_LABEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submit.execWaitLabel',
+  { defaultMessage: 'Execution wait (seconds)' }
+);
+
+export const EXEC_WAIT_HELP = (max: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.submit.execWaitHelp', {
+    defaultMessage: 'Optional. How long the sample runs before the VM is collected, up to {max}.',
+    values: { max },
+  });
+
 export const SUBMIT_BY_HASH = i18n.translate(
   'xpack.securitySolution.detonatePrototype.submit.byHash',
   { defaultMessage: 'By hash' }
@@ -793,3 +804,109 @@ export const OVERVIEW_DETAIL_TAGS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.overview.detailTags',
   { defaultMessage: 'Tags' }
 );
+
+export const FOOTER_ADD_TO_CHAT_PROMPT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.addToChatPrompt',
+  { defaultMessage: 'Explain this detonation result and what I should do next.' }
+);
+
+export const FOOTER_ADD_TO_CHAT_DESCRIPTION = (taskId: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.addToChatDescription', {
+    defaultMessage: 'Detonation run {taskId}',
+    values: { taskId },
+  });
+
+export const FOOTER_RERUN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.rerun',
+  { defaultMessage: 'Re-run' }
+);
+
+export const FOOTER_RERUN_LONGER_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.rerunLongerTimeout',
+  { defaultMessage: 'Re-run with longer timeout' }
+);
+
+export const FOOTER_TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.takeAction',
+  { defaultMessage: 'Take action' }
+);
+
+export const FOOTER_ADD_TO_CASE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.addToCase',
+  { defaultMessage: 'Add to case' }
+);
+
+export const FOOTER_SHARE_LINK = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.shareLink',
+  { defaultMessage: 'Share link' }
+);
+
+export const FOOTER_SHARE_LINK_COPIED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.shareLinkCopied',
+  { defaultMessage: 'Link copied to clipboard' }
+);
+
+export const FOOTER_BLOCK_HASH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHash',
+  { defaultMessage: 'Block hash' }
+);
+
+export const FOOTER_BLOCK_HASH_NO_HASH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashNoHash',
+  { defaultMessage: 'This run has no sha256 to block.' }
+);
+
+export const FOOTER_BLOCK_HASH_NO_PRIVILEGE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashNoPrivilege',
+  { defaultMessage: 'You need Endpoint blocklist write privilege to block a hash.' }
+);
+
+export const FOOTER_BLOCK_HASH_CONFIRM_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashConfirmTitle',
+  { defaultMessage: 'Block this hash?' }
+);
+
+export const FOOTER_BLOCK_HASH_CONFIRM_BODY = (hash: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashConfirmBody', {
+    defaultMessage:
+      'This adds {hash} to the Endpoint blocklist for all policies. Endpoint will block this file from running.',
+    values: { hash },
+  });
+
+export const FOOTER_BLOCK_HASH_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashConfirm',
+  { defaultMessage: 'Block hash' }
+);
+
+export const FOOTER_BLOCK_HASH_CANCEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashCancel',
+  { defaultMessage: 'Cancel' }
+);
+
+export const FOOTER_BLOCK_HASH_NAME = (hash: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashName', {
+    defaultMessage: 'Detonation: {hash}',
+    values: { hash },
+  });
+
+export const FOOTER_BLOCK_HASH_DESCRIPTION = (taskId: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashDescription', {
+    defaultMessage: 'Blocked from the result of detonation run {taskId}.',
+    values: { taskId },
+  });
+
+export const FOOTER_BLOCK_HASH_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashSuccess',
+  { defaultMessage: 'Hash added to the Endpoint blocklist' }
+);
+
+export const FOOTER_BLOCK_HASH_ERROR = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashError',
+  { defaultMessage: 'Could not add the hash to the Endpoint blocklist' }
+);
+
+export const FOOTER_FAILED_NOTE_FALLBACK = (worker: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.failedNoteFallback', {
+    defaultMessage: 'The run failed in the {worker} step.',
+    values: { worker },
+  });

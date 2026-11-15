@@ -294,6 +294,12 @@ export interface DetonateTaskUpdate {
 /* Requests and responses                                                      */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Longest execution wait the connector accepts (mirrors the server's
+ * `CONNECTOR_MAX_EXEC_WAIT_SECS`, which the public bundle cannot import).
+ */
+export const DETONATE_MAX_EXEC_WAIT_SECS = 900;
+
 /** Fields every submit-* request carries. */
 export interface DetonateBaseRequest {
   tags?: string[];

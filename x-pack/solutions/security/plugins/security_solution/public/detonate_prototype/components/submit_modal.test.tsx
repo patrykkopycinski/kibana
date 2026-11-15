@@ -33,6 +33,7 @@ import {
   SUBMIT_MODAL_PRIOR_RUN_TEST_ID,
   SUBMIT_MODAL_READ_ONLY_TEST_ID,
   SUBMIT_MODAL_ERROR_TEST_ID,
+  SUBMIT_MODAL_EXEC_WAIT_TEST_ID,
   SUBMIT_MODAL_USAGE_ERROR_TEST_ID,
   SUBMIT_MODAL_USAGE_TEST_ID,
 } from './submit_modal';
@@ -245,6 +246,40 @@ describe('SubmitModal', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       expect(mutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({ vm_os_family: 'windows' })
+      );
+    });
+
+    it('pre-fills the OS family and the exec wait of a run being repeated and sends them', () => {
+      renderModal({ initialHash: SHA256, initialOsFamily: 'linux', initialExecWaitSecs: 600 });
+
+      expect(screen.getByTestId('detonatePrototypeOsFamily')).toHaveValue('linux');
+      expect(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID)).toHaveValue(600);
+      fireEvent.click(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(mutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({ vm_os_family: 'linux', exec_wait_secs: 600 })
+      );
+    });
+
+    it('sends the exec wait the analyst typed, and omits it when the field is cleared', () => {
+      renderModal({ initialHash: SHA256, initialExecWaitSecs: 300 });
+
+      fireEvent.change(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID), {
+        target: { value: '450' },
+      });
+      fireEvent.click(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(mutateAsync).toHaveBeenLastCalledWith(
+        expect.objectContaining({ exec_wait_secs: 450 })
+      );
+
+      fireEvent.change(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID), {
+        target: { value: '' },
+      });
+      fireEvent.click(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(mutateAsync).toHaveBeenLastCalledWith(
+        expect.not.objectContaining({ exec_wait_secs: expect.anything() })
       );
     });
 

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useEffect, useMemo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDetonationTask } from '../../../detonate_prototype/hooks/use_detonate';
 import {
@@ -17,6 +17,7 @@ import {
 import { FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { useTabs } from '../../shared/hooks/use_tabs';
 import { Header } from './header';
+import { Footer } from './footer';
 import { Content } from './content';
 import { getTabsDisplayed, type DetonationPanelPaths, validTabIds } from './tabs';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
@@ -84,6 +85,11 @@ export const DetonationDetails: FC<DetonationDetailsProps> = memo(({ taskId }) =
       <EuiFlyoutBody css={detonationFlyoutBodyCss}>
         <Content tabs={tabs} selectedTabId={selectedTabId} />
       </EuiFlyoutBody>
+      {task && (
+        <EuiFlyoutFooter>
+          <Footer task={task} />
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 });

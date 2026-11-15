@@ -40,8 +40,14 @@ const details = (
     { title: i18n.OVERVIEW_DETAIL_TASK_ID, description: task.id },
     { title: i18n.OVERVIEW_FIELD_SHA256, description: task.sample_hash ?? i18n.META_EMPTY },
     { title: i18n.OVERVIEW_DETAIL_ENVIRONMENT, description: environment },
-    { title: i18n.OVERVIEW_DETAIL_AGENT_VERSION, description: task.agent_version },
-    { title: i18n.OVERVIEW_DETAIL_TELEMETRY_CLUSTER, description: task.telemetry_cluster_version },
+    {
+      title: i18n.OVERVIEW_DETAIL_AGENT_VERSION,
+      description: task.agent_version || i18n.META_EMPTY,
+    },
+    {
+      title: i18n.OVERVIEW_DETAIL_TELEMETRY_CLUSTER,
+      description: task.telemetry_cluster_version || i18n.META_EMPTY,
+    },
     {
       title: i18n.OVERVIEW_DETAIL_SUBMITTED,
       description: <FormattedRelative value={new Date(task.created_at)} />,

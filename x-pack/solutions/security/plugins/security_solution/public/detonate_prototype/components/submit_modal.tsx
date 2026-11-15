@@ -21,6 +21,7 @@ import {
   EuiButtonEmpty,
   EuiComboBox,
   EuiConfirmModal,
+  EuiFieldNumber,
   EuiFieldText,
   EuiFilePicker,
   EuiForm,
@@ -41,7 +42,11 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
-import { DETONATE_VM_OS_FAMILIES, isAllowanceExhausted } from '../../../common/detonate_prototype';
+import {
+  DETONATE_MAX_EXEC_WAIT_SECS,
+  DETONATE_VM_OS_FAMILIES,
+  isAllowanceExhausted,
+} from '../../../common/detonate_prototype';
 import type {
   DetonateSubmitOrigin,
   DetonateSubmitSource,
@@ -60,6 +65,7 @@ import { submitAndNotify } from './submit_and_notify';
 
 export const SUBMIT_MODAL_TEST_ID = 'detonatePrototypeSubmitModal';
 export const SUBMIT_MODAL_HASH_INPUT_TEST_ID = 'detonatePrototypeSampleHash';
+export const SUBMIT_MODAL_EXEC_WAIT_TEST_ID = 'detonatePrototypeExecWaitSecs';
 export const SUBMIT_MODAL_FILE_INPUT_TEST_ID = 'detonatePrototypeSampleFile';
 export const SUBMIT_MODAL_BUTTON_TEST_ID = 'detonatePrototypeSubmitButton';
 export const SUBMIT_MODAL_ERROR_TEST_ID = 'detonatePrototypeSubmitError';
@@ -107,6 +113,10 @@ interface Props {
   initialHash?: string;
   /** Pre-filled by the alert action so the run is findable afterwards. */
   initialTags?: string[];
+  /** Pre-filled by Re-run so the new run uses the same VM OS as the one being repeated. */
+  initialOsFamily?: DetonateVmOsFamily;
+  /** Pre-filled by Re-run with a longer wait; left empty, the service default applies. */
+  initialExecWaitSecs?: number;
   /** Which surface the modal was opened from; recorded with the run. */
   source: DetonateSubmitSource;
   /** Context the surface already knows (alert, host, user, path); recorded with the run. */
@@ -119,7 +129,17 @@ interface Props {
 }
 
 export const SubmitModal = React.memo<Props>(
-  ({ initialHash, initialTags, source, initialOrigin, onClose, onSubmitted, onViewTask }) => {
+  ({
+    initialHash,
+    initialTags,
+    initialOsFamily,
+    initialExecWaitSecs,
+    source,
+    initialOrigin,
+    onClose,
+    onSubmitted,
+    onViewTask,
+  }) => {
     const modalTitleId = useGeneratedHtmlId();
     const confirmTitleId = useGeneratedHtmlId();
     const [mode, setMode] = useState<SubmitMode>('hash');
@@ -128,7 +148,10 @@ export const SubmitModal = React.memo<Props>(
     const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>(
       (initialTags ?? []).map((label) => ({ label }))
     );
-    const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(UNSET);
+    const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(
+      initialOsFamily ?? UNSET
+    );
+    const [execWaitSecs, setExecWaitSecs] = useState<number | undefined>(initialExecWaitSecs);
     /** The button arms the run; the confirm modal is what actually submits. */
     const [isConfirming, setIsConfirming] = useState(false);
 
@@ -155,9 +178,10 @@ export const SubmitModal = React.memo<Props>(
       () => ({
         ...(tagValues.length ? { tags: tagValues } : {}),
         ...(osFamily ? { vm_os_family: osFamily } : {}),
+        ...(execWaitSecs !== undefined ? { exec_wait_secs: execWaitSecs } : {}),
         origin: { ...initialOrigin, source },
       }),
-      [tagValues, osFamily, source, initialOrigin]
+      [tagValues, osFamily, execWaitSecs, source, initialOrigin]
     );
 
     const hasSubmitPrivilege = useCanSubmitDetonation();
@@ -304,6 +328,26 @@ export const SubmitModal = React.memo<Props>(
                   setOsFamily(event.target.value as DetonateVmOsFamily | typeof UNSET)
                 }
                 data-test-subj="detonatePrototypeOsFamily"
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={i18n.EXEC_WAIT_LABEL}
+              helpText={i18n.EXEC_WAIT_HELP(DETONATE_MAX_EXEC_WAIT_SECS)}
+              fullWidth
+            >
+              <EuiFieldNumber
+                fullWidth
+                min={0}
+                max={DETONATE_MAX_EXEC_WAIT_SECS}
+                step={1}
+                value={execWaitSecs ?? ''}
+                placeholder={i18n.SERVICE_DEFAULT}
+                onChange={(event) => {
+                  const { value } = event.target;
+                  setExecWaitSecs(value === '' ? undefined : Number(value));
+                }}
+                data-test-subj={SUBMIT_MODAL_EXEC_WAIT_TEST_ID}
               />
             </EuiFormRow>
           </EuiForm>

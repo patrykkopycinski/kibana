@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { DetonationResult } from '../../../detonate_prototype/components/detonation_result';
+import { cellActionRenderer } from '../../shared/components/cell_actions';
+import { TableTab } from '../../document/main/tabs/table_tab';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
+import { buildDetonationRecord } from './utils/build_detonation_record';
 import { SessionTab } from './session_tab';
 import {
   DETONATION_DETAILS_JSON_TAB_TEST_ID,
   DETONATION_DETAILS_OVERVIEW_TAB_TEST_ID,
   DETONATION_DETAILS_SESSION_TAB_TEST_ID,
+  DETONATION_DETAILS_TABLE_TAB_TEST_ID,
 } from './test_ids';
 
-export type DetonationPanelPaths = 'overview' | 'session' | 'json';
+export type DetonationPanelPaths = 'overview' | 'table' | 'session' | 'json';
 
-export const validTabIds: DetonationPanelPaths[] = ['overview', 'session', 'json'];
+export const validTabIds: DetonationPanelPaths[] = ['overview', 'table', 'session', 'json'];
 
 export interface DetonationPanelTabType {
   id: DetonationPanelPaths;
@@ -58,6 +63,22 @@ export const getTabsDisplayed = ({
     ),
     content: <DetonationResult taskId={taskId} />,
   },
+  {
+    id: 'table',
+    'data-test-subj': DETONATION_DETAILS_TABLE_TAB_TEST_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.detonation.header.tableTabLabel"
+        defaultMessage="Table"
+      />
+    ),
+    content: task ? (
+      <TableTab hit={buildDetonationRecord(task)} renderCellActions={cellActionRenderer} />
+    ) : (
+      <EuiLoadingSpinner size="l" />
+    ),
+  },
+  // Session tab moves to a Session View tool flyout in Phase F
   {
     id: 'session',
     'data-test-subj': DETONATION_DETAILS_SESSION_TAB_TEST_ID,

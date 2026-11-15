@@ -420,3 +420,38 @@ export const SUBMIT_MODAL_SUCCESS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.submitModal.success',
   { defaultMessage: 'Detonation started' }
 );
+
+export const META_STATUS = i18n.translate('xpack.securitySolution.detonatePrototype.meta.status', {
+  defaultMessage: 'Status',
+});
+
+export const META_VERDICT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.meta.verdict',
+  { defaultMessage: 'Verdict' }
+);
+
+export const META_ALERTS = i18n.translate('xpack.securitySolution.detonatePrototype.meta.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const META_DURATION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.meta.duration',
+  { defaultMessage: 'Duration' }
+);
+
+export const META_CONFIDENCE_HIGH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.meta.confidenceHigh',
+  { defaultMessage: 'High confidence' }
+);
+
+export const META_CONFIDENCE_MEDIUM = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.meta.confidenceMedium',
+  { defaultMessage: 'Medium confidence' }
+);
+
+export const META_CONFIDENCE_LOW = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.meta.confidenceLow',
+  { defaultMessage: 'Low confidence' }
+);
+
+export const META_EMPTY = '—';

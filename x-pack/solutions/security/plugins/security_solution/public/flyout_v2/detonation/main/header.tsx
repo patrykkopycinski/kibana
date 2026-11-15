@@ -5,17 +5,117 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { DetonateTask } from '../../../../common/detonate_prototype';
+import type { DetonateConfidence, DetonateTask } from '../../../../common/detonate_prototype';
+import {
+  deriveDetonateVerdict,
+  detonationConfidence,
+  isDetonationComplete,
+  totalDetonationAlerts,
+} from '../../../../common/detonate_prototype';
 import { DetonationStatusBadge } from '../../../detonate_prototype/components/detonation_status_badge';
 import { DetonateVerdictBadge } from '../../../detonate_prototype/components/verdict_badge';
+import { useDetonationTaskUpdates } from '../../../detonate_prototype/hooks/use_detonate';
+import * as i18n from '../../../detonate_prototype/translations';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { DetonationPanelPaths, DetonationPanelTabType } from './tabs';
-import { DETONATION_DETAILS_TITLE_TEST_ID } from './test_ids';
+import {
+  DETONATION_DETAILS_META_ALERTS_TEST_ID,
+  DETONATION_DETAILS_META_DURATION_TEST_ID,
+  DETONATION_DETAILS_META_STATUS_TEST_ID,
+  DETONATION_DETAILS_META_TEST_ID,
+  DETONATION_DETAILS_META_VERDICT_TEST_ID,
+  DETONATION_DETAILS_TITLE_TEST_ID,
+} from './test_ids';
+import { formatDetonationDuration, getDetonationDurationMs } from './utils/detonation_duration';
+
+const CONFIDENCE_LABEL: Record<DetonateConfidence, string> = {
+  high: i18n.META_CONFIDENCE_HIGH,
+  medium: i18n.META_CONFIDENCE_MEDIUM,
+  low: i18n.META_CONFIDENCE_LOW,
+};
+
+interface MetaCardProps {
+  title: string;
+  'data-test-subj': string;
+  children: React.ReactNode;
+}
+
+const MetaCard: FC<MetaCardProps> = ({ title, 'data-test-subj': dataTestSubj, children }) => (
+  <EuiFlexItem data-test-subj={dataTestSubj}>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+      <EuiText size="xs" color="subdued">
+        {title}
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiText size="s">{children}</EuiText>
+    </EuiPanel>
+  </EuiFlexItem>
+);
+
+/**
+ * Status, verdict, alert count and duration of the run, as cards under the title.
+ */
+const MetaCards: FC<{ task: DetonateTask }> = ({ task }) => {
+  const isComplete = isDetonationComplete(task);
+  const { data: updates } = useDetonationTaskUpdates(task.id, isComplete);
+  const { verdict } = deriveDetonateVerdict(task);
+  const hasAlertsCount = [
+    task.production_endpoint_alerts_count,
+    task.diagnostic_endpoint_alerts_count,
+    task.production_detection_alerts_count,
+  ].some((count) => count !== undefined);
+  const durationMs = getDetonationDurationMs(task, updates);
+
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+      data-test-subj={DETONATION_DETAILS_META_TEST_ID}
+    >
+      <MetaCard title={i18n.META_STATUS} data-test-subj={DETONATION_DETAILS_META_STATUS_TEST_ID}>
+        <DetonationStatusBadge task={task} showProgress />
+      </MetaCard>
+      <MetaCard title={i18n.META_VERDICT} data-test-subj={DETONATION_DETAILS_META_VERDICT_TEST_ID}>
+        {verdict ? (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <DetonateVerdictBadge task={task} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {CONFIDENCE_LABEL[detonationConfidence(verdict)]}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          i18n.META_EMPTY
+        )}
+      </MetaCard>
+      <MetaCard title={i18n.META_ALERTS} data-test-subj={DETONATION_DETAILS_META_ALERTS_TEST_ID}>
+        {hasAlertsCount ? totalDetonationAlerts(task) : i18n.META_EMPTY}
+      </MetaCard>
+      <MetaCard
+        title={i18n.META_DURATION}
+        data-test-subj={DETONATION_DETAILS_META_DURATION_TEST_ID}
+      >
+        {durationMs === undefined ? i18n.META_EMPTY : formatDetonationDuration(durationMs)}
+      </MetaCard>
+    </EuiFlexGroup>
+  );
+};
 
 export interface HeaderProps {
   /**
@@ -41,7 +141,7 @@ export interface HeaderProps {
 }
 
 /**
- * Header of the detonation result flyout: file name, verdict, status and tabs.
+ * Header of the detonation result flyout: file name, meta cards and tabs.
  */
 export const Header: FC<HeaderProps> = memo(
   ({ taskId, task, selectedTabId, setSelectedTabId, tabs }) => {
@@ -70,19 +170,11 @@ export const Header: FC<HeaderProps> = memo(
         {task && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-              <EuiFlexItem grow={false}>
-                <DetonateVerdictBadge task={task} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DetonationStatusBadge task={task} showProgress />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <FormattedRelative value={new Date(task.created_at)} />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiText size="xs" color="subdued">
+              <FormattedRelative value={new Date(task.created_at)} />
+            </EuiText>
+            <EuiSpacer size="s" />
+            <MetaCards task={task} />
           </>
         )}
         <EuiSpacer size="s" />

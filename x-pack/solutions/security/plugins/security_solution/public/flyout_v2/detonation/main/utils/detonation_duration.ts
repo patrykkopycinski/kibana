@@ -19,7 +19,10 @@ export const getDetonationDurationMs = (
   updates: DetonateTaskUpdate[] | undefined
 ): number | undefined => {
   if (!isDetonationComplete(task) || !updates?.length) return undefined;
-  const finishedAt = Math.max(...updates.map(({ timestamp }) => Date.parse(timestamp)));
+  // One unparseable timestamp would make Math.max return NaN and hide the duration.
+  const times = updates.map(({ timestamp }) => Date.parse(timestamp)).filter(Number.isFinite);
+  if (!times.length) return undefined;
+  const finishedAt = Math.max(...times);
   const duration = finishedAt - Date.parse(task.created_at);
   return Number.isFinite(duration) && duration >= 0 ? duration : undefined;
 };

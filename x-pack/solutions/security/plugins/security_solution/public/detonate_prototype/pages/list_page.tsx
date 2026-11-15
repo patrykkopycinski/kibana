@@ -84,6 +84,8 @@ export const DetonateListPage = React.memo(() => {
       tags: params.getAll('tags'),
     };
   }, [locationSearch]);
+  const hasPrefill = Boolean(prefill.hash) || prefill.tags.length > 0;
+  const prefillKey = hasPrefill ? JSON.stringify([prefill.hash, prefill.tags]) : '';
 
   const healthcheck = useDetonateHealthcheck();
   const { data, isLoading } = useDetonationTasks({
@@ -97,16 +99,39 @@ export const DetonateListPage = React.memo(() => {
     [openDetonationFlyout]
   );
 
-  /** An alert hand-off arrives with a hash or tags in the URL: open the modal pre-filled. */
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(
-    Boolean(prefill.hash) || prefill.tags.length > 0
+  /**
+   * `prefill` is set only for a modal opened by a URL hand-off. Each opening gets a new
+   * `id` so the modal remounts and its form state resets.
+   */
+  const [modal, setModal] = useState<{ id: number; prefill?: typeof prefill } | undefined>(() =>
+    hasPrefill ? { id: 0, prefill } : undefined
   );
-  const openSubmitModal = useCallback(() => setIsSubmitModalOpen(true), []);
-  const closeSubmitModal = useCallback(() => setIsSubmitModalOpen(false), []);
+  const modalCount = useRef(0);
+
+  // An alert hand-off arrives with a hash or tags in the URL: open the modal pre-filled.
+  // Keyed on the prefill itself, so a later query-string change (back/forward or a new
+  // hand-off link) opens it again, while closing it does not bring it back.
+  const handledPrefillKey = useRef(prefillKey);
+  useEffect(() => {
+    if (prefillKey === handledPrefillKey.current) return;
+    handledPrefillKey.current = prefillKey;
+    if (hasPrefill) {
+      modalCount.current += 1;
+      setModal({ id: modalCount.current, prefill });
+    }
+  }, [prefillKey, hasPrefill, prefill]);
+
+  // The URL prefill stays in the address bar after the modal closes, so the button
+  // must open a blank form rather than the old hash and tags.
+  const openSubmitModal = useCallback(() => {
+    modalCount.current += 1;
+    setModal({ id: modalCount.current });
+  }, []);
+  const closeSubmitModal = useCallback(() => setModal(undefined), []);
 
   const onSubmitted = useCallback(
     (task: DetonateTask) => {
-      setIsSubmitModalOpen(false);
+      setModal(undefined);
       toasts.addSuccess({
         title: i18n.SUBMIT_MODAL_SUCCESS,
         text: toMountPoint(
@@ -126,7 +151,7 @@ export const DetonateListPage = React.memo(() => {
 
   const onViewPriorRun = useCallback(
     (taskId: string) => {
-      setIsSubmitModalOpen(false);
+      setModal(undefined);
       goToTask(taskId);
     },
     [goToTask]
@@ -231,11 +256,11 @@ export const DetonateListPage = React.memo(() => {
         </>
       )}
 
-      {isSubmitModalOpen && (
+      {modal && (
         <SubmitModal
-          key={locationSearch}
-          initialHash={prefill.hash}
-          initialTags={prefill.tags}
+          key={modal.id}
+          initialHash={modal.prefill?.hash}
+          initialTags={modal.prefill?.tags}
           source="detonate_page"
           onClose={closeSubmitModal}
           onSubmitted={onSubmitted}

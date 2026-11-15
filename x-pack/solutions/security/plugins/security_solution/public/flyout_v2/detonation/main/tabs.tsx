@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { DetonationResult } from '../../../detonate_prototype/components/detonation_result';
@@ -22,6 +22,15 @@ import {
   DETONATION_DETAILS_SESSION_TAB_TEST_ID,
   DETONATION_DETAILS_TABLE_TAB_TEST_ID,
 } from './test_ids';
+
+/**
+ * The record is rebuilt only when the run changes, so a poll that returns the same
+ * run does not hand the shared table a new `hit` on every render.
+ */
+const DetonationTableTab = ({ task }: { task: DetonateTask }) => {
+  const hit = useMemo(() => buildDetonationRecord(task), [task]);
+  return <TableTab hit={hit} renderCellActions={cellActionRenderer} />;
+};
 
 export type DetonationPanelPaths = 'overview' | 'table' | 'session' | 'json';
 
@@ -74,11 +83,7 @@ export const getTabsDisplayed = ({
     ),
     // The shared tab runs alert-oriented lookups (data view, rule, entity store) that return
     // nothing useful for a run record. To be revisited with the tool flyouts.
-    content: task ? (
-      <TableTab hit={buildDetonationRecord(task)} renderCellActions={cellActionRenderer} />
-    ) : (
-      <EuiLoadingSpinner size="l" />
-    ),
+    content: task ? <DetonationTableTab task={task} /> : <EuiLoadingSpinner size="l" />,
   },
   // Kept until a Session View tool flyout replaces it.
   {

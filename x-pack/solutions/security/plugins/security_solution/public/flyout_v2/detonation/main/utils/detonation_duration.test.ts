@@ -38,6 +38,23 @@ describe('getDetonationDurationMs', () => {
     expect(duration).toBe(125_000);
   });
 
+  it('ignores an unparseable timestamp instead of hiding the duration', () => {
+    const task = makeTask();
+
+    expect(
+      getDetonationDurationMs(task, [
+        update(task, 'not-a-date'),
+        update(task, '2026-10-27T10:02:05Z'),
+      ])
+    ).toBe(125_000);
+  });
+
+  it('is undefined when no update has a parseable timestamp', () => {
+    const task = makeTask();
+
+    expect(getDetonationDurationMs(task, [update(task, 'not-a-date')])).toBeUndefined();
+  });
+
   it('is undefined while the run is still in flight', () => {
     const task = makeTask({
       last_worker_name: 'detonate.workers.start_vm',

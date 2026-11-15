@@ -342,17 +342,18 @@ describe('SubmitModal', () => {
       expect(mutateAsync).not.toHaveBeenCalled();
     });
 
-    it.each([['b'.repeat(32)], ['c'.repeat(40)], [SHA256]])(
-      'accepts the %s-character hash',
-      (value) => {
-        renderModal();
+    it.each([
+      [32, 'b'.repeat(32)],
+      [40, 'c'.repeat(40)],
+      [64, SHA256],
+    ])('accepts the %i-character hash', (_length, value) => {
+      renderModal();
 
-        typeHash(value);
+      typeHash(value);
 
-        expect(screen.queryByText(i18n.SUBMIT_MODAL_INVALID_HASH)).toBeNull();
-        expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
-      }
-    );
+      expect(screen.queryByText(i18n.SUBMIT_MODAL_INVALID_HASH)).toBeNull();
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+    });
 
     it('does not flag an empty field as invalid', () => {
       renderModal();
@@ -404,7 +405,12 @@ describe('SubmitModal', () => {
           'Dec 1, 2026'
         );
       } finally {
-        process.env.TZ = originalTz;
+        // Assigning undefined would store the string "undefined" as the zone.
+        if (originalTz === undefined) {
+          delete process.env.TZ;
+        } else {
+          process.env.TZ = originalTz;
+        }
       }
     });
 

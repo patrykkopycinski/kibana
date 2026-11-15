@@ -424,7 +424,14 @@ describe('SubmitModal', () => {
 
       expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
       expect(screen.getByTestId(SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID)).toHaveTextContent(
-        i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED('Dec 1, 2026')
+        i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED(
+          new Date(resetsAt).toLocaleDateString(undefined, {
+            timeZone: 'UTC',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })
+        )
       );
     });
 

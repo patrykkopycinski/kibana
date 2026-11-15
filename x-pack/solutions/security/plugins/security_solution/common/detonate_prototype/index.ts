@@ -298,8 +298,8 @@ export interface DetonateTaskUpdate {
 export const DETONATE_MAX_EXEC_WAIT_SECS = 900;
 
 /**
- * Execution wait the detonation service applies to a submit that omits `exec_wait_secs`. Mirrors
- * the service default, `DEFAULT_EXEC_WAIT_SECS` in the simulator's `task_store.ts`.
+ * Execution wait the detonation service applies to a submit that omits `exec_wait_secs`; matches
+ * the Detonate simulator's default exec wait (60 s).
  */
 export const DETONATE_DEFAULT_EXEC_WAIT_SECS = 60;
 

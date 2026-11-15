@@ -11,6 +11,7 @@ import { copyToClipboard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { DETONATE_DEFAULT_EXEC_WAIT_SECS } from '../../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { useCanAttachToCase } from '../../../cases/attachments/hooks/use_can_attach_to_case';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -229,11 +230,14 @@ describe('<Footer />', () => {
     it.each([
       ['0', 0],
       ['missing', undefined],
-    ])('falls back to the service default when the recorded wait is %s', (_name, wait) => {
+    ])('doubles the service default when the recorded wait is %s', (_name, wait) => {
       renderFooter(failedTask({ exec_wait_secs: wait } as unknown as Partial<DetonateTask>));
 
       fireEvent.click(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID));
-      expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 60 }));
+      expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 120 }));
+      expect(mockSubmitModalProps?.initialExecWaitSecs).toBeGreaterThan(
+        DETONATE_DEFAULT_EXEC_WAIT_SECS
+      );
     });
 
     it('opens the new run in the flyout once it was submitted', () => {
@@ -358,6 +362,40 @@ describe('<Footer />', () => {
         expect(attachment.type).toBe(COMMENT_ATTACHMENT_TYPE);
         expect(attachment.data.content).toContain('task-1');
         expect(attachment.data.content).toContain('evil.example');
+      });
+
+      it.each([
+        ['not read yet', undefined],
+        [
+          'empty',
+          {
+            'detonate.iocs.domains': [],
+            'detonate.iocs.ips': [],
+            'detonate.iocs.file_hashes': [],
+          },
+        ],
+      ])('is disabled, with the reason, when the indicators are %s', (_name, data) => {
+        jest.mocked(useDetonationRecord).mockReturnValue({
+          data,
+        } as unknown as ReturnType<typeof useDetonationRecord>);
+        renderFooter(makeTask());
+        openTakeAction();
+
+        const item = screen.getByTestId(DETONATION_FOOTER_ADD_TO_CASE_TEST_ID);
+        expect(item).toBeDisabled();
+        fireEvent.click(item);
+        expect(mockOpenCaseModal).not.toHaveBeenCalled();
+      });
+
+      it('shows why Add to case is disabled when there are no indicators', async () => {
+        jest.mocked(useDetonationRecord).mockReturnValue({
+          data: undefined,
+        } as unknown as ReturnType<typeof useDetonationRecord>);
+        renderFooter(makeTask());
+        openTakeAction();
+
+        fireEvent.mouseOver(screen.getByTestId(DETONATION_FOOTER_ADD_TO_CASE_TEST_ID));
+        expect(await screen.findByText(i18n.FOOTER_ADD_TO_CASE_NO_INDICATORS)).toBeInTheDocument();
       });
 
       it('is hidden when the user cannot attach to a case', () => {

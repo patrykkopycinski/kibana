@@ -156,18 +156,18 @@ export const Footer = memo(({ task }: FooterProps) => {
   });
 
   // Re-run. A failed or inconclusive run is most often a timeout, so the pre-filled wait is
-  // doubled; the cap is the connector's, so the form never offers a wait it would clamp.
+  // doubled from the wait the run actually used; the cap is the connector's, so the form never
+  // offers a wait it would clamp.
   const rerunInitialTags = useMemo(
     () => task.tags.filter((tag) => !tag.startsWith(SPACE_TAG_PREFIX)),
     [task.tags]
   );
   // Older run records can lack the field even though the type says it is always set.
   const currentExecWaitSecs = task.exec_wait_secs as number | undefined;
+  // A 0 or missing wait means the service applied its default.
+  const effectiveExecWaitSecs = currentExecWaitSecs || DETONATE_DEFAULT_EXEC_WAIT_SECS;
   const rerunExecWaitSecs = needsLongerTimeout
-    ? Math.min(
-        Math.max((currentExecWaitSecs ?? 0) * 2, DETONATE_DEFAULT_EXEC_WAIT_SECS),
-        DETONATE_MAX_EXEC_WAIT_SECS
-      )
+    ? Math.min(effectiveExecWaitSecs * 2, DETONATE_MAX_EXEC_WAIT_SECS)
     : currentExecWaitSecs;
   const closeRerun = useCallback(() => setIsRerunOpen(false), []);
   const openRun = useCallback(
@@ -179,7 +179,9 @@ export const Footer = memo(({ task }: FooterProps) => {
   );
   const onRerunSubmitted = useCallback((newTask: DetonateTask) => openRun(newTask.id), [openRun]);
 
-  // Add to case: the same path and permission gate as the indicators section.
+  // Add to case: the same path and permission gate as the indicators section. With no indicator
+  // rows the comment would carry only its header, so the item is disabled.
+  const hasIndicators = indicators.rows.length > 0;
   const caseModal = cases.hooks.useCasesAddToExistingCaseModal({
     onClose: () => {},
     onSuccess: () => {},
@@ -227,8 +229,7 @@ export const Footer = memo(({ task }: FooterProps) => {
     setIsBlockConfirmOpen(true);
   }, [closePopover]);
   const closeBlockConfirm = useCallback(() => setIsBlockConfirmOpen(false), []);
-  const confirmBlockHash = useCallback(async () => {
-    setIsBlocking(true);
+  const blockHashOnEveryOs = useCallback(async () => {
     const client = BlocklistsApiClient.getInstance(http);
     const conditionEntries: ConditionEntry[] = [
       { field: 'file.hash.*', operator: 'included', type: 'match_any', value: [hash] },
@@ -286,9 +287,16 @@ export const Footer = memo(({ task }: FooterProps) => {
         addInfo(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED(names(alreadyBlocked)));
       }
     }
-    setIsBlocking(false);
-    setIsBlockConfirmOpen(false);
   }, [addError, addInfo, addSuccess, addWarning, hash, http, taskId]);
+  const confirmBlockHash = useCallback(async () => {
+    setIsBlocking(true);
+    try {
+      await blockHashOnEveryOs();
+    } finally {
+      setIsBlocking(false);
+      setIsBlockConfirmOpen(false);
+    }
+  }, [blockHashOnEveryOs]);
 
   const menuItems = useMemo(() => {
     const items = [];
@@ -298,6 +306,8 @@ export const Footer = memo(({ task }: FooterProps) => {
           key="addToCase"
           icon="casesApp"
           onClick={onAddToCase}
+          disabled={!hasIndicators}
+          toolTipContent={hasIndicators ? undefined : i18n.FOOTER_ADD_TO_CASE_NO_INDICATORS}
           data-test-subj={DETONATION_FOOTER_ADD_TO_CASE_TEST_ID}
         >
           {i18n.FOOTER_ADD_TO_CASE}
@@ -325,7 +335,7 @@ export const Footer = memo(({ task }: FooterProps) => {
       </EuiContextMenuItem>
     );
     return items;
-  }, [blockDisabledReason, canAttachToCase, onAddToCase, onBlockHash, onShareLink]);
+  }, [blockDisabledReason, canAttachToCase, hasIndicators, onAddToCase, onBlockHash, onShareLink]);
 
   const takeActionButton = (
     <EuiButton

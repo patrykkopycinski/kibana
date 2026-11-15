@@ -842,6 +842,14 @@ export const FOOTER_ADD_TO_CASE = i18n.translate(
   { defaultMessage: 'Add to case' }
 );
 
+export const FOOTER_ADD_TO_CASE_NO_INDICATORS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.addToCaseNoIndicators',
+  {
+    defaultMessage:
+      'No indicators to attach. This run has no extracted domains, IPs or file hashes.',
+  }
+);
+
 export const FOOTER_SHARE_LINK = i18n.translate(
   'xpack.securitySolution.detonatePrototype.footer.shareLink',
   { defaultMessage: 'Share link' }

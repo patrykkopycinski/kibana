@@ -152,6 +152,8 @@ export const SubmitModal = React.memo<Props>(
       initialOsFamily ?? UNSET
     );
     const [execWaitSecs, setExecWaitSecs] = useState<number | undefined>(initialExecWaitSecs);
+    /** A browser-rejected entry ('abc', a lone '-') reads as '' but is not an empty field. */
+    const [execWaitBadInput, setExecWaitBadInput] = useState(false);
     /** The button arms the run; the confirm modal is what actually submits. */
     const [isConfirming, setIsConfirming] = useState(false);
 
@@ -197,10 +199,11 @@ export const SubmitModal = React.memo<Props>(
     const hashInvalid = mode === 'hash' && hash.trim().length > 0 && !isValidSampleHash(hash);
     const hasSample = mode === 'hash' ? isValidSampleHash(hash) : file !== undefined;
     const execWaitInvalid =
-      execWaitSecs !== undefined &&
-      (!Number.isInteger(execWaitSecs) ||
-        execWaitSecs < 0 ||
-        execWaitSecs > DETONATE_MAX_EXEC_WAIT_SECS);
+      execWaitBadInput ||
+      (execWaitSecs !== undefined &&
+        (!Number.isInteger(execWaitSecs) ||
+          execWaitSecs < 0 ||
+          execWaitSecs > DETONATE_MAX_EXEC_WAIT_SECS));
     const canSubmit = hasSubmitPrivilege && hasSample && !allowanceExhausted && !execWaitInvalid;
 
     const doSubmit = useCallback(async () => {
@@ -352,7 +355,8 @@ export const SubmitModal = React.memo<Props>(
                 value={execWaitSecs ?? ''}
                 placeholder={i18n.SERVICE_DEFAULT}
                 onChange={(event) => {
-                  const { value } = event.target;
+                  const { value, validity } = event.target;
+                  setExecWaitBadInput(validity.badInput);
                   setExecWaitSecs(value === '' ? undefined : Number(value));
                 }}
                 data-test-subj={SUBMIT_MODAL_EXEC_WAIT_TEST_ID}

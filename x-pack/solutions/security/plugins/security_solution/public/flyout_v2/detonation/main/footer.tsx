@@ -169,6 +169,9 @@ export const Footer = memo(({ task }: FooterProps) => {
   const rerunExecWaitSecs = needsLongerTimeout
     ? Math.min(effectiveExecWaitSecs * 2, DETONATE_MAX_EXEC_WAIT_SECS)
     : currentExecWaitSecs;
+  // At the cap the pre-filled wait is the current one, so "longer" would be a false promise.
+  const offersLongerTimeout =
+    needsLongerTimeout && effectiveExecWaitSecs < DETONATE_MAX_EXEC_WAIT_SECS;
   const closeRerun = useCallback(() => setIsRerunOpen(false), []);
   const openRun = useCallback(
     (id: string) => {
@@ -276,6 +279,9 @@ export const Footer = memo(({ task }: FooterProps) => {
       });
     } else if (failedOses.length > 0) {
       addWarning(i18n.FOOTER_BLOCK_HASH_PARTIAL(names(failedOses)));
+      if (created.length > 0) {
+        addSuccess(i18n.FOOTER_BLOCK_HASH_PARTIAL_SUCCESS(names(created)));
+      }
       if (alreadyBlocked.length > 0) {
         addInfo(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED(names(alreadyBlocked)));
       }
@@ -383,7 +389,7 @@ export const Footer = memo(({ task }: FooterProps) => {
             onClick={() => setIsRerunOpen(true)}
             data-test-subj={DETONATION_FOOTER_RERUN_TEST_ID}
           >
-            {needsLongerTimeout ? i18n.FOOTER_RERUN_LONGER_TIMEOUT : i18n.FOOTER_RERUN}
+            {offersLongerTimeout ? i18n.FOOTER_RERUN_LONGER_TIMEOUT : i18n.FOOTER_RERUN}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

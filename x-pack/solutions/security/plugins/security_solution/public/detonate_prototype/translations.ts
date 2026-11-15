@@ -933,6 +933,12 @@ export const FOOTER_BLOCK_HASH_PARTIAL = (failedOs: string) =>
     values: { failedOs },
   });
 
+export const FOOTER_BLOCK_HASH_PARTIAL_SUCCESS = (os: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashPartialSuccess', {
+    defaultMessage: 'The hash was added to the Endpoint blocklist on: {os}',
+    values: { os },
+  });
+
 export const FOOTER_BLOCK_HASH_ALREADY_BLOCKED = (os: string) =>
   i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashAlreadyBlocked', {
     defaultMessage: 'The hash is already blocked on: {os}',

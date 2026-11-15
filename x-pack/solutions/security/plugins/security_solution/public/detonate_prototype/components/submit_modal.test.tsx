@@ -318,6 +318,30 @@ describe('SubmitModal', () => {
       );
     });
 
+    it.each([['abc'], ['-']])(
+      'flags a browser-rejected exec wait of %s as invalid, not as an empty field',
+      (value) => {
+        renderModal({ initialHash: SHA256, initialExecWaitSecs: 300 });
+        const input = screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID);
+        Object.defineProperty(input, 'validity', { value: { badInput: true }, configurable: true });
+
+        fireEvent.change(input, { target: { value } });
+
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+        expect(screen.getByText(i18n.EXEC_WAIT_INVALID(900))).toBeInTheDocument();
+        expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
+
+        Object.defineProperty(input, 'validity', {
+          value: { badInput: false },
+          configurable: true,
+        });
+        fireEvent.change(input, { target: { value: '450' } });
+
+        expect(screen.queryByText(i18n.EXEC_WAIT_INVALID(900))).toBeNull();
+        expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+      }
+    );
+
     it('treats an empty exec wait as valid', () => {
       renderModal({ initialHash: SHA256, initialExecWaitSecs: 300 });
 

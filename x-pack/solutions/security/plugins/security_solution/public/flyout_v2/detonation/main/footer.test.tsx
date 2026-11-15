@@ -220,6 +220,19 @@ describe('<Footer />', () => {
       expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 600 }));
     });
 
+    it('offers a plain re-run, pre-filling the cap, when the wait is already at the cap', () => {
+      renderFooter(failedTask({ exec_wait_secs: 900 } as Partial<DetonateTask>));
+
+      expect(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID)).toHaveTextContent(
+        i18n.FOOTER_RERUN
+      );
+      expect(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID)).not.toHaveTextContent(
+        i18n.FOOTER_RERUN_LONGER_TIMEOUT
+      );
+      fireEvent.click(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID));
+      expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 900 }));
+    });
+
     it('never pre-fills a wait above the connector cap', () => {
       renderFooter(failedTask({ exec_wait_secs: 800 } as Partial<DetonateTask>));
 
@@ -531,7 +544,7 @@ describe('<Footer />', () => {
         ).not.toBeInTheDocument();
       });
 
-      it('warns, naming the OS, when only some entries could be created', async () => {
+      it('warns, naming the OS that failed and the OSes that were blocked, on a partial write', async () => {
         mockCreateBlocklist
           .mockResolvedValueOnce({})
           .mockRejectedValueOnce(new Error('boom'))
@@ -544,7 +557,10 @@ describe('<Footer />', () => {
         await waitFor(() =>
           expect(mockAddWarning).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_PARTIAL('Linux'))
         );
-        expect(mockAddSuccess).not.toHaveBeenCalled();
+        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
+        expect(mockAddSuccess).toHaveBeenCalledWith(
+          i18n.FOOTER_BLOCK_HASH_PARTIAL_SUCCESS('Windows, macOS')
+        );
         expect(mockAddError).not.toHaveBeenCalled();
       });
 
@@ -593,7 +609,9 @@ describe('<Footer />', () => {
           expect(mockAddWarning).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_PARTIAL('Linux'))
         );
         expect(mockAddInfo).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED('Windows'));
-        expect(mockAddSuccess).not.toHaveBeenCalled();
+        expect(mockAddSuccess).toHaveBeenCalledWith(
+          i18n.FOOTER_BLOCK_HASH_PARTIAL_SUCCESS('macOS')
+        );
         expect(mockAddError).not.toHaveBeenCalled();
       });
 

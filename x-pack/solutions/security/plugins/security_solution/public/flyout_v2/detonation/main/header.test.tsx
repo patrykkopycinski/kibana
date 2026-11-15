@@ -60,11 +60,17 @@ describe('<Header />', () => {
       .mockReturnValue({ data: undefined } as ReturnType<typeof useDetonationTaskUpdates>);
   });
 
-  it('renders the file name and no meta cards until the run has loaded', () => {
+  it('falls back to the task id and shows no meta cards until the run has loaded', () => {
     renderHeader(undefined);
 
     expect(screen.getByTestId(DETONATION_DETAILS_TITLE_TEST_ID)).toHaveTextContent('task-1');
     expect(screen.queryByTestId(DETONATION_DETAILS_META_STATUS_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('titles the flyout with the sample file name once the run has loaded', () => {
+    renderHeader(makeTask());
+
+    expect(screen.getByTestId(DETONATION_DETAILS_TITLE_TEST_ID)).toHaveTextContent('invoice.pdf');
   });
 
   it('renders status, verdict with confidence, alert count and duration for a finished run', () => {

@@ -175,20 +175,19 @@ export const SubmitModal = React.memo<Props>(
 
     const doSubmit = useCallback(async () => {
       setLastSubmitted(mode);
-      // Errors are surfaced by the mutation state (the error callout below),
-      // but the discarded promise would still be an unhandled rejection.
-      const submit = async () => {
-        if (mode === 'hash') {
-          const task = await submitHash.mutateAsync({ sample_hash: hash.trim(), ...options });
-          onSubmitted(task);
-          return;
-        }
-        if (file) {
-          const task = await submitFile.mutateAsync({ file, ...options });
-          onSubmitted(task);
-        }
-      };
-      await submit().catch(() => undefined);
+      const request =
+        mode === 'hash'
+          ? submitHash.mutateAsync({ sample_hash: hash.trim(), ...options })
+          : file
+          ? submitFile.mutateAsync({ file, ...options })
+          : undefined;
+      // Only the mutation's rejection is swallowed: the mutation state already shows it in
+      // the error callout below. A throw from onSubmitted is a bug in the caller and must
+      // not be hidden by the same catch.
+      const task = await request?.catch(() => undefined);
+      if (task) {
+        onSubmitted(task);
+      }
     }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
 
     const onConfirm = useCallback(() => {
@@ -199,7 +198,11 @@ export const SubmitModal = React.memo<Props>(
     const onCreateTag = useCallback((label: string) => {
       const trimmed = label.trim();
       if (trimmed) {
-        setTags((current) => [...current, { label: trimmed }]);
+        setTags((current) =>
+          current.some(({ label: existing }) => existing === trimmed)
+            ? current
+            : [...current, { label: trimmed }]
+        );
       }
     }, []);
 

@@ -197,6 +197,31 @@ describe('SubmitModal', () => {
       });
     });
 
+    describe('tags', () => {
+      const createTag = (value: string) => {
+        const input = screen
+          .getByTestId('detonatePrototypeTags')
+          .querySelector<HTMLInputElement>('[data-test-subj="comboBoxSearchInput"]');
+        fireEvent.change(input as HTMLInputElement, { target: { value } });
+        fireEvent.keyDown(input as HTMLInputElement, { key: 'Enter', code: 'Enter', keyCode: 13 });
+      };
+
+      it('does not add a tag that is already selected, including a prefilled one', () => {
+        renderModal({ initialHash: SHA256, initialTags: ['alert:doc-7'] });
+
+        createTag('alert:doc-7');
+        createTag(' alert:doc-7 ');
+        createTag('extra');
+        createTag('extra');
+
+        fireEvent.click(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID));
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+        expect(mutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({ tags: ['alert:doc-7', 'extra'] })
+        );
+      });
+    });
+
     it('sends the chosen OS family', () => {
       renderModal();
 
@@ -274,6 +299,34 @@ describe('SubmitModal', () => {
       fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
 
       expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+    });
+  });
+
+  describe('onSubmitted failures', () => {
+    // A throw from onSubmitted cannot be asserted directly: jest fails the running test on
+    // the unhandled rejection it causes, and the sandboxed `process` cannot listen for it.
+    // What keeps it visible is that the swallowing catch sits on the mutation's promise only,
+    // so the test pins that: the catch is attached to the mutation result and onSubmitted
+    // runs on the task it resolves to.
+    it('swallows only the mutation rejection and calls onSubmitted outside that catch', async () => {
+      const task = { id: 'task-1' } as DetonateTask;
+      const mutation = Promise.resolve(task);
+      const swallow = jest.fn((handler: (reason: unknown) => unknown) => {
+        expect(handler(new Error('mutation failed'))).toBeUndefined();
+        return Promise.resolve(task);
+      });
+      Object.assign(mutation, { catch: swallow });
+      mutateAsync.mockReturnValue(mutation);
+      const onSubmitted = jest.fn();
+      renderModal({ onSubmitted });
+
+      submit();
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => expect(onSubmitted).toHaveBeenCalledTimes(1));
+      expect(onSubmitted).toHaveBeenCalledWith(task);
+      expect(swallow).toHaveBeenCalledTimes(1);
+      expect(mutateAsync).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -333,6 +333,15 @@ describe('DetonationResult overview', () => {
       expect(list).toHaveTextContent('10.0.0.1');
     });
 
+    it('leaves the sandbox agent id empty before the VM has started', () => {
+      // Task preparation is done but the VM was not asked for yet, so the run is not queued.
+      renderResult(queued({ last_worker_status: 'success', elastic_agent_id: 'agent-123' }));
+
+      expect(screen.getByTestId(DETONATION_HIGHLIGHTED_FIELDS_LIST_TEST_ID)).not.toHaveTextContent(
+        'agent-123'
+      );
+    });
+
     it('says the indicators wait for the run while it is going', () => {
       renderResult(running());
 
@@ -482,6 +491,16 @@ describe('DetonationResult overview', () => {
       expect(bundle.objects.map((object: { pattern: string }) => object.pattern)).toContain(
         "[domain-name:value = 'evil.example']"
       );
+    });
+
+    it('disables the STIX export when no indicator can be expressed in STIX', () => {
+      renderResult(createTask(), { record: { 'detonate.iocs.file_hashes': ['abc123'] } });
+
+      const button = screen.getByTestId(DETONATION_INDICATORS_EXPORT_STIX_TEST_ID);
+      expect(screen.getByTestId(DETONATION_INDICATORS_TABLE_TEST_ID)).toHaveTextContent('abc123');
+      expect(button).toBeDisabled();
+      fireEvent.click(button);
+      expect(downloadBlob).not.toHaveBeenCalled();
     });
 
     it('opens the add-to-case modal with one comment listing the indicators', () => {

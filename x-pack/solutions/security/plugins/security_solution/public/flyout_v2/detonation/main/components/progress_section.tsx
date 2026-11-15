@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import { DETONATE_WORKERS, isDetonationComplete } from '../../../../../common/detonate_prototype';
+import { isDetonationComplete } from '../../../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../../../common/detonate_prototype';
 import { WorkerTimeline } from '../../../../detonate_prototype/components/worker_timeline';
 import { useDetonationTaskUpdates } from '../../../../detonate_prototype/hooks/use_detonate';
@@ -20,6 +20,7 @@ import {
 } from '../test_ids';
 import { formatDetonationDuration, getDetonationDurationMs } from '../utils/detonation_duration';
 import { isDetonationQueued } from '../utils/detonation_queued';
+import { isDetonationVmStarted } from '../utils/detonation_vm_started';
 import { OverviewSection } from './overview_section';
 
 interface ProgressSectionProps {
@@ -36,8 +37,7 @@ export const ProgressSection = ({ task }: ProgressSectionProps) => {
   const { data: updates } = useDetonationTaskUpdates(task.id, complete);
 
   const durationMs = getDetonationDurationMs(task, updates);
-  // The agent id is only meaningful once the VM has been asked for.
-  const vmStarted = DETONATE_WORKERS.indexOf(task.last_worker_name) >= 1;
+  const vmStarted = isDetonationVmStarted(task);
 
   return (
     <OverviewSection

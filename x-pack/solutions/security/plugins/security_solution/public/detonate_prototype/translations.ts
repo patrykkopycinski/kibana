@@ -723,6 +723,14 @@ export const OVERVIEW_INDICATORS_CREATE_RULE = i18n.translate(
   { defaultMessage: 'Create indicator match rule' }
 );
 
+export const OVERVIEW_INDICATORS_EXPORT_STIX_EMPTY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsExportStixEmptyTooltip',
+  {
+    defaultMessage:
+      'Nothing to export. STIX cannot express any of these indicators, for example hashes of an unknown length.',
+  }
+);
+
 export const OVERVIEW_INDICATORS_CREATE_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detonatePrototype.overview.indicatorsCreateRuleTooltip',
   {

@@ -15,6 +15,7 @@ import {
   DETONATION_HIGHLIGHTED_FIELDS_TEST_ID,
 } from '../test_ids';
 import type { DetonationIndicators, IndicatorType } from '../utils/detonation_indicators';
+import { isDetonationVmStarted } from '../utils/detonation_vm_started';
 import { OverviewSection } from './overview_section';
 
 const SHOWN_INDICATORS = 3;
@@ -70,7 +71,8 @@ export const HighlightedFieldsSection = ({
     },
     {
       title: i18n.OVERVIEW_SANDBOX_AGENT_ID,
-      description: task.elastic_agent_id ?? i18n.META_EMPTY,
+      // Only meaningful once the VM has been asked for, as in the progress section.
+      description: (isDetonationVmStarted(task) && task.elastic_agent_id) || i18n.META_EMPTY,
     },
     {
       title: i18n.OVERVIEW_FIELD_NETWORK_INDICATORS,

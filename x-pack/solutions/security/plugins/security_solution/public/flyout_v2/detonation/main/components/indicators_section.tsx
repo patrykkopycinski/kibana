@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -99,13 +99,18 @@ export const IndicatorsSection = ({
     });
   }, [caseModal, taskId, rows]);
 
+  const stixBundle = useMemo(
+    () => buildStixBundle(taskId, rows, createdAt),
+    [taskId, rows, createdAt]
+  );
+  const stixEmpty = stixBundle.objects.length === 0;
+
   const onExportStix = useCallback(() => {
-    const bundle = buildStixBundle(taskId, rows, createdAt);
     downloadBlob(
-      new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' }),
+      new Blob([JSON.stringify(stixBundle, null, 2)], { type: 'application/json' }),
       `detonation-${taskId}-indicators.stix.json`
     );
-  }, [taskId, createdAt, rows]);
+  }, [taskId, stixBundle]);
 
   let body: React.ReactNode;
   if (pending) {
@@ -165,14 +170,19 @@ export const IndicatorsSection = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="download"
-              onClick={onExportStix}
-              data-test-subj={DETONATION_INDICATORS_EXPORT_STIX_TEST_ID}
+            <EuiToolTip
+              content={stixEmpty ? i18n.OVERVIEW_INDICATORS_EXPORT_STIX_EMPTY_TOOLTIP : undefined}
             >
-              {i18n.OVERVIEW_INDICATORS_EXPORT_STIX}
-            </EuiButtonEmpty>
+              <EuiButtonEmpty
+                size="s"
+                iconType="download"
+                onClick={onExportStix}
+                isDisabled={stixEmpty}
+                data-test-subj={DETONATION_INDICATORS_EXPORT_STIX_TEST_ID}
+              >
+                {i18n.OVERVIEW_INDICATORS_EXPORT_STIX}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {/* Disabled: the rule needs a drafted rule body and an approval

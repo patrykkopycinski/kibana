@@ -99,7 +99,7 @@ export const detonateValidateDraftStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.validateDraft.documentation.details',
       {
         defaultMessage:
-          'Prototype step. The guard walks the parsed AST (never string matching): single local FROM with sources contained in `securitySolution:defaultIndex`, no SET header, no subquery, no cluster prefix, no `::` selector, no `-` exclusion, no date-math, and nothing that could match the sandbox stream `.kibana-detonate-sandbox-*`. On success the output rule carries the drafted tags plus `detonate:trial`, `detonate:<task_id>` and a fresh `detonate:candidate:<uuid>` tag, and the trial schedule (interval/from replaced). `sandbox_query` is the sandbox-count variant built from the same AST.',
+          'Prototype step. The guard walks the parsed AST (never string matching): single local FROM with sources contained in `securitySolution:defaultIndex`, no SET header, no subquery, no cluster prefix, no `::` selector, no `-` exclusion, no date-math, and nothing that could match the sandbox stream `.kibana-detonate-sandbox-*`. On success the output rule carries the drafted tags plus `detonate:trial`, `detonate:TASK_ID` and a fresh `detonate:candidate:UUID` tag, and the trial schedule (interval/from replaced). `sandbox_query` is the sandbox-count variant built from the same AST.',
       }
     ),
     examples: [

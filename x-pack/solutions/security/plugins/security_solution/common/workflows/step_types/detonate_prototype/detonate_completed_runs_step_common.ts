@@ -79,7 +79,7 @@ export const detonateCompletedRunsStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateCompletedRuns.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Read-only. Failed and unfinished runs are skipped. Runs without an alert:<id> tag (submitted from the detonation page or by the assistant) are counted but cannot be written back.',
+          'Prototype step. Read-only. Failed and unfinished runs are skipped. Runs without an alert:ALERT_ID tag (submitted from the detonation page or by the assistant) are counted but cannot be written back.',
       }
     ),
     examples: [

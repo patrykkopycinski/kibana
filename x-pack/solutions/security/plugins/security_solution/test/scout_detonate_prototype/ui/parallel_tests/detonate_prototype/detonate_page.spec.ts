@@ -32,7 +32,7 @@ import { expect } from '@kbn/scout-security/ui';
  * inert, and detected by Defend). Supplied by the runner so no specific
  * sample digest is pinned in the repository.
  */
-// The service echoes hashes lowercased, and toHaveText with a string is case-sensitive.
+// Compare in one case: toHaveText with a string is case-sensitive, and the service may normalise case.
 const SAMPLE_SHA256 = (process.env.DETONATE_SAMPLE_SHA256 ?? '').toLowerCase();
 
 /** `/app/security` + the prototype's route. */

@@ -142,6 +142,8 @@ export const SubmitModal = React.memo<Props>(
     // exhausted line stays up from that last data, because Kibana does not enforce the
     // allowance on submit and a failed refetch must not re-enable it. Only the count is
     // hidden on error, since it may be out of date; the error line shows instead.
+    // With no usage loaded yet, submit stays open: the service's own quota still
+    // refuses, and a usage outage should not block every submission.
     const usageData = usageQuery.data;
     // No architecture select: the service's submit contract has no architecture field yet.
     // The run's architecture is shown read-only in the result.

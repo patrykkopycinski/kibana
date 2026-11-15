@@ -115,7 +115,10 @@ interface Props {
   initialTags?: string[];
   /** Pre-filled by Re-run so the new run uses the same VM OS as the one being repeated. */
   initialOsFamily?: DetonateVmOsFamily;
-  /** Pre-filled by Re-run with a longer wait; left empty, the service default applies. */
+  /**
+   * Pre-filled by Re-run: the run's own wait, or a longer one after a failed or inconclusive run.
+   * Unset, the service default applies.
+   */
   initialExecWaitSecs?: number;
   /** Which surface the modal was opened from; recorded with the run. */
   source: DetonateSubmitSource;

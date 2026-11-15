@@ -236,6 +236,9 @@ describe('<Footer />', () => {
     it('never pre-fills a wait above the connector cap', () => {
       renderFooter(failedTask({ exec_wait_secs: 800 } as Partial<DetonateTask>));
 
+      expect(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID)).toHaveTextContent(
+        i18n.FOOTER_RERUN_LONGER_TIMEOUT
+      );
       fireEvent.click(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID));
       expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 900 }));
     });
@@ -612,6 +615,7 @@ describe('<Footer />', () => {
         expect(mockAddSuccess).toHaveBeenCalledWith(
           i18n.FOOTER_BLOCK_HASH_PARTIAL_SUCCESS('macOS')
         );
+        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
         expect(mockAddError).not.toHaveBeenCalled();
       });
 

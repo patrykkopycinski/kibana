@@ -342,6 +342,31 @@ describe('SubmitModal', () => {
       }
     );
 
+    it('tracks bad input from native input events when the value string stays empty', () => {
+      renderModal({ initialHash: SHA256 });
+      const input = screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID);
+      const setBadInput = (badInput: boolean) =>
+        Object.defineProperty(input, 'validity', { value: { badInput }, configurable: true });
+
+      setBadInput(true);
+      fireEvent.input(input, { target: { value: '' } });
+
+      expect(input).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
+
+      setBadInput(false);
+      fireEvent.input(input, { target: { value: '' } });
+
+      expect(screen.queryByText(i18n.EXEC_WAIT_INVALID(900))).toBeNull();
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+
+      setBadInput(true);
+      fireEvent.input(input, { target: { value: '' } });
+
+      expect(screen.getByText(i18n.EXEC_WAIT_INVALID(900))).toBeInTheDocument();
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
+    });
+
     it('treats an empty exec wait as valid', () => {
       renderModal({ initialHash: SHA256, initialExecWaitSecs: 300 });
 

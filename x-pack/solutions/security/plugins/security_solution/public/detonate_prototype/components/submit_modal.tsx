@@ -359,6 +359,7 @@ export const SubmitModal = React.memo<Props>(
                   setExecWaitBadInput(validity.badInput);
                   setExecWaitSecs(value === '' ? undefined : Number(value));
                 }}
+                onInput={(event) => setExecWaitBadInput(event.currentTarget.validity.badInput)}
                 data-test-subj={SUBMIT_MODAL_EXEC_WAIT_TEST_ID}
               />
             </EuiFormRow>

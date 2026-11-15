@@ -51,7 +51,7 @@ const mockTask = (task: DetonateTask) => {
 
 describe('DetonationResult overview', () => {
   it('shows the VM architecture when the run has one', () => {
-    mockTask(createTask({ vm_architecture: 'arm64' }));
+    mockTask(createTask({ vm_architecture: 'aarch64' }));
     render(
       <I18nProvider>
         <DetonationResult taskId="task-1" />
@@ -59,7 +59,7 @@ describe('DetonationResult overview', () => {
     );
 
     expect(screen.getByTestId('detonatePrototypeDetails')).toHaveTextContent('VM architecture');
-    expect(screen.getByTestId('detonatePrototypeDetails')).toHaveTextContent('arm64');
+    expect(screen.getByTestId('detonatePrototypeDetails')).toHaveTextContent('aarch64');
   });
 
   it('omits the VM architecture row when the run has none', () => {

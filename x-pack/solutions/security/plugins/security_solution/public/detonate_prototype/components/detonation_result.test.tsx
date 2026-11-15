@@ -27,9 +27,11 @@ import {
   DETONATION_INDICATORS_ADD_TO_CASE_TEST_ID,
   DETONATION_INDICATORS_CREATE_RULE_TEST_ID,
   DETONATION_INDICATORS_EMPTY_TEST_ID,
+  DETONATION_INDICATORS_ERROR_TEST_ID,
   DETONATION_INDICATORS_EXPORT_STIX_TEST_ID,
   DETONATION_INDICATORS_NOT_READ_TEST_ID,
   DETONATION_INDICATORS_PENDING_TEST_ID,
+  DETONATION_INDICATORS_RETRY_TEST_ID,
   DETONATION_INDICATORS_TABLE_TEST_ID,
   DETONATION_INDICATORS_TEST_ID,
   DETONATION_NETWORK_TEST_ID,
@@ -138,13 +140,23 @@ const renderResult = (
   {
     record,
     recordLoading = false,
-  }: { record?: Partial<DetonationRecord>; recordLoading?: boolean } = {}
+    recordError = false,
+    refetch = jest.fn(),
+  }: {
+    record?: Partial<DetonationRecord>;
+    recordLoading?: boolean;
+    recordError?: boolean;
+    refetch?: jest.Mock;
+  } = {}
 ) => {
   jest.mocked(useDetonationTask).mockReturnValue({ data: task, isLoading: false } as never);
   jest.mocked(useCompletedDetonationHistoryByHash).mockReturnValue({ completedRuns: [] } as never);
-  jest
-    .mocked(useDetonationRecord)
-    .mockReturnValue({ data: record, isLoading: recordLoading } as never);
+  jest.mocked(useDetonationRecord).mockReturnValue({
+    data: record,
+    isLoading: recordLoading,
+    isError: recordError,
+    refetch,
+  } as never);
   return render(
     <I18nProvider>
       <DetonationResult taskId={task.id} />
@@ -263,6 +275,13 @@ describe('DetonationResult overview', () => {
       );
     });
 
+    it('stays open while the run is going even when storage holds a folded state', () => {
+      mockStorageGet.mockReturnValue({ progress: false });
+      renderResult(running());
+
+      expect(screen.getByTestId('workerTimeline')).toBeInTheDocument();
+    });
+
     it('hides the agent id before the VM has started', () => {
       renderResult(queued({ elastic_agent_id: 'agent-123' }));
 
@@ -317,6 +336,14 @@ describe('DetonationResult overview', () => {
       expect(screen.getByTestId(DETONATION_HIGHLIGHTED_FIELDS_LIST_TEST_ID)).toHaveTextContent(
         'when the run completes'
       );
+    });
+
+    it('says the indicators could not be read when reading the record failed', () => {
+      renderResult(createTask(), { recordError: true });
+
+      const list = screen.getByTestId(DETONATION_HIGHLIGHTED_FIELDS_LIST_TEST_ID);
+      expect(list).toHaveTextContent('Could not be read');
+      expect(list).not.toHaveTextContent('not read: no alert');
     });
 
     it('says the indicators were not read when the record has none', () => {
@@ -389,6 +416,17 @@ describe('DetonationResult overview', () => {
       renderResult(createTask(), { recordLoading: true });
 
       expect(screen.getByTestId(DETONATION_INDICATORS_PENDING_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('shows an error with a retry, not "not read", when the record could not be read', () => {
+      const refetch = jest.fn();
+      renderResult(createTask(), { recordError: true, refetch });
+
+      expect(screen.getByTestId(DETONATION_INDICATORS_ERROR_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId(DETONATION_INDICATORS_NOT_READ_TEST_ID)).toBeNull();
+
+      fireEvent.click(screen.getByTestId(DETONATION_INDICATORS_RETRY_TEST_ID));
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
 
     it('says "not read" when the record has no indicator arrays', () => {
@@ -473,6 +511,15 @@ describe('DetonationResult overview', () => {
       expect(details).toHaveTextContent('8.1.0');
       expect(details).toHaveTextContent('malwarebazaar');
       expect(details).toHaveTextContent('alert:abc');
+    });
+
+    it('does not list the space tag', () => {
+      renderResult(createTask({ tags: ['space:default', 'alert:abc'] }));
+      expand(DETONATION_RUN_DETAILS_TEST_ID);
+
+      const details = screen.getByTestId('detonatePrototypeDetails');
+      expect(details).toHaveTextContent('alert:abc');
+      expect(details).not.toHaveTextContent('space:default');
     });
 
     it('leaves out the architecture when the run has none', () => {

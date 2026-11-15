@@ -7,6 +7,7 @@
 
 import { v5 as uuidv5 } from 'uuid';
 import type { DetonationRecord } from '../../../../../common/detonate_prototype';
+import * as i18n from '../../../../detonate_prototype/translations';
 
 export type IndicatorType = 'domain' | 'ip' | 'file_hash';
 
@@ -80,6 +81,7 @@ export interface StixIndicator {
   created: string;
   modified: string;
   name: string;
+  indicator_types: ['malicious-activity'];
   pattern: string;
   pattern_type: 'stix';
   valid_from: string;
@@ -92,11 +94,16 @@ export interface StixBundle {
 }
 
 /**
- * A STIX 2.1 bundle with one indicator per row. Ids come from the pattern, and
- * `now` is passed in, so the same input always gives the same bundle. Rows
- * whose pattern cannot be expressed are left out.
+ * A STIX 2.1 bundle with one indicator per row. Ids come from the task id and
+ * the pattern, and `createdAt` (the run's creation time) is passed in, so the
+ * same input always gives the same bundle. Rows whose pattern cannot be
+ * expressed are left out.
  */
-export const buildStixBundle = (taskId: string, rows: IndicatorRow[], now: string): StixBundle => {
+export const buildStixBundle = (
+  taskId: string,
+  rows: IndicatorRow[],
+  createdAt: string
+): StixBundle => {
   const seen = new Set<string>();
   const objects: StixIndicator[] = [];
   for (const row of rows) {
@@ -106,13 +113,14 @@ export const buildStixBundle = (taskId: string, rows: IndicatorRow[], now: strin
       objects.push({
         type: 'indicator',
         spec_version: '2.1',
-        id: `indicator--${uuidv5(pattern, STIX_ID_NAMESPACE)}`,
-        created: now,
-        modified: now,
+        id: `indicator--${uuidv5(`${taskId}:${pattern}`, STIX_ID_NAMESPACE)}`,
+        created: createdAt,
+        modified: createdAt,
         name: row.value,
+        indicator_types: ['malicious-activity'],
         pattern,
         pattern_type: 'stix',
-        valid_from: now,
+        valid_from: createdAt,
       });
     }
   }
@@ -129,7 +137,7 @@ export const buildStixBundle = (taskId: string, rows: IndicatorRow[], now: strin
 /** Markdown comment listing the indicators, for a case. */
 export const buildIndicatorsComment = (taskId: string, rows: IndicatorRow[]): string =>
   [
-    `Indicators observed in detonation run \`${taskId}\`:`,
+    i18n.OVERVIEW_INDICATORS_COMMENT_HEADER({ taskId }),
     '',
-    ...rows.map(({ type, value }) => `- ${type}: \`${value}\``),
+    ...rows.map(({ type, value }) => i18n.OVERVIEW_INDICATORS_COMMENT_LINE({ type, value })),
   ].join('\n');

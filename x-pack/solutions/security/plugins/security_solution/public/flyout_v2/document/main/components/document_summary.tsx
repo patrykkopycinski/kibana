@@ -98,6 +98,10 @@ export interface DocumentSummaryProps {
    * If true we'll show anonymized values
    */
   showAnonymizedValues?: boolean;
+  /**
+   * When false the summary is not saved as a summary document. Defaults to true.
+   */
+  persist?: boolean;
 }
 
 /**
@@ -141,6 +145,7 @@ export const DocumentSummary = memo(
     promptContext,
     setHasSummary,
     showAnonymizedValues,
+    persist,
   }: DocumentSummaryProps) => {
     const {
       summary,
@@ -157,6 +162,7 @@ export const DocumentSummary = memo(
       defaultConnectorId: defaultConnectorId || '',
       promptContext,
       showAnonymizedValues,
+      persist,
     });
 
     useEffect(() => {

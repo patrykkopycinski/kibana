@@ -121,6 +121,7 @@ export const useDetonationRecord = (taskId: string | undefined, isComplete: bool
     enabled: Boolean(taskId) && isComplete,
     queryFn: ({ signal }) => detonateApi.getRunRecord(http, taskId as string, signal),
     staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 };
 

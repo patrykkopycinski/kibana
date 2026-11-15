@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { SPACE_TAG_PREFIX } from '../../../../../common/detonate_prototype';
 import type { DetonateTask, DetonationRecord } from '../../../../../common/detonate_prototype';
 import * as i18n from '../../../../detonate_prototype/translations';
 import { DETONATION_RUN_DETAILS_TEST_ID } from '../test_ids';
@@ -48,12 +49,14 @@ const details = (
   ];
   if (source) items.push({ title: i18n.OVERVIEW_DETAIL_SOURCE, description: source });
   if (submitter) items.push({ title: i18n.OVERVIEW_DETAIL_SUBMITTER, description: submitter });
-  if (task.tags.length) {
+  // The space tag scopes the run to a space; it is bookkeeping, not a label the analyst set.
+  const tags = task.tags.filter((tag) => !tag.startsWith(SPACE_TAG_PREFIX));
+  if (tags.length) {
     items.push({
       title: i18n.OVERVIEW_DETAIL_TAGS,
       description: (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {task.tags.map((tag) => (
+          {tags.map((tag) => (
             <EuiFlexItem grow={false} key={tag}>
               <EuiBadge color="hollow">{tag}</EuiBadge>
             </EuiFlexItem>

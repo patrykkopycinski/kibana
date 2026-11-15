@@ -40,6 +40,11 @@ export interface DocumentSummarySectionProps {
    * to `DOCUMENT_SUMMARY_SECTION_TEST_ID`.
    */
   ['data-test-subj']?: string;
+  /**
+   * When false the summary is not saved as a summary document for `documentId`.
+   * Defaults to true.
+   */
+  persist?: boolean;
 }
 
 /**
@@ -60,6 +65,7 @@ export const DocumentSummarySection = memo(
     documentId,
     getPromptContext,
     'data-test-subj': dataTestSubj = DOCUMENT_SUMMARY_SECTION_TEST_ID,
+    persist = true,
   }: DocumentSummarySectionProps) => {
     const [hasSummary, setHasSummary] = useState(false);
 
@@ -105,6 +111,7 @@ export const DocumentSummarySection = memo(
         documentId={documentId}
         canSeeAdvancedSettings={canSeeAdvancedSettings}
         defaultConnectorId={defaultConnectorId}
+        persist={persist}
         promptContext={promptContext}
         setHasSummary={setHasSummary}
         showAnonymizedValues={showAnonymizedValues}

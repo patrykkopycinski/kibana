@@ -37,7 +37,6 @@ import { DETONATE_WORKER_LABELS, DETONATE_WORKERS } from '../../../common/detona
 import type { DetonateTaskUpdate, DetonateWorkerStatus } from '../../../common/detonate_prototype';
 import { useDetonationTaskUpdates } from '../hooks/use_detonate';
 import { DETONATE_ICONS } from '../icons';
-import * as i18n from '../translations';
 
 export const WORKER_TIMELINE_TEST_ID = 'detonatePrototypeWorkerTimeline';
 
@@ -78,9 +77,6 @@ export const WorkerTimeline = React.memo<Props>(({ taskId, isComplete }) => {
 
   return (
     <EuiPanel hasBorder data-test-subj={WORKER_TIMELINE_TEST_ID}>
-      <EuiText size="xs">
-        <h3>{i18n.TIMELINE_TITLE}</h3>
-      </EuiText>
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         {DETONATE_WORKERS.map((worker) => {
           const entry = byWorker.get(worker);

@@ -37,6 +37,8 @@ const fallbackLine = (task: DetonateTask): string => {
  * Reuses the document flyout's AI summary section with the task id as the
  * document id. Known differences from a detonation-specific summary:
  * - it hard-codes the assistant context category to `alert` ("Alert summary");
+ * - the summary is not saved (`persist={false}`): a run is not an alert, so
+ *   no summary document is written for its id and it is lost on close;
  * - it keeps its expanded state under the document flyout's storage key, in a
  *   section called `aisummary`, not under the detonation flyout's key;
  * - it renders its own "AI summary" section, so it gets no wrapper section here.
@@ -67,6 +69,7 @@ export const AiSummarySection = ({ task }: AiSummarySectionProps) => {
       <DocumentSummarySection
         key={task.id}
         documentId={task.id}
+        persist={false}
         getPromptContext={getPromptContext}
         data-test-subj={DETONATION_AI_SUMMARY_TEST_ID}
       />

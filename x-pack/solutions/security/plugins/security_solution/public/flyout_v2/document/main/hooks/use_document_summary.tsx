@@ -47,6 +47,18 @@ export interface UseDocumentSummaryParams {
    * If true we'll show anonymized values
    */
   showAnonymizedValues?: boolean;
+  /**
+   * When false the generated summary is kept in component state and no summary document is
+   * written for `documentId`. Defaults to true.
+   */
+  persist?: boolean;
+}
+
+interface GeneratedSummary {
+  summary: string;
+  recommendedActions?: string;
+  replacements: Replacements;
+  updatedAt: string;
 }
 
 export interface UseDocumentSummaryResult {
@@ -131,6 +143,7 @@ export const useDocumentSummary = ({
   defaultConnectorId,
   promptContext,
   showAnonymizedValues = false,
+  persist = true,
 }: UseDocumentSummaryParams): UseDocumentSummaryResult => {
   const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
@@ -158,25 +171,27 @@ export const useDocumentSummary = ({
     connectorId: defaultConnectorId,
   });
   const { bulkUpdate } = useBulkUpdateDocumentSummary();
+  const [generatedSummary, setGeneratedSummary] = useState<GeneratedSummary | null>(null);
 
   useEffect(() => {
-    if (fetchedSummary.data.length > 0) {
+    const current = generatedSummary ?? fetchedSummary.data[0];
+    if (current) {
       setHasSummary(true);
       setSummary(
         showAnonymizedValues
-          ? fetchedSummary.data[0].summary
+          ? current.summary
           : replaceAnonymizedValuesWithOriginalValues({
-              messageContent: fetchedSummary.data[0].summary,
-              replacements: fetchedSummary.data[0].replacements,
+              messageContent: current.summary,
+              replacements: current.replacements,
             })
       );
       setRecommendedActions(
-        fetchedSummary.data[0].recommendedActions
+        current.recommendedActions
           ? showAnonymizedValues
-            ? fetchedSummary.data[0].recommendedActions
+            ? current.recommendedActions
             : replaceAnonymizedValuesWithOriginalValues({
-                messageContent: fetchedSummary.data[0].recommendedActions,
-                replacements: fetchedSummary.data[0].replacements,
+                messageContent: current.recommendedActions,
+                replacements: current.replacements,
               })
           : undefined
       );
@@ -185,7 +200,7 @@ export const useDocumentSummary = ({
       setSummary(NO_SUMMARY_AVAILABLE);
       setRecommendedActions(undefined);
     }
-  }, [fetchedSummary, showAnonymizedValues]);
+  }, [fetchedSummary, generatedSummary, showAnonymizedValues]);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -269,7 +284,16 @@ export const useDocumentSummary = ({
       }
 
       if (!rawResponse.isError && !hasInvalidResponse && responseSummary != null) {
-        if (fetchedSummary.data.length > 0) {
+        if (!persist) {
+          setGeneratedSummary({
+            summary: responseSummary,
+            ...(responseRecommendedActions
+              ? { recommendedActions: responseRecommendedActions }
+              : {}),
+            replacements: content.replacements,
+            updatedAt: new Date().toISOString(),
+          });
+        } else if (fetchedSummary.data.length > 0) {
           await bulkUpdate({
             documentSummary: {
               update: [
@@ -300,7 +324,7 @@ export const useDocumentSummary = ({
             },
           });
         }
-        await refetchSummary();
+        if (persist) await refetchSummary();
       } else {
         const errorResponse = rawResponse.response ?? '';
         if (errorResponse.includes('Failed to load action')) {
@@ -323,6 +347,7 @@ export const useDocumentSummary = ({
     documentId,
     fetchedSummary.data,
     messageAndReplacements,
+    persist,
     refetchSummary,
     sendMessage,
   ]);
@@ -334,11 +359,11 @@ export const useDocumentSummary = ({
   }, [abortStream]);
 
   const generatedAt = useMemo<number | null>(() => {
-    const updatedAt = fetchedSummary.data[0]?.updatedAt;
+    const updatedAt = generatedSummary?.updatedAt ?? fetchedSummary.data[0]?.updatedAt;
     if (!updatedAt) return null;
     const parsed = new Date(updatedAt).getTime();
     return Number.isNaN(parsed) ? null : parsed;
-  }, [fetchedSummary.data]);
+  }, [fetchedSummary.data, generatedSummary]);
 
   return {
     summary,

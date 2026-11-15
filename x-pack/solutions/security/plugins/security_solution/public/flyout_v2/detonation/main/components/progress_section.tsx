@@ -28,8 +28,7 @@ interface ProgressSectionProps {
 
 /**
  * Open while the run is going, folded once it is over, with the run time in the
- * header. The timeline brings its own "Detonation progress" heading inside a
- * bordered panel, so the title shows twice; the shared timeline is left alone.
+ * header. The open state follows the run, so it is not remembered between runs.
  */
 export const ProgressSection = ({ task }: ProgressSectionProps) => {
   const complete = isDetonationComplete(task);
@@ -47,6 +46,7 @@ export const ProgressSection = ({ task }: ProgressSectionProps) => {
       sectionId="progress"
       title={i18n.OVERVIEW_PROGRESS_TITLE}
       defaultExpanded={!complete}
+      persist={false}
       data-test-subj={DETONATION_PROGRESS_TEST_ID}
       extraAction={
         durationMs === undefined ? undefined : (
@@ -69,7 +69,7 @@ export const ProgressSection = ({ task }: ProgressSectionProps) => {
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued" data-test-subj={DETONATION_PROGRESS_AGENT_ID_TEST_ID}>
-            {`${i18n.OVERVIEW_SANDBOX_AGENT_ID}: ${task.elastic_agent_id}`}
+            {i18n.OVERVIEW_SANDBOX_AGENT_ID_VALUE({ id: task.elastic_agent_id })}
           </EuiText>
         </>
       )}

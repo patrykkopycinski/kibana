@@ -158,6 +158,41 @@ describe('useDocumentSummary', () => {
     expect(result.current.recommendedActions).toBe('Generated actions');
   });
 
+  it('should keep the summary in state and write no document when persist is false', async () => {
+    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
+      data: { data: [], prompt: 'Generate an alert summary!' },
+      refetch: mockRefetchSummary,
+      isFetched: true,
+    });
+    mockSendMessage.mockResolvedValue({
+      response: JSON.stringify({ summary: 'Generated summary', recommendedActions: 'Do this' }),
+      isError: false,
+    });
+
+    const { result } = renderHook(() =>
+      useDocumentSummary({
+        documentId: 'task-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        persist: false,
+      })
+    );
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
+
+    await act(async () => {
+      await result.current.fetchAISummary();
+    });
+
+    expect(mockBulkUpdate).not.toHaveBeenCalled();
+    expect(mockRefetchSummary).not.toHaveBeenCalled();
+    expect(result.current.summary).toBe('Generated summary');
+    expect(result.current.recommendedActions).toBe('Do this');
+    expect(result.current.hasSummary).toBe(true);
+    expect(result.current.generatedAt).not.toBeNull();
+  });
+
   it('should recover summaries wrapped in markdown code fences', async () => {
     (useFetchDocumentSummary as jest.Mock)
       .mockReturnValueOnce({

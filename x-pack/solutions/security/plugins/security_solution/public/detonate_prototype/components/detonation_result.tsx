@@ -14,7 +14,7 @@
  * case a naive "wait for the last worker" poller hangs on forever.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -80,7 +80,13 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
   const complete = task ? isDetonationComplete(task) : false;
   // Indicators come from alerts, which are final only when the run is, so the
   // record is read once the run is over.
-  const { data: record, isLoading: recordLoading } = useDetonationRecord(task?.id, complete);
+  const {
+    data: record,
+    isLoading: recordLoading,
+    isError: recordError,
+    refetch: refetchRecord,
+  } = useDetonationRecord(task?.id, complete);
+  const indicators = useMemo(() => getDetonationIndicators(record), [record]);
 
   if (isLoading && !task) {
     return (
@@ -103,7 +109,6 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
   const queued = isDetonationQueued(task);
   const benign = detonationWasBenign(task);
   const coverageGap = complete && !failed ? diagnosticOnlyEventCodes(task) : [];
-  const indicators = getDetonationIndicators(record);
   const pending = !complete || recordLoading;
 
   // The viewed run counts toward the streak: three benign runs in a row includes
@@ -138,7 +143,12 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
           />
         ) : (
           <>
-            <HighlightedFieldsSection task={task} indicators={indicators} pending={pending} />
+            <HighlightedFieldsSection
+              task={task}
+              indicators={indicators}
+              pending={pending}
+              recordError={recordError}
+            />
             <EuiHorizontalRule margin="m" />
             <SandboxAlertsSection task={task} />
             <EuiHorizontalRule margin="m" />
@@ -148,7 +158,14 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
             <EuiHorizontalRule margin="m" />
             <NetworkSection />
             <EuiHorizontalRule margin="m" />
-            <IndicatorsSection taskId={task.id} indicators={indicators} pending={pending} />
+            <IndicatorsSection
+              taskId={task.id}
+              createdAt={task.created_at}
+              indicators={indicators}
+              pending={pending}
+              recordError={recordError}
+              onRetry={refetchRecord}
+            />
             <EuiHorizontalRule margin="m" />
             <RunDetailsSection task={task} record={record} />
           </>

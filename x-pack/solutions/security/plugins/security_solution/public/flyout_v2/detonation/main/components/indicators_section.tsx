@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '../../../../common/lib/kibana';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_attach_to_case';
@@ -24,9 +25,11 @@ import {
   DETONATION_INDICATORS_ADD_TO_CASE_TEST_ID,
   DETONATION_INDICATORS_CREATE_RULE_TEST_ID,
   DETONATION_INDICATORS_EMPTY_TEST_ID,
+  DETONATION_INDICATORS_ERROR_TEST_ID,
   DETONATION_INDICATORS_EXPORT_STIX_TEST_ID,
   DETONATION_INDICATORS_NOT_READ_TEST_ID,
   DETONATION_INDICATORS_PENDING_TEST_ID,
+  DETONATION_INDICATORS_RETRY_TEST_ID,
   DETONATION_INDICATORS_TABLE_TEST_ID,
   DETONATION_INDICATORS_TEST_ID,
 } from '../test_ids';
@@ -56,12 +59,24 @@ const COLUMNS: Array<EuiBasicTableColumn<IndicatorRow>> = [
 
 interface IndicatorsSectionProps {
   taskId: string;
+  /** When the run was created; stamps the STIX export. */
+  createdAt: string;
   indicators: DetonationIndicators;
   /** True until the run is over and its record has been read. */
   pending: boolean;
+  /** True when reading the run's record failed. */
+  recordError: boolean;
+  onRetry: () => void;
 }
 
-export const IndicatorsSection = ({ taskId, indicators, pending }: IndicatorsSectionProps) => {
+export const IndicatorsSection = ({
+  taskId,
+  createdAt,
+  indicators,
+  pending,
+  recordError,
+  onRetry,
+}: IndicatorsSectionProps) => {
   const { cases } = useKibana().services;
   const canAttachToCase = useCanAttachToCase();
   const { rows, state } = indicators;
@@ -82,12 +97,12 @@ export const IndicatorsSection = ({ taskId, indicators, pending }: IndicatorsSec
   }, [caseModal, taskId, rows]);
 
   const onExportStix = useCallback(() => {
-    const bundle = buildStixBundle(taskId, rows, new Date().toISOString());
+    const bundle = buildStixBundle(taskId, rows, createdAt);
     downloadBlob(
       new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' }),
       `detonation-${taskId}-indicators.stix.json`
     );
-  }, [taskId, rows]);
+  }, [taskId, createdAt, rows]);
 
   let body: React.ReactNode;
   if (pending) {
@@ -95,6 +110,21 @@ export const IndicatorsSection = ({ taskId, indicators, pending }: IndicatorsSec
       <EuiText size="s" color="subdued" data-test-subj={DETONATION_INDICATORS_PENDING_TEST_ID}>
         {i18n.OVERVIEW_INDICATORS_PENDING}
       </EuiText>
+    );
+  } else if (recordError) {
+    body = (
+      <KbnDangerCallout
+        size="s"
+        title={i18n.OVERVIEW_RECORD_ERROR_TITLE}
+        actionProps={{
+          primary: {
+            children: i18n.OVERVIEW_RECORD_ERROR_RETRY,
+            onClick: onRetry,
+            'data-test-subj': DETONATION_INDICATORS_RETRY_TEST_ID,
+          },
+        }}
+        data-test-subj={DETONATION_INDICATORS_ERROR_TEST_ID}
+      />
     );
   } else if (state === 'not_read') {
     body = (

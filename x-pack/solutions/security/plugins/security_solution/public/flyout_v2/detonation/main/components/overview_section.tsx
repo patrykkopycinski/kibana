@@ -18,6 +18,8 @@ interface OverviewSectionProps {
   defaultExpanded: boolean;
   'data-test-subj': string;
   extraAction?: ReactNode;
+  /** When false the section is not remembered in local storage and always starts as `defaultExpanded`. */
+  persist?: boolean;
   children: ReactNode;
 }
 
@@ -28,13 +30,15 @@ export const OverviewSection = ({
   defaultExpanded,
   'data-test-subj': dataTestSubj,
   extraAction,
+  persist = true,
   children,
 }: OverviewSectionProps) => {
-  const expanded = useExpandSection({
+  const storedExpanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
     title: sectionId,
     defaultValue: defaultExpanded,
   });
+  const expanded = persist ? storedExpanded : defaultExpanded;
 
   return (
     <ExpandableSection
@@ -42,7 +46,7 @@ export const OverviewSection = ({
       expanded={expanded}
       gutterSize="none"
       headingLevel="h3"
-      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      localStorageKey={persist ? FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS : undefined}
       sectionId={sectionId}
       title={title}
       extraAction={extraAction}

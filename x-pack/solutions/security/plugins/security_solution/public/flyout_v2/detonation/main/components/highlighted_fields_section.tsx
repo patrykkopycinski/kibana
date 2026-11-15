@@ -24,21 +24,28 @@ interface HighlightedFieldsSectionProps {
   indicators: DetonationIndicators;
   /** True until the run is over and its record has been read. */
   pending: boolean;
+  /** True when reading the run's record failed. */
+  recordError: boolean;
 }
 
 /** A few indicators of the given types, with a count of the rest. */
 const indicatorSummary = (
   { state, rows }: DetonationIndicators,
   types: IndicatorType[],
-  pending: boolean
+  pending: boolean,
+  recordError: boolean
 ): string => {
   if (pending) return i18n.OVERVIEW_PENDING_UNTIL_COMPLETE;
+  if (recordError) return i18n.OVERVIEW_RECORD_ERROR_FIELD;
   if (state === 'not_read') return i18n.OVERVIEW_NOT_READ;
   const values = rows.filter(({ type }) => types.includes(type)).map(({ value }) => value);
   if (!values.length) return i18n.OVERVIEW_NONE_FOUND;
   const shown = values.slice(0, SHOWN_INDICATORS).join(', ');
   return values.length > SHOWN_INDICATORS
-    ? `${shown} ${i18n.OVERVIEW_MORE({ count: values.length - SHOWN_INDICATORS })}`
+    ? i18n.OVERVIEW_INDICATORS_SHOWN_WITH_MORE({
+        shown,
+        count: values.length - SHOWN_INDICATORS,
+      })
     : shown;
 };
 
@@ -46,7 +53,9 @@ export const HighlightedFieldsSection = ({
   task,
   indicators,
   pending,
+  recordError,
 }: HighlightedFieldsSectionProps) => {
+  // Process and registry fields are left out: the run has no data for them until sandbox telemetry exists.
   const listItems: EuiDescriptionListProps['listItems'] = [
     { title: i18n.OVERVIEW_FIELD_SHA256, description: task.sample_hash ?? i18n.META_EMPTY },
     { title: i18n.OVERVIEW_FIELD_FILE_NAME, description: task.sample_filename ?? i18n.META_EMPTY },
@@ -65,11 +74,11 @@ export const HighlightedFieldsSection = ({
     },
     {
       title: i18n.OVERVIEW_FIELD_NETWORK_INDICATORS,
-      description: indicatorSummary(indicators, ['domain', 'ip'], pending),
+      description: indicatorSummary(indicators, ['domain', 'ip'], pending, recordError),
     },
     {
       title: i18n.OVERVIEW_FIELD_FILE_INDICATORS,
-      description: indicatorSummary(indicators, ['file_hash'], pending),
+      description: indicatorSummary(indicators, ['file_hash'], pending, recordError),
     },
   ];
 

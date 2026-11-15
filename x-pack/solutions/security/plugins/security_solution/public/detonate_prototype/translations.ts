@@ -168,11 +168,6 @@ export const STATUS_UNSUPPORTED_OS_DESCRIPTION = i18n.translate(
   { defaultMessage: "The sandbox has no virtual machine for this host's operating system." }
 );
 
-export const TIMELINE_TITLE = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.detail.timelineTitle',
-  { defaultMessage: 'Detonation progress' }
-);
-
 export const PRODUCTION_ENDPOINT_ALERTS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.productionEndpointAlerts',
   { defaultMessage: 'Endpoint alerts' }
@@ -506,6 +501,12 @@ export const OVERVIEW_SANDBOX_AGENT_ID = i18n.translate(
   { defaultMessage: 'Sandbox agent ID' }
 );
 
+export const OVERVIEW_SANDBOX_AGENT_ID_VALUE = ({ id }: { id: string }): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.sandboxAgentIdValue', {
+    defaultMessage: 'Sandbox agent ID: {id}',
+    values: { id },
+  });
+
 export const OVERVIEW_QUEUED_NOTE_TITLE = i18n.translate(
   'xpack.securitySolution.detonatePrototype.overview.queuedNoteTitle',
   { defaultMessage: 'Waiting for a VM' }
@@ -569,10 +570,49 @@ export const OVERVIEW_FIELD_FILE_INDICATORS = i18n.translate(
   { defaultMessage: 'File indicators' }
 );
 
-export const OVERVIEW_MORE = ({ count }: { count: number }): string =>
-  i18n.translate('xpack.securitySolution.detonatePrototype.overview.more', {
-    defaultMessage: '+{count} more',
-    values: { count },
+export const OVERVIEW_INDICATORS_SHOWN_WITH_MORE = ({
+  shown,
+  count,
+}: {
+  shown: string;
+  count: number;
+}): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.indicatorsShownWithMore', {
+    defaultMessage: '{shown} +{count} more',
+    values: { shown, count },
+  });
+
+export const OVERVIEW_RECORD_ERROR_FIELD = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.recordErrorField',
+  { defaultMessage: 'Could not be read' }
+);
+
+export const OVERVIEW_RECORD_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.recordErrorTitle',
+  { defaultMessage: "The run's record could not be read, so its indicators are not available." }
+);
+
+export const OVERVIEW_RECORD_ERROR_RETRY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.recordErrorRetry',
+  { defaultMessage: 'Retry' }
+);
+
+export const OVERVIEW_INDICATORS_COMMENT_HEADER = ({ taskId }: { taskId: string }): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.indicatorsCommentHeader', {
+    defaultMessage: 'Indicators observed in detonation run `{taskId}`:',
+    values: { taskId },
+  });
+
+export const OVERVIEW_INDICATORS_COMMENT_LINE = ({
+  type,
+  value,
+}: {
+  type: string;
+  value: string;
+}): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.indicatorsCommentLine', {
+    defaultMessage: '- {type}: `{value}`',
+    values: { type, value },
   });
 
 export const OVERVIEW_NONE_FOUND = i18n.translate(

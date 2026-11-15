@@ -14,6 +14,7 @@ import {
 } from './detonation_indicators';
 
 const NOW = '2026-01-01T00:00:00.000Z';
+const CREATED_AT = '2025-12-31T10:00:00.000Z';
 const SHA256 = 'a'.repeat(64);
 
 const record = (fields: Record<string, unknown>): DetonationRecord =>
@@ -134,6 +135,24 @@ describe('buildStixBundle', () => {
       valid_from: NOW,
     });
     expect(bundle.objects[0].id).toMatch(/^indicator--[0-9a-f-]{36}$/);
+  });
+
+  it('stamps the run creation time and marks every indicator as malicious activity', () => {
+    const bundle = buildStixBundle('task-1', rows, CREATED_AT);
+    bundle.objects.forEach((indicator) => {
+      expect(indicator).toMatchObject({
+        created: CREATED_AT,
+        modified: CREATED_AT,
+        valid_from: CREATED_AT,
+        indicator_types: ['malicious-activity'],
+      });
+    });
+  });
+
+  it('gives the same indicator a different id in a different run', () => {
+    const first = buildStixBundle('task-1', rows, NOW).objects.map(({ id }) => id);
+    const second = buildStixBundle('task-2', rows, NOW).objects.map(({ id }) => id);
+    first.forEach((id, index) => expect(id).not.toBe(second[index]));
   });
 
   it('is deterministic for the same input', () => {

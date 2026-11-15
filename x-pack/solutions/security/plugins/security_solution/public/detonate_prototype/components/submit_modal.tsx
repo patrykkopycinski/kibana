@@ -135,7 +135,8 @@ export const SubmitModal = React.memo<Props>(
     const submitFile = useSubmitFile();
     /** The error and spinner follow the mutation that was last submitted, not the visible tab. */
     const [lastSubmitted, setLastSubmitted] = useState<SubmitMode | undefined>();
-    const active = lastSubmitted === 'file' ? submitFile : lastSubmitted === 'hash' ? submitHash : undefined;
+    const active =
+      lastSubmitted === 'file' ? submitFile : lastSubmitted === 'hash' ? submitHash : undefined;
     const usage = useDetonateUsage();
     // No architecture select: the service's submit contract has no architecture field yet.
     // The run's architecture is shown read-only in the result.

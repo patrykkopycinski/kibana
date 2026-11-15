@@ -299,7 +299,9 @@ describe('SubmitModal', () => {
 
       submit();
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(() => expect(screen.getByTestId(SUBMIT_MODAL_ERROR_TEST_ID)).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByTestId(SUBMIT_MODAL_ERROR_TEST_ID)).toBeInTheDocument()
+      );
 
       fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
 

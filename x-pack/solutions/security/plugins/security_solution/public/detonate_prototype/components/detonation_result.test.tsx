@@ -46,9 +46,7 @@ const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
 
 const mockTask = (task: DetonateTask) => {
   jest.mocked(useDetonationTask).mockReturnValue({ data: task, isLoading: false } as never);
-  jest
-    .mocked(useCompletedDetonationHistoryByHash)
-    .mockReturnValue({ completedRuns: [] } as never);
+  jest.mocked(useCompletedDetonationHistoryByHash).mockReturnValue({ completedRuns: [] } as never);
 };
 
 describe('DetonationResult overview', () => {
@@ -72,8 +70,6 @@ describe('DetonationResult overview', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('detonatePrototypeDetails')).not.toHaveTextContent(
-      'VM architecture'
-    );
+    expect(screen.getByTestId('detonatePrototypeDetails')).not.toHaveTextContent('VM architecture');
   });
 });

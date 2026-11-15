@@ -53,7 +53,10 @@ describe('submit mutations', () => {
     });
 
     expect(invalidatedKeys(invalidate)).toEqual(
-      expect.arrayContaining([[DETONATE_QUERY_KEY, 'tasks'], [DETONATE_QUERY_KEY, 'usage']])
+      expect.arrayContaining([
+        [DETONATE_QUERY_KEY, 'tasks'],
+        [DETONATE_QUERY_KEY, 'usage'],
+      ])
     );
   });
 
@@ -66,7 +69,10 @@ describe('submit mutations', () => {
     });
 
     expect(invalidatedKeys(invalidate)).toEqual(
-      expect.arrayContaining([[DETONATE_QUERY_KEY, 'tasks'], [DETONATE_QUERY_KEY, 'usage']])
+      expect.arrayContaining([
+        [DETONATE_QUERY_KEY, 'tasks'],
+        [DETONATE_QUERY_KEY, 'usage'],
+      ])
     );
   });
 

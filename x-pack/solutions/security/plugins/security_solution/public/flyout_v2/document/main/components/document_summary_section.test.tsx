@@ -100,7 +100,7 @@ describe('DocumentSummarySection', () => {
     });
   });
 
-  it('should render the AI summary section with title, sparkles icon, and options menu', () => {
+  it('should render the AI summary section with title, sparkles icon, and options menu', async () => {
     const getPromptContext = jest.fn().mockResolvedValue({ 'host.name': ['h1'] });
 
     const { getByTestId } = render(
@@ -109,13 +109,17 @@ describe('DocumentSummarySection', () => {
       </TestProviders>
     );
 
+    await waitFor(() => {
+      expect(screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID)).toBeEnabled();
+    });
+
     const header = getByTestId(`${DOCUMENT_SUMMARY_SECTION_TEST_ID}${HEADER_TEST_ID}`);
     expect(header).toHaveTextContent('AI summary');
     expect(header.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
     expect(getByTestId(DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render with custom data-test-subj', () => {
+  it('should render with custom data-test-subj', async () => {
     const getPromptContext = jest.fn().mockResolvedValue({ 'host.name': ['h1'] });
 
     const { getByTestId } = render(
@@ -127,6 +131,10 @@ describe('DocumentSummarySection', () => {
         />
       </TestProviders>
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID)).toBeEnabled();
+    });
 
     expect(getByTestId(`custom-test-id${HEADER_TEST_ID}`)).toHaveTextContent('AI summary');
   });
@@ -153,12 +161,16 @@ describe('DocumentSummarySection', () => {
       expect(await screen.findByText('Unsaved summary text')).toBeInTheDocument();
 
       const toggle = screen.getByRole('button', { name: /AI summary/ });
-      fireEvent.click(toggle);
+      await act(async () => {
+        fireEvent.click(toggle);
+      });
       await waitFor(() => {
         expect(screen.queryByText('Unsaved summary text')).not.toBeInTheDocument();
       });
 
-      fireEvent.click(toggle);
+      await act(async () => {
+        fireEvent.click(toggle);
+      });
 
       expect(await screen.findByText('Unsaved summary text')).toBeInTheDocument();
       expect(mockSendMessage).toHaveBeenCalledTimes(1);

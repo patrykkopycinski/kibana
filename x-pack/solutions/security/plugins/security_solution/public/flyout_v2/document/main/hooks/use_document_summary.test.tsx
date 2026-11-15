@@ -72,7 +72,7 @@ describe('useDocumentSummary', () => {
     });
   });
 
-  it('should initialize with default values', () => {
+  it('should initialize with default values', async () => {
     const { result } = renderHook(() =>
       useDocumentSummary({
         documentId: 'test-document-id',
@@ -87,6 +87,9 @@ describe('useDocumentSummary', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.messageAndReplacements).toBeNull();
     expect(result.current.recommendedActions).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
   });
 
   it('should fetch AI summary when fetchAISummary is called', async () => {
@@ -227,6 +230,9 @@ describe('useDocumentSummary', () => {
 
     expect(result.current.hasSummary).toBe(false);
     expect(result.current.summary).toBe('No summary available');
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
   });
 
   it('should keep the summary in state and write no document when persist is false', async () => {

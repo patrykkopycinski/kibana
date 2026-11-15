@@ -178,10 +178,11 @@ export const useDocumentSummary = ({
     [documentId]
   );
   // Read-only subscription: the entry is only ever written by `setQueryData` below.
+  // Persisting callers never write it, so their empty entry is collected on unmount.
   const { data: cachedSummary } = useQuery<GeneratedSummary | null>(
     ephemeralSummaryKey,
     () => null,
-    { enabled: false, staleTime: Infinity, cacheTime: Infinity }
+    { enabled: false, staleTime: Infinity, cacheTime: persist ? 0 : Infinity }
   );
   const generatedSummary = persist ? null : cachedSummary;
 

@@ -38,7 +38,8 @@ const fallbackLine = (task: DetonateTask): string => {
  * document id. Known differences from a detonation-specific summary:
  * - it hard-codes the assistant context category to `alert` ("Alert summary");
  * - the summary is not saved (`persist={false}`): a run is not an alert, so
- *   no summary document is written for its id and it is lost on close;
+ *   no summary document is written for its id. It is kept in the query cache
+ *   for this page session, and a reload drops it;
  * - it keeps its expanded state under the document flyout's storage key, in a
  *   section called `aisummary`, not under the detonation flyout's key;
  * - it renders its own "AI summary" section, so it gets no wrapper section here.

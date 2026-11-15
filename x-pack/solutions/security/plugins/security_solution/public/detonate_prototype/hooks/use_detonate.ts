@@ -243,20 +243,25 @@ export const useCompletedDetonationHistoryByHash = (hash: string | undefined) =>
 
 /**
  * Submitting invalidates the list so a new run shows up without a manual
- * refresh. It deliberately does not invalidate on error: a failed submit may
- * still have reached the service, and refetching would not tell us either way.
+ * refresh, and the usage query so the allowance line counts the new run. It
+ * deliberately does not invalidate on error: a failed submit may still have
+ * reached the service, and refetching would not tell us either way.
  */
-const useInvalidateTaskList = () => {
+const useInvalidateAfterSubmit = () => {
   const queryClient = useQueryClient();
   return useCallback(
-    () => queryClient.invalidateQueries({ queryKey: [DETONATE_QUERY_KEY, 'tasks'] }),
+    () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: [DETONATE_QUERY_KEY, 'tasks'] }),
+        queryClient.invalidateQueries({ queryKey: usageKey }),
+      ]),
     [queryClient]
   );
 };
 
 export const useSubmitHash = () => {
   const { http } = useKibana().services;
-  const invalidate = useInvalidateTaskList();
+  const invalidate = useInvalidateAfterSubmit();
   const track = useTrackDetonation();
 
   return useMutation<DetonateTask, Error, SubmitHashParams>({
@@ -270,7 +275,7 @@ export const useSubmitHash = () => {
 
 export const useSubmitFile = () => {
   const { http } = useKibana().services;
-  const invalidate = useInvalidateTaskList();
+  const invalidate = useInvalidateAfterSubmit();
   const track = useTrackDetonation();
 
   return useMutation<DetonateTask, Error, SubmitFileParams>({

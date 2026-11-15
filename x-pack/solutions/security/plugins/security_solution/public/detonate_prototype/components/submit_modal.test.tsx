@@ -12,9 +12,6 @@
  * confirm (a detonation spends a VM), cancelling submits nothing, an untouched
  * modal sends only the hash and its source, a malformed hash is stopped before
  * the service sees it, and an exhausted allowance disables submit.
- *
- * Mutation check: wire the button straight to `doSubmit` and the first case
- * goes red.
  */
 
 import React from 'react';
@@ -35,6 +32,8 @@ import {
   SUBMIT_MODAL_LIMITATIONS_TEST_ID,
   SUBMIT_MODAL_PRIOR_RUN_TEST_ID,
   SUBMIT_MODAL_READ_ONLY_TEST_ID,
+  SUBMIT_MODAL_ERROR_TEST_ID,
+  SUBMIT_MODAL_USAGE_ERROR_TEST_ID,
   SUBMIT_MODAL_USAGE_TEST_ID,
 } from './submit_modal';
 
@@ -53,8 +52,8 @@ const mockCapabilities = (security: Record<string, boolean>) =>
     services: { http: {}, application: { capabilities: { siemV5: security } } },
   } as never);
 
-const mockUsage = (usage: DetonateUsage | undefined) =>
-  jest.spyOn(useDetonate, 'useDetonateUsage').mockReturnValue({ data: usage } as never);
+const mockUsage = (usage: DetonateUsage | undefined, isError = false) =>
+  jest.spyOn(useDetonate, 'useDetonateUsage').mockReturnValue({ data: usage, isError } as never);
 
 const mockPriorRun = (completedRun: { id: string } | undefined) =>
   jest
@@ -247,6 +246,67 @@ describe('SubmitModal', () => {
     });
   });
 
+  describe('mode switch', () => {
+    it('drops the chosen file when switching tabs, so the remounted picker cannot leave submit enabled', () => {
+      renderModal();
+
+      fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
+      fireEvent.change(screen.getByTestId(SUBMIT_MODAL_FILE_INPUT_TEST_ID), {
+        target: { files: [new File(['MZ'], 'sample.exe')] },
+      });
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+
+      fireEvent.click(screen.getByText(i18n.SUBMIT_BY_HASH));
+      fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
+
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
+    });
+  });
+
+  describe('submit errors', () => {
+    const failSubmit = () => {
+      const error = Object.assign(new Error('boom'), { body: { message: 'Service said no' } });
+      mutateAsync.mockRejectedValue(error);
+      jest.spyOn(useDetonate, 'useSubmitHash').mockReturnValue({
+        mutateAsync,
+        isLoading: false,
+        isError: true,
+        error,
+      } as never);
+    };
+
+    it('shows the error and keeps the modal open when the submit fails', async () => {
+      failSubmit();
+      const onClose = jest.fn();
+      const onSubmitted = jest.fn();
+      renderModal({ onClose, onSubmitted });
+
+      expect(screen.queryByTestId(SUBMIT_MODAL_ERROR_TEST_ID)).toBeNull();
+
+      submit();
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId(SUBMIT_MODAL_ERROR_TEST_ID)).toHaveTextContent('Service said no')
+      );
+      expect(onSubmitted).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('keeps showing the error of the last submitted mutation after switching tabs', async () => {
+      failSubmit();
+      renderModal();
+
+      submit();
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => expect(screen.getByTestId(SUBMIT_MODAL_ERROR_TEST_ID)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
+
+      expect(screen.getByTestId(SUBMIT_MODAL_ERROR_TEST_ID)).toHaveTextContent('Service said no');
+    });
+  });
+
   describe('hash validation', () => {
     it('shows an inline error, disables submit and stays open for a malformed hash', () => {
       const onClose = jest.fn();
@@ -254,7 +314,9 @@ describe('SubmitModal', () => {
 
       typeHash('not-a-hash');
 
-      expect(screen.getByText(i18n.SUBMIT_MODAL_INVALID_HASH)).toBeInTheDocument();
+      expect(screen.getByTestId(SUBMIT_MODAL_HASH_ERROR_TEST_ID)).toHaveTextContent(
+        i18n.SUBMIT_MODAL_INVALID_HASH
+      );
       expect(screen.getByTestId(SUBMIT_MODAL_HASH_INPUT_TEST_ID)).toHaveAttribute(
         'aria-invalid',
         'true'
@@ -307,8 +369,37 @@ describe('SubmitModal', () => {
 
       expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
       expect(screen.getByTestId(SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID)).toHaveTextContent(
-        i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED(new Date(resetsAt).toLocaleDateString())
+        i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED('Dec 1, 2026')
       );
+    });
+
+    it('shows the reset date in UTC even where the local day is the day before', () => {
+      const originalTz = process.env.TZ;
+      process.env.TZ = 'America/Los_Angeles';
+      try {
+        mockUsage({
+          used: 10,
+          allowance: 10,
+          resetsAt: '2026-12-01T00:00:00.000Z',
+        } as DetonateUsage);
+        renderModal({ initialHash: SHA256 });
+
+        expect(screen.getByTestId(SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID)).toHaveTextContent(
+          'Dec 1, 2026'
+        );
+      } finally {
+        process.env.TZ = originalTz;
+      }
+    });
+
+    it('says the allowance is unavailable when the usage fetch fails', () => {
+      mockUsage(undefined, true);
+      renderModal();
+
+      expect(screen.getByTestId(SUBMIT_MODAL_USAGE_ERROR_TEST_ID)).toHaveTextContent(
+        i18n.SUBMIT_MODAL_USAGE_UNAVAILABLE
+      );
+      expect(screen.queryByTestId(SUBMIT_MODAL_USAGE_TEST_ID)).toBeNull();
     });
   });
 

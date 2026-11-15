@@ -72,13 +72,15 @@ export const getTabsDisplayed = ({
         defaultMessage="Table"
       />
     ),
+    // The shared tab runs alert-oriented lookups (data view, rule, entity store) that return
+    // nothing useful for a run record. To be revisited with the tool flyouts.
     content: task ? (
       <TableTab hit={buildDetonationRecord(task)} renderCellActions={cellActionRenderer} />
     ) : (
       <EuiLoadingSpinner size="l" />
     ),
   },
-  // Session tab moves to a Session View tool flyout in Phase F
+  // Kept until a Session View tool flyout replaces it.
   {
     id: 'session',
     'data-test-subj': DETONATION_DETAILS_SESSION_TAB_TEST_ID,

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * contributor license agreements. Licensed under the Elastic License 2.0; you
- * may not use this file except in compliance with the Elastic License 2.0.
- */
-
 /**
  * Detonate prototype — submission modal.
  *
@@ -74,6 +68,7 @@ export const SUBMIT_MODAL_USAGE_TEST_ID = 'detonatePrototypeSubmitUsage';
 export const SUBMIT_MODAL_PRIOR_RUN_TEST_ID = 'detonatePrototypeSubmitPriorRun';
 export const SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID = 'detonatePrototypeSubmitAllowanceExhausted';
 export const SUBMIT_MODAL_HASH_ERROR_TEST_ID = 'detonatePrototypeSubmitHashError';
+export const SUBMIT_MODAL_USAGE_ERROR_TEST_ID = 'detonatePrototypeSubmitUsageError';
 export const SUBMIT_CONFIRM_TEST_ID = 'detonatePrototypeSubmitConfirm';
 
 type SubmitMode = 'hash' | 'file';
@@ -138,9 +133,12 @@ export const SubmitModal = React.memo<Props>(
 
     const submitHash = useSubmitHash();
     const submitFile = useSubmitFile();
-    const active = mode === 'hash' ? submitHash : submitFile;
+    /** The error and spinner follow the mutation that was last submitted, not the visible tab. */
+    const [lastSubmitted, setLastSubmitted] = useState<SubmitMode | undefined>();
+    const active = lastSubmitted === 'file' ? submitFile : lastSubmitted === 'hash' ? submitHash : undefined;
     const usage = useDetonateUsage();
-    // Architecture select deferred until Q-H (service submit contract has no vm_architecture); task read-side lands in B2.
+    // No architecture select: the service's submit contract has no architecture field yet.
+    // The run's architecture is shown read-only in the result.
 
     const tagValues = useMemo(() => tags.map(({ label }) => label), [tags]);
 
@@ -168,6 +166,7 @@ export const SubmitModal = React.memo<Props>(
     const canSubmit = hasSubmitPrivilege && hasSample && !allowanceExhausted;
 
     const doSubmit = useCallback(async () => {
+      setLastSubmitted(mode);
       // Errors are surfaced by the mutation state (the error callout below),
       // but the discarded promise would still be an unhandled rejection.
       const submit = async () => {
@@ -196,6 +195,13 @@ export const SubmitModal = React.memo<Props>(
       }
     }, []);
 
+    // The file picker remounts on a tab switch and no longer shows the old file,
+    // so a stale selection must not keep submit enabled.
+    const onModeChange = useCallback((next: SubmitMode) => {
+      setMode(next);
+      setFile(undefined);
+    }, []);
+
     const onFileChange = useCallback((files: FileList | null) => {
       setFile(files?.[0]);
     }, []);
@@ -211,10 +217,10 @@ export const SubmitModal = React.memo<Props>(
         </EuiModalHeader>
         <EuiModalBody>
           <EuiTabs size="s">
-            <EuiTab isSelected={mode === 'hash'} onClick={() => setMode('hash')}>
+            <EuiTab isSelected={mode === 'hash'} onClick={() => onModeChange('hash')}>
               {i18n.SUBMIT_BY_HASH}
             </EuiTab>
-            <EuiTab isSelected={mode === 'file'} onClick={() => setMode('file')}>
+            <EuiTab isSelected={mode === 'file'} onClick={() => onModeChange('file')}>
               {i18n.SUBMIT_BY_FILE}
             </EuiTab>
           </EuiTabs>
@@ -226,7 +232,13 @@ export const SubmitModal = React.memo<Props>(
                 label={i18n.SAMPLE_HASH_LABEL}
                 helpText={i18n.SAMPLE_HASH_HELP}
                 isInvalid={hashInvalid}
-                error={hashInvalid ? i18n.SUBMIT_MODAL_INVALID_HASH : undefined}
+                error={
+                  hashInvalid ? (
+                    <span data-test-subj={SUBMIT_MODAL_HASH_ERROR_TEST_ID}>
+                      {i18n.SUBMIT_MODAL_INVALID_HASH}
+                    </span>
+                  ) : undefined
+                }
                 fullWidth
               >
                 <EuiFieldText
@@ -287,6 +299,12 @@ export const SubmitModal = React.memo<Props>(
             data-test-subj={SUBMIT_MODAL_LIMITATIONS_TEST_ID}
           />
 
+          {usage.isError && (
+            <EuiText size="s" color="subdued" data-test-subj={SUBMIT_MODAL_USAGE_ERROR_TEST_ID}>
+              {i18n.SUBMIT_MODAL_USAGE_UNAVAILABLE}
+            </EuiText>
+          )}
+
           {usage.data && (
             <EuiText size="s" color="subdued" data-test-subj={SUBMIT_MODAL_USAGE_TEST_ID}>
               {i18n.SUBMIT_MODAL_USAGE({
@@ -303,12 +321,17 @@ export const SubmitModal = React.memo<Props>(
               data-test-subj={SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID}
             >
               {i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED(
-                new Date(usage.data.resetsAt).toLocaleDateString()
+                new Date(usage.data.resetsAt).toLocaleDateString(undefined, {
+                  timeZone: 'UTC',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
               )}
             </EuiText>
           )}
 
-          {active.isError && (
+          {active?.isError && (
             <>
               <EuiSpacer size="m" />
               <KbnDangerCallout
@@ -335,7 +358,7 @@ export const SubmitModal = React.memo<Props>(
           <EuiButton
             fill
             isDisabled={!canSubmit}
-            isLoading={active.isLoading}
+            isLoading={active?.isLoading}
             onClick={() => setIsConfirming(true)}
             data-test-subj={SUBMIT_MODAL_BUTTON_TEST_ID}
           >

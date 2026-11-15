@@ -381,6 +381,11 @@ export const SUBMIT_MODAL_ALLOWANCE_EXHAUSTED = (resetsAt: string) =>
     values: { resetsAt },
   });
 
+export const SUBMIT_MODAL_USAGE_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.usageUnavailable',
+  { defaultMessage: 'Allowance unavailable' }
+);
+
 export const SUBMIT_MODAL_PRIOR_RUN = i18n.translate(
   'xpack.securitySolution.detonatePrototype.submitModal.priorRun',
   { defaultMessage: 'A completed detonation for this hash exists' }

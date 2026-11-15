@@ -382,7 +382,7 @@ describe('<Footer />', () => {
         openTakeAction();
 
         const item = screen.getByTestId(DETONATION_FOOTER_ADD_TO_CASE_TEST_ID);
-        expect(item).toBeDisabled();
+        expect(item).toHaveAttribute('aria-disabled', 'true');
         fireEvent.click(item);
         expect(mockOpenCaseModal).not.toHaveBeenCalled();
       });
@@ -394,7 +394,8 @@ describe('<Footer />', () => {
         renderFooter(makeTask());
         openTakeAction();
 
-        fireEvent.mouseOver(screen.getByTestId(DETONATION_FOOTER_ADD_TO_CASE_TEST_ID));
+        // aria-disabled keeps the item focusable, so keyboard users reach the tooltip.
+        act(() => screen.getByTestId(DETONATION_FOOTER_ADD_TO_CASE_TEST_ID).focus());
         expect(await screen.findByText(i18n.FOOTER_ADD_TO_CASE_NO_INDICATORS)).toBeInTheDocument();
       });
 
@@ -444,7 +445,7 @@ describe('<Footer />', () => {
         openTakeAction();
 
         const item = screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID);
-        expect(item).toBeDisabled();
+        expect(item).toHaveAttribute('aria-disabled', 'true');
         fireEvent.click(item);
         expect(
           screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
@@ -458,7 +459,7 @@ describe('<Footer />', () => {
         openTakeAction();
 
         const item = screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID);
-        expect(item).toBeDisabled();
+        expect(item).toHaveAttribute('aria-disabled', 'true');
         fireEvent.click(item);
         expect(
           screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
@@ -470,7 +471,10 @@ describe('<Footer />', () => {
         renderFooter(makeTask({ sample_hash: undefined }));
         openTakeAction();
 
-        expect(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID)).toBeDisabled();
+        expect(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID)).toHaveAttribute(
+          'aria-disabled',
+          'true'
+        );
       });
 
       it('writes nothing until the confirmation is accepted', () => {
@@ -593,6 +597,27 @@ describe('<Footer />', () => {
         expect(mockAddInfo).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED('Windows'));
         expect(mockAddSuccess).not.toHaveBeenCalled();
         expect(mockAddError).not.toHaveBeenCalled();
+      });
+
+      it('reports an error and closes the confirmation when the write throws before any request', async () => {
+        const error = new Error('no client');
+        jest.mocked(BlocklistsApiClient.getInstance).mockImplementation(() => {
+          throw error;
+        });
+        renderFooter(makeTask());
+        openTakeAction();
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+        await waitFor(() =>
+          expect(mockAddError).toHaveBeenCalledWith(error, { title: i18n.FOOTER_BLOCK_HASH_ERROR })
+        );
+        await waitFor(() =>
+          expect(
+            screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
+          ).not.toBeInTheDocument()
+        );
+        expect(mockAddSuccess).not.toHaveBeenCalled();
       });
 
       it('reports a failed write on every OS with an error toast', async () => {

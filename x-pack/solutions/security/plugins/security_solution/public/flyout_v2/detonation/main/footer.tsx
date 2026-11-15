@@ -292,11 +292,15 @@ export const Footer = memo(({ task }: FooterProps) => {
     setIsBlocking(true);
     try {
       await blockHashOnEveryOs();
+    } catch (error) {
+      addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.FOOTER_BLOCK_HASH_ERROR,
+      });
     } finally {
       setIsBlocking(false);
       setIsBlockConfirmOpen(false);
     }
-  }, [blockHashOnEveryOs]);
+  }, [addError, blockHashOnEveryOs]);
 
   const menuItems = useMemo(() => {
     const items = [];
@@ -307,6 +311,7 @@ export const Footer = memo(({ task }: FooterProps) => {
           icon="casesApp"
           onClick={onAddToCase}
           disabled={!hasIndicators}
+          hasAriaDisabled
           toolTipContent={hasIndicators ? undefined : i18n.FOOTER_ADD_TO_CASE_NO_INDICATORS}
           data-test-subj={DETONATION_FOOTER_ADD_TO_CASE_TEST_ID}
         >
@@ -327,6 +332,7 @@ export const Footer = memo(({ task }: FooterProps) => {
         key="blockHash"
         icon="crossInCircle"
         disabled={Boolean(blockDisabledReason)}
+        hasAriaDisabled
         toolTipContent={blockDisabledReason}
         onClick={onBlockHash}
         data-test-subj={DETONATION_FOOTER_BLOCK_HASH_TEST_ID}

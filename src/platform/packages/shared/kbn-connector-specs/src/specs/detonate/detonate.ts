@@ -371,7 +371,7 @@ export const Detonate: ConnectorSpec = {
   metadata: {
     id: '.detonate',
     displayName: 'Detonate',
-    description: i18n.translate('core.kibanaConnectorSpecs.detonate.metadata.description', {
+    description: i18n.translate('connectorSpecs.detonate.metadata.description', {
       defaultMessage:
         'Submit a file, hash, URL, or commands to a malware detonation sandbox and read the run status, logs, and alerts',
     }),
@@ -397,10 +397,10 @@ export const Detonate: ConnectorSpec = {
       url: UISchemas.url('https://detonate.example.com')
         .describe('Detonation service base URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.detonate.config.url.label', {
+          label: i18n.translate('connectorSpecs.detonate.config.url.label', {
             defaultMessage: 'Service URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.detonate.config.url.helpText', {
+          helpText: i18n.translate('connectorSpecs.detonate.config.url.helpText', {
             defaultMessage:
               'Base URL of the detonation service gateway, without the /v1/detonate path or a trailing slash.',
           }),
@@ -603,7 +603,7 @@ export const Detonate: ConnectorSpec = {
       await get(ctx, 'healthcheck', `${getBaseUrl(ctx)}/healthcheck`);
       return {};
     },
-    description: i18n.translate('core.kibanaConnectorSpecs.detonate.test.description', {
+    description: i18n.translate('connectorSpecs.detonate.test.description', {
       defaultMessage: 'Checks that the detonation service is reachable and accepts the API key',
     }),
     enabled: true,

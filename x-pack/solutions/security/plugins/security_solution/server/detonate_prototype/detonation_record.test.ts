@@ -32,6 +32,7 @@ const maliciousTask = (overrides: Partial<DetonateTask> = {}) =>
     sample_filename: 'sample.bin',
     sample_source: 'malwarebazaar',
     vm_os_family: 'linux',
+    vm_architecture: 'aarch64',
     production_endpoint_alerts_count: 2,
     production_endpoint_alert_groups: [{ alerts_count: 2, event_code: 'malicious_file' }],
     diagnostic_endpoint_alerts_count: 1,
@@ -77,6 +78,7 @@ describe('toDetonationRecord', () => {
       'file.hash.sha256': 'abcdef',
       'file.name': 'sample.bin',
       'detonate.vm.os_family': 'linux',
+      'detonate.vm.architecture': 'aarch64',
       'detonate.alerts.total': 3,
       // Same list the verdict note uses: production and diagnostic codes together.
       'detonate.endpoint_event_codes': ['malicious_file', 'behavior'],

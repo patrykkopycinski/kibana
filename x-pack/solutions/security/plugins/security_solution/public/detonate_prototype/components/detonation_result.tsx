@@ -70,6 +70,9 @@ const details = (task: DetonateTask): EuiDescriptionListProps['listItems'] => {
   if (task.vm_os_family) {
     items.push({ title: 'VM', description: task.vm_os_family });
   }
+  if (task.vm_architecture) {
+    items.push({ title: 'VM architecture', description: task.vm_architecture });
+  }
   if (task.tags.length) {
     items.push({
       title: 'Tags',

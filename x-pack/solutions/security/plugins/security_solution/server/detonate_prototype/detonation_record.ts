@@ -54,6 +54,7 @@ export interface DetonationRecord {
   'file.name'?: string;
   'detonate.sample.source'?: string;
   'detonate.vm.os_family'?: string;
+  'detonate.vm.architecture'?: string;
   'detonate.vm.has_internet': boolean;
   'detonate.alerts.total': number;
   'detonate.alerts.production_endpoint': number;
@@ -154,6 +155,7 @@ export const DETONATION_RECORD_FIELDS: Readonly<
   'file.name': 'keyword',
   'detonate.sample.source': 'keyword',
   'detonate.vm.os_family': 'keyword',
+  'detonate.vm.architecture': 'keyword',
   'detonate.vm.has_internet': 'boolean',
   'detonate.alerts.total': 'long',
   'detonate.alerts.production_endpoint': 'long',
@@ -278,6 +280,7 @@ export const toDetonationRecord = (
     ...(task.sample_filename ? { 'file.name': task.sample_filename } : {}),
     ...(task.sample_source ? { 'detonate.sample.source': task.sample_source } : {}),
     ...(task.vm_os_family ? { 'detonate.vm.os_family': task.vm_os_family } : {}),
+    ...(task.vm_architecture ? { 'detonate.vm.architecture': task.vm_architecture } : {}),
     'detonate.vm.has_internet': task.vm_has_internet === true,
     'detonate.alerts.total': totalDetonationAlerts(task),
     'detonate.alerts.production_endpoint': task.production_endpoint_alerts_count ?? 0,

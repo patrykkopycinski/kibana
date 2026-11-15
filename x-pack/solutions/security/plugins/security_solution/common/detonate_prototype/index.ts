@@ -140,6 +140,10 @@ export type DetonateSampleSource = (typeof DETONATE_SAMPLE_SOURCES)[number];
 export const DETONATE_VM_OS_FAMILIES = ['linux', 'windows', 'darwin'] as const;
 export type DetonateVmOsFamily = (typeof DETONATE_VM_OS_FAMILIES)[number];
 
+/** Read-side only: the service reports the VM architecture on a task but takes no such input on submit. */
+export const DETONATE_VM_ARCHITECTURES = ['x86_64', 'aarch64'] as const;
+export type DetonateVmArchitecture = (typeof DETONATE_VM_ARCHITECTURES)[number];
+
 export const DETONATE_DETECTION_SEVERITIES = ['low', 'medium', 'high'] as const;
 export type DetonateDetectionSeverity = (typeof DETONATE_DETECTION_SEVERITIES)[number];
 
@@ -243,6 +247,7 @@ export interface DetonateTask {
   exec_sample_arguments?: string;
 
   vm_os_family?: DetonateVmOsFamily;
+  vm_architecture?: DetonateVmArchitecture;
   vm_disk_image?: string;
   vm_has_internet: boolean;
   vm_instance_name?: string;

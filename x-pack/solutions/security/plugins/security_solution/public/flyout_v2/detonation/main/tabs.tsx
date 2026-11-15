@@ -23,10 +23,7 @@ import {
   DETONATION_DETAILS_TABLE_TAB_TEST_ID,
 } from './test_ids';
 
-/**
- * The record is rebuilt only when the run changes, so a poll that returns the same
- * run does not hand the shared table a new `hit` on every render.
- */
+/** Built once per task object; the tabs memo and React Query's structural sharing keep it stable across polls. */
 const DetonationTableTab = ({ task }: { task: DetonateTask }) => {
   const hit = useMemo(() => buildDetonationRecord(task), [task]);
   return <TableTab hit={hit} renderCellActions={cellActionRenderer} />;

@@ -418,6 +418,19 @@ describe('SubmitModal', () => {
       expect(screen.queryByTestId(SUBMIT_MODAL_USAGE_TEST_ID)).toBeNull();
     });
 
+    it('keeps submit disabled and the exhausted line when a refetch fails after the allowance was used up', () => {
+      mockUsage(
+        { used: 10, allowance: 10, resetsAt: '2026-12-01T00:00:00.000Z' } as DetonateUsage,
+        true
+      );
+      renderModal({ initialHash: SHA256 });
+
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
+      expect(screen.getByTestId(SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(SUBMIT_MODAL_USAGE_ERROR_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId(SUBMIT_MODAL_USAGE_TEST_ID)).toBeNull();
+    });
+
     it('hides the stale count when a refetch failed but the last data is still held', () => {
       mockUsage(
         { used: 3, allowance: 10, resetsAt: '2026-12-01T00:00:00.000Z' } as DetonateUsage,

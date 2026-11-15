@@ -138,9 +138,11 @@ export const SubmitModal = React.memo<Props>(
     const active =
       lastSubmitted === 'file' ? submitFile : lastSubmitted === 'hash' ? submitHash : undefined;
     const usageQuery = useDetonateUsage();
-    // React Query keeps the last data when a refetch fails. Show the error instead of a
-    // count that may be out of date, so the two lines never appear together.
-    const usageData = usageQuery.isError ? undefined : usageQuery.data;
+    // React Query keeps the last data when a refetch fails. Submit stays blocked and the
+    // exhausted line stays up from that last data, because Kibana does not enforce the
+    // allowance on submit and a failed refetch must not re-enable it. Only the count is
+    // hidden on error, since it may be out of date; the error line shows instead.
+    const usageData = usageQuery.data;
     // No architecture select: the service's submit contract has no architecture field yet.
     // The run's architecture is shown read-only in the result.
 
@@ -316,7 +318,7 @@ export const SubmitModal = React.memo<Props>(
             </EuiText>
           )}
 
-          {usageData && (
+          {usageData && !usageQuery.isError && (
             <EuiText size="s" color="subdued" data-test-subj={SUBMIT_MODAL_USAGE_TEST_ID}>
               {i18n.SUBMIT_MODAL_USAGE({
                 used: usageData.used,

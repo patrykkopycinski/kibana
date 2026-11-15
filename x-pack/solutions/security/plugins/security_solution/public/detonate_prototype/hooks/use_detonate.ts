@@ -108,8 +108,10 @@ export const useDetonationTaskUpdates = (taskId: string | undefined, isComplete:
 
 /**
  * Month-to-date usage against the space's allowance. Cached for a minute:
- * the modal reads it on open, and a stale-by-seconds count is fine — the
- * server still refuses submissions past the allowance.
+ * the modal reads it on open, and a stale-by-seconds count is fine. Kibana
+ * does not enforce the allowance on submit; the modal only reads this to block
+ * the button, and the external service's own daily quota (429) is the only
+ * server-side refusal.
  */
 export const useDetonateUsage = () => {
   const { http } = useKibana().services;

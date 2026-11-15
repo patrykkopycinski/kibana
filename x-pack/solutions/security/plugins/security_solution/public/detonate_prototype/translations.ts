@@ -20,11 +20,6 @@ export const DETONATE_PROTOTYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SUBMIT_PANEL_TITLE = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.submit.title',
-  { defaultMessage: 'Submit a sample' }
-);
-
 export const SAMPLE_HASH_LABEL = i18n.translate(
   'xpack.securitySolution.detonatePrototype.submit.sampleHashLabel',
   { defaultMessage: 'Sample hash' }
@@ -364,3 +359,64 @@ export const NOTIFY_FAILED_TITLE = (sample: string) =>
     defaultMessage: 'Detonation failed: {sample}',
     values: { sample },
   });
+
+export const SUBMIT_MODAL_LIMITATIONS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.limitations',
+  {
+    defaultMessage:
+      'No anti-evasion hardening and no outbound internet. Samples that check for a VM or need a live C2 may show little activity and return an inconclusive verdict.',
+  }
+);
+
+export const SUBMIT_MODAL_USAGE = ({ used, allowance }: { used: number; allowance: number }) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.submitModal.usage', {
+    defaultMessage: '{used} of {allowance} detonations used this month',
+    values: { used, allowance },
+  });
+
+export const SUBMIT_MODAL_ALLOWANCE_EXHAUSTED = (resetsAt: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.submitModal.allowanceExhausted', {
+    defaultMessage:
+      'Monthly allowance used. Submitting is disabled until the allowance resets on {resetsAt}.',
+    values: { resetsAt },
+  });
+
+export const SUBMIT_MODAL_PRIOR_RUN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.priorRun',
+  { defaultMessage: 'A completed detonation for this hash exists' }
+);
+
+export const SUBMIT_MODAL_PRIOR_RUN_VIEW = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.priorRunView',
+  { defaultMessage: 'View' }
+);
+
+export const SUBMIT_MODAL_INVALID_HASH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.invalidHash',
+  { defaultMessage: 'Enter a valid MD5 (32), SHA-1 (40) or SHA-256 (64) hexadecimal hash.' }
+);
+
+export const SUBMIT_SAMPLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.openButton',
+  { defaultMessage: 'Submit sample' }
+);
+
+export const SUBMIT_MODAL_CANCEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.cancel',
+  { defaultMessage: 'Cancel' }
+);
+
+export const SUBMIT_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.title',
+  { defaultMessage: 'Submit a sample' }
+);
+
+export const SUBMIT_MODAL_VIEW_RESULT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.viewResult',
+  { defaultMessage: 'View result' }
+);
+
+export const SUBMIT_MODAL_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.submitModal.success',
+  { defaultMessage: 'Detonation started' }
+);

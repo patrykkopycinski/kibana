@@ -24,12 +24,14 @@ import {
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
+  DETONATE_USAGE_PATH,
   detonateRunDiffPath,
   detonateRunSessionPath,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateHashRequest,
   DetonateSubmitOrigin,
+  DetonateUsage,
   DetonateRunDiffEmpty,
   DetonateRunDiffResult,
   DetonateRunSessionResult,
@@ -54,6 +56,10 @@ export type SubmitHashParams = DetonateHashRequest & { origin?: DetonateSubmitOr
 export const detonateApi = {
   healthcheck: (http: HttpSetup, signal?: AbortSignal) =>
     http.get<{ status: string }>(DETONATE_HEALTHCHECK_PATH, { version: VERSION.version, signal }),
+
+  /** The space's month-to-date usage against its allowance. */
+  getUsage: (http: HttpSetup, signal?: AbortSignal) =>
+    http.get<DetonateUsage>(DETONATE_USAGE_PATH, { version: VERSION.version, signal }),
 
   submitHash: (http: HttpSetup, request: SubmitHashParams, signal?: AbortSignal) =>
     http.post<DetonateTask>(DETONATE_SUBMIT_HASH_PATH, {

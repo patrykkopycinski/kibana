@@ -101,7 +101,6 @@ describe('useFlyoutApi', () => {
     result.current.openIocFlyoutAsChild(iocParams);
     result.current.openDetonationFlyout(detonationParams);
     result.current.openDetonationFlyoutAsChild(detonationParams);
-    result.current.openDetonationSubmitAsChild({ hash: 'abc' });
     result.current.openNetworkFlyout(networkParams);
     result.current.openNetworkFlyoutAsChild(networkParams);
     result.current.openRuleFlyout(ruleParams);
@@ -129,7 +128,6 @@ describe('useFlyoutApi', () => {
     expect(iocApi.openIocFlyoutAsChild).toHaveBeenCalledWith(iocParams);
     expect(detonationApi.openDetonationFlyout).toHaveBeenCalledWith(detonationParams);
     expect(detonationApi.openDetonationFlyoutAsChild).toHaveBeenCalledWith(detonationParams);
-    expect(detonationApi.openDetonationSubmitAsChild).toHaveBeenCalledWith({ hash: 'abc' });
     expect(networkApi.openNetworkFlyout).toHaveBeenCalledWith(networkParams);
     expect(networkApi.openNetworkFlyoutAsChild).toHaveBeenCalledWith(networkParams);
     expect(ruleApi.openRuleFlyout).toHaveBeenCalledWith(ruleParams);

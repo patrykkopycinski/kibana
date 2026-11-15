@@ -92,7 +92,10 @@ jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
 }));
 
-const mockUseDetonateAlertAction = jest.fn().mockReturnValue({ detonateActionItems: [] });
+const mockUseDetonateAlertAction = jest.fn().mockReturnValue({
+  detonateActionItems: [],
+  detonateModal: null,
+});
 jest.mock('../../../../detonate_prototype/hooks/use_detonate_alert_action', () => ({
   useDetonateAlertAction: (...args: unknown[]) => mockUseDetonateAlertAction(...args),
 }));

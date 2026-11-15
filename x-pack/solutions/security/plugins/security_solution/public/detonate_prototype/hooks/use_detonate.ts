@@ -31,6 +31,7 @@ import type {
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
+  DetonateUsage,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
 import type { SubmitFileParams, SubmitHashParams } from '../api/client';
@@ -55,6 +56,7 @@ const updatesKey = (taskId: string) => [DETONATE_QUERY_KEY, 'updates', taskId] a
 const listKey = (query: DetonateListQuery) => [DETONATE_QUERY_KEY, 'tasks', query] as const;
 const sessionKey = (taskId: string) => [DETONATE_QUERY_KEY, 'session', taskId] as const;
 const diffKey = (taskId: string) => [DETONATE_QUERY_KEY, 'diff', taskId] as const;
+const usageKey = [DETONATE_QUERY_KEY, 'usage'] as const;
 
 /** Is the detonation service reachable and configured? */
 export const useDetonateHealthcheck = () => {
@@ -101,6 +103,21 @@ export const useDetonationTaskUpdates = (taskId: string | undefined, isComplete:
     enabled: Boolean(taskId),
     queryFn: ({ signal }) => detonateApi.getTaskUpdates(http, taskId as string, signal),
     refetchInterval: isComplete ? false : POLL_INTERVAL_MS,
+  });
+};
+
+/**
+ * Month-to-date usage against the space's allowance. Cached for a minute:
+ * the modal reads it on open, and a stale-by-seconds count is fine — the
+ * server still refuses submissions past the allowance.
+ */
+export const useDetonateUsage = () => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonateUsage>({
+    queryKey: usageKey,
+    queryFn: ({ signal }) => detonateApi.getUsage(http, signal),
+    staleTime: 60_000,
   });
 };
 

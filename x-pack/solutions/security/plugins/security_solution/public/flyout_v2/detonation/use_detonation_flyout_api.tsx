@@ -8,17 +8,12 @@
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import type { DetonateSubmitOrigin } from '../../../common/detonate_prototype';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
-import {
-  DETONATION_SUBMIT_TITLE,
-  DETONATION_TITLE,
-  formatFlyoutTitle,
-} from '../shared/constants/flyout_titles';
+import { DETONATION_TITLE, formatFlyoutTitle } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
 import {
@@ -31,24 +26,10 @@ import {
 const DetonationDetails = lazy(() =>
   import('./main').then((m) => ({ default: m.DetonationDetails }))
 );
-const DetonationSubmit = lazy(() =>
-  import('./submit').then((m) => ({ default: m.DetonationSubmit }))
-);
 
 export interface OpenDetonationFlyoutParams {
   /** Id of the detonation run to show. */
   taskId: string;
-  /** Which UI trigger opened this flyout, when known. */
-  origin?: FlyoutOrigin;
-}
-
-export interface OpenDetonationSubmitParams {
-  /** Hash to prefill in the submit form. */
-  hash?: string;
-  /** Tags to prefill in the submit form, e.g. the `alert:<id>` link back to an alert. */
-  tags?: string[];
-  /** Origin context to record with the run: the alert, host, user and file path it came from. */
-  submitOrigin?: Omit<DetonateSubmitOrigin, 'source'>;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
 }
@@ -63,18 +44,10 @@ export interface DetonationFlyoutApi {
    * stays on it, e.g. an alert).
    */
   openDetonationFlyoutAsChild: (params: OpenDetonationFlyoutParams) => void;
-  /**
-   * Opens the detonation submit form as a child of the currently open flyout. Once the run was
-   * accepted, the child is replaced by that run's detonation result child.
-   *
-   * Not URL-restorable: no descriptor is written for it (a submit form has no state worth
-   * restoring), so the URL keeps describing the parent flyout until the result child opens.
-   */
-  openDetonationSubmitAsChild: (params?: OpenDetonationSubmitParams) => void;
 }
 
 /**
- * Developer-facing API to open the detonation result flyout and its submit child, in the same
+ * Developer-facing API to open the detonation result flyout, in the same
  * mindset as `useIocFlyoutApi`. Must be used within the Security Solution app shell.
  */
 export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
@@ -148,26 +121,8 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
     [open, getTitle, readRootDescriptor, writeOnOpen, buildOnClose]
   );
 
-  const openDetonationSubmitAsChild = useCallback(
-    ({ hash, tags, submitOrigin, origin }: OpenDetonationSubmitParams = {}) => {
-      open(
-        <DetonationSubmit
-          initialHash={hash}
-          initialTags={tags}
-          initialOrigin={submitOrigin}
-          onSubmitted={(task) => openDetonationFlyoutAsChild({ taskId: task.id, origin })}
-        />,
-        FLYOUT_SESSION_KIND.INHERIT,
-        buildFlyoutNavTitle(DETONATION_SUBMIT_TITLE),
-        undefined,
-        origin
-      );
-    },
-    [open, openDetonationFlyoutAsChild]
-  );
-
   return useMemo(
-    () => ({ openDetonationFlyout, openDetonationFlyoutAsChild, openDetonationSubmitAsChild }),
-    [openDetonationFlyout, openDetonationFlyoutAsChild, openDetonationSubmitAsChild]
+    () => ({ openDetonationFlyout, openDetonationFlyoutAsChild }),
+    [openDetonationFlyout, openDetonationFlyoutAsChild]
   );
 };

@@ -8,9 +8,10 @@
 /**
  * Detonate prototype — list page.
  *
- * The submission form and the list of past runs live on the same page: the
- * analyst's next action after submitting is to watch the run, and splitting
- * them would make them navigate to find out what they just started.
+ * The submission modal opens from the page header and the list of past runs
+ * sits right below: the analyst's next action after submitting is to watch the
+ * run, and splitting them would make them navigate to find out what they just
+ * started.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -18,6 +19,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,19 +32,24 @@ import {
 import type { EuiBasicTableColumn, Criteria } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { totalDetonationAlerts } from '../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonateHealthcheck, useDetonationTasks } from '../hooks/use_detonate';
 import { DetonationStatusBadge } from '../components/detonation_status_badge';
 import { DetonateVerdictBadge } from '../components/verdict_badge';
-import { SubmitForm } from '../components/submit_form';
+import { SubmitModal } from '../components/submit_modal';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { useKibana } from '../../common/lib/kibana';
 import * as i18n from '../translations';
 
 export const LIST_PAGE_TEST_ID = 'detonatePrototypeListPage';
 export const RUNS_TABLE_TEST_ID = 'detonatePrototypeRunsTable';
 export const SERVICE_UNAVAILABLE_TEST_ID = 'detonatePrototypeServiceUnavailable';
+export const SUBMIT_SAMPLE_BUTTON_TEST_ID = 'detonatePrototypeSubmitSample';
+export const SUBMIT_TOAST_TEST_ID = 'detonatePrototypeSubmitToast';
+export const SUBMIT_TOAST_VIEW_RESULT_TEST_ID = 'detonatePrototypeSubmitToastViewResult';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -57,6 +64,8 @@ const serviceErrorMessage = (error: unknown): string => {
 
 export const DetonateListPage = React.memo(() => {
   const { openDetonationFlyout } = useFlyoutApi();
+  const { services } = useKibana();
+  const toasts = services.notifications.toasts;
   const { taskId: deepLinkedTaskId } = useParams<{ taskId?: string }>();
   const { search: locationSearch } = useLocation();
   const [search, setSearch] = useState('');
@@ -86,6 +95,41 @@ export const DetonateListPage = React.memo(() => {
   const goToTask = useCallback(
     (taskId: string) => openDetonationFlyout({ taskId }),
     [openDetonationFlyout]
+  );
+
+  /** An alert hand-off arrives with a hash or tags in the URL: open the modal pre-filled. */
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(
+    Boolean(prefill.hash) || prefill.tags.length > 0
+  );
+  const openSubmitModal = useCallback(() => setIsSubmitModalOpen(true), []);
+  const closeSubmitModal = useCallback(() => setIsSubmitModalOpen(false), []);
+
+  const onSubmitted = useCallback(
+    (task: DetonateTask) => {
+      setIsSubmitModalOpen(false);
+      toasts.addSuccess({
+        title: i18n.SUBMIT_MODAL_SUCCESS,
+        text: toMountPoint(
+          <EuiLink
+            onClick={() => goToTask(task.id)}
+            data-test-subj={SUBMIT_TOAST_VIEW_RESULT_TEST_ID}
+          >
+            {i18n.SUBMIT_MODAL_VIEW_RESULT}
+          </EuiLink>,
+          services
+        ),
+        'data-test-subj': SUBMIT_TOAST_TEST_ID,
+      });
+    },
+    [goToTask, services, toasts]
+  );
+
+  const onViewPriorRun = useCallback(
+    (taskId: string) => {
+      setIsSubmitModalOpen(false);
+      goToTask(taskId);
+    },
+    [goToTask]
   );
 
   /** `/detonate_prototype/:taskId` stays a shareable link: it opens the run's flyout over the list. */
@@ -162,6 +206,16 @@ export const DetonateListPage = React.memo(() => {
       <EuiPageHeader
         pageTitle={i18n.DETONATE_PROTOTYPE}
         description={i18n.DETONATE_PROTOTYPE_DESCRIPTION}
+        rightSideItems={[
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={openSubmitModal}
+            data-test-subj={SUBMIT_SAMPLE_BUTTON_TEST_ID}
+          >
+            {i18n.SUBMIT_SAMPLE_BUTTON}
+          </EuiButton>,
+        ]}
       />
       <EuiSpacer size="l" />
 
@@ -177,14 +231,17 @@ export const DetonateListPage = React.memo(() => {
         </>
       )}
 
-      <SubmitForm
-        key={locationSearch}
-        initialHash={prefill.hash}
-        initialTags={prefill.tags}
-        source="detonate_page"
-        onSubmitted={(task) => goToTask(task.id)}
-      />
-      <EuiSpacer size="l" />
+      {isSubmitModalOpen && (
+        <SubmitModal
+          key={locationSearch}
+          initialHash={prefill.hash}
+          initialTags={prefill.tags}
+          source="detonate_page"
+          onClose={closeSubmitModal}
+          onSubmitted={onSubmitted}
+          onViewTask={onViewPriorRun}
+        />
+      )}
 
       <EuiPanel hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">

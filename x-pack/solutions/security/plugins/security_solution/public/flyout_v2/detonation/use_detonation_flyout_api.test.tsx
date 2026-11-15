@@ -41,10 +41,6 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
 }));
 
-interface SubmitElement {
-  props: { onSubmitted: (task: { id: string }) => void };
-}
-
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
 
@@ -114,45 +110,6 @@ describe('useDetonationFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
     });
-  });
-
-  it('openDetonationSubmitAsChild opens an inheriting child without touching the URL', () => {
-    const replace = jest.fn();
-    useHistoryMock.mockReturnValue({ location: { search: '' }, replace });
-    const { result } = renderHook(() => useDetonationFlyoutApi());
-    result.current.openDetonationSubmitAsChild({ hash: 'abc', tags: ['alert:1'] });
-
-    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-      'FLYOUT_CONTENT',
-      expect.objectContaining({
-        size: 's',
-        session: 'inherit',
-        historyKey: documentFlyoutHistoryKey,
-        onClose: undefined,
-      })
-    );
-    expect(replace).not.toHaveBeenCalled();
-  });
-
-  it('replaces the submit child with the result child once the run was submitted', () => {
-    const replace = jest.fn();
-    useHistoryMock.mockReturnValue({ location: { search: '' }, replace });
-    const { result } = renderHook(() => useDetonationFlyoutApi());
-    result.current.openDetonationSubmitAsChild({ hash: 'abc' });
-
-    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0] as {
-      children: { props: { children: { props: { children: SubmitElement } } } };
-    };
-    children.props.children.props.children.props.onSubmitted({ id: 'new-task' });
-
-    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(2);
-    expect(mockOpenSystemFlyout.mock.calls[1][1]).toEqual(
-      expect.objectContaining({ session: 'inherit' })
-    );
-    const { search } = replace.mock.calls[0][0];
-    expect(decode(new URLSearchParams(search).get('flyoutV2') as string)).toEqual([
-      { kind: 'detonation', taskId: 'new-task', asChild: true },
-    ]);
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

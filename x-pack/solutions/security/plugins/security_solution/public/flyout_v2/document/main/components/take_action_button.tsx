@@ -274,7 +274,7 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const { detonateActionItems } = useDetonateAlertAction({
+    const { detonateActionItems, detonateModal } = useDetonateAlertAction({
       hit,
       closePopover: closePopoverHandler,
     });
@@ -400,6 +400,7 @@ export const TakeActionButton = memo(
             onConfirm={handleExceptionConfirm}
           />
         )}
+        {detonateModal}
       </>
     );
   }

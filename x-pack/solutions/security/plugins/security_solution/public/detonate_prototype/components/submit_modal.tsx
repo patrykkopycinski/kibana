@@ -1,0 +1,366 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * contributor license agreements. Licensed under the Elastic License 2.0; you
+ * may not use this file except in compliance with the Elastic License 2.0.
+ */
+
+/**
+ * Detonate prototype — submission modal.
+ *
+ * One component, two surfaces: the Detonate page (button in the header) and
+ * the alert flyout (Take action → "Detonate file"). The hash input is
+ * validated client-side so an obviously-wrong digest never spends a confirm
+ * cycle, and the allowance line is the analyst's only cost signal before the
+ * confirm.
+ */
+
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiComboBox,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiFilePicker,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSelect,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+
+import { DETONATE_VM_OS_FAMILIES, isAllowanceExhausted } from '../../../common/detonate_prototype';
+import type {
+  DetonateSubmitOrigin,
+  DetonateSubmitSource,
+  DetonateTask,
+  DetonateVmOsFamily,
+} from '../../../common/detonate_prototype';
+import {
+  useCompletedDetonationByHash,
+  useDetonateUsage,
+  useSubmitFile,
+  useSubmitHash,
+} from '../hooks/use_detonate';
+import { useCanSubmitDetonation } from '../hooks/use_can_submit_detonation';
+import * as i18n from '../translations';
+
+export const SUBMIT_MODAL_TEST_ID = 'detonatePrototypeSubmitModal';
+export const SUBMIT_MODAL_HASH_INPUT_TEST_ID = 'detonatePrototypeSampleHash';
+export const SUBMIT_MODAL_FILE_INPUT_TEST_ID = 'detonatePrototypeSampleFile';
+export const SUBMIT_MODAL_BUTTON_TEST_ID = 'detonatePrototypeSubmitButton';
+export const SUBMIT_MODAL_ERROR_TEST_ID = 'detonatePrototypeSubmitError';
+export const SUBMIT_MODAL_READ_ONLY_TEST_ID = 'detonatePrototypeSubmitReadOnly';
+export const SUBMIT_MODAL_LIMITATIONS_TEST_ID = 'detonatePrototypeSubmitLimitations';
+export const SUBMIT_MODAL_USAGE_TEST_ID = 'detonatePrototypeSubmitUsage';
+export const SUBMIT_MODAL_PRIOR_RUN_TEST_ID = 'detonatePrototypeSubmitPriorRun';
+export const SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID = 'detonatePrototypeSubmitAllowanceExhausted';
+export const SUBMIT_MODAL_HASH_ERROR_TEST_ID = 'detonatePrototypeSubmitHashError';
+export const SUBMIT_CONFIRM_TEST_ID = 'detonatePrototypeSubmitConfirm';
+
+type SubmitMode = 'hash' | 'file';
+
+/**
+ * The service decides the OS when the request omits it, and its default is
+ * the right answer more often than ours would be. An empty value means "do
+ * not send the field".
+ */
+const UNSET = '' as const;
+
+const osOptions = [
+  { value: UNSET, text: i18n.SERVICE_DEFAULT },
+  ...DETONATE_VM_OS_FAMILIES.map((value) => ({ value, text: value })),
+];
+
+/** MD5 (32), SHA-1 (40) or SHA-256 (64) hexadecimal characters. */
+const HASH_PATTERN = /^(?:[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$/i;
+
+export const isValidSampleHash = (hash: string): boolean => HASH_PATTERN.test(hash.trim());
+
+const isSha256 = (hash: string): boolean => /^[0-9a-f]{64}$/i.test(hash.trim());
+
+const errorMessage = (error: unknown): string => {
+  // Kibana's http client puts the server's `{ message }` on `body`.
+  const body = (error as { body?: { message?: string } } | undefined)?.body;
+  if (body?.message) {
+    return body.message;
+  }
+  return error instanceof Error ? error.message : String(error);
+};
+
+interface Props {
+  /** Pre-filled by the alert action so the analyst does not retype a hash. */
+  initialHash?: string;
+  /** Pre-filled by the alert action so the run is findable afterwards. */
+  initialTags?: string[];
+  /** Which surface the modal was opened from; recorded with the run. */
+  source: DetonateSubmitSource;
+  /** Context the surface already knows (alert, host, user, path); recorded with the run. */
+  initialOrigin?: Omit<DetonateSubmitOrigin, 'source'>;
+  onClose: () => void;
+  /** Called with the created run once the submission was accepted. */
+  onSubmitted: (task: DetonateTask) => void;
+  /** Opens an existing run (the prior-run View link). */
+  onViewTask: (taskId: string) => void;
+}
+
+export const SubmitModal = React.memo<Props>(
+  ({ initialHash, initialTags, source, initialOrigin, onClose, onSubmitted, onViewTask }) => {
+    const modalTitleId = useGeneratedHtmlId();
+    const confirmTitleId = useGeneratedHtmlId();
+    const [mode, setMode] = useState<SubmitMode>('hash');
+    const [hash, setHash] = useState(initialHash ?? '');
+    const [file, setFile] = useState<File | undefined>();
+    const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>(
+      (initialTags ?? []).map((label) => ({ label }))
+    );
+    const [osFamily, setOsFamily] = useState<DetonateVmOsFamily | typeof UNSET>(UNSET);
+    /** The button arms the run; the confirm modal is what actually submits. */
+    const [isConfirming, setIsConfirming] = useState(false);
+
+    const submitHash = useSubmitHash();
+    const submitFile = useSubmitFile();
+    const active = mode === 'hash' ? submitHash : submitFile;
+    const usage = useDetonateUsage();
+    // Architecture select deferred until Q-H (service submit contract has no vm_architecture); task read-side lands in B2.
+
+    const tagValues = useMemo(() => tags.map(({ label }) => label), [tags]);
+
+    const options = useMemo(
+      () => ({
+        ...(tagValues.length ? { tags: tagValues } : {}),
+        ...(osFamily ? { vm_os_family: osFamily } : {}),
+        origin: { ...initialOrigin, source },
+      }),
+      [tagValues, osFamily, source, initialOrigin]
+    );
+
+    const hasSubmitPrivilege = useCanSubmitDetonation();
+    const allowanceExhausted = usage.data ? isAllowanceExhausted(usage.data) : false;
+
+    // Run docs store only the SHA-256, so only that digest can have a prior run.
+    const priorRunLookup = useMemo(
+      () => (mode === 'hash' && isSha256(hash) ? hash.trim().toLowerCase() : undefined),
+      [mode, hash]
+    );
+    const { completedRun } = useCompletedDetonationByHash(priorRunLookup);
+
+    const hashInvalid = mode === 'hash' && hash.trim().length > 0 && !isValidSampleHash(hash);
+    const hasSample = mode === 'hash' ? isValidSampleHash(hash) : file !== undefined;
+    const canSubmit = hasSubmitPrivilege && hasSample && !allowanceExhausted;
+
+    const doSubmit = useCallback(async () => {
+      // Errors are surfaced by the mutation state (the error callout below),
+      // but the discarded promise would still be an unhandled rejection.
+      const submit = async () => {
+        if (mode === 'hash') {
+          const task = await submitHash.mutateAsync({ sample_hash: hash.trim(), ...options });
+          onSubmitted(task);
+          return;
+        }
+        if (file) {
+          const task = await submitFile.mutateAsync({ file, ...options });
+          onSubmitted(task);
+        }
+      };
+      await submit().catch(() => undefined);
+    }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
+
+    const onConfirm = useCallback(() => {
+      setIsConfirming(false);
+      void doSubmit();
+    }, [doSubmit]);
+
+    const onCreateTag = useCallback((label: string) => {
+      const trimmed = label.trim();
+      if (trimmed) {
+        setTags((current) => [...current, { label: trimmed }]);
+      }
+    }, []);
+
+    const onFileChange = useCallback((files: FileList | null) => {
+      setFile(files?.[0]);
+    }, []);
+
+    return (
+      <EuiModal
+        onClose={onClose}
+        aria-labelledby={modalTitleId}
+        data-test-subj={SUBMIT_MODAL_TEST_ID}
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle id={modalTitleId}>{i18n.SUBMIT_MODAL_TITLE}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiTabs size="s">
+            <EuiTab isSelected={mode === 'hash'} onClick={() => setMode('hash')}>
+              {i18n.SUBMIT_BY_HASH}
+            </EuiTab>
+            <EuiTab isSelected={mode === 'file'} onClick={() => setMode('file')}>
+              {i18n.SUBMIT_BY_FILE}
+            </EuiTab>
+          </EuiTabs>
+          <EuiSpacer size="m" />
+
+          <EuiForm component="form" onSubmit={(event) => event.preventDefault()}>
+            {mode === 'hash' ? (
+              <EuiFormRow
+                label={i18n.SAMPLE_HASH_LABEL}
+                helpText={i18n.SAMPLE_HASH_HELP}
+                isInvalid={hashInvalid}
+                error={hashInvalid ? i18n.SUBMIT_MODAL_INVALID_HASH : undefined}
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  value={hash}
+                  onChange={(event) => setHash(event.target.value)}
+                  isInvalid={hashInvalid}
+                  data-test-subj={SUBMIT_MODAL_HASH_INPUT_TEST_ID}
+                />
+              </EuiFormRow>
+            ) : (
+              <EuiFormRow label={i18n.SAMPLE_FILE_LABEL} fullWidth>
+                <EuiFilePicker
+                  fullWidth
+                  initialPromptText={i18n.SAMPLE_FILE_PROMPT}
+                  onChange={onFileChange}
+                  data-test-subj={SUBMIT_MODAL_FILE_INPUT_TEST_ID}
+                />
+              </EuiFormRow>
+            )}
+
+            {completedRun && (
+              <EuiText size="s" data-test-subj={SUBMIT_MODAL_PRIOR_RUN_TEST_ID}>
+                {i18n.SUBMIT_MODAL_PRIOR_RUN}{' '}
+                <EuiLink onClick={() => onViewTask(completedRun.id)}>
+                  {i18n.SUBMIT_MODAL_PRIOR_RUN_VIEW}
+                </EuiLink>
+              </EuiText>
+            )}
+
+            <EuiFormRow label={i18n.TAGS_LABEL} helpText={i18n.TAGS_HELP} fullWidth>
+              <EuiComboBox
+                fullWidth
+                noSuggestions
+                selectedOptions={tags}
+                onChange={setTags}
+                onCreateOption={onCreateTag}
+                data-test-subj="detonatePrototypeTags"
+              />
+            </EuiFormRow>
+
+            <EuiFormRow label={i18n.OS_FAMILY_LABEL} fullWidth>
+              <EuiSelect
+                fullWidth
+                options={osOptions}
+                value={osFamily}
+                onChange={(event) =>
+                  setOsFamily(event.target.value as DetonateVmOsFamily | typeof UNSET)
+                }
+                data-test-subj="detonatePrototypeOsFamily"
+              />
+            </EuiFormRow>
+          </EuiForm>
+
+          <EuiSpacer size="m" />
+          <KbnWarningCallout
+            title={i18n.SUBMIT_MODAL_LIMITATIONS}
+            data-test-subj={SUBMIT_MODAL_LIMITATIONS_TEST_ID}
+          />
+
+          {usage.data && (
+            <EuiText size="s" color="subdued" data-test-subj={SUBMIT_MODAL_USAGE_TEST_ID}>
+              {i18n.SUBMIT_MODAL_USAGE({
+                used: usage.data.used,
+                allowance: usage.data.allowance,
+              })}
+            </EuiText>
+          )}
+
+          {allowanceExhausted && usage.data && (
+            <EuiText
+              size="s"
+              color="danger"
+              data-test-subj={SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID}
+            >
+              {i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED(
+                new Date(usage.data.resetsAt).toLocaleDateString()
+              )}
+            </EuiText>
+          )}
+
+          {active.isError && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnDangerCallout
+                announceOnMount
+                title={errorMessage(active.error)}
+                data-test-subj={SUBMIT_MODAL_ERROR_TEST_ID}
+              />
+            </>
+          )}
+
+          {!hasSubmitPrivilege && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnInfoCallout
+                title={i18n.SUBMIT_READ_ONLY_TITLE}
+                text={i18n.SUBMIT_READ_ONLY_DESCRIPTION}
+                data-test-subj={SUBMIT_MODAL_READ_ONLY_TEST_ID}
+              />
+            </>
+          )}
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onClose}>{i18n.SUBMIT_MODAL_CANCEL}</EuiButtonEmpty>
+          <EuiButton
+            fill
+            isDisabled={!canSubmit}
+            isLoading={active.isLoading}
+            onClick={() => setIsConfirming(true)}
+            data-test-subj={SUBMIT_MODAL_BUTTON_TEST_ID}
+          >
+            {i18n.DETONATE_BUTTON}
+          </EuiButton>
+        </EuiModalFooter>
+
+        {isConfirming && (
+          <EuiConfirmModal
+            aria-labelledby={confirmTitleId}
+            title={i18n.SUBMIT_CONFIRM_TITLE}
+            titleProps={{ id: confirmTitleId }}
+            onCancel={() => setIsConfirming(false)}
+            onConfirm={onConfirm}
+            cancelButtonText={i18n.SUBMIT_CONFIRM_CANCEL}
+            confirmButtonText={i18n.DETONATE_BUTTON}
+            buttonColor="primary"
+            defaultFocusedButton="confirm"
+            data-test-subj={SUBMIT_CONFIRM_TEST_ID}
+          >
+            <p>{i18n.SUBMIT_CONFIRM_BODY}</p>
+          </EuiConfirmModal>
+        )}
+      </EuiModal>
+    );
+  }
+);
+SubmitModal.displayName = 'SubmitModal';

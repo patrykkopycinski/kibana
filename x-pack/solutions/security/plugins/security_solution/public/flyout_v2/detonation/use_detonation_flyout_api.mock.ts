@@ -15,5 +15,4 @@ import type { DetonationFlyoutApi } from './use_detonation_flyout_api';
 export const createDetonationFlyoutApiMock = (): jest.Mocked<DetonationFlyoutApi> => ({
   openDetonationFlyout: jest.fn(),
   openDetonationFlyoutAsChild: jest.fn(),
-  openDetonationSubmitAsChild: jest.fn(),
 });

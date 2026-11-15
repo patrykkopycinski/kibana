@@ -6,5 +6,6 @@
  */
 
 export const FLYOUT_STORAGE_KEYS = {
+  OVERVIEW_TAB_EXPANDED_SECTIONS: 'securitySolution.detonationFlyout.overviewSectionExpanded',
   SELECTED_TAB: 'securitySolution.detonationFlyout.rightPanel.selectedTabs',
 };

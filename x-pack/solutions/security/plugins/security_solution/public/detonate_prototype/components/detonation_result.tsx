@@ -8,27 +8,25 @@
 /**
  * Detonate prototype — the content of one run.
  *
- * Shows a run while it is happening and the alerts it produced once it is
- * over. Completion comes from the shared predicate, so the poll stops on
- * failure as well as on success — the case a naive "wait for the last worker"
- * poller hangs on forever. Rendered inside the detonation result flyout.
+ * The Overview tab of the detonation result flyout: one collapsible section
+ * per block, in the order the epic lists them. Completion comes from the
+ * shared predicate, so polling stops on failure as well as on success — the
+ * case a naive "wait for the last worker" poller hangs on forever.
  */
 
 import React from 'react';
 import {
   EuiBadge,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingLogo,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
-import { FormattedRelative } from '@kbn/i18n-react';
 
 import {
   detonationWasBenign,
@@ -37,59 +35,36 @@ import {
   isDetonationFailed,
   runHistoryIncluding,
 } from '../../../common/detonate_prototype';
-import type { DetonateTask } from '../../../common/detonate_prototype';
-import { useDetonationTask, useCompletedDetonationHistoryByHash } from '../hooks/use_detonate';
-import { WorkerTimeline } from './worker_timeline';
+import {
+  useCompletedDetonationHistoryByHash,
+  useDetonationRecord,
+  useDetonationTask,
+} from '../hooks/use_detonate';
 import { RunHistory } from './run_history';
 import { BehaviorDiffCard } from './behavior_diff_card';
-import { DetectionAlertGroups, EndpointAlertGroups } from './alert_groups';
+import { AiSummarySection } from '../../flyout_v2/detonation/main/components/ai_summary_section';
+import { HighlightedFieldsSection } from '../../flyout_v2/detonation/main/components/highlighted_fields_section';
+import { IndicatorsSection } from '../../flyout_v2/detonation/main/components/indicators_section';
+import { ProgressSection } from '../../flyout_v2/detonation/main/components/progress_section';
+import { RunDetailsSection } from '../../flyout_v2/detonation/main/components/run_details_section';
+import { SandboxAlertsSection } from '../../flyout_v2/detonation/main/components/sandbox_alerts_section';
+import {
+  BehaviorSection,
+  NetworkSection,
+} from '../../flyout_v2/detonation/main/components/telemetry_unavailable_sections';
+import {
+  DETONATION_OVERVIEW_FORK_ONLY_TEST_ID,
+  DETONATION_OVERVIEW_QUEUED_NOTE_TEST_ID,
+  DETONATION_OVERVIEW_TEST_ID,
+} from '../../flyout_v2/detonation/main/test_ids';
+import { getDetonationIndicators } from '../../flyout_v2/detonation/main/utils/detonation_indicators';
+import { isDetonationQueued } from '../../flyout_v2/detonation/main/utils/detonation_queued';
 import * as i18n from '../translations';
 
 export const DETAIL_PAGE_TEST_ID = 'detonatePrototypeDetailPage';
 export const DETAIL_FAILURE_TEST_ID = 'detonatePrototypeDetailFailure';
 export const DETAIL_BENIGN_TEST_ID = 'detonatePrototypeDetailBenign';
 export const DETAIL_COVERAGE_GAP_TEST_ID = 'detonatePrototypeDetailCoverageGap';
-
-const details = (task: DetonateTask): EuiDescriptionListProps['listItems'] => {
-  const items: EuiDescriptionListProps['listItems'] = [
-    { title: 'Task ID', description: task.id },
-    {
-      title: 'Submitted',
-      description: <FormattedRelative value={new Date(task.created_at)} />,
-    },
-    { title: 'Agent version', description: task.agent_version },
-    { title: 'Telemetry cluster', description: task.telemetry_cluster_version },
-  ];
-
-  if (task.sample_filename) {
-    items.push({ title: 'Sample filename', description: task.sample_filename });
-  }
-  if (task.sample_source) {
-    items.push({ title: 'Sample source', description: task.sample_source });
-  }
-  if (task.vm_os_family) {
-    items.push({ title: 'VM', description: task.vm_os_family });
-  }
-  if (task.vm_architecture) {
-    items.push({ title: 'VM architecture', description: task.vm_architecture });
-  }
-  if (task.tags.length) {
-    items.push({
-      title: 'Tags',
-      description: (
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {task.tags.map((tag) => (
-            <EuiFlexItem grow={false} key={tag}>
-              <EuiBadge color="hollow">{tag}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
-    });
-  }
-
-  return items;
-};
 
 interface DetonationResultProps {
   taskId: string;
@@ -101,6 +76,11 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
   // The run history needs the hash, which the task carries — the hook is
   // disabled until the task resolves and re-fetches once it does.
   const historyByHash = useCompletedDetonationHistoryByHash(task?.sample_hash);
+
+  const complete = task ? isDetonationComplete(task) : false;
+  // Indicators come from alerts, which are final only when the run is, so the
+  // record is read once the run is over.
+  const { data: record, isLoading: recordLoading } = useDetonationRecord(task?.id, complete);
 
   if (isLoading && !task) {
     return (
@@ -120,9 +100,11 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
   }
 
   const failed = isDetonationFailed(task);
-  const complete = isDetonationComplete(task);
+  const queued = isDetonationQueued(task);
   const benign = detonationWasBenign(task);
   const coverageGap = complete && !failed ? diagnosticOnlyEventCodes(task) : [];
+  const indicators = getDetonationIndicators(record);
+  const pending = !complete || recordLoading;
 
   // The viewed run counts toward the streak: three benign runs in a row includes
   // the one on screen.
@@ -142,110 +124,101 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
         </>
       )}
 
-      {benign && (
-        <>
+      <div data-test-subj={DETONATION_OVERVIEW_TEST_ID}>
+        <AiSummarySection task={task} />
+        <EuiHorizontalRule margin="m" />
+        <ProgressSection task={task} />
+        <EuiHorizontalRule margin="m" />
+
+        {queued ? (
           <KbnInfoCallout
-            announceOnMount
-            title={i18n.BENIGN_RUN_TITLE}
-            text={i18n.BENIGN_RUN_BODY}
-            data-test-subj={DETAIL_BENIGN_TEST_ID}
+            title={i18n.OVERVIEW_QUEUED_NOTE_TITLE}
+            text={i18n.OVERVIEW_QUEUED_NOTE_BODY}
+            data-test-subj={DETONATION_OVERVIEW_QUEUED_NOTE_TEST_ID}
           />
-          <EuiSpacer size="l" />
-        </>
-      )}
+        ) : (
+          <>
+            <HighlightedFieldsSection task={task} indicators={indicators} pending={pending} />
+            <EuiHorizontalRule margin="m" />
+            <SandboxAlertsSection task={task} />
+            <EuiHorizontalRule margin="m" />
+            {/* Visualizations (Phase F) and Response (Phase G, blocked on the
+                rule id) go here; neither is built yet, so neither is rendered. */}
+            <BehaviorSection />
+            <EuiHorizontalRule margin="m" />
+            <NetworkSection />
+            <EuiHorizontalRule margin="m" />
+            <IndicatorsSection taskId={task.id} indicators={indicators} pending={pending} />
+            <EuiHorizontalRule margin="m" />
+            <RunDetailsSection task={task} record={record} />
+          </>
+        )}
+      </div>
 
-      {/* The gap panel only appears when there is a gap: a run production
-          covered fully needs no "potential coverage gap" hedging, and a benign
-          run already has its own callout above. */}
-      {coverageGap.length > 0 && (
-        <>
-          <EuiPanel hasBorder data-test-subj={DETAIL_COVERAGE_GAP_TEST_ID}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h3>{i18n.COVERAGE_GAP_TITLE}</h3>
-                </EuiTitle>
+      {/* fork-only, dropped in the upstream cut: none of these blocks is in the
+          epic's Overview list. */}
+      {!queued && (
+        <div data-test-subj={DETONATION_OVERVIEW_FORK_ONLY_TEST_ID}>
+          <EuiSpacer size="l" />
+          {benign && (
+            <>
+              <KbnInfoCallout
+                announceOnMount
+                title={i18n.BENIGN_RUN_TITLE}
+                text={i18n.BENIGN_RUN_BODY}
+                data-test-subj={DETAIL_BENIGN_TEST_ID}
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          {/* The gap panel only appears when there is a gap: a run production
+              covered fully needs no "potential coverage gap" hedging, and a
+              benign run already has its own callout above. */}
+          {coverageGap.length > 0 && (
+            <>
+              <EuiPanel hasBorder data-test-subj={DETAIL_COVERAGE_GAP_TEST_ID}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h3>{i18n.COVERAGE_GAP_TITLE}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning">{coverageGap.length}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  {i18n.COVERAGE_GAP_BODY}
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                  {coverageGap.map((code) => (
+                    <EuiFlexItem grow={false} key={code}>
+                      <EuiBadge color="hollow">{code}</EuiBadge>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiPanel>
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          {/* Every completed run of the same sample, this one included. Only
+              after completion, when the streak the history cites can exist. */}
+          {complete && task.sample_hash && (
+            <EuiFlexGroup gutterSize="l" responsive={false}>
+              <EuiFlexItem>
+                <RunHistory runs={historyRuns} hash={task.sample_hash} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">{coverageGap.length}</EuiBadge>
+              <EuiFlexItem>
+                <BehaviorDiffCard taskId={task.id} />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              {i18n.COVERAGE_GAP_BODY}
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {coverageGap.map((code) => (
-                <EuiFlexItem grow={false} key={code}>
-                  <EuiBadge color="hollow">{code}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiPanel>
-          <EuiSpacer size="l" />
-        </>
+          )}
+        </div>
       )}
-
-      <EuiPanel hasBorder>
-        <EuiDescriptionList
-          type="column"
-          columnWidths={[1, 3]}
-          listItems={details(task)}
-          data-test-subj="detonatePrototypeDetails"
-        />
-      </EuiPanel>
-
-      {/* Progress lives beside the details while the run is in flight. */}
-      {!complete && (
-        <>
-          <EuiSpacer size="l" />
-          <WorkerTimeline taskId={task.id} isComplete={complete} />
-        </>
-      )}
-      <EuiSpacer size="l" />
-
-      {/* F7: every completed run of the same sample, this one included.
-          Rendered for every run — a single-run history is honest too — but
-          only after completion, when the streak the proposal cites can
-          actually exist. */}
-      {complete && task.sample_hash && (
-        <EuiFlexGroup gutterSize="l" responsive={false}>
-          <EuiFlexItem>
-            <RunHistory runs={historyRuns} hash={task.sample_hash} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <BehaviorDiffCard taskId={task.id} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          <EndpointAlertGroups
-            title={i18n.PRODUCTION_ENDPOINT_ALERTS}
-            total={task.production_endpoint_alerts_count}
-            groups={task.production_endpoint_alert_groups}
-            testSubj="detonatePrototypeProductionEndpointAlerts"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DetectionAlertGroups
-            title={i18n.PRODUCTION_DETECTION_ALERTS}
-            total={task.production_detection_alerts_count}
-            groups={task.production_detection_alert_groups}
-            testSubj="detonatePrototypeProductionDetectionAlerts"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EndpointAlertGroups
-            title={i18n.DIAGNOSTIC_ENDPOINT_ALERTS}
-            total={task.diagnostic_endpoint_alerts_count}
-            groups={task.diagnostic_endpoint_alert_groups}
-            testSubj="detonatePrototypeDiagnosticEndpointAlerts"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </div>
   );
 });

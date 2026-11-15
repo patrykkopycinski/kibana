@@ -6,14 +6,13 @@
  */
 
 import type {
-  DetonateConfidence,
   DetonateDecisionState,
   DetonateExtractedIocs,
   DetonateSubmitOrigin,
   DetonateTask,
   DetonateTaskUpdate,
   DetonateVerdictName,
-  DetonationRunStatus,
+  DetonationRecord,
 } from '../../common/detonate_prototype';
 import {
   deriveDetonateVerdict,
@@ -26,64 +25,8 @@ import {
   totalDetonationAlerts,
 } from '../../common/detonate_prototype';
 
-/**
- * A run as one flat, ECS-style document, the source for the result flyout's
- * Table and JSON tabs. Every field is listed explicitly and nothing is spread
- * from the task, so a field the service adds later cannot reach a reader.
- */
-export interface DetonationRecord {
-  '@timestamp': string;
-  'detonate.doc_kind': 'run';
-  'event.start': string;
-  'event.end'?: string;
-  /** Nanoseconds, as in ECS. */
-  'event.duration'?: number;
-  'detonate.task_id': string;
-  'detonate.alert_id'?: string;
-  'detonate.state': DetonationRunStatus;
-  'detonate.verdict'?: DetonateVerdictName;
-  'detonate.confidence'?: DetonateConfidence;
-  'detonate.evidence'?: string;
-  'detonate.step.number': number;
-  'detonate.step.of': number;
-  'detonate.step.label': string;
-  'detonate.step.worker': string;
-  'detonate.step.status': string;
-  'detonate.step.details'?: string;
-  'file.hash.sha256'?: string;
-  'file.name'?: string;
-  'detonate.sample.source'?: string;
-  'detonate.vm.os_family'?: string;
-  'detonate.vm.architecture'?: string;
-  'detonate.vm.has_internet': boolean;
-  'detonate.alerts.total': number;
-  'detonate.alerts.production_endpoint': number;
-  'detonate.alerts.diagnostic_endpoint': number;
-  'detonate.alerts.production_detection': number;
-  'detonate.endpoint_event_codes': string[];
-  'detonate.detection_rule_names': string[];
-  /** Behaviour only the diagnostic side saw: candidate detections for an analyst. */
-  'detonate.detections_to_review': string[];
-  /** Absent when no alert read succeeded, so "none found" and "not read" stay distinct. */
-  'detonate.iocs.domains'?: string[];
-  'detonate.iocs.ips'?: string[];
-  'detonate.iocs.file_hashes'?: string[];
-  /** The space the run belongs to; the results index is per space. */
-  'detonate.space_id'?: string;
-  'detonate.source'?: DetonateSubmitOrigin['source'];
-  'detonate.submitter'?: string;
-  /** The `alert:` tag's alert plus any the caller named. */
-  'detonate.origin.alert_ids'?: string[];
-  'host.name'?: string;
-  'user.name'?: string;
-  'file.path'?: string;
-  'file.size'?: number;
-  'file.mime_type'?: string;
-  'detonate.workflow.execution_id'?: string;
-  'detonate.conversation_id'?: string;
-  /** The run's tags without its space tags. */
-  tags?: string[];
-}
+// The shape moved to common so the browser can read the record route's body.
+export type { DetonationRecord };
 
 /**
  * What a sweep decided about one alert, keyed by the alert's id. It reuses the

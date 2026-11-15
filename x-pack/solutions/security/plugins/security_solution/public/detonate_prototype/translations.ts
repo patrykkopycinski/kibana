@@ -460,3 +460,288 @@ export const META_CONFIDENCE_LOW = i18n.translate(
 );
 
 export const META_EMPTY = '—';
+
+export const OVERVIEW_AI_SUMMARY_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.aiSummaryTitle',
+  { defaultMessage: 'AI summary' }
+);
+
+export const OVERVIEW_AI_SUMMARY_NO_VERDICT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.aiSummaryNoVerdict',
+  { defaultMessage: 'No verdict yet' }
+);
+
+export const OVERVIEW_AI_SUMMARY_LINE = ({
+  verdict,
+  confidence,
+  evidence,
+}: {
+  verdict: string;
+  confidence: string;
+  evidence: string;
+}): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.aiSummaryLine', {
+    defaultMessage: '{verdict} · {confidence}. {evidence}',
+    values: { verdict, confidence, evidence },
+  });
+
+export const OVERVIEW_PROGRESS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.progressTitle',
+  { defaultMessage: 'Detonation progress' }
+);
+
+export const OVERVIEW_PROGRESS_WAITING = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.progressWaiting',
+  { defaultMessage: 'Waiting for a VM…' }
+);
+
+export const OVERVIEW_PROGRESS_DURATION = ({ duration }: { duration: string }): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.progressDuration', {
+    defaultMessage: 'Took {duration}',
+    values: { duration },
+  });
+
+export const OVERVIEW_SANDBOX_AGENT_ID = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.sandboxAgentId',
+  { defaultMessage: 'Sandbox agent ID' }
+);
+
+export const OVERVIEW_QUEUED_NOTE_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.queuedNoteTitle',
+  { defaultMessage: 'Waiting for a VM' }
+);
+
+export const OVERVIEW_QUEUED_NOTE_BODY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.queuedNoteBody',
+  {
+    defaultMessage:
+      'The run has not reached a sandbox VM yet. The remaining sections appear once it starts.',
+  }
+);
+
+export const OVERVIEW_HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.highlightedFieldsTitle',
+  { defaultMessage: 'Highlighted fields' }
+);
+
+export const OVERVIEW_FIELD_SHA256 = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldSha256',
+  { defaultMessage: 'SHA-256' }
+);
+
+export const OVERVIEW_FIELD_FILE_NAME = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldFileName',
+  { defaultMessage: 'File name' }
+);
+
+export const OVERVIEW_FIELD_OS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldOs',
+  { defaultMessage: 'Operating system' }
+);
+
+export const OVERVIEW_FIELD_ARCHITECTURE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldArchitecture',
+  { defaultMessage: 'Architecture' }
+);
+
+export const OVERVIEW_FIELD_INTERNET = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldInternet',
+  { defaultMessage: 'Internet access' }
+);
+
+export const OVERVIEW_INTERNET_ON = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.internetOn',
+  { defaultMessage: 'Enabled' }
+);
+
+export const OVERVIEW_INTERNET_OFF = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.internetOff',
+  { defaultMessage: 'Disabled' }
+);
+
+export const OVERVIEW_FIELD_NETWORK_INDICATORS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldNetworkIndicators',
+  { defaultMessage: 'Network indicators' }
+);
+
+export const OVERVIEW_FIELD_FILE_INDICATORS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.fieldFileIndicators',
+  { defaultMessage: 'File indicators' }
+);
+
+export const OVERVIEW_MORE = ({ count }: { count: number }): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.overview.more', {
+    defaultMessage: '+{count} more',
+    values: { count },
+  });
+
+export const OVERVIEW_NONE_FOUND = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.noneFound',
+  { defaultMessage: 'None found' }
+);
+
+export const OVERVIEW_NOT_READ = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.notRead',
+  { defaultMessage: 'Not read' }
+);
+
+export const OVERVIEW_PENDING_UNTIL_COMPLETE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.pendingUntilComplete',
+  { defaultMessage: 'Available when the run completes' }
+);
+
+export const OVERVIEW_SANDBOX_ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.sandboxAlertsTitle',
+  { defaultMessage: 'Sandbox alerts' }
+);
+
+export const OVERVIEW_SANDBOX_ALERTS_EMPTY_RUNNING = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.sandboxAlertsEmptyRunning',
+  { defaultMessage: 'No alerts yet. They appear here as the sandbox raises them.' }
+);
+
+export const OVERVIEW_SANDBOX_ALERTS_EMPTY_COMPLETE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.sandboxAlertsEmptyComplete',
+  { defaultMessage: 'The sandbox raised no alerts for this run.' }
+);
+
+export const OVERVIEW_BEHAVIOR_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.behaviorTitle',
+  { defaultMessage: 'Behavior' }
+);
+
+export const OVERVIEW_NETWORK_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.networkTitle',
+  { defaultMessage: 'Network' }
+);
+
+export const OVERVIEW_TELEMETRY_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.telemetryUnavailable',
+  {
+    defaultMessage:
+      'Not available yet. Sandbox endpoint telemetry is not collected in this cluster, so there is nothing to summarize here.',
+  }
+);
+
+export const OVERVIEW_INDICATORS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsTitle',
+  { defaultMessage: 'Indicators' }
+);
+
+export const OVERVIEW_INDICATORS_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsEmpty',
+  { defaultMessage: "The run's alerts were read and held no indicators." }
+);
+
+export const OVERVIEW_INDICATORS_NOT_READ = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsNotRead',
+  { defaultMessage: 'Indicators were not read: no alert for this run could be read.' }
+);
+
+export const OVERVIEW_INDICATORS_PENDING = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsPending',
+  { defaultMessage: "Indicators are read from the run's alerts once the run completes." }
+);
+
+export const OVERVIEW_INDICATOR_TYPE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorType',
+  { defaultMessage: 'Type' }
+);
+
+export const OVERVIEW_INDICATOR_VALUE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorValue',
+  { defaultMessage: 'Value' }
+);
+
+export const OVERVIEW_INDICATOR_TYPE_DOMAIN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorTypeDomain',
+  { defaultMessage: 'Domain' }
+);
+
+export const OVERVIEW_INDICATOR_TYPE_IP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorTypeIp',
+  { defaultMessage: 'IP address' }
+);
+
+export const OVERVIEW_INDICATOR_TYPE_FILE_HASH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorTypeFileHash',
+  { defaultMessage: 'File hash' }
+);
+
+export const OVERVIEW_INDICATORS_ADD_TO_CASE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsAddToCase',
+  { defaultMessage: 'Add all to case' }
+);
+
+export const OVERVIEW_INDICATORS_EXPORT_STIX = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsExportStix',
+  { defaultMessage: 'Export STIX' }
+);
+
+export const OVERVIEW_INDICATORS_CREATE_RULE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsCreateRule',
+  { defaultMessage: 'Create indicator match rule' }
+);
+
+export const OVERVIEW_INDICATORS_CREATE_RULE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.indicatorsCreateRuleTooltip',
+  {
+    defaultMessage:
+      'Not available yet. A rule needs its threat mapping and indicator index drafted and approved first.',
+  }
+);
+
+export const OVERVIEW_RUN_DETAILS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.runDetailsTitle',
+  { defaultMessage: 'Run details' }
+);
+
+export const OVERVIEW_DETAIL_TASK_ID = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailTaskId',
+  { defaultMessage: 'Task ID' }
+);
+
+export const OVERVIEW_DETAIL_ENVIRONMENT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailEnvironment',
+  { defaultMessage: 'Environment' }
+);
+
+export const OVERVIEW_DETAIL_INTERNET_ON = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailInternetOn',
+  { defaultMessage: 'internet on' }
+);
+
+export const OVERVIEW_DETAIL_INTERNET_OFF = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailInternetOff',
+  { defaultMessage: 'no internet' }
+);
+
+export const OVERVIEW_DETAIL_AGENT_VERSION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailAgentVersion',
+  { defaultMessage: 'Agent version' }
+);
+
+export const OVERVIEW_DETAIL_TELEMETRY_CLUSTER = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailTelemetryCluster',
+  { defaultMessage: 'Telemetry cluster' }
+);
+
+export const OVERVIEW_DETAIL_SOURCE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailSource',
+  { defaultMessage: 'Source' }
+);
+
+export const OVERVIEW_DETAIL_SUBMITTER = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailSubmitter',
+  { defaultMessage: 'Submitter' }
+);
+
+export const OVERVIEW_DETAIL_SUBMITTED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailSubmitted',
+  { defaultMessage: 'Submitted' }
+);
+
+export const OVERVIEW_DETAIL_TAGS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailTags',
+  { defaultMessage: 'Tags' }
+);

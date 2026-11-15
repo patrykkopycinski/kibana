@@ -17,7 +17,7 @@ import {
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { DetonateConfidence, DetonateTask } from '../../../../common/detonate_prototype';
+import type { DetonateTask } from '../../../../common/detonate_prototype';
 import {
   deriveDetonateVerdict,
   detonationConfidence,
@@ -30,6 +30,7 @@ import { useDetonationTaskUpdates } from '../../../detonate_prototype/hooks/use_
 import * as i18n from '../../../detonate_prototype/translations';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { CONFIDENCE_LABEL } from './utils/detonation_labels';
 import type { DetonationPanelPaths, DetonationPanelTabType } from './tabs';
 import {
   DETONATION_DETAILS_META_ALERTS_TEST_ID,
@@ -40,12 +41,6 @@ import {
   DETONATION_DETAILS_TITLE_TEST_ID,
 } from './test_ids';
 import { formatDetonationDuration, getDetonationDurationMs } from './utils/detonation_duration';
-
-const CONFIDENCE_LABEL: Record<DetonateConfidence, string> = {
-  high: i18n.META_CONFIDENCE_HIGH,
-  medium: i18n.META_CONFIDENCE_MEDIUM,
-  low: i18n.META_CONFIDENCE_LOW,
-};
 
 interface MetaCardProps {
   title: string;

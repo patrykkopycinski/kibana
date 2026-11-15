@@ -32,6 +32,7 @@ import type {
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
   DetonateUsage,
+  DetonationRecord,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
 import type { SubmitFileParams, SubmitHashParams } from '../api/client';
@@ -54,6 +55,7 @@ export interface DetonateListQuery {
 const taskKey = (taskId: string) => [DETONATE_QUERY_KEY, 'task', taskId] as const;
 const updatesKey = (taskId: string) => [DETONATE_QUERY_KEY, 'updates', taskId] as const;
 const listKey = (query: DetonateListQuery) => [DETONATE_QUERY_KEY, 'tasks', query] as const;
+const recordKey = (taskId: string) => [DETONATE_QUERY_KEY, 'record', taskId] as const;
 const sessionKey = (taskId: string) => [DETONATE_QUERY_KEY, 'session', taskId] as const;
 const diffKey = (taskId: string) => [DETONATE_QUERY_KEY, 'diff', taskId] as const;
 const usageKey = [DETONATE_QUERY_KEY, 'usage'] as const;
@@ -103,6 +105,22 @@ export const useDetonationTaskUpdates = (taskId: string | undefined, isComplete:
     enabled: Boolean(taskId),
     queryFn: ({ signal }) => detonateApi.getTaskUpdates(http, taskId as string, signal),
     refetchInterval: isComplete ? false : POLL_INTERVAL_MS,
+  });
+};
+
+/**
+ * The run as one flat record, read once the run is over. The route re-reads
+ * the run's alerts and upserts the stored record on every call, so it is not
+ * polled: indicators come from alerts, which are final only when the run is.
+ */
+export const useDetonationRecord = (taskId: string | undefined, isComplete: boolean) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonationRecord>({
+    queryKey: recordKey(taskId ?? ''),
+    enabled: Boolean(taskId) && isComplete,
+    queryFn: ({ signal }) => detonateApi.getRunRecord(http, taskId as string, signal),
+    staleTime: 60_000,
   });
 };
 

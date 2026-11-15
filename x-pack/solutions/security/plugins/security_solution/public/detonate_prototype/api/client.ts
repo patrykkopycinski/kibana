@@ -26,6 +26,7 @@ import {
   DETONATE_TASKS_PATH,
   DETONATE_USAGE_PATH,
   detonateRunDiffPath,
+  detonateRunRecordPath,
   detonateRunSessionPath,
 } from '../../../common/detonate_prototype';
 import type {
@@ -38,6 +39,7 @@ import type {
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
+  DetonationRecord,
 } from '../../../common/detonate_prototype';
 
 /** Every prototype route is registered at version 1. */
@@ -135,6 +137,16 @@ export const detonateApi = {
    */
   getRunSession: (http: HttpSetup, taskId: string, signal?: AbortSignal) =>
     http.get<DetonateRunSessionResult>(detonateRunSessionPath(taskId), {
+      version: VERSION.version,
+      signal,
+    }),
+
+  /**
+   * The run as one flat record, including the indicators read off its alerts.
+   * The indicator arrays are absent when no alert read succeeded.
+   */
+  getRunRecord: (http: HttpSetup, taskId: string, signal?: AbortSignal) =>
+    http.get<DetonationRecord>(detonateRunRecordPath(taskId), {
       version: VERSION.version,
       signal,
     }),

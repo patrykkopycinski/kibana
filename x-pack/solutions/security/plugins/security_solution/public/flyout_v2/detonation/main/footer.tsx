@@ -74,11 +74,12 @@ const BLOCKLIST_OSES = Object.keys(BLOCKLIST_OS_LABELS) as BlocklistOs[];
 const MAX_CHAT_INDICATORS = 100;
 
 const isConflictError = (error: unknown): boolean => {
+  // The lists route answers through buildSiemResponse, whose body is snake_case.
   const { body, response } = (error ?? {}) as {
-    body?: { statusCode?: number };
+    body?: { status_code?: number };
     response?: { status?: number };
   };
-  return body?.statusCode === 409 || response?.status === 409;
+  return response?.status === 409 || body?.status_code === 409;
 };
 
 export interface FooterProps {
@@ -274,6 +275,9 @@ export const Footer = memo(({ task }: FooterProps) => {
       });
     } else if (failedOses.length > 0) {
       addWarning(i18n.FOOTER_BLOCK_HASH_PARTIAL(names(failedOses)));
+      if (alreadyBlocked.length > 0) {
+        addInfo(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED(names(alreadyBlocked)));
+      }
     } else {
       if (created.length > 0) {
         addSuccess(i18n.FOOTER_BLOCK_HASH_SUCCESS);

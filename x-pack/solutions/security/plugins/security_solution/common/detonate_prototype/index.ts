@@ -297,7 +297,10 @@ export interface DetonateTaskUpdate {
 /** Longest execution wait the connector accepts; the server's connector client imports it. */
 export const DETONATE_MAX_EXEC_WAIT_SECS = 900;
 
-/** Execution wait the detonation service applies to a submit that omits `exec_wait_secs`. */
+/**
+ * Execution wait the detonation service applies to a submit that omits `exec_wait_secs`. Mirrors
+ * the service default, `DEFAULT_EXEC_WAIT_SECS` in the simulator's `task_store.ts`.
+ */
 export const DETONATE_DEFAULT_EXEC_WAIT_SECS = 60;
 
 /** Fields every submit-* request carries. */

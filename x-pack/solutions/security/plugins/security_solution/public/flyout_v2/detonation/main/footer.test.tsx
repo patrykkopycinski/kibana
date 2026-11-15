@@ -508,8 +508,22 @@ describe('<Footer />', () => {
         expect(mockAddError).not.toHaveBeenCalled();
       });
 
-      it('reports that the hash is already blocked when the entries exist', async () => {
-        mockCreateBlocklist.mockRejectedValue({ body: { statusCode: 409 } });
+      it.each([
+        [
+          'the status of the response and the body',
+          {
+            name: 'HttpFetchError',
+            response: { status: 409 },
+            body: {
+              message: `exception list item id: "detonate-block-${SHA256}-windows" already exists`,
+              status_code: 409,
+            },
+          },
+        ],
+        ['only the status of the response', { response: { status: 409 } }],
+        ['only the status_code of the body', { body: { status_code: 409 } }],
+      ])('reports that the hash is already blocked on %s', async (_name, conflict) => {
+        mockCreateBlocklist.mockRejectedValue(conflict);
         renderFooter(makeTask());
         openTakeAction();
         fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
@@ -523,6 +537,24 @@ describe('<Footer />', () => {
         expect(mockAddSuccess).not.toHaveBeenCalled();
         expect(mockAddError).not.toHaveBeenCalled();
         expect(mockAddWarning).not.toHaveBeenCalled();
+      });
+
+      it('also says which OS was already blocked when another write fails', async () => {
+        mockCreateBlocklist
+          .mockRejectedValueOnce({ response: { status: 409 } })
+          .mockRejectedValueOnce(new Error('boom'))
+          .mockResolvedValueOnce({});
+        renderFooter(makeTask());
+        openTakeAction();
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+        await waitFor(() =>
+          expect(mockAddWarning).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_PARTIAL('Linux'))
+        );
+        expect(mockAddInfo).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED('Windows'));
+        expect(mockAddSuccess).not.toHaveBeenCalled();
+        expect(mockAddError).not.toHaveBeenCalled();
       });
 
       it('reports a failed write on every OS with an error toast', async () => {

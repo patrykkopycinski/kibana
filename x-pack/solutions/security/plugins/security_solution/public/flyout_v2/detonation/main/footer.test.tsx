@@ -439,9 +439,28 @@ describe('<Footer />', () => {
     });
 
     describe('block hash', () => {
-      it('is disabled, with the reason, when the user cannot write the blocklist', () => {
-        setup({ canWriteBlocklist: false });
-        renderFooter(makeTask());
+      it.each<[string, Parameters<typeof setup>[0], DetonateTask, string]>([
+        [
+          'the user cannot write the blocklist',
+          { canWriteBlocklist: false },
+          makeTask(),
+          i18n.FOOTER_BLOCK_HASH_NO_PRIVILEGE,
+        ],
+        [
+          'the user lacks the global artifact privilege',
+          { canManageGlobalArtifacts: false },
+          makeTask(),
+          i18n.FOOTER_BLOCK_HASH_NO_GLOBAL_PRIVILEGE,
+        ],
+        [
+          'the run has no hash',
+          {},
+          makeTask({ sample_hash: undefined }),
+          i18n.FOOTER_BLOCK_HASH_NO_HASH,
+        ],
+      ])('is disabled, with the reason, when %s', async (_label, options, task, expected) => {
+        setup(options);
+        renderFooter(task);
         openTakeAction();
 
         const item = screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID);
@@ -451,30 +470,9 @@ describe('<Footer />', () => {
           screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
         ).not.toBeInTheDocument();
         expect(mockCreateBlocklist).not.toHaveBeenCalled();
-      });
 
-      it('is disabled when the user lacks the global artifact privilege', () => {
-        setup({ canManageGlobalArtifacts: false });
-        renderFooter(makeTask());
-        openTakeAction();
-
-        const item = screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID);
-        expect(item).toHaveAttribute('aria-disabled', 'true');
-        fireEvent.click(item);
-        expect(
-          screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
-        ).not.toBeInTheDocument();
-        expect(mockCreateBlocklist).not.toHaveBeenCalled();
-      });
-
-      it('is disabled when the run has no hash', () => {
-        renderFooter(makeTask({ sample_hash: undefined }));
-        openTakeAction();
-
-        expect(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID)).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        act(() => item.focus());
+        expect(await screen.findByText(expected)).toBeInTheDocument();
       });
 
       it('writes nothing until the confirmation is accepted', () => {

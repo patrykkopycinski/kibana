@@ -196,7 +196,12 @@ export const SubmitModal = React.memo<Props>(
 
     const hashInvalid = mode === 'hash' && hash.trim().length > 0 && !isValidSampleHash(hash);
     const hasSample = mode === 'hash' ? isValidSampleHash(hash) : file !== undefined;
-    const canSubmit = hasSubmitPrivilege && hasSample && !allowanceExhausted;
+    const execWaitInvalid =
+      execWaitSecs !== undefined &&
+      (!Number.isInteger(execWaitSecs) ||
+        execWaitSecs < 0 ||
+        execWaitSecs > DETONATE_MAX_EXEC_WAIT_SECS);
+    const canSubmit = hasSubmitPrivilege && hasSample && !allowanceExhausted && !execWaitInvalid;
 
     const doSubmit = useCallback(async () => {
       setLastSubmitted(mode);
@@ -334,6 +339,8 @@ export const SubmitModal = React.memo<Props>(
             <EuiFormRow
               label={i18n.EXEC_WAIT_LABEL}
               helpText={i18n.EXEC_WAIT_HELP(DETONATE_MAX_EXEC_WAIT_SECS)}
+              isInvalid={execWaitInvalid}
+              error={i18n.EXEC_WAIT_INVALID(DETONATE_MAX_EXEC_WAIT_SECS)}
               fullWidth
             >
               <EuiFieldNumber
@@ -341,6 +348,7 @@ export const SubmitModal = React.memo<Props>(
                 min={0}
                 max={DETONATE_MAX_EXEC_WAIT_SECS}
                 step={1}
+                isInvalid={execWaitInvalid}
                 value={execWaitSecs ?? ''}
                 placeholder={i18n.SERVICE_DEFAULT}
                 onChange={(event) => {

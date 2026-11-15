@@ -21,13 +21,16 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  DETONATE_DEFAULT_EXEC_WAIT_SECS,
   DETONATE_MAX_EXEC_WAIT_SECS,
+  DETONATE_WORKER_LABELS,
   SPACE_TAG_PREFIX,
   deriveDetonateVerdict,
   isDetonationComplete,
   isDetonationFailed,
 } from '../../../../common/detonate_prototype';
-import type { DetonateTask, DetonateVmOsFamily } from '../../../../common/detonate_prototype';
+import type { DetonateTask } from '../../../../common/detonate_prototype';
+import type { ConditionEntry } from '../../../../common/endpoint/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { useCanAttachToCase } from '../../../cases/attachments/hooks/use_can_attach_to_case';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -58,11 +61,24 @@ import {
   DETONATION_FOOTER_TEST_ID,
 } from './test_ids';
 
-/** The blocklist artifact is compiled per OS; the sandbox's `darwin` is the artifact's `macos`. */
-const BLOCKLIST_OS_BY_VM_OS: Readonly<Record<DetonateVmOsFamily, 'linux' | 'windows' | 'macos'>> = {
-  linux: 'linux',
-  windows: 'windows',
-  darwin: 'macos',
+/** The blocklist artifact is compiled per OS, and a sha256 is valid on every one of them. */
+const BLOCKLIST_OS_LABELS = {
+  windows: 'Windows',
+  linux: 'Linux',
+  macos: 'macOS',
+} as const;
+type BlocklistOs = keyof typeof BLOCKLIST_OS_LABELS;
+const BLOCKLIST_OSES = Object.keys(BLOCKLIST_OS_LABELS) as BlocklistOs[];
+
+/** The most indicator rows the assistant gets, so a noisy run cannot flood its context. */
+const MAX_CHAT_INDICATORS = 100;
+
+const isConflictError = (error: unknown): boolean => {
+  const { body, response } = (error ?? {}) as {
+    body?: { statusCode?: number };
+    response?: { status?: number };
+  };
+  return body?.statusCode === 409 || response?.status === 409;
 };
 
 export interface FooterProps {
@@ -83,12 +99,14 @@ export interface FooterProps {
  */
 export const Footer = memo(({ task }: FooterProps) => {
   const { http, cases } = useKibana().services;
-  const { addSuccess, addError } = useAppToasts();
+  const { addSuccess, addError, addInfo, addWarning } = useAppToasts();
   const { getAppUrl } = useAppUrl();
   const { openDetonationFlyout } = useFlyoutApi();
   const canAttachToCase = useCanAttachToCase();
   const { endpointPrivileges } = useUserPrivileges();
   const canWriteBlocklist = Boolean(endpointPrivileges?.canWriteBlocklist);
+  // The entry is tagged `policy:all`, a global artifact the server gates separately.
+  const canManageGlobalArtifacts = Boolean(endpointPrivileges?.canManageGlobalArtifacts);
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const taskId = task.id;
@@ -123,7 +141,9 @@ export const Footer = memo(({ task }: FooterProps) => {
           diagnostic_endpoint: task.diagnostic_endpoint_alerts_count ?? 0,
           production_detection: task.production_detection_alerts_count ?? 0,
         },
-        indicators: indicators.rows,
+        indicators_total: indicators.rows.length,
+        indicators_truncated: indicators.rows.length > MAX_CHAT_INDICATORS,
+        indicators: indicators.rows.slice(0, MAX_CHAT_INDICATORS),
       }),
     [taskId, task, conclusion, indicators.rows]
   );
@@ -140,9 +160,14 @@ export const Footer = memo(({ task }: FooterProps) => {
     () => task.tags.filter((tag) => !tag.startsWith(SPACE_TAG_PREFIX)),
     [task.tags]
   );
+  // Older run records can lack the field even though the type says it is always set.
+  const currentExecWaitSecs = task.exec_wait_secs as number | undefined;
   const rerunExecWaitSecs = needsLongerTimeout
-    ? Math.min(task.exec_wait_secs * 2, DETONATE_MAX_EXEC_WAIT_SECS)
-    : task.exec_wait_secs;
+    ? Math.min(
+        Math.max((currentExecWaitSecs ?? 0) * 2, DETONATE_DEFAULT_EXEC_WAIT_SECS),
+        DETONATE_MAX_EXEC_WAIT_SECS
+      )
+    : currentExecWaitSecs;
   const closeRerun = useCallback(() => setIsRerunOpen(false), []);
   const openRun = useCallback(
     (id: string) => {
@@ -175,18 +200,24 @@ export const Footer = memo(({ task }: FooterProps) => {
     closePopover();
     const params = new URLSearchParams();
     params.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam([{ kind: 'detonation', taskId }]));
-    const path = getAppUrl({
+    const url = getAppUrl({
       deepLinkId: SecurityPageName.detonatePrototype,
       path: `?${params.toString()}`,
+      absolute: true,
     });
-    copyToClipboard(`${window.location.origin}${path}`);
-    addSuccess(i18n.FOOTER_SHARE_LINK_COPIED);
-  }, [addSuccess, closePopover, getAppUrl, taskId]);
+    if (copyToClipboard(url)) {
+      addSuccess(i18n.FOOTER_SHARE_LINK_COPIED);
+    } else {
+      addWarning(i18n.FOOTER_SHARE_LINK_COPY_FAILED);
+    }
+  }, [addSuccess, addWarning, closePopover, getAppUrl, taskId]);
 
-  // Block hash: needs the blocklist write privilege and an explicit confirmation.
+  // Block hash: needs both blocklist privileges and an explicit confirmation.
   const hash = task.sample_hash ?? '';
   const blockDisabledReason = !canWriteBlocklist
     ? i18n.FOOTER_BLOCK_HASH_NO_PRIVILEGE
+    : !canManageGlobalArtifacts
+    ? i18n.FOOTER_BLOCK_HASH_NO_GLOBAL_PRIVILEGE
     : !hash
     ? i18n.FOOTER_BLOCK_HASH_NO_HASH
     : undefined;
@@ -197,35 +228,63 @@ export const Footer = memo(({ task }: FooterProps) => {
   const closeBlockConfirm = useCallback(() => setIsBlockConfirmOpen(false), []);
   const confirmBlockHash = useCallback(async () => {
     setIsBlocking(true);
-    try {
-      const item = {
-        description: i18n.FOOTER_BLOCK_HASH_DESCRIPTION(taskId),
-        entries: [
-          {
-            field: 'file.hash.*',
-            operator: 'included',
-            type: 'match_any',
-            value: [hash],
-          },
-        ],
-        list_id: 'endpoint_blocklists',
-        name: i18n.FOOTER_BLOCK_HASH_NAME(hash),
-        namespace_type: 'agnostic',
-        os_types: [BLOCKLIST_OS_BY_VM_OS[task.vm_os_family ?? 'windows']],
-        tags: ['policy:all'],
-        type: 'simple',
-      } as unknown as CreateExceptionListItemSchema;
-      await BlocklistsApiClient.getInstance(http).create(item);
-      addSuccess(i18n.FOOTER_BLOCK_HASH_SUCCESS);
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), {
+    const client = BlocklistsApiClient.getInstance(http);
+    const conditionEntries: ConditionEntry[] = [
+      { field: 'file.hash.*', operator: 'included', type: 'match_any', value: [hash] },
+    ];
+    // One entry per OS; a fixed `item_id` makes a repeat block a conflict rather than a duplicate.
+    const results = await Promise.allSettled(
+      BLOCKLIST_OSES.map((os) => {
+        const item: CreateExceptionListItemSchema = {
+          description: i18n.FOOTER_BLOCK_HASH_DESCRIPTION(taskId),
+          entries: conditionEntries as CreateExceptionListItemSchema['entries'],
+          item_id: `detonate-block-${hash}-${os}`,
+          list_id: 'endpoint_blocklists',
+          name: i18n.FOOTER_BLOCK_HASH_NAME(hash),
+          namespace_type: 'agnostic',
+          os_types: [os],
+          tags: ['policy:all'],
+          type: 'simple',
+        };
+        return client.create(item);
+      })
+    );
+
+    const created: BlocklistOs[] = [];
+    const alreadyBlocked: BlocklistOs[] = [];
+    const failedOses: BlocklistOs[] = [];
+    let firstError: unknown;
+    results.forEach((result, index) => {
+      const os = BLOCKLIST_OSES[index];
+      if (result.status === 'fulfilled') {
+        created.push(os);
+      } else if (isConflictError(result.reason)) {
+        alreadyBlocked.push(os);
+      } else {
+        failedOses.push(os);
+        firstError = firstError ?? result.reason;
+      }
+    });
+    const names = (oses: BlocklistOs[]) => oses.map((os) => BLOCKLIST_OS_LABELS[os]).join(', ');
+
+    if (failedOses.length > 0 && created.length + alreadyBlocked.length === 0) {
+      addError(firstError instanceof Error ? firstError : new Error(String(firstError)), {
         title: i18n.FOOTER_BLOCK_HASH_ERROR,
+        toastMessage: i18n.FOOTER_BLOCK_HASH_PARTIAL(names(failedOses)),
       });
-    } finally {
-      setIsBlocking(false);
-      setIsBlockConfirmOpen(false);
+    } else if (failedOses.length > 0) {
+      addWarning(i18n.FOOTER_BLOCK_HASH_PARTIAL(names(failedOses)));
+    } else {
+      if (created.length > 0) {
+        addSuccess(i18n.FOOTER_BLOCK_HASH_SUCCESS);
+      }
+      if (alreadyBlocked.length > 0) {
+        addInfo(i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED(names(alreadyBlocked)));
+      }
     }
-  }, [addError, addSuccess, hash, http, task.vm_os_family, taskId]);
+    setIsBlocking(false);
+    setIsBlockConfirmOpen(false);
+  }, [addError, addInfo, addSuccess, addWarning, hash, http, taskId]);
 
   const menuItems = useMemo(() => {
     const items = [];
@@ -287,7 +346,9 @@ export const Footer = memo(({ task }: FooterProps) => {
           <EuiFlexItem data-test-subj={DETONATION_FOOTER_FAILED_NOTE_TEST_ID}>
             <EuiText size="s" color="danger">
               {task.last_worker_status_details ||
-                i18n.FOOTER_FAILED_NOTE_FALLBACK(task.last_worker_name)}
+                i18n.FOOTER_FAILED_NOTE_FALLBACK(
+                  DETONATE_WORKER_LABELS[task.last_worker_name] ?? task.last_worker_name
+                )}
             </EuiText>
           </EuiFlexItem>
         )}

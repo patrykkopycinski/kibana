@@ -27,7 +27,7 @@ import type {
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
 } from '../../common/detonate_prototype';
-import { redactDetonateTask } from '../../common/detonate_prototype';
+import { DETONATE_MAX_EXEC_WAIT_SECS, redactDetonateTask } from '../../common/detonate_prototype';
 import type { DetonateClient, DetonateTaskSearchQuery } from './client';
 import {
   DETONATE_SANDBOX_UNAVAILABLE_STATUS,
@@ -37,7 +37,7 @@ import {
 
 /** The connector's own submit limits; it refuses anything larger as invalid params. */
 export const CONNECTOR_MAX_SAMPLE_BYTES = 10 * 1024 * 1024;
-export const CONNECTOR_MAX_EXEC_WAIT_SECS = 900;
+export const CONNECTOR_MAX_EXEC_WAIT_SECS = DETONATE_MAX_EXEC_WAIT_SECS;
 
 /**
  * The actions framework caps a connector response at 1 MiB by default, and a

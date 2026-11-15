@@ -71,6 +71,12 @@ export const EXEC_WAIT_HELP = (max: number) =>
     values: { max },
   });
 
+export const EXEC_WAIT_INVALID = (max: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.submit.execWaitInvalid', {
+    defaultMessage: 'Enter a whole number of seconds from 0 to {max}.',
+    values: { max },
+  });
+
 export const SUBMIT_BY_HASH = i18n.translate(
   'xpack.securitySolution.detonatePrototype.submit.byHash',
   { defaultMessage: 'By hash' }
@@ -861,6 +867,14 @@ export const FOOTER_BLOCK_HASH_NO_PRIVILEGE = i18n.translate(
   { defaultMessage: 'You need Endpoint blocklist write privilege to block a hash.' }
 );
 
+export const FOOTER_BLOCK_HASH_NO_GLOBAL_PRIVILEGE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.blockHashNoGlobalPrivilege',
+  {
+    defaultMessage:
+      'Blocking a hash for all policies requires the global artifact management privilege.',
+  }
+);
+
 export const FOOTER_BLOCK_HASH_CONFIRM_TITLE = i18n.translate(
   'xpack.securitySolution.detonatePrototype.footer.blockHashConfirmTitle',
   { defaultMessage: 'Block this hash?' }
@@ -869,7 +883,7 @@ export const FOOTER_BLOCK_HASH_CONFIRM_TITLE = i18n.translate(
 export const FOOTER_BLOCK_HASH_CONFIRM_BODY = (hash: string) =>
   i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashConfirmBody', {
     defaultMessage:
-      'This adds {hash} to the Endpoint blocklist for all policies. Endpoint will block this file from running.',
+      'This blocks {hash} on Windows, macOS and Linux for all policies. Endpoint will block this file from running.',
     values: { hash },
   });
 
@@ -903,6 +917,23 @@ export const FOOTER_BLOCK_HASH_SUCCESS = i18n.translate(
 export const FOOTER_BLOCK_HASH_ERROR = i18n.translate(
   'xpack.securitySolution.detonatePrototype.footer.blockHashError',
   { defaultMessage: 'Could not add the hash to the Endpoint blocklist' }
+);
+
+export const FOOTER_BLOCK_HASH_PARTIAL = (failedOs: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashPartial', {
+    defaultMessage: 'The hash was not added to the Endpoint blocklist on: {failedOs}',
+    values: { failedOs },
+  });
+
+export const FOOTER_BLOCK_HASH_ALREADY_BLOCKED = (os: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.footer.blockHashAlreadyBlocked', {
+    defaultMessage: 'The hash is already blocked on: {os}',
+    values: { os },
+  });
+
+export const FOOTER_SHARE_LINK_COPY_FAILED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.shareLinkCopyFailed',
+  { defaultMessage: 'Could not copy the link to the clipboard' }
 );
 
 export const FOOTER_FAILED_NOTE_FALLBACK = (worker: string) =>

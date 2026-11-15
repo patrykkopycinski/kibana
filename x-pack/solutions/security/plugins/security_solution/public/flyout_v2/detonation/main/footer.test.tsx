@@ -56,7 +56,8 @@ jest.mock('@elastic/eui', () => ({
 }));
 jest.mock('../../../common/lib/kibana/hooks', () => ({
   useAppUrl: () => ({
-    getAppUrl: ({ path }: { path?: string } = {}) => `/app/security/detonate${path ?? ''}`,
+    getAppUrl: ({ path, absolute }: { path?: string; absolute?: boolean } = {}) =>
+      `${absolute ? 'http://localhost:5601' : ''}/app/security/detonate${path ?? ''}`,
   }),
 }));
 
@@ -108,6 +109,8 @@ const inconclusiveTask = () =>
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const mockAddInfo = jest.fn();
+const mockAddWarning = jest.fn();
 const mockOpenCaseModal = jest.fn();
 const mockOpenAgentBuilderFlyout = jest.fn();
 const mockCreateBlocklist = jest.fn();
@@ -115,11 +118,17 @@ const mockCreateBlocklist = jest.fn();
 const setup = ({
   canAttachToCase = true,
   canWriteBlocklist = true,
+  canManageGlobalArtifacts = true,
   chatAvailable = true,
-}: { canAttachToCase?: boolean; canWriteBlocklist?: boolean; chatAvailable?: boolean } = {}) => {
+}: {
+  canAttachToCase?: boolean;
+  canWriteBlocklist?: boolean;
+  canManageGlobalArtifacts?: boolean;
+  chatAvailable?: boolean;
+} = {}) => {
   jest.mocked(useCanAttachToCase).mockReturnValue(canAttachToCase);
   jest.mocked(useUserPrivileges).mockReturnValue({
-    endpointPrivileges: { canWriteBlocklist },
+    endpointPrivileges: { canWriteBlocklist, canManageGlobalArtifacts },
   } as ReturnType<typeof useUserPrivileges>);
   jest.mocked(useAgentBuilderAvailability).mockReturnValue({
     hasAgentBuilderPrivilege: chatAvailable,
@@ -148,6 +157,8 @@ describe('<Footer />', () => {
     jest.mocked(useAppToasts).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
+      addInfo: mockAddInfo,
+      addWarning: mockAddWarning,
     } as unknown as ReturnType<typeof useAppToasts>);
     jest.mocked(useKibana).mockReturnValue({
       services: {
@@ -169,6 +180,7 @@ describe('<Footer />', () => {
       create: mockCreateBlocklist,
     } as unknown as BlocklistsApiClient);
     mockCreateBlocklist.mockResolvedValue({});
+    jest.mocked(copyToClipboard).mockReturnValue(true);
     setup();
   });
 
@@ -214,6 +226,16 @@ describe('<Footer />', () => {
       expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 900 }));
     });
 
+    it.each([
+      ['0', 0],
+      ['missing', undefined],
+    ])('falls back to the service default when the recorded wait is %s', (_name, wait) => {
+      renderFooter(failedTask({ exec_wait_secs: wait } as unknown as Partial<DetonateTask>));
+
+      fireEvent.click(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID));
+      expect(mockSubmitModalProps).toEqual(expect.objectContaining({ initialExecWaitSecs: 60 }));
+    });
+
     it('opens the new run in the flyout once it was submitted', () => {
       renderFooter(makeTask());
       fireEvent.click(screen.getByTestId(DETONATION_FOOTER_RERUN_TEST_ID));
@@ -241,7 +263,7 @@ describe('<Footer />', () => {
       renderFooter(failedTask({ last_worker_status_details: undefined }));
 
       expect(screen.getByTestId(DETONATION_FOOTER_FAILED_NOTE_TEST_ID)).toHaveTextContent(
-        i18n.FOOTER_FAILED_NOTE_FALLBACK('detonate.workers.start_vm')
+        i18n.FOOTER_FAILED_NOTE_FALLBACK('Running in the sandbox')
       );
     });
 
@@ -270,6 +292,8 @@ describe('<Footer />', () => {
           diagnostic_endpoint: 0,
           production_detection: 0,
         },
+        indicators_total: 2,
+        indicators_truncated: false,
         indicators: [
           { type: 'domain', value: 'evil.example' },
           { type: 'ip', value: '10.0.0.9' },
@@ -278,6 +302,23 @@ describe('<Footer />', () => {
 
       fireEvent.click(screen.getByTestId('newAgentBuilderAttachment'));
       expect(mockOpenAgentBuilderFlyout).toHaveBeenCalledTimes(1);
+    });
+
+    it('caps the indicator rows handed to the assistant and says so', () => {
+      jest.mocked(useDetonationRecord).mockReturnValue({
+        data: {
+          'detonate.iocs.domains': Array.from({ length: 150 }, (_, i) => `d${i}.example`),
+          'detonate.iocs.ips': [],
+          'detonate.iocs.file_hashes': [],
+        },
+      } as unknown as ReturnType<typeof useDetonationRecord>);
+      renderFooter(makeTask());
+
+      const { attachmentData } = jest.mocked(useAgentBuilderAttachment).mock.calls[0][0];
+      const payload = JSON.parse((attachmentData as { content: string }).content);
+      expect(payload.indicators).toHaveLength(100);
+      expect(payload.indicators_total).toBe(150);
+      expect(payload.indicators_truncated).toBe(true);
     });
 
     it('reports the status instead of a verdict for a run that failed', () => {
@@ -338,18 +379,43 @@ describe('<Footer />', () => {
 
         expect(copyToClipboard).toHaveBeenCalledTimes(1);
         const url = new URL(jest.mocked(copyToClipboard).mock.calls[0][0]);
-        expect(url.origin).toBe(window.location.origin);
         expect(url.pathname).toBe('/app/security/detonate');
         expect(decodeFlyoutV2UrlParam(url.searchParams.get(FLYOUT_V2_URL_PARAM) ?? '')).toEqual([
           { kind: 'detonation', taskId: 'task-1' },
         ]);
+        expect(url.origin).toBe('http://localhost:5601');
         expect(mockAddSuccess).toHaveBeenCalledWith(i18n.FOOTER_SHARE_LINK_COPIED);
+      });
+
+      it('warns instead of confirming when the clipboard write fails', () => {
+        jest.mocked(copyToClipboard).mockReturnValue(false);
+        renderFooter(makeTask());
+        openTakeAction();
+
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_SHARE_LINK_TEST_ID));
+
+        expect(mockAddWarning).toHaveBeenCalledWith(i18n.FOOTER_SHARE_LINK_COPY_FAILED);
+        expect(mockAddSuccess).not.toHaveBeenCalled();
       });
     });
 
     describe('block hash', () => {
       it('is disabled, with the reason, when the user cannot write the blocklist', () => {
         setup({ canWriteBlocklist: false });
+        renderFooter(makeTask());
+        openTakeAction();
+
+        const item = screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID);
+        expect(item).toBeDisabled();
+        fireEvent.click(item);
+        expect(
+          screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
+        ).not.toBeInTheDocument();
+        expect(mockCreateBlocklist).not.toHaveBeenCalled();
+      });
+
+      it('is disabled when the user lacks the global artifact privilege', () => {
+        setup({ canManageGlobalArtifacts: false });
         renderFooter(makeTask());
         openTakeAction();
 
@@ -384,7 +450,18 @@ describe('<Footer />', () => {
         ).not.toBeInTheDocument();
       });
 
-      it('creates a blocklist entry for the sha256 on the run OS and confirms with a toast', async () => {
+      it('names every OS in the confirmation', () => {
+        renderFooter(makeTask());
+        openTakeAction();
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
+
+        const body = screen.getByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID);
+        expect(body).toHaveTextContent('Windows');
+        expect(body).toHaveTextContent('macOS');
+        expect(body).toHaveTextContent('Linux');
+      });
+
+      it('creates one entry per OS for the sha256 and confirms with one toast', async () => {
         renderFooter(makeTask({ vm_os_family: 'darwin' }));
         openTakeAction();
         fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
@@ -393,22 +470,63 @@ describe('<Footer />', () => {
         await waitFor(() =>
           expect(mockAddSuccess).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_SUCCESS)
         );
-        expect(mockCreateBlocklist).toHaveBeenCalledWith(
-          expect.objectContaining({
-            list_id: 'endpoint_blocklists',
-            entries: [
-              { field: 'file.hash.*', operator: 'included', type: 'match_any', value: [SHA256] },
-            ],
-            os_types: ['macos'],
-          })
-        );
+        expect(mockCreateBlocklist).toHaveBeenCalledTimes(3);
+        ['windows', 'linux', 'macos'].forEach((os, index) => {
+          expect(mockCreateBlocklist).toHaveBeenNthCalledWith(
+            index + 1,
+            expect.objectContaining({
+              list_id: 'endpoint_blocklists',
+              item_id: `detonate-block-${SHA256}-${os}`,
+              entries: [
+                { field: 'file.hash.*', operator: 'included', type: 'match_any', value: [SHA256] },
+              ],
+              os_types: [os],
+              tags: ['policy:all'],
+            })
+          );
+        });
+        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
         expect(
           screen.queryByTestId(DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID)
         ).not.toBeInTheDocument();
       });
 
-      it('reports a failed write with an error toast', async () => {
-        const error = new Error('conflict');
+      it('warns, naming the OS, when only some entries could be created', async () => {
+        mockCreateBlocklist
+          .mockResolvedValueOnce({})
+          .mockRejectedValueOnce(new Error('boom'))
+          .mockResolvedValueOnce({});
+        renderFooter(makeTask());
+        openTakeAction();
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+        await waitFor(() =>
+          expect(mockAddWarning).toHaveBeenCalledWith(i18n.FOOTER_BLOCK_HASH_PARTIAL('Linux'))
+        );
+        expect(mockAddSuccess).not.toHaveBeenCalled();
+        expect(mockAddError).not.toHaveBeenCalled();
+      });
+
+      it('reports that the hash is already blocked when the entries exist', async () => {
+        mockCreateBlocklist.mockRejectedValue({ body: { statusCode: 409 } });
+        renderFooter(makeTask());
+        openTakeAction();
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_BLOCK_HASH_TEST_ID));
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+        await waitFor(() =>
+          expect(mockAddInfo).toHaveBeenCalledWith(
+            i18n.FOOTER_BLOCK_HASH_ALREADY_BLOCKED('Windows, Linux, macOS')
+          )
+        );
+        expect(mockAddSuccess).not.toHaveBeenCalled();
+        expect(mockAddError).not.toHaveBeenCalled();
+        expect(mockAddWarning).not.toHaveBeenCalled();
+      });
+
+      it('reports a failed write on every OS with an error toast', async () => {
+        const error = new Error('boom');
         mockCreateBlocklist.mockRejectedValue(error);
         renderFooter(makeTask());
         openTakeAction();
@@ -416,7 +534,10 @@ describe('<Footer />', () => {
         fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
         await waitFor(() =>
-          expect(mockAddError).toHaveBeenCalledWith(error, { title: i18n.FOOTER_BLOCK_HASH_ERROR })
+          expect(mockAddError).toHaveBeenCalledWith(error, {
+            title: i18n.FOOTER_BLOCK_HASH_ERROR,
+            toastMessage: i18n.FOOTER_BLOCK_HASH_PARTIAL('Windows, Linux, macOS'),
+          })
         );
         expect(mockAddSuccess).not.toHaveBeenCalled();
       });

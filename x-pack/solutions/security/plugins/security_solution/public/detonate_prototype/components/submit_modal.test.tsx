@@ -283,6 +283,52 @@ describe('SubmitModal', () => {
       );
     });
 
+    it.each([['1.5'], ['-1'], ['901']])(
+      'flags an exec wait of %s as invalid and disables submit',
+      (value) => {
+        renderModal({ initialHash: SHA256 });
+
+        fireEvent.change(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID), {
+          target: { value },
+        });
+
+        expect(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID)).toHaveAttribute(
+          'aria-invalid',
+          'true'
+        );
+        expect(screen.getByText(i18n.EXEC_WAIT_INVALID(900))).toBeInTheDocument();
+        expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
+        expect(mutateAsync).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([['0'], ['900']])('accepts an exec wait of %s at the bounds', (value) => {
+      renderModal({ initialHash: SHA256 });
+
+      fireEvent.change(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID), {
+        target: { value },
+      });
+
+      expect(screen.queryByText(i18n.EXEC_WAIT_INVALID(900))).toBeNull();
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+      fireEvent.click(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(mutateAsync).toHaveBeenLastCalledWith(
+        expect.objectContaining({ exec_wait_secs: Number(value) })
+      );
+    });
+
+    it('treats an empty exec wait as valid', () => {
+      renderModal({ initialHash: SHA256, initialExecWaitSecs: 300 });
+
+      fireEvent.change(screen.getByTestId(SUBMIT_MODAL_EXEC_WAIT_TEST_ID), {
+        target: { value: '' },
+      });
+
+      expect(screen.queryByText(i18n.EXEC_WAIT_INVALID(900))).toBeNull();
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+    });
+
     it('calls onSubmitted with the task the service answered', async () => {
       const onSubmitted = jest.fn();
       renderModal({ onSubmitted });

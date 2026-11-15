@@ -16,6 +16,7 @@ import {
   useFetchAnonymizationFields,
 } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useFetchDocumentSummary } from './use_fetch_document_summary';
 import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 
@@ -48,8 +49,8 @@ export interface UseDocumentSummaryParams {
    */
   showAnonymizedValues?: boolean;
   /**
-   * When false the generated summary is kept in component state and no summary document is
-   * written for `documentId`. Defaults to true.
+   * When false the generated summary is kept in the query cache, so it survives the host
+   * section unmounting, and no summary document is written for `documentId`. Defaults to true.
    */
   persist?: boolean;
 }
@@ -171,7 +172,18 @@ export const useDocumentSummary = ({
     connectorId: defaultConnectorId,
   });
   const { bulkUpdate } = useBulkUpdateDocumentSummary();
-  const [generatedSummary, setGeneratedSummary] = useState<GeneratedSummary | null>(null);
+  const queryClient = useQueryClient();
+  const ephemeralSummaryKey = useMemo(
+    () => ['documentSummary', 'ephemeral', documentId],
+    [documentId]
+  );
+  // Read-only subscription: the entry is only ever written by `setQueryData` below.
+  const { data: cachedSummary } = useQuery<GeneratedSummary | null>(
+    ephemeralSummaryKey,
+    () => null,
+    { enabled: false, staleTime: Infinity, cacheTime: Infinity }
+  );
+  const generatedSummary = persist ? null : cachedSummary;
 
   useEffect(() => {
     const current = generatedSummary ?? fetchedSummary.data[0];
@@ -285,7 +297,7 @@ export const useDocumentSummary = ({
 
       if (!rawResponse.isError && !hasInvalidResponse && responseSummary != null) {
         if (!persist) {
-          setGeneratedSummary({
+          queryClient.setQueryData<GeneratedSummary>(ephemeralSummaryKey, {
             summary: responseSummary,
             ...(responseRecommendedActions
               ? { recommendedActions: responseRecommendedActions }
@@ -345,9 +357,11 @@ export const useDocumentSummary = ({
   }, [
     bulkUpdate,
     documentId,
+    ephemeralSummaryKey,
     fetchedSummary.data,
     messageAndReplacements,
     persist,
+    queryClient,
     refetchSummary,
     sendMessage,
   ]);

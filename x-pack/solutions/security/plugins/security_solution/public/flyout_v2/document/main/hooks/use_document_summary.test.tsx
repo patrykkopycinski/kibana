@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
+import { act, renderHook as renderHookBase, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDocumentSummary } from './use_document_summary';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
@@ -30,6 +32,16 @@ const promptContext: PromptContext = {
   tooltip: '_tooltip',
   replacements: { 'host.name': '12345' },
 };
+const renderHook = <T,>(
+  callback: () => T,
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+) => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return renderHookBase(callback, { wrapper });
+};
+
 describe('useDocumentSummary', () => {
   const mockSendMessage = jest.fn();
   const mockAbortStream = jest.fn();
@@ -156,6 +168,65 @@ describe('useDocumentSummary', () => {
     expect(mockRefetchSummary).toHaveBeenCalled();
     expect(result.current.summary).toBe('Generated summary');
     expect(result.current.recommendedActions).toBe('Generated actions');
+  });
+
+  it('should keep the unsaved summary after the hook unmounts and mounts again', async () => {
+    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
+      data: { data: [], prompt: 'Generate an alert summary!' },
+      refetch: mockRefetchSummary,
+      isFetched: true,
+    });
+    mockSendMessage.mockResolvedValue({
+      response: JSON.stringify({ summary: 'Generated summary', recommendedActions: 'Do this' }),
+      isError: false,
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const params = {
+      documentId: 'task-id',
+      defaultConnectorId: 'test-connector-id',
+      promptContext,
+      persist: false,
+    };
+
+    const first = renderHook(() => useDocumentSummary(params), queryClient);
+    await waitFor(() => {
+      expect(first.result.current.messageAndReplacements).not.toBeNull();
+    });
+    await act(async () => {
+      await first.result.current.fetchAISummary();
+    });
+    expect(first.result.current.summary).toBe('Generated summary');
+    first.unmount();
+
+    const second = renderHook(() => useDocumentSummary(params), queryClient);
+
+    await waitFor(() => {
+      expect(second.result.current.summary).toBe('Generated summary');
+    });
+    expect(second.result.current.hasSummary).toBe(true);
+    expect(mockSendMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not read the unsaved summary when persist is true', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClient.setQueryData(['documentSummary', 'ephemeral', 'task-id'], {
+      summary: 'Unsaved summary',
+      replacements: {},
+      updatedAt: new Date().toISOString(),
+    });
+
+    const { result } = renderHook(
+      () =>
+        useDocumentSummary({
+          documentId: 'task-id',
+          defaultConnectorId: 'test-connector-id',
+          promptContext,
+        }),
+      queryClient
+    );
+
+    expect(result.current.hasSummary).toBe(false);
+    expect(result.current.summary).toBe('No summary available');
   });
 
   it('should keep the summary in state and write no document when persist is false', async () => {

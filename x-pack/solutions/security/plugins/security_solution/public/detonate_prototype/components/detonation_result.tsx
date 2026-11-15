@@ -84,6 +84,7 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
     data: record,
     isLoading: recordLoading,
     isError: recordError,
+    isFetching: recordFetching,
     refetch: refetchRecord,
   } = useDetonationRecord(task?.id, complete);
   const indicators = useMemo(() => getDetonationIndicators(record), [record]);
@@ -164,7 +165,8 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
               indicators={indicators}
               pending={pending}
               recordError={recordError}
-              onRetry={refetchRecord}
+              onRetry={() => refetchRecord()}
+              retrying={recordFetching}
             />
             <EuiHorizontalRule margin="m" />
             <RunDetailsSection task={task} record={record} />

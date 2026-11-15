@@ -67,6 +67,8 @@ interface IndicatorsSectionProps {
   /** True when reading the run's record failed. */
   recordError: boolean;
   onRetry: () => void;
+  /** True while a retry of the record read is in flight. */
+  retrying?: boolean;
 }
 
 export const IndicatorsSection = ({
@@ -76,6 +78,7 @@ export const IndicatorsSection = ({
   pending,
   recordError,
   onRetry,
+  retrying = false,
 }: IndicatorsSectionProps) => {
   const { cases } = useKibana().services;
   const canAttachToCase = useCanAttachToCase();
@@ -120,6 +123,7 @@ export const IndicatorsSection = ({
           primary: {
             children: i18n.OVERVIEW_RECORD_ERROR_RETRY,
             onClick: onRetry,
+            isLoading: retrying,
             'data-test-subj': DETONATION_INDICATORS_RETRY_TEST_ID,
           },
         }}

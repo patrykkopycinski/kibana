@@ -141,11 +141,13 @@ const renderResult = (
     record,
     recordLoading = false,
     recordError = false,
+    recordFetching = false,
     refetch = jest.fn(),
   }: {
     record?: Partial<DetonationRecord>;
     recordLoading?: boolean;
     recordError?: boolean;
+    recordFetching?: boolean;
     refetch?: jest.Mock;
   } = {}
 ) => {
@@ -155,6 +157,7 @@ const renderResult = (
     data: record,
     isLoading: recordLoading,
     isError: recordError,
+    isFetching: recordFetching,
     refetch,
   } as never);
   return render(
@@ -427,6 +430,15 @@ describe('DetonationResult overview', () => {
 
       fireEvent.click(screen.getByTestId(DETONATION_INDICATORS_RETRY_TEST_ID));
       expect(refetch).toHaveBeenCalledTimes(1);
+      expect(refetch).toHaveBeenCalledWith();
+    });
+
+    it('disables the retry and shows it loading while the record is refetching', () => {
+      renderResult(createTask(), { recordError: true, recordFetching: true });
+
+      const retry = screen.getByTestId(DETONATION_INDICATORS_RETRY_TEST_ID);
+      expect(retry).toBeDisabled();
+      expect(retry.querySelector('.euiLoadingSpinner')).not.toBeNull();
     });
 
     it('says "not read" when the record has no indicator arrays', () => {

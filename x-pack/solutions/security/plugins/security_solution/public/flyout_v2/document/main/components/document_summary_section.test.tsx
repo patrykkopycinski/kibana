@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useChatComplete } from '@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete';
+import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { TestProviders } from '../../../../common/mock';
 import {
   DOCUMENT_SUMMARY_SECTION_TEST_ID,
   DocumentSummarySection,
 } from './document_summary_section';
+import { GENERATE_INSIGHTS_BUTTON_TEST_ID } from './document_summary';
 import { DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from './document_summary_options_menu';
+import { useFetchDocumentSummary } from '../hooks/use_fetch_document_summary';
+import { useBulkUpdateDocumentSummary } from '../hooks/use_bulk_update_document_summary';
 import { HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
@@ -29,6 +34,13 @@ jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
     error: null,
   }),
 }));
+
+jest.mock('@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete');
+jest.mock(
+  '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
+);
+jest.mock('../hooks/use_fetch_document_summary');
+jest.mock('../hooks/use_bulk_update_document_summary');
 
 jest.mock('../hooks/use_anonymization_toggle', () => ({
   useAnonymizationToggle: () => ({
@@ -67,8 +79,29 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('DocumentSummarySection', () => {
+  const mockSendMessage = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useChatComplete as jest.Mock).mockReturnValue({
+      sendMessage: mockSendMessage,
+      abortStream: jest.fn(),
+    });
+    (useFetchAnonymizationFields as jest.Mock).mockReturnValue({ data: [], isFetched: true });
+    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
+      data: { data: [], prompt: 'Generate an alert summary!' },
+      refetch: jest.fn(),
+      isFetched: true,
+    });
+    (useBulkUpdateDocumentSummary as jest.Mock).mockReturnValue({ bulkUpdate: jest.fn() });
+    mockSendMessage.mockResolvedValue({
+      response: JSON.stringify({ summary: 'Unsaved summary text', recommendedActions: 'Act' }),
+      isError: false,
+    });
+  });
+
   it('should render the AI summary section with title, sparkles icon, and options menu', () => {
-    const getPromptContext = jest.fn();
+    const getPromptContext = jest.fn().mockResolvedValue({ 'host.name': ['h1'] });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -83,7 +116,7 @@ describe('DocumentSummarySection', () => {
   });
 
   it('should render with custom data-test-subj', () => {
-    const getPromptContext = jest.fn();
+    const getPromptContext = jest.fn().mockResolvedValue({ 'host.name': ['h1'] });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -96,5 +129,39 @@ describe('DocumentSummarySection', () => {
     );
 
     expect(getByTestId(`custom-test-id${HEADER_TEST_ID}`)).toHaveTextContent('AI summary');
+  });
+
+  describe('when the summary is not persisted', () => {
+    it('keeps the generated summary when the section is folded and unfolded', async () => {
+      const getPromptContext = () => Promise.resolve({ 'host.name': ['h1'] });
+      render(
+        <TestProviders>
+          <DocumentSummarySection
+            documentId="test-document-id"
+            getPromptContext={getPromptContext}
+            persist={false}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID)).toBeEnabled();
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID));
+      });
+      expect(await screen.findByText('Unsaved summary text')).toBeInTheDocument();
+
+      const toggle = screen.getByRole('button', { name: /AI summary/ });
+      fireEvent.click(toggle);
+      await waitFor(() => {
+        expect(screen.queryByText('Unsaved summary text')).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(toggle);
+
+      expect(await screen.findByText('Unsaved summary text')).toBeInTheDocument();
+      expect(mockSendMessage).toHaveBeenCalledTimes(1);
+    });
   });
 });

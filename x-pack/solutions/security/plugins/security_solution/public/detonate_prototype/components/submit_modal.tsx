@@ -56,6 +56,7 @@ import {
 } from '../hooks/use_detonate';
 import { useCanSubmitDetonation } from '../hooks/use_can_submit_detonation';
 import * as i18n from '../translations';
+import { submitAndNotify } from './submit_and_notify';
 
 export const SUBMIT_MODAL_TEST_ID = 'detonatePrototypeSubmitModal';
 export const SUBMIT_MODAL_HASH_INPUT_TEST_ID = 'detonatePrototypeSampleHash';
@@ -181,13 +182,7 @@ export const SubmitModal = React.memo<Props>(
           : file
           ? submitFile.mutateAsync({ file, ...options })
           : undefined;
-      // Only the mutation's rejection is swallowed: the mutation state already shows it in
-      // the error callout below. A throw from onSubmitted is a bug in the caller and must
-      // not be hidden by the same catch.
-      const task = await request?.catch(() => undefined);
-      if (task) {
-        onSubmitted(task);
-      }
+      await submitAndNotify(request, onSubmitted);
     }, [mode, hash, file, options, submitHash, submitFile, onSubmitted]);
 
     const onConfirm = useCallback(() => {
@@ -291,6 +286,8 @@ export const SubmitModal = React.memo<Props>(
               <EuiComboBox
                 fullWidth
                 noSuggestions
+                // Tags are keyword-mapped and compared exactly, so `Extra` and `extra` differ.
+                isCaseSensitive
                 selectedOptions={tags}
                 onChange={setTags}
                 onCreateOption={onCreateTag}

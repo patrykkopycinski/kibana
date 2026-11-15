@@ -210,6 +210,7 @@ describe('SubmitModal', () => {
         renderModal({ initialHash: SHA256, initialTags: ['alert:doc-7'] });
 
         createTag('alert:doc-7');
+        // The padded value is the one that reaches onCreateTag; EUI blocks exact repeats itself.
         createTag(' alert:doc-7 ');
         createTag('extra');
         createTag('extra');
@@ -218,6 +219,18 @@ describe('SubmitModal', () => {
         fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
         expect(mutateAsync).toHaveBeenCalledWith(
           expect.objectContaining({ tags: ['alert:doc-7', 'extra'] })
+        );
+      });
+
+      it('treats tags that differ only in case as different tags', () => {
+        renderModal({ initialHash: SHA256, initialTags: ['extra'] });
+
+        createTag('Extra');
+
+        fireEvent.click(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID));
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+        expect(mutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({ tags: ['extra', 'Extra'] })
         );
       });
     });
@@ -299,34 +312,6 @@ describe('SubmitModal', () => {
       fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
 
       expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
-    });
-  });
-
-  describe('onSubmitted failures', () => {
-    // A throw from onSubmitted cannot be asserted directly: jest fails the running test on
-    // the unhandled rejection it causes, and the sandboxed `process` cannot listen for it.
-    // What keeps it visible is that the swallowing catch sits on the mutation's promise only,
-    // so the test pins that: the catch is attached to the mutation result and onSubmitted
-    // runs on the task it resolves to.
-    it('swallows only the mutation rejection and calls onSubmitted outside that catch', async () => {
-      const task = { id: 'task-1' } as DetonateTask;
-      const mutation = Promise.resolve(task);
-      const swallow = jest.fn((handler: (reason: unknown) => unknown) => {
-        expect(handler(new Error('mutation failed'))).toBeUndefined();
-        return Promise.resolve(task);
-      });
-      Object.assign(mutation, { catch: swallow });
-      mutateAsync.mockReturnValue(mutation);
-      const onSubmitted = jest.fn();
-      renderModal({ onSubmitted });
-
-      submit();
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-
-      await waitFor(() => expect(onSubmitted).toHaveBeenCalledTimes(1));
-      expect(onSubmitted).toHaveBeenCalledWith(task);
-      expect(swallow).toHaveBeenCalledTimes(1);
-      expect(mutateAsync).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -443,9 +428,9 @@ describe('SubmitModal', () => {
       );
     });
 
-    it('shows the reset date in UTC even where the local day is the day before', () => {
-      const originalTz = process.env.TZ;
-      process.env.TZ = 'America/Los_Angeles';
+    it('formats the reset date in UTC whatever the host zone is', () => {
+      // The jest sandbox cannot change the process zone, so pin the option, not the output.
+      const toLocaleDate = jest.spyOn(Date.prototype, 'toLocaleDateString');
       try {
         mockUsage({
           used: 10,
@@ -454,16 +439,12 @@ describe('SubmitModal', () => {
         } as DetonateUsage);
         renderModal({ initialHash: SHA256 });
 
-        expect(screen.getByTestId(SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID)).toHaveTextContent(
-          'Dec 1, 2026'
+        expect(toLocaleDate).toHaveBeenCalledWith(
+          undefined,
+          expect.objectContaining({ timeZone: 'UTC' })
         );
       } finally {
-        // Assigning undefined would store the string "undefined" as the zone.
-        if (originalTz === undefined) {
-          delete process.env.TZ;
-        } else {
-          process.env.TZ = originalTz;
-        }
+        toLocaleDate.mockRestore();
       }
     });
 

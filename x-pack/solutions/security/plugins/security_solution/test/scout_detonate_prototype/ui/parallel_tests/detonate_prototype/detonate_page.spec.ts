@@ -24,6 +24,7 @@
  */
 
 import { spaceTest, tags } from '@kbn/scout-security';
+import type { ScoutPage } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 /**
@@ -39,13 +40,18 @@ const DETONATE_APP = 'security/detonate_prototype';
 const LIST_PAGE = 'detonatePrototypeListPage';
 const SERVICE_UNAVAILABLE = 'detonatePrototypeServiceUnavailable';
 const RUNS_TABLE_LINK = 'detonatePrototypeRunsTable-link';
+const SUBMIT_SAMPLE_BUTTON = 'detonatePrototypeSubmitSample';
+const SUBMIT_MODAL = 'detonatePrototypeSubmitModal';
 const SAMPLE_HASH_INPUT = 'detonatePrototypeSampleHash';
 const TAGS_INPUT = 'detonatePrototypeTags';
+// The modal's submit button only opens a confirmation; this EUI test subject
+// on the confirm button is what actually starts the run.
 const SUBMIT_BUTTON = 'detonatePrototypeSubmitButton';
-// The submit button only opens a confirmation modal; this EUI test subject
-// on the modal's confirm button is what actually starts the run.
 const CONFIRM_BUTTON = 'confirmModalConfirmButton';
 const SUBMIT_ERROR = 'detonatePrototypeSubmitError';
+// Submitting closes the modal and raises a toast; its link opens the run's flyout.
+const SUBMIT_TOAST = 'detonatePrototypeSubmitToast';
+const SUBMIT_TOAST_VIEW_RESULT = 'detonatePrototypeSubmitToastViewResult';
 const DETONATION_FLYOUT = 'securitySolutionFlyoutDetonationDetails';
 const DETONATION_TITLE = 'securitySolutionFlyoutDetonationDetailsTitle';
 // The container subj attaches to the flyout header (document-flyout
@@ -75,6 +81,26 @@ const HEALTHCHECK_URL = '/internal/detonate_prototype/healthcheck';
  * much longer than a default action timeout to reach a terminal state.
  */
 const RUN_COMPLETION_TIMEOUT_MS = 180_000;
+
+/**
+ * Confirms the open submit modal, then follows the success toast to the new
+ * run's result flyout. Shared by every spec that starts a run.
+ */
+const confirmSubmitAndOpenResult = async (page: ScoutPage) => {
+  await page.testSubj.click(SUBMIT_BUTTON);
+  await page.testSubj.click(CONFIRM_BUTTON);
+  await expect(page.testSubj.locator(SUBMIT_ERROR)).toBeHidden();
+  await expect(page.testSubj.locator(SUBMIT_MODAL)).toBeHidden();
+  await expect(page.testSubj.locator(SUBMIT_TOAST)).toBeVisible();
+  await page.testSubj.click(SUBMIT_TOAST_VIEW_RESULT);
+};
+
+/** Opens the submit modal from the page header and enters the sample hash. */
+const openModalAndEnterHash = async (page: ScoutPage) => {
+  await page.testSubj.click(SUBMIT_SAMPLE_BUTTON);
+  await expect(page.testSubj.locator(SUBMIT_MODAL)).toBeVisible();
+  await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
+};
 
 spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, () => {
   // Skipped, not thrown at import: a throw breaks test discovery for every
@@ -107,12 +133,10 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
       await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
       await expect(page.testSubj.locator(SERVICE_UNAVAILABLE)).toBeHidden();
 
-      await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
-      await page.testSubj.click(SUBMIT_BUTTON);
-      await page.testSubj.click(CONFIRM_BUTTON);
-      await expect(page.testSubj.locator(SUBMIT_ERROR)).toBeHidden();
+      await openModalAndEnterHash(page);
+      await confirmSubmitAndOpenResult(page);
 
-      // Submitting opens the new run's result flyout on top of the list page.
+      // The toast's "View result" link opens the new run's flyout on top of the list page.
       await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
       await expect(page.testSubj.locator(DETONATION_OVERVIEW_TAB)).toBeVisible();
 
@@ -151,11 +175,10 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await page.gotoApp(DETONATE_APP);
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
-    await page.testSubj.click(SUBMIT_BUTTON);
-    await page.testSubj.click(CONFIRM_BUTTON);
+    await openModalAndEnterHash(page);
+    await confirmSubmitAndOpenResult(page);
 
-    // Submitting opens the new run's result flyout; the header title is the
+    // The flyout opened from the toast; its header title is the
     // run's sample hash, so it identifies the run for the same-run check below.
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
     const flyoutTitle = await page.testSubj.locator(DETONATION_TITLE).innerText();
@@ -183,9 +206,8 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await page.gotoApp(DETONATE_APP);
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
-    await page.testSubj.click(SUBMIT_BUTTON);
-    await page.testSubj.click(CONFIRM_BUTTON);
+    await openModalAndEnterHash(page);
+    await confirmSubmitAndOpenResult(page);
 
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
     await expect(
@@ -208,7 +230,7 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     ).toBeGreaterThan(1);
   });
 
-  spaceTest('pre-fills the form the way the alert action does', async ({ page }) => {
+  spaceTest('opens the submit modal pre-filled the way the alert action does', async ({ page }) => {
     // What the "Detonate file" alert action builds: the hash it extracted from
     // the alert document, plus a tag tying the run back to that document.
     const tag = 'alert:scout-alert-id';
@@ -216,6 +238,8 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await page.gotoApp(DETONATE_APP, { params: { sample_hash: SAMPLE_SHA256, tags: tag } });
 
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
+    // The hand-off lands with the modal already open, no header click needed.
+    await expect(page.testSubj.locator(SUBMIT_MODAL)).toBeVisible();
     await expect(page.testSubj.locator(SAMPLE_HASH_INPUT)).toHaveValue(SAMPLE_SHA256);
     await expect(page.testSubj.locator(TAGS_INPUT)).toContainText(tag);
   });
@@ -237,12 +261,12 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await page.gotoApp(DETONATE_APP, {
       params: { sample_hash: SAMPLE_SHA256, tags: 'fixture:eicar-linux-reenrolled' },
     });
+    await expect(page.testSubj.locator(SUBMIT_MODAL)).toBeVisible();
     await expect(page.testSubj.locator(SAMPLE_HASH_INPUT)).toHaveValue(SAMPLE_SHA256);
     // The tag is what pins the recording this run replays; without it the
     // run replays the seed default and the diff below is zero-delta.
     await expect(page.testSubj.locator(TAGS_INPUT)).toContainText('fixture:eicar-linux-reenrolled');
-    await page.testSubj.click(SUBMIT_BUTTON);
-    await page.testSubj.click(CONFIRM_BUTTON);
+    await confirmSubmitAndOpenResult(page);
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
     await expect(
       page.testSubj.locator(DETONATION_FLYOUT).locator(`[data-test-subj="${STATUS_COMPLETE}"]`)

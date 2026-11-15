@@ -89,6 +89,11 @@ const RUN_COMPLETION_TIMEOUT_MS = 180_000;
 const confirmSubmitAndOpenResult = async (page: ScoutPage) => {
   await page.testSubj.click(SUBMIT_BUTTON);
   await page.testSubj.click(CONFIRM_BUTTON);
+  // Wait for the outcome first: right after the click neither element exists yet, so
+  // asserting the error is hidden would pass before the response arrives.
+  await expect(
+    page.testSubj.locator(SUBMIT_TOAST).or(page.testSubj.locator(SUBMIT_ERROR))
+  ).toBeVisible();
   await expect(page.testSubj.locator(SUBMIT_ERROR)).toBeHidden();
   await expect(page.testSubj.locator(SUBMIT_MODAL)).toBeHidden();
   await expect(page.testSubj.locator(SUBMIT_TOAST)).toBeVisible();
@@ -178,28 +183,28 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
     await openModalAndEnterHash(page);
     await confirmSubmitAndOpenResult(page);
 
-    // The flyout opened from the toast; its header title is the
-    // run's sample hash, so it identifies the run for the same-run check below.
+    // The flyout opened from the toast. The header title shows the task id until the
+    // task loads, so wait for the hash (a hash submit has no filename) before relying on it.
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
-    const flyoutTitle = await page.testSubj.locator(DETONATION_TITLE).innerText();
+    await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
 
     // The flyout closes back onto the list page, which still lists the run.
     await page.testSubj.locator(FLYOUT_CLOSE).click();
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeHidden();
     await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-    // The runs table lists newest first; the just-submitted run is the top
-    // row for this sample hash. Scope by text so leftover runs from other
-    // specs cannot satisfy this assertion for a run that never appeared.
+    // The runs table lists newest first. Filtering by the sample hash pins the sample,
+    // not this specific run: leftover runs of the same sample from other specs can match
+    // too, but a run list without this sample cannot satisfy the assertion.
     const submittedRun = page.testSubj
       .locator(RUNS_TABLE_LINK)
-      .filter({ hasText: flyoutTitle })
+      .filter({ hasText: SAMPLE_SHA256 })
       .first(); // eslint-disable-line playwright/no-nth-methods -- parallel specs share the table; the text filter already pins the sample
     await expect(submittedRun).toBeVisible();
     await submittedRun.click();
 
     await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
-    await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(flyoutTitle);
+    await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
   });
 
   spaceTest("shows the run's process lineage in the Session tab", async ({ page }) => {

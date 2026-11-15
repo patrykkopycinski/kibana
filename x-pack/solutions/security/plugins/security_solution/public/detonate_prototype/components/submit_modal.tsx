@@ -137,7 +137,10 @@ export const SubmitModal = React.memo<Props>(
     const [lastSubmitted, setLastSubmitted] = useState<SubmitMode | undefined>();
     const active =
       lastSubmitted === 'file' ? submitFile : lastSubmitted === 'hash' ? submitHash : undefined;
-    const usage = useDetonateUsage();
+    const usageQuery = useDetonateUsage();
+    // React Query keeps the last data when a refetch fails. Show the error instead of a
+    // count that may be out of date, so the two lines never appear together.
+    const usageData = usageQuery.isError ? undefined : usageQuery.data;
     // No architecture select: the service's submit contract has no architecture field yet.
     // The run's architecture is shown read-only in the result.
 
@@ -153,7 +156,7 @@ export const SubmitModal = React.memo<Props>(
     );
 
     const hasSubmitPrivilege = useCanSubmitDetonation();
-    const allowanceExhausted = usage.data ? isAllowanceExhausted(usage.data) : false;
+    const allowanceExhausted = usageData ? isAllowanceExhausted(usageData) : false;
 
     // Run docs store only the SHA-256, so only that digest can have a prior run.
     const priorRunLookup = useMemo(
@@ -198,10 +201,17 @@ export const SubmitModal = React.memo<Props>(
 
     // The file picker remounts on a tab switch and no longer shows the old file,
     // so a stale selection must not keep submit enabled.
-    const onModeChange = useCallback((next: SubmitMode) => {
-      setMode(next);
-      setFile(undefined);
-    }, []);
+    // EuiTab also fires onClick on the already-selected tab; that must not clear the file.
+    const onModeChange = useCallback(
+      (next: SubmitMode) => {
+        if (next === mode) {
+          return;
+        }
+        setMode(next);
+        setFile(undefined);
+      },
+      [mode]
+    );
 
     const onFileChange = useCallback((files: FileList | null) => {
       setFile(files?.[0]);
@@ -300,29 +310,29 @@ export const SubmitModal = React.memo<Props>(
             data-test-subj={SUBMIT_MODAL_LIMITATIONS_TEST_ID}
           />
 
-          {usage.isError && (
+          {usageQuery.isError && (
             <EuiText size="s" color="subdued" data-test-subj={SUBMIT_MODAL_USAGE_ERROR_TEST_ID}>
               {i18n.SUBMIT_MODAL_USAGE_UNAVAILABLE}
             </EuiText>
           )}
 
-          {usage.data && (
+          {usageData && (
             <EuiText size="s" color="subdued" data-test-subj={SUBMIT_MODAL_USAGE_TEST_ID}>
               {i18n.SUBMIT_MODAL_USAGE({
-                used: usage.data.used,
-                allowance: usage.data.allowance,
+                used: usageData.used,
+                allowance: usageData.allowance,
               })}
             </EuiText>
           )}
 
-          {allowanceExhausted && usage.data && (
+          {allowanceExhausted && usageData && (
             <EuiText
               size="s"
               color="danger"
               data-test-subj={SUBMIT_MODAL_ALLOWANCE_EXHAUSTED_TEST_ID}
             >
               {i18n.SUBMIT_MODAL_ALLOWANCE_EXHAUSTED(
-                new Date(usage.data.resetsAt).toLocaleDateString(undefined, {
+                new Date(usageData.resetsAt).toLocaleDateString(undefined, {
                   timeZone: 'UTC',
                   year: 'numeric',
                   month: 'short',

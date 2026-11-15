@@ -261,6 +261,20 @@ describe('SubmitModal', () => {
 
       expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeDisabled();
     });
+
+    it('keeps the chosen file when the already-selected tab is clicked again', () => {
+      renderModal();
+
+      fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
+      fireEvent.change(screen.getByTestId(SUBMIT_MODAL_FILE_INPUT_TEST_ID), {
+        target: { files: [new File(['MZ'], 'sample.exe')] },
+      });
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+
+      fireEvent.click(screen.getByText(i18n.SUBMIT_BY_FILE));
+
+      expect(screen.getByTestId(SUBMIT_MODAL_BUTTON_TEST_ID)).toBeEnabled();
+    });
   });
 
   describe('submit errors', () => {
@@ -401,6 +415,17 @@ describe('SubmitModal', () => {
       expect(screen.getByTestId(SUBMIT_MODAL_USAGE_ERROR_TEST_ID)).toHaveTextContent(
         i18n.SUBMIT_MODAL_USAGE_UNAVAILABLE
       );
+      expect(screen.queryByTestId(SUBMIT_MODAL_USAGE_TEST_ID)).toBeNull();
+    });
+
+    it('hides the stale count when a refetch failed but the last data is still held', () => {
+      mockUsage(
+        { used: 3, allowance: 10, resetsAt: '2026-12-01T00:00:00.000Z' } as DetonateUsage,
+        true
+      );
+      renderModal();
+
+      expect(screen.getByTestId(SUBMIT_MODAL_USAGE_ERROR_TEST_ID)).toBeInTheDocument();
       expect(screen.queryByTestId(SUBMIT_MODAL_USAGE_TEST_ID)).toBeNull();
     });
   });

@@ -102,7 +102,7 @@ interface DetonateButtonProps {
  * here so a card showing a finished run makes no usage request.
  *
  * Epic #20877 §6: no "Request more allowance" button, only the reset date; pending product answer.
- * Epic #20877 §6 (decided): computed in the browser, not stored on the run.
+ * Epic #20877 §6 (decided): the allowance check is computed in the browser, not stored on the run.
  */
 const DetonateButton: FC<DetonateButtonProps> = ({
   label,

@@ -244,6 +244,32 @@ describe('useDetonationRuns polling', () => {
     expect(result.current.data?.pages).toHaveLength(3);
   });
 
+  it('lets a poll tick leave an in-flight Load more to finish', async () => {
+    let resolveSecondPage: (value: unknown) => void = () => {};
+    jest.mocked(detonateApi.searchRuns).mockImplementation(((
+      _http: unknown,
+      { from }: { from?: number }
+    ) =>
+      from === 1
+        ? new Promise((resolve) => {
+            resolveSecondPage = resolve;
+          })
+        : Promise.resolve({ hits: [row('running')], total: 100 })) as never);
+    const { result } = await mount(1);
+
+    let loadMore: Promise<unknown> = Promise.resolve();
+    act(() => {
+      loadMore = result.current.fetchNextPage({ pageParam: 1 });
+    });
+    await tick();
+    await act(async () => {
+      resolveSecondPage({ hits: [row('complete')], total: 100 });
+      await loadMore;
+    });
+
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+  });
+
   describe('getNextPageParam', () => {
     const lastOptions = (size: number) => {
       const { wrapper } = setup();

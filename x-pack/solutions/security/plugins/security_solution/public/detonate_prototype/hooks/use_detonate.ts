@@ -201,8 +201,12 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
     // Re-reads only the pages that hold a running row, not every page scrolled. Offsets can drift
     // between pages (a new run shifts rows down) until the next full load; accepted.
     // `refetchPage` is accepted by `refetch`, not by the query options, hence the manual interval.
+    // `cancelRefetch: false`: the default cancels an in-flight Load more, whose rows would never append.
     const timer = setInterval(() => {
-      refetch({ refetchPage: (page: DetonationRunsResponse) => page.hits.some(isRunInFlight) });
+      refetch({
+        refetchPage: (page: DetonationRunsResponse) => page.hits.some(isRunInFlight),
+        cancelRefetch: false,
+      });
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [shouldPoll, refetch]);

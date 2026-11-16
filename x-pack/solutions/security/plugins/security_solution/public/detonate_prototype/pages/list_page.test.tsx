@@ -65,6 +65,7 @@ interface MockTableProps {
   onSort: (sort: string[][]) => void;
   onFetchMoreRecords: () => void;
   sampleSizeState: number;
+  ariaLabelledBy: string;
   rowsPerPageState: number;
   externalCustomRenderers: Record<string, (props: { rowIndex: number }) => React.ReactNode>;
 }
@@ -309,6 +310,17 @@ describe('DetonateListPage', () => {
       expect(screen.queryByTestId('mockTable')).not.toBeInTheDocument();
     });
 
+    it('names the grid after the page title element', async () => {
+      mockRuns([makeRun()]);
+      renderPage();
+      await screen.findByTestId('mockTable');
+
+      const { ariaLabelledBy } = lastTableProps();
+
+      expect(ariaLabelledBy).toBeTruthy();
+      expect(document.getElementById(ariaLabelledBy)).toHaveTextContent('Detonations');
+    });
+
     it('asks for the default columns and renders sample, verdict, alerts and status per run', async () => {
       mockRuns([makeRun()]);
       renderPage();
@@ -398,6 +410,39 @@ describe('DetonateListPage', () => {
 
       fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-preset-all`));
       expect(lastRunsQuery().kql).toBeUndefined();
+    });
+
+    it('keeps the unfiltered empty message when no filter is active', () => {
+      renderPage();
+
+      expect(screen.getByTestId(RUNS_TABLE_TEST_ID)).toHaveTextContent(/No detonations yet/);
+      expect(screen.queryByTestId(`${RUNS_TABLE_TEST_ID}-no-match`)).not.toBeInTheDocument();
+    });
+
+    it('says no detonations match when a preset is active and nothing is found', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-preset-malicious`));
+
+      expect(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-no-match`)).toHaveTextContent(
+        'No detonations match these filters'
+      );
+      expect(screen.getByTestId(RUNS_TABLE_TEST_ID)).not.toHaveTextContent(/No detonations yet/);
+    });
+
+    it('says no detonations match when a free text search finds nothing, and clears it', () => {
+      renderPage();
+      const input = screen.getByTestId('detonatePrototypeRunsSearch');
+      fireEvent.change(input, { target: { value: 'evil' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 13 });
+      expect(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-no-match`)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-clear-filters`));
+
+      expect(lastRunsQuery().search).toBeUndefined();
+      expect(lastRunsQuery().kql).toBeUndefined();
+      expect(screen.queryByTestId(`${RUNS_TABLE_TEST_ID}-no-match`)).not.toBeInTheDocument();
+      expect(screen.getByTestId('detonatePrototypeRunsSearch')).toHaveValue('');
     });
 
     it('passes the free text search to the runs query, trimmed', () => {

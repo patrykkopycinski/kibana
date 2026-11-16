@@ -33,6 +33,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -195,6 +196,7 @@ interface RunsTableProps {
   onPageSizeChange: (pageSize: number) => void;
   loadingState: DataLoadingState;
   onFetchMore: () => void;
+  titleId: string;
 }
 
 const RunsTable = ({
@@ -207,6 +209,7 @@ const RunsTable = ({
   onPageSizeChange,
   loadingState,
   onFetchMore,
+  titleId,
 }: RunsTableProps) => {
   const { openDetonationFlyout } = useFlyoutApi();
   const { services } = useKibana();
@@ -406,7 +409,7 @@ const RunsTable = ({
       getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
     >
       <UnifiedDataTable
-        ariaLabelledBy={i18n.RUNS_TITLE}
+        ariaLabelledBy={titleId}
         columns={currentColumns}
         dataView={dataView}
         loadingState={loadingState}
@@ -449,6 +452,9 @@ export const DetonateListPage = React.memo(() => {
   const [preset, setPreset] = useState<PresetId>('all');
   const [sort, setSort] = useState<SortOrder>(DEFAULT_SORT);
   const [pageSize, setPageSize] = useState(DETONATION_RUNS_DEFAULT_PAGE_SIZE);
+  const titleId = useGeneratedHtmlId({ prefix: 'detonateRunsTitle' });
+  // EuiFieldSearch is uncontrolled: a new key empties its text when the filters are cleared.
+  const [searchKey, setSearchKey] = useState(0);
 
   /**
    * The alert action arrives here with the hash it extracted. Reading it from
@@ -497,6 +503,7 @@ export const DetonateListPage = React.memo(() => {
     // Load more (shown once polling raises the total) a no-op. Polling still uses getNextPageParam.
     if (hits.length + pageSize > DETONATION_RUNS_MAX_RESULT_WINDOW) return;
     // An empty last page means `total` is stale: refetch only page 0 (fresh `total`) and the last page, not all pages.
+    // Default cancelRefetch: this is the user's click, so it wins over a poll already in flight.
     if (lastPageIsEmpty) {
       refetch({
         refetchPage: (_page, index, allPages) => index === 0 || index === allPages.length - 1,
@@ -537,6 +544,12 @@ export const DetonateListPage = React.memo(() => {
   }, [dataViews, toasts]);
 
   const onPresetChange = useCallback((id: string) => setPreset(id as PresetId), []);
+  const isFiltered = Boolean(kql) || Boolean(search);
+  const clearFilters = useCallback(() => {
+    setPreset('all');
+    setSearch('');
+    setSearchKey((key) => key + 1);
+  }, []);
 
   /**
    * `prefill` is set only for a modal opened by a URL hand-off. Each opening gets a new
@@ -652,11 +665,12 @@ export const DetonateListPage = React.memo(() => {
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiText>
-              <h2>{i18n.RUNS_TITLE}</h2>
+              <h2 id={titleId}>{i18n.RUNS_TITLE}</h2>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFieldSearch
+              key={searchKey}
               placeholder={i18n.RUNS_SEARCH_PLACEHOLDER}
               incremental={false}
               onSearch={onSearch}
@@ -689,7 +703,24 @@ export const DetonateListPage = React.memo(() => {
               data-test-subj={`${RUNS_TABLE_TEST_ID}-error`}
             />
           ) : !isLoading && totalHits === 0 ? (
-            <EuiEmptyPrompt body={<p>{i18n.RUNS_EMPTY}</p>} titleSize="xs" />
+            isFiltered ? (
+              <EuiEmptyPrompt
+                body={<p>{i18n.RUNS_NO_MATCH}</p>}
+                titleSize="xs"
+                actions={
+                  <EuiButton
+                    size="s"
+                    onClick={clearFilters}
+                    data-test-subj={`${RUNS_TABLE_TEST_ID}-clear-filters`}
+                  >
+                    {i18n.RUNS_CLEAR_FILTERS}
+                  </EuiButton>
+                }
+                data-test-subj={`${RUNS_TABLE_TEST_ID}-no-match`}
+              />
+            ) : (
+              <EuiEmptyPrompt body={<p>{i18n.RUNS_EMPTY}</p>} titleSize="xs" />
+            )
           ) : dataView ? (
             <RunsTable
               dataView={dataView}
@@ -707,6 +738,7 @@ export const DetonateListPage = React.memo(() => {
                   : DataLoadingState.loaded
               }
               onFetchMore={loadMore}
+              titleId={titleId}
             />
           ) : null}
         </div>

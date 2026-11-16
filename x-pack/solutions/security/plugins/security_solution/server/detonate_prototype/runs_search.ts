@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataViewBase, KueryNode } from '@kbn/es-query';
@@ -98,6 +99,10 @@ export const buildRunsQuery = ({
   },
 });
 
+const isIndexNotFound = (error: unknown): boolean =>
+  isResponseError(error) &&
+  (error.statusCode === 404 || error.body?.error?.type === 'index_not_found_exception');
+
 export const searchRuns = async ({
   esClient,
   spaceId,
@@ -109,21 +114,28 @@ export const searchRuns = async ({
 }): Promise<DetonationRunsResponse> => {
   const sortField = query.sort_field ?? '@timestamp';
   const sortDirection = query.sort_direction ?? 'desc';
-  const response = await esClient.search<DetonationRecord>({
-    index: detonateResultsIndexName(spaceId),
-    // A space whose first run has not been written has no index yet: an empty list, not an error.
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    query: buildRunsQuery(query),
-    sort: [
-      { [sortField]: { order: sortDirection, unmapped_type: DETONATION_RUN_FIELDS[sortField] } },
-      // Ties break on the task id so paging and the flyout's previous/next stay stable.
-      { 'detonate.task_id': { order: 'asc', unmapped_type: 'keyword' } },
-    ],
-    from: query.from ?? 0,
-    size: query.size ?? DETONATION_RUNS_DEFAULT_PAGE_SIZE,
-    track_total_hits: true,
-  });
+  const response = await esClient
+    .search<DetonationRecord>({
+      index: detonateResultsIndexName(spaceId),
+      // A space whose first run has not been written has no index yet: an empty list, not an error.
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: buildRunsQuery(query),
+      sort: [
+        { [sortField]: { order: sortDirection, unmapped_type: DETONATION_RUN_FIELDS[sortField] } },
+        // Ties break on the task id so paging and the flyout's previous/next stay stable.
+        { 'detonate.task_id': { order: 'asc', unmapped_type: 'keyword' } },
+      ],
+      from: query.from ?? 0,
+      size: query.size ?? DETONATION_RUNS_DEFAULT_PAGE_SIZE,
+      track_total_hits: true,
+    })
+    // Defensive: the flags above do not cover every hidden-index edge case, so a still-missing index is empty too.
+    .catch((error: unknown) => {
+      if (isIndexNotFound(error)) return undefined;
+      throw error;
+    });
+  if (!response) return { hits: [], total: 0 };
   const { total } = response.hits;
   return {
     hits: response.hits.hits.flatMap(({ _source }) => (_source ? [_source] : [])),

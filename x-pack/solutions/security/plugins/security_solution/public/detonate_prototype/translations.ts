@@ -105,6 +105,16 @@ export const RUNS_EMPTY = i18n.translate('xpack.securitySolution.detonatePrototy
   defaultMessage: 'No detonations yet. Submit a sample to start one.',
 });
 
+export const RUNS_NO_MATCH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.noMatch',
+  { defaultMessage: 'No detonations match these filters' }
+);
+
+export const RUNS_CLEAR_FILTERS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.clearFilters',
+  { defaultMessage: 'Clear filters' }
+);
+
 export const RUNS_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.errorTitle',
   { defaultMessage: 'Could not load detonations' }

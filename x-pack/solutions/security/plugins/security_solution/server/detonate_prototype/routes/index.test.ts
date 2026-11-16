@@ -1542,14 +1542,48 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
     });
 
-    it('answers an empty list when the results index does not exist yet', async () => {
+    it('searches tolerating a missing index and answers an empty list', async () => {
       esClient.search.mockResolvedValue({
         hits: { total: { value: 0, relation: 'eq' }, hits: [] },
       });
 
       await search();
 
+      expect(searchArgs()).toEqual(
+        expect.objectContaining({ ignore_unavailable: true, allow_no_indices: true })
+      );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hits: [], total: 0 } });
+    });
+
+    describe('when the search still rejects', () => {
+      const responseError = (statusCode: number, type: string) => {
+        const { errors } = jest.requireActual<{
+          errors: typeof import('@elastic/elasticsearch').errors;
+        }>('@elastic/elasticsearch');
+        return new errors.ResponseError({
+          statusCode,
+          body: { error: { type, reason: 'boom' } },
+          headers: {},
+          meta: {},
+          warnings: [],
+        } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
+      };
+
+      it('answers an empty list for an index_not_found_exception', async () => {
+        esClient.search.mockRejectedValue(responseError(404, 'index_not_found_exception'));
+
+        await search();
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hits: [], total: 0 } });
+      });
+
+      it('does not swallow any other search failure', async () => {
+        esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
+
+        await search();
+
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+      });
     });
 
     it('answers 400 for a clause without a field, which would match every field', async () => {

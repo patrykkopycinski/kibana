@@ -99,9 +99,9 @@ export const buildRunsQuery = ({
   },
 });
 
+// The error type, not the status: other 404s (a missing resource, a proxy answering 404) are real failures.
 const isIndexNotFound = (error: unknown): boolean =>
-  isResponseError(error) &&
-  (error.statusCode === 404 || error.body?.error?.type === 'index_not_found_exception');
+  isResponseError(error) && error.body?.error?.type === 'index_not_found_exception';
 
 export const searchRuns = async ({
   esClient,

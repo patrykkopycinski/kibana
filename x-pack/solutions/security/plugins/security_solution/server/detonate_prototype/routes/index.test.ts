@@ -1556,13 +1556,13 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     describe('when the search still rejects', () => {
-      const responseError = (statusCode: number, type: string) => {
+      const responseError = (statusCode: number, type?: string) => {
         const { errors } = jest.requireActual<{
           errors: typeof import('@elastic/elasticsearch').errors;
         }>('@elastic/elasticsearch');
         return new errors.ResponseError({
           statusCode,
-          body: { error: { type, reason: 'boom' } },
+          body: type ? { error: { type, reason: 'boom' } } : undefined,
           headers: {},
           meta: {},
           warnings: [],
@@ -1579,6 +1579,22 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       it('does not swallow any other search failure', async () => {
         esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
+
+        await search();
+
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+      });
+
+      it('does not treat another 404 type as a missing index', async () => {
+        esClient.search.mockRejectedValue(responseError(404, 'resource_not_found_exception'));
+
+        await search();
+
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+      });
+
+      it('does not treat a 404 without a body as a missing index', async () => {
+        esClient.search.mockRejectedValue(responseError(404));
 
         await search();
 

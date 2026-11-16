@@ -65,6 +65,7 @@ import {
   detonateSandboxStreamName,
   deriveDetonateVerdict,
   diffCategoryCounts,
+  isDetonationComplete,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateAlertDoc,
@@ -82,6 +83,7 @@ import type {
   DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
   DetonateTask,
+  DetonateTaskUpdate,
   DetonateUsage,
 } from '../../../common/detonate_prototype';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -410,6 +412,24 @@ export const registerDetonatePrototypeRoutes = ({
   };
 
   /**
+   * The run's updates, for the duration on its record, read only once the task has finished:
+   * a running task has no end yet, so its poll ticks cost nothing extra. Best-effort, so a
+   * failed read writes the record without a duration; a later write keeps one already stored.
+   */
+  const readCompletedUpdates = async (
+    client: DetonateClient,
+    task: DetonateTask
+  ): Promise<DetonateTaskUpdate[]> => {
+    if (!isDetonationComplete(task)) return [];
+    try {
+      return await client.getTaskUpdates(task.id);
+    } catch (error) {
+      logger.debug(`Detonation ${task.id}: could not read updates: ${error}`);
+      return [];
+    }
+  };
+
+  /**
    * The results store only changes when something reads the run, so a run that ended since its last
    * read still says "running" there. For the live running hits on the returned page (up to the page
    * size), read the service and write the answer through, then return it in place of the stored hit.
@@ -429,8 +449,11 @@ export const registerDetonatePrototypeRoutes = ({
 
     const refresh = async (hit: DetonationRecord): Promise<DetonationRecord> => {
       const taskId = hit['detonate.task_id'];
-      const fresh = toDetonationRecord(await getTaskInSpace(getClient(request), taskId, spaceId), {
+      const client = getClient(request);
+      const task = await getTaskInSpace(client, taskId, spaceId);
+      const fresh = toDetonationRecord(task, {
         spaceId,
+        updates: await readCompletedUpdates(client, task),
       });
       // Waits for the write to be searchable: the table's stats search runs right after this
       // response, and a run that just ended must not still count as running there.
@@ -741,10 +764,15 @@ export const registerDetonatePrototypeRoutes = ({
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
           const spaceId = spaceIdFromRequest(request);
-          const task = await getTaskInSpace(getClient(request), request.params.taskId, spaceId);
+          const client = getClient(request);
+          const task = await getTaskInSpace(client, request.params.taskId, spaceId);
           // Every poll writes: the UI and the workflow poll until the run ends, and
           // Elasticsearch skips the write when the document did not change.
-          void recordRun(spaceId, () => toDetonationRecord(task, { spaceId }));
+          const writeRecord = async () => {
+            const updates = await readCompletedUpdates(client, task);
+            await recordRun(spaceId, () => toDetonationRecord(task, { spaceId, updates }));
+          };
+          void writeRecord();
           return response.ok<DetonateTask>({ body: task });
         } catch (error) {
           return toErrorResponse(error, response);
@@ -800,10 +828,7 @@ export const registerDetonatePrototypeRoutes = ({
           const task = await getTaskInSpace(client, request.params.id, spaceId);
           // Both reads are best-effort: the record stays useful without a duration or IOCs.
           const [updates, iocs] = await Promise.all([
-            client.getTaskUpdates(task.id).catch((error) => {
-              logger.debug(`Detonation ${task.id}: could not read updates: ${error}`);
-              return [];
-            }),
+            readCompletedUpdates(client, task),
             readTaskIocs(
               task,
               (kind) => client.getTaskAlerts(task.id, kind, IOC_ALERT_READ_LIMIT),

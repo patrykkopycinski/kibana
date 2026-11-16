@@ -2012,6 +2012,24 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(esClient.update).toHaveBeenCalledTimes(1);
       });
 
+      it('writes the duration of a run the refresh finds finished', async () => {
+        returnHits('running');
+        client.getTask.mockResolvedValue(runningTask as never);
+        client.getTaskUpdates.mockResolvedValue([
+          { task: runningTask, timestamp: '2026-12-15T10:05:00.000Z' },
+        ] as never);
+
+        await search();
+
+        expect(client.getTaskUpdates).toHaveBeenCalledWith('a');
+        expect(esClient.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            doc: expect.objectContaining({ 'event.duration': 6 * 60 * 1000 * 1_000_000 }),
+          }),
+          expect.anything()
+        );
+      });
+
       it('waits for the write-through to be searchable, so the stats search that follows sees it', async () => {
         returnHits('running');
         client.getTask.mockResolvedValue(runningTask as never);
@@ -3750,6 +3768,64 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(esClient.update).toHaveBeenCalledTimes(1);
       expect(mockResponse.ok).toHaveBeenCalledTimes(1);
       expect(mockResponse.customError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('the duration on a record written by the write that sees the run finish', () => {
+    const FIVE_MINUTES_NS = 5 * 60 * 1000 * 1_000_000;
+    const finishedTask = {
+      ...NO_ALERT_GROUPS,
+      id: 'task-1',
+      created_at: '2026-12-15T10:00:00.000Z',
+      tags: ['space:default'],
+    };
+    const stillRunning = { ...finishedTask, last_worker_name: 'detonate.workers.detonate_file' };
+    const updatesEndingAfterFiveMinutes = [
+      { task: finishedTask, timestamp: '2026-12-15T10:05:00.000Z' },
+    ];
+
+    const poll = async () => {
+      await getTaskHandler()(
+        createContext(),
+        createRequest('get', `${DETONATE_TASKS_PATH}/task-1`, undefined, { taskId: 'task-1' }),
+        mockResponse
+      );
+      await flushWrites();
+    };
+    const writtenDoc = () =>
+      (esClient.update.mock.calls[0][0] as unknown as { doc: Record<string, unknown> }).doc;
+
+    it('writes event.duration from a completed task on a poll', async () => {
+      client.getTask.mockResolvedValue(finishedTask as never);
+      client.getTaskUpdates.mockResolvedValue(updatesEndingAfterFiveMinutes as never);
+
+      await poll();
+
+      expect(client.getTaskUpdates).toHaveBeenCalledWith('task-1');
+      expect(writtenDoc()).toMatchObject({ 'event.duration': FIVE_MINUTES_NS });
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: finishedTask });
+    });
+
+    it('does not read the updates of a running task on a poll, and writes it without a duration', async () => {
+      client.getTask.mockResolvedValue(stillRunning as never);
+
+      await poll();
+
+      expect(client.getTaskUpdates).not.toHaveBeenCalled();
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      expect(writtenDoc()).not.toHaveProperty(['event.duration']);
+    });
+
+    it('still writes the record, without a duration, when the updates cannot be read', async () => {
+      client.getTask.mockResolvedValue(finishedTask as never);
+      client.getTaskUpdates.mockRejectedValue(new Error('timeline down'));
+
+      await poll();
+
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      expect(writtenDoc()).toMatchObject({ 'detonate.task_id': 'task-1' });
+      expect(writtenDoc()).not.toHaveProperty(['event.duration']);
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: finishedTask });
     });
   });
 });

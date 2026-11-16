@@ -37,6 +37,7 @@ import {
 
 import {
   alertRunTag,
+  DETONATION_DURATION_REPAIR_MAX_AGE_MS,
   DETONATION_RUN_MAX_AGE_MS,
   DETONATION_RUNS_MAX_KQL_LENGTH,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
@@ -205,10 +206,13 @@ const handoffMarkerListSchema = schema.maybe(
 const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
 
 /** How many stale runs (running, or complete without a duration) the runs route re-reads at once. */
-const RUNNING_REFRESH_CONCURRENCY = 5;
+const STALE_REFRESH_CONCURRENCY = 5;
 
 /** The whole refresh pass gives up after this long and answers with the stored hits. */
-const RUNNING_REFRESH_DEADLINE_MS = 3_000;
+const STALE_REFRESH_DEADLINE_MS = 3_000;
+
+/** At most this many complete runs without a duration are repaired per request. */
+const DURATION_REPAIR_MAX_PER_REQUEST = 3;
 
 const ORIGIN_TEXT_MAX_LENGTH = { host_name: 256, user_name: 256, file_path: 4096 } as const;
 
@@ -417,8 +421,12 @@ export const registerDetonatePrototypeRoutes = ({
    * returned page (up to the page size) that are either live running runs or complete runs with no
    * duration, read the service and write the answer through, then return it in place of the stored
    * hit. Running hits are started first, so a page of old complete runs cannot use up the time
-   * budget a live one needs. Any failure, or running out of time, keeps the stored hit: the table
-   * must load even when the service is down or hung.
+   * budget a live one needs. Repairing a complete run is bounded two ways, because a run that
+   * cannot be repaired (task gone, no usable updates) is otherwise re-read on every load: only
+   * runs newer than DETONATION_DURATION_REPAIR_MAX_AGE_MS, and at most
+   * DURATION_REPAIR_MAX_PER_REQUEST per request; running hits are not capped. Any failure, or
+   * running out of time, keeps the stored hit: the table must load even when the service is down
+   * or hung.
    */
   const refreshStaleHits = async (
     request: KibanaRequest,
@@ -426,13 +434,15 @@ export const registerDetonatePrototypeRoutes = ({
     spaceId: string
   ): Promise<DetonationRecord[]> => {
     // One deadline for the whole pass, not per hit, so a hung service costs at most this much.
-    const deadline = Date.now() + RUNNING_REFRESH_DEADLINE_MS;
+    const deadline = Date.now() + STALE_REFRESH_DEADLINE_MS;
     const isLive = (hit: DetonationRecord) =>
       hit['detonate.state'] === 'running' &&
       Date.now() - Date.parse(hit['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
-    // Any age: a complete run whose updates read failed is re-tried on a later page load.
-    const isCompleteWithoutDuration = (hit: DetonationRecord) =>
-      hit['detonate.state'] === 'complete' && hit['event.duration'] === undefined;
+    // A complete run whose updates read failed is re-tried on a later page load, while recent.
+    const isRepairable = (hit: DetonationRecord) =>
+      hit['detonate.state'] === 'complete' &&
+      hit['event.duration'] === undefined &&
+      Date.now() - Date.parse(hit['@timestamp']) < DETONATION_DURATION_REPAIR_MAX_AGE_MS;
 
     const refresh = async (hit: DetonationRecord): Promise<DetonationRecord> => {
       const taskId = hit['detonate.task_id'];
@@ -442,9 +452,14 @@ export const registerDetonatePrototypeRoutes = ({
         spaceId,
         updates: await readCompletedUpdates(client, task, logger),
       });
-      // Waits for the write to be searchable: the table's stats search runs right after this
-      // response, and a run that just ended must not still count as running there.
-      await recordRun(spaceId, () => fresh, { refresh: 'wait_for' });
+      // A run that was stored as running waits for the write to be searchable: the table's stats
+      // search runs right after this response, and a run that just ended must not still count as
+      // running there. Repairing an already-complete hit changes no count, so it does not wait.
+      await recordRun(
+        spaceId,
+        () => fresh,
+        hit['detonate.state'] === 'running' ? { refresh: 'wait_for' } : {}
+      );
       // The submit-only fields are not on the task; the stored hit still carries them.
       return { ...hit, ...fresh };
     };
@@ -467,14 +482,15 @@ export const registerDetonatePrototypeRoutes = ({
       }
     };
 
-    // pMap starts its items in order, so sorting the running ones to the front (the sort is
-    // stable) gives them the first slots; results go back to their original positions.
-    const candidates = hits
-      .map((hit, index) => ({ hit, index }))
-      .filter(({ hit }) => isLive(hit) || isCompleteWithoutDuration(hit))
-      .sort((a, b) => Number(!isLive(a.hit)) - Number(!isLive(b.hit)));
+    // pMap starts its items in order, so the running ones go first and get the first slots;
+    // results go back to their original positions.
+    const indexed = hits.map((hit, index) => ({ hit, index }));
+    const candidates = [
+      ...indexed.filter(({ hit }) => isLive(hit)),
+      ...indexed.filter(({ hit }) => isRepairable(hit)).slice(0, DURATION_REPAIR_MAX_PER_REQUEST),
+    ];
     const refreshed = await pMap(candidates, ({ hit }) => refreshWithinDeadline(hit), {
-      concurrency: RUNNING_REFRESH_CONCURRENCY,
+      concurrency: STALE_REFRESH_CONCURRENCY,
     });
     const result = [...hits];
     candidates.forEach(({ index }, position) => {

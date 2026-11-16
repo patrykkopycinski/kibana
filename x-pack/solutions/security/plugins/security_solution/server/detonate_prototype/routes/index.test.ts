@@ -2054,6 +2054,43 @@ describe('registerDetonatePrototypeRoutes', () => {
         );
       });
 
+      it('writes a repair of an already-complete hit without waiting for it to be searchable', async () => {
+        returnSources(storedHit('complete'));
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
+
+        await search();
+
+        expect(esClient.update).toHaveBeenCalledTimes(1);
+        expect(esClient.update.mock.calls[0][0]).not.toHaveProperty('refresh');
+      });
+
+      it('does not re-read a complete hit without a duration older than 24 hours', async () => {
+        returnSources(
+          storedHit('complete', 0, new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString())
+        );
+
+        await search();
+
+        expect(client.getTask).not.toHaveBeenCalled();
+        expect(client.getTaskUpdates).not.toHaveBeenCalled();
+        expect(esClient.update).not.toHaveBeenCalled();
+      });
+
+      it('repairs at most three complete hits per request', async () => {
+        const ids = ['c1', 'c2', 'c3', 'c4', 'c5'];
+        returnSources(...ids.map((id) => ({ ...storedHit('complete'), 'detonate.task_id': id })));
+        client.getTask.mockImplementation((async (id: string) => ({
+          ...nowFinishedTask,
+          id,
+        })) as never);
+
+        await search();
+
+        expect(client.getTask.mock.calls.map(([id]) => id)).toEqual(['c1', 'c2', 'c3']);
+        expect(esClient.update).toHaveBeenCalledTimes(3);
+        expect(returnedHits().map((hit) => hit['detonate.task_id'])).toEqual(ids);
+      });
+
       it('keeps the stored hit and still answers when the service fails', async () => {
         returnHits('running');
         client.getTask.mockRejectedValue(new Error('service down'));
@@ -2183,7 +2220,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(doc).not.toHaveProperty(['event.duration']);
       });
 
-      it('refreshes a complete hit without a duration, at any age, and gives it one', async () => {
+      it('refreshes a recent complete hit without a duration and gives it one', async () => {
         returnSources({
           ...storedHit('complete', 0, new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()),
         });
@@ -2216,36 +2253,60 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(esClient.update).not.toHaveBeenCalled();
       });
 
+      it('refreshes every running hit even when complete ones reach the repair cap', async () => {
+        const completeIds = ['c1', 'c2', 'c3', 'c4', 'c5'];
+        const runningIds = ['r1', 'r2', 'r3', 'r4', 'r5', 'r6'];
+        returnSources(
+          ...completeIds.map((id) => ({ ...storedHit('complete'), 'detonate.task_id': id })),
+          ...runningIds.map((id) => ({ ...storedHit('running'), 'detonate.task_id': id }))
+        );
+        client.getTask.mockImplementation((async (id: string) => ({
+          ...nowFinishedTask,
+          id,
+        })) as never);
+
+        await search();
+
+        const read = client.getTask.mock.calls.map(([id]) => id);
+        expect(read).toEqual(expect.arrayContaining(runningIds));
+        expect(read.filter((id) => completeIds.includes(id as string))).toHaveLength(3);
+        const hits = returnedHits();
+        expect(hits.map((hit) => hit['detonate.task_id'])).toEqual([...completeIds, ...runningIds]);
+        runningIds.forEach((_id, i) =>
+          expect(hits[completeIds.length + i]).toEqual(
+            expect.objectContaining({ 'detonate.state': 'complete' })
+          )
+        );
+        const updatedIds = esClient.update.mock.calls.map(([args]) => (args as { id: string }).id);
+        expect(updatedIds).toEqual(expect.arrayContaining(runningIds));
+        expect(updatedIds).toHaveLength(9);
+      });
+
       it('starts running hits before complete ones when the deadline is short', async () => {
         jest.useFakeTimers();
         try {
-          // Five hung complete hits would fill every slot if they went first.
-          const completeIds = ['c1', 'c2', 'c3', 'c4', 'c5'];
+          // Hung repairs must not use up the time budget the live runs need.
+          const completeIds = ['c1', 'c2', 'c3'];
+          const runningIds = ['r1', 'r2', 'r3', 'r4', 'r5'];
           returnSources(
-            ...completeIds.map((id) => ({
-              ...storedHit('complete'),
-              'detonate.task_id': id,
-            })),
-            { ...storedHit('running'), 'detonate.task_id': 'live' }
+            ...completeIds.map((id) => ({ ...storedHit('complete'), 'detonate.task_id': id })),
+            ...runningIds.map((id) => ({ ...storedHit('running'), 'detonate.task_id': id }))
           );
           client.getTask.mockImplementation(((id: string) =>
-            id === 'live'
-              ? Promise.resolve({ ...nowFinishedTask, id: 'live' })
+            id.startsWith('r')
+              ? new Promise((resolve) =>
+                  setTimeout(() => resolve({ ...nowFinishedTask, id }), 2_000)
+                )
               : new Promise(() => {})) as never);
 
           const answered = search();
           await jest.advanceTimersByTimeAsync(3_500);
           await answered;
 
-          const hits = returnedHits();
-          expect(hits.map((hit) => hit['detonate.task_id'])).toEqual([...completeIds, 'live']);
-          expect(hits[5]).toEqual(expect.objectContaining({ 'detonate.state': 'complete' }));
-          expect(hits[0]).toEqual(expect.objectContaining({ 'detonate.state': 'complete' }));
-          expect(esClient.update).toHaveBeenCalledTimes(1);
-          expect(esClient.update).toHaveBeenCalledWith(
-            expect.objectContaining({ id: 'live' }),
-            expect.anything()
+          const updatedIds = esClient.update.mock.calls.map(
+            ([args]) => (args as { id: string }).id
           );
+          expect(updatedIds.sort()).toEqual(runningIds);
         } finally {
           jest.useRealTimers();
         }

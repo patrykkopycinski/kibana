@@ -306,6 +306,13 @@ export const DETONATE_MAX_EXEC_WAIT_SECS = 900;
 export const DETONATION_RUN_MAX_AGE_MS = (DETONATE_MAX_EXEC_WAIT_SECS + 300) * 1000;
 
 /**
+ * A complete run stored without a duration is only repaired while it is this recent: an older one
+ * is assumed unrepairable (task gone from the service, no usable updates), and a longer window
+ * just repeats failing reads.
+ */
+export const DETONATION_DURATION_REPAIR_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+/**
  * Execution wait the detonation service applies to a submit that omits `exec_wait_secs`; matches
  * the Detonate simulator's default exec wait (60 s).
  */

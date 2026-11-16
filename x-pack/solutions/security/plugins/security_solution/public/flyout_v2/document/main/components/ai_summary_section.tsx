@@ -15,6 +15,8 @@ import { DocumentSummarySection } from './document_summary_section';
 import { EventKind } from '../constants/event_kinds';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
 import { getRawData } from '../../../../assistant/helpers';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDetonationCardRuns } from '../../../../detonate_prototype/hooks/use_detonate';
 import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
 
 const EMPTY_DATA: TimelineEventsDetailsItem[] = [];
@@ -53,7 +55,34 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
     [dataFormattedForFieldBrowser]
   );
 
-  const getPromptContext = useCallback(async () => getRawData(safeData), [safeData]);
+  const detonatePrototypeEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
+  // An undefined alert id disables the query, so nothing is read unless the feature is on.
+  const includeDetonation = detonatePrototypeEnabled && isAlert;
+  const { alertRuns } = useDetonationCardRuns({
+    alertId: includeDetonation ? hit.raw._id : undefined,
+    hash: undefined,
+  });
+  // Runs come newest first. The summary is stored per document, not keyed by its prompt context,
+  // so the fields can arrive after the first render without invalidating anything.
+  const detonation = includeDetonation
+    ? alertRuns.data?.hits.find(
+        (run) => run['detonate.state'] === 'complete' && run['detonate.verdict']
+      )
+    : undefined;
+  const detonateVerdict = detonation?.['detonate.verdict'];
+  const detonateConfidence = detonation?.['detonate.confidence'];
+
+  const getPromptContext = useCallback(async () => {
+    const rawData = getRawData(safeData);
+    if (!detonateVerdict) {
+      return rawData;
+    }
+    return {
+      ...rawData,
+      'detonate.verdict': [detonateVerdict],
+      ...(detonateConfidence ? { 'detonate.confidence': [detonateConfidence] } : {}),
+    };
+  }, [safeData, detonateVerdict, detonateConfidence]);
 
   if (!isAlert) {
     return null;

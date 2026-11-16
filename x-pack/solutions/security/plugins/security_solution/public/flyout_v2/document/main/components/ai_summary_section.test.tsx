@@ -13,6 +13,8 @@ import { AISummarySection } from './ai_summary_section';
 import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
 import { getRawData } from '../../../../assistant/helpers';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDetonationCardRuns } from '../../../../detonate_prototype/hooks/use_detonate';
 
 const MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID = 'document-summary-section-stub';
 
@@ -30,6 +32,9 @@ jest.mock('./document_summary_section', () => ({
     );
   },
 }));
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../detonate_prototype/hooks/use_detonate');
 
 jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
   useEventDetails: jest.fn(),
@@ -71,6 +76,8 @@ describe('AISummarySection', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest.mocked(useDetonationCardRuns).mockReturnValue({ alertRuns: { data: undefined } } as never);
     mockUseEventDetails.mockReturnValue({
       browserFields: {},
       dataAsNestedObject: null,
@@ -128,5 +135,60 @@ describe('AISummarySection', () => {
 
     expect(queryByTestId(AI_SUMMARY_SECTION_TEST_ID)).not.toBeInTheDocument();
     expect(mockDocumentSummarySection).not.toHaveBeenCalled();
+  });
+
+  describe('detonation verdict in the prompt context', () => {
+    const completed = {
+      'detonate.state': 'complete',
+      'detonate.verdict': 'malicious',
+      'detonate.confidence': 'high',
+    };
+    const setRuns = (hits: Array<Record<string, unknown>>) =>
+      jest
+        .mocked(useDetonationCardRuns)
+        .mockReturnValue({ alertRuns: { data: { hits } } } as never);
+
+    it('adds the newest completed run verdict and confidence when the flag is on', async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      setRuns([
+        { 'detonate.state': 'running' },
+        completed,
+        { ...completed, 'detonate.verdict': 'benign' },
+      ]);
+      render(<AISummarySection hit={createMockHit()} />);
+
+      const props = mockDocumentSummarySection.mock.calls[0][0];
+      await expect(props.getPromptContext()).resolves.toEqual({
+        ...getRawData(mockDataFormattedForFieldBrowser),
+        'detonate.verdict': ['malicious'],
+        'detonate.confidence': ['high'],
+      });
+      expect(useDetonationCardRuns).toHaveBeenCalledWith({
+        alertId: 'event-id-1',
+        hash: undefined,
+      });
+    });
+
+    it('leaves the context unchanged when no run has completed', async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      setRuns([{ 'detonate.state': 'running' }]);
+      render(<AISummarySection hit={createMockHit()} />);
+
+      const props = mockDocumentSummarySection.mock.calls[0][0];
+      await expect(props.getPromptContext()).resolves.toEqual(
+        getRawData(mockDataFormattedForFieldBrowser)
+      );
+    });
+
+    it('does not read runs or add fields when the flag is off', async () => {
+      setRuns([completed]);
+      render(<AISummarySection hit={createMockHit()} />);
+
+      expect(useDetonationCardRuns).toHaveBeenCalledWith({ alertId: undefined, hash: undefined });
+      const props = mockDocumentSummarySection.mock.calls[0][0];
+      await expect(props.getPromptContext()).resolves.toEqual(
+        getRawData(mockDataFormattedForFieldBrowser)
+      );
+    });
   });
 });

@@ -22,6 +22,7 @@ import {
   DETONATE_RUNS_PATH,
   DETONATE_TASKS_PATH,
   DETONATE_USAGE_PATH,
+  DETONATION_RUNS_SORT_FIELDS,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { createRunRecorder } from '../results_store';
@@ -1433,6 +1434,134 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect.objectContaining({ statusCode: 503 })
       );
       expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('runs search', () => {
+    const runsHandler = () =>
+      router.versioned.getRoute('get', DETONATE_RUNS_PATH).versions['1'].handler;
+    const runsQuerySchema = () => {
+      const { config } = router.versioned.getRoute('get', DETONATE_RUNS_PATH).versions['1'];
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      return (validation as { request: { query: { validate(q: unknown): unknown } } }).request
+        .query;
+    };
+    const search = (query: Record<string, unknown> = {}) =>
+      runsHandler()(
+        createContext(),
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: DETONATE_RUNS_PATH,
+          query: runsQuerySchema().validate(query) as never,
+        }),
+        mockResponse
+      );
+    const searchArgs = () => esClient.search.mock.calls[0][0];
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          hits: [
+            { _source: { 'detonate.task_id': 'a' } },
+            { _source: { 'detonate.task_id': 'b' } },
+          ],
+        },
+      });
+    });
+
+    it('bounds every parameter and rejects a sort field outside the allowlist', () => {
+      const schemaOf = runsQuerySchema();
+
+      expect(schemaOf.validate({})).toEqual({});
+      expect(() => schemaOf.validate({ kql: 'a'.repeat(1025) })).toThrow();
+      expect(() => schemaOf.validate({ search: 'a'.repeat(129) })).toThrow();
+      expect(() => schemaOf.validate({ size: 101 })).toThrow();
+      expect(() => schemaOf.validate({ size: 0 })).toThrow();
+      expect(() => schemaOf.validate({ from: -1 })).toThrow();
+      expect(() => schemaOf.validate({ from: 10000 })).toThrow();
+      expect(() => schemaOf.validate({ sort_direction: 'sideways' })).toThrow();
+      expect(() => schemaOf.validate({ sort_field: 'tags' })).toThrow();
+      expect(() => schemaOf.validate({ sort_field: 'detonate.doc_kind' })).toThrow();
+      DETONATION_RUNS_SORT_FIELDS.forEach((sortField) =>
+        expect(schemaOf.validate({ sort_field: sortField })).toEqual({ sort_field: sortField })
+      );
+    });
+
+    it("reads this space's results index as the internal user and returns the hits and total", async () => {
+      await search();
+
+      expect(searchArgs()).toEqual(
+        expect.objectContaining({
+          index: '.kibana-detonate-results-team-a',
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          track_total_hits: true,
+          from: 0,
+          size: 50,
+        })
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { hits: [{ 'detonate.task_id': 'a' }, { 'detonate.task_id': 'b' }], total: 2 },
+      });
+    });
+
+    it('always filters to run documents, with or without a KQL filter', async () => {
+      await search({ kql: 'detonate.state: "running"' });
+
+      const { filter } = searchArgs().query.bool;
+      expect(filter[0]).toEqual({ term: { 'detonate.doc_kind': 'run' } });
+      expect(JSON.stringify(filter[1])).toContain('detonate.state');
+    });
+
+    it('sorts by the requested field, ties broken by task id', async () => {
+      await search({ sort_field: 'detonate.alerts.total', sort_direction: 'asc' });
+
+      expect(searchArgs().sort).toEqual([
+        { 'detonate.alerts.total': { order: 'asc', unmapped_type: 'long' } },
+        { 'detonate.task_id': { order: 'asc', unmapped_type: 'keyword' } },
+      ]);
+    });
+
+    it('turns free text into escaped wildcard clauses over hash, name, tag and submitter', async () => {
+      await search({ search: 'ev*il" OR x:y' });
+
+      const { filter } = searchArgs().query.bool;
+      expect(JSON.stringify(filter)).not.toContain('query_string');
+      expect(filter[1].bool.should).toEqual(
+        ['file.hash.sha256', 'file.name', 'tags', 'detonate.submitter'].map((field) => ({
+          wildcard: { [field]: { value: '*ev\\*il" OR x:y*', case_insensitive: true } },
+        }))
+      );
+    });
+
+    it('answers an empty list when the results index does not exist yet', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+      });
+
+      await search();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hits: [], total: 0 } });
+    });
+
+    it('answers 400 for KQL that does not parse and never queries', async () => {
+      await search({ kql: 'detonate.state: (' });
+
+      expect(mockResponse.badRequest).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('answers 500 when the results store fails', async () => {
+      esClient.search.mockRejectedValue(new Error('es down'));
+
+      await search();
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
     });
   });
 

@@ -13,8 +13,10 @@ import type {
   DetonateTaskUpdate,
   DetonateVerdictName,
   DetonationRecord,
+  DetonationRecordFieldType,
 } from '../../common/detonate_prototype';
 import {
+  DETONATION_RUN_FIELDS,
   deriveDetonateVerdict,
   detonationConfidence,
   detonationStep,
@@ -67,61 +69,17 @@ type ResultsDocField =
   | keyof AlertDecisionRecord
   | keyof DetonationHandoffFields;
 
-export type DetonationRecordFieldType = 'keyword' | 'date' | 'long' | 'boolean';
+export type { DetonationRecordFieldType };
 
 /** Every results-index field and its Elasticsearch type; the index mapping is built from it. */
 export const DETONATION_RECORD_FIELDS: Readonly<
   Record<ResultsDocField, DetonationRecordFieldType>
 > = {
-  '@timestamp': 'date',
-  'detonate.doc_kind': 'keyword',
+  ...DETONATION_RUN_FIELDS,
   'detonate.decision.state': 'keyword',
   'detonate.decision.reason': 'keyword',
   'detonate.handoff.hunt': 'keyword',
   'detonate.handoff.coverage': 'keyword',
-  'event.start': 'date',
-  'event.end': 'date',
-  'event.duration': 'long',
-  'detonate.task_id': 'keyword',
-  'detonate.alert_id': 'keyword',
-  'detonate.state': 'keyword',
-  'detonate.verdict': 'keyword',
-  'detonate.confidence': 'keyword',
-  'detonate.evidence': 'keyword',
-  'detonate.step.number': 'long',
-  'detonate.step.of': 'long',
-  'detonate.step.label': 'keyword',
-  'detonate.step.worker': 'keyword',
-  'detonate.step.status': 'keyword',
-  'detonate.step.details': 'keyword',
-  'file.hash.sha256': 'keyword',
-  'file.name': 'keyword',
-  'detonate.sample.source': 'keyword',
-  'detonate.vm.os_family': 'keyword',
-  'detonate.vm.architecture': 'keyword',
-  'detonate.vm.has_internet': 'boolean',
-  'detonate.alerts.total': 'long',
-  'detonate.alerts.production_endpoint': 'long',
-  'detonate.alerts.diagnostic_endpoint': 'long',
-  'detonate.alerts.production_detection': 'long',
-  'detonate.endpoint_event_codes': 'keyword',
-  'detonate.detection_rule_names': 'keyword',
-  'detonate.detections_to_review': 'keyword',
-  'detonate.iocs.domains': 'keyword',
-  'detonate.iocs.ips': 'keyword',
-  'detonate.iocs.file_hashes': 'keyword',
-  'detonate.space_id': 'keyword',
-  'detonate.source': 'keyword',
-  'detonate.submitter': 'keyword',
-  'detonate.origin.alert_ids': 'keyword',
-  'host.name': 'keyword',
-  'user.name': 'keyword',
-  'file.path': 'keyword',
-  'file.size': 'long',
-  'file.mime_type': 'keyword',
-  'detonate.workflow.execution_id': 'keyword',
-  'detonate.conversation_id': 'keyword',
-  tags: 'keyword',
 };
 
 /** What only the submit knows; it is written once and never re-derived from the task. */

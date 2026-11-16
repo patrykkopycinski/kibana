@@ -1209,3 +1209,94 @@ export interface DetonationRecord {
   /** The run's tags without its space tags. */
   tags?: string[];
 }
+
+export type DetonationRecordFieldType = 'keyword' | 'date' | 'long' | 'boolean';
+
+/**
+ * Every run field and its Elasticsearch type. The server builds the index mapping from it and the
+ * Detonations table builds its ad-hoc data view from it, so the two cannot drift.
+ */
+export const DETONATION_RUN_FIELDS: Readonly<
+  Record<keyof DetonationRecord, DetonationRecordFieldType>
+> = {
+  '@timestamp': 'date',
+  'detonate.doc_kind': 'keyword',
+  'event.start': 'date',
+  'event.end': 'date',
+  'event.duration': 'long',
+  'detonate.task_id': 'keyword',
+  'detonate.alert_id': 'keyword',
+  'detonate.state': 'keyword',
+  'detonate.verdict': 'keyword',
+  'detonate.confidence': 'keyword',
+  'detonate.evidence': 'keyword',
+  'detonate.step.number': 'long',
+  'detonate.step.of': 'long',
+  'detonate.step.label': 'keyword',
+  'detonate.step.worker': 'keyword',
+  'detonate.step.status': 'keyword',
+  'detonate.step.details': 'keyword',
+  'file.hash.sha256': 'keyword',
+  'file.name': 'keyword',
+  'detonate.sample.source': 'keyword',
+  'detonate.vm.os_family': 'keyword',
+  'detonate.vm.architecture': 'keyword',
+  'detonate.vm.has_internet': 'boolean',
+  'detonate.alerts.total': 'long',
+  'detonate.alerts.production_endpoint': 'long',
+  'detonate.alerts.diagnostic_endpoint': 'long',
+  'detonate.alerts.production_detection': 'long',
+  'detonate.endpoint_event_codes': 'keyword',
+  'detonate.detection_rule_names': 'keyword',
+  'detonate.detections_to_review': 'keyword',
+  'detonate.iocs.domains': 'keyword',
+  'detonate.iocs.ips': 'keyword',
+  'detonate.iocs.file_hashes': 'keyword',
+  'detonate.space_id': 'keyword',
+  'detonate.source': 'keyword',
+  'detonate.submitter': 'keyword',
+  'detonate.origin.alert_ids': 'keyword',
+  'host.name': 'keyword',
+  'user.name': 'keyword',
+  'file.path': 'keyword',
+  'file.size': 'long',
+  'file.mime_type': 'keyword',
+  'detonate.workflow.execution_id': 'keyword',
+  'detonate.conversation_id': 'keyword',
+  tags: 'keyword',
+};
+
+/** Single-valued run fields the Detonations table may sort by; the route rejects any other. */
+export const DETONATION_RUNS_SORT_FIELDS = [
+  '@timestamp',
+  'file.name',
+  'file.hash.sha256',
+  'detonate.verdict',
+  'detonate.state',
+  'detonate.alerts.total',
+  'detonate.vm.os_family',
+  'detonate.source',
+] as const;
+export type DetonationRunsSortField = (typeof DETONATION_RUNS_SORT_FIELDS)[number];
+export type DetonationRunsSortDirection = 'asc' | 'desc';
+
+export const DETONATION_RUNS_MAX_KQL_LENGTH = 1024;
+export const DETONATION_RUNS_MAX_SEARCH_LENGTH = 128;
+export const DETONATION_RUNS_MAX_PAGE_SIZE = 100;
+export const DETONATION_RUNS_DEFAULT_PAGE_SIZE = 50;
+
+/** What the Detonations table asks of the runs route. */
+export interface DetonationRunsQuery {
+  kql?: string;
+  /** Free text over hash, name, tag and submitter. */
+  search?: string;
+  sort_field?: DetonationRunsSortField;
+  sort_direction?: DetonationRunsSortDirection;
+  from?: number;
+  size?: number;
+}
+
+export interface DetonationRunsResponse {
+  hits: DetonationRecord[];
+  total: number;
+}

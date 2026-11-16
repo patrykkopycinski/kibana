@@ -28,6 +28,10 @@ import { DetonationStatusBadge } from '../../../detonate_prototype/components/de
 import { DetonateVerdictBadge } from '../../../detonate_prototype/components/verdict_badge';
 import { useDetonationTaskUpdates } from '../../../detonate_prototype/hooks/use_detonate';
 import * as i18n from '../../../detonate_prototype/translations';
+import {
+  DocumentPagination,
+  useShowDocumentPagination,
+} from '../../document/main/components/document_pagination';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { CONFIDENCE_LABEL } from './utils/detonation_labels';
@@ -155,9 +159,22 @@ export const Header: FC<HeaderProps> = memo(
       [setSelectedTabId, selectedTabId, tabs]
     );
 
+    // Present only when the Detonations table opened the flyout with its rows.
+    const showPagination = useShowDocumentPagination();
+
     return (
       <>
         <FlyoutHeaderActions />
+        {showPagination && (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <DocumentPagination />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <FlyoutTitle
           title={task?.sample_filename ?? task?.sample_hash ?? taskId}
           data-test-subj={DETONATION_DETAILS_TITLE_TEST_ID}

@@ -15,6 +15,8 @@ import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { DETONATION_TITLE, formatFlyoutTitle } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
+import { PaginationStoreProvider } from '../document/pagination/context';
+import { createPaginationStore } from '../document/pagination/store';
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
 import {
   FLYOUT_DESCRIPTOR_KIND,
@@ -32,6 +34,16 @@ export interface OpenDetonationFlyoutParams {
   taskId: string;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
+  /**
+   * The runs the Detonations table shows, in its current sort, with `taskId` among them. Adds
+   * previous/next paging to the flyout header; omitted, the flyout has none.
+   */
+  pagination?: DetonationFlyoutPagination;
+}
+
+export interface DetonationFlyoutPagination {
+  /** Run ids in table order. */
+  taskIds: readonly string[];
 }
 
 export interface DetonationFlyoutApi {
@@ -45,6 +57,34 @@ export interface DetonationFlyoutApi {
    */
   openDetonationFlyoutAsChild: (params: OpenDetonationFlyoutParams) => void;
 }
+
+/**
+ * The flyout body, inside a pagination store when the table handed over its rows. Unlike the
+ * alerts flyout (`usePaginatedFlyout`), the table does not own the store: a run is fetched by id,
+ * so paging reopens the flyout on the neighbouring id with the same row list instead of swapping a
+ * document held in the table.
+ */
+const withPagination = (
+  params: OpenDetonationFlyoutParams,
+  reopen: (params: OpenDetonationFlyoutParams) => void
+): ReactNode => {
+  const details = <DetonationDetails taskId={params.taskId} />;
+  const { pagination } = params;
+  const index = pagination ? pagination.taskIds.indexOf(params.taskId) : -1;
+  if (!pagination || index < 0) return details;
+
+  const store = createPaginationStore();
+  store.setState({
+    flyoutDocumentIndex: index,
+    totalDocumentCount: pagination.taskIds.length,
+    flyoutDocumentId: params.taskId,
+    openDocumentFlyoutImpl: (documentIndex) => {
+      const taskId = pagination.taskIds[documentIndex];
+      if (taskId) reopen({ ...params, taskId });
+    },
+  });
+  return <PaginationStoreProvider value={store}>{details}</PaginationStoreProvider>;
+};
 
 /**
  * Developer-facing API to open the detonation result flyout, in the same
@@ -95,7 +135,7 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
       writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.detonation, taskId: params.taskId });
       const onClose = buildOnClose(null);
       open(
-        <DetonationDetails taskId={params.taskId} />,
+        withPagination(params, openDetonationFlyout),
         sessionMode,
         getTitle(params),
         onClose,

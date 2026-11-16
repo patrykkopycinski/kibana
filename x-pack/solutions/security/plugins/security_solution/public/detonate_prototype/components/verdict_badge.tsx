@@ -18,7 +18,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import { deriveDetonateVerdict } from '../../../common/detonate_prototype';
-import type { DetonateTask } from '../../../common/detonate_prototype';
+import type { DetonateTask, DetonateVerdictName } from '../../../common/detonate_prototype';
 import * as i18n from '../translations';
 
 export const VERDICT_BADGE_TEST_ID = 'detonatePrototypeVerdictBadge';
@@ -29,6 +29,37 @@ const VERDICT_COLOR: Record<string, string> = {
   inconclusive: 'warning',
 };
 
+interface DetonateVerdictNameBadgeProps {
+  verdict: DetonateVerdictName;
+  /** Why this verdict, shown on hover. */
+  evidence?: string;
+}
+
+/** The badge for a verdict already derived and stored, as the results store holds it. */
+export const DetonateVerdictNameBadge = React.memo<DetonateVerdictNameBadgeProps>(
+  ({ verdict, evidence }) => {
+    const label =
+      verdict === 'malicious'
+        ? i18n.VERDICT_MALICIOUS
+        : verdict === 'benign'
+        ? i18n.VERDICT_BENIGN
+        : i18n.VERDICT_INCONCLUSIVE;
+
+    return (
+      <EuiToolTip content={evidence}>
+        <EuiBadge
+          color={VERDICT_COLOR[verdict]}
+          data-test-subj={`${VERDICT_BADGE_TEST_ID}-${verdict}`}
+          tabIndex={0}
+        >
+          {label}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+);
+DetonateVerdictNameBadge.displayName = 'DetonateVerdictNameBadge';
+
 interface DetonateVerdictBadgeProps {
   task: DetonateTask;
 }
@@ -36,24 +67,6 @@ interface DetonateVerdictBadgeProps {
 export const DetonateVerdictBadge = React.memo<DetonateVerdictBadgeProps>(({ task }) => {
   const { verdict, evidence } = deriveDetonateVerdict(task);
   if (!verdict) return null;
-
-  const label =
-    verdict === 'malicious'
-      ? i18n.VERDICT_MALICIOUS
-      : verdict === 'benign'
-      ? i18n.VERDICT_BENIGN
-      : i18n.VERDICT_INCONCLUSIVE;
-
-  return (
-    <EuiToolTip content={evidence}>
-      <EuiBadge
-        color={VERDICT_COLOR[verdict]}
-        data-test-subj={`${VERDICT_BADGE_TEST_ID}-${verdict}`}
-        tabIndex={0}
-      >
-        {label}
-      </EuiBadge>
-    </EuiToolTip>
-  );
+  return <DetonateVerdictNameBadge verdict={verdict} evidence={evidence} />;
 });
 DetonateVerdictBadge.displayName = 'DetonateVerdictBadge';

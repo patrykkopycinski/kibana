@@ -12,14 +12,23 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider, useInfiniteQuery } from '@kbn/react-query';
 
 import { detonateApi } from '../api/client';
-import { DETONATE_QUERY_KEY, useSubmitFile, useSubmitHash } from './use_detonate';
+import {
+  DETONATE_QUERY_KEY,
+  useDetonationRuns,
+  useSubmitFile,
+  useSubmitHash,
+} from './use_detonate';
 
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({ services: { http: {} } }),
 }));
+jest.mock('@kbn/react-query', () => {
+  const actual = jest.requireActual('@kbn/react-query');
+  return { ...actual, useInfiniteQuery: jest.fn(actual.useInfiniteQuery) };
+});
 jest.mock('../api/client');
 jest.mock('../components/detonation_notifier', () => ({ useTrackDetonation: () => jest.fn() }));
 
@@ -86,5 +95,30 @@ describe('submit mutations', () => {
     });
 
     expect(invalidate).not.toHaveBeenCalled();
+  });
+});
+
+describe('useDetonationRuns polling', () => {
+  const pagesOf = (...states: string[]) => ({
+    pages: [{ hits: states.map((state) => ({ 'detonate.state': state })), total: states.length }],
+  });
+
+  const refetchIntervalOption = () => {
+    const { wrapper } = setup();
+    renderHook(() => useDetonationRuns({ size: 50 }), { wrapper });
+    const { calls } = jest.mocked(useInfiniteQuery).mock;
+    return (
+      calls[calls.length - 1][0] as unknown as { refetchInterval: (data: unknown) => unknown }
+    ).refetchInterval;
+  };
+
+  it('polls while a loaded row is running', () => {
+    expect(refetchIntervalOption()(pagesOf('complete', 'running'))).toEqual(expect.any(Number));
+  });
+
+  it('stops polling once no loaded row is running, or nothing has loaded', () => {
+    const refetchInterval = refetchIntervalOption();
+    expect(refetchInterval(pagesOf('complete', 'failed'))).toBe(false);
+    expect(refetchInterval(undefined)).toBe(false);
   });
 });

@@ -98,12 +98,17 @@ export const RUNS_TITLE = i18n.translate('xpack.securitySolution.detonatePrototy
 
 export const RUNS_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.searchPlaceholder',
-  { defaultMessage: 'Search by hash, filename or tag' }
+  { defaultMessage: 'Search by hash, filename, tag or submitter' }
 );
 
 export const RUNS_EMPTY = i18n.translate('xpack.securitySolution.detonatePrototype.runs.empty', {
   defaultMessage: 'No detonations yet. Submit a sample to start one.',
 });
+
+export const RUNS_DATA_VIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.dataViewError',
+  { defaultMessage: 'Could not set up the Detonations table' }
+);
 
 export const COLUMN_SAMPLE = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.columnSample',
@@ -115,9 +120,48 @@ export const COLUMN_SUBMITTED = i18n.translate(
   { defaultMessage: 'Submitted' }
 );
 
-export const COLUMN_PROGRESS = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.runs.columnProgress',
-  { defaultMessage: 'Progress' }
+export const COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.columnStatus',
+  { defaultMessage: 'Status' }
+);
+
+export const COLUMN_OS = i18n.translate('xpack.securitySolution.detonatePrototype.runs.columnOs', {
+  defaultMessage: 'OS',
+});
+
+export const COLUMN_SOURCE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.columnSource',
+  { defaultMessage: 'Source' }
+);
+
+export const RUNS_PRESETS_LABEL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.presetsLabel',
+  { defaultMessage: 'Quick filters' }
+);
+
+export const RUNS_PRESET_ALL = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.presetAll',
+  { defaultMessage: 'All' }
+);
+
+export const RUNS_PRESET_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.presetInProgress',
+  { defaultMessage: 'In progress' }
+);
+
+export const RUNS_PRESET_MALICIOUS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.presetMalicious',
+  { defaultMessage: 'Malicious' }
+);
+
+export const RUNS_PRESET_NEEDS_ATTENTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.presetNeedsAttention',
+  { defaultMessage: 'Needs attention' }
+);
+
+export const RUNS_COPY_HASH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.copyHash',
+  { defaultMessage: 'Copy SHA-256' }
 );
 
 export const COLUMN_VERDICT = i18n.translate(

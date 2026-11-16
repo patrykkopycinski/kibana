@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { useDetonationTaskUpdates } from '../../../detonate_prototype/hooks/use_detonate';
 import { Header } from './header';
+import { FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID } from '../../document/main/components/test_ids';
+import { PaginationStoreProvider } from '../../document/pagination/context';
+import { createPaginationStore } from '../../document/pagination/store';
 import {
   DETONATION_DETAILS_META_ALERTS_TEST_ID,
   DETONATION_DETAILS_META_DURATION_TEST_ID,
@@ -51,6 +54,21 @@ const renderHeader = (task: DetonateTask | undefined) =>
         tabs={[]}
       />
     </I18nProvider>
+  );
+
+const renderHeaderWithStore = (store: ReturnType<typeof createPaginationStore>) =>
+  render(
+    <PaginationStoreProvider value={store}>
+      <I18nProvider>
+        <Header
+          taskId="task-1"
+          task={makeTask()}
+          selectedTabId="overview"
+          setSelectedTabId={jest.fn()}
+          tabs={[]}
+        />
+      </I18nProvider>
+    </PaginationStoreProvider>
   );
 
 describe('<Header />', () => {
@@ -108,5 +126,40 @@ describe('<Header />', () => {
     expect(screen.getByTestId(DETONATION_DETAILS_META_VERDICT_TEST_ID)).toHaveTextContent('—');
     expect(screen.getByTestId(DETONATION_DETAILS_META_ALERTS_TEST_ID)).toHaveTextContent('—');
     expect(screen.getByTestId(DETONATION_DETAILS_META_DURATION_TEST_ID)).toHaveTextContent('—');
+  });
+
+  describe('run pagination', () => {
+    it('renders no pager when the flyout was not opened from the table', () => {
+      renderHeader(makeTask());
+
+      expect(screen.queryByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('renders no pager for a single run', () => {
+      const store = createPaginationStore();
+      act(() => store.setState({ flyoutDocumentIndex: 0, totalDocumentCount: 1 }));
+      renderHeaderWithStore(store);
+
+      expect(screen.queryByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('shows the position in the table and opens the neighbouring runs', () => {
+      const store = createPaginationStore();
+      const openDocumentFlyoutImpl = jest.fn();
+      act(() =>
+        store.setState({ flyoutDocumentIndex: 1, totalDocumentCount: 3, openDocumentFlyoutImpl })
+      );
+      renderHeaderWithStore(store);
+
+      const pager = screen.getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID);
+      expect(pager).toHaveTextContent('2 of 3');
+
+      fireEvent.click(pager.querySelector('[data-test-subj="pagination-button-next"]') as Element);
+      expect(openDocumentFlyoutImpl).toHaveBeenLastCalledWith(2);
+      fireEvent.click(
+        pager.querySelector('[data-test-subj="pagination-button-previous"]') as Element
+      );
+      expect(openDocumentFlyoutImpl).toHaveBeenLastCalledWith(0);
+    });
   });
 });

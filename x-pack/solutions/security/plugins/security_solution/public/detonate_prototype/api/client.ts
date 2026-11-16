@@ -21,6 +21,7 @@ import type { HttpSetup } from '@kbn/core/public';
 
 import {
   DETONATE_HEALTHCHECK_PATH,
+  DETONATE_RUNS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
@@ -40,6 +41,8 @@ import type {
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
   DetonationRecord,
+  DetonationRunsQuery,
+  DetonationRunsResponse,
 } from '../../../common/detonate_prototype';
 
 /** Every prototype route is registered at version 1. */
@@ -121,6 +124,14 @@ export const detonateApi = {
     http.get<DetonateTaskSearchResponse>(DETONATE_TASKS_PATH, {
       version: VERSION.version,
       query,
+      signal,
+    }),
+
+  /** Runs from the results store, filtered, sorted and paged by the server. */
+  searchRuns: (http: HttpSetup, query: DetonationRunsQuery, signal?: AbortSignal) =>
+    http.get<DetonationRunsResponse>(DETONATE_RUNS_PATH, {
+      version: VERSION.version,
+      query: { ...query },
       signal,
     }),
 

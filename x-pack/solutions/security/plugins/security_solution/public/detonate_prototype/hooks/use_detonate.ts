@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
 import {
@@ -33,6 +33,8 @@ import type {
   DetonateTaskUpdate,
   DetonateUsage,
   DetonationRecord,
+  DetonationRunsQuery,
+  DetonationRunsResponse,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
 import type { SubmitFileParams, SubmitHashParams } from '../api/client';
@@ -152,6 +154,34 @@ export const useDetonationTasks = (query: DetonateListQuery) => {
     // Keeps the table populated while the next page loads, instead of
     // flashing an empty state between pages.
     keepPreviousData: true,
+  });
+};
+
+/**
+ * A run on a VM; the table keeps polling while it sees one. Deliberate difference from the epic
+ * ("queued or running"): `DetonationRunStatus` has no queued state yet, so only running counts.
+ */
+const isRunInFlight = (run: DetonationRecord): boolean => run['detonate.state'] === 'running';
+
+/**
+ * Runs for the Detonations table, loaded a page at a time as the table asks for more. Polls only
+ * while a loaded row is running, so an idle table makes no requests. The key sits under
+ * `[DETONATE_QUERY_KEY, 'tasks']`, so a submit invalidates it with the task lists.
+ */
+export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
+  const { http } = useKibana().services;
+
+  return useInfiniteQuery<DetonationRunsResponse, Error>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'runs', query],
+    queryFn: ({ signal, pageParam = 0 }: { signal?: AbortSignal; pageParam?: number }) =>
+      detonateApi.searchRuns(http, { ...query, from: pageParam }, signal),
+    getNextPageParam: (lastPage, pages) => {
+      const loaded = pages.reduce((count, page) => count + page.hits.length, 0);
+      return lastPage.hits.length > 0 && loaded < lastPage.total ? loaded : undefined;
+    },
+    keepPreviousData: true,
+    refetchInterval: (data) =>
+      data?.pages.some((page) => page.hits.some(isRunInFlight)) ? POLL_INTERVAL_MS : false,
   });
 };
 

@@ -36,6 +36,9 @@ import {
 
 import {
   alertRunTag,
+  DETONATION_RUNS_MAX_KQL_LENGTH,
+  DETONATION_RUNS_MAX_PAGE_SIZE,
+  DETONATION_RUNS_MAX_SEARCH_LENGTH,
   DETONATE_HANDOFF_MARKERS,
   DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
@@ -68,6 +71,7 @@ import type {
   DetonateRunDiffEmpty,
   DetonateRunDiffResult,
   DetonateRunSessionResult,
+  DetonationRunsResponse,
   DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
   DetonateTask,
@@ -112,6 +116,7 @@ import {
 } from '../handoffs';
 import { buildDetonateCountQueries, validateSandboxCountRuleQuery } from '../esql_draft_guard';
 import type { DetonationRecord } from '../detonation_record';
+import { InvalidRunsQueryError, searchRuns } from '../runs_search';
 
 /**
  * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
@@ -1502,6 +1507,67 @@ export const registerDetonatePrototypeRoutes = ({
             ),
           });
         } catch (error) {
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * The Detonations table's rows, read from the results store rather than the service so the table can
+   * filter and sort on any run field. The internal user reads the hidden index; only this space's
+   * index is addressed, so the space boundary holds.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: DETONATE_RUNS_PATH,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              kql: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_KQL_LENGTH })),
+              search: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_SEARCH_LENGTH })),
+              // The allowlist keeps a caller from sorting on an unmapped or multi-valued field; it mirrors
+              // DETONATION_RUNS_SORT_FIELDS, which the route test pins.
+              sort_field: schema.maybe(
+                schema.oneOf([
+                  schema.literal('@timestamp'),
+                  schema.literal('file.name'),
+                  schema.literal('file.hash.sha256'),
+                  schema.literal('detonate.verdict'),
+                  schema.literal('detonate.state'),
+                  schema.literal('detonate.alerts.total'),
+                  schema.literal('detonate.vm.os_family'),
+                  schema.literal('detonate.source'),
+                ])
+              ),
+              sort_direction: schema.maybe(
+                schema.oneOf([schema.literal('asc'), schema.literal('desc')])
+              ),
+              // `from + size` stays under the default 10k result window.
+              from: schema.maybe(schema.number({ min: 0, max: 9900 })),
+              size: schema.maybe(schema.number({ min: 1, max: DETONATION_RUNS_MAX_PAGE_SIZE })),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          return response.ok<DetonationRunsResponse>({
+            body: await searchRuns({
+              esClient: await getInternalEsClient(),
+              spaceId: spaceIdFromRequest(request),
+              query: request.query,
+            }),
+          });
+        } catch (error) {
+          if (error instanceof InvalidRunsQueryError) {
+            return response.badRequest({ body: { message: error.message } });
+          }
           return toErrorResponse(error, response);
         }
       }

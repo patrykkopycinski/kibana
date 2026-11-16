@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { act, renderHook } from '@testing-library/react';
 import { useHistory } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useDetonationFlyoutApi } from './use_detonation_flyout_api';
+import type { PaginationStore } from '../document/pagination/store';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -131,5 +133,62 @@ describe('useDetonationFlyoutApi', () => {
     const { search } = replace.mock.calls[0][0];
     const encoded = new URLSearchParams(search).get('flyoutV2');
     expect(decode(encoded as string)).toEqual([{ kind: 'detonation', taskId: 'task-1' }]);
+  });
+
+  describe('pagination', () => {
+    // The flyout body is `<FlyoutSessionContextProvider><Suspense>{body}</Suspense>`.
+    const openedBody = (): React.ReactElement => {
+      const calls = (flyoutProviders as jest.Mock).mock.calls;
+      const session = calls[calls.length - 1][0].children as React.ReactElement;
+      return (session.props.children as React.ReactElement).props.children;
+    };
+    const openedStore = (): PaginationStore => openedBody().props.value;
+
+    it('wraps the flyout in a pagination store over the given runs', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      result.current.openDetonationFlyout({
+        taskId: 'run-2',
+        pagination: { taskIds: ['run-1', 'run-2', 'run-3'] },
+      });
+
+      expect(openedStore().getSnapshot()).toEqual(
+        expect.objectContaining({
+          flyoutDocumentIndex: 1,
+          totalDocumentCount: 3,
+          flyoutDocumentId: 'run-2',
+        })
+      );
+    });
+
+    it('reopens the flyout on the neighbouring run, keeping the same row order', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      const taskIds = ['run-1', 'run-2', 'run-3'];
+      result.current.openDetonationFlyout({ taskId: 'run-2', pagination: { taskIds } });
+
+      act(() => openedStore().getSnapshot().openDocumentFlyoutImpl?.(2));
+
+      expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(2);
+      expect(openedStore().getSnapshot()).toEqual(
+        expect.objectContaining({
+          flyoutDocumentIndex: 2,
+          totalDocumentCount: 3,
+          flyoutDocumentId: 'run-3',
+        })
+      );
+      expect(openedBody().props.children.props.taskId).toBe('run-3');
+    });
+
+    it('adds no pagination without rows, or when the run is not among them', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+
+      result.current.openDetonationFlyout({ taskId: 'run-2' });
+      expect(openedBody().props.taskId).toBe('run-2');
+
+      result.current.openDetonationFlyout({
+        taskId: 'run-9',
+        pagination: { taskIds: ['run-1', 'run-2'] },
+      });
+      expect(openedBody().props.taskId).toBe('run-9');
+    });
   });
 });

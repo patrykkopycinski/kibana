@@ -10,6 +10,7 @@ import {
   InvalidRunsQueryError,
   buildRunStatsQuery,
   resolveStatsTime,
+  searchRunStats,
   statsTimeError,
   trendIntervalMs,
 } from './runs_search';
@@ -127,5 +128,30 @@ describe('buildRunStatsQuery', () => {
     expect(() => buildRunStatsQuery({ start: range.end, end: range.start })).toThrow(
       InvalidRunsQueryError
     );
+  });
+});
+
+describe('searchRunStats verdict counts', () => {
+  it('counts a verdict named like an inherited property as unknown', async () => {
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 5 } },
+      aggregations: {
+        verdicts: {
+          buckets: [
+            { key: 'malicious', doc_count: 3 },
+            { key: 'constructor', doc_count: 2 },
+          ],
+        },
+      },
+    });
+
+    const { verdicts } = await searchRunStats({
+      esClient: { search } as never,
+      spaceId: 'default',
+      query: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-11T00:00:00.000Z' },
+    });
+
+    expect(verdicts).toEqual({ malicious: 3, benign: 0, inconclusive: 0, unknown: 2 });
+    expect(Object.keys(verdicts)).not.toContain('constructor');
   });
 });

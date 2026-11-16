@@ -316,7 +316,9 @@ const verdictCounts = (terms: TermsBuckets | undefined): DetonationStatsVerdictC
   const counts = zeroVerdicts();
   for (const { key, doc_count: count } of terms?.buckets ?? []) {
     // A verdict this build does not know (written by a newer one) still counts, as unknown.
-    const verdict = key in counts ? (key as keyof DetonationStatsVerdictCounts) : 'unknown';
+    const verdict = Object.hasOwn(counts, key)
+      ? (key as keyof DetonationStatsVerdictCounts)
+      : 'unknown';
     counts[verdict] += count;
   }
   return counts;

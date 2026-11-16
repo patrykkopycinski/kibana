@@ -22,6 +22,7 @@ import {
   DETONATION_OVERVIEW_ALLOWANCE_TEST_ID,
   DETONATION_OVERVIEW_CONTENT_TEST_ID,
   DETONATION_OVERVIEW_COUNTS_TEST_ID,
+  DETONATION_OVERVIEW_ALERT_RUNS_UNAVAILABLE_TEST_ID,
   DETONATION_OVERVIEW_DETONATE_TEST_ID,
   DETONATION_OVERVIEW_EVIDENCE_TEST_ID,
   DETONATION_OVERVIEW_FAILED_TEST_ID,
@@ -318,6 +319,29 @@ describe('DetonationOverview', () => {
     } as never);
     const { getByTestId } = renderCard();
     expect(getByTestId(DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('notes that the alert runs are unavailable only when that query failed', () => {
+    const prior = run({ 'detonate.task_id': 'task-elsewhere' });
+    jest.mocked(useDetonationCardRuns).mockReturnValue({
+      alertRuns: query(undefined, { isError: true }),
+      hashRuns: query([prior]),
+    } as never);
+    const failed = renderCard();
+    expect(
+      failed.getByTestId(DETONATION_OVERVIEW_ALERT_RUNS_UNAVAILABLE_TEST_ID)
+    ).toHaveTextContent("Couldn't load this alert's own detonations.");
+    failed.unmount();
+
+    jest.mocked(useDetonationCardRuns).mockReturnValue({
+      alertRuns: query([]),
+      hashRuns: query([prior]),
+    } as never);
+    const ok = renderCard();
+    expect(ok.getByTestId(DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID)).toBeInTheDocument();
+    expect(
+      ok.queryByTestId(DETONATION_OVERVIEW_ALERT_RUNS_UNAVAILABLE_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 
   it('shows the error only when neither query produced a run', () => {

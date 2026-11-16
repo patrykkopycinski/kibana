@@ -52,6 +52,8 @@ export const DETONATION_OVERVIEW_UNSUPPORTED_OS_TEST_ID =
   `${DETONATION_OVERVIEW_TEST_ID}UnsupportedOs` as const;
 export const DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID =
   `${DETONATION_OVERVIEW_TEST_ID}PriorRun` as const;
+export const DETONATION_OVERVIEW_ALERT_RUNS_UNAVAILABLE_TEST_ID =
+  `${DETONATION_OVERVIEW_TEST_ID}AlertRunsUnavailable` as const;
 export const DETONATION_OVERVIEW_FAILED_TEST_ID = `${DETONATION_OVERVIEW_TEST_ID}Failed` as const;
 export const DETONATION_OVERVIEW_EVIDENCE_TEST_ID =
   `${DETONATION_OVERVIEW_TEST_ID}Evidence` as const;
@@ -96,13 +98,11 @@ interface DetonateButtonProps {
 }
 
 /**
- * A submit button that gives way to the allowance message once the month's allowance is spent.
- * Usage is read here, not in the card, so a card showing a finished run makes no usage request.
+ * Submit button that gives way to the allowance message once the allowance is spent. Usage is read
+ * here so a card showing a finished run makes no usage request.
  *
  * Epic #20877 §6: no "Request more allowance" button, only the reset date; pending product answer.
- *
- * Epic #20877 §6 (decided): the allowance-reached state is computed in the browser, not stored on
- * the run.
+ * Epic #20877 §6 (decided): computed in the browser, not stored on the run.
  */
 const DetonateButton: FC<DetonateButtonProps> = ({
   label,
@@ -287,7 +287,7 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
     }
   }, [openResult, run]);
 
-  // The card is loading while either read could still produce a run; it errors only when neither did.
+  // Loading while either read could still produce a run; errors only when neither did.
   const isLoading =
     alertRuns.isLoading || (!alertRuns.data?.hits.length && hashRuns.isFetching && !hashRuns.data);
   const isError = alertRuns.isError && !run;
@@ -306,6 +306,17 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
               data-test-subj={DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID}
             >
               {i18n.ALERT_CARD_PRIOR_RUN_ELSEWHERE}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {priorRun && alertRuns.isError && (
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj={DETONATION_OVERVIEW_ALERT_RUNS_UNAVAILABLE_TEST_ID}
+            >
+              {i18n.ALERT_CARD_ALERT_RUNS_UNAVAILABLE}
             </EuiText>
           </EuiFlexItem>
         )}
@@ -399,9 +410,7 @@ export interface DetonationOverviewProps {
 }
 
 /**
- * The alert flyout's Malware analysis card. The caller shows it for local alerts only. It renders
- * nothing when the flag is off or the alert carries no hash: the epic defines no card for an
- * alert without a file to detonate.
+ * The alert flyout's Malware analysis card, for local alerts only.
  *
  * Epic #20877 §6 (decided): family omitted until the service sends it.
  */
@@ -409,8 +418,7 @@ export const DetonationOverview: FC<DetonationOverviewProps> = ({ hit }) => {
   const isEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
   const hash = useMemo(() => getDetonatableHash(hit), [hit]);
 
-  // Epic #20877 §6: hidden for an alert with no hash, which the epic does not define; pending
-  // product answer.
+  // Epic #20877 §6: hidden for an alert with no hash; pending product answer.
   if (!isEnabled || !hash) {
     return null;
   }

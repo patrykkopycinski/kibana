@@ -1164,6 +1164,11 @@ export const ALERT_CARD_PRIOR_RUN_ELSEWHERE = i18n.translate(
   { defaultMessage: 'Detonated before, from another alert.' }
 );
 
+export const ALERT_CARD_ALERT_RUNS_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.alertRunsUnavailable',
+  { defaultMessage: "Couldn't load this alert's own detonations." }
+);
+
 export const ALERT_CARD_FAILED_FALLBACK = i18n.translate(
   'xpack.securitySolution.detonatePrototype.alertCard.failedFallback',
   { defaultMessage: 'The detonation did not finish.' }

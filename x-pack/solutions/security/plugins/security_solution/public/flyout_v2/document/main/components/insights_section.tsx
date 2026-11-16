@@ -6,7 +6,8 @@
  */
 
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useMemo } from 'react';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { type CellActionRenderer } from '../../../shared/components/cell_actions';
@@ -22,6 +23,11 @@ import { PrevalenceOverview } from './prevalence_overview';
 import { EntitiesOverview } from './entities_overview';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
+
+// Lazy so the detonate prototype's code stays out of the flyout's main chunk until an alert needs it.
+const DetonationOverview = lazy(() =>
+  import('./detonation_overview').then((module) => ({ default: module.DetonationOverview }))
+);
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -73,6 +79,10 @@ export const InsightsSection = memo(
           ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
           : (getFieldValue(hit, 'signal.rule.id') as string),
       [hit, isAlert]
+    );
+    const isRemoteDocument = useMemo(
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
     );
     const { rule } = useRuleWithFallback(ruleId);
     const investigationFields = useMemo(
@@ -164,6 +174,11 @@ export const InsightsSection = memo(
           showIcon={false}
           onShowPrevalenceDetails={onShowPrevalenceDetails}
         />
+        {isAlert && !isRemoteDocument && (
+          <Suspense fallback={null}>
+            <DetonationOverview hit={hit} />
+          </Suspense>
+        )}
       </ExpandableSection>
     );
   }

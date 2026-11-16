@@ -1127,3 +1127,59 @@ export const DASHBOARD_TOP_TERMS_EMPTY = i18n.translate(
   'xpack.securitySolution.detonatePrototype.dashboard.topTerms.empty',
   { defaultMessage: 'No alerts recorded in this range' }
 );
+
+export const ALERT_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.title',
+  { defaultMessage: 'Malware analysis' }
+);
+
+export const ALERT_CARD_OPEN_RESULT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.openResult',
+  { defaultMessage: 'Open result' }
+);
+
+export const ALERT_CARD_BEHAVIORS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.behaviors',
+  { defaultMessage: 'Behaviors' }
+);
+
+export const ALERT_CARD_IOCS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.iocs',
+  { defaultMessage: 'Indicators' }
+);
+
+export const ALERT_CARD_NOT_ANALYZED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.notAnalyzedDescription',
+  { defaultMessage: 'This file has not been detonated yet.' }
+);
+
+export const ALERT_CARD_PRIOR_RUN_ELSEWHERE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.priorRunElsewhere',
+  { defaultMessage: 'Detonated before, from another alert.' }
+);
+
+export const ALERT_CARD_FAILED_FALLBACK = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.failedFallback',
+  { defaultMessage: 'The detonation did not finish.' }
+);
+
+export const ALERT_CARD_SUPPORTED_OSES = (osList: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.alertCard.supportedOses', {
+    defaultMessage: 'Supported operating systems: {osList}.',
+    values: { osList },
+  });
+
+export const ALERT_CARD_OS_LINUX = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.osLinux',
+  { defaultMessage: 'Linux' }
+);
+
+export const ALERT_CARD_OS_WINDOWS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.osWindows',
+  { defaultMessage: 'Windows' }
+);
+
+export const ALERT_CARD_OS_MACOS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.alertCard.osMacos',
+  { defaultMessage: 'macOS' }
+);

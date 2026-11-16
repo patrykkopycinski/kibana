@@ -132,6 +132,7 @@ export const INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCoun
 export const INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID =
   `${INSIGHTS_TEST_ID}AlertsCountNavigationButton` as const;
 
+export const DETONATION_OVERVIEW_TEST_ID = `${PREFIX}InsightsDetonation` as const;
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
 export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
   `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;

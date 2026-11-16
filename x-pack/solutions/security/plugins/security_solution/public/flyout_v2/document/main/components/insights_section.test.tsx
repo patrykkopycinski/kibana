@@ -77,6 +77,9 @@ jest.mock('./entities_overview', () => ({
     </button>
   ),
 }));
+jest.mock('./detonation_overview', () => ({
+  DetonationOverview: () => <div data-test-subj="detonationOverviewMock" />,
+}));
 jest.mock('../../tools/entities', () => ({
   EntityDetails: () => null,
 }));
@@ -225,6 +228,36 @@ describe('InsightsSection', () => {
     );
 
     expect(queryByTestId('threatIntelligenceOverviewMock')).not.toBeInTheDocument();
+  });
+
+  it('renders the detonation overview for local alerts only', async () => {
+    const { findByTestId, queryByTestId, rerender } = renderInsightsSection(alertMockHit);
+
+    expect(await findByTestId('detonationOverviewMock')).toBeInTheDocument();
+
+    const rerenderWith = (hit: DataTableRecord) =>
+      rerender(
+        <IntlProvider locale="en">
+          <Provider store={store}>
+            <Router history={history}>
+              <InsightsSection
+                hit={hit}
+                renderCellActions={mockRenderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            </Router>
+          </Provider>
+        </IntlProvider>
+      );
+
+    rerenderWith(nonAlertMockHit);
+    expect(queryByTestId('detonationOverviewMock')).not.toBeInTheDocument();
+
+    rerenderWith({
+      ...alertMockHit,
+      raw: { _id: '1', _index: 'remote_cluster:alerts', _source: {} },
+    } as DataTableRecord);
+    expect(queryByTestId('detonationOverviewMock')).not.toBeInTheDocument();
   });
 
   it('opens a tools flyout when clicking entities overview', () => {

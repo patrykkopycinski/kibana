@@ -88,11 +88,7 @@ export interface DetonationOrigin extends DetonateSubmitOrigin {
   file?: { size: number; mime_type?: string };
 }
 
-/**
- * When the run finished, if it has: the first update (the service lists them oldest first) that
- * shows it complete. Later updates must not stretch the duration; with no such update, the
- * latest timestamp stands in.
- */
+/** When the run finished: the first update showing it complete (updates are oldest first), else the latest. */
 const finishedAt = (task: DetonateTask, updates: readonly DetonateTaskUpdate[]) => {
   if (!isDetonationComplete(task)) return undefined;
   const timed = updates

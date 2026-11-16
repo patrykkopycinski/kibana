@@ -196,7 +196,6 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
       return lastPage.hits.length > 0 ? loaded : undefined;
     },
     keepPreviousData: true,
-    // A 4xx (a rejected filter) answers the same on every retry, except 429; only a transient failure is worth one.
     retry: shouldRetry,
   });
 
@@ -256,7 +255,6 @@ export const useDetonationRunStats = (query: DetonationRunStatsQuery) => {
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'stats', query],
     queryFn: ({ signal }) => detonateApi.getRunStats(http, query, signal),
     keepPreviousData: true,
-    // Same as the table: a rejected KQL answers 400 on every retry.
     retry: shouldRetry,
   });
 };

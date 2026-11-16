@@ -416,18 +416,10 @@ export const registerDetonatePrototypeRoutes = ({
 
   /**
    * The results store only changes when something reads the run, so a run that ended since its last
-   * read still says "running" there, and a run stored as complete without a duration (its updates
-   * read failed, or it was written before durations existed) never gets one. For the hits on the
-   * returned page (up to the page size) that are either live running runs or complete runs with no
-   * duration, read the service and write the answer through, then return it in place of the stored
-   * hit. Running hits are started first, so a page of old complete runs cannot use up the time
-   * budget a live one needs. Repairing a complete run is bounded two ways, because a run that
-   * cannot be repaired (task gone, no usable updates) is otherwise re-read on every load: only
-   * runs newer than DETONATION_DURATION_REPAIR_MAX_AGE_MS, and at most
-   * DURATION_REPAIR_MAX_PER_REQUEST per request, chosen at random from the repairable ones so none
-   * is starved behind runs that cannot be repaired; running hits are not capped. Any failure, or
-   * running out of time, keeps the stored hit: the table must load even when the service is down
-   * or hung.
+   * read is stuck "running", and a complete run without a duration never gets one. Re-read the
+   * page's live running hits and repairable complete hits, write the answer through, and return it
+   * in place of the stored hit. Any failure, or the deadline, keeps the stored hit: the table must
+   * load even when the service is down or hung.
    */
   const refreshStaleHits = async (
     request: KibanaRequest,
@@ -439,7 +431,7 @@ export const registerDetonatePrototypeRoutes = ({
     const isLive = (hit: DetonationRecord) =>
       hit['detonate.state'] === 'running' &&
       Date.now() - Date.parse(hit['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
-    // A complete run whose updates read failed is re-tried on a later page load, while recent.
+    // Re-tried on later loads while recent: its updates read may have failed.
     const isRepairable = (hit: DetonationRecord) =>
       hit['detonate.state'] === 'complete' &&
       hit['event.duration'] === undefined &&

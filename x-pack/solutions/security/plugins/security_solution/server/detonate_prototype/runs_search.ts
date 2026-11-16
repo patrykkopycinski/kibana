@@ -8,17 +8,27 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { errors, estypes } from '@elastic/elasticsearch';
+import dateMath from '@kbn/datemath';
+import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataViewBase, KueryNode } from '@kbn/es-query';
 import {
+  DETONATE_VERDICTS,
   DETONATION_RUN_FIELDS,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
+  DETONATION_STATS_MAX_TREND_BUCKETS,
+  DETONATION_STATS_TOP_TERMS_SIZE,
+  DETONATION_STATS_UNKNOWN_VERDICT,
   detonateResultsIndexName,
 } from '../../common/detonate_prototype';
 import type {
   DetonationRecord,
+  DetonationRunStatsQuery,
+  DetonationRunStatsResponse,
   DetonationRunsQuery,
   DetonationRunsResponse,
+  DetonationStatsTerm,
+  DetonationStatsVerdictCounts,
 } from '../../common/detonate_prototype';
 import { isIndexNotFound } from './es_errors';
 
@@ -157,5 +167,200 @@ export const searchRuns = async ({
   return {
     hits: response.hits.hits.flatMap(({ _source }) => (_source ? [_source] : [])),
     total: typeof total === 'number' ? total : total?.value ?? 0,
+  };
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** `event.duration` is stored in nanoseconds, as in ECS; the dashboard shows milliseconds. */
+const NANOS_PER_MILLI = 1_000_000;
+
+/** UTC, not the server's zone: the trend's day buckets are UTC, so `now/d` must round to the same edge. */
+const utcMoment = Object.assign(
+  (input?: moment.MomentInput) => moment.utc(input),
+  moment
+) as typeof moment;
+
+/** Resolves an ISO date or date math (`now-30d`) to epoch milliseconds; a range's end rounds up (`now/d` is the day's last millisecond). */
+export const resolveStatsTime = (value: string, roundUp: boolean): number => {
+  const parsed = dateMath.parse(value, { roundUp, momentInstance: utcMoment });
+  if (!parsed?.isValid()) throw new InvalidRunsQueryError(`Invalid time: ${value.slice(0, 64)}`);
+  return parsed.valueOf();
+};
+
+/** The route schema's check, so a bad date is a 400 before any query is built. */
+export const statsTimeError = (value: string): string | undefined =>
+  dateMath.parse(value)?.isValid() ? undefined : 'must be an ISO date or date math such as now-30d';
+
+/**
+ * The trend is one bucket per day until the range would pass the bucket cap; a longer range gets a
+ * whole number of days per bucket (a `fixed_interval`, so buckets align to the epoch, not to calendar
+ * weeks or months) so a year-long or all-time range cannot ask Elasticsearch for thousands of buckets.
+ */
+export const trendIntervalMs = (fromMs: number, toMs: number): number => {
+  const rangeDays = Math.max(toMs - fromMs, 0) / DAY_MS;
+  // `extended_bounds` can add one bucket at each edge beyond range/interval, hence the - 2.
+  return Math.max(1, Math.ceil(rangeDays / (DETONATION_STATS_MAX_TREND_BUCKETS - 2))) * DAY_MS;
+};
+
+export const buildRunStatsQuery = ({
+  from,
+  to,
+  kql,
+  search,
+}: DetonationRunStatsQuery): {
+  query: estypes.QueryDslQueryContainer;
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  intervalMs: number;
+} => {
+  const fromMs = resolveStatsTime(from, false);
+  const toMs = resolveStatsTime(to, true);
+  if (toMs < fromMs) throw new InvalidRunsQueryError('Invalid time range: from is after to');
+  const intervalMs = trendIntervalMs(fromMs, toMs);
+  const runs = buildRunsQuery({ kql, search });
+  const verdictTerms = {
+    terms: {
+      field: 'detonate.verdict',
+      // A run with no verdict yet (pending, running, failed) is counted, not dropped.
+      missing: DETONATION_STATS_UNKNOWN_VERDICT,
+      size: DETONATE_VERDICTS.length + 1,
+    },
+  };
+  return {
+    intervalMs,
+    query: {
+      bool: {
+        filter: [
+          ...(runs.bool?.filter as estypes.QueryDslQueryContainer[]),
+          {
+            range: {
+              '@timestamp': {
+                gte: fromMs,
+                lte: toMs,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      verdicts: verdictTerms,
+      mean_duration: { avg: { field: 'event.duration' } },
+      // Only the production side: diagnostic-only alerts are the sandbox's own noise, not a detection.
+      siem_alerts: { sum: { field: 'detonate.alerts.production_detection' } },
+      endpoint_alerts: { sum: { field: 'detonate.alerts.production_endpoint' } },
+      trend: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: `${intervalMs / DAY_MS}d`,
+          min_doc_count: 0,
+          extended_bounds: { min: fromMs, max: toMs },
+        },
+        aggs: { verdicts: verdictTerms },
+      },
+      top_rules: {
+        terms: { field: 'detonate.detection_rule_names', size: DETONATION_STATS_TOP_TERMS_SIZE },
+      },
+      top_event_codes: {
+        terms: { field: 'detonate.endpoint_event_codes', size: DETONATION_STATS_TOP_TERMS_SIZE },
+      },
+    },
+  };
+};
+
+const zeroVerdicts = (): DetonationStatsVerdictCounts => ({
+  malicious: 0,
+  benign: 0,
+  inconclusive: 0,
+  [DETONATION_STATS_UNKNOWN_VERDICT]: 0,
+});
+
+interface TermsBuckets {
+  buckets: Array<{ key: string | number; doc_count: number }>;
+}
+
+const verdictCounts = (terms: TermsBuckets | undefined): DetonationStatsVerdictCounts => {
+  const counts = zeroVerdicts();
+  for (const { key, doc_count: count } of terms?.buckets ?? []) {
+    // A verdict this build does not know (written by a newer one) still counts, as unknown.
+    const verdict = key in counts ? (key as keyof DetonationStatsVerdictCounts) : 'unknown';
+    counts[verdict] += count;
+  }
+  return counts;
+};
+
+const topTerms = (terms: TermsBuckets | undefined): DetonationStatsTerm[] =>
+  (terms?.buckets ?? []).map(({ key, doc_count: count }) => ({ key: String(key), count }));
+
+const emptyStats = (intervalMs: number): DetonationRunStatsResponse => ({
+  total: 0,
+  verdicts: zeroVerdicts(),
+  meanDurationMs: null,
+  alerts: { siem: 0, endpoint: 0 },
+  trend: { intervalMs, buckets: [] },
+  topRules: [],
+  topEventCodes: [],
+});
+
+export const searchRunStats = async ({
+  esClient,
+  spaceId,
+  query,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  query: DetonationRunStatsQuery;
+}): Promise<DetonationRunStatsResponse> => {
+  const { query: esQuery, aggs, intervalMs } = buildRunStatsQuery(query);
+  const response = await esClient
+    .search<DetonationRecord>({
+      index: detonateResultsIndexName(spaceId),
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: 0,
+      track_total_hits: true,
+      query: esQuery,
+      aggs,
+    })
+    .catch((error: unknown) => {
+      if (isIndexNotFound(error)) return undefined;
+      // The time range is validated up front, so a 400 here is the caller's KQL or search only when they sent one.
+      if (isResponseError(error) && error.statusCode === 400 && hasUserFilter(query)) {
+        throw new InvalidRunsQueryError(`Invalid runs query: ${rejectionReason(error)}`);
+      }
+      throw error;
+    });
+  if (!response) return emptyStats(intervalMs);
+  const { total } = response.hits;
+  const found = response.aggregations as
+    | {
+        verdicts?: TermsBuckets;
+        mean_duration?: { value: number | null };
+        siem_alerts?: { value: number | null };
+        endpoint_alerts?: { value: number | null };
+        trend?: { buckets: Array<{ key: number; doc_count: number; verdicts?: TermsBuckets }> };
+        top_rules?: TermsBuckets;
+        top_event_codes?: TermsBuckets;
+      }
+    | undefined;
+  const meanNanos = found?.mean_duration?.value;
+  return {
+    total: typeof total === 'number' ? total : total?.value ?? 0,
+    verdicts: verdictCounts(found?.verdicts),
+    meanDurationMs: typeof meanNanos === 'number' ? meanNanos / NANOS_PER_MILLI : null,
+    alerts: {
+      siem: found?.siem_alerts?.value ?? 0,
+      endpoint: found?.endpoint_alerts?.value ?? 0,
+    },
+    trend: {
+      intervalMs,
+      buckets: (found?.trend?.buckets ?? []).map(({ key, doc_count: count, verdicts }) => ({
+        key,
+        total: count,
+        verdicts: verdictCounts(verdicts),
+      })),
+    },
+    topRules: topTerms(found?.top_rules),
+    topEventCodes: topTerms(found?.top_event_codes),
   };
 };

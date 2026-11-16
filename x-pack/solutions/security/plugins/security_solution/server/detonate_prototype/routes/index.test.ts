@@ -20,6 +20,7 @@ import {
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_RUNS_PATH,
+  DETONATE_RUNS_STATS_PATH,
   DETONATE_TASKS_PATH,
   DETONATE_USAGE_PATH,
   DETONATION_RUNS_SORT_FIELDS,
@@ -1434,6 +1435,257 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect.objectContaining({ statusCode: 503 })
       );
       expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('runs stats', () => {
+    const statsHandler = () =>
+      router.versioned.getRoute('get', DETONATE_RUNS_STATS_PATH).versions['1'].handler;
+    const statsQuerySchema = () => {
+      const { config } = router.versioned.getRoute('get', DETONATE_RUNS_STATS_PATH).versions['1'];
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      return (validation as { request: { query: { validate(q: unknown): unknown } } }).request
+        .query;
+    };
+    const stats = (query: Record<string, unknown> = {}) =>
+      statsHandler()(
+        createContext(),
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: DETONATE_RUNS_STATS_PATH,
+          query: statsQuerySchema().validate({ from: 'now-30d', to: 'now', ...query }) as never,
+        }),
+        mockResponse
+      );
+    const searchArgs = () => esClient.search.mock.calls[0][0];
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+      esClient.search.mockResolvedValue({
+        hits: { total: { value: 3, relation: 'eq' }, hits: [] },
+        aggregations: {
+          verdicts: {
+            buckets: [
+              { key: 'malicious', doc_count: 2 },
+              { key: 'unknown', doc_count: 1 },
+            ],
+          },
+          mean_duration: { value: 90_000_000_000 },
+          siem_alerts: { value: 4 },
+          endpoint_alerts: { value: 7 },
+          trend: {
+            buckets: [
+              {
+                key: 1_700_000_000_000,
+                doc_count: 3,
+                verdicts: { buckets: [{ key: 'malicious', doc_count: 3 }] },
+              },
+            ],
+          },
+          top_rules: { buckets: [{ key: 'Rule A', doc_count: 2 }] },
+          top_event_codes: { buckets: [{ key: 'malicious_file', doc_count: 5 }] },
+        },
+      });
+    });
+
+    it('requires bounded time strings, accepting ISO dates and date math, and bounds kql and search', () => {
+      const schemaOf = statsQuerySchema();
+
+      expect(schemaOf.validate({ from: 'now-30d', to: 'now' })).toEqual({
+        from: 'now-30d',
+        to: 'now',
+      });
+      expect(schemaOf.validate({ from: '2026-01-01T00:00:00.000Z', to: 'now/d' })).toEqual({
+        from: '2026-01-01T00:00:00.000Z',
+        to: 'now/d',
+      });
+      expect(() => schemaOf.validate({})).toThrow();
+      expect(() => schemaOf.validate({ from: 'now-30d' })).toThrow();
+      expect(() => schemaOf.validate({ from: 'not a date', to: 'now' })).toThrow(/date math/);
+      expect(() => schemaOf.validate({ from: 'now', to: 'now+1x' })).toThrow();
+      expect(() =>
+        schemaOf.validate({ from: 'now-'.concat('1d'.repeat(40)), to: 'now' })
+      ).toThrow();
+      expect(() =>
+        schemaOf.validate({ from: 'now-1d', to: 'now', kql: 'a'.repeat(1025) })
+      ).toThrow();
+      expect(() =>
+        schemaOf.validate({ from: 'now-1d', to: 'now', search: 'a'.repeat(129) })
+      ).toThrow();
+    });
+
+    it("aggregates this space's run documents inside the time range, with no hits", async () => {
+      await stats({ from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' });
+
+      const args = searchArgs();
+      expect(args).toEqual(
+        expect.objectContaining({
+          index: '.kibana-detonate-results-team-a',
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: 0,
+          track_total_hits: true,
+        })
+      );
+      expect(args.query.bool.filter).toEqual([
+        { term: { 'detonate.doc_kind': 'run' } },
+        {
+          range: {
+            '@timestamp': {
+              gte: Date.parse('2026-01-01T00:00:00.000Z'),
+              lte: Date.parse('2026-01-31T00:00:00.000Z'),
+              format: 'epoch_millis',
+            },
+          },
+        },
+      ]);
+      expect(args.aggs.verdicts.terms).toEqual({
+        field: 'detonate.verdict',
+        missing: 'unknown',
+        size: 4,
+      });
+      expect(args.aggs.mean_duration).toEqual({ avg: { field: 'event.duration' } });
+      // The diagnostic-only side is not a detection.
+      expect(args.aggs.siem_alerts).toEqual({
+        sum: { field: 'detonate.alerts.production_detection' },
+      });
+      expect(args.aggs.endpoint_alerts).toEqual({
+        sum: { field: 'detonate.alerts.production_endpoint' },
+      });
+      expect(JSON.stringify(args.aggs)).not.toContain('diagnostic_endpoint');
+      expect(args.aggs.top_rules.terms).toEqual({
+        field: 'detonate.detection_rule_names',
+        size: 10,
+      });
+      expect(args.aggs.top_event_codes.terms).toEqual({
+        field: 'detonate.endpoint_event_codes',
+        size: 10,
+      });
+      expect(args.aggs.trend.date_histogram).toEqual({
+        field: '@timestamp',
+        fixed_interval: '1d',
+        min_doc_count: 0,
+        extended_bounds: {
+          min: Date.parse('2026-01-01T00:00:00.000Z'),
+          max: Date.parse('2026-01-31T00:00:00.000Z'),
+        },
+      });
+      expect(args.aggs.trend.aggs.verdicts.terms.field).toBe('detonate.verdict');
+    });
+
+    it('applies the same KQL and search as the runs route, after the run-document pin', async () => {
+      await stats({ kql: 'detonate.state: "running"', search: 'evil' });
+
+      const { filter } = searchArgs().query.bool;
+      expect(filter[0]).toEqual({ term: { 'detonate.doc_kind': 'run' } });
+      expect(JSON.stringify(filter[1])).toContain('detonate.state');
+      expect(JSON.stringify(filter[2])).toContain('file.name');
+      expect(filter[3].range['@timestamp']).toBeDefined();
+    });
+
+    it('caps the trend at 120 buckets by widening the interval on a long range', async () => {
+      await stats({ from: '2020-01-01T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' });
+
+      const { date_histogram: histogram } = searchArgs().aggs.trend;
+      const days = Number(histogram.fixed_interval.replace('d', ''));
+      expect(days).toBeGreaterThan(1);
+      const rangeDays = (Date.parse('2026-01-01') - Date.parse('2020-01-01')) / 86_400_000;
+      // Two extra buckets: extended_bounds can add one at each edge.
+      expect(Math.ceil(rangeDays / days) + 2).toBeLessThanOrEqual(120);
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          trend: expect.objectContaining({ intervalMs: days * 86_400_000 }),
+        }),
+      });
+    });
+
+    it('shapes the aggregations: verdicts, ms duration, alert sums, trend and top terms', async () => {
+      await stats();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          total: 3,
+          verdicts: { malicious: 2, benign: 0, inconclusive: 0, unknown: 1 },
+          meanDurationMs: 90_000,
+          alerts: { siem: 4, endpoint: 7 },
+          trend: {
+            intervalMs: 86_400_000,
+            buckets: [
+              {
+                key: 1_700_000_000_000,
+                total: 3,
+                verdicts: { malicious: 3, benign: 0, inconclusive: 0, unknown: 0 },
+              },
+            ],
+          },
+          topRules: [{ key: 'Rule A', count: 2 }],
+          topEventCodes: [{ key: 'malicious_file', count: 5 }],
+        },
+      });
+    });
+
+    it('reports no mean duration when no run has one', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+        aggregations: { mean_duration: { value: null } },
+      });
+
+      await stats();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ total: 0, meanDurationMs: null }),
+      });
+    });
+
+    it.each([
+      ['an invalid KQL', { kql: 'detonate.state: (' }],
+      ['a clause without a field', { kql: 'foo' }],
+    ])('answers 400 for %s without querying', async (_name, query) => {
+      await stats(query);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Invalid KQL') },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('answers 400 for a range that ends before it starts', async () => {
+      await stats({ from: 'now', to: 'now-1d' });
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('from is after to') },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('answers an empty shape for a missing index', async () => {
+      const { errors } = jest.requireActual<{
+        errors: typeof import('@elastic/elasticsearch').errors;
+      }>('@elastic/elasticsearch');
+      esClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+          headers: {},
+          meta: {},
+          warnings: [],
+        } as unknown as ConstructorParameters<typeof errors.ResponseError>[0])
+      );
+
+      await stats();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          total: 0,
+          verdicts: { malicious: 0, benign: 0, inconclusive: 0, unknown: 0 },
+          meanDurationMs: null,
+          alerts: { siem: 0, endpoint: 0 },
+          trend: { intervalMs: 86_400_000, buckets: [] },
+          topRules: [],
+          topEventCodes: [],
+        },
+      });
     });
   });
 

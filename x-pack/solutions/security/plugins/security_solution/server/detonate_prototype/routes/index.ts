@@ -43,6 +43,7 @@ import {
   DETONATION_RUNS_MAX_PAGE_SIZE,
   DETONATION_RUNS_MAX_RESULT_WINDOW,
   DETONATION_RUNS_MAX_SEARCH_LENGTH,
+  DETONATION_STATS_MAX_TIME_LENGTH,
   DETONATE_HANDOFF_MARKERS,
   DETONATE_HANDOFFS_PATH,
   DETONATE_HEALTHCHECK_PATH,
@@ -51,6 +52,7 @@ import {
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
+  DETONATE_RUNS_STATS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_TASKS_PATH,
@@ -75,6 +77,7 @@ import type {
   DetonateRunDiffEmpty,
   DetonateRunDiffResult,
   DetonateRunSessionResult,
+  DetonationRunStatsResponse,
   DetonationRunsResponse,
   DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
@@ -120,7 +123,7 @@ import {
 } from '../handoffs';
 import { buildDetonateCountQueries, validateSandboxCountRuleQuery } from '../esql_draft_guard';
 import type { DetonationRecord } from '../detonation_record';
-import { InvalidRunsQueryError, searchRuns } from '../runs_search';
+import { InvalidRunsQueryError, searchRunStats, searchRuns, statsTimeError } from '../runs_search';
 
 /**
  * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
@@ -1643,6 +1646,53 @@ export const registerDetonatePrototypeRoutes = ({
           return response.ok<DetonationRunsResponse>({
             body: { ...stored, hits: await refreshRunningHits(request, stored.hits, spaceId) },
           });
+        } catch (error) {
+          if (error instanceof InvalidRunsQueryError) {
+            return response.badRequest({ body: { message: error.message } });
+          }
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * The Detonations dashboard's aggregates (counts, verdict mix, trend, top rules and event codes) over
+   * the same runs the table filters, so the panels and the table never disagree.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: DETONATE_RUNS_STATS_PATH,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              from: schema.string({
+                maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
+                validate: statsTimeError,
+              }),
+              to: schema.string({
+                maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
+                validate: statsTimeError,
+              }),
+              kql: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_KQL_LENGTH })),
+              search: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_SEARCH_LENGTH })),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const stats = await searchRunStats({
+            esClient: await getInternalEsClient(),
+            spaceId: spaceIdFromRequest(request),
+            query: request.query,
+          });
+          return response.ok<DetonationRunStatsResponse>({ body: stats });
         } catch (error) {
           if (error instanceof InvalidRunsQueryError) {
             return response.badRequest({ body: { message: error.message } });

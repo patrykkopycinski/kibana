@@ -34,6 +34,8 @@ export const DETONATE_TASKS_PATH = `${DETONATE_PROTOTYPE_API}/tasks` as const;
 export const DETONATE_HEALTHCHECK_PATH = `${DETONATE_PROTOTYPE_API}/healthcheck` as const;
 /** Kibana-shaped views of a run, as opposed to the service's raw task. */
 export const DETONATE_RUNS_PATH = `${DETONATE_PROTOTYPE_API}/runs` as const;
+/** The Detonations dashboard's aggregates over the same filtered runs as the table. */
+export const DETONATE_RUNS_STATS_PATH = `${DETONATE_RUNS_PATH}/stats` as const;
 
 /** The prototype's app route, registered as a deep link under Security. */
 export const DETONATE_PROTOTYPE_APP_PATH = '/detonate_prototype' as const;
@@ -1307,4 +1309,50 @@ export interface DetonationRunsQuery {
 export interface DetonationRunsResponse {
   hits: DetonationRecord[];
   total: number;
+}
+
+/** Bounds on a time-range string (an ISO date or date math such as `now-30d`). */
+export const DETONATION_STATS_MAX_TIME_LENGTH = 64;
+/** The trend never has more buckets than this: a longer range gets a coarser interval. */
+export const DETONATION_STATS_MAX_TREND_BUCKETS = 120;
+/** How many detection rules / endpoint event codes the breakdown lists. */
+export const DETONATION_STATS_TOP_TERMS_SIZE = 10;
+/** The bucket for a run with no verdict yet (pending, running or failed). */
+export const DETONATION_STATS_UNKNOWN_VERDICT = 'unknown' as const;
+
+export type DetonationStatsVerdict = DetonateVerdictName | typeof DETONATION_STATS_UNKNOWN_VERDICT;
+export type DetonationStatsVerdictCounts = Record<DetonationStatsVerdict, number>;
+
+/** What the Detonations dashboard asks of the stats route: a time range plus the table's filters. */
+export interface DetonationRunStatsQuery {
+  /** An ISO date or date math (`now-30d`); filters `@timestamp`. */
+  from: string;
+  to: string;
+  kql?: string;
+  search?: string;
+}
+
+export interface DetonationStatsTerm {
+  key: string;
+  count: number;
+}
+
+export interface DetonationStatsTrendBucket {
+  /** Start of the bucket, epoch milliseconds (UTC). */
+  key: number;
+  total: number;
+  verdicts: DetonationStatsVerdictCounts;
+}
+
+export interface DetonationRunStatsResponse {
+  /** Runs in the range that match the filters. */
+  total: number;
+  verdicts: DetonationStatsVerdictCounts;
+  /** Mean `event.duration` over runs that have one, in milliseconds; null when none do. */
+  meanDurationMs: number | null;
+  /** Sums over the runs in range; the diagnostic-only side is deliberately left out. */
+  alerts: { siem: number; endpoint: number };
+  trend: { intervalMs: number; buckets: DetonationStatsTrendBucket[] };
+  topRules: DetonationStatsTerm[];
+  topEventCodes: DetonationStatsTerm[];
 }

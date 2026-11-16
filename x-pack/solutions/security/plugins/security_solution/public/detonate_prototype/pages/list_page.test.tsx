@@ -64,6 +64,8 @@ interface MockTableProps {
   setExpandedDoc: (record: unknown) => void;
   onSort: (sort: string[][]) => void;
   onFetchMoreRecords: () => void;
+  sampleSizeState: number;
+  rowsPerPageState: number;
   externalCustomRenderers: Record<string, (props: { rowIndex: number }) => React.ReactNode>;
 }
 const mockTable = jest.fn<void, [MockTableProps]>();
@@ -76,6 +78,16 @@ jest.mock('@kbn/unified-data-table', () => ({
   UnifiedDataTable: (rawProps: Record<string, unknown>) => {
     const props = rawProps as unknown as MockTableProps;
     mockTable(props);
+    // The footer is the real one, wired as data_table.tsx wires it, so Load more reachability is
+    // decided by the props the page passes. The package does not export the footer.
+    const { UnifiedDataTableFooter } = jest.requireActual(
+      '@kbn/unified-data-table/src/components/data_table_footer'
+    );
+    const rowCount = props.rows.length;
+    const timefilter = {
+      getRefreshInterval: () => ({ pause: true, value: 0 }),
+      getRefreshIntervalUpdate$: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }),
+    };
     return (
       <div data-test-subj="mockTable">
         {/* Capped: the load-more window test passes ~10k rows, and rendering them all exhausts the heap. */}
@@ -88,6 +100,19 @@ jest.mock('@kbn/unified-data-table', () => ({
             ))}
           </div>
         ))}
+        <UnifiedDataTableFooter
+          isLoadingMore={false}
+          rowCount={rowCount}
+          sampleSize={props.sampleSizeState}
+          pageCount={Math.ceil(rowCount / props.rowsPerPageState)}
+          pageIndex={Math.ceil(rowCount / props.rowsPerPageState) - 1}
+          totalHits={props.totalHits}
+          onFetchMoreRecords={props.onFetchMoreRecords}
+          data={{ query: { timefilter: { timefilter } } }}
+          fieldFormats={{ getDefaultInstance: () => ({ convertToText: String }) }}
+          paginationMode="multiPage"
+          hasScrolledToBottom
+        />
       </div>
     );
   },
@@ -223,6 +248,15 @@ describe('DetonateListPage', () => {
       act(() => lastTableProps().onFetchMoreRecords());
 
       expect(fetchNextPage).toHaveBeenCalledWith({ pageParam: 80 });
+    });
+
+    it('shows the footer Load more link for 50 of 80 rows and fetches through it', async () => {
+      mockPages(50);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('dscGridSampleSizeFetchMoreLink'));
+
+      expect(fetchNextPage).toHaveBeenCalledWith({ pageParam: 50 });
     });
 
     it('does not fetch when the next page would pass the result window', async () => {

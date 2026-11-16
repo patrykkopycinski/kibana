@@ -230,6 +230,18 @@ describe('useDetonationRuns polling', () => {
     const { calls } = jest.mocked(detonateApi.searchRuns).mock;
     expect(calls).toHaveLength(1);
     expect(calls[0][1]).toEqual(expect.objectContaining({ from: 80 }));
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(3));
+
+    // The page at 80 holds running rows and follows a short page (30 of 50): the poll must
+    // rebuild its offset instead of dropping it.
+    jest.mocked(detonateApi.searchRuns).mockClear();
+    await tick();
+    await waitFor(() =>
+      expect(jest.mocked(detonateApi.searchRuns).mock.calls.map(([, q]) => q.from)).toContain(80)
+    );
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+
+    expect(result.current.data?.pages).toHaveLength(3);
   });
 
   describe('getNextPageParam', () => {
@@ -270,11 +282,18 @@ describe('useDetonationRuns polling', () => {
       expect(getNextPageParam(pages[1], pages)).toBe(9950);
     });
 
-    it('stops after a short page', () => {
+    it('stops only on an empty page', () => {
+      const { getNextPageParam } = lastOptions(50);
+      const pages = [page(50, 80), page(0, 80)];
+
+      expect(getNextPageParam(pages[1], pages)).toBeUndefined();
+    });
+
+    it('keeps asking after a short page so a refetch can rebuild later offsets', () => {
       const { getNextPageParam } = lastOptions(50);
       const pages = [page(50, 80), page(30, 80)];
 
-      expect(getNextPageParam(pages[1], pages)).toBeUndefined();
+      expect(getNextPageParam(pages[1], pages)).toBe(80);
     });
 
     it('ignores a shrunken total so a selective refetch cannot drop later pages', () => {

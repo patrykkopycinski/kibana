@@ -185,11 +185,11 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
       // Elasticsearch refuses `from + size` past the result window; the route rejects it too.
       const size = query.size ?? DETONATION_RUNS_DEFAULT_PAGE_SIZE;
       if (loaded + size > DETONATION_RUNS_MAX_RESULT_WINDOW) return undefined;
-      // A short page is the last one. `total` is deliberately not consulted: a selective refetch
-      // rebuilds each page's offset through this function, and a refetched page whose `total`
-      // shrank (a run left the filter) would return undefined here and drop every later page.
+      // Only an empty page stops. A selective refetch rebuilds each page's offset through this
+      // function, so neither a refetched page's shrunken `total` nor a short page that precedes a
+      // page loaded through Load more may return undefined here: react-query drops that page.
       // The cost is one empty fetch when the rows end exactly on a page boundary.
-      return lastPage.hits.length === size ? loaded : undefined;
+      return lastPage.hits.length > 0 ? loaded : undefined;
     },
     keepPreviousData: true,
   });

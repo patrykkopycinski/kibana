@@ -88,8 +88,6 @@ export const SUBMIT_TOAST_VIEW_RESULT_TEST_ID = 'detonatePrototypeSubmitToastVie
 const LOCAL_STORAGE_COLUMNS_KEY = 'securitySolution.detonatePrototype.runsTable.columns';
 const LOCAL_STORAGE_SETTINGS_KEY = 'securitySolution.detonatePrototype.runsTable.settings';
 const RUNS_RESULTS_INDEX_PATTERN = '.kibana-detonate-results-*';
-/** UnifiedDataTable's own cap on loaded rows; the route reads no further than this anyway. */
-const SAMPLE_SIZE = 10_000;
 const RUNS_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 const SAMPLE_COLUMN = 'file.name';
@@ -418,7 +416,8 @@ const RunsTable = ({
         // The route sorts; sorting the loaded pages again would disagree with it.
         isInMemorySortEnabled={false}
         rows={rows}
-        sampleSizeState={SAMPLE_SIZE}
+        // The footer shows Load more only while rowCount <= 10,000 - sampleSize, so a 10,000 sample hid it.
+        sampleSizeState={pageSize}
         setExpandedDoc={openRow}
         renderDocumentView={EmptyComponent}
         sort={[sort]}
@@ -485,7 +484,7 @@ export const DetonateListPage = React.memo(() => {
   const totalHits = data?.pages[0]?.total ?? 0;
 
   const loadMore = useCallback(() => {
-    // Explicit offset: a short last page makes getNextPageParam return undefined, which would leave
+    // Explicit offset: after an empty page getNextPageParam returns undefined, which would leave
     // Load more (shown once polling raises the total) a no-op. Polling still uses getNextPageParam.
     if (hits.length + pageSize > DETONATION_RUNS_MAX_RESULT_WINDOW) return;
     fetchNextPage({ pageParam: hits.length });

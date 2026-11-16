@@ -236,7 +236,7 @@ export const STATUS_ALLOWANCE_REACHED = i18n.translate(
 
 export const STATUS_ALLOWANCE_REACHED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detonatePrototype.status.allowanceReachedDescription',
-  { defaultMessage: 'Queued until the monthly allowance resets.' }
+  { defaultMessage: 'Submitting is disabled until the monthly allowance resets.' }
 );
 
 export const STATUS_UNSUPPORTED_OS = i18n.translate(
@@ -1137,6 +1137,12 @@ export const ALERT_CARD_OPEN_RESULT = i18n.translate(
   'xpack.securitySolution.detonatePrototype.alertCard.openResult',
   { defaultMessage: 'Open result' }
 );
+
+export const ALERT_CARD_COUNT = (label: string, count: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.alertCard.count', {
+    defaultMessage: '{label}: {count}',
+    values: { label, count },
+  });
 
 export const ALERT_CARD_BEHAVIORS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.alertCard.behaviors',

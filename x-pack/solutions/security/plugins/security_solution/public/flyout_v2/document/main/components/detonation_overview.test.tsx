@@ -23,6 +23,7 @@ import {
   DETONATION_OVERVIEW_CONTENT_TEST_ID,
   DETONATION_OVERVIEW_COUNTS_TEST_ID,
   DETONATION_OVERVIEW_DETONATE_TEST_ID,
+  DETONATION_OVERVIEW_EVIDENCE_TEST_ID,
   DETONATION_OVERVIEW_FAILED_TEST_ID,
   DETONATION_OVERVIEW_OPEN_RESULT_TEST_ID,
   DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID,
@@ -270,5 +271,84 @@ describe('DetonationOverview', () => {
 
     fireEvent.click(modal);
     expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'new-task' });
+  });
+
+  it('opens the run as a new session from the card title', () => {
+    setRuns([run()]);
+    const { getByTestId } = renderCard();
+
+    fireEvent.click(getByTestId(`${DETONATION_OVERVIEW_TEST_ID}TitleLink`));
+    expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'task-1' });
+  });
+
+  it('has no title link when there is no run to open', () => {
+    const { queryByTestId } = renderCard();
+    expect(queryByTestId(`${DETONATION_OVERVIEW_TEST_ID}TitleLink`)).not.toBeInTheDocument();
+  });
+
+  it('shows the one-line summary of a completed run as escaped text', () => {
+    setRuns([run({ 'detonate.evidence': 'Dropped <b>payload</b> and beaconed' })]);
+    const { getByTestId } = renderCard();
+
+    const evidence = getByTestId(DETONATION_OVERVIEW_EVIDENCE_TEST_ID);
+    expect(evidence).toHaveTextContent('Dropped <b>payload</b> and beaconed');
+    expect(evidence.querySelector('b')).toBeNull();
+  });
+
+  it('shows no summary line for a run that has no evidence', () => {
+    setRuns([run()]);
+    const { queryByTestId } = renderCard();
+    expect(queryByTestId(DETONATION_OVERVIEW_EVIDENCE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('keeps loading, not offering Detonate, while the hash read is still in flight', () => {
+    jest.mocked(useDetonationCardRuns).mockReturnValue({
+      alertRuns: query([]),
+      hashRuns: query(undefined, { isFetching: true }),
+    } as never);
+    const { getByTestId, queryByTestId } = renderCard();
+    expect(getByTestId(`${DETONATION_OVERVIEW_TEST_ID}Loading`)).toBeInTheDocument();
+    expect(queryByTestId(DETONATION_OVERVIEW_DETONATE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('shows a run from one query even when the other query failed', () => {
+    jest.mocked(useDetonationCardRuns).mockReturnValue({
+      alertRuns: query(undefined, { isError: true }),
+      hashRuns: query([run({ 'detonate.task_id': 'task-elsewhere' })]),
+    } as never);
+    const { getByTestId } = renderCard();
+    expect(getByTestId(DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows the error only when neither query produced a run', () => {
+    jest.mocked(useDetonationCardRuns).mockReturnValue({
+      alertRuns: query(undefined, { isError: true }),
+      hashRuns: query([]),
+    } as never);
+    const { getByTestId, queryByTestId } = renderCard();
+    expect(getByTestId(`${DETONATION_OVERVIEW_TEST_ID}Panel`)).toBeInTheDocument();
+    expect(queryByTestId(DETONATION_OVERVIEW_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(DETONATION_OVERVIEW_DETONATE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('clamps long failure details to two lines', () => {
+    setRuns([run({ 'detonate.state': 'failed', 'detonate.step.details': 'x'.repeat(500) })]);
+    const { getByTestId } = renderCard();
+    const { className } = getByTestId(DETONATION_OVERVIEW_FAILED_TEST_ID);
+    const emotionCss = Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules))
+      .map((rule) => rule.cssText)
+      .join('');
+    const [, emotionClass] = className.match(/(css-\S+)/) ?? [];
+    expect(emotionClass).toBeDefined();
+    expect(emotionCss).toMatch(
+      new RegExp(`\\.${emotionClass}[^}]*-webkit-line-clamp:\\s*2`)
+    );
+  });
+
+  it('offers Re-run as a text link', () => {
+    setRuns([run({ 'detonate.state': 'failed' })]);
+    const { getByTestId } = renderCard();
+    expect(getByTestId(DETONATION_OVERVIEW_RERUN_TEST_ID).className).toMatch(/euiButtonEmpty/);
   });
 });

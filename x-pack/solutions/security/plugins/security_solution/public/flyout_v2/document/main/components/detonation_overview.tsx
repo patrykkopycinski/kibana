@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -52,6 +53,8 @@ export const DETONATION_OVERVIEW_UNSUPPORTED_OS_TEST_ID =
 export const DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID =
   `${DETONATION_OVERVIEW_TEST_ID}PriorRun` as const;
 export const DETONATION_OVERVIEW_FAILED_TEST_ID = `${DETONATION_OVERVIEW_TEST_ID}Failed` as const;
+export const DETONATION_OVERVIEW_EVIDENCE_TEST_ID =
+  `${DETONATION_OVERVIEW_TEST_ID}Evidence` as const;
 export const DETONATION_OVERVIEW_COUNTS_TEST_ID = `${DETONATION_OVERVIEW_TEST_ID}Counts` as const;
 
 const OS_LABELS: Readonly<Record<DetonateVmOsFamily, string>> = {
@@ -59,6 +62,13 @@ const OS_LABELS: Readonly<Record<DetonateVmOsFamily, string>> = {
   windows: i18n.ALERT_CARD_OS_WINDOWS,
   darwin: i18n.ALERT_CARD_OS_MACOS,
 };
+
+const FAILED_DETAILS_CSS = css`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+`;
 
 const getStringField = (hit: DataTableRecord, field: string): string | undefined => {
   const value = getFieldValue(hit, field);
@@ -79,6 +89,8 @@ const stepOf = (run: DetonationRecord): DetonationStep | undefined => {
 
 interface DetonateButtonProps {
   label: string;
+  /** Renders a text link instead of a filled button. */
+  isLink?: boolean;
   onClick: () => void;
   'data-test-subj': string;
 }
@@ -88,9 +100,13 @@ interface DetonateButtonProps {
  * Usage is read here, not in the card, so a card showing a finished run makes no usage request.
  *
  * Epic #20877 §6: no "Request more allowance" button, only the reset date; pending product answer.
+ *
+ * Epic #20877 §6 (decided): the allowance-reached state is computed in the browser, not stored on
+ * the run.
  */
 const DetonateButton: FC<DetonateButtonProps> = ({
   label,
+  isLink = false,
   onClick,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -117,7 +133,11 @@ const DetonateButton: FC<DetonateButtonProps> = ({
       />
     );
   }
-  return (
+  return isLink ? (
+    <EuiButtonEmpty size="s" flush="left" onClick={onClick} data-test-subj={dataTestSubj}>
+      {label}
+    </EuiButtonEmpty>
+  ) : (
     <EuiButton size="s" onClick={onClick} data-test-subj={dataTestSubj}>
       {label}
     </EuiButton>
@@ -162,9 +182,20 @@ const RunSummary: FC<RunSummaryProps> = ({ run }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {state === 'complete' && run['detonate.evidence'] && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" data-test-subj={DETONATION_OVERVIEW_EVIDENCE_TEST_ID}>
+            {run['detonate.evidence']}
+          </EuiText>
+        </EuiFlexItem>
+      )}
       {state === 'failed' && (
         <EuiFlexItem grow={false}>
-          <EuiText size="s" data-test-subj={DETONATION_OVERVIEW_FAILED_TEST_ID}>
+          <EuiText
+            size="s"
+            css={FAILED_DETAILS_CSS}
+            data-test-subj={DETONATION_OVERVIEW_FAILED_TEST_ID}
+          >
             {run['detonate.step.details'] ?? i18n.ALERT_CARD_FAILED_FALLBACK}
           </EuiText>
         </EuiFlexItem>
@@ -173,20 +204,29 @@ const RunSummary: FC<RunSummaryProps> = ({ run }) => {
         <EuiFlexItem grow={false}>
           <EuiText size="s" data-test-subj={DETONATION_OVERVIEW_COUNTS_TEST_ID}>
             <ul>
-              <li>{`${i18n.PRODUCTION_ENDPOINT_ALERTS}: ${
-                run['detonate.alerts.production_endpoint'] ?? 0
-              }`}</li>
-              <li>{`${i18n.PRODUCTION_DETECTION_ALERTS}: ${
-                run['detonate.alerts.production_detection'] ?? 0
-              }`}</li>
+              <li>
+                {i18n.ALERT_CARD_COUNT(
+                  i18n.PRODUCTION_ENDPOINT_ALERTS,
+                  run['detonate.alerts.production_endpoint'] ?? 0
+                )}
+              </li>
+              <li>
+                {i18n.ALERT_CARD_COUNT(
+                  i18n.PRODUCTION_DETECTION_ALERTS,
+                  run['detonate.alerts.production_detection'] ?? 0
+                )}
+              </li>
               {/*
                * Epic #20877 §6: "Behaviors" counts `endpoint_event_codes` as a proxy; pending
                * product answer on the real definition.
                */}
-              <li>{`${i18n.ALERT_CARD_BEHAVIORS}: ${
-                run['detonate.endpoint_event_codes']?.length ?? 0
-              }`}</li>
-              <li>{`${i18n.ALERT_CARD_IOCS}: ${iocCount}`}</li>
+              <li>
+                {i18n.ALERT_CARD_COUNT(
+                  i18n.ALERT_CARD_BEHAVIORS,
+                  run['detonate.endpoint_event_codes']?.length ?? 0
+                )}
+              </li>
+              <li>{i18n.ALERT_CARD_COUNT(i18n.ALERT_CARD_IOCS, iocCount)}</li>
             </ul>
           </EuiText>
         </EuiFlexItem>
@@ -212,6 +252,7 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
   const run = alertRun ?? priorRun;
 
   const hostOsType = getStringField(hit, 'host.os.type');
+  // Epic #20877 §6 (decided): computed in the browser, not stored on the run.
   const isUnsupportedOs =
     hostOsType !== undefined && detonateOsFamilyFromHostOsType(hostOsType) === undefined;
 
@@ -245,6 +286,11 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
       openResult(run['detonate.task_id']);
     }
   }, [openResult, run]);
+
+  // The card is loading while either read could still produce a run; it errors only when neither did.
+  const isLoading =
+    alertRuns.isLoading || (!alertRuns.data?.hits.length && hashRuns.isFetching && !hashRuns.data);
+  const isError = (alertRuns.isError || hashRuns.isError) && !run;
 
   const osList = DETONATE_VM_OS_FAMILIES.map((family) => OS_LABELS[family]).join(', ');
 
@@ -282,6 +328,7 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
               <EuiFlexItem grow={false}>
                 <DetonateButton
                   label={i18n.FOOTER_RERUN}
+                  isLink
                   onClick={openModal}
                   data-test-subj={DETONATION_OVERVIEW_RERUN_TEST_ID}
                 />
@@ -323,8 +370,12 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
 
   return (
     <ExpandablePanel
-      header={{ title: i18n.ALERT_CARD_TITLE, iconType: 'bug' }}
-      content={{ loading: alertRuns.isLoading, error: alertRuns.isError }}
+      header={{
+        title: i18n.ALERT_CARD_TITLE,
+        iconType: 'bug',
+        link: run ? { callback: openRunResult, tooltip: i18n.ALERT_CARD_OPEN_RESULT } : undefined,
+      }}
+      content={{ loading: isLoading, error: isError }}
       data-test-subj={DETONATION_OVERVIEW_TEST_ID}
     >
       <div data-test-subj={DETONATION_OVERVIEW_CONTENT_TEST_ID}>{body}</div>
@@ -352,7 +403,7 @@ export interface DetonationOverviewProps {
  * nothing when the flag is off or the alert carries no hash: the epic defines no card for an
  * alert without a file to detonate.
  *
- * Epic #20877 §6: the family is omitted because runs carry no family field.
+ * Epic #20877 §6 (decided): family omitted until the service sends it.
  */
 export const DetonationOverview: FC<DetonationOverviewProps> = ({ hit }) => {
   const isEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');

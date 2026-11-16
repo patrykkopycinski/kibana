@@ -622,7 +622,9 @@ describe('useDetonationCardRuns', () => {
     ({ 'detonate.state': state, '@timestamp': timestamp } as never);
   const mount = (params: { alertId?: string; hash?: string }) => {
     const { wrapper } = setup();
-    return renderHook(() => useDetonationCardRuns(params), { wrapper });
+    return renderHook(() => useDetonationCardRuns({ alertId: params.alertId, hash: params.hash }), {
+      wrapper,
+    });
   };
   const queryOptions = (keyPart: string) => {
     const options = jest

@@ -63,6 +63,7 @@ interface MockTableProps {
   sort: string[][];
   setExpandedDoc: (record: unknown) => void;
   onSort: (sort: string[][]) => void;
+  onFetchMoreRecords: () => void;
   externalCustomRenderers: Record<string, (props: { rowIndex: number }) => React.ReactNode>;
 }
 const mockTable = jest.fn<void, [MockTableProps]>();
@@ -77,7 +78,8 @@ jest.mock('@kbn/unified-data-table', () => ({
     mockTable(props);
     return (
       <div data-test-subj="mockTable">
-        {props.rows.map((row, rowIndex) => (
+        {/* Capped: the load-more window test passes ~10k rows, and rendering them all exhausts the heap. */}
+        {props.rows.slice(0, 100).map((row, rowIndex) => (
           <div key={row.raw._id} data-test-subj={`mockRow-${rowIndex}`}>
             {props.columns.map((column) => (
               <div key={column} data-test-subj={`mockCell-${rowIndex}-${column}`}>
@@ -192,6 +194,46 @@ describe('DetonateListPage', () => {
     jest.mocked(useFlyoutApi).mockReturnValue({ openDetonationFlyout } as never);
     jest.mocked(useDetonateHealthcheck).mockReturnValue({ isError: false } as never);
     mockRuns([]);
+  });
+
+  describe('load more', () => {
+    const mockPages = (count: number) =>
+      jest.mocked(useDetonationRuns).mockReturnValue({
+        data: {
+          pages: [
+            {
+              hits: Array.from({ length: count }, (_, i) =>
+                makeRun({ 'detonate.task_id': `r${i}` })
+              ),
+              total: count + 30,
+            },
+          ],
+        },
+        isLoading: false,
+        isFetching: false,
+        isFetchingNextPage: false,
+        fetchNextPage,
+      } as never);
+
+    it('asks for the offset after the loaded rows, not the one getNextPageParam derives', async () => {
+      mockPages(80);
+      renderPage();
+      await screen.findByTestId('mockTable');
+
+      act(() => lastTableProps().onFetchMoreRecords());
+
+      expect(fetchNextPage).toHaveBeenCalledWith({ pageParam: 80 });
+    });
+
+    it('does not fetch when the next page would pass the result window', async () => {
+      mockPages(9980);
+      renderPage();
+      await screen.findByTestId('mockTable');
+
+      act(() => lastTableProps().onFetchMoreRecords());
+
+      expect(fetchNextPage).not.toHaveBeenCalled();
+    });
   });
 
   describe('runs table', () => {

@@ -58,6 +58,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
+  DETONATION_RUNS_MAX_RESULT_WINDOW,
   DETONATION_RUNS_SORT_FIELDS,
   DETONATION_RUN_FIELDS,
 } from '../../../common/detonate_prototype';
@@ -483,6 +484,13 @@ export const DetonateListPage = React.memo(() => {
   const hits = useMemo(() => data?.pages.flatMap((page) => page.hits) ?? [], [data]);
   const totalHits = data?.pages[0]?.total ?? 0;
 
+  const loadMore = useCallback(() => {
+    // Explicit offset: a short last page makes getNextPageParam return undefined, which would leave
+    // Load more (shown once polling raises the total) a no-op. Polling still uses getNextPageParam.
+    if (hits.length + pageSize > DETONATION_RUNS_MAX_RESULT_WINDOW) return;
+    fetchNextPage({ pageParam: hits.length });
+  }, [fetchNextPage, hits.length, pageSize]);
+
   // Deviation from the epic: the toast, the prior-run link and the deep link open one run, without the pager.
   const goToTask = useCallback(
     (taskId: string) => openDetonationFlyout({ taskId }),
@@ -683,7 +691,7 @@ export const DetonateListPage = React.memo(() => {
                   ? DataLoadingState.loadingMore
                   : DataLoadingState.loaded
               }
-              onFetchMore={fetchNextPage}
+              onFetchMore={loadMore}
             />
           ) : null}
         </div>

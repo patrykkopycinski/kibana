@@ -201,6 +201,37 @@ describe('useDetonationRuns polling', () => {
     expect(result.current.data?.pages).toHaveLength(2);
   });
 
+  it('fetches the rows after a short last page once a refetch raises the total', async () => {
+    let page0Reads = 0;
+    const hitsFor = (from?: number) =>
+      Array.from({ length: from === 0 ? 50 : 30 }, () => row('running'));
+    jest.mocked(detonateApi.searchRuns).mockImplementation(((
+      _http: unknown,
+      { from }: { from?: number }
+    ) => {
+      if (from === 0) page0Reads += 1;
+      const total = from === 0 && page0Reads > 1 ? 110 : 80;
+      return Promise.resolve({ hits: hitsFor(from), total });
+    }) as never);
+    const { result } = await mount(50);
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+    await tick();
+    await waitFor(() => expect(result.current.data?.pages[0].total).toBe(110));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    jest.mocked(detonateApi.searchRuns).mockClear();
+
+    await act(async () => {
+      await result.current.fetchNextPage({ pageParam: 80 });
+    });
+
+    const { calls } = jest.mocked(detonateApi.searchRuns).mock;
+    expect(calls).toHaveLength(1);
+    expect(calls[0][1]).toEqual(expect.objectContaining({ from: 80 }));
+  });
+
   describe('getNextPageParam', () => {
     const lastOptions = (size: number) => {
       const { wrapper } = setup();

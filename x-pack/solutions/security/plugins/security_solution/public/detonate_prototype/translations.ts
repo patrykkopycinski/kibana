@@ -1092,10 +1092,11 @@ export const DASHBOARD_VERDICT_UNKNOWN = i18n.translate(
   { defaultMessage: 'No verdict yet' }
 );
 
-export const DASHBOARD_TREND_TITLE = i18n.translate(
-  'xpack.securitySolution.detonatePrototype.dashboard.trend.title',
-  { defaultMessage: 'Detonations per day, by verdict' }
-);
+export const DASHBOARD_TREND_TITLE = (days: number): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.dashboard.trend.title', {
+    defaultMessage: 'Detonations per {days, plural, one {day} other {# days}}, by verdict',
+    values: { days },
+  });
 
 export const DASHBOARD_TREND_X_AXIS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.dashboard.trend.xAxis',

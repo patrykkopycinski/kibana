@@ -35,6 +35,8 @@ import {
 import type { EuiThemeComputed } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { i18n as kbnI18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   DetonationRunStatsResponse,
@@ -56,6 +58,7 @@ export const DASHBOARD_TOP_EVENT_CODES_TEST_ID = `${DASHBOARD_TEST_ID}-topEventC
 /** What a figure with no data shows; the tooltip beside it says why. */
 const NO_VALUE = '—';
 const CHART_HEIGHT = 220;
+const DAY_MS = 24 * 60 * 60 * 1000;
 const VERDICT_ORDER: readonly DetonationStatsVerdict[] = [
   'malicious',
   'inconclusive',
@@ -85,9 +88,10 @@ export const verdictColor = (
     ? colors.warning
     : colors.mediumShade;
 
-const numberFormat = new Intl.NumberFormat();
+// The app's locale, not the browser's, so counts and dates agree with the translated text around them.
+const numberFormat = new Intl.NumberFormat(kbnI18n.getLocale());
 const formatCount = (count: number): string => numberFormat.format(count);
-const dayFormat = new Intl.DateTimeFormat(undefined, {
+const dayFormat = new Intl.DateTimeFormat(kbnI18n.getLocale(), {
   month: 'short',
   day: 'numeric',
   timeZone: 'UTC',
@@ -268,6 +272,10 @@ export const DetonationsDashboard = React.memo<DetonationsDashboardProps>(
     };
     const hasRuns = (stats?.total ?? 0) > 0;
     const trendData = useMemo(() => (stats ? toTrendData(stats) : []), [stats]);
+    // Deviation from the epic: the bucket widens with the range, so the title says how wide it is.
+    const trendTitle = i18n.DASHBOARD_TREND_TITLE(
+      stats ? Math.max(1, Math.round(stats.trend.intervalMs / DAY_MS)) : 1
+    );
     const colorOf = (verdict: DetonationStatsVerdict) => verdictColor(verdict, euiTheme.colors);
 
     return (
@@ -341,8 +349,11 @@ export const DetonationsDashboard = React.memo<DetonationsDashboardProps>(
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="s">
-                          <strong>{formatCount(count)}</strong>
-                          {` (${share}%)`}
+                          <FormattedMessage
+                            id="xpack.securitySolution.detonatePrototype.dashboard.verdicts.share"
+                            defaultMessage="{count} ({share}%)"
+                            values={{ count: <strong>{formatCount(count)}</strong>, share }}
+                          />
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -354,12 +365,12 @@ export const DetonationsDashboard = React.memo<DetonationsDashboardProps>(
           <EuiFlexItem>
             <DashboardPanel
               {...state}
-              title={i18n.DASHBOARD_TREND_TITLE}
+              title={trendTitle}
               testId={DASHBOARD_TREND_TEST_ID}
               isEmpty={!hasRuns}
             >
               <div css={{ height: CHART_HEIGHT, width: '100%', minWidth: 0 }}>
-                <Chart title={i18n.DASHBOARD_TREND_TITLE}>
+                <Chart title={trendTitle}>
                   <Settings
                     baseTheme={baseTheme}
                     showLegend

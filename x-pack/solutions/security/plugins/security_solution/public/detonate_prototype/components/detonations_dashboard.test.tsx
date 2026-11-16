@@ -176,6 +176,17 @@ describe('DetonationsDashboard', () => {
   });
 
   describe('trend chart', () => {
+    it.each([
+      [DAY, 'Detonations per day, by verdict'],
+      [3 * DAY, 'Detonations per 3 days, by verdict'],
+    ])('titles the panel with the bucket width (%d ms)', (intervalMs, title) => {
+      renderDashboard({
+        stats: makeStats({ trend: { ...makeStats().trend, intervalMs } }),
+      });
+
+      expect(screen.getByTestId(DASHBOARD_TREND_TEST_ID)).toHaveTextContent(title);
+    });
+
     it('makes one datum per bucket and verdict', () => {
       const data = toTrendData(makeStats());
 

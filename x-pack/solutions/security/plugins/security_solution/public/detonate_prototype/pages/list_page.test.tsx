@@ -125,6 +125,7 @@ const addSuccess = jest.fn();
 const addError = jest.fn();
 const openDetonationFlyout = jest.fn();
 const fetchNextPage = jest.fn();
+const refetch = jest.fn();
 
 const DEFAULT_COLUMN_IDS = [
   '@timestamp',
@@ -238,6 +239,7 @@ describe('DetonateListPage', () => {
         isFetching: false,
         isFetchingNextPage: false,
         fetchNextPage,
+        refetch,
       } as never);
 
     it('asks for the offset after the loaded rows, not the one getNextPageParam derives', async () => {
@@ -257,6 +259,29 @@ describe('DetonateListPage', () => {
       fireEvent.click(await screen.findByTestId('dscGridSampleSizeFetchMoreLink'));
 
       expect(fetchNextPage).toHaveBeenCalledWith({ pageParam: 50 });
+    });
+
+    it('refetches instead of appending another page when the last page is empty', async () => {
+      const run = (i: number) => makeRun({ 'detonate.task_id': `r${i}` });
+      jest.mocked(useDetonationRuns).mockReturnValue({
+        data: {
+          pages: [
+            { hits: Array.from({ length: 50 }, (_, i) => run(i)), total: 80 },
+            { hits: [], total: 80 },
+          ],
+        },
+        isLoading: false,
+        isFetching: false,
+        isFetchingNextPage: false,
+        fetchNextPage,
+        refetch,
+      } as never);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('dscGridSampleSizeFetchMoreLink'));
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+      expect(fetchNextPage).not.toHaveBeenCalled();
     });
 
     it('does not fetch when the next page would pass the result window', async () => {

@@ -477,18 +477,32 @@ export const DetonateListPage = React.memo(() => {
     }),
     [kql, search, sort, pageSize]
   );
-  const { data, isLoading, isError, error, isFetching, isFetchingNextPage, fetchNextPage } =
-    useDetonationRuns(runsQuery);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+  } = useDetonationRuns(runsQuery);
 
   const hits = useMemo(() => data?.pages.flatMap((page) => page.hits) ?? [], [data]);
   const totalHits = data?.pages[0]?.total ?? 0;
+  const lastPageIsEmpty = data?.pages[data.pages.length - 1]?.hits.length === 0;
 
   const loadMore = useCallback(() => {
     // Explicit offset: after an empty page getNextPageParam returns undefined, which would leave
     // Load more (shown once polling raises the total) a no-op. Polling still uses getNextPageParam.
     if (hits.length + pageSize > DETONATION_RUNS_MAX_RESULT_WINDOW) return;
+    // An empty last page means `total` is stale; refresh it instead of appending another empty page.
+    if (lastPageIsEmpty) {
+      refetch();
+      return;
+    }
     fetchNextPage({ pageParam: hits.length });
-  }, [fetchNextPage, hits.length, pageSize]);
+  }, [fetchNextPage, hits.length, pageSize, refetch, lastPageIsEmpty]);
 
   // Deviation from the epic: the toast, the prior-run link and the deep link open one run, without the pager.
   const goToTask = useCallback(

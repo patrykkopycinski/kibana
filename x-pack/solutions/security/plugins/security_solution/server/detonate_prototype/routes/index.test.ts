@@ -1578,13 +1578,16 @@ describe('registerDetonatePrototypeRoutes', () => {
         created_at: '2026-12-15T09:59:00.000Z',
         tags: ['space:team-a'],
       };
+      const storedHit = (state: string, index = 0, timestamp = new Date().toISOString()) => ({
+        'detonate.task_id': ['a', 'b'][index],
+        'detonate.state': state,
+        '@timestamp': timestamp,
+      });
       const returnHits = (...states: string[]) =>
         esClient.search.mockResolvedValue({
           hits: {
             total: { value: states.length, relation: 'eq' },
-            hits: states.map((state, index) => ({
-              _source: { 'detonate.task_id': ['a', 'b'][index], 'detonate.state': state },
-            })),
+            hits: states.map((state, index) => ({ _source: storedHit(state, index) })),
           },
         });
       const returnedHits = () =>
@@ -1610,8 +1613,79 @@ describe('registerDetonatePrototypeRoutes', () => {
 
         await search();
 
-        expect(returnedHits()).toEqual([{ 'detonate.task_id': 'a', 'detonate.state': 'running' }]);
+        expect(returnedHits()).toEqual([
+          expect.objectContaining({ 'detonate.task_id': 'a', 'detonate.state': 'running' }),
+        ]);
         expect(mockResponse.customError).not.toHaveBeenCalled();
+      });
+
+      it('keeps the submit-only fields the task does not carry when it refreshes a hit', async () => {
+        esClient.search.mockResolvedValue({
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            hits: [
+              {
+                _source: {
+                  ...storedHit('running'),
+                  'detonate.source': 'file',
+                  'detonate.submitter': 'analyst',
+                },
+              },
+            ],
+          },
+        });
+        client.getTask.mockResolvedValue(runningTask as never);
+
+        await search();
+
+        expect(returnedHits()[0]).toEqual(
+          expect.objectContaining({
+            'detonate.state': 'complete',
+            'detonate.source': 'file',
+            'detonate.submitter': 'analyst',
+          })
+        );
+      });
+
+      it('answers with the stored hit when the service never responds', async () => {
+        jest.useFakeTimers();
+        try {
+          returnHits('running');
+          client.getTask.mockReturnValue(new Promise(() => {}));
+
+          const answered = search();
+          await jest.advanceTimersByTimeAsync(3_500);
+          await answered;
+
+          expect(returnedHits()).toEqual([
+            expect.objectContaining({ 'detonate.task_id': 'a', 'detonate.state': 'running' }),
+          ]);
+          expect(mockResponse.customError).not.toHaveBeenCalled();
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      it('does not re-read a running hit older than any run can last', async () => {
+        esClient.search.mockResolvedValue({
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            hits: [
+              {
+                _source: storedHit(
+                  'running',
+                  0,
+                  new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+                ),
+              },
+            ],
+          },
+        });
+
+        await search();
+
+        expect(client.getTask).not.toHaveBeenCalled();
+        expect(returnedHits()[0]).toEqual(expect.objectContaining({ 'detonate.state': 'running' }));
       });
 
       it('keeps the stored hit of a run that has left this space', async () => {
@@ -1620,7 +1694,9 @@ describe('registerDetonatePrototypeRoutes', () => {
 
         await search();
 
-        expect(returnedHits()[0]).toEqual({ 'detonate.task_id': 'a', 'detonate.state': 'running' });
+        expect(returnedHits()[0]).toEqual(
+          storedHit('running', 0, returnedHits()[0]['@timestamp'] as string)
+        );
         expect(esClient.update).not.toHaveBeenCalled();
       });
 

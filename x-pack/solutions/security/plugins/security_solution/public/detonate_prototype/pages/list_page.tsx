@@ -412,7 +412,6 @@ const RunsTable = ({
         dataView={dataView}
         loadingState={loadingState}
         onResize={onResize}
-        // UnifiedDataTable has no `onAddColumn`/`onRemoveColumn` here: `onSetColumns` carries every change.
         onSetColumns={onSetColumns}
         onSort={onSort}
         // The route sorts; sorting the loaded pages again would disagree with it.

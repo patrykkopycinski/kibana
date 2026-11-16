@@ -153,19 +153,27 @@ describe('useDetonationRuns polling', () => {
     expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
   });
 
-  it('refetches only the first page on a poll', async () => {
-    respondWith([row('running')], 100);
+  it('refetches only the page that holds the running row on a poll', async () => {
+    jest.mocked(detonateApi.searchRuns).mockImplementation(((
+      _http: unknown,
+      { from }: { from?: number }
+    ) =>
+      Promise.resolve({
+        hits: [row(from === 1 ? 'running' : 'complete')],
+        total: 100,
+      })) as never);
     const { result } = await mount(1);
     await act(async () => {
       await result.current.fetchNextPage();
     });
-    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2);
+    // The running row is on page 2, so polling starts once that page is rendered.
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
 
     await tick();
 
     const { calls } = jest.mocked(detonateApi.searchRuns).mock;
     expect(calls).toHaveLength(3);
-    expect(calls[2][1]).toEqual(expect.objectContaining({ from: 0 }));
+    expect(calls[2][1]).toEqual(expect.objectContaining({ from: 1 }));
   });
 
   describe('getNextPageParam', () => {

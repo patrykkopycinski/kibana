@@ -18,6 +18,7 @@
  * shaping are decided once.
  */
 
+import pMap from 'p-map';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
@@ -36,6 +37,7 @@ import {
 
 import {
   alertRunTag,
+  DETONATION_RUN_MAX_AGE_MS,
   DETONATION_RUNS_MAX_KQL_LENGTH,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
   DETONATION_RUNS_MAX_PAGE_SIZE,
@@ -197,6 +199,12 @@ const handoffMarkerListSchema = schema.maybe(
  * transfer service.
  */
 const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
+
+/** How many running runs the runs route re-reads from the service at once. */
+const RUNNING_REFRESH_CONCURRENCY = 5;
+
+/** The whole refresh pass gives up after this long and answers with the stored hits. */
+const RUNNING_REFRESH_DEADLINE_MS = 3_000;
 
 const ORIGIN_TEXT_MAX_LENGTH = { host_name: 256, user_name: 256, file_path: 4096 } as const;
 
@@ -400,30 +408,57 @@ export const registerDetonatePrototypeRoutes = ({
 
   /**
    * The results store only changes when something reads the run, so a run that ended since its last
-   * read still says "running" there. For the running hits on the returned page (at most one page),
-   * read the service and write the answer through, then return it in place of the stored hit. A
-   * failed read keeps the stored hit: the table must load even when the service is down.
+   * read still says "running" there. For the live running hits on the returned page (up to the page
+   * size), read the service and write the answer through, then return it in place of the stored hit.
+   * Any failure, or running out of time, keeps the stored hit: the table must load even when the
+   * service is down or hung.
    */
   const refreshRunningHits = async (
     request: KibanaRequest,
     hits: DetonationRecord[],
     spaceId: string
-  ): Promise<DetonationRecord[]> =>
-    Promise.all(
-      hits.map(async (hit) => {
-        if (hit['detonate.state'] !== 'running') return hit;
-        const taskId = hit['detonate.task_id'];
+  ): Promise<DetonationRecord[]> => {
+    // One deadline for the whole pass, not per hit, so a hung service costs at most this much.
+    const deadline = Date.now() + RUNNING_REFRESH_DEADLINE_MS;
+    const isLive = (hit: DetonationRecord) =>
+      hit['detonate.state'] === 'running' &&
+      Date.now() - Date.parse(hit['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
+
+    const refresh = async (hit: DetonationRecord): Promise<DetonationRecord> => {
+      const taskId = hit['detonate.task_id'];
+      const fresh = toDetonationRecord(await getTaskInSpace(getClient(request), taskId, spaceId), {
+        spaceId,
+      });
+      await recordRun(spaceId, () => fresh);
+      // The submit-only fields are not on the task; the stored hit still carries them.
+      return { ...hit, ...fresh };
+    };
+
+    return pMap(
+      hits,
+      async (hit) => {
+        if (!isLive(hit)) return hit;
+        const remaining = deadline - Date.now();
+        if (remaining <= 0) return hit;
+        let timer: NodeJS.Timeout | undefined;
+        const timedOut = new Promise<DetonationRecord>((resolve) => {
+          timer = setTimeout(() => resolve(hit), remaining);
+        });
         try {
-          const task = await getTaskInSpace(getClient(request), taskId, spaceId);
-          const fresh = toDetonationRecord(task, { spaceId });
-          await recordRun(spaceId, () => fresh);
-          return fresh;
+          // `getTask` takes no abort signal, so a hung read is abandoned, not cancelled.
+          return await Promise.race([refresh(hit), timedOut]);
         } catch (error) {
-          logger.warn(`Detonation ${taskId}: could not refresh a running run: ${error}`);
+          logger.debug(
+            `Detonation ${hit['detonate.task_id']}: could not refresh a running run: ${error}`
+          );
           return hit;
+        } finally {
+          clearTimeout(timer);
         }
-      })
+      },
+      { concurrency: RUNNING_REFRESH_CONCURRENCY }
     );
+  };
 
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
   const spaceIdFromRequest = (request: KibanaRequest): string =>
@@ -1604,6 +1639,7 @@ export const registerDetonatePrototypeRoutes = ({
             spaceId,
             query: request.query,
           });
+          // A refreshed hit can contradict the active preset or sort until the next read.
           return response.ok<DetonationRunsResponse>({
             body: { ...stored, hits: await refreshRunningHits(request, stored.hits, spaceId) },
           });

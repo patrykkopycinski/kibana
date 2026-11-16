@@ -31,7 +31,7 @@ export class InvalidRunsQueryError extends Error {}
 
 /**
  * The run fields as a data view, so KQL compiles against known types (a keyword field becomes a
- * `term`/`match` clause, not a `query_string` over a guessed field).
+ * `term`/`wildcard` clause, not a `query_string` over a guessed field).
  */
 const RUNS_DATA_VIEW: DataViewBase = {
   title: 'detonate-runs',

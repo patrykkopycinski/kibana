@@ -298,6 +298,12 @@ export interface DetonateTaskUpdate {
 export const DETONATE_MAX_EXEC_WAIT_SECS = 900;
 
 /**
+ * The longest a run can still be live: the execution wait cap plus a margin for boot, upload and
+ * teardown. A row still saying "running" past this (a run the service lost) is not re-read or polled.
+ */
+export const DETONATION_RUN_MAX_AGE_MS = (DETONATE_MAX_EXEC_WAIT_SECS + 300) * 1000;
+
+/**
  * Execution wait the detonation service applies to a submit that omits `exec_wait_secs`; matches
  * the Detonate simulator's default exec wait (60 s).
  */

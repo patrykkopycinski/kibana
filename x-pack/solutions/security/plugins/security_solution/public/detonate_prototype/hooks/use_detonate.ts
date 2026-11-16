@@ -20,7 +20,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/re
 
 import { useKibana } from '../../common/lib/kibana';
 import {
-  DETONATE_MAX_EXEC_WAIT_SECS,
+  DETONATION_RUN_MAX_AGE_MS,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
   DETONATION_RUNS_MAX_RESULT_WINDOW,
   isDetonationComplete,
@@ -161,12 +161,6 @@ export const useDetonationTasks = (query: DetonateListQuery) => {
 };
 
 /**
- * The longest a run can still be live: the execution wait cap plus a margin for boot, upload and
- * teardown. A row stuck on "running" past this (a run the service lost) must not poll forever.
- */
-const DETONATION_RUN_MAX_AGE_MS = (DETONATE_MAX_EXEC_WAIT_SECS + 300) * 1000;
-
-/**
  * A run on a VM; the table keeps polling while it sees one. Deliberate difference from the epic
  * ("queued or running"): `DetonationRunStatus` has no queued state yet, so only running counts.
  */
@@ -200,11 +194,11 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
   const shouldPoll = Boolean(data?.pages.some((page) => page.hits.some(isRunInFlight)));
   useEffect(() => {
     if (!shouldPoll) return;
-    // A poll re-reads only the first page: that is where the newest, still-running rows are, and
-    // refetching every loaded page would multiply the load by the pages scrolled. `refetchPage`
-    // is accepted by `refetch`, not by the query options, hence the manual interval.
+    // Re-reads only the pages that hold a running row, not every page scrolled. Offsets can drift
+    // between pages (a new run shifts rows down) until the next full load; accepted.
+    // `refetchPage` is accepted by `refetch`, not by the query options, hence the manual interval.
     const timer = setInterval(() => {
-      refetch({ refetchPage: (_page, index) => index === 0 });
+      refetch({ refetchPage: (page: DetonationRunsResponse) => page.hits.some(isRunInFlight) });
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [shouldPoll, refetch]);

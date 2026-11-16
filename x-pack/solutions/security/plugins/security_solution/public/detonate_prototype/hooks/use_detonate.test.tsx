@@ -176,6 +176,31 @@ describe('useDetonationRuns polling', () => {
     expect(calls[2][1]).toEqual(expect.objectContaining({ from: 1 }));
   });
 
+  it('keeps every loaded page when a refetched page comes back with a smaller total', async () => {
+    let page0Reads = 0;
+    jest.mocked(detonateApi.searchRuns).mockImplementation(((
+      _http: unknown,
+      { from }: { from?: number }
+    ) => {
+      if (from === 0) page0Reads += 1;
+      // Both pages hold a running row, so both are refetched and page 1's offset is rebuilt from
+      // page 0's refetched response, whose total fell below the next offset (a run left the filter).
+      const total = from === 0 && page0Reads > 1 ? 1 : 100;
+      return Promise.resolve({ hits: [row('running')], total });
+    }) as never);
+    const { result } = await mount(1);
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+
+    await tick();
+    await waitFor(() => expect(page0Reads).toBe(2));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+
+    expect(result.current.data?.pages).toHaveLength(2);
+  });
+
   describe('getNextPageParam', () => {
     const lastOptions = (size: number) => {
       const { wrapper } = setup();
@@ -202,16 +227,30 @@ describe('useDetonationRuns polling', () => {
 
     it('stops when the next page would pass the 10,000 result window', () => {
       const { getNextPageParam } = lastOptions(50);
-      const pages = [page(9960, 20000)];
+      const pages = [page(9910, 20000), page(50, 20000)];
 
-      expect(getNextPageParam(pages[0], pages)).toBeUndefined();
+      expect(getNextPageParam(pages[1], pages)).toBeUndefined();
     });
 
     it('still asks for the last page that fits the window', () => {
       const { getNextPageParam } = lastOptions(50);
-      const pages = [page(9950, 20000)];
+      const pages = [page(9900, 20000), page(50, 20000)];
 
-      expect(getNextPageParam(pages[0], pages)).toBe(9950);
+      expect(getNextPageParam(pages[1], pages)).toBe(9950);
+    });
+
+    it('stops after a short page', () => {
+      const { getNextPageParam } = lastOptions(50);
+      const pages = [page(50, 80), page(30, 80)];
+
+      expect(getNextPageParam(pages[1], pages)).toBeUndefined();
+    });
+
+    it('ignores a shrunken total so a selective refetch cannot drop later pages', () => {
+      const { getNextPageParam } = lastOptions(50);
+      const pages = [page(50, 500), page(50, 40)];
+
+      expect(getNextPageParam(pages[1], pages)).toBe(100);
     });
   });
 });

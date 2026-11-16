@@ -1562,7 +1562,9 @@ describe('registerDetonatePrototypeRoutes', () => {
         }>('@elastic/elasticsearch');
         return new errors.ResponseError({
           statusCode,
-          body: type ? { error: { type, reason: 'boom' } } : undefined,
+          body: type
+            ? { error: { type, reason: 'boom', root_cause: [{ type, reason: 'boom root' }] } }
+            : undefined,
           headers: {},
           meta: {},
           warnings: [],
@@ -1577,12 +1579,40 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hits: [], total: 0 } });
       });
 
-      it('does not swallow any other search failure', async () => {
+      it('answers 400 with the root-cause reason when Elasticsearch rejects the query', async () => {
         esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
 
         await search();
 
         expect(mockResponse.ok).not.toHaveBeenCalled();
+        expect(mockResponse.customError).not.toHaveBeenCalled();
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: { message: 'Invalid KQL: boom root' },
+        });
+      });
+
+      it('bounds the root-cause reason in the 400 message', async () => {
+        const error = responseError(400, 'search_phase_execution_exception');
+        (
+          error.body as { error: { root_cause: Array<{ reason: string }> } }
+        ).error.root_cause[0].reason = 'x'.repeat(1000);
+        esClient.search.mockRejectedValue(error);
+
+        await search();
+
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: { message: `Invalid KQL: ${'x'.repeat(200)}` },
+        });
+      });
+
+      it('rethrows a 5xx search failure unchanged', async () => {
+        esClient.search.mockRejectedValue(responseError(503, 'search_phase_execution_exception'));
+
+        await search();
+
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+        expect(mockResponse.badRequest).not.toHaveBeenCalled();
+        expect(mockResponse.customError).toHaveBeenCalled();
       });
 
       it('does not treat another 404 type as a missing index', async () => {

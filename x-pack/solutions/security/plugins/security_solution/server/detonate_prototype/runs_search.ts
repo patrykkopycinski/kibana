@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import type { estypes } from '@elastic/elasticsearch';
+import type { errors, estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataViewBase, KueryNode } from '@kbn/es-query';
 import {
@@ -108,6 +108,14 @@ export const buildRunsQuery = ({
 const isIndexNotFound = (error: unknown): boolean =>
   isResponseError(error) && error.body?.error?.type === 'index_not_found_exception';
 
+const MAX_REJECTION_REASON_LENGTH = 200;
+
+const rejectionReason = (error: errors.ResponseError): string =>
+  (error.body?.error?.root_cause?.[0]?.reason ?? error.body?.error?.reason ?? error.message).slice(
+    0,
+    MAX_REJECTION_REASON_LENGTH
+  );
+
 export const searchRuns = async ({
   esClient,
   spaceId,
@@ -138,6 +146,10 @@ export const searchRuns = async ({
     // Defensive: the flags above do not cover every hidden-index edge case, so a still-missing index is empty too.
     .catch((error: unknown) => {
       if (isIndexNotFound(error)) return undefined;
+      // A 400 means Elasticsearch rejected the query (e.g. a date or number KQL compiles but cannot parse): the caller's input, so the route answers 400.
+      if (isResponseError(error) && error.statusCode === 400) {
+        throw new InvalidRunsQueryError(`Invalid KQL: ${rejectionReason(error)}`);
+      }
       throw error;
     });
   if (!response) return { hits: [], total: 0 };

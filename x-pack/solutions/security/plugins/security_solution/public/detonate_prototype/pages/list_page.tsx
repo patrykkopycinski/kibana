@@ -591,10 +591,10 @@ export const DetonateListPage = React.memo(() => {
       return;
     }
     let cancelled = false;
-    const fail = (error: Error) => {
+    const fail = (cause: Error) => {
       if (cancelled) return;
       setDataViewFailed(true);
-      toasts.addError(error, { title: i18n.RUNS_DATA_VIEW_ERROR });
+      toasts.addError(cause, { title: i18n.RUNS_DATA_VIEW_ERROR });
     };
     // The current space's index, not the `-*` pattern: the SearchBar's value suggestions query this title,
     // and the pattern would suggest values from other spaces' runs.

@@ -9,6 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 
+import { isIndexNotFound } from './es_errors';
+
 import {
   DETONATE_MAX_FAILED_RUNS,
   DETONATE_RESULTS_INDEX_PREFIX,
@@ -171,9 +173,10 @@ export const findLatestCompletedRun = async (
  */
 const AWAITED_TRANSPORT_OPTIONS = { requestTimeout: 10000, maxRetries: 1 } as const;
 
-const isIndexNotFound = (error: unknown): boolean =>
-  isResponseError(error) &&
-  (error.statusCode === 404 || error.body?.error?.type === 'index_not_found_exception');
+// `update` on a run with no document answers 404 `document_missing_exception`, a missing run, not a fault.
+const isRunMissing = (error: unknown): boolean =>
+  isIndexNotFound(error) ||
+  (isResponseError(error) && error.body?.error?.type === 'document_missing_exception');
 
 /**
  * The template only shapes indices created after it, and `dynamic: false` stores
@@ -622,7 +625,7 @@ export const setHandoffMarkers = async ({
     );
     return true;
   } catch (error) {
-    if (isIndexNotFound(error)) return false;
+    if (isRunMissing(error)) return false;
     throw error;
   }
 };

@@ -20,6 +20,7 @@ import type {
   DetonationRunsQuery,
   DetonationRunsResponse,
 } from '../../common/detonate_prototype';
+import { isIndexNotFound } from './es_errors';
 
 /** The fields the free-text box matches: hash, name, tag and submitter. */
 const SEARCH_FIELDS = ['file.hash.sha256', 'file.name', 'tags', 'detonate.submitter'] as const;
@@ -104,9 +105,8 @@ export const buildRunsQuery = ({
   },
 });
 
-// The error type, not the status: other 404s (a missing resource, a proxy answering 404) are real failures.
-const isIndexNotFound = (error: unknown): boolean =>
-  isResponseError(error) && error.body?.error?.type === 'index_not_found_exception';
+const hasUserFilter = ({ kql, search }: Pick<DetonationRunsQuery, 'kql' | 'search'>): boolean =>
+  Boolean(kql?.trim() || search?.trim());
 
 const MAX_REJECTION_REASON_LENGTH = 200;
 
@@ -146,9 +146,9 @@ export const searchRuns = async ({
     // Defensive: the flags above do not cover every hidden-index edge case, so a still-missing index is empty too.
     .catch((error: unknown) => {
       if (isIndexNotFound(error)) return undefined;
-      // A 400 means Elasticsearch rejected the query (e.g. a date or number KQL compiles but cannot parse): the caller's input, so the route answers 400.
-      if (isResponseError(error) && error.statusCode === 400) {
-        throw new InvalidRunsQueryError(`Invalid KQL: ${rejectionReason(error)}`);
+      // A 400 is the caller's input only when they sent a filter (e.g. a date KQL compiles but Elasticsearch cannot parse); otherwise it is our fault.
+      if (isResponseError(error) && error.statusCode === 400 && hasUserFilter(query)) {
+        throw new InvalidRunsQueryError(`Invalid runs query: ${rejectionReason(error)}`);
       }
       throw error;
     });

@@ -98,6 +98,40 @@ describe('submit mutations', () => {
   });
 });
 
+describe('useDetonationRuns retries', () => {
+  // The shared `setup` turns retries off for every query, which would hide the hook's own rule.
+  const mountWithRetries = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: 3, retryDelay: 0 } },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    return renderHook(() => useDetonationRuns({ size: 50 }), { wrapper });
+  };
+  const httpError = (status: number) => Object.assign(new Error('boom'), { response: { status } });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('does not retry a 4xx: the fetch is called once and the query errors', async () => {
+    jest.mocked(detonateApi.searchRuns).mockRejectedValue(httpError(400));
+
+    const { result } = mountWithRetries();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a server failure up to three times', async () => {
+    jest.mocked(detonateApi.searchRuns).mockRejectedValue(httpError(503));
+
+    const { result } = mountWithRetries();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(4);
+  });
+});
+
 describe('useDetonationRuns polling', () => {
   const POLL_MS = 5000;
   const row = (state: string, at = Date.now()) => ({

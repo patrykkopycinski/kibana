@@ -318,6 +318,15 @@ describe('createResultsIndexEnsurer', () => {
     await expect(createResultsIndexEnsurer()(esClient, 'team-a')).resolves.toBeUndefined();
   });
 
+  it('rethrows a 404 that is not a missing index', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.putMapping.mockRejectedValue(
+      responseError(404, 'resource_not_found_exception')
+    );
+
+    await expect(createResultsIndexEnsurer()(esClient, 'team-a')).rejects.toThrow();
+  });
+
   it('retries a mapping update that failed on the next call', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.putMapping
@@ -793,6 +802,9 @@ describe('setHandoffMarkers', () => {
     );
 
     esClient.update.mockRejectedValueOnce(responseError(500, 'boom'));
+    await expect(setHandoffMarkers({ ...args, add: [...args.add], remove: [] })).rejects.toThrow();
+
+    esClient.update.mockRejectedValueOnce(responseError(404, 'resource_not_found_exception'));
     await expect(setHandoffMarkers({ ...args, add: [...args.add], remove: [] })).rejects.toThrow();
   });
 });

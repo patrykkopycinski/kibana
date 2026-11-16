@@ -1582,14 +1582,37 @@ describe('registerDetonatePrototypeRoutes', () => {
       it('answers 400 with the root-cause reason when Elasticsearch rejects the query', async () => {
         esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
 
-        await search();
+        await search({ kql: '@timestamp > "not-a-date"' });
 
         expect(mockResponse.ok).not.toHaveBeenCalled();
         expect(mockResponse.customError).not.toHaveBeenCalled();
         expect(mockResponse.badRequest).toHaveBeenCalledWith({
-          body: { message: 'Invalid KQL: boom root' },
+          body: { message: 'Invalid runs query: boom root' },
         });
       });
+
+      it('answers 400 for a rejected free-text search too', async () => {
+        esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
+
+        await search({ search: 'abc' });
+
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: { message: 'Invalid runs query: boom root' },
+        });
+      });
+
+      it.each([[{ sort_field: '@timestamp' }], [{ kql: '   ', search: ' ' }]])(
+        'does not blame the caller for a 400 on a request with no filter (%j)',
+        async (query) => {
+          esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
+
+          await search(query);
+
+          expect(mockResponse.ok).not.toHaveBeenCalled();
+          expect(mockResponse.badRequest).not.toHaveBeenCalled();
+          expect(mockResponse.customError).toHaveBeenCalled();
+        }
+      );
 
       it('bounds the root-cause reason in the 400 message', async () => {
         const error = responseError(400, 'search_phase_execution_exception');
@@ -1598,17 +1621,17 @@ describe('registerDetonatePrototypeRoutes', () => {
         ).error.root_cause[0].reason = 'x'.repeat(1000);
         esClient.search.mockRejectedValue(error);
 
-        await search();
+        await search({ kql: 'detonate.state: running' });
 
         expect(mockResponse.badRequest).toHaveBeenCalledWith({
-          body: { message: `Invalid KQL: ${'x'.repeat(200)}` },
+          body: { message: `Invalid runs query: ${'x'.repeat(200)}` },
         });
       });
 
       it('rethrows a 5xx search failure unchanged', async () => {
         esClient.search.mockRejectedValue(responseError(503, 'search_phase_execution_exception'));
 
-        await search();
+        await search({ kql: 'detonate.state: running' });
 
         expect(mockResponse.ok).not.toHaveBeenCalled();
         expect(mockResponse.badRequest).not.toHaveBeenCalled();

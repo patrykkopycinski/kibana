@@ -168,6 +168,12 @@ const isRunInFlight = (run: DetonationRecord): boolean =>
   run['detonate.state'] === 'running' &&
   Date.now() - Date.parse(run['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
 
+/** The Kibana http client carries the status on `response`; a plain thrown Error has none. */
+const isClientError = (error: unknown): boolean => {
+  const status = (error as { response?: { status?: number } } | undefined)?.response?.status;
+  return status !== undefined && status >= 400 && status < 500;
+};
+
 /**
  * Runs for the Detonations table, loaded a page at a time as the table asks for more. Polls only
  * while a loaded row is running, so an idle table makes no requests. The key sits under
@@ -192,6 +198,8 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
       return lastPage.hits.length > 0 ? loaded : undefined;
     },
     keepPreviousData: true,
+    // A 4xx (a rejected filter) answers the same on every retry; only a transient failure is worth one.
+    retry: (failureCount, error) => !isClientError(error) && failureCount < 3,
   });
 
   const { data, refetch } = result;

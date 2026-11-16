@@ -101,6 +101,17 @@ describe('upsertDetonationRecord', () => {
     );
   });
 
+  it('waits for the write to be searchable only when asked to', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    await upsertDetonationRecord(esClient, 'team-a', RECORD, { refresh: 'wait_for' });
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'task-1', refresh: 'wait_for' }),
+      { requestTimeout: 2000, maxRetries: 0 }
+    );
+  });
+
   it('refuses a space id that cannot name an index', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -211,6 +222,18 @@ describe('createRunRecorder', () => {
       maxRetries: 0,
     });
     expect(esClient.update).toHaveBeenCalledTimes(2);
+  });
+
+  it('passes the write options through, and writes without a refresh by default', async () => {
+    const { esClient, recordRun } = setup();
+
+    await recordRun('team-a', () => RECORD, { refresh: 'wait_for' });
+    await recordRun('team-a', () => RECORD);
+
+    expect(esClient.update.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ refresh: 'wait_for' })
+    );
+    expect(esClient.update.mock.calls[1][0]).not.toHaveProperty('refresh');
   });
 
   it('logs a warning and resolves when the write fails', async () => {

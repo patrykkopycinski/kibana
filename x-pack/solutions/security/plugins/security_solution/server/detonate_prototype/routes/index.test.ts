@@ -380,6 +380,7 @@ describe('registerDetonatePrototypeRoutes', () => {
           tags: ['alert:alert-1', 'space:default'],
         });
         expect(esClient.update).toHaveBeenCalledTimes(1);
+        expect(esClient.update.mock.calls[0][0]).not.toHaveProperty('refresh');
         expect(esClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
             index: '.kibana-detonate-results-default',
@@ -2009,6 +2010,18 @@ describe('registerDetonatePrototypeRoutes', () => {
           expect.objectContaining({ 'detonate.task_id': 'a', 'detonate.state': 'complete' })
         );
         expect(esClient.update).toHaveBeenCalledTimes(1);
+      });
+
+      it('waits for the write-through to be searchable, so the stats search that follows sees it', async () => {
+        returnHits('running');
+        client.getTask.mockResolvedValue(runningTask as never);
+
+        await search();
+
+        expect(esClient.update).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'a', refresh: 'wait_for' }),
+          expect.anything()
+        );
       });
 
       it('keeps the stored hit and still answers when the service fails', async () => {

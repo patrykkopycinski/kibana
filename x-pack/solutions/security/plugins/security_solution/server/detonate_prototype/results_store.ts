@@ -83,6 +83,11 @@ export const installResultsTemplate = async (esClient: ElasticsearchClient): Pro
   await esClient.indices.putIndexTemplate(resultsIndexTemplate(), WRITE_TRANSPORT_OPTIONS);
 };
 
+/** `refresh: 'wait_for'` makes the write visible to search before it resolves; default is no wait. */
+export interface RecordRunOptions {
+  refresh?: 'wait_for';
+}
+
 /**
  * Writes one run's document, keyed by task id. A partial record merges into the
  * existing document, so fields only an earlier write knew (the submit origin)
@@ -91,7 +96,8 @@ export const installResultsTemplate = async (esClient: ElasticsearchClient): Pro
 export const upsertDetonationRecord = async (
   esClient: ElasticsearchClient,
   spaceId: string,
-  record: DetonationRecord
+  record: DetonationRecord,
+  { refresh }: RecordRunOptions = {}
 ): Promise<void> => {
   await esClient.update(
     {
@@ -99,6 +105,8 @@ export const upsertDetonationRecord = async (
       id: record['detonate.task_id'],
       doc: record,
       doc_as_upsert: true,
+      // Omitted unless asked for, so the submit and sweep writes stay fire-and-forget.
+      ...(refresh ? { refresh } : {}),
     },
     WRITE_TRANSPORT_OPTIONS
   );
@@ -634,7 +642,11 @@ export const setHandoffMarkers = async ({
  * Best-effort and at-most-once per call: a failed or timed-out write is not retried,
  * and the origin fields live only on the submit write, so losing it loses them for good.
  */
-export type RecordRun = (spaceId: string, buildRecord: () => DetonationRecord) => Promise<void>;
+export type RecordRun = (
+  spaceId: string,
+  buildRecord: () => DetonationRecord,
+  options?: RecordRunOptions
+) => Promise<void>;
 
 /**
  * The one writer every surface shares. It writes as the internal user, so each
@@ -652,7 +664,7 @@ export const createRunRecorder = ({
 }): RecordRun => {
   const ensureResultsIndex = createResultsIndexEnsurer();
 
-  return async (spaceId, buildRecord) => {
+  return async (spaceId, buildRecord, options) => {
     let taskId: string | undefined;
     try {
       const record = buildRecord();
@@ -666,7 +678,7 @@ export const createRunRecorder = ({
           `Detonation ${taskId}: could not update the results mapping, writing anyway: ${error}`
         )
       );
-      await upsertDetonationRecord(esClient, spaceId, record);
+      await upsertDetonationRecord(esClient, spaceId, record, options);
     } catch (error) {
       logger.warn(
         `Detonation ${taskId ?? 'unknown'}: could not write the results document: ${error}`

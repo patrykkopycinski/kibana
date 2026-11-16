@@ -432,7 +432,9 @@ export const registerDetonatePrototypeRoutes = ({
       const fresh = toDetonationRecord(await getTaskInSpace(getClient(request), taskId, spaceId), {
         spaceId,
       });
-      await recordRun(spaceId, () => fresh);
+      // Waits for the write to be searchable: the table's stats search runs right after this
+      // response, and a run that just ended must not still count as running there.
+      await recordRun(spaceId, () => fresh, { refresh: 'wait_for' });
       // The submit-only fields are not on the task; the stored hit still carries them.
       return { ...hit, ...fresh };
     };

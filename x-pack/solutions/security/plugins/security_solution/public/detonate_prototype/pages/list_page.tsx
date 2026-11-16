@@ -496,9 +496,11 @@ export const DetonateListPage = React.memo(() => {
     // Explicit offset: after an empty page getNextPageParam returns undefined, which would leave
     // Load more (shown once polling raises the total) a no-op. Polling still uses getNextPageParam.
     if (hits.length + pageSize > DETONATION_RUNS_MAX_RESULT_WINDOW) return;
-    // An empty last page means `total` is stale; refresh it instead of appending another empty page.
+    // An empty last page means `total` is stale: refetch only page 0 (fresh `total`) and the last page, not all pages.
     if (lastPageIsEmpty) {
-      refetch();
+      refetch({
+        refetchPage: (_page, index, allPages) => index === 0 || index === allPages.length - 1,
+      });
       return;
     }
     fetchNextPage({ pageParam: hits.length });

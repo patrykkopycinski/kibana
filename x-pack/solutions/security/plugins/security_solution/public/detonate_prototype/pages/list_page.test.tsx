@@ -266,8 +266,9 @@ describe('DetonateListPage', () => {
       jest.mocked(useDetonationRuns).mockReturnValue({
         data: {
           pages: [
-            { hits: Array.from({ length: 50 }, (_, i) => run(i)), total: 80 },
-            { hits: [], total: 80 },
+            { hits: Array.from({ length: 50 }, (_, i) => run(i)), total: 120 },
+            { hits: Array.from({ length: 50 }, (_, i) => run(50 + i)), total: 120 },
+            { hits: [], total: 120 },
           ],
         },
         isLoading: false,
@@ -282,6 +283,11 @@ describe('DetonateListPage', () => {
 
       expect(refetch).toHaveBeenCalledTimes(1);
       expect(fetchNextPage).not.toHaveBeenCalled();
+      const { refetchPage } = refetch.mock.calls[0][0];
+      const allPages = [{}, {}, {}];
+      expect(refetchPage({}, 0, allPages)).toBe(true);
+      expect(refetchPage({}, 1, allPages)).toBe(false);
+      expect(refetchPage({}, 2, allPages)).toBe(true);
     });
 
     it('does not fetch when the next page would pass the result window', async () => {

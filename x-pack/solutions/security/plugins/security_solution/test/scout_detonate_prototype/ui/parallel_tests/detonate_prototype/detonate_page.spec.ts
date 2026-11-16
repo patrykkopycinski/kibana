@@ -62,6 +62,11 @@ const DETONATION_BODY = 'securitySolutionFlyoutDetonationDetailsBody';
 const DETONATION_OVERVIEW_TAB = `${DETONATION_FLYOUT}OverviewTab`;
 const DETONATION_SESSION_TAB = `${DETONATION_FLYOUT}SessionTab`;
 const FLYOUT_CLOSE = 'euiFlyoutCloseButton';
+// Header actions that open a tool as a child flyout of the result, and the tools' own bodies.
+const OPEN_SESSION_VIEW_BUTTON = `${DETONATION_FLYOUT}OpenSessionView`;
+const OPEN_NOTES_BUTTON = `${DETONATION_FLYOUT}OpenNotes`;
+const SESSION_VIEW_TOOL = `${DETONATION_FLYOUT}SessionViewTool`;
+const NOTES_TOOL = `${DETONATION_FLYOUT}NotesTool`;
 const STATUS_COMPLETE = 'detonatePrototypeStatus-complete';
 const STATUS_FAILED = 'detonatePrototypeStatus-failed';
 const ENDPOINT_ALERTS_COUNT = 'detonatePrototypeProductionEndpointAlerts-count';
@@ -106,6 +111,35 @@ const openModalAndEnterHash = async (page: ScoutPage) => {
   await page.testSubj.click(SUBMIT_SAMPLE_BUTTON);
   await expect(page.testSubj.locator(SUBMIT_MODAL)).toBeVisible();
   await page.testSubj.fill(SAMPLE_HASH_INPUT, SAMPLE_SHA256);
+};
+
+/**
+ * Opens a tool from the result's header, checks it is a child (the result stays open
+ * underneath it), then closes the result and checks the tool went with it.
+ */
+const expectToolClosesWithResult = async (
+  page: ScoutPage,
+  name: string,
+  openButton: string,
+  toolTestSubj: string
+) => {
+  const result = page.testSubj.locator(DETONATION_FLYOUT);
+  const tool = page.testSubj.locator(toolTestSubj);
+
+  await expect(tool, `${name} is closed to start`).toBeHidden();
+  await page.testSubj.click(openButton);
+
+  await expect(tool, `${name} opens`).toBeVisible();
+  await expect(result, `the result stays open under ${name}`).toBeVisible();
+
+  // With a child open there are two close buttons; the result's is the first in the DOM
+  // (it opened first), the child's is the last.
+  await page.testSubj
+    .locator(FLYOUT_CLOSE)
+    .first() // eslint-disable-line playwright/no-nth-methods -- the result flyout's close button is the first of the stacked pair
+    .click();
+  await expect(result, 'the result closes').toBeHidden();
+  await expect(tool, `${name} closes with the result`).toBeHidden();
 };
 
 spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, () => {
@@ -208,6 +242,37 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
 
       await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
       await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
+    }
+  );
+
+  spaceTest(
+    'closes the Session View and Notes tools together with the result flyout they opened from',
+    async ({ page }) => {
+      await page.gotoApp(DETONATE_APP);
+      await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
+
+      await openModalAndEnterHash(page);
+      await confirmSubmitAndOpenResult(page);
+
+      // Notes only render once the task has loaded; the title shows the hash then.
+      await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
+
+      await expectToolClosesWithResult(
+        page,
+        'Session View',
+        OPEN_SESSION_VIEW_BUTTON,
+        SESSION_VIEW_TOOL
+      );
+
+      // The result is closed now: reopen it from the runs table for the second tool.
+      await page.testSubj
+        .locator(RUNS_TABLE_LINK)
+        .filter({ hasText: SAMPLE_SHA256 })
+        .first() // eslint-disable-line playwright/no-nth-methods -- parallel specs share the table; the text filter already pins the sample
+        .click();
+      await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
+
+      await expectToolClosesWithResult(page, 'Notes', OPEN_NOTES_BUTTON, NOTES_TOOL);
     }
   );
 

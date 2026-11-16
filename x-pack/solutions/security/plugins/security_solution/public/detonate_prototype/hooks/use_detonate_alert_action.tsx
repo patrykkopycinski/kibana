@@ -16,10 +16,10 @@
  *      Detonate page uses), prefilled with the hash. The modal is where the
  *      confirm-before-VM-spent lives; a second submit path here would be a
  *      second thing to keep in step with the service contract. The caller
- *      renders `detonateModal`, and on success the result opens as a child of
- *      the alert flyout, so the analyst stays on the alert.
+ *      renders `detonateModal`, and on success the result opens as a new
+ *      session, replacing the alert flyout.
  *
- * The report opens as a child of the alert flyout as well.
+ * The report opens as a new session as well.
  *
  * The items are absent, rather than disabled, when they cannot apply: a
  * disabled "Detonate file" on an alert about a network connection is noise in
@@ -67,7 +67,7 @@ export const useDetonateAlertAction = ({
   closePopover,
 }: UseDetonateAlertActionParams): UseDetonateAlertActionResult => {
   const isEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
-  const { openDetonationFlyoutAsChild } = useFlyoutApi();
+  const { openDetonationFlyout } = useFlyoutApi();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const hash = useMemo(() => getDetonatableHash(hit), [hit]);
@@ -92,9 +92,9 @@ export const useDetonateAlertAction = ({
   const openResult = useCallback(
     (taskId: string) => {
       setIsModalVisible(false);
-      openDetonationFlyoutAsChild({ taskId });
+      openDetonationFlyout({ taskId });
     },
-    [openDetonationFlyoutAsChild]
+    [openDetonationFlyout]
   );
 
   const onSubmitted = useCallback((task: DetonateTask) => openResult(task.id), [openResult]);
@@ -116,8 +116,8 @@ export const useDetonateAlertAction = ({
       return;
     }
     closePopover();
-    openDetonationFlyoutAsChild({ taskId: completedRun.id });
-  }, [closePopover, completedRun, openDetonationFlyoutAsChild]);
+    openDetonationFlyout({ taskId: completedRun.id });
+  }, [closePopover, completedRun, openDetonationFlyout]);
 
   const detonateActionItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
     if (!isEnabled || !hash) {

@@ -72,7 +72,7 @@ describe('getDetonatableHash', () => {
 
 describe('useDetonateAlertAction', () => {
   const hash = 'a'.repeat(64);
-  const openDetonationFlyoutAsChild = jest.fn();
+  const openDetonationFlyout = jest.fn();
   const closePopover = jest.fn();
 
   const alertHit = (flattened: Record<string, unknown>, id = 'alert-1'): DataTableRecord =>
@@ -84,7 +84,7 @@ describe('useDetonateAlertAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
-    jest.mocked(useFlyoutApi).mockReturnValue({ openDetonationFlyoutAsChild } as never);
+    jest.mocked(useFlyoutApi).mockReturnValue({ openDetonationFlyout } as never);
     jest.mocked(useCompletedDetonationByHash).mockReturnValue({ completedRun: undefined } as never);
   });
 
@@ -164,7 +164,7 @@ describe('useDetonateAlertAction', () => {
     );
   });
 
-  it('closes the modal and opens the result child once the sample is submitted', () => {
+  it('closes the modal and opens the result as a new session once the sample is submitted', () => {
     const { result } = setup(alertHit({ 'file.hash.sha256': hash }));
     act(() => {
       result.current.detonateActionItems[0].onClick?.({} as never);
@@ -173,11 +173,11 @@ describe('useDetonateAlertAction', () => {
       result.current.detonateModal?.props.onSubmitted({ id: 'task-9' });
     });
 
-    expect(openDetonationFlyoutAsChild).toHaveBeenCalledWith({ taskId: 'task-9' });
+    expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'task-9' });
     expect(result.current.detonateModal).toBeNull();
   });
 
-  it('closes the modal and opens the result child from the prior-run link', () => {
+  it('closes the modal and opens the result as a new session from the prior-run link', () => {
     const { result } = setup(alertHit({ 'file.hash.sha256': hash }));
     act(() => {
       result.current.detonateActionItems[0].onClick?.({} as never);
@@ -186,11 +186,11 @@ describe('useDetonateAlertAction', () => {
       result.current.detonateModal?.props.onViewTask('run-2');
     });
 
-    expect(openDetonationFlyoutAsChild).toHaveBeenCalledWith({ taskId: 'run-2' });
+    expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'run-2' });
     expect(result.current.detonateModal).toBeNull();
   });
 
-  it('opens the result child for the completed run when one exists', () => {
+  it('opens the result as a new session for the completed run when one exists', () => {
     jest
       .mocked(useCompletedDetonationByHash)
       .mockReturnValue({ completedRun: { id: 'run-3' } } as never);
@@ -205,7 +205,7 @@ describe('useDetonateAlertAction', () => {
     items[0].onClick?.({} as never);
 
     expect(closePopover).toHaveBeenCalledTimes(1);
-    expect(openDetonationFlyoutAsChild).toHaveBeenCalledWith({ taskId: 'run-3' });
+    expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'run-3' });
     expect(result.current.detonateModal).toBeNull();
   });
 });

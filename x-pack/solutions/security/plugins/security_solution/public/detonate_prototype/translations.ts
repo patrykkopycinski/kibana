@@ -1014,3 +1014,110 @@ export const FOOTER_FAILED_NOTE_FALLBACK = (worker: string) =>
     defaultMessage: 'The run failed in the {worker} step.',
     values: { worker },
   });
+
+export const DASHBOARD_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.title',
+  { defaultMessage: 'Detonations overview' }
+);
+
+export const DASHBOARD_KQL_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.kqlPlaceholder',
+  { defaultMessage: 'Filter detonations using KQL, e.g. detonate.verdict:malicious' }
+);
+
+export const DASHBOARD_FILTER_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.filterErrorTitle',
+  { defaultMessage: 'The filter was rejected' }
+);
+
+export const DASHBOARD_PANEL_ERROR = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.panelError',
+  { defaultMessage: 'Could not load this panel' }
+);
+
+export const DASHBOARD_PANEL_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.panelEmpty',
+  { defaultMessage: 'No detonations in this range' }
+);
+
+export const DASHBOARD_NO_DATA = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.noData',
+  { defaultMessage: 'No data' }
+);
+
+export const DASHBOARD_NO_DURATION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.noDurationTooltip',
+  { defaultMessage: 'No detonation in this range has finished with a recorded duration' }
+);
+
+export const DASHBOARD_NO_RUNS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.noRunsTooltip',
+  { defaultMessage: 'No detonations match the time range and filters' }
+);
+
+export const DASHBOARD_KPI_DETONATIONS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.kpi.detonations',
+  { defaultMessage: 'Detonations' }
+);
+
+export const DASHBOARD_KPI_MEAN_TIME = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.kpi.meanTime',
+  { defaultMessage: 'Mean time to result' }
+);
+
+export const DASHBOARD_KPI_ALERTS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.kpi.alerts',
+  { defaultMessage: 'Alerts across detonations' }
+);
+
+export const DASHBOARD_KPI_ALERTS_SPLIT = ({
+  siem,
+  endpoint,
+}: {
+  siem: string;
+  endpoint: string;
+}): string =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.dashboard.kpi.alertsSplit', {
+    defaultMessage: '{siem} SIEM · {endpoint} endpoint',
+    values: { siem, endpoint },
+  });
+
+export const DASHBOARD_VERDICTS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.verdicts.title',
+  { defaultMessage: 'Verdicts' }
+);
+
+export const DASHBOARD_VERDICT_UNKNOWN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.verdicts.unknown',
+  { defaultMessage: 'No verdict yet' }
+);
+
+export const DASHBOARD_TREND_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.trend.title',
+  { defaultMessage: 'Detonations per day, by verdict' }
+);
+
+export const DASHBOARD_TREND_X_AXIS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.trend.xAxis',
+  { defaultMessage: 'Date' }
+);
+
+export const DASHBOARD_TREND_Y_AXIS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.trend.yAxis',
+  { defaultMessage: 'Detonations' }
+);
+
+export const DASHBOARD_TOP_RULES_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.topRules.title',
+  { defaultMessage: 'Top detection rules' }
+);
+
+export const DASHBOARD_TOP_EVENT_CODES_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.topEventCodes.title',
+  { defaultMessage: 'Top endpoint event codes' }
+);
+
+export const DASHBOARD_TOP_TERMS_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.dashboard.topTerms.empty',
+  { defaultMessage: 'No alerts recorded in this range' }
+);

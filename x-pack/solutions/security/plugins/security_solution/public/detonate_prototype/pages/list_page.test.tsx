@@ -20,9 +20,18 @@ import { useHistory } from 'react-router-dom';
 import type { DetonateTask, DetonationRecord } from '../../../common/detonate_prototype';
 import { useKibana } from '../../common/lib/kibana';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import { useDetonateHealthcheck, useDetonationRuns } from '../hooks/use_detonate';
+import {
+  useDetonateHealthcheck,
+  useDetonationRuns,
+  useDetonationRunStats,
+} from '../hooks/use_detonate';
 import type { SubmitModal as SubmitModalType } from '../components/submit_modal';
-import { DetonateListPage, RUNS_TABLE_TEST_ID, SUBMIT_SAMPLE_BUTTON_TEST_ID } from './list_page';
+import {
+  DetonateListPage,
+  FILTER_ERROR_TEST_ID,
+  RUNS_TABLE_TEST_ID,
+  SUBMIT_SAMPLE_BUTTON_TEST_ID,
+} from './list_page';
 
 type SubmitModalProps = React.ComponentProps<typeof SubmitModalType>;
 
@@ -122,11 +131,28 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: jest.fn((node: React.ReactNode) => node),
 }));
 
+interface MockSearchBarProps {
+  query: { query: string; language: string };
+  dateRangeFrom: string;
+  dateRangeTo: string;
+  onQuerySubmit: (
+    payload: { dateRange: { from: string; to: string }; query?: { query: string } },
+    isUpdated?: boolean
+  ) => void;
+}
+const mockSearchBar = jest.fn<void, [MockSearchBarProps]>();
+const MockSearchBar = (props: object) => {
+  mockSearchBar(props as MockSearchBarProps);
+  return <div data-test-subj="mockSearchBar" />;
+};
+const lastSearchBarProps = () => mockSearchBar.mock.calls[mockSearchBar.mock.calls.length - 1][0];
+
 const addSuccess = jest.fn();
 const addError = jest.fn();
 const openDetonationFlyout = jest.fn();
 const fetchNextPage = jest.fn();
 const refetch = jest.fn();
+const statsRefetch = jest.fn();
 
 const DEFAULT_COLUMN_IDS = [
   '@timestamp',
@@ -166,6 +192,21 @@ const mockRuns = (hits: DetonationRecord[], overrides: Record<string, unknown> =
   } as never);
 
 const lastTableProps = () => mockTable.mock.calls[mockTable.mock.calls.length - 1][0];
+
+const mockStats = (overrides: Record<string, unknown> = {}) =>
+  jest.mocked(useDetonationRunStats).mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+    isFetching: false,
+    refetch: statsRefetch,
+    ...overrides,
+  } as never);
+
+const lastStatsQuery = () => {
+  const { calls } = jest.mocked(useDetonationRunStats).mock;
+  return calls[calls.length - 1][0];
+};
 
 const lastRunsQuery = () => {
   const { calls } = jest.mocked(useDetonationRuns).mock;
@@ -212,6 +253,7 @@ describe('DetonateListPage', () => {
         fieldFormats: {},
         storage: {},
         data: {},
+        unifiedSearch: { ui: { SearchBar: MockSearchBar } },
       },
     } as never);
     mockUseColumns.mockReturnValue({
@@ -221,6 +263,7 @@ describe('DetonateListPage', () => {
     jest.mocked(useFlyoutApi).mockReturnValue({ openDetonationFlyout } as never);
     jest.mocked(useDetonateHealthcheck).mockReturnValue({ isError: false } as never);
     mockRuns([]);
+    mockStats();
   });
 
   describe('load more', () => {
@@ -453,6 +496,110 @@ describe('DetonateListPage', () => {
       fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 13 });
 
       expect(lastRunsQuery().search).toBe('evil');
+    });
+
+    describe('time range and KQL bar', () => {
+      const submit = (kql: string, isUpdated = true) =>
+        act(() =>
+          lastSearchBarProps().onQuerySubmit(
+            { dateRange: { from: 'now-7d', to: 'now-1h' }, query: { query: kql } },
+            isUpdated
+          )
+        );
+
+      it('starts at the last 30 days with no KQL, on the table and the panels alike', () => {
+        renderPage();
+
+        expect(lastRunsQuery()).toEqual(expect.objectContaining({ start: 'now-30d', end: 'now' }));
+        expect(lastStatsQuery()).toEqual({ from: 'now-30d', to: 'now' });
+      });
+
+      it('sends a submitted time range and KQL to the runs and the stats alike', () => {
+        renderPage();
+
+        submit('detonate.verdict:benign');
+
+        expect(lastRunsQuery()).toEqual(
+          expect.objectContaining({
+            start: 'now-7d',
+            end: 'now-1h',
+            kql: 'detonate.verdict:benign',
+          })
+        );
+        expect(lastStatsQuery()).toEqual({
+          from: 'now-7d',
+          to: 'now-1h',
+          kql: 'detonate.verdict:benign',
+        });
+        expect(lastSearchBarProps()).toEqual(
+          expect.objectContaining({
+            dateRangeFrom: 'now-7d',
+            dateRangeTo: 'now-1h',
+            query: { query: 'detonate.verdict:benign', language: 'kuery' },
+          })
+        );
+      });
+
+      it('ANDs the quick filter with the KQL, each part in parentheses', () => {
+        renderPage();
+
+        fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-preset-needs_attention`));
+        submit('host.name:a or host.name:b');
+
+        const expected =
+          '(detonate.state:failed or detonate.verdict:inconclusive) and (host.name:a or host.name:b)';
+        expect(lastRunsQuery().kql).toBe(expected);
+        expect(lastStatsQuery().kql).toBe(expected);
+      });
+
+      it('refetches the runs and the stats when the bar is submitted unchanged', () => {
+        mockRuns([], { refetch });
+        renderPage();
+        refetch.mockClear();
+
+        submit('', false);
+
+        expect(refetch).toHaveBeenCalledTimes(1);
+        expect(statsRefetch).toHaveBeenCalledTimes(1);
+        expect(lastRunsQuery()).toEqual(expect.objectContaining({ start: 'now-30d' }));
+      });
+
+      it('clears the KQL, with the other filters', () => {
+        renderPage();
+        submit('detonate.verdict:benign');
+        expect(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-no-match`)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-clear-filters`));
+
+        expect(lastRunsQuery().kql).toBeUndefined();
+        expect(lastStatsQuery().kql).toBeUndefined();
+        expect(lastSearchBarProps().query.query).toBe('');
+      });
+
+      it('shows a rejected KQL once, above the panels, and not as a table error', () => {
+        const rejected = {
+          response: { status: 400 },
+          body: { message: 'Invalid KQL: Expected "(" at column 3' },
+        };
+        mockRuns([], { data: undefined, isError: true, error: rejected });
+        mockStats({ data: undefined, isError: true, error: rejected });
+        renderPage();
+
+        const callouts = screen.getAllByTestId(FILTER_ERROR_TEST_ID);
+        expect(callouts).toHaveLength(1);
+        expect(callouts[0]).toHaveTextContent('Invalid KQL: Expected "(" at column 3');
+        expect(screen.queryByTestId(`${RUNS_TABLE_TEST_ID}-error`)).not.toBeInTheDocument();
+      });
+
+      it('shows no filter callout for a server failure, which stays a table error', () => {
+        mockRuns([], { data: undefined, isError: true, error: new Error('runs search exploded') });
+        renderPage();
+
+        expect(screen.queryByTestId(FILTER_ERROR_TEST_ID)).not.toBeInTheDocument();
+        expect(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-error`)).toHaveTextContent(
+          'runs search exploded'
+        );
+      });
     });
 
     it('sorts newest first by default and applies a header sort on an allowlisted field', async () => {

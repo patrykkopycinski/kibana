@@ -42,6 +42,7 @@ import type {
   DetonationRunStatsResponse,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
+import { isClientError } from './is_client_error';
 import type { SubmitFileParams, SubmitHashParams } from '../api/client';
 import { useTrackDetonation } from '../components/detonation_notifier';
 
@@ -169,12 +170,6 @@ export const useDetonationTasks = (query: DetonateListQuery) => {
 const isRunInFlight = (run: DetonationRecord): boolean =>
   run['detonate.state'] === 'running' &&
   Date.now() - Date.parse(run['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
-
-/** The Kibana http client carries the status on `response`; a plain thrown Error has none. */
-const isClientError = (error: unknown): boolean => {
-  const status = (error as { response?: { status?: number } } | undefined)?.response?.status;
-  return status !== undefined && status >= 400 && status < 500;
-};
 
 /**
  * Runs for the Detonations table, loaded a page at a time as the table asks for more. Polls only

@@ -55,6 +55,7 @@ import {
 } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
@@ -67,10 +68,17 @@ import type {
   DetonationRecord,
   DetonationRecordFieldType,
   DetonationRunsQuery,
+  DetonationRunStatsQuery,
   DetonationRunsSortField,
   DetonateTask,
 } from '../../../common/detonate_prototype';
-import { useDetonateHealthcheck, useDetonationRuns } from '../hooks/use_detonate';
+import {
+  useDetonateHealthcheck,
+  useDetonationRuns,
+  useDetonationRunStats,
+} from '../hooks/use_detonate';
+import { isClientError } from '../hooks/is_client_error';
+import { DetonationsDashboard } from '../components/detonations_dashboard';
 import { DetonationStateBadge } from '../components/detonation_state_badge';
 import { DetonateVerdictNameBadge } from '../components/verdict_badge';
 import { SubmitModal } from '../components/submit_modal';
@@ -81,6 +89,7 @@ import * as i18n from '../translations';
 
 export const LIST_PAGE_TEST_ID = 'detonatePrototypeListPage';
 export const RUNS_TABLE_TEST_ID = 'detonatePrototypeRunsTable';
+export const FILTER_ERROR_TEST_ID = 'detonatePrototypeFilterError';
 export const SERVICE_UNAVAILABLE_TEST_ID = 'detonatePrototypeServiceUnavailable';
 export const SUBMIT_SAMPLE_BUTTON_TEST_ID = 'detonatePrototypeSubmitSample';
 export const SUBMIT_TOAST_TEST_ID = 'detonatePrototypeSubmitToast';
@@ -180,6 +189,15 @@ const buildRunFields = (): Record<string, FieldSpec> =>
 
 const sourceOf = (rows: DataTableRecord[], rowIndex: number): DetonationRecord | undefined =>
   rows[rowIndex]?.raw._source as DetonationRecord | undefined;
+
+const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-30d', to: 'now' };
+
+/** The quick filter and the analyst's KQL both apply: each is parenthesised so an `or` in one cannot widen the other. */
+const andKql = (...parts: Array<string | undefined>): string | undefined => {
+  const present = parts.filter((part): part is string => Boolean(part?.trim()));
+  if (present.length === 0) return undefined;
+  return present.length === 1 ? present[0] : present.map((part) => `(${part})`).join(' and ');
+};
 
 const serviceErrorMessage = (error: unknown): string => {
   const body = (error as { body?: { message?: string } } | undefined)?.body;
@@ -457,6 +475,10 @@ export const DetonateListPage = React.memo(() => {
   const titleId = useGeneratedHtmlId({ prefix: 'detonateRunsTitle' });
   // EuiFieldSearch is uncontrolled: a new key empties its text when the filters are cleared.
   const [searchKey, setSearchKey] = useState(0);
+  // Deviation from the epic: a local time range, not Security's global time. This page is not wired
+  // into the Security URL state or the global KQL header, so the global picker would not drive it.
+  const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [userKql, setUserKql] = useState('');
 
   /**
    * The alert action arrives here with the hash it extracted. Reading it from
@@ -474,17 +496,30 @@ export const DetonateListPage = React.memo(() => {
   const prefillKey = hasPrefill ? JSON.stringify([prefill.hash, prefill.tags]) : '';
 
   const healthcheck = useDetonateHealthcheck();
-  const kql = PRESETS.find(({ id }) => id === preset)?.kql;
+  const presetKql = PRESETS.find(({ id }) => id === preset)?.kql;
+  const kql = useMemo(() => andKql(presetKql, userKql), [presetKql, userKql]);
   const runsQuery = useMemo<Omit<DetonationRunsQuery, 'from'>>(
     () => ({
       ...(kql ? { kql } : {}),
       ...(search ? { search } : {}),
+      start: timeRange.from,
+      end: timeRange.to,
       sort_field: sort[0] as DetonationRunsSortField,
       sort_direction: sort[1] === 'asc' ? 'asc' : 'desc',
       size: pageSize,
     }),
-    [kql, search, sort, pageSize]
+    [kql, search, timeRange, sort, pageSize]
   );
+  const statsQuery = useMemo<DetonationRunStatsQuery>(
+    () => ({
+      from: timeRange.from,
+      to: timeRange.to,
+      ...(kql ? { kql } : {}),
+      ...(search ? { search } : {}),
+    }),
+    [kql, search, timeRange]
+  );
+  const stats = useDetonationRunStats(statsQuery);
   const {
     data,
     isLoading,
@@ -495,6 +530,11 @@ export const DetonateListPage = React.memo(() => {
     fetchNextPage,
     refetch,
   } = useDetonationRuns(runsQuery);
+
+  // A rejected filter fails the table and every panel alike: say so once, above them all.
+  const rejectedFilterError = [error, stats.error].find(
+    (failure) => failure !== null && failure !== undefined && isClientError(failure)
+  );
 
   const hits = useMemo(() => data?.pages.flatMap((page) => page.hits) ?? [], [data]);
   const totalHits = data?.pages[0]?.total ?? 0;
@@ -550,8 +590,27 @@ export const DetonateListPage = React.memo(() => {
   const clearFilters = useCallback(() => {
     setPreset('all');
     setSearch('');
+    setUserKql('');
     setSearchKey((key) => key + 1);
   }, []);
+  const onQuerySubmit = useCallback(
+    ({ dateRange, query }: { dateRange: TimeRange; query?: Query }, isUpdated?: boolean) => {
+      if (!isUpdated) {
+        // Submitting an unchanged bar is a refresh.
+        refetch();
+        stats.refetch();
+        return;
+      }
+      setTimeRange(dateRange);
+      setUserKql(typeof query?.query === 'string' ? query.query : '');
+    },
+    [refetch, stats]
+  );
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = services;
 
   /**
    * `prefill` is set only for a modal opened by a URL hand-off. Each opening gets a new
@@ -663,6 +722,47 @@ export const DetonateListPage = React.memo(() => {
         />
       )}
 
+      <SearchBar
+        appName="Detonate"
+        displayStyle="inPage"
+        showFilterBar={false}
+        showQueryInput
+        showDatePicker
+        showSubmitButton
+        indexPatterns={dataView ? [dataView] : []}
+        dateRangeFrom={timeRange.from}
+        dateRangeTo={timeRange.to}
+        query={{ query: userKql, language: 'kuery' }}
+        placeholder={i18n.DASHBOARD_KQL_PLACEHOLDER}
+        onQuerySubmit={onQuerySubmit}
+        isLoading={isFetching || stats.isFetching}
+      />
+      <EuiSpacer size="m" />
+
+      {rejectedFilterError !== undefined && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.DASHBOARD_FILTER_ERROR_TITLE}
+            text={serviceErrorMessage(rejectedFilterError)}
+            data-test-subj={FILTER_ERROR_TEST_ID}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <DetonationsDashboard
+        stats={stats.data}
+        isLoading={stats.isLoading}
+        isError={stats.isError}
+        errorMessage={
+          stats.isError && !isClientError(stats.error)
+            ? serviceErrorMessage(stats.error)
+            : undefined
+        }
+      />
+      <EuiSpacer size="l" />
+
       <EuiPanel hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
@@ -697,7 +797,7 @@ export const DetonateListPage = React.memo(() => {
 
         <div data-test-subj={RUNS_TABLE_TEST_ID}>
           <EuiProgress size="xs" color="accent" css={{ opacity: isFetching ? 1 : 0 }} />
-          {isError && !data ? (
+          {isError && !data && isClientError(error) ? null : isError && !data ? (
             <KbnWarningCallout
               announceOnMount
               title={i18n.RUNS_ERROR_TITLE}

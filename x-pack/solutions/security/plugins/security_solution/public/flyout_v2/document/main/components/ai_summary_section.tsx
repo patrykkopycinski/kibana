@@ -56,6 +56,8 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
   );
 
   const detonatePrototypeEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
+  // Epic #20877 §6 (decided): only verdict and confidence; no sandbox-written text
+  // (detonate.evidence, step details) because of prompt-injection risk.
   // An undefined alert id disables the query, so nothing is read unless the feature is on.
   const includeDetonation = detonatePrototypeEnabled && isAlert;
   const { alertRuns } = useDetonationCardRuns({

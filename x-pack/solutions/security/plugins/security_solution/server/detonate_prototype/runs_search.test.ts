@@ -10,6 +10,7 @@ import {
   InvalidRunsQueryError,
   buildRunStatsQuery,
   resolveStatsTime,
+  statsTimeError,
   trendIntervalMs,
 } from './runs_search';
 
@@ -58,6 +59,40 @@ describe('resolveStatsTime', () => {
 
   it('rejects text that is neither', () => {
     expect(() => resolveStatsTime('yesterday-ish', false)).toThrow(InvalidRunsQueryError);
+  });
+});
+
+describe('statsTimeError', () => {
+  it.each([
+    '2026-01-01',
+    '2026-01-01T00:00:00.000Z',
+    '2026-01-01T12:00:00Z||/d',
+    'now',
+    'now-30d',
+    'now/d',
+  ])('accepts %s', (value) => {
+    expect(statsTimeError(value)).toBeUndefined();
+  });
+
+  it.each(['12', 'garbage 2020', 'Nov 1 2026', 'yesterday-ish', '', 'now-', 'nowhere', '||now'])(
+    'rejects %j',
+    (value) => {
+      expect(statsTimeError(value)).toEqual(expect.any(String));
+    }
+  );
+
+  it('agrees with the resolver on every input', () => {
+    for (const value of ['12', 'garbage 2020', '2026-01-01', 'now-7d']) {
+      const resolves = (() => {
+        try {
+          resolveStatsTime(value, false);
+          return true;
+        } catch {
+          return false;
+        }
+      })();
+      expect(statsTimeError(value) === undefined).toBe(resolves);
+    }
   });
 });
 

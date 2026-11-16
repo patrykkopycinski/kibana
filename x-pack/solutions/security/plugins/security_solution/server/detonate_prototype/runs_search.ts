@@ -213,16 +213,32 @@ const utcMoment = Object.assign(
   moment
 ) as typeof moment;
 
+/**
+ * `now…` date math, or a strict ISO 8601 date with optional `||<math>`. `dateMath.parse` hands the
+ * anchor to a non-strict `moment()`, which reads '12' or 'garbage 2020' as a date (and logs a
+ * deprecation warning), so the anchor is checked strictly first. Parsed in UTC, like the trend buckets.
+ */
+const parseStatsTime = (value: string, roundUp: boolean): moment.Moment | undefined => {
+  if (!value.startsWith('now')) {
+    const anchor = value.split('||')[0];
+    if (!moment.utc(anchor, moment.ISO_8601, true).isValid()) return undefined;
+  }
+  const parsed = dateMath.parse(value, { roundUp, momentInstance: utcMoment });
+  return parsed?.isValid() ? parsed : undefined;
+};
+
 /** Resolves an ISO date or date math (`now-30d`) to epoch milliseconds; a range's end rounds up (`now/d` is the day's last millisecond). */
 export const resolveStatsTime = (value: string, roundUp: boolean): number => {
-  const parsed = dateMath.parse(value, { roundUp, momentInstance: utcMoment });
-  if (!parsed?.isValid()) throw new InvalidRunsQueryError(`Invalid time: ${value.slice(0, 64)}`);
+  const parsed = parseStatsTime(value, roundUp);
+  if (!parsed) throw new InvalidRunsQueryError(`Invalid time: ${value.slice(0, 64)}`);
   return parsed.valueOf();
 };
 
 /** The route schema's check, so a bad date is a 400 before any query is built. */
 export const statsTimeError = (value: string): string | undefined =>
-  dateMath.parse(value)?.isValid() ? undefined : 'must be an ISO date or date math such as now-30d';
+  parseStatsTime(value, false)
+    ? undefined
+    : 'must be an ISO 8601 date or date math such as now-30d';
 
 /**
  * The trend is one bucket per day until the range would pass the bucket cap; a longer range gets a

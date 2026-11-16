@@ -341,9 +341,7 @@ describe('DetonationOverview', () => {
       .join('');
     const [, emotionClass] = className.match(/(css-\S+)/) ?? [];
     expect(emotionClass).toBeDefined();
-    expect(emotionCss).toMatch(
-      new RegExp(`\\.${emotionClass}[^}]*-webkit-line-clamp:\\s*2`)
-    );
+    expect(emotionCss).toMatch(new RegExp(`\\.${emotionClass}[^}]*-webkit-line-clamp:\\s*2`));
   });
 
   it('offers Re-run as a text link', () => {

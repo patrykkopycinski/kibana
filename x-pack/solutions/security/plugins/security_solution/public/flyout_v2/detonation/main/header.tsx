@@ -6,16 +6,19 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiToolTip,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import {
@@ -32,7 +35,9 @@ import {
   DocumentPagination,
   useShowDocumentPagination,
 } from '../../document/main/components/document_pagination';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
+import { useFlyoutApi } from '../../use_flyout_api';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { CONFIDENCE_LABEL } from './utils/detonation_labels';
 import type { DetonationPanelPaths, DetonationPanelTabType } from './tabs';
@@ -42,9 +47,21 @@ import {
   DETONATION_DETAILS_META_STATUS_TEST_ID,
   DETONATION_DETAILS_META_TEST_ID,
   DETONATION_DETAILS_META_VERDICT_TEST_ID,
+  DETONATION_DETAILS_OPEN_NOTES_TEST_ID,
+  DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID,
   DETONATION_DETAILS_TITLE_TEST_ID,
 } from './test_ids';
 import { formatDetonationDuration, getDetonationDurationMs } from './utils/detonation_duration';
+
+const OPEN_SESSION_VIEW_LABEL = kbnI18n.translate(
+  'xpack.securitySolution.flyout.detonation.header.openSessionView',
+  { defaultMessage: 'Open Session View' }
+);
+
+const OPEN_NOTES_LABEL = kbnI18n.translate(
+  'xpack.securitySolution.flyout.detonation.header.openNotes',
+  { defaultMessage: 'Open notes' }
+);
 
 interface MetaCardProps {
   title: string;
@@ -162,9 +179,41 @@ export const Header: FC<HeaderProps> = memo(
     // Present only when the Detonations table opened the flyout with its rows.
     const showPagination = useShowDocumentPagination();
 
+    const { openDetonationSessionView, openDetonationNotes } = useFlyoutApi();
+    const onOpenSessionView = useCallback(
+      () => openDetonationSessionView({ taskId, origin: FLYOUT_ORIGIN.FLYOUT_HEADER }),
+      [openDetonationSessionView, taskId]
+    );
+    const onOpenNotes = useCallback(() => {
+      if (task) {
+        openDetonationNotes({ task, origin: FLYOUT_ORIGIN.FLYOUT_HEADER });
+      }
+    }, [openDetonationNotes, task]);
+
     return (
       <>
-        <FlyoutHeaderActions />
+        <FlyoutHeaderActions>
+          <EuiToolTip content={OPEN_SESSION_VIEW_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="commandLine"
+              color="text"
+              aria-label={OPEN_SESSION_VIEW_LABEL}
+              onClick={onOpenSessionView}
+              data-test-subj={DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID}
+            />
+          </EuiToolTip>
+          {task && (
+            <EuiToolTip content={OPEN_NOTES_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="comment"
+                color="text"
+                aria-label={OPEN_NOTES_LABEL}
+                onClick={onOpenNotes}
+                data-test-subj={DETONATION_DETAILS_OPEN_NOTES_TEST_ID}
+              />
+            </EuiToolTip>
+          )}
+        </FlyoutHeaderActions>
         {showPagination && (
           <>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>

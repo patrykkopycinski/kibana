@@ -8,6 +8,9 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../use_flyout_api';
+import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { useDetonationTaskUpdates } from '../../../detonate_prototype/hooks/use_detonate';
 import { Header } from './header';
@@ -19,12 +22,15 @@ import {
   DETONATION_DETAILS_META_DURATION_TEST_ID,
   DETONATION_DETAILS_META_STATUS_TEST_ID,
   DETONATION_DETAILS_META_VERDICT_TEST_ID,
+  DETONATION_DETAILS_OPEN_NOTES_TEST_ID,
+  DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID,
   DETONATION_DETAILS_TITLE_TEST_ID,
 } from './test_ids';
 
 jest.mock('../../../detonate_prototype/hooks/use_detonate');
+jest.mock('../../use_flyout_api');
 jest.mock('../../shared/components/flyout_header_actions', () => ({
-  FlyoutHeaderActions: () => null,
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const baseTask = {
@@ -72,7 +78,11 @@ const renderHeaderWithStore = (store: ReturnType<typeof createPaginationStore>) 
   );
 
 describe('<Header />', () => {
+  const flyoutApi = createFlyoutApiMock();
+
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
     jest
       .mocked(useDetonationTaskUpdates)
       .mockReturnValue({ data: undefined } as ReturnType<typeof useDetonationTaskUpdates>);
@@ -126,6 +136,47 @@ describe('<Header />', () => {
     expect(screen.getByTestId(DETONATION_DETAILS_META_VERDICT_TEST_ID)).toHaveTextContent('—');
     expect(screen.getByTestId(DETONATION_DETAILS_META_ALERTS_TEST_ID)).toHaveTextContent('—');
     expect(screen.getByTestId(DETONATION_DETAILS_META_DURATION_TEST_ID)).toHaveTextContent('—');
+  });
+
+  describe('tool openers', () => {
+    it('opens Session View for the run from the header', () => {
+      renderHeader(makeTask());
+
+      fireEvent.click(screen.getByTestId(DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID));
+
+      expect(flyoutApi.openDetonationSessionView).toHaveBeenCalledWith({
+        taskId: 'task-1',
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    });
+
+    it('opens Session View before the run has loaded, keyed on the task id', () => {
+      renderHeader(undefined);
+
+      fireEvent.click(screen.getByTestId(DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID));
+
+      expect(flyoutApi.openDetonationSessionView).toHaveBeenCalledWith(
+        expect.objectContaining({ taskId: 'task-1' })
+      );
+    });
+
+    it('opens Notes with the loaded run', () => {
+      const task = makeTask();
+      renderHeader(task);
+
+      fireEvent.click(screen.getByTestId(DETONATION_DETAILS_OPEN_NOTES_TEST_ID));
+
+      expect(flyoutApi.openDetonationNotes).toHaveBeenCalledWith({
+        task,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    });
+
+    it('offers no Notes button until the run has loaded', () => {
+      renderHeader(undefined);
+
+      expect(screen.queryByTestId(DETONATION_DETAILS_OPEN_NOTES_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 
   describe('run pagination', () => {

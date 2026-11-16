@@ -9,11 +9,25 @@ import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
-import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
-import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
+import {
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import type { DetonateTask } from '../../../common/detonate_prototype';
+import {
+  useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
+} from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
-import { DETONATION_TITLE, formatFlyoutTitle } from '../shared/constants/flyout_titles';
+import {
+  DETONATION_TITLE,
+  NOTES_TITLE,
+  SESSION_VIEW_TITLE,
+  formatFlyoutTitle,
+} from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
 import { PaginationStoreProvider } from '../document/pagination/context';
 import { createPaginationStore } from '../document/pagination/store';
@@ -27,6 +41,13 @@ import {
 // their bundle; the chunks only load when a flyout is actually opened.
 const DetonationDetails = lazy(() =>
   import('./main').then((m) => ({ default: m.DetonationDetails }))
+);
+
+const DetonationSessionView = lazy(() =>
+  import('./tools/session_view').then((m) => ({ default: m.DetonationSessionView }))
+);
+const DetonationNotes = lazy(() =>
+  import('./tools/notes').then((m) => ({ default: m.DetonationNotes }))
 );
 
 export interface OpenDetonationFlyoutParams {
@@ -56,6 +77,30 @@ export interface DetonationFlyoutApi {
    * stays on it, e.g. an alert).
    */
   openDetonationFlyoutAsChild: (params: OpenDetonationFlyoutParams) => void;
+  /**
+   * Opens Session View over the run's recorded process events as a child of the result flyout
+   * (`session: 'inherit'`), so closing the result closes it.
+   */
+  openDetonationSessionView: (params: OpenDetonationSessionViewParams) => void;
+  /**
+   * Opens Notes for the run as a child of the result flyout (`session: 'inherit'`). Notes are
+   * keyed on the run's task id.
+   */
+  openDetonationNotes: (params: OpenDetonationNotesParams) => void;
+}
+
+export interface OpenDetonationSessionViewParams {
+  /** Id of the detonation run. */
+  taskId: string;
+  /** Which UI trigger opened the tool, when known. */
+  origin?: FlyoutOrigin;
+}
+
+export interface OpenDetonationNotesParams {
+  /** The detonation run; its id is the notes' document id. */
+  task: DetonateTask;
+  /** Which UI trigger opened the tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 /**
@@ -93,6 +138,7 @@ const withPagination = (
 export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const openFlyout = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
@@ -161,8 +207,77 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
     [open, getTitle, readRootDescriptor, writeOnOpen, buildOnClose]
   );
 
+  /**
+   * Opens a tool as a child of the result. Unlike the alert flyout's tools (`openChildFlyout` in
+   * `use_shared_tools_flyout_api`), the tool is not written to the URL: the `sessionView` and
+   * `notes` descriptors are keyed on a document id and index, which a run is not, and restoring
+   * one would open the alert-document tool on a `detonate-tasks` id. With no URL write there is no
+   * `onClose` to build: a close must not touch the result's entry in the stack.
+   * Epic #20877 §5 deviates here, pending product answer: a refresh restores the result only.
+   */
+  const openToolAsChild = useCallback(
+    (
+      children: ReactNode,
+      title: string,
+      tool: typeof FLYOUT_TOOL.SESSION_VIEW | typeof FLYOUT_TOOL.NOTES,
+      origin?: FlyoutOrigin
+    ) => {
+      const properties: OverlaySystemFlyoutOpenOptions = {
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+        title: buildFlyoutNavTitle(title),
+      };
+      openFlyout(
+        children,
+        properties,
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool,
+          flyoutType: FLYOUT_TYPE.DETONATION,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
+    },
+    [openFlyout, defaultToolsFlyoutProperties, historyKey]
+  );
+
+  const openDetonationSessionView = useCallback(
+    ({ taskId, origin }: OpenDetonationSessionViewParams) =>
+      openToolAsChild(
+        <DetonationSessionView taskId={taskId} />,
+        formatFlyoutTitle(SESSION_VIEW_TITLE, taskId),
+        FLYOUT_TOOL.SESSION_VIEW,
+        origin
+      ),
+    [openToolAsChild]
+  );
+
+  const openDetonationNotes = useCallback(
+    ({ task, origin }: OpenDetonationNotesParams) =>
+      openToolAsChild(
+        <DetonationNotes task={task} />,
+        formatFlyoutTitle(NOTES_TITLE, task.sample_filename ?? task.id),
+        FLYOUT_TOOL.NOTES,
+        origin
+      ),
+    [openToolAsChild]
+  );
+
   return useMemo(
-    () => ({ openDetonationFlyout, openDetonationFlyoutAsChild }),
-    [openDetonationFlyout, openDetonationFlyoutAsChild]
+    () => ({
+      openDetonationFlyout,
+      openDetonationFlyoutAsChild,
+      openDetonationSessionView,
+      openDetonationNotes,
+    }),
+    [
+      openDetonationFlyout,
+      openDetonationFlyoutAsChild,
+      openDetonationSessionView,
+      openDetonationNotes,
+    ]
   );
 };

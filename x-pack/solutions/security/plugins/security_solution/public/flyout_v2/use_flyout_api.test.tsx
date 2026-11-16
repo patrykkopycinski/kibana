@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FlowTargetSourceDest } from '../../common/search_strategy/security_solution/network';
 import type { Indicator } from '../../common/threat_intelligence/types/indicator';
+import type { DetonateTask } from '../../common/detonate_prototype';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
 import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
@@ -74,6 +75,7 @@ describe('useFlyoutApi', () => {
     const userParams = { userName: 'user-1' };
     const iocParams = { indicator: { _id: 'ioc-1', fields: {} } as unknown as Indicator };
     const detonationParams = { taskId: 'task-1' };
+    const detonationTask = { id: 'task-1' } as unknown as DetonateTask;
     const networkParams = { ip: '1.2.3.4', flowTarget: FlowTargetSourceDest.source };
     const ruleParams = { ruleId: 'rule-1' };
     const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
@@ -101,6 +103,8 @@ describe('useFlyoutApi', () => {
     result.current.openIocFlyoutAsChild(iocParams);
     result.current.openDetonationFlyout(detonationParams);
     result.current.openDetonationFlyoutAsChild(detonationParams);
+    result.current.openDetonationSessionView({ taskId: 'task-1' });
+    result.current.openDetonationNotes({ task: detonationTask });
     result.current.openNetworkFlyout(networkParams);
     result.current.openNetworkFlyoutAsChild(networkParams);
     result.current.openRuleFlyout(ruleParams);
@@ -128,6 +132,8 @@ describe('useFlyoutApi', () => {
     expect(iocApi.openIocFlyoutAsChild).toHaveBeenCalledWith(iocParams);
     expect(detonationApi.openDetonationFlyout).toHaveBeenCalledWith(detonationParams);
     expect(detonationApi.openDetonationFlyoutAsChild).toHaveBeenCalledWith(detonationParams);
+    expect(detonationApi.openDetonationSessionView).toHaveBeenCalledWith({ taskId: 'task-1' });
+    expect(detonationApi.openDetonationNotes).toHaveBeenCalledWith({ task: detonationTask });
     expect(networkApi.openNetworkFlyout).toHaveBeenCalledWith(networkParams);
     expect(networkApi.openNetworkFlyoutAsChild).toHaveBeenCalledWith(networkParams);
     expect(ruleApi.openRuleFlyout).toHaveBeenCalledWith(ruleParams);

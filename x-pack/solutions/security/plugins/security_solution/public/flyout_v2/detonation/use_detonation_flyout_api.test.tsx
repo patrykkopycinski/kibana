@@ -10,6 +10,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useHistory } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import type { DetonateTask } from '../../../common/detonate_prototype';
 import { useDetonationFlyoutApi } from './use_detonation_flyout_api';
 import type { PaginationStore } from '../document/pagination/store';
 import { useKibana } from '../../common/lib/kibana';
@@ -22,6 +23,7 @@ import {
   FLYOUT_SURFACE,
   FLYOUT_TYPE,
   FLYOUT_SESSION_KIND,
+  FLYOUT_TOOL,
 } from '../../common/lib/telemetry';
 
 jest.mock('react-redux-v7', () => ({
@@ -41,6 +43,7 @@ jest.mock('../shared/components/flyout_provider', () => ({
 }));
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
+  useDefaultToolsFlyoutProperties: jest.fn(() => ({ size: 'm' })),
 }));
 
 const mockOpenSystemFlyout = jest.fn();
@@ -111,6 +114,91 @@ describe('useDetonationFlyoutApi', () => {
       tool: undefined,
       session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
+    });
+  });
+
+  describe('tools opened as children of the result', () => {
+    const task = { id: 'task-1', sample_filename: 'invoice.pdf' } as unknown as DetonateTask;
+
+    const openedBody = (): React.ReactElement => {
+      // `useOpenFlyout` wraps the body as session provider > Suspense > tool element.
+      const call = jest.mocked(flyoutProviders).mock.calls[0];
+      const provider = (call[0] as { children: React.ReactElement }).children;
+      const suspense = (provider.props as { children: React.ReactElement }).children;
+      return (suspense.props as { children: React.ReactElement }).children;
+    };
+
+    it('openDetonationSessionView opens a tools-size child that inherits the result session', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      result.current.openDetonationSessionView({
+        taskId: 'task-1',
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+
+      expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+        'FLYOUT_CONTENT',
+        expect.objectContaining({
+          size: 'm',
+          session: 'inherit',
+          historyKey: documentFlyoutHistoryKey,
+        })
+      );
+      expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.DETONATION,
+        tool: FLYOUT_TOOL.SESSION_VIEW,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    });
+
+    it('openDetonationSessionView renders Session View for the given run', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      result.current.openDetonationSessionView({ taskId: 'task-1' });
+
+      expect(openedBody().props).toEqual({ taskId: 'task-1' });
+    });
+
+    it('openDetonationNotes opens a tools-size child that inherits the result session', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      result.current.openDetonationNotes({ task, origin: FLYOUT_ORIGIN.FLYOUT_HEADER });
+
+      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+        'FLYOUT_CONTENT',
+        expect.objectContaining({
+          size: 'm',
+          session: 'inherit',
+          historyKey: documentFlyoutHistoryKey,
+        })
+      );
+      expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.DETONATION,
+        tool: FLYOUT_TOOL.NOTES,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    });
+
+    it('openDetonationNotes renders Notes for the given run', () => {
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      result.current.openDetonationNotes({ task });
+
+      expect(openedBody().props).toEqual({ task });
+    });
+
+    it('does not write the tool to the URL or hook the result entry on close', () => {
+      const replace = jest.fn();
+      useHistoryMock.mockReturnValue({ replace, location: { search: '' } });
+      const { result } = renderHook(() => useDetonationFlyoutApi());
+      result.current.openDetonationSessionView({ taskId: 'task-1' });
+      result.current.openDetonationNotes({ task });
+
+      expect(replace).not.toHaveBeenCalled();
+      mockOpenSystemFlyout.mock.calls.forEach(([, properties]) =>
+        expect(properties.onClose).toBeUndefined()
+      );
     });
   });
 

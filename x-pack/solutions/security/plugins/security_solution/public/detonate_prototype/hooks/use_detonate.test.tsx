@@ -359,6 +359,35 @@ describe('useDetonationRuns polling', () => {
     expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2);
   });
 
+  it('does not refetch the stats when a filter change loads rows with none running', async () => {
+    jest.mocked(detonateApi.getRunStats).mockResolvedValue({} as never);
+    jest.mocked(detonateApi.searchRuns).mockImplementation(async (_http, query) => ({
+      hits: query.kql ? [row('complete')] : [row('running')],
+      total: 1,
+    }));
+    const { wrapper } = setup();
+    const hook = renderHook(
+      ({ kql }: { kql?: string }) => ({
+        runs: useDetonationRuns({ size: 50, ...(kql ? { kql } : {}) }),
+        stats: useDetonationRunStats({ start: 'now-7d', end: 'now', ...(kql ? { kql } : {}) }),
+      }),
+      { wrapper, initialProps: {} as { kql?: string } }
+    );
+    await waitFor(() => expect(hook.result.current.stats.isSuccess).toBe(true));
+    await waitFor(() => expect(hook.result.current.runs.isSuccess).toBe(true));
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+
+    hook.rerender({ kql: 'detonate.verdict:benign' });
+    await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(hook.result.current.runs.data?.pages[0].hits[0]['detonate.state']).toBe('complete')
+    );
+    await act(async () => {});
+
+    // The new key's own fetch only; the running to idle step was a key change, not a run finishing.
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2);
+  });
+
   it('does not restart a stats search that is still running when the next tick fires', async () => {
     respondWith([row('running')]);
     await mountWithStats();

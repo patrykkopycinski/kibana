@@ -200,7 +200,7 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
     retry: shouldRetry,
   });
 
-  const { data, refetch } = result;
+  const { data, refetch, isPreviousData } = result;
   const shouldPoll = Boolean(data?.pages.some((page) => page.hits.some(isRunInFlight)));
   // `cancelRefetch: false`: a stats search slower than the poll interval would otherwise be
   // cancelled and restarted on every tick, and never finish.
@@ -230,11 +230,15 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
   }, [shouldPoll, refetch, refreshStats]);
 
   // The last running row finishing stops the polling, so no later tick would refresh the stats.
+  // While a new key loads, `keepPreviousData` still shows the old key's rows: that is not polling,
+  // or the new key's first result with no running row would read as a finish and refetch the stats
+  // the new key has just fetched.
   const wasPolling = useRef(false);
+  const isPolling = shouldPoll && !isPreviousData;
   useEffect(() => {
-    if (wasPolling.current && !shouldPoll) refreshStats();
-    wasPolling.current = shouldPoll;
-  }, [shouldPoll, refreshStats]);
+    if (wasPolling.current && !shouldPoll && !isPreviousData) refreshStats();
+    wasPolling.current = isPolling;
+  }, [shouldPoll, isPreviousData, isPolling, refreshStats]);
 
   return result;
 };

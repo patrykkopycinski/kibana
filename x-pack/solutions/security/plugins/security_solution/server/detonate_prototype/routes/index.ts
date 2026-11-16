@@ -65,7 +65,6 @@ import {
   detonateSandboxStreamName,
   deriveDetonateVerdict,
   diffCategoryCounts,
-  isDetonationComplete,
 } from '../../../common/detonate_prototype';
 import type {
   DetonateAlertDoc,
@@ -83,13 +82,13 @@ import type {
   DetonateSandboxCountResult,
   DetonateSandboxIngestResult,
   DetonateTask,
-  DetonateTaskUpdate,
   DetonateUsage,
 } from '../../../common/detonate_prototype';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { DetonateClient } from '../client';
+import { readCompletedUpdates } from '../completed_updates';
 import { DetonateServiceError } from '../client';
 import type { HasDetonatePrivilege } from '../authz';
 import {
@@ -205,7 +204,7 @@ const handoffMarkerListSchema = schema.maybe(
  */
 const MAX_SAMPLE_BYTES = 32 * 1024 * 1024;
 
-/** How many running runs the runs route re-reads from the service at once. */
+/** How many stale runs (running, or complete without a duration) the runs route re-reads at once. */
 const RUNNING_REFRESH_CONCURRENCY = 5;
 
 /** The whole refresh pass gives up after this long and answers with the stored hits. */
@@ -412,31 +411,16 @@ export const registerDetonatePrototypeRoutes = ({
   };
 
   /**
-   * The run's updates, for the duration on its record, read only once the task has finished:
-   * a running task has no end yet, so its poll ticks cost nothing extra. Best-effort, so a
-   * failed read writes the record without a duration; a later write keeps one already stored.
-   */
-  const readCompletedUpdates = async (
-    client: DetonateClient,
-    task: DetonateTask
-  ): Promise<DetonateTaskUpdate[]> => {
-    if (!isDetonationComplete(task)) return [];
-    try {
-      return await client.getTaskUpdates(task.id);
-    } catch (error) {
-      logger.debug(`Detonation ${task.id}: could not read updates: ${error}`);
-      return [];
-    }
-  };
-
-  /**
    * The results store only changes when something reads the run, so a run that ended since its last
-   * read still says "running" there. For the live running hits on the returned page (up to the page
-   * size), read the service and write the answer through, then return it in place of the stored hit.
-   * Any failure, or running out of time, keeps the stored hit: the table must load even when the
-   * service is down or hung.
+   * read still says "running" there, and a run stored as complete without a duration (its updates
+   * read failed, or it was written before durations existed) never gets one. For the hits on the
+   * returned page (up to the page size) that are either live running runs or complete runs with no
+   * duration, read the service and write the answer through, then return it in place of the stored
+   * hit. Running hits are started first, so a page of old complete runs cannot use up the time
+   * budget a live one needs. Any failure, or running out of time, keeps the stored hit: the table
+   * must load even when the service is down or hung.
    */
-  const refreshRunningHits = async (
+  const refreshStaleHits = async (
     request: KibanaRequest,
     hits: DetonationRecord[],
     spaceId: string
@@ -446,6 +430,9 @@ export const registerDetonatePrototypeRoutes = ({
     const isLive = (hit: DetonationRecord) =>
       hit['detonate.state'] === 'running' &&
       Date.now() - Date.parse(hit['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
+    // Any age: a complete run whose updates read failed is re-tried on a later page load.
+    const isCompleteWithoutDuration = (hit: DetonationRecord) =>
+      hit['detonate.state'] === 'complete' && hit['event.duration'] === undefined;
 
     const refresh = async (hit: DetonationRecord): Promise<DetonationRecord> => {
       const taskId = hit['detonate.task_id'];
@@ -453,7 +440,7 @@ export const registerDetonatePrototypeRoutes = ({
       const task = await getTaskInSpace(client, taskId, spaceId);
       const fresh = toDetonationRecord(task, {
         spaceId,
-        updates: await readCompletedUpdates(client, task),
+        updates: await readCompletedUpdates(client, task, logger),
       });
       // Waits for the write to be searchable: the table's stats search runs right after this
       // response, and a run that just ended must not still count as running there.
@@ -462,30 +449,38 @@ export const registerDetonatePrototypeRoutes = ({
       return { ...hit, ...fresh };
     };
 
-    return pMap(
-      hits,
-      async (hit) => {
-        if (!isLive(hit)) return hit;
-        const remaining = deadline - Date.now();
-        if (remaining <= 0) return hit;
-        let timer: NodeJS.Timeout | undefined;
-        const timedOut = new Promise<DetonationRecord>((resolve) => {
-          timer = setTimeout(() => resolve(hit), remaining);
-        });
-        try {
-          // `getTask` takes no abort signal, so a hung read is abandoned, not cancelled.
-          return await Promise.race([refresh(hit), timedOut]);
-        } catch (error) {
-          logger.debug(
-            `Detonation ${hit['detonate.task_id']}: could not refresh a running run: ${error}`
-          );
-          return hit;
-        } finally {
-          clearTimeout(timer);
-        }
-      },
-      { concurrency: RUNNING_REFRESH_CONCURRENCY }
-    );
+    const refreshWithinDeadline = async (hit: DetonationRecord): Promise<DetonationRecord> => {
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) return hit;
+      let timer: NodeJS.Timeout | undefined;
+      const timedOut = new Promise<DetonationRecord>((resolve) => {
+        timer = setTimeout(() => resolve(hit), remaining);
+      });
+      try {
+        // `getTask` takes no abort signal, so a hung read is abandoned, not cancelled.
+        return await Promise.race([refresh(hit), timedOut]);
+      } catch (error) {
+        logger.debug(`Detonation ${hit['detonate.task_id']}: could not refresh a run: ${error}`);
+        return hit;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+
+    // pMap starts its items in order, so sorting the running ones to the front (the sort is
+    // stable) gives them the first slots; results go back to their original positions.
+    const candidates = hits
+      .map((hit, index) => ({ hit, index }))
+      .filter(({ hit }) => isLive(hit) || isCompleteWithoutDuration(hit))
+      .sort((a, b) => Number(!isLive(a.hit)) - Number(!isLive(b.hit)));
+    const refreshed = await pMap(candidates, ({ hit }) => refreshWithinDeadline(hit), {
+      concurrency: RUNNING_REFRESH_CONCURRENCY,
+    });
+    const result = [...hits];
+    candidates.forEach(({ index }, position) => {
+      result[index] = refreshed[position];
+    });
+    return result;
   };
 
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
@@ -769,7 +764,7 @@ export const registerDetonatePrototypeRoutes = ({
           // Every poll writes: the UI and the workflow poll until the run ends, and
           // Elasticsearch skips the write when the document did not change.
           const writeRecord = async () => {
-            const updates = await readCompletedUpdates(client, task);
+            const updates = await readCompletedUpdates(client, task, logger);
             await recordRun(spaceId, () => toDetonationRecord(task, { spaceId, updates }));
           };
           void writeRecord();
@@ -828,7 +823,7 @@ export const registerDetonatePrototypeRoutes = ({
           const task = await getTaskInSpace(client, request.params.id, spaceId);
           // Both reads are best-effort: the record stays useful without a duration or IOCs.
           const [updates, iocs] = await Promise.all([
-            readCompletedUpdates(client, task),
+            readCompletedUpdates(client, task, logger),
             readTaskIocs(
               task,
               (kind) => client.getTaskAlerts(task.id, kind, IOC_ALERT_READ_LIMIT),
@@ -1683,7 +1678,7 @@ export const registerDetonatePrototypeRoutes = ({
           });
           // A refreshed hit can contradict the active preset or sort until the next read.
           return response.ok<DetonationRunsResponse>({
-            body: { ...stored, hits: await refreshRunningHits(request, stored.hits, spaceId) },
+            body: { ...stored, hits: await refreshStaleHits(request, stored.hits, spaceId) },
           });
         } catch (error) {
           if (error instanceof InvalidRunsQueryError) {

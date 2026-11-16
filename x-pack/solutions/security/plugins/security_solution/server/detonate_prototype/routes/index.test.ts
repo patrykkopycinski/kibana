@@ -1976,8 +1976,8 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
     });
 
-    describe('running runs', () => {
-      const runningTask = {
+    describe('stale runs', () => {
+      const nowFinishedTask = {
         ...NO_ALERT_GROUPS,
         id: 'a',
         created_at: '2026-12-15T09:59:00.000Z',
@@ -1995,13 +1995,25 @@ describe('registerDetonatePrototypeRoutes', () => {
             hits: states.map((state, index) => ({ _source: storedHit(state, index) })),
           },
         });
+      const stillRunningTask = {
+        ...nowFinishedTask,
+        last_worker_name: 'detonate.workers.stop_vm',
+        last_worker_status: 'started',
+      };
+      const returnSources = (...sources: Array<Record<string, unknown>>) =>
+        esClient.search.mockResolvedValue({
+          hits: {
+            total: { value: sources.length, relation: 'eq' },
+            hits: sources.map((_source) => ({ _source })),
+          },
+        });
       const returnedHits = () =>
         (mockResponse.ok.mock.calls[0][0] as { body: { hits: Array<Record<string, unknown>> } })
           .body.hits;
 
       it('re-reads a running hit, returns it fresh and writes it through', async () => {
         returnHits('running');
-        client.getTask.mockResolvedValue(runningTask as never);
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
 
         await search();
 
@@ -2014,9 +2026,9 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       it('writes the duration of a run the refresh finds finished', async () => {
         returnHits('running');
-        client.getTask.mockResolvedValue(runningTask as never);
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
         client.getTaskUpdates.mockResolvedValue([
-          { task: runningTask, timestamp: '2026-12-15T10:05:00.000Z' },
+          { task: nowFinishedTask, timestamp: '2026-12-15T10:05:00.000Z' },
         ] as never);
 
         await search();
@@ -2032,7 +2044,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       it('waits for the write-through to be searchable, so the stats search that follows sees it', async () => {
         returnHits('running');
-        client.getTask.mockResolvedValue(runningTask as never);
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
 
         await search();
 
@@ -2069,7 +2081,7 @@ describe('registerDetonatePrototypeRoutes', () => {
             ],
           },
         });
-        client.getTask.mockResolvedValue(runningTask as never);
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
 
         await search();
 
@@ -2125,7 +2137,7 @@ describe('registerDetonatePrototypeRoutes', () => {
 
       it('keeps the stored hit of a run that has left this space', async () => {
         returnHits('running');
-        client.getTask.mockResolvedValue({ ...runningTask, tags: ['space:team-b'] } as never);
+        client.getTask.mockResolvedValue({ ...nowFinishedTask, tags: ['space:team-b'] } as never);
 
         await search();
 
@@ -2135,13 +2147,108 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(esClient.update).not.toHaveBeenCalled();
       });
 
-      it('does not re-read a run that is not running', async () => {
-        returnHits('complete', 'failed');
+      it('does not re-read a failed run, or a complete one that has a duration', async () => {
+        returnSources(
+          { ...storedHit('complete'), 'event.duration': 5 },
+          { ...storedHit('failed', 1) }
+        );
 
         await search();
 
         expect(client.getTask).not.toHaveBeenCalled();
         expect(returnedHits()).toHaveLength(2);
+      });
+
+      it('does not read the updates of a task that is still running', async () => {
+        returnHits('running');
+        client.getTask.mockResolvedValue(stillRunningTask as never);
+
+        await search();
+
+        expect(client.getTaskUpdates).not.toHaveBeenCalled();
+        expect(esClient.update).toHaveBeenCalledTimes(1);
+        expect(returnedHits()[0]).toEqual(expect.objectContaining({ 'detonate.state': 'running' }));
+      });
+
+      it('writes the record without a duration when the updates read fails', async () => {
+        returnHits('running');
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
+        client.getTaskUpdates.mockRejectedValue(new Error('timeline down'));
+
+        await search();
+
+        expect(esClient.update).toHaveBeenCalledTimes(1);
+        const { doc } = esClient.update.mock.calls[0][0] as { doc: Record<string, unknown> };
+        expect(doc['detonate.state']).toBe('complete');
+        expect(doc).not.toHaveProperty(['event.duration']);
+      });
+
+      it('refreshes a complete hit without a duration, at any age, and gives it one', async () => {
+        returnSources({
+          ...storedHit('complete', 0, new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()),
+        });
+        client.getTask.mockResolvedValue(nowFinishedTask as never);
+        client.getTaskUpdates.mockResolvedValue([
+          { task: nowFinishedTask, timestamp: '2026-12-15T10:05:00.000Z' },
+        ] as never);
+
+        await search();
+
+        expect(client.getTask).toHaveBeenCalledWith('a');
+        expect(returnedHits()[0]).toEqual(
+          expect.objectContaining({ 'event.duration': 6 * 60 * 1000 * 1_000_000 })
+        );
+        expect(esClient.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            doc: expect.objectContaining({ 'event.duration': 6 * 60 * 1000 * 1_000_000 }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('does not re-read a complete hit that already has a duration', async () => {
+        returnSources({ ...storedHit('complete'), 'event.duration': 5 });
+
+        await search();
+
+        expect(client.getTask).not.toHaveBeenCalled();
+        expect(client.getTaskUpdates).not.toHaveBeenCalled();
+        expect(esClient.update).not.toHaveBeenCalled();
+      });
+
+      it('starts running hits before complete ones when the deadline is short', async () => {
+        jest.useFakeTimers();
+        try {
+          // Five hung complete hits would fill every slot if they went first.
+          const completeIds = ['c1', 'c2', 'c3', 'c4', 'c5'];
+          returnSources(
+            ...completeIds.map((id) => ({
+              ...storedHit('complete'),
+              'detonate.task_id': id,
+            })),
+            { ...storedHit('running'), 'detonate.task_id': 'live' }
+          );
+          client.getTask.mockImplementation(((id: string) =>
+            id === 'live'
+              ? Promise.resolve({ ...nowFinishedTask, id: 'live' })
+              : new Promise(() => {})) as never);
+
+          const answered = search();
+          await jest.advanceTimersByTimeAsync(3_500);
+          await answered;
+
+          const hits = returnedHits();
+          expect(hits.map((hit) => hit['detonate.task_id'])).toEqual([...completeIds, 'live']);
+          expect(hits[5]).toEqual(expect.objectContaining({ 'detonate.state': 'complete' }));
+          expect(hits[0]).toEqual(expect.objectContaining({ 'detonate.state': 'complete' }));
+          expect(esClient.update).toHaveBeenCalledTimes(1);
+          expect(esClient.update).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'live' }),
+            expect.anything()
+          );
+        } finally {
+          jest.useRealTimers();
+        }
       });
     });
 

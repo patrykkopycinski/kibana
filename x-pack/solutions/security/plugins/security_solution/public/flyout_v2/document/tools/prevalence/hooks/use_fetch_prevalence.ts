@@ -60,6 +60,11 @@ export interface UseFetchPrevalenceParams {
    * The from and to values for the query
    */
   interval: { from: string; to: string };
+  /**
+   * Optional index patterns to search. Defaults to the security default patterns (detections and
+   * non-detections indices) when omitted.
+   */
+  indexPatterns?: string[];
 }
 
 export interface UseFetchPrevalenceResult {
@@ -94,6 +99,7 @@ export interface UseFetchPrevalenceResult {
 export const useFetchPrevalence = ({
   highlightedFieldsFilters,
   interval: { from, to },
+  indexPatterns: indexPatternsOverride,
 }: UseFetchPrevalenceParams): UseFetchPrevalenceResult => {
   const {
     services: {
@@ -110,7 +116,8 @@ export const useFetchPrevalence = ({
   const shouldExcludeColdAndFrozenTiers = !isServerless && excludeColdAndFrozenTiers;
 
   // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
-  const { indexPatterns } = useSecurityDefaultPatterns();
+  const { indexPatterns: defaultIndexPatterns } = useSecurityDefaultPatterns();
+  const indexPatterns = indexPatternsOverride ?? defaultIndexPatterns;
 
   const searchRequest = buildSearchRequest(
     highlightedFieldsFilters,
@@ -121,7 +128,7 @@ export const useFetchPrevalence = ({
   );
 
   const { data, isLoading, isError } = useQuery(
-    [QUERY_KEY, highlightedFieldsFilters, from, to],
+    [QUERY_KEY, highlightedFieldsFilters, from, to, indexPatterns],
     () => createFetchData<RawAggregatedDataResponse>(searchService, searchRequest)
   );
 

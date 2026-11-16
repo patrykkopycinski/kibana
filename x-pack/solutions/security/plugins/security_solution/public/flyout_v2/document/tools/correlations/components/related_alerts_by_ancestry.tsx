@@ -48,6 +48,10 @@ export interface RelatedAlertsByAncestryProps {
    * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
    */
   useLegacyExpandableFlyout: boolean;
+  /**
+   * Optional index patterns to search. Defaults to the security default patterns when omitted.
+   */
+  indexPatterns?: string[];
 }
 
 /**
@@ -61,9 +65,11 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   scopeId,
   onShowAlert,
   useLegacyExpandableFlyout,
+  indexPatterns: indexPatternsOverride,
 }) => {
   const { storage } = useKibana().services;
-  const { indexPatterns } = useSecurityDefaultPatterns();
+  const { indexPatterns: defaultIndexPatterns } = useSecurityDefaultPatterns();
+  const indexPatterns = indexPatternsOverride ?? defaultIndexPatterns;
 
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.ANCESTRY_ALERTS_TIME_RANGE);
 

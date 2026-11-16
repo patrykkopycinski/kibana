@@ -57,7 +57,7 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
 );
 
-const renderRelatedAlertsByAncestry = (documentIndex?: string) =>
+const renderRelatedAlertsByAncestry = (documentIndex?: string, indexPatterns?: string[]) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -67,6 +67,7 @@ const renderRelatedAlertsByAncestry = (documentIndex?: string) =>
           scopeId={scopeId}
           onShowAlert={mockOnShowAlert}
           useLegacyExpandableFlyout={false}
+          indexPatterns={indexPatterns}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>
@@ -205,6 +206,26 @@ describe('<RelatedAlertsByAncestry />', () => {
 
     expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
       expect.objectContaining({ indices: ['index1'] })
+    );
+  });
+
+  it('searches the provided index patterns instead of the defaults when overridden', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    renderRelatedAlertsByAncestry(undefined, ['custom-*']);
+
+    expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: ['custom-*'] })
     );
   });
 

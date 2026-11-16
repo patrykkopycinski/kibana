@@ -106,6 +106,25 @@ describe('useFetchPrevalence', () => {
     );
   });
 
+  it('searches the provided index patterns instead of the defaults when overridden', async () => {
+    renderHook(() =>
+      useFetchPrevalence({ highlightedFieldsFilters, interval, indexPatterns: ['custom-*'] })
+    );
+
+    const [queryKey, queryFn] = (useQuery as jest.Mock).mock.calls[0];
+    expect(queryKey).toContainEqual(['custom-*']);
+    await queryFn();
+
+    expect(createFetchData).toHaveBeenCalledWith(
+      searchServiceMock,
+      expect.objectContaining({
+        params: expect.objectContaining({
+          index: ['custom-*'],
+        }),
+      })
+    );
+  });
+
   it('does not exclude cold/frozen tiers when ui setting is disabled', () => {
     uiSettingsGetMock.mockReturnValue(false);
 

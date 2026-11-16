@@ -5,11 +5,27 @@
  * 2.0.
  */
 
+const statusOf = (error: unknown): number | undefined =>
+  (error as { response?: { status?: number } } | undefined)?.response?.status;
+
 /**
  * The Kibana http client carries the status on `response`; a plain thrown Error has none. Its own
  * module so the page can ask the same question as the retry policy while the hooks are mocked.
  */
 export const isClientError = (error: unknown): boolean => {
-  const status = (error as { response?: { status?: number } } | undefined)?.response?.status;
+  const status = statusOf(error);
   return status !== undefined && status >= 400 && status < 500;
 };
+
+/**
+ * Only a 400 means the server rejected the filter (a KQL it cannot parse). Any other 4xx (401,
+ * 403, 404...) is an ordinary failure and renders as one.
+ */
+export const isRejectedFilter = (error: unknown): boolean => statusOf(error) === 400;
+
+/**
+ * Retry policy for the runs and stats queries: a 4xx answers the same on every retry, except 429,
+ * which is the server asking the client to try again; anything else gets up to three tries.
+ */
+export const shouldRetry = (failureCount: number, error: unknown): boolean =>
+  failureCount < 3 && (!isClientError(error) || statusOf(error) === 429);

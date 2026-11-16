@@ -42,7 +42,7 @@ import type {
   DetonationRunStatsResponse,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
-import { isClientError } from './is_client_error';
+import { shouldRetry } from './is_client_error';
 import type { SubmitFileParams, SubmitHashParams } from '../api/client';
 import { useTrackDetonation } from '../components/detonation_notifier';
 
@@ -196,8 +196,8 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
       return lastPage.hits.length > 0 ? loaded : undefined;
     },
     keepPreviousData: true,
-    // A 4xx (a rejected filter) answers the same on every retry; only a transient failure is worth one.
-    retry: (failureCount, error) => !isClientError(error) && failureCount < 3,
+    // A 4xx (a rejected filter) answers the same on every retry, except 429; only a transient failure is worth one.
+    retry: shouldRetry,
   });
 
   const { data, refetch } = result;
@@ -236,7 +236,7 @@ export const useDetonationRunStats = (query: DetonationRunStatsQuery) => {
     queryFn: ({ signal }) => detonateApi.getRunStats(http, query, signal),
     keepPreviousData: true,
     // Same as the table: a rejected KQL answers 400 on every retry.
-    retry: (failureCount, error) => !isClientError(error) && failureCount < 3,
+    retry: shouldRetry,
   });
 };
 

@@ -591,6 +591,21 @@ describe('DetonateListPage', () => {
         expect(screen.queryByTestId(`${RUNS_TABLE_TEST_ID}-error`)).not.toBeInTheDocument();
       });
 
+      it.each([401, 403, 404, 429])(
+        'shows a %i as an ordinary error: no filter callout, the table and panel errors stay',
+        (status) => {
+          const failure = { response: { status }, body: { message: `denied ${status}` } };
+          mockRuns([], { data: undefined, isError: true, error: failure });
+          mockStats({ data: undefined, isError: true, error: failure });
+          renderPage();
+
+          expect(screen.queryByTestId(FILTER_ERROR_TEST_ID)).not.toBeInTheDocument();
+          expect(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-error`)).toHaveTextContent(
+            `denied ${status}`
+          );
+        }
+      );
+
       it('shows no filter callout for a server failure, which stays a table error', () => {
         mockRuns([], { data: undefined, isError: true, error: new Error('runs search exploded') });
         renderPage();

@@ -77,7 +77,7 @@ import {
   useDetonationRuns,
   useDetonationRunStats,
 } from '../hooks/use_detonate';
-import { isClientError } from '../hooks/is_client_error';
+import { isRejectedFilter } from '../hooks/is_client_error';
 import { DetonationsDashboard } from '../components/detonations_dashboard';
 import { DetonationStateBadge } from '../components/detonation_state_badge';
 import { DetonateVerdictNameBadge } from '../components/verdict_badge';
@@ -531,9 +531,9 @@ export const DetonateListPage = React.memo(() => {
     refetch,
   } = useDetonationRuns(runsQuery);
 
-  // A rejected filter fails the table and every panel alike: say so once, above them all.
+  // A rejected filter (400) fails the table and every panel alike: say so once, above them all.
   const rejectedFilterError = [error, stats.error].find(
-    (failure) => failure !== null && failure !== undefined && isClientError(failure)
+    (failure) => failure !== null && failure !== undefined && isRejectedFilter(failure)
   );
 
   const hits = useMemo(() => data?.pages.flatMap((page) => page.hits) ?? [], [data]);
@@ -756,7 +756,7 @@ export const DetonateListPage = React.memo(() => {
         isLoading={stats.isLoading}
         isError={stats.isError}
         errorMessage={
-          stats.isError && !isClientError(stats.error)
+          stats.isError && !isRejectedFilter(stats.error)
             ? serviceErrorMessage(stats.error)
             : undefined
         }
@@ -797,7 +797,7 @@ export const DetonateListPage = React.memo(() => {
 
         <div data-test-subj={RUNS_TABLE_TEST_ID}>
           <EuiProgress size="xs" color="accent" css={{ opacity: isFetching ? 1 : 0 }} />
-          {isError && !data && isClientError(error) ? null : isError && !data ? (
+          {isError && !data && isRejectedFilter(error) ? null : isError && !data ? (
             <KbnWarningCallout
               announceOnMount
               title={i18n.RUNS_ERROR_TITLE}

@@ -123,6 +123,24 @@ describe('useDetonationRuns retries', () => {
     expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
   });
 
+  it.each([401, 403, 404])('does not retry a %i either', async (status) => {
+    jest.mocked(detonateApi.searchRuns).mockRejectedValue(httpError(status));
+
+    const { result } = mountWithRetries();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a 429 up to three times: the server asked to be tried again', async () => {
+    jest.mocked(detonateApi.searchRuns).mockRejectedValue(httpError(429));
+
+    const { result } = mountWithRetries();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(4);
+  });
+
   it('retries a server failure up to three times', async () => {
     jest.mocked(detonateApi.searchRuns).mockRejectedValue(httpError(503));
 
@@ -200,6 +218,15 @@ describe('dashboard queries share time + kql + search', () => {
       'runs',
       query,
     ]);
+  });
+
+  it('stats retries a 429', async () => {
+    jest.mocked(detonateApi.getRunStats).mockRejectedValue(httpError(429));
+    const { result } = renderHook(() => useDetonationRunStats({ from: 'now-7d', to: 'now' }), {
+      wrapper: mount(3).wrapper,
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(4);
   });
 
   it('stats does not retry a 4xx but retries a server failure', async () => {

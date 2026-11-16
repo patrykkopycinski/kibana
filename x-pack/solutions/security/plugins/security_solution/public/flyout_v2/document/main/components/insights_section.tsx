@@ -17,6 +17,7 @@ import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -84,6 +85,7 @@ export const InsightsSection = memo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const { rule } = useRuleWithFallback(ruleId);
     const investigationFields = useMemo(
       () => rule?.investigation_fields?.field_names ?? [],
@@ -174,7 +176,7 @@ export const InsightsSection = memo(
           showIcon={false}
           onShowPrevalenceDetails={onShowPrevalenceDetails}
         />
-        {isAlert && !isRemoteDocument && (
+        {isAlert && !isRemoteDocument && !isRulePreview && (
           <Suspense fallback={null}>
             <DetonationOverview hit={hit} />
           </Suspense>

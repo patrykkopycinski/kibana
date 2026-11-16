@@ -260,6 +260,15 @@ describe('InsightsSection', () => {
     expect(queryByTestId('detonationOverviewMock')).not.toBeInTheDocument();
   });
 
+  it('does not render the detonation overview for a rule-preview alert', () => {
+    const { queryByTestId } = renderInsightsSection({
+      ...alertMockHit,
+      raw: { _id: '1', _index: '.internal.preview.alerts-security.alerts-default', _source: {} },
+    } as DataTableRecord);
+
+    expect(queryByTestId('detonationOverviewMock')).not.toBeInTheDocument();
+  });
+
   it('opens a tools flyout when clicking entities overview', () => {
     const { getByTestId } = renderInsightsSection();
 

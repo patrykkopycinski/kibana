@@ -30,6 +30,7 @@ import {
   EuiPageHeader,
   EuiPanel,
   EuiProgress,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -86,7 +87,6 @@ import { DetonateVerdictNameBadge } from '../components/verdict_badge';
 import { SubmitModal } from '../components/submit_modal';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
-import { useSpaceId } from '../../common/hooks/use_space_id';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import * as i18n from '../translations';
 
@@ -580,32 +580,44 @@ export const DetonateListPage = React.memo(() => {
   );
 
   const dataViews = services.dataViews;
+  const { spaces } = services;
   const [dataView, setDataView] = useState<DataView>();
-  const spaceId = useSpaceId();
+  // Set when the space lookup or the data view creation fails, so a failure does not look like the
+  // table still loading. Kept out of the shared `useSpaceId`, which has no failure path.
+  const [dataViewFailed, setDataViewFailed] = useState(false);
   useEffect(() => {
+    if (!spaces) {
+      setDataViewFailed(true);
+      return;
+    }
+    let cancelled = false;
+    const fail = (error: Error) => {
+      if (cancelled) return;
+      setDataViewFailed(true);
+      toasts.addError(error, { title: i18n.RUNS_DATA_VIEW_ERROR });
+    };
     // The current space's index, not the `-*` pattern: the SearchBar's value suggestions query this title,
     // and the pattern would suggest values from other spaces' runs.
-    if (spaceId === undefined) return;
-    let cancelled = false;
-    dataViews
-      .create(
-        {
-          title: detonateResultsIndexName(spaceId),
-          timeFieldName: '@timestamp',
-          fields: buildRunFields(),
-        },
-        true
+    spaces
+      .getActiveSpace()
+      .then(({ id }) =>
+        dataViews.create(
+          {
+            title: detonateResultsIndexName(id),
+            timeFieldName: '@timestamp',
+            fields: buildRunFields(),
+          },
+          true
+        )
       )
       .then((created) => {
         if (!cancelled) setDataView(created);
       })
-      .catch((createError: Error) =>
-        toasts.addError(createError, { title: i18n.RUNS_DATA_VIEW_ERROR })
-      );
+      .catch(fail);
     return () => {
       cancelled = true;
     };
-  }, [dataViews, toasts, spaceId]);
+  }, [dataViews, spaces, toasts]);
 
   const onPresetChange = useCallback((id: string) => setPreset(id as PresetId), []);
   const isFiltered = Boolean(kql) || Boolean(search);
@@ -751,7 +763,7 @@ export const DetonateListPage = React.memo(() => {
         showQueryInput
         showDatePicker
         showSubmitButton
-        // Deviation from the epic: the KQL-only Detonate page has no language to switch to.
+        // KQL is the only language the route accepts.
         disableQueryLanguageSwitcher
         indexPatterns={dataView ? [dataView] : []}
         dateRangeFrom={timeRange.from}
@@ -866,7 +878,20 @@ export const DetonateListPage = React.memo(() => {
               onFetchMore={loadMore}
               titleId={titleId}
             />
-          ) : null}
+          ) : dataViewFailed ? (
+            <KbnWarningCallout
+              announceOnMount
+              title={i18n.RUNS_DATA_VIEW_ERROR}
+              data-test-subj={`${RUNS_TABLE_TEST_ID}-data-view-error`}
+            />
+          ) : (
+            <EuiSkeletonText
+              lines={6}
+              isLoading
+              contentAriaLabel={i18n.RUNS_TABLE_LOADING}
+              data-test-subj={`${RUNS_TABLE_TEST_ID}-loading`}
+            />
+          )}
         </div>
       </EuiPanel>
     </div>

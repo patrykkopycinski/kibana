@@ -120,6 +120,11 @@ export const RUNS_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Could not load detonations' }
 );
 
+export const RUNS_TABLE_LOADING = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.tableLoading',
+  { defaultMessage: 'Loading the Detonations table' }
+);
+
 export const RUNS_DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.dataViewError',
   { defaultMessage: 'Could not set up the Detonations table' }

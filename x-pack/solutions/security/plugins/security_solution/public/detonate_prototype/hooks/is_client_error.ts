@@ -9,10 +9,11 @@ const statusOf = (error: unknown): number | undefined =>
   (error as { response?: { status?: number } } | undefined)?.response?.status;
 
 /**
- * The Kibana http client carries the status on `response`; a plain thrown Error has none. Its own
- * module so the page can ask the same question as the retry policy while the hooks are mocked.
+ * The Kibana http client carries the status on `response`; a plain thrown Error has none. This
+ * module is separate from the hooks so the page can use `isRejectedFilter` while the hooks are
+ * mocked in its tests.
  */
-export const isClientError = (error: unknown): boolean => {
+const isClientError = (error: unknown): boolean => {
   const status = statusOf(error);
   return status !== undefined && status >= 400 && status < 500;
 };

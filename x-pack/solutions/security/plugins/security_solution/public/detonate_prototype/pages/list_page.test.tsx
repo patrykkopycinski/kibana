@@ -151,6 +151,7 @@ const lastSearchBarProps = () => mockSearchBar.mock.calls[mockSearchBar.mock.cal
 
 const addSuccess = jest.fn();
 const createDataView = jest.fn();
+const getActiveSpace = jest.fn();
 const addError = jest.fn();
 const openDetonationFlyout = jest.fn();
 const fetchNextPage = jest.fn();
@@ -246,11 +247,12 @@ describe('DetonateListPage', () => {
     jest.clearAllMocks();
     window.localStorage.clear();
     createDataView.mockResolvedValue({ id: 'runs-data-view', fields: [] });
+    getActiveSpace.mockResolvedValue({ id: 'sandbox' });
     jest.mocked(useKibana).mockReturnValue({
       services: {
         notifications: { toasts: { addSuccess, addError } },
         dataViews: { create: createDataView },
-        spaces: { getActiveSpace: jest.fn().mockResolvedValue({ id: 'sandbox' }) },
+        spaces: { getActiveSpace },
         uiSettings: { get: jest.fn() },
         uiActions: { getTriggerCompatibleActions: jest.fn() },
         application: { capabilities: {} },
@@ -281,6 +283,42 @@ describe('DetonateListPage', () => {
       expect(createDataView.mock.calls[0][0]).toMatchObject({
         title: '.kibana-detonate-results-sandbox',
       });
+    });
+
+    it('shows the table skeleton, not a blank table, while the data view resolves', async () => {
+      createDataView.mockReturnValue(new Promise(() => {}));
+      mockRuns([makeRun({ 'detonate.task_id': 'r1' })]);
+      renderPage();
+
+      expect(await screen.findByTestId('detonatePrototypeRunsTable-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockTable')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('detonatePrototypeRunsTable-data-view-error')).toBeNull();
+    });
+
+    it('shows an error, and no skeleton, when the space lookup fails', async () => {
+      const failure = new Error('spaces down');
+      getActiveSpace.mockRejectedValue(failure);
+      mockRuns([makeRun({ 'detonate.task_id': 'r1' })]);
+      renderPage();
+
+      expect(
+        await screen.findByTestId('detonatePrototypeRunsTable-data-view-error')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('detonatePrototypeRunsTable-loading')).toBeNull();
+      expect(addError).toHaveBeenCalledWith(failure, {
+        title: 'Could not set up the Detonations table',
+      });
+      expect(createDataView).not.toHaveBeenCalled();
+    });
+
+    it('shows the same error when the data view cannot be created', async () => {
+      createDataView.mockRejectedValue(new Error('no data view'));
+      mockRuns([makeRun({ 'detonate.task_id': 'r1' })]);
+      renderPage();
+
+      expect(
+        await screen.findByTestId('detonatePrototypeRunsTable-data-view-error')
+      ).toBeInTheDocument();
     });
 
     it('keeps the query language fixed to KQL', async () => {

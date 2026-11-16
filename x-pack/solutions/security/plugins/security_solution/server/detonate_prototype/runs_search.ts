@@ -101,19 +101,52 @@ const searchQuery = (search: string): estypes.QueryDslQueryContainer => ({
   },
 });
 
-export const buildRunsQuery = ({
-  kql,
-  search,
-}: Pick<DetonationRunsQuery, 'kql' | 'search'>): estypes.QueryDslQueryContainer => ({
+const timeRangeFilter = (fromMs?: number, toMs?: number): estypes.QueryDslQueryContainer[] =>
+  fromMs === undefined && toMs === undefined
+    ? []
+    : [
+        {
+          range: {
+            '@timestamp': {
+              ...(fromMs === undefined ? {} : { gte: fromMs }),
+              ...(toMs === undefined ? {} : { lte: toMs }),
+              format: 'epoch_millis',
+            },
+          },
+        },
+      ];
+
+const buildRunsFilter = (
+  { kql, search }: Pick<DetonationRunsQuery, 'kql' | 'search'>,
+  range: estypes.QueryDslQueryContainer[]
+): estypes.QueryDslQueryContainer => ({
   bool: {
     // Always pinned: the index also holds alert decisions, and KQL must not widen to them.
     filter: [
       { term: { 'detonate.doc_kind': 'run' } },
       ...(kql?.trim() ? [kqlToQuery(kql)] : []),
       ...(search?.trim() ? [searchQuery(search.trim())] : []),
+      ...range,
     ],
   },
 });
+
+export const buildRunsQuery = ({
+  kql,
+  search,
+  start,
+  end,
+}: Pick<
+  DetonationRunsQuery,
+  'kql' | 'search' | 'start' | 'end'
+>): estypes.QueryDslQueryContainer => {
+  const startMs = start === undefined ? undefined : resolveStatsTime(start, false);
+  const endMs = end === undefined ? undefined : resolveStatsTime(end, true);
+  if (startMs !== undefined && endMs !== undefined && endMs < startMs) {
+    throw new InvalidRunsQueryError('Invalid time range: start is after end');
+  }
+  return buildRunsFilter({ kql, search }, timeRangeFilter(startMs, endMs));
+};
 
 const hasUserFilter = ({ kql, search }: Pick<DetonationRunsQuery, 'kql' | 'search'>): boolean =>
   Boolean(kql?.trim() || search?.trim());
@@ -216,7 +249,6 @@ export const buildRunStatsQuery = ({
   const toMs = resolveStatsTime(to, true);
   if (toMs < fromMs) throw new InvalidRunsQueryError('Invalid time range: from is after to');
   const intervalMs = trendIntervalMs(fromMs, toMs);
-  const runs = buildRunsQuery({ kql, search });
   const verdictTerms = {
     terms: {
       field: 'detonate.verdict',
@@ -227,22 +259,7 @@ export const buildRunStatsQuery = ({
   };
   return {
     intervalMs,
-    query: {
-      bool: {
-        filter: [
-          ...(runs.bool?.filter as estypes.QueryDslQueryContainer[]),
-          {
-            range: {
-              '@timestamp': {
-                gte: fromMs,
-                lte: toMs,
-                format: 'epoch_millis',
-              },
-            },
-          },
-        ],
-      },
-    },
+    query: buildRunsFilter({ kql, search }, timeRangeFilter(fromMs, toMs)),
     aggs: {
       verdicts: verdictTerms,
       mean_duration: { avg: { field: 'event.duration' } },

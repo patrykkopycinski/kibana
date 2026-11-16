@@ -1302,8 +1302,12 @@ export interface DetonationRunsQuery {
   search?: string;
   sort_field?: DetonationRunsSortField;
   sort_direction?: DetonationRunsSortDirection;
+  /** Paging offset; the time range is `start`/`end`, as `from` is taken. */
   from?: number;
   size?: number;
+  /** An ISO date or date math (`now-30d`); with `end`, filters `@timestamp`. */
+  start?: string;
+  end?: string;
 }
 
 export interface DetonationRunsResponse {

@@ -1622,6 +1622,18 @@ export const registerDetonatePrototypeRoutes = ({
                   schema.number({ min: 0, max: DETONATION_RUNS_MAX_RESULT_WINDOW })
                 ),
                 size: schema.maybe(schema.number({ min: 1, max: DETONATION_RUNS_MAX_PAGE_SIZE })),
+                start: schema.maybe(
+                  schema.string({
+                    maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
+                    validate: statsTimeError,
+                  })
+                ),
+                end: schema.maybe(
+                  schema.string({
+                    maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
+                    validate: statsTimeError,
+                  })
+                ),
               },
               {
                 // `from + size` stays inside the default 10k result window, whatever the page size.

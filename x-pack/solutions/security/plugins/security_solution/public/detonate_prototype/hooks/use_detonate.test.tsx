@@ -18,6 +18,7 @@ import { detonateApi } from '../api/client';
 import {
   DETONATE_QUERY_KEY,
   useDetonationRuns,
+  useDetonationRunStats,
   useSubmitFile,
   useSubmitHash,
 } from './use_detonate';
@@ -129,6 +130,93 @@ describe('useDetonationRuns retries', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(detonateApi.searchRuns).toHaveBeenCalledTimes(4);
+  });
+});
+
+describe('dashboard queries share time + kql + search', () => {
+  const emptyStats = {
+    total: 0,
+    verdicts: { malicious: 0, benign: 0, inconclusive: 0, unknown: 0 },
+    meanDurationMs: null,
+    alerts: { siem: 0, endpoint: 0 },
+    trend: { intervalMs: 86_400_000, buckets: [] },
+    topRules: [],
+    topEventCodes: [],
+  };
+  const mount = (retry: number | false = false) => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry, retryDelay: 0 } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    return { queryClient, wrapper };
+  };
+  const httpError = (status: number) => Object.assign(new Error('boom'), { response: { status } });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(detonateApi.getRunStats).mockResolvedValue(emptyStats);
+    jest.mocked(detonateApi.searchRuns).mockResolvedValue({ hits: [], total: 0 });
+  });
+
+  it('keys the stats query on the time range, kql and search, and sends them', async () => {
+    const { queryClient, wrapper } = mount();
+    const query = { from: 'now-7d', to: 'now', kql: 'detonate.verdict:malicious', search: 'abc' };
+    const { result, rerender } = renderHook((q) => useDetonationRunStats(q), {
+      wrapper,
+      initialProps: query,
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(detonateApi.getRunStats).toHaveBeenLastCalledWith({}, query, expect.anything());
+
+    rerender({ ...query, from: 'now-30d' });
+    await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+
+    const keys = queryClient
+      .getQueryCache()
+      .getAll()
+      .map((q) => q.queryKey);
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        [DETONATE_QUERY_KEY, 'tasks', 'stats', query],
+        [DETONATE_QUERY_KEY, 'tasks', 'stats', { ...query, from: 'now-30d' }],
+      ])
+    );
+  });
+
+  it('keys the runs query on start/end and kql, and sends them', async () => {
+    const { queryClient, wrapper } = mount();
+    const query = { start: 'now-7d', end: 'now', kql: 'host.name:a', size: 50 };
+    const { result } = renderHook(() => useDetonationRuns(query), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(detonateApi.searchRuns).toHaveBeenCalledWith(
+      {},
+      { ...query, from: 0 },
+      expect.anything()
+    );
+    expect(queryClient.getQueryCache().getAll()[0].queryKey).toEqual([
+      DETONATE_QUERY_KEY,
+      'tasks',
+      'runs',
+      query,
+    ]);
+  });
+
+  it('stats does not retry a 4xx but retries a server failure', async () => {
+    jest.mocked(detonateApi.getRunStats).mockRejectedValue(httpError(400));
+    const first = renderHook(() => useDetonationRunStats({ from: 'now-7d', to: 'now' }), {
+      wrapper: mount(3).wrapper,
+    });
+    await waitFor(() => expect(first.result.current.isError).toBe(true));
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+
+    jest.clearAllMocks();
+    jest.mocked(detonateApi.getRunStats).mockRejectedValue(httpError(503));
+    const second = renderHook(() => useDetonationRunStats({ from: 'now-7d', to: 'now' }), {
+      wrapper: mount(3).wrapper,
+    });
+    await waitFor(() => expect(second.result.current.isError).toBe(true));
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(4);
   });
 });
 

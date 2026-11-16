@@ -38,6 +38,8 @@ import type {
   DetonationRecord,
   DetonationRunsQuery,
   DetonationRunsResponse,
+  DetonationRunStatsQuery,
+  DetonationRunStatsResponse,
 } from '../../../common/detonate_prototype';
 import { detonateApi } from '../api/client';
 import type { SubmitFileParams, SubmitHashParams } from '../api/client';
@@ -220,6 +222,23 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
   }, [shouldPoll, refetch]);
 
   return result;
+};
+
+/**
+ * The dashboard's aggregates. Takes the same time + kql + search as `useDetonationRuns`, so the
+ * panels and the table always describe the same runs. Under `[DETONATE_QUERY_KEY, 'tasks']`, so a
+ * submit invalidates it with the lists; a finishing run moves the counts, so it refreshes with them.
+ */
+export const useDetonationRunStats = (query: DetonationRunStatsQuery) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonationRunStatsResponse, Error>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'stats', query],
+    queryFn: ({ signal }) => detonateApi.getRunStats(http, query, signal),
+    keepPreviousData: true,
+    // Same as the table: a rejected KQL answers 400 on every retry.
+    retry: (failureCount, error) => !isClientError(error) && failureCount < 3,
+  });
 };
 
 /**

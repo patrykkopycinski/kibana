@@ -1787,6 +1787,35 @@ describe('registerDetonatePrototypeRoutes', () => {
       ]);
     });
 
+    it('filters @timestamp by start/end (ISO or date math) after the other filters, and bounds them', async () => {
+      await search({ start: '2026-01-01T00:00:00.000Z', end: '2026-01-31T00:00:00.000Z' });
+
+      const { filter } = searchArgs().query.bool;
+      expect(filter).toEqual([
+        { term: { 'detonate.doc_kind': 'run' } },
+        {
+          range: {
+            '@timestamp': {
+              gte: Date.parse('2026-01-01T00:00:00.000Z'),
+              lte: Date.parse('2026-01-31T00:00:00.000Z'),
+              format: 'epoch_millis',
+            },
+          },
+        },
+      ]);
+      expect(() => runsQuerySchema().validate({ start: 'not a date' })).toThrow(/date math/);
+      expect(() => runsQuerySchema().validate({ end: 'now-'.concat('1d'.repeat(40)) })).toThrow();
+    });
+
+    it('answers 400 for a start after the end without querying', async () => {
+      await search({ start: 'now', end: 'now-1d' });
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('start is after end') },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
     it('turns free text into escaped wildcard clauses over hash, name, tag and submitter', async () => {
       await search({ search: 'ev*il" OR x:y' });
 

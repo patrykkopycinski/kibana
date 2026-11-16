@@ -178,6 +178,7 @@ const isRunInFlight = (run: DetonationRecord): boolean =>
  */
 export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
   const { http } = useKibana().services;
+  const queryClient = useQueryClient();
 
   const result = useInfiniteQuery<DetonationRunsResponse, Error>({
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'runs', query],
@@ -212,9 +213,11 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
         refetchPage: (page: DetonationRunsResponse) => page.hits.some(isRunInFlight),
         cancelRefetch: false,
       });
+      // A running row may have finished: the dashboard's counts move with it, so it refreshes on the same tick.
+      queryClient.invalidateQueries({ queryKey: [DETONATE_QUERY_KEY, 'tasks', 'stats'] });
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [shouldPoll, refetch]);
+  }, [shouldPoll, refetch, queryClient]);
 
   return result;
 };
@@ -222,7 +225,8 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
 /**
  * The dashboard's aggregates. Takes the same time + kql + search as `useDetonationRuns`, so the
  * panels and the table always describe the same runs. Under `[DETONATE_QUERY_KEY, 'tasks']`, so a
- * submit invalidates it with the lists; a finishing run moves the counts, so it refreshes with them.
+ * submit invalidates it with the lists. It does not poll itself: `useDetonationRuns` invalidates it
+ * on each of its poll ticks, so a finishing run moves the counts.
  */
 export const useDetonationRunStats = (query: DetonationRunStatsQuery) => {
   const { http } = useKibana().services;

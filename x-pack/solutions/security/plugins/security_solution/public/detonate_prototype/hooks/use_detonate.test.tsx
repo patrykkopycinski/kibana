@@ -257,6 +257,40 @@ describe('useDetonationRuns polling', () => {
     expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2);
   });
 
+  const mountWithStats = async () => {
+    jest.mocked(detonateApi.getRunStats).mockResolvedValue({} as never);
+    const { wrapper } = setup();
+    const hook = renderHook(
+      () => ({
+        runs: useDetonationRuns({ size: 50 }),
+        stats: useDetonationRunStats({ from: 'now-7d', to: 'now' }),
+      }),
+      { wrapper }
+    );
+    await waitFor(() => expect(hook.result.current.stats.isSuccess).toBe(true));
+    await waitFor(() => expect(hook.result.current.runs.isSuccess).toBe(true));
+  };
+
+  it('refreshes the dashboard stats on each poll tick while a run is running', async () => {
+    respondWith([row('running')]);
+    await mountWithStats();
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+
+    await tick();
+
+    await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+  });
+
+  it('does not refresh the dashboard stats when no run is running', async () => {
+    respondWith([row('complete')]);
+    await mountWithStats();
+
+    await tick();
+    await act(async () => {});
+
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+  });
+
   it('does not poll once no loaded row is running', async () => {
     respondWith([row('complete'), row('failed')]);
     await mount();

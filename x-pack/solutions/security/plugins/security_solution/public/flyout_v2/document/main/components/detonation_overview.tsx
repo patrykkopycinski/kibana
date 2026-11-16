@@ -290,7 +290,7 @@ const DetonationOverviewContent: FC<DetonationOverviewContentProps> = ({ hit, ha
   // The card is loading while either read could still produce a run; it errors only when neither did.
   const isLoading =
     alertRuns.isLoading || (!alertRuns.data?.hits.length && hashRuns.isFetching && !hashRuns.data);
-  const isError = (alertRuns.isError || hashRuns.isError) && !run;
+  const isError = alertRuns.isError && !run;
 
   const osList = DETONATE_VM_OS_FAMILIES.map((family) => OS_LABELS[family]).join(', ');
 

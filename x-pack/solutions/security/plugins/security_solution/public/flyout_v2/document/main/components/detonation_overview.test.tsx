@@ -331,17 +331,23 @@ describe('DetonationOverview', () => {
     expect(queryByTestId(DETONATION_OVERVIEW_DETONATE_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('keeps Detonate available when only the secondary hash lookup failed', () => {
+    jest.mocked(useDetonationCardRuns).mockReturnValue({
+      alertRuns: query([]),
+      hashRuns: query(undefined, { isError: true }),
+    } as never);
+    const { getByTestId, queryByTestId } = renderCard();
+    expect(getByTestId(DETONATION_OVERVIEW_DETONATE_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(DETONATION_OVERVIEW_PRIOR_RUN_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('clamps long failure details to two lines', () => {
     setRuns([run({ 'detonate.state': 'failed', 'detonate.step.details': 'x'.repeat(500) })]);
     const { getByTestId } = renderCard();
-    const { className } = getByTestId(DETONATION_OVERVIEW_FAILED_TEST_ID);
-    const emotionCss = Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules))
-      .map((rule) => rule.cssText)
-      .join('');
-    const [, emotionClass] = className.match(/(css-\S+)/) ?? [];
-    expect(emotionClass).toBeDefined();
-    expect(emotionCss).toMatch(new RegExp(`\\.${emotionClass}[^}]*-webkit-line-clamp:\\s*2`));
+    expect(getByTestId(DETONATION_OVERVIEW_FAILED_TEST_ID)).toHaveStyleRule(
+      '-webkit-line-clamp',
+      '2'
+    );
   });
 
   it('offers Re-run as a text link', () => {

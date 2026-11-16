@@ -1688,6 +1688,56 @@ describe('registerDetonatePrototypeRoutes', () => {
         },
       });
     });
+
+    describe('when the stats search rejects', () => {
+      const responseError = (statusCode: number, type: string) => {
+        const { errors } = jest.requireActual<{
+          errors: typeof import('@elastic/elasticsearch').errors;
+        }>('@elastic/elasticsearch');
+        return new errors.ResponseError({
+          statusCode,
+          body: { error: { type, reason: 'boom', root_cause: [{ type, reason: 'boom root' }] } },
+          headers: {},
+          meta: {},
+          warnings: [],
+        } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
+      };
+
+      it.each([[{ kql: '@timestamp > "not-a-date"' }], [{ search: 'abc' }]])(
+        'answers 400 when Elasticsearch rejects a user filter (%j)',
+        async (query) => {
+          esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
+
+          await stats(query);
+
+          expect(mockResponse.ok).not.toHaveBeenCalled();
+          expect(mockResponse.customError).not.toHaveBeenCalled();
+          expect(mockResponse.badRequest).toHaveBeenCalledWith({
+            body: { message: 'Invalid runs query: boom root' },
+          });
+        }
+      );
+
+      it('does not blame the caller for a 400 on a request with no filter', async () => {
+        esClient.search.mockRejectedValue(responseError(400, 'search_phase_execution_exception'));
+
+        await stats();
+
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+        expect(mockResponse.badRequest).not.toHaveBeenCalled();
+        expect(mockResponse.customError).toHaveBeenCalled();
+      });
+
+      it('does not answer 400 for a non-400 failure, even with a filter', async () => {
+        esClient.search.mockRejectedValue(responseError(503, 'search_phase_execution_exception'));
+
+        await stats({ kql: 'detonate.state: running' });
+
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+        expect(mockResponse.badRequest).not.toHaveBeenCalled();
+        expect(mockResponse.customError).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('runs search', () => {

@@ -12,11 +12,12 @@
 
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider, useInfiniteQuery } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider, useInfiniteQuery, useQuery } from '@kbn/react-query';
 
 import { detonateApi } from '../api/client';
 import {
   DETONATE_QUERY_KEY,
+  useDetonationCardRuns,
   useDetonationRuns,
   useDetonationRunStats,
   useSubmitFile,
@@ -28,7 +29,11 @@ jest.mock('../../common/lib/kibana', () => ({
 }));
 jest.mock('@kbn/react-query', () => {
   const actual = jest.requireActual('@kbn/react-query');
-  return { ...actual, useInfiniteQuery: jest.fn(actual.useInfiniteQuery) };
+  return {
+    ...actual,
+    useInfiniteQuery: jest.fn(actual.useInfiniteQuery),
+    useQuery: jest.fn(actual.useQuery),
+  };
 });
 jest.mock('../api/client');
 jest.mock('../components/detonation_notifier', () => ({ useTrackDetonation: () => jest.fn() }));
@@ -608,5 +613,104 @@ describe('useDetonationRuns polling', () => {
 
       expect(getNextPageParam(pages[1], pages)).toBe(100);
     });
+  });
+});
+
+describe('useDetonationCardRuns', () => {
+  const SHA = 'ab'.repeat(32);
+  const run = (state: string, timestamp: string) =>
+    ({ 'detonate.state': state, '@timestamp': timestamp } as never);
+  const mount = (params: { alertId?: string; hash?: string }) => {
+    const { wrapper } = setup();
+    return renderHook(() => useDetonationCardRuns(params), { wrapper });
+  };
+  const queryOptions = (keyPart: string) => {
+    const options = jest
+      .mocked(useQuery)
+      .mock.calls.map(([opts]) => opts as unknown as Record<string, unknown>)
+      .reverse()
+      .find((opts) => (opts.queryKey as unknown[])[2] === keyPart);
+    return options as {
+      queryKey: unknown[];
+      refetchInterval: (data: unknown) => number | false;
+    };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(detonateApi.searchRuns).mockResolvedValue({ hits: [], total: 0 });
+  });
+
+  it('reads this alert’s runs, and the newest run of the same file from other alerts', async () => {
+    mount({ alertId: 'alert-1', hash: SHA });
+
+    await waitFor(() => expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2));
+    expect(jest.mocked(detonateApi.searchRuns).mock.calls.map(([, query]) => query)).toEqual(
+      expect.arrayContaining([
+        { kql: 'detonate.origin.alert_ids: "alert-1"', size: 10 },
+        {
+          kql: `file.hash.sha256: "${SHA}" and not detonate.origin.alert_ids: "alert-1"`,
+          size: 1,
+        },
+      ])
+    );
+  });
+
+  it('lowercases the hash', async () => {
+    mount({ alertId: 'alert-1', hash: SHA.toUpperCase() });
+
+    await waitFor(() => expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2));
+    expect(jest.mocked(detonateApi.searchRuns).mock.calls[1][1].kql).toContain(`"${SHA}"`);
+  });
+
+  it('escapes quotes and backslashes in the alert id so it stays one phrase', async () => {
+    mount({ alertId: 'a"b\\c', hash: SHA });
+
+    await waitFor(() => expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2));
+    const kqls = jest.mocked(detonateApi.searchRuns).mock.calls.map(([, query]) => query.kql);
+    expect(kqls).toEqual(
+      expect.arrayContaining([
+        'detonate.origin.alert_ids: "a\\"b\\\\c"',
+        expect.stringMatching(/ and not detonate\.origin\.alert_ids: "a\\"b\\\\c"$/),
+      ])
+    );
+  });
+
+  it('skips the cross-alert read for a hash that is not a SHA-256', async () => {
+    mount({ alertId: 'alert-1', hash: 'e'.repeat(32) });
+
+    await waitFor(() => expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1));
+    expect(jest.mocked(detonateApi.searchRuns).mock.calls[0][1].kql).toBe(
+      'detonate.origin.alert_ids: "alert-1"'
+    );
+  });
+
+  it('reads nothing without an alert id', async () => {
+    const { result } = mount({ hash: SHA });
+
+    expect(result.current.alertRuns.fetchStatus).toBe('idle');
+    expect(result.current.hashRuns.fetchStatus).toBe('idle');
+    expect(detonateApi.searchRuns).not.toHaveBeenCalled();
+  });
+
+  it('keeps both keys under the tasks prefix a submit invalidates', () => {
+    mount({ alertId: 'alert-1', hash: SHA });
+
+    expect(queryOptions('card-alert').queryKey.slice(0, 2)).toEqual([DETONATE_QUERY_KEY, 'tasks']);
+    expect(queryOptions('card-hash').queryKey.slice(0, 2)).toEqual([DETONATE_QUERY_KEY, 'tasks']);
+  });
+
+  it('polls only while a loaded run is running', () => {
+    mount({ alertId: 'alert-1', hash: SHA });
+    const { refetchInterval } = queryOptions('card-alert');
+    const now = new Date().toISOString();
+
+    expect(refetchInterval({ hits: [run('running', now)], total: 1 })).toBe(5000);
+    expect(refetchInterval({ hits: [run('complete', now)], total: 1 })).toBe(false);
+    expect(refetchInterval(undefined)).toBe(false);
+    // A "running" record older than the run ceiling is stale, not in flight.
+    expect(refetchInterval({ hits: [run('running', '2020-01-01T00:00:00Z')], total: 1 })).toBe(
+      false
+    );
   });
 });

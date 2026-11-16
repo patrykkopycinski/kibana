@@ -41,32 +41,8 @@ import {
 import type { DetonateTask } from '../../../common/detonate_prototype';
 import { SubmitModal } from '../components/submit_modal';
 import { DETONATE_FILE_ACTION, DETONATE_VIEW_REPORT_ACTION } from '../translations';
+import { getDetonatableHash } from './detonatable_hash';
 import { useCompletedDetonationByHash } from './use_detonate';
-
-/**
- * Hash fields in the order the detonation service prefers them. SHA-256 first
- * because that is what the sample stores key on; the weaker digests are a
- * fallback for older endpoint documents that only carry them.
- */
-const HASH_FIELDS = [
-  'file.hash.sha256',
-  'process.hash.sha256',
-  'file.hash.sha1',
-  'process.hash.sha1',
-  'file.hash.md5',
-  'process.hash.md5',
-] as const;
-
-/** First populated hash on the document, or undefined when it carries none. */
-export const getDetonatableHash = (hit: DataTableRecord): string | undefined => {
-  for (const field of HASH_FIELDS) {
-    const value = getFieldValue(hit, field);
-    if (typeof value === 'string' && value.length > 0) {
-      return value;
-    }
-  }
-  return undefined;
-};
 
 const getStringField = (hit: DataTableRecord, field: string): string | undefined => {
   const value = getFieldValue(hit, field);

@@ -259,6 +259,68 @@ export const useDetonationRunStats = (query: DetonationRunStatsQuery) => {
   });
 };
 
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+const CARD_ALERT_RUNS_SIZE = 10;
+
+/**
+ * The alert flyout card's two reads of the runs route: the runs started from this alert, and the
+ * newest run of the same file from any other alert. Each polls only while its own newest rows
+ * hold a running run. The keys sit under `[DETONATE_QUERY_KEY, 'tasks']`, so a submit refreshes
+ * the card with the other task lists.
+ *
+ * The cross-alert query matches `file.hash.sha256`, so it only runs for a SHA-256.
+ */
+export const useDetonationCardRuns = ({
+  alertId,
+  hash,
+}: {
+  alertId: string | undefined;
+  hash: string | undefined;
+}) => {
+  const { http } = useKibana().services;
+  const sha256 = hash?.toLowerCase();
+  const hasSha256 = sha256 !== undefined && SHA256_PATTERN.test(sha256);
+
+  const poll = (data: DetonationRunsResponse | undefined) =>
+    data?.hits.some(isRunInFlight) ? POLL_INTERVAL_MS : (false as const);
+
+  const alertRuns = useQuery<DetonationRunsResponse, Error>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'card-alert', alertId ?? ''],
+    enabled: Boolean(alertId),
+    queryFn: ({ signal }) =>
+      detonateApi.searchRuns(
+        http,
+        {
+          kql: `detonate.origin.alert_ids: ${quoteQueryValue(alertId ?? '')}`,
+          size: CARD_ALERT_RUNS_SIZE,
+        },
+        signal
+      ),
+    refetchInterval: poll,
+    retry: shouldRetry,
+  });
+
+  const hashRuns = useQuery<DetonationRunsResponse, Error>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'card-hash', sha256 ?? '', alertId ?? ''],
+    enabled: hasSha256 && Boolean(alertId),
+    queryFn: ({ signal }) =>
+      detonateApi.searchRuns(
+        http,
+        {
+          kql:
+            `file.hash.sha256: ${quoteQueryValue(sha256 ?? '')}` +
+            ` and not detonate.origin.alert_ids: ${quoteQueryValue(alertId ?? '')}`,
+          size: 1,
+        },
+        signal
+      ),
+    refetchInterval: poll,
+    retry: shouldRetry,
+  });
+
+  return { alertRuns, hashRuns };
+};
+
 /**
  * Session View config for a run (N1). One fetch per run: the route's copy of
  * the run's events into the sandbox stream is idempotent, so re-mounting the

@@ -18,7 +18,8 @@ import {
 } from '../../common/constants/action_ids';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import { getDetonatableHash, useDetonateAlertAction } from './use_detonate_alert_action';
+import { getDetonatableHash } from './detonatable_hash';
+import { useDetonateAlertAction } from './use_detonate_alert_action';
 import { useCompletedDetonationByHash } from './use_detonate';
 
 jest.mock('../../common/hooks/use_experimental_features');

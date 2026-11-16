@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { useHistory } from 'react-router-dom';
@@ -133,6 +133,8 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 
 interface MockSearchBarProps {
   query: { query: string; language: string };
+  disableQueryLanguageSwitcher?: boolean;
+  indexPatterns: Array<{ id?: string }>;
   dateRangeFrom: string;
   dateRangeTo: string;
   onQuerySubmit: (
@@ -148,6 +150,7 @@ const MockSearchBar = (props: object) => {
 const lastSearchBarProps = () => mockSearchBar.mock.calls[mockSearchBar.mock.calls.length - 1][0];
 
 const addSuccess = jest.fn();
+const createDataView = jest.fn();
 const addError = jest.fn();
 const openDetonationFlyout = jest.fn();
 const fetchNextPage = jest.fn();
@@ -242,10 +245,12 @@ describe('DetonateListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     window.localStorage.clear();
+    createDataView.mockResolvedValue({ id: 'runs-data-view', fields: [] });
     jest.mocked(useKibana).mockReturnValue({
       services: {
         notifications: { toasts: { addSuccess, addError } },
-        dataViews: { create: jest.fn().mockResolvedValue({ id: 'runs-data-view', fields: [] }) },
+        dataViews: { create: createDataView },
+        spaces: { getActiveSpace: jest.fn().mockResolvedValue({ id: 'sandbox' }) },
         uiSettings: { get: jest.fn() },
         uiActions: { getTriggerCompatibleActions: jest.fn() },
         application: { capabilities: {} },
@@ -264,6 +269,26 @@ describe('DetonateListPage', () => {
     jest.mocked(useDetonateHealthcheck).mockReturnValue({ isError: false } as never);
     mockRuns([]);
     mockStats();
+  });
+
+  describe('search bar', () => {
+    it("builds the data view on the active space's results index, not the all-spaces pattern", async () => {
+      renderPage();
+      await screen.findByTestId('mockSearchBar');
+      await waitFor(() => expect(lastSearchBarProps().indexPatterns).toHaveLength(1));
+
+      expect(createDataView).toHaveBeenCalledTimes(1);
+      expect(createDataView.mock.calls[0][0]).toMatchObject({
+        title: '.kibana-detonate-results-sandbox',
+      });
+    });
+
+    it('keeps the query language fixed to KQL', async () => {
+      renderPage();
+      await screen.findByTestId('mockSearchBar');
+
+      expect(lastSearchBarProps().disableQueryLanguageSwitcher).toBe(true);
+    });
   });
 
   describe('load more', () => {

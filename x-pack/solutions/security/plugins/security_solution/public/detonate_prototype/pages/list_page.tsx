@@ -64,6 +64,7 @@ import {
   DETONATION_RUNS_MAX_RESULT_WINDOW,
   DETONATION_RUNS_SORT_FIELDS,
   DETONATION_RUN_FIELDS,
+  detonateResultsIndexName,
 } from '../../../common/detonate_prototype';
 import type {
   DetonationRecord,
@@ -85,6 +86,7 @@ import { DetonateVerdictNameBadge } from '../components/verdict_badge';
 import { SubmitModal } from '../components/submit_modal';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import * as i18n from '../translations';
 
@@ -98,7 +100,6 @@ export const SUBMIT_TOAST_VIEW_RESULT_TEST_ID = 'detonatePrototypeSubmitToastVie
 
 const LOCAL_STORAGE_COLUMNS_KEY = 'securitySolution.detonatePrototype.runsTable.columns';
 const LOCAL_STORAGE_SETTINGS_KEY = 'securitySolution.detonatePrototype.runsTable.settings';
-const RUNS_RESULTS_INDEX_PATTERN = '.kibana-detonate-results-*';
 const RUNS_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 const SAMPLE_COLUMN = 'file.name';
@@ -257,7 +258,7 @@ const RunsTable = ({
             buildDataTableRecord(
               {
                 _id: hit['detonate.task_id'],
-                _index: RUNS_RESULTS_INDEX_PATTERN,
+                _index: dataView.title,
                 _source: { ...hit },
               },
               dataView
@@ -580,12 +581,16 @@ export const DetonateListPage = React.memo(() => {
 
   const dataViews = services.dataViews;
   const [dataView, setDataView] = useState<DataView>();
+  const spaceId = useSpaceId();
   useEffect(() => {
+    // The current space's index, not the `-*` pattern: the SearchBar's value suggestions query this title,
+    // and the pattern would suggest values from other spaces' runs.
+    if (spaceId === undefined) return;
     let cancelled = false;
     dataViews
       .create(
         {
-          title: RUNS_RESULTS_INDEX_PATTERN,
+          title: detonateResultsIndexName(spaceId),
           timeFieldName: '@timestamp',
           fields: buildRunFields(),
         },
@@ -600,7 +605,7 @@ export const DetonateListPage = React.memo(() => {
     return () => {
       cancelled = true;
     };
-  }, [dataViews, toasts]);
+  }, [dataViews, toasts, spaceId]);
 
   const onPresetChange = useCallback((id: string) => setPreset(id as PresetId), []);
   const isFiltered = Boolean(kql) || Boolean(search);
@@ -746,6 +751,8 @@ export const DetonateListPage = React.memo(() => {
         showQueryInput
         showDatePicker
         showSubmitButton
+        // Deviation from the epic: the KQL-only Detonate page has no language to switch to.
+        disableQueryLanguageSwitcher
         indexPatterns={dataView ? [dataView] : []}
         dateRangeFrom={timeRange.from}
         dateRangeTo={timeRange.to}

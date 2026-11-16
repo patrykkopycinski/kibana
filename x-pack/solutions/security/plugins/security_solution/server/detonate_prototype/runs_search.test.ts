@@ -67,7 +67,7 @@ describe('buildRunStatsQuery', () => {
   it('pins run documents and the range, and adds the KQL and search between them', () => {
     const { query } = buildRunStatsQuery({ ...range, kql: 'detonate.state: running', search: 'x' });
 
-    const filter = query.bool?.filter as Array<Record<string, unknown>>;
+    const filter = query?.bool?.filter as Array<Record<string, unknown>>;
     expect(filter).toHaveLength(4);
     expect(filter[0]).toEqual({ term: { 'detonate.doc_kind': 'run' } });
     expect(filter[3]).toHaveProperty('range.@timestamp');

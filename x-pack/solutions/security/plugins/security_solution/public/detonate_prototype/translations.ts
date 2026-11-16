@@ -1183,3 +1183,43 @@ export const ALERT_CARD_OS_MACOS = i18n.translate(
   'xpack.securitySolution.detonatePrototype.alertCard.osMacos',
   { defaultMessage: 'macOS' }
 );
+
+export const RESPONSE_RUNS_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.title',
+  { defaultMessage: 'Detonations issued from this alert' }
+);
+
+export const RESPONSE_RUNS_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.empty',
+  { defaultMessage: 'No detonations have been issued from this alert.' }
+);
+
+export const RESPONSE_RUNS_ERROR = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.error',
+  { defaultMessage: 'Could not load the detonations issued from this alert.' }
+);
+
+export const RESPONSE_RUNS_COLUMN_TIME = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.columnTime',
+  { defaultMessage: 'Time' }
+);
+
+export const RESPONSE_RUNS_COLUMN_SUBMITTER = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.columnSubmitter',
+  { defaultMessage: 'Submitted by' }
+);
+
+export const RESPONSE_RUNS_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.columnStatus',
+  { defaultMessage: 'Status' }
+);
+
+export const RESPONSE_RUNS_COLUMN_RESULT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.columnResult',
+  { defaultMessage: 'Result' }
+);
+
+export const RESPONSE_RUNS_OPEN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.responseRuns.open',
+  { defaultMessage: 'Open' }
+);

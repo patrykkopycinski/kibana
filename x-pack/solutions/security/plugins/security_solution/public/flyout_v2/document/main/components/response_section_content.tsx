@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { Suspense, lazy, memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { EventKind } from '../constants/event_kinds';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_SECTION_TEST_ID } from './test_ids';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
+
+// Lazy so the detonate prototype's code stays out of the flyout's main chunk until an alert needs it.
+const DetonationRunsList = lazy(() =>
+  import('./detonation_runs_list').then((module) => ({ default: module.DetonationRunsList }))
+);
 
 const KEY = 'response';
 
@@ -49,6 +55,7 @@ export const ResponseSectionContent = memo<ResponseSectionContentProps>(
       title: KEY,
       defaultValue: false,
     });
+    const detonatePrototypeEnabled = useIsExperimentalFeatureEnabled('detonatePrototypeEnabled');
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -92,17 +99,24 @@ export const ResponseSectionContent = memo<ResponseSectionContentProps>(
             />
           </EuiCallOut>
         ) : (
-          <EuiButton
-            onClick={onShowResponseDetails}
-            iconType="documentation"
-            data-test-subj={RESPONSE_BUTTON_TEST_ID}
-            size="s"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.response.responseButtonLabel"
-              defaultMessage="Response"
-            />
-          </EuiButton>
+          <>
+            <EuiButton
+              onClick={onShowResponseDetails}
+              iconType="documentation"
+              data-test-subj={RESPONSE_BUTTON_TEST_ID}
+              size="s"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.response.responseButtonLabel"
+                defaultMessage="Response"
+              />
+            </EuiButton>
+            {detonatePrototypeEnabled && (
+              <Suspense fallback={null}>
+                <DetonationRunsList hit={hit} />
+              </Suspense>
+            )}
+          </>
         )}
       </ExpandableSection>
     );

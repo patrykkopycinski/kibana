@@ -7,18 +7,26 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   RESPONSE_BUTTON_TEST_ID,
   RESPONSE_SECTION_CONTENT_TEST_ID,
   RESPONSE_SECTION_HEADER_TEST_ID,
 } from './test_ids';
+import { DETONATION_RUNS_LIST_TEST_ID } from './detonation_runs_list';
 import { ResponseSectionContent } from './response_section_content';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
+}));
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('./detonation_runs_list', () => ({
+  DETONATION_RUNS_LIST_TEST_ID: 'detonationRunsListMock',
+  DetonationRunsList: () => <div data-test-subj="detonationRunsListMock" />,
 }));
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
@@ -68,6 +76,7 @@ describe('<ResponseSectionContent />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
   });
 
   it('should render response component', () => {
@@ -122,5 +131,30 @@ describe('<ResponseSectionContent />', () => {
     expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toHaveTextContent('Response');
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
+  });
+
+  describe('detonations issued from this alert', () => {
+    it('lists them under the Response button when the detonate flag is on', async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      const { getByTestId, findByTestId } = renderResponseSectionContent();
+      expect(await findByTestId(DETONATION_RUNS_LIST_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RESPONSE_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('does not list them when the detonate flag is off', () => {
+      const { queryByTestId } = renderResponseSectionContent();
+      expect(queryByTestId(DETONATION_RUNS_LIST_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not list them in a rule preview', async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      const { queryByTestId, getByTestId } = renderResponseSectionContent({
+        hit: previewAlertMockHit,
+      });
+      await waitFor(() =>
+        expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE)
+      );
+      expect(queryByTestId(DETONATION_RUNS_LIST_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 });

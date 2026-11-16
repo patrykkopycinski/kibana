@@ -29,10 +29,7 @@ export interface DetonationRunsListProps {
   hit: DataTableRecord;
 }
 
-/**
- * Every run whose originating alerts include this one, newest first. The query is the card's
- * alert query, so the two views read the same cache entry.
- */
+/** Runs from this alert, newest first; shares the card's cache entry. */
 export const DetonationRunsList: FC<DetonationRunsListProps> = ({ hit }) => {
   const alertId = hit.raw._id ?? '';
   const { alertRuns } = useDetonationCardRuns({ alertId, hash: undefined });

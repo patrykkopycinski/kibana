@@ -263,11 +263,8 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const CARD_ALERT_RUNS_SIZE = 10;
 
 /**
- * The alert flyout card's two reads of the runs route: the runs started from this alert, and the
- * newest run of the same file from any other alert. Each polls only while its own newest rows
- * hold a running run. The keys sit under `[DETONATE_QUERY_KEY, 'tasks']`, so a submit refreshes
- * the card with the other task lists.
- *
+ * The alert flyout card's two runs reads: this alert's runs, and the newest run of the same file
+ * from any alert. Keys sit under `[DETONATE_QUERY_KEY, 'tasks']` so a submit refreshes them.
  * The cross-alert query matches `file.hash.sha256`, so it only runs for a SHA-256.
  */
 export const useDetonationCardRuns = ({

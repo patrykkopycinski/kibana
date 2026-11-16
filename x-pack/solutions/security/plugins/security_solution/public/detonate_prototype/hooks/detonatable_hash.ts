@@ -8,11 +8,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 
-/**
- * Hash fields in the order the detonation service prefers them. SHA-256 first
- * because that is what the sample stores key on; the weaker digests are a
- * fallback for older endpoint documents that only carry them.
- */
+/** SHA-256 first because the sample stores key on it; weaker digests are a fallback. */
 const HASH_FIELDS = [
   'file.hash.sha256',
   'process.hash.sha256',

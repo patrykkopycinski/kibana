@@ -586,10 +586,6 @@ export const DetonateListPage = React.memo(() => {
   // table still loading. Kept out of the shared `useSpaceId`, which has no failure path.
   const [dataViewFailed, setDataViewFailed] = useState(false);
   useEffect(() => {
-    if (!spaces) {
-      setDataViewFailed(true);
-      return;
-    }
     let cancelled = false;
     const fail = (cause: Error) => {
       if (cancelled) return;

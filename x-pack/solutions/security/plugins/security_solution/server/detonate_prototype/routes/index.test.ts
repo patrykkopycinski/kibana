@@ -1514,11 +1514,16 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('always filters to run documents, with or without a KQL filter', async () => {
-      await search({ kql: 'detonate.state: "running"' });
+      const runTerm = { term: { 'detonate.doc_kind': 'run' } };
 
-      const { filter } = searchArgs().query.bool;
-      expect(filter[0]).toEqual({ term: { 'detonate.doc_kind': 'run' } });
-      expect(JSON.stringify(filter[1])).toContain('detonate.state');
+      await search({ kql: 'detonate.state: "running"' });
+      const withKql = searchArgs().query.bool.filter;
+      expect(withKql[0]).toEqual(runTerm);
+      expect(JSON.stringify(withKql[1])).toContain('detonate.state');
+
+      esClient.search.mockClear();
+      await search();
+      expect(searchArgs().query.bool.filter).toEqual([runTerm]);
     });
 
     it('sorts by the requested field, ties broken by task id', async () => {

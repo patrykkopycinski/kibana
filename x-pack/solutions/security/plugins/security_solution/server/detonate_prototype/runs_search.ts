@@ -28,7 +28,7 @@ const SEARCH_FIELDS = ['file.hash.sha256', 'file.name', 'tags', 'detonate.submit
 /** A `wildcard` value matches literally except for these; the user's text must not carry any. */
 const escapeWildcard = (text: string): string => text.replace(/[\\*?]/g, (char) => `\\${char}`);
 
-/** Thrown for a KQL string that does not parse; the route answers it with a 400. */
+/** Thrown for a rejected user filter (unparseable or fieldless KQL, KQL that won't compile, or an Elasticsearch 400 on it); the route answers 400. */
 export class InvalidRunsQueryError extends Error {}
 
 /**

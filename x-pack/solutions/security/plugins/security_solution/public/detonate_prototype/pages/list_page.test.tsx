@@ -473,6 +473,53 @@ describe('DetonateListPage', () => {
         expect.objectContaining({ sort_field: 'detonate.alerts.total', sort_direction: 'asc' })
       );
     });
+
+    // The shapes EUI's column action passes: it appends a new column to the current sort.
+    describe('header sort as EUI reports it', () => {
+      const sortedBy = (field: string, direction: string) =>
+        expect.objectContaining({ sort_field: field, sort_direction: direction });
+
+      beforeEach(async () => {
+        mockRuns([makeRun()]);
+        renderPage();
+        await screen.findByTestId('mockTable');
+      });
+
+      it('sorts on the column added to the default sort', () => {
+        act(() =>
+          lastTableProps().onSort([
+            ['@timestamp', 'desc'],
+            ['detonate.alerts.total', 'desc'],
+          ])
+        );
+
+        expect(lastRunsQuery()).toEqual(sortedBy('detonate.alerts.total', 'desc'));
+      });
+
+      it('flips the direction of the sorted column in place', () => {
+        act(() => lastTableProps().onSort([['@timestamp', 'asc']]));
+
+        expect(lastRunsQuery()).toEqual(sortedBy('@timestamp', 'asc'));
+      });
+
+      it('falls back to the default sort when the sort is cleared', () => {
+        act(() => lastTableProps().onSort([['detonate.alerts.total', 'asc']]));
+        act(() => lastTableProps().onSort([]));
+
+        expect(lastRunsQuery()).toEqual(sortedBy('@timestamp', 'desc'));
+      });
+
+      it('ignores a newly added column the server cannot sort on', () => {
+        act(() =>
+          lastTableProps().onSort([
+            ['@timestamp', 'desc'],
+            ['tags', 'asc'],
+          ])
+        );
+
+        expect(lastRunsQuery()).toEqual(sortedBy('@timestamp', 'desc'));
+      });
+    });
   });
 
   it('keeps the modal closed until "Submit sample" is clicked', () => {

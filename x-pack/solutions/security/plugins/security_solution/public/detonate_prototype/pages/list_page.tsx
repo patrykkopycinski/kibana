@@ -297,11 +297,13 @@ const RunsTable = ({
 
   const onSort = useCallback(
     (next: string[][]) => {
+      // EUI appends a newly sorted column to the current sort and the server sorts on one field, so take the added entry.
+      const [field, direction] =
+        next.find(([nextField]) => nextField !== sort[0]) ?? next[0] ?? DEFAULT_SORT;
       // Only single-valued fields sort server-side; any other column header sort is dropped.
-      const [field, direction] = next[0] ?? DEFAULT_SORT;
       if (isSortField(field)) onSortChange([field, direction]);
     },
-    [onSortChange]
+    [onSortChange, sort]
   );
 
   const customCellRenderers = useMemo<CustomCellRenderer>(

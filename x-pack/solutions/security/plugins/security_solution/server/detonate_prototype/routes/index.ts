@@ -424,7 +424,8 @@ export const registerDetonatePrototypeRoutes = ({
    * budget a live one needs. Repairing a complete run is bounded two ways, because a run that
    * cannot be repaired (task gone, no usable updates) is otherwise re-read on every load: only
    * runs newer than DETONATION_DURATION_REPAIR_MAX_AGE_MS, and at most
-   * DURATION_REPAIR_MAX_PER_REQUEST per request; running hits are not capped. Any failure, or
+   * DURATION_REPAIR_MAX_PER_REQUEST per request, chosen at random from the repairable ones so none
+   * is starved behind runs that cannot be repaired; running hits are not capped. Any failure, or
    * running out of time, keeps the stored hit: the table must load even when the service is down
    * or hung.
    */
@@ -485,9 +486,17 @@ export const registerDetonatePrototypeRoutes = ({
     // pMap starts its items in order, so the running ones go first and get the first slots;
     // results go back to their original positions.
     const indexed = hits.map((hit, index) => ({ hit, index }));
+    const repairable = indexed.filter(({ hit }) => isRepairable(hit));
+    // A partial Fisher-Yates pick: a fixed prefix would starve a repairable run behind three that
+    // cannot be repaired, until its window closed.
+    const repairs = Math.min(DURATION_REPAIR_MAX_PER_REQUEST, repairable.length);
+    for (let i = 0; i < repairs; i++) {
+      const j = i + Math.floor(Math.random() * (repairable.length - i));
+      [repairable[i], repairable[j]] = [repairable[j], repairable[i]];
+    }
     const candidates = [
       ...indexed.filter(({ hit }) => isLive(hit)),
-      ...indexed.filter(({ hit }) => isRepairable(hit)).slice(0, DURATION_REPAIR_MAX_PER_REQUEST),
+      ...repairable.slice(0, repairs),
     ];
     const refreshed = await pMap(candidates, ({ hit }) => refreshWithinDeadline(hit), {
       concurrency: STALE_REFRESH_CONCURRENCY,

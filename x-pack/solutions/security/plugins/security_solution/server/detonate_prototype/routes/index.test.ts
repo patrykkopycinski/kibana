@@ -2076,19 +2076,49 @@ describe('registerDetonatePrototypeRoutes', () => {
         expect(esClient.update).not.toHaveBeenCalled();
       });
 
-      it('repairs at most three complete hits per request', async () => {
+      describe('choosing which complete hits to repair', () => {
         const ids = ['c1', 'c2', 'c3', 'c4', 'c5'];
-        returnSources(...ids.map((id) => ({ ...storedHit('complete'), 'detonate.task_id': id })));
-        client.getTask.mockImplementation((async (id: string) => ({
-          ...nowFinishedTask,
-          id,
-        })) as never);
+        // Math.random is replaced for the pick only; the values are consumed in order, then 0.
+        const pickWith = (...values: number[]) => {
+          const queue = [...values];
+          return jest.spyOn(Math, 'random').mockImplementation(() => queue.shift() ?? 0);
+        };
+        const searchFiveComplete = async () => {
+          returnSources(...ids.map((id) => ({ ...storedHit('complete'), 'detonate.task_id': id })));
+          client.getTask.mockImplementation((async (id: string) => ({
+            ...nowFinishedTask,
+            id,
+          })) as never);
+          await search();
+        };
+        afterEach(() => jest.restoreAllMocks());
 
-        await search();
+        it('repairs at most three complete hits per request', async () => {
+          pickWith(0, 0, 0);
 
-        expect(client.getTask.mock.calls.map(([id]) => id)).toEqual(['c1', 'c2', 'c3']);
-        expect(esClient.update).toHaveBeenCalledTimes(3);
-        expect(returnedHits().map((hit) => hit['detonate.task_id'])).toEqual(ids);
+          await searchFiveComplete();
+
+          expect(client.getTask.mock.calls.map(([id]) => id).sort()).toEqual(['c1', 'c2', 'c3']);
+          expect(esClient.update).toHaveBeenCalledTimes(3);
+          expect(returnedHits().map((hit) => hit['detonate.task_id'])).toEqual(ids);
+        });
+
+        it('picks the repairs at random, so a hit behind the first three is still tried', async () => {
+          // Partial Fisher-Yates over [c1..c5]: 0.9 swaps c5 to the front, 0 keeps c2, 0.4 swaps
+          // c4 into the third slot.
+          pickWith(0.9, 0, 0.4);
+
+          await searchFiveComplete();
+
+          expect(client.getTask.mock.calls.map(([id]) => id).sort()).toEqual(['c2', 'c4', 'c5']);
+          expect(esClient.update).toHaveBeenCalledTimes(3);
+          const hits = returnedHits();
+          expect(hits.map((hit) => hit['detonate.task_id'])).toEqual(ids);
+          const updatedIds = esClient.update.mock.calls.map(
+            ([args]) => (args as { id: string }).id
+          );
+          expect(updatedIds.sort()).toEqual(['c2', 'c4', 'c5']);
+        });
       });
 
       it('keeps the stored hit and still answers when the service fails', async () => {

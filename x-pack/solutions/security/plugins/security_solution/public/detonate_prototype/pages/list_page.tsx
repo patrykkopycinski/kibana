@@ -55,6 +55,7 @@ import {
 } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -192,11 +193,26 @@ const sourceOf = (rows: DataTableRecord[], rowIndex: number): DetonationRecord |
 
 const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-30d', to: 'now' };
 
-/** The quick filter and the analyst's KQL both apply: each is parenthesised so an `or` in one cannot widen the other. */
-const andKql = (...parts: Array<string | undefined>): string | undefined => {
-  const present = parts.filter((part): part is string => Boolean(part?.trim()));
-  if (present.length === 0) return undefined;
-  return present.length === 1 ? present[0] : present.map((part) => `(${part})`).join(' and ');
+const parses = (kql: string): boolean => {
+  try {
+    fromKueryExpression(kql);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * The quick filter and the analyst's KQL both apply, each in parentheses so an `or` in one cannot
+ * widen the other. Parentheses only hold if the user's text is balanced on its own: `a) or (b`
+ * would close the preset's group and reopen another. So KQL that does not parse alone is sent
+ * alone, never combined; the route rejects it with a 400 and the page shows that parse error.
+ */
+const andKql = (presetKql: string | undefined, userKql: string): string | undefined => {
+  const user = userKql.trim() ? userKql : undefined;
+  if (!presetKql) return user;
+  if (!user) return presetKql;
+  return parses(user) ? `(${presetKql}) and (${user})` : user;
 };
 
 const serviceErrorMessage = (error: unknown): string => {
@@ -520,6 +536,7 @@ export const DetonateListPage = React.memo(() => {
     [kql, search, timeRange]
   );
   const stats = useDetonationRunStats(statsQuery);
+  const { refetch: refetchStats } = stats;
   const {
     data,
     isLoading,
@@ -598,13 +615,13 @@ export const DetonateListPage = React.memo(() => {
       if (!isUpdated) {
         // Submitting an unchanged bar is a refresh.
         refetch();
-        stats.refetch();
+        refetchStats();
         return;
       }
       setTimeRange(dateRange);
       setUserKql(typeof query?.query === 'string' ? query.query : '');
     },
-    [refetch, stats]
+    [refetch, refetchStats]
   );
   const {
     unifiedSearch: {

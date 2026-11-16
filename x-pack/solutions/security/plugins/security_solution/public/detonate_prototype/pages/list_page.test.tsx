@@ -564,6 +564,29 @@ describe('DetonateListPage', () => {
         expect(lastRunsQuery()).toEqual(expect.objectContaining({ start: 'now-30d' }));
       });
 
+      it('sends KQL that does not parse alone by itself, so it cannot widen the preset', () => {
+        renderPage();
+        fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-preset-malicious`));
+        expect(lastRunsQuery().kql).toBe('detonate.verdict:malicious');
+
+        submit('file.name:a) or (file.name:b');
+
+        // Combined it would parse as `(detonate.verdict:malicious) and (file.name:a) or (file.name:b)`.
+        expect(lastRunsQuery().kql).toBe('file.name:a) or (file.name:b');
+        expect(lastStatsQuery().kql).toBe('file.name:a) or (file.name:b');
+      });
+
+      it('still combines balanced KQL with the preset, each in parentheses', () => {
+        renderPage();
+        fireEvent.click(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-preset-malicious`));
+
+        submit('file.name:a or file.name:b');
+
+        expect(lastRunsQuery().kql).toBe(
+          '(detonate.verdict:malicious) and (file.name:a or file.name:b)'
+        );
+      });
+
       it('clears the KQL, with the other filters', () => {
         renderPage();
         submit('detonate.verdict:benign');

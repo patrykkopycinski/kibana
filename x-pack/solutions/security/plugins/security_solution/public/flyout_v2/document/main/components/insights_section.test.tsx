@@ -260,11 +260,34 @@ describe('InsightsSection', () => {
     expect(queryByTestId('detonationOverviewMock')).not.toBeInTheDocument();
   });
 
-  it('does not render the detonation overview for a rule-preview alert', () => {
-    const { queryByTestId } = renderInsightsSection({
-      ...alertMockHit,
-      raw: { _id: '1', _index: '.internal.preview.alerts-security.alerts-default', _source: {} },
-    } as DataTableRecord);
+  it('does not render the detonation overview for a rule-preview alert', async () => {
+    const { findByTestId, queryByTestId, rerender } = renderInsightsSection(alertMockHit);
+
+    // Positive control: the card is lazy, so wait for it before asserting its absence.
+    expect(await findByTestId('detonationOverviewMock')).toBeInTheDocument();
+
+    rerender(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InsightsSection
+              hit={
+                {
+                  ...alertMockHit,
+                  raw: {
+                    _id: '1',
+                    _index: '.internal.preview.alerts-security.alerts-default',
+                    _source: {},
+                  },
+                } as DataTableRecord
+              }
+              renderCellActions={mockRenderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
 
     expect(queryByTestId('detonationOverviewMock')).not.toBeInTheDocument();
   });

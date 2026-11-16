@@ -1455,7 +1455,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         httpServerMock.createKibanaRequest({
           method: 'get',
           path: DETONATE_RUNS_STATS_PATH,
-          query: statsQuerySchema().validate({ from: 'now-30d', to: 'now', ...query }) as never,
+          query: statsQuerySchema().validate({ start: 'now-30d', end: 'now', ...query }) as never,
         }),
         mockResponse
       );
@@ -1493,31 +1493,31 @@ describe('registerDetonatePrototypeRoutes', () => {
     it('requires bounded time strings, accepting ISO dates and date math, and bounds kql and search', () => {
       const schemaOf = statsQuerySchema();
 
-      expect(schemaOf.validate({ from: 'now-30d', to: 'now' })).toEqual({
-        from: 'now-30d',
-        to: 'now',
+      expect(schemaOf.validate({ start: 'now-30d', end: 'now' })).toEqual({
+        start: 'now-30d',
+        end: 'now',
       });
-      expect(schemaOf.validate({ from: '2026-01-01T00:00:00.000Z', to: 'now/d' })).toEqual({
-        from: '2026-01-01T00:00:00.000Z',
-        to: 'now/d',
+      expect(schemaOf.validate({ start: '2026-01-01T00:00:00.000Z', end: 'now/d' })).toEqual({
+        start: '2026-01-01T00:00:00.000Z',
+        end: 'now/d',
       });
       expect(() => schemaOf.validate({})).toThrow();
-      expect(() => schemaOf.validate({ from: 'now-30d' })).toThrow();
-      expect(() => schemaOf.validate({ from: 'not a date', to: 'now' })).toThrow(/date math/);
-      expect(() => schemaOf.validate({ from: 'now', to: 'now+1x' })).toThrow();
+      expect(() => schemaOf.validate({ start: 'now-30d' })).toThrow();
+      expect(() => schemaOf.validate({ start: 'not a date', end: 'now' })).toThrow(/date math/);
+      expect(() => schemaOf.validate({ start: 'now', end: 'now+1x' })).toThrow();
       expect(() =>
-        schemaOf.validate({ from: 'now-'.concat('1d'.repeat(40)), to: 'now' })
+        schemaOf.validate({ start: 'now-'.concat('1d'.repeat(40)), end: 'now' })
       ).toThrow();
       expect(() =>
-        schemaOf.validate({ from: 'now-1d', to: 'now', kql: 'a'.repeat(1025) })
+        schemaOf.validate({ start: 'now-1d', end: 'now', kql: 'a'.repeat(1025) })
       ).toThrow();
       expect(() =>
-        schemaOf.validate({ from: 'now-1d', to: 'now', search: 'a'.repeat(129) })
+        schemaOf.validate({ start: 'now-1d', end: 'now', search: 'a'.repeat(129) })
       ).toThrow();
     });
 
     it("aggregates this space's run documents inside the time range, with no hits", async () => {
-      await stats({ from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' });
+      await stats({ start: '2026-01-01T00:00:00.000Z', end: '2026-01-31T00:00:00.000Z' });
 
       const args = searchArgs();
       expect(args).toEqual(
@@ -1586,7 +1586,7 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('caps the trend at 120 buckets by widening the interval on a long range', async () => {
-      await stats({ from: '2020-01-01T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' });
+      await stats({ start: '2020-01-01T00:00:00.000Z', end: '2026-01-01T00:00:00.000Z' });
 
       const { date_histogram: histogram } = searchArgs().aggs.trend;
       const days = Number(histogram.fixed_interval.replace('d', ''));
@@ -1652,10 +1652,10 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
 
     it('answers 400 for a range that ends before it starts', async () => {
-      await stats({ from: 'now', to: 'now-1d' });
+      await stats({ start: 'now', end: 'now-1d' });
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining('from is after to') },
+        body: { message: expect.stringContaining('start is after end') },
       });
       expect(esClient.search).not.toHaveBeenCalled();
     });

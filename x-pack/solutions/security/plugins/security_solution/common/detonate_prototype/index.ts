@@ -1330,8 +1330,8 @@ export type DetonationStatsVerdictCounts = Record<DetonationStatsVerdict, number
 /** What the Detonations dashboard asks of the stats route: a time range plus the table's filters. */
 export interface DetonationRunStatsQuery {
   /** An ISO date or date math (`now-30d`); filters `@timestamp`. */
-  from: string;
-  to: string;
+  start: string;
+  end: string;
   kql?: string;
   search?: string;
 }

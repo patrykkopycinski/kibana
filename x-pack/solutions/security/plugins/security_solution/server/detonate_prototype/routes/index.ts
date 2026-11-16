@@ -1685,11 +1685,11 @@ export const registerDetonatePrototypeRoutes = ({
         validate: {
           request: {
             query: schema.object({
-              from: schema.string({
+              start: schema.string({
                 maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
                 validate: statsTimeError,
               }),
-              to: schema.string({
+              end: schema.string({
                 maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
                 validate: statsTimeError,
               }),

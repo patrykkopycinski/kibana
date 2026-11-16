@@ -97,7 +97,7 @@ describe('statsTimeError', () => {
 });
 
 describe('buildRunStatsQuery', () => {
-  const range = { from: '2026-01-01T00:00:00.000Z', to: '2026-01-11T00:00:00.000Z' };
+  const range = { start: '2026-01-01T00:00:00.000Z', end: '2026-01-11T00:00:00.000Z' };
 
   it('pins run documents and the range, and adds the KQL and search between them', () => {
     const { query } = buildRunStatsQuery({ ...range, kql: 'detonate.state: running', search: 'x' });
@@ -124,7 +124,7 @@ describe('buildRunStatsQuery', () => {
   });
 
   it('rejects a range that ends before it starts', () => {
-    expect(() => buildRunStatsQuery({ from: range.to, to: range.from })).toThrow(
+    expect(() => buildRunStatsQuery({ start: range.end, end: range.start })).toThrow(
       InvalidRunsQueryError
     );
   });

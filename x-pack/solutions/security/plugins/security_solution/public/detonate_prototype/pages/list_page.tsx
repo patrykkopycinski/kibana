@@ -529,8 +529,8 @@ export const DetonateListPage = React.memo(() => {
   );
   const statsQuery = useMemo<DetonationRunStatsQuery>(
     () => ({
-      from: timeRange.from,
-      to: timeRange.to,
+      start: timeRange.from,
+      end: timeRange.to,
       ...(kql ? { kql } : {}),
       ...(search ? { search } : {}),
     }),

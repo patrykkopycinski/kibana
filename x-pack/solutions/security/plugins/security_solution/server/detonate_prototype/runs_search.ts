@@ -252,8 +252,8 @@ export const trendIntervalMs = (fromMs: number, toMs: number): number => {
 };
 
 export const buildRunStatsQuery = ({
-  from,
-  to,
+  start,
+  end,
   kql,
   search,
 }: DetonationRunStatsQuery): {
@@ -261,10 +261,10 @@ export const buildRunStatsQuery = ({
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   intervalMs: number;
 } => {
-  const fromMs = resolveStatsTime(from, false);
-  const toMs = resolveStatsTime(to, true);
-  if (toMs < fromMs) throw new InvalidRunsQueryError('Invalid time range: from is after to');
-  const intervalMs = trendIntervalMs(fromMs, toMs);
+  const startMs = resolveStatsTime(start, false);
+  const endMs = resolveStatsTime(end, true);
+  if (endMs < startMs) throw new InvalidRunsQueryError('Invalid time range: start is after end');
+  const intervalMs = trendIntervalMs(startMs, endMs);
   const verdictTerms = {
     terms: {
       field: 'detonate.verdict',
@@ -275,7 +275,7 @@ export const buildRunStatsQuery = ({
   };
   return {
     intervalMs,
-    query: buildRunsFilter({ kql, search }, timeRangeFilter(fromMs, toMs)),
+    query: buildRunsFilter({ kql, search }, timeRangeFilter(startMs, endMs)),
     aggs: {
       verdicts: verdictTerms,
       mean_duration: { avg: { field: 'event.duration' } },
@@ -287,7 +287,7 @@ export const buildRunStatsQuery = ({
           field: '@timestamp',
           fixed_interval: `${intervalMs / DAY_MS}d`,
           min_doc_count: 0,
-          extended_bounds: { min: fromMs, max: toMs },
+          extended_bounds: { min: startMs, max: endMs },
         },
         aggs: { verdicts: verdictTerms },
       },

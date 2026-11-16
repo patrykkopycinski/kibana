@@ -178,7 +178,7 @@ describe('dashboard queries share time + kql + search', () => {
 
   it('keys the stats query on the time range, kql and search, and sends them', async () => {
     const { queryClient, wrapper } = mount();
-    const query = { from: 'now-7d', to: 'now', kql: 'detonate.verdict:malicious', search: 'abc' };
+    const query = { start: 'now-7d', end: 'now', kql: 'detonate.verdict:malicious', search: 'abc' };
     const { result, rerender } = renderHook((q) => useDetonationRunStats(q), {
       wrapper,
       initialProps: query,
@@ -186,7 +186,7 @@ describe('dashboard queries share time + kql + search', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(detonateApi.getRunStats).toHaveBeenLastCalledWith({}, query, expect.anything());
 
-    rerender({ ...query, from: 'now-30d' });
+    rerender({ ...query, start: 'now-30d' });
     await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
 
     const keys = queryClient
@@ -196,7 +196,7 @@ describe('dashboard queries share time + kql + search', () => {
     expect(keys).toEqual(
       expect.arrayContaining([
         [DETONATE_QUERY_KEY, 'tasks', 'stats', query],
-        [DETONATE_QUERY_KEY, 'tasks', 'stats', { ...query, from: 'now-30d' }],
+        [DETONATE_QUERY_KEY, 'tasks', 'stats', { ...query, start: 'now-30d' }],
       ])
     );
   });
@@ -222,7 +222,7 @@ describe('dashboard queries share time + kql + search', () => {
 
   it('stats retries a 429', async () => {
     jest.mocked(detonateApi.getRunStats).mockRejectedValue(httpError(429));
-    const { result } = renderHook(() => useDetonationRunStats({ from: 'now-7d', to: 'now' }), {
+    const { result } = renderHook(() => useDetonationRunStats({ start: 'now-7d', end: 'now' }), {
       wrapper: mount(3).wrapper,
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -231,7 +231,7 @@ describe('dashboard queries share time + kql + search', () => {
 
   it('stats does not retry a 4xx but retries a server failure', async () => {
     jest.mocked(detonateApi.getRunStats).mockRejectedValue(httpError(400));
-    const first = renderHook(() => useDetonationRunStats({ from: 'now-7d', to: 'now' }), {
+    const first = renderHook(() => useDetonationRunStats({ start: 'now-7d', end: 'now' }), {
       wrapper: mount(3).wrapper,
     });
     await waitFor(() => expect(first.result.current.isError).toBe(true));
@@ -239,7 +239,7 @@ describe('dashboard queries share time + kql + search', () => {
 
     jest.clearAllMocks();
     jest.mocked(detonateApi.getRunStats).mockRejectedValue(httpError(503));
-    const second = renderHook(() => useDetonationRunStats({ from: 'now-7d', to: 'now' }), {
+    const second = renderHook(() => useDetonationRunStats({ start: 'now-7d', end: 'now' }), {
       wrapper: mount(3).wrapper,
     });
     await waitFor(() => expect(second.result.current.isError).toBe(true));
@@ -290,7 +290,7 @@ describe('useDetonationRuns polling', () => {
     const hook = renderHook(
       () => ({
         runs: useDetonationRuns({ size: 50 }),
-        stats: useDetonationRunStats({ from: 'now-7d', to: 'now' }),
+        stats: useDetonationRunStats({ start: 'now-7d', end: 'now' }),
       }),
       { wrapper }
     );

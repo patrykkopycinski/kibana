@@ -574,7 +574,7 @@ describe('DetonateListPage', () => {
         renderPage();
 
         expect(lastRunsQuery()).toEqual(expect.objectContaining({ start: 'now-30d', end: 'now' }));
-        expect(lastStatsQuery()).toEqual({ from: 'now-30d', to: 'now' });
+        expect(lastStatsQuery()).toEqual({ start: 'now-30d', end: 'now' });
       });
 
       it('sends a submitted time range and KQL to the runs and the stats alike', () => {
@@ -590,8 +590,8 @@ describe('DetonateListPage', () => {
           })
         );
         expect(lastStatsQuery()).toEqual({
-          from: 'now-7d',
-          to: 'now-1h',
+          start: 'now-7d',
+          end: 'now-1h',
           kql: 'detonate.verdict:benign',
         });
         expect(lastSearchBarProps()).toEqual(

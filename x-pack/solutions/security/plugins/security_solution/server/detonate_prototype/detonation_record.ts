@@ -88,11 +88,19 @@ export interface DetonationOrigin extends DetonateSubmitOrigin {
   file?: { size: number; mime_type?: string };
 }
 
-/** When the run reached its last update, if it has finished. */
+/**
+ * When the run finished, if it has: the first update (the service lists them oldest first) that
+ * shows it complete. Later updates must not stretch the duration; with no such update, the
+ * latest timestamp stands in.
+ */
 const finishedAt = (task: DetonateTask, updates: readonly DetonateTaskUpdate[]) => {
   if (!isDetonationComplete(task)) return undefined;
-  const times = updates.map(({ timestamp }) => Date.parse(timestamp)).filter(Number.isFinite);
-  return times.length > 0 ? Math.max(...times) : undefined;
+  const timed = updates
+    .map((update) => ({ task: update.task, time: Date.parse(update.timestamp) }))
+    .filter(({ time }) => Number.isFinite(time));
+  const completing = timed.find(({ task: updateTask }) => isDetonationComplete(updateTask));
+  if (completing) return completing.time;
+  return timed.length > 0 ? Math.max(...timed.map(({ time }) => time)) : undefined;
 };
 
 const originFields = (

@@ -154,17 +154,44 @@ describe('toDetonationRecord', () => {
     }
   });
 
-  it('takes the duration from the last update of a finished run', () => {
+  const runningTask = () =>
+    createTask({ last_worker_name: 'detonate.workers.stop_vm', last_worker_status: 'started' });
+
+  it('takes the end from the first update that shows the run finished', () => {
     const record = toDetonationRecord(createTask(), {
       updates: [
+        { task: runningTask(), timestamp: '2026-01-01T00:02:30.000Z' },
         { task: createTask(), timestamp: '2026-01-01T00:04:00.000Z' },
-        { task: createTask(), timestamp: '2026-01-01T00:02:30.000Z' },
         { task: createTask(), timestamp: 'not a date' },
       ],
     });
 
     expect(record['event.end']).toBe('2026-01-01T00:04:00.000Z');
     expect(record['event.duration']).toBe(4 * 60 * 1000 * 1_000_000);
+  });
+
+  it('ignores updates after the run finished', () => {
+    const record = toDetonationRecord(createTask(), {
+      updates: [
+        { task: runningTask(), timestamp: '2026-01-01T00:02:00.000Z' },
+        { task: createTask(), timestamp: '2026-01-01T00:04:00.000Z' },
+        { task: createTask(), timestamp: '2026-01-01T00:09:00.000Z' },
+      ],
+    });
+
+    expect(record['event.end']).toBe('2026-01-01T00:04:00.000Z');
+    expect(record['event.duration']).toBe(4 * 60 * 1000 * 1_000_000);
+  });
+
+  it('falls back to the latest update when none shows the run finished', () => {
+    const record = toDetonationRecord(createTask(), {
+      updates: [
+        { task: runningTask(), timestamp: '2026-01-01T00:04:00.000Z' },
+        { task: runningTask(), timestamp: '2026-01-01T00:02:30.000Z' },
+      ],
+    });
+
+    expect(record['event.end']).toBe('2026-01-01T00:04:00.000Z');
   });
 
   it('omits the duration when there are no updates', () => {

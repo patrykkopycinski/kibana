@@ -15,7 +15,7 @@
  * moment — or poll forever on a run that failed.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
@@ -202,6 +202,16 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
 
   const { data, refetch } = result;
   const shouldPoll = Boolean(data?.pages.some((page) => page.hits.some(isRunInFlight)));
+  // `cancelRefetch: false`: a stats search slower than the poll interval would otherwise be
+  // cancelled and restarted on every tick, and never finish.
+  const refreshStats = useCallback(
+    () =>
+      queryClient.invalidateQueries(
+        { queryKey: [DETONATE_QUERY_KEY, 'tasks', 'stats'] },
+        { cancelRefetch: false }
+      ),
+    [queryClient]
+  );
   useEffect(() => {
     if (!shouldPoll) return;
     // Re-reads only the pages that hold a running row, not every page scrolled. Offsets can drift
@@ -209,15 +219,22 @@ export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
     // `refetchPage` is accepted by `refetch`, not by the query options, hence the manual interval.
     // `cancelRefetch: false`: the default cancels an in-flight Load more, whose rows would never append.
     const timer = setInterval(() => {
+      // A running row may have finished and the dashboard's counts move with it. The runs response
+      // is what writes the finished state to the results index, so the stats search waits for it.
       refetch({
         refetchPage: (page: DetonationRunsResponse) => page.hits.some(isRunInFlight),
         cancelRefetch: false,
-      });
-      // A running row may have finished: the dashboard's counts move with it, so it refreshes on the same tick.
-      queryClient.invalidateQueries({ queryKey: [DETONATE_QUERY_KEY, 'tasks', 'stats'] });
+      }).then(refreshStats);
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [shouldPoll, refetch, queryClient]);
+  }, [shouldPoll, refetch, refreshStats]);
+
+  // The last running row finishing stops the polling, so no later tick would refresh the stats.
+  const wasPolling = useRef(false);
+  useEffect(() => {
+    if (wasPolling.current && !shouldPoll) refreshStats();
+    wasPolling.current = shouldPoll;
+  }, [shouldPoll, refreshStats]);
 
   return result;
 };

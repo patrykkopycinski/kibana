@@ -296,6 +296,14 @@ describe('useDetonationRuns polling', () => {
     );
     await waitFor(() => expect(hook.result.current.stats.isSuccess).toBe(true));
     await waitFor(() => expect(hook.result.current.runs.isSuccess).toBe(true));
+    return hook;
+  };
+  const deferred = <T,>() => {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((res) => {
+      resolve = res;
+    });
+    return { promise, resolve };
   };
 
   it('refreshes the dashboard stats on each poll tick while a run is running', async () => {
@@ -306,6 +314,63 @@ describe('useDetonationRuns polling', () => {
     await tick();
 
     await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+  });
+
+  it('fetches the stats only after the runs response that finishes a row has resolved', async () => {
+    const second = deferred<unknown>();
+    jest
+      .mocked(detonateApi.searchRuns)
+      .mockResolvedValueOnce({ hits: [row('running')], total: 1 } as never)
+      .mockReturnValueOnce(second.promise as never);
+    await mountWithStats();
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+
+    await tick();
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2);
+    // The runs request is still in flight, so the write it makes has not happened yet.
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      second.resolve({ hits: [row('complete')], total: 1 });
+    });
+
+    await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+    const [runsOrder] = jest.mocked(detonateApi.searchRuns).mock.invocationCallOrder.slice(-1);
+    const [statsOrder] = jest.mocked(detonateApi.getRunStats).mock.invocationCallOrder.slice(-1);
+    expect(statsOrder).toBeGreaterThan(runsOrder);
+  });
+
+  it('refreshes the stats once when the last running row finishes and polling stops', async () => {
+    jest
+      .mocked(detonateApi.searchRuns)
+      .mockResolvedValueOnce({ hits: [row('running')], total: 1 } as never)
+      .mockResolvedValue({ hits: [row('complete')], total: 1 } as never);
+    const { result } = await mountWithStats();
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(1);
+
+    // A load that is not a poll tick (a manual refetch) sees the row finish.
+    await act(async () => {
+      await result.current.runs.refetch();
+    });
+
+    await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+    await tick();
+    await act(async () => {});
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not restart a stats search that is still running when the next tick fires', async () => {
+    respondWith([row('running')]);
+    await mountWithStats();
+    jest.mocked(detonateApi.getRunStats).mockReturnValue(new Promise(() => {}) as never);
+
+    await tick();
+    await waitFor(() => expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2));
+    await tick();
+    await act(async () => {});
+
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(3);
+    expect(detonateApi.getRunStats).toHaveBeenCalledTimes(2);
   });
 
   it('does not refresh the dashboard stats when no run is running', async () => {

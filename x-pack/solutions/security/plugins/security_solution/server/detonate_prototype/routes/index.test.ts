@@ -1611,6 +1611,21 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(esClient.search).not.toHaveBeenCalled();
     });
 
+    it('answers 400 for KQL that parses but does not compile against the run fields', async () => {
+      // Nested syntax on a flat field: fromKueryExpression accepts it, toElasticsearchQuery throws.
+      await search({ kql: 'detonate.step:{ number: 1 }' });
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining(
+            'Invalid KQL: detonate.step.number is not a nested field'
+          ),
+        },
+      });
+      expect(mockResponse.customError).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
     it('compiles a field clause against the run fields, not a query_string', async () => {
       await search({ kql: 'detonate.state: running and detonate.alerts.total > 2' });
 

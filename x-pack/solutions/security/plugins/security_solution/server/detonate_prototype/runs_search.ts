@@ -67,7 +67,12 @@ const kqlToQuery = (kql: string): estypes.QueryDslQueryContainer => {
   if (hasFieldlessClause(node)) {
     throw new InvalidRunsQueryError('Invalid KQL: every clause needs a field, as in field:value');
   }
-  return toElasticsearchQuery(node, RUNS_DATA_VIEW);
+  try {
+    return toElasticsearchQuery(node, RUNS_DATA_VIEW);
+  } catch (error) {
+    // Parses but does not compile against the typed fields (e.g. nested syntax on a flat field): the caller's input, not a fault.
+    throw new InvalidRunsQueryError(`Invalid KQL: ${error instanceof Error ? error.message : ''}`);
+  }
 };
 
 /**

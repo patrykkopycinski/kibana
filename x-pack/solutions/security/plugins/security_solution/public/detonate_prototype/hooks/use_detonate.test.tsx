@@ -361,10 +361,13 @@ describe('useDetonationRuns polling', () => {
 
   it('does not refetch the stats when a filter change loads rows with none running', async () => {
     jest.mocked(detonateApi.getRunStats).mockResolvedValue({} as never);
-    jest.mocked(detonateApi.searchRuns).mockImplementation(async (_http, query) => ({
+    jest.mocked(detonateApi.searchRuns).mockImplementation((async (
+      _http: unknown,
+      query: { kql?: string }
+    ) => ({
       hits: query.kql ? [row('complete')] : [row('running')],
       total: 1,
-    }));
+    })) as never);
     const { wrapper } = setup();
     const hook = renderHook(
       ({ kql }: { kql?: string }) => ({

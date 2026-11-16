@@ -15,11 +15,14 @@
  * moment — or poll forever on a run that failed.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
 import {
+  DETONATE_MAX_EXEC_WAIT_SECS,
+  DETONATION_RUNS_DEFAULT_PAGE_SIZE,
+  DETONATION_RUNS_MAX_RESULT_WINDOW,
   isDetonationComplete,
   isDetonationFailed,
   quoteQueryValue,
@@ -158,10 +161,18 @@ export const useDetonationTasks = (query: DetonateListQuery) => {
 };
 
 /**
+ * The longest a run can still be live: the execution wait cap plus a margin for boot, upload and
+ * teardown. A row stuck on "running" past this (a run the service lost) must not poll forever.
+ */
+const DETONATION_RUN_MAX_AGE_MS = (DETONATE_MAX_EXEC_WAIT_SECS + 300) * 1000;
+
+/**
  * A run on a VM; the table keeps polling while it sees one. Deliberate difference from the epic
  * ("queued or running"): `DetonationRunStatus` has no queued state yet, so only running counts.
  */
-const isRunInFlight = (run: DetonationRecord): boolean => run['detonate.state'] === 'running';
+const isRunInFlight = (run: DetonationRecord): boolean =>
+  run['detonate.state'] === 'running' &&
+  Date.now() - Date.parse(run['@timestamp']) < DETONATION_RUN_MAX_AGE_MS;
 
 /**
  * Runs for the Detonations table, loaded a page at a time as the table asks for more. Polls only
@@ -171,18 +182,34 @@ const isRunInFlight = (run: DetonationRecord): boolean => run['detonate.state'] 
 export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
   const { http } = useKibana().services;
 
-  return useInfiniteQuery<DetonationRunsResponse, Error>({
+  const result = useInfiniteQuery<DetonationRunsResponse, Error>({
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'runs', query],
     queryFn: ({ signal, pageParam = 0 }: { signal?: AbortSignal; pageParam?: number }) =>
       detonateApi.searchRuns(http, { ...query, from: pageParam }, signal),
     getNextPageParam: (lastPage, pages) => {
       const loaded = pages.reduce((count, page) => count + page.hits.length, 0);
+      // Elasticsearch refuses `from + size` past the result window; the route rejects it too.
+      const size = query.size ?? DETONATION_RUNS_DEFAULT_PAGE_SIZE;
+      if (loaded + size > DETONATION_RUNS_MAX_RESULT_WINDOW) return undefined;
       return lastPage.hits.length > 0 && loaded < lastPage.total ? loaded : undefined;
     },
     keepPreviousData: true,
-    refetchInterval: (data) =>
-      data?.pages.some((page) => page.hits.some(isRunInFlight)) ? POLL_INTERVAL_MS : false,
   });
+
+  const { data, refetch } = result;
+  const shouldPoll = Boolean(data?.pages.some((page) => page.hits.some(isRunInFlight)));
+  useEffect(() => {
+    if (!shouldPoll) return;
+    // A poll re-reads only the first page: that is where the newest, still-running rows are, and
+    // refetching every loaded page would multiply the load by the pages scrolled. `refetchPage`
+    // is accepted by `refetch`, not by the query options, hence the manual interval.
+    const timer = setInterval(() => {
+      refetch({ refetchPage: (_page, index) => index === 0 });
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [shouldPoll, refetch]);
+
+  return result;
 };
 
 /**

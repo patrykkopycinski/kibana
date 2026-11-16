@@ -1284,6 +1284,8 @@ export const DETONATION_RUNS_MAX_KQL_LENGTH = 1024;
 export const DETONATION_RUNS_MAX_SEARCH_LENGTH = 128;
 export const DETONATION_RUNS_MAX_PAGE_SIZE = 100;
 export const DETONATION_RUNS_DEFAULT_PAGE_SIZE = 50;
+/** Elasticsearch's default `index.max_result_window`: `from + size` may not pass it. */
+export const DETONATION_RUNS_MAX_RESULT_WINDOW = 10_000;
 
 /** What the Detonations table asks of the runs route. */
 export interface DetonationRunsQuery {

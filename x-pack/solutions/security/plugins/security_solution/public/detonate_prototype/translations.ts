@@ -105,6 +105,11 @@ export const RUNS_EMPTY = i18n.translate('xpack.securitySolution.detonatePrototy
   defaultMessage: 'No detonations yet. Submit a sample to start one.',
 });
 
+export const RUNS_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.errorTitle',
+  { defaultMessage: 'Could not load detonations' }
+);
+
 export const RUNS_DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.dataViewError',
   { defaultMessage: 'Could not set up the Detonations table' }

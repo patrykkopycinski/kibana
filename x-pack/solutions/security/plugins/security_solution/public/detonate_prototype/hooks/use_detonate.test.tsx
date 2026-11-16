@@ -11,7 +11,7 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useInfiniteQuery } from '@kbn/react-query';
 
 import { detonateApi } from '../api/client';
@@ -99,26 +99,111 @@ describe('submit mutations', () => {
 });
 
 describe('useDetonationRuns polling', () => {
-  const pagesOf = (...states: string[]) => ({
-    pages: [{ hits: states.map((state) => ({ 'detonate.state': state })), total: states.length }],
+  const POLL_MS = 5000;
+  const row = (state: string, at = Date.now()) => ({
+    'detonate.state': state,
+    '@timestamp': new Date(at).toISOString(),
   });
+  const respondWith = (hits: unknown[], total = hits.length) =>
+    jest.mocked(detonateApi.searchRuns).mockResolvedValue({ hits, total } as never);
 
-  const refetchIntervalOption = () => {
+  const mount = async (size = 50) => {
     const { wrapper } = setup();
-    renderHook(() => useDetonationRuns({ size: 50 }), { wrapper });
-    const { calls } = jest.mocked(useInfiniteQuery).mock;
-    return (
-      calls[calls.length - 1][0] as unknown as { refetchInterval: (data: unknown) => unknown }
-    ).refetchInterval;
+    const hook = renderHook(() => useDetonationRuns({ size }), { wrapper });
+    await waitFor(() => expect(hook.result.current.isSuccess).toBe(true));
+    return hook;
+  };
+  const tick = async () => {
+    await act(async () => {
+      jest.advanceTimersByTime(POLL_MS + 100);
+    });
   };
 
-  it('polls while a loaded row is running', () => {
-    expect(refetchIntervalOption()(pagesOf('complete', 'running'))).toEqual(expect.any(Number));
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it('polls while a loaded row is running', async () => {
+    respondWith([row('complete'), row('running')]);
+    await mount();
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
+
+    await tick();
+
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2);
   });
 
-  it('stops polling once no loaded row is running, or nothing has loaded', () => {
-    const refetchInterval = refetchIntervalOption();
-    expect(refetchInterval(pagesOf('complete', 'failed'))).toBe(false);
-    expect(refetchInterval(undefined)).toBe(false);
+  it('does not poll once no loaded row is running', async () => {
+    respondWith([row('complete'), row('failed')]);
+    await mount();
+
+    await tick();
+
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops polling for a row that has said running for longer than any run can last', async () => {
+    respondWith([row('running', Date.now() - 3 * 60 * 60 * 1000)]);
+    await mount();
+
+    await tick();
+
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches only the first page on a poll', async () => {
+    respondWith([row('running')], 100);
+    const { result } = await mount(1);
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+    expect(detonateApi.searchRuns).toHaveBeenCalledTimes(2);
+
+    await tick();
+
+    const { calls } = jest.mocked(detonateApi.searchRuns).mock;
+    expect(calls).toHaveLength(3);
+    expect(calls[2][1]).toEqual(expect.objectContaining({ from: 0 }));
+  });
+
+  describe('getNextPageParam', () => {
+    const lastOptions = (size: number) => {
+      const { wrapper } = setup();
+      renderHook(() => useDetonationRuns({ size }), { wrapper });
+      const { calls } = jest.mocked(useInfiniteQuery).mock;
+      return calls[calls.length - 1][0] as unknown as {
+        getNextPageParam: (
+          lastPage: { hits: unknown[]; total: number },
+          pages: Array<{ hits: unknown[]; total: number }>
+        ) => number | undefined;
+      };
+    };
+    const page = (count: number, total: number) => ({
+      hits: Array.from({ length: count }, () => ({})),
+      total,
+    });
+
+    it('asks for the next offset while rows remain', () => {
+      const { getNextPageParam } = lastOptions(50);
+      const first = page(50, 500);
+
+      expect(getNextPageParam(first, [first])).toBe(50);
+    });
+
+    it('stops when the next page would pass the 10,000 result window', () => {
+      const { getNextPageParam } = lastOptions(50);
+      const pages = [page(9960, 20000)];
+
+      expect(getNextPageParam(pages[0], pages)).toBeUndefined();
+    });
+
+    it('still asks for the last page that fits the window', () => {
+      const { getNextPageParam } = lastOptions(50);
+      const pages = [page(9950, 20000)];
+
+      expect(getNextPageParam(pages[0], pages)).toBe(9950);
+    });
   });
 });

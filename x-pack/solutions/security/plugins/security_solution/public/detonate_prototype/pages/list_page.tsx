@@ -154,6 +154,9 @@ const FIELD_SPEC_TYPE: Readonly<
   boolean: { type: 'boolean', esTypes: ['boolean'] },
 };
 
+const isSortField = (field: string): field is DetonationRunsSortField =>
+  (DETONATION_RUNS_SORT_FIELDS as readonly string[]).includes(field);
+
 /**
  * An unpersisted data view over the results index, built from the run field list. It stays ad hoc
  * until the A4 split settles the results index naming (Q-I, `logs-*`), when a real data view can
@@ -167,14 +170,13 @@ const buildRunFields = (): Record<string, FieldSpec> =>
         name,
         ...FIELD_SPEC_TYPE[fieldType],
         searchable: true,
-        aggregatable: true,
+        // Deviation from the epic: UnifiedDataTable offers a header sort only on aggregatable fields, and
+        // the route sorts on the allowlist alone, so every other column is marked non-aggregatable.
+        aggregatable: isSortField(name),
         readFromDocValues: true,
       },
     ])
   );
-
-const isSortField = (field: string): field is DetonationRunsSortField =>
-  (DETONATION_RUNS_SORT_FIELDS as readonly string[]).includes(field);
 
 const sourceOf = (rows: DataTableRecord[], rowIndex: number): DetonationRecord | undefined =>
   rows[rowIndex]?.raw._source as DetonationRecord | undefined;
@@ -229,13 +231,17 @@ const RunsTable = ({
     [hits, dataView]
   );
 
-  // Rows that are not cached in the results index yet cannot be opened; the id is the run id.
+  // `record.id` is Discover's `index::id::routing` doc id, so the run id is read from the raw `_id`.
+  // Deviation from the epic: the flyout's pager covers the loaded rows only; the table's load-more extends it.
   const openRow = useCallback(
     (record?: DataTableRecord) => {
-      if (!record) return;
+      const taskId = record?.raw._id;
+      if (!taskId) return;
       openDetonationFlyout({
-        taskId: record.id,
-        pagination: { taskIds: rows.map(({ id }) => id) },
+        taskId,
+        pagination: {
+          taskIds: rows.flatMap(({ raw }) => (raw._id ? [raw._id] : [])),
+        },
       });
     },
     [openDetonationFlyout, rows]
@@ -406,6 +412,7 @@ const RunsTable = ({
         dataView={dataView}
         loadingState={loadingState}
         onResize={onResize}
+        // UnifiedDataTable has no `onAddColumn`/`onRemoveColumn` here: `onSetColumns` carries every change.
         onSetColumns={onSetColumns}
         onSort={onSort}
         // The route sorts; sorting the loaded pages again would disagree with it.
@@ -471,12 +478,13 @@ export const DetonateListPage = React.memo(() => {
     }),
     [kql, search, sort, pageSize]
   );
-  const { data, isLoading, isFetching, isFetchingNextPage, fetchNextPage } =
+  const { data, isLoading, isError, error, isFetching, isFetchingNextPage, fetchNextPage } =
     useDetonationRuns(runsQuery);
 
   const hits = useMemo(() => data?.pages.flatMap((page) => page.hits) ?? [], [data]);
   const totalHits = data?.pages[0]?.total ?? 0;
 
+  // Deviation from the epic: the toast, the prior-run link and the deep link open one run, without the pager.
   const goToTask = useCallback(
     (taskId: string) => openDetonationFlyout({ taskId }),
     [openDetonationFlyout]
@@ -498,7 +506,9 @@ export const DetonateListPage = React.memo(() => {
       .then((created) => {
         if (!cancelled) setDataView(created);
       })
-      .catch((error: Error) => toasts.addError(error, { title: i18n.RUNS_DATA_VIEW_ERROR }));
+      .catch((createError: Error) =>
+        toasts.addError(createError, { title: i18n.RUNS_DATA_VIEW_ERROR })
+      );
     return () => {
       cancelled = true;
     };
@@ -649,7 +659,14 @@ export const DetonateListPage = React.memo(() => {
 
         <div data-test-subj={RUNS_TABLE_TEST_ID}>
           <EuiProgress size="xs" color="accent" css={{ opacity: isFetching ? 1 : 0 }} />
-          {!isLoading && totalHits === 0 ? (
+          {isError && !data ? (
+            <KbnWarningCallout
+              announceOnMount
+              title={i18n.RUNS_ERROR_TITLE}
+              text={serviceErrorMessage(error)}
+              data-test-subj={`${RUNS_TABLE_TEST_ID}-error`}
+            />
+          ) : !isLoading && totalHits === 0 ? (
             <EuiEmptyPrompt body={<p>{i18n.RUNS_EMPTY}</p>} titleSize="xs" />
           ) : dataView ? (
             <RunsTable

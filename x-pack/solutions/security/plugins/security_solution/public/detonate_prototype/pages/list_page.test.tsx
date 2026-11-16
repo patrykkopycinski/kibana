@@ -47,8 +47,9 @@ jest.mock('@kbn/cell-actions', () => ({
 }));
 jest.mock('@kbn/discover-utils', () => ({
   ...jest.requireActual('@kbn/discover-utils'),
+  // Discover's real doc id is `index::id::routing`, not the bare `_id`; the table must not rely on it.
   buildDataTableRecord: (raw: unknown) => ({
-    id: (raw as { _id: string })._id,
+    id: `${(raw as { _index: string })._index}::${(raw as { _id: string })._id}::`,
     raw,
     flattened: {},
   }),
@@ -237,6 +238,28 @@ describe('DetonateListPage', () => {
         taskId: 'run-2',
         pagination: { taskIds: ['run-1', 'run-2'] },
       });
+    });
+
+    it('shows the service error, not the empty prompt, when the runs cannot be loaded', () => {
+      mockRuns([], {
+        data: undefined,
+        isError: true,
+        error: new Error('runs search exploded'),
+      });
+      renderPage();
+
+      expect(screen.getByTestId(`${RUNS_TABLE_TEST_ID}-error`)).toHaveTextContent(
+        'runs search exploded'
+      );
+      expect(screen.getByTestId(RUNS_TABLE_TEST_ID)).not.toHaveTextContent(/no detonations yet/i);
+    });
+
+    it('keeps the loaded table when a later poll fails', async () => {
+      mockRuns([makeRun()], { isError: true, error: new Error('poll failed') });
+      renderPage();
+
+      expect(await screen.findByTestId('mockTable')).toBeInTheDocument();
+      expect(screen.queryByTestId(`${RUNS_TABLE_TEST_ID}-error`)).not.toBeInTheDocument();
     });
 
     it('opens the flyout for the row the grid expands', async () => {

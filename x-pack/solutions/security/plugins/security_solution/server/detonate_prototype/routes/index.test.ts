@@ -1481,7 +1481,12 @@ describe('registerDetonatePrototypeRoutes', () => {
       expect(() => schemaOf.validate({ size: 101 })).toThrow();
       expect(() => schemaOf.validate({ size: 0 })).toThrow();
       expect(() => schemaOf.validate({ from: -1 })).toThrow();
-      expect(() => schemaOf.validate({ from: 10000 })).toThrow();
+      expect(() => schemaOf.validate({ from: 10001 })).toThrow();
+      // The default page of 50 from 9951 would pass the window.
+      expect(() => schemaOf.validate({ from: 9951 })).toThrow();
+      expect(() => schemaOf.validate({ from: 9950, size: 100 })).toThrow();
+      expect(schemaOf.validate({ from: 9900, size: 100 })).toEqual({ from: 9900, size: 100 });
+      expect(schemaOf.validate({ from: 9950 })).toEqual({ from: 9950 });
       expect(() => schemaOf.validate({ sort_direction: 'sideways' })).toThrow();
       expect(() => schemaOf.validate({ sort_field: 'tags' })).toThrow();
       expect(() => schemaOf.validate({ sort_field: 'detonate.doc_kind' })).toThrow();
@@ -1545,6 +1550,88 @@ describe('registerDetonatePrototypeRoutes', () => {
       await search();
 
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hits: [], total: 0 } });
+    });
+
+    it('answers 400 for a clause without a field, which would match every field', async () => {
+      await search({ kql: 'foo' });
+      await search({ kql: '*:foo' });
+      await search({ kql: 'detonate.state: running and bar' });
+
+      expect(mockResponse.badRequest).toHaveBeenCalledTimes(3);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('compiles a field clause against the run fields, not a query_string', async () => {
+      await search({ kql: 'detonate.state: running and detonate.alerts.total > 2' });
+
+      const { filter } = searchArgs().query.bool;
+      expect(JSON.stringify(filter[1])).not.toContain('query_string');
+      expect(JSON.stringify(filter[1])).toContain(
+        '{"term":{"detonate.state":{"value":"running"}}}'
+      );
+    });
+
+    describe('running runs', () => {
+      const runningTask = {
+        ...NO_ALERT_GROUPS,
+        id: 'a',
+        created_at: '2026-12-15T09:59:00.000Z',
+        tags: ['space:team-a'],
+      };
+      const returnHits = (...states: string[]) =>
+        esClient.search.mockResolvedValue({
+          hits: {
+            total: { value: states.length, relation: 'eq' },
+            hits: states.map((state, index) => ({
+              _source: { 'detonate.task_id': ['a', 'b'][index], 'detonate.state': state },
+            })),
+          },
+        });
+      const returnedHits = () =>
+        (mockResponse.ok.mock.calls[0][0] as { body: { hits: Array<Record<string, unknown>> } })
+          .body.hits;
+
+      it('re-reads a running hit, returns it fresh and writes it through', async () => {
+        returnHits('running');
+        client.getTask.mockResolvedValue(runningTask as never);
+
+        await search();
+
+        expect(client.getTask).toHaveBeenCalledWith('a');
+        expect(returnedHits()[0]).toEqual(
+          expect.objectContaining({ 'detonate.task_id': 'a', 'detonate.state': 'complete' })
+        );
+        expect(esClient.update).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the stored hit and still answers when the service fails', async () => {
+        returnHits('running');
+        client.getTask.mockRejectedValue(new Error('service down'));
+
+        await search();
+
+        expect(returnedHits()).toEqual([{ 'detonate.task_id': 'a', 'detonate.state': 'running' }]);
+        expect(mockResponse.customError).not.toHaveBeenCalled();
+      });
+
+      it('keeps the stored hit of a run that has left this space', async () => {
+        returnHits('running');
+        client.getTask.mockResolvedValue({ ...runningTask, tags: ['space:team-b'] } as never);
+
+        await search();
+
+        expect(returnedHits()[0]).toEqual({ 'detonate.task_id': 'a', 'detonate.state': 'running' });
+        expect(esClient.update).not.toHaveBeenCalled();
+      });
+
+      it('does not re-read a run that is not running', async () => {
+        returnHits('complete', 'failed');
+
+        await search();
+
+        expect(client.getTask).not.toHaveBeenCalled();
+        expect(returnedHits()).toHaveLength(2);
+      });
     });
 
     it('answers 400 for KQL that does not parse and never queries', async () => {

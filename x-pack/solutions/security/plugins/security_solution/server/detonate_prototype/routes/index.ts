@@ -37,7 +37,9 @@ import {
 import {
   alertRunTag,
   DETONATION_RUNS_MAX_KQL_LENGTH,
+  DETONATION_RUNS_DEFAULT_PAGE_SIZE,
   DETONATION_RUNS_MAX_PAGE_SIZE,
+  DETONATION_RUNS_MAX_RESULT_WINDOW,
   DETONATION_RUNS_MAX_SEARCH_LENGTH,
   DETONATE_HANDOFF_MARKERS,
   DETONATE_HANDOFFS_PATH,
@@ -395,6 +397,33 @@ export const registerDetonatePrototypeRoutes = ({
       body: { message: 'The detonation request could not be completed.' },
     });
   };
+
+  /**
+   * The results store only changes when something reads the run, so a run that ended since its last
+   * read still says "running" there. For the running hits on the returned page (at most one page),
+   * read the service and write the answer through, then return it in place of the stored hit. A
+   * failed read keeps the stored hit: the table must load even when the service is down.
+   */
+  const refreshRunningHits = async (
+    request: KibanaRequest,
+    hits: DetonationRecord[],
+    spaceId: string
+  ): Promise<DetonationRecord[]> =>
+    Promise.all(
+      hits.map(async (hit) => {
+        if (hit['detonate.state'] !== 'running') return hit;
+        const taskId = hit['detonate.task_id'];
+        try {
+          const task = await getTaskInSpace(getClient(request), taskId, spaceId);
+          const fresh = toDetonationRecord(task, { spaceId });
+          await recordRun(spaceId, () => fresh);
+          return fresh;
+        } catch (error) {
+          logger.warn(`Detonation ${taskId}: could not refresh a running run: ${error}`);
+          return hit;
+        }
+      })
+    );
 
   /** Runs are tagged with the space they were submitted from, and read back only from it. */
   const spaceIdFromRequest = (request: KibanaRequest): string =>
@@ -1528,41 +1557,55 @@ export const registerDetonatePrototypeRoutes = ({
         version: '1',
         validate: {
           request: {
-            query: schema.object({
-              kql: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_KQL_LENGTH })),
-              search: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_SEARCH_LENGTH })),
-              // The allowlist keeps a caller from sorting on an unmapped or multi-valued field; it mirrors
-              // DETONATION_RUNS_SORT_FIELDS, which the route test pins.
-              sort_field: schema.maybe(
-                schema.oneOf([
-                  schema.literal('@timestamp'),
-                  schema.literal('file.name'),
-                  schema.literal('file.hash.sha256'),
-                  schema.literal('detonate.verdict'),
-                  schema.literal('detonate.state'),
-                  schema.literal('detonate.alerts.total'),
-                  schema.literal('detonate.vm.os_family'),
-                  schema.literal('detonate.source'),
-                ])
-              ),
-              sort_direction: schema.maybe(
-                schema.oneOf([schema.literal('asc'), schema.literal('desc')])
-              ),
-              // `from + size` stays under the default 10k result window.
-              from: schema.maybe(schema.number({ min: 0, max: 9900 })),
-              size: schema.maybe(schema.number({ min: 1, max: DETONATION_RUNS_MAX_PAGE_SIZE })),
-            }),
+            query: schema.object(
+              {
+                kql: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_KQL_LENGTH })),
+                search: schema.maybe(
+                  schema.string({ maxLength: DETONATION_RUNS_MAX_SEARCH_LENGTH })
+                ),
+                // The allowlist keeps a caller from sorting on an unmapped or multi-valued field; it mirrors
+                // DETONATION_RUNS_SORT_FIELDS, which the route test pins.
+                sort_field: schema.maybe(
+                  schema.oneOf([
+                    schema.literal('@timestamp'),
+                    schema.literal('file.name'),
+                    schema.literal('file.hash.sha256'),
+                    schema.literal('detonate.verdict'),
+                    schema.literal('detonate.state'),
+                    schema.literal('detonate.alerts.total'),
+                    schema.literal('detonate.vm.os_family'),
+                    schema.literal('detonate.source'),
+                  ])
+                ),
+                sort_direction: schema.maybe(
+                  schema.oneOf([schema.literal('asc'), schema.literal('desc')])
+                ),
+                from: schema.maybe(
+                  schema.number({ min: 0, max: DETONATION_RUNS_MAX_RESULT_WINDOW })
+                ),
+                size: schema.maybe(schema.number({ min: 1, max: DETONATION_RUNS_MAX_PAGE_SIZE })),
+              },
+              {
+                // `from + size` stays inside the default 10k result window, whatever the page size.
+                validate: ({ from = 0, size = DETONATION_RUNS_DEFAULT_PAGE_SIZE }) =>
+                  from + size > DETONATION_RUNS_MAX_RESULT_WINDOW
+                    ? `[from]: from + size must not exceed ${DETONATION_RUNS_MAX_RESULT_WINDOW}`
+                    : undefined,
+              }
+            ),
           },
         },
       },
       async (_context, request, response): Promise<IKibanaResponse> => {
         try {
+          const spaceId = spaceIdFromRequest(request);
+          const stored = await searchRuns({
+            esClient: await getInternalEsClient(),
+            spaceId,
+            query: request.query,
+          });
           return response.ok<DetonationRunsResponse>({
-            body: await searchRuns({
-              esClient: await getInternalEsClient(),
-              spaceId: spaceIdFromRequest(request),
-              query: request.query,
-            }),
+            body: { ...stored, hits: await refreshRunningHits(request, stored.hits, spaceId) },
           });
         } catch (error) {
           if (error instanceof InvalidRunsQueryError) {

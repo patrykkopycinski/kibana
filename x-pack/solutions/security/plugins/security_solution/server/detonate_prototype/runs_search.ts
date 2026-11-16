@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataViewBase, KueryNode } from '@kbn/es-query';
 import {
   DETONATION_RUN_FIELDS,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
@@ -28,12 +29,44 @@ const escapeWildcard = (text: string): string => text.replace(/[\\*?]/g, (char) 
 /** Thrown for a KQL string that does not parse; the route answers it with a 400. */
 export class InvalidRunsQueryError extends Error {}
 
+/**
+ * The run fields as a data view, so KQL compiles against known types (a keyword field becomes a
+ * `term`/`match` clause, not a `query_string` over a guessed field).
+ */
+const RUNS_DATA_VIEW: DataViewBase = {
+  title: 'detonate-runs',
+  fields: Object.entries(DETONATION_RUN_FIELDS).map(([name, esType]) => ({
+    name,
+    type: esType === 'keyword' ? 'string' : esType === 'long' ? 'number' : esType,
+    esTypes: [esType],
+  })),
+};
+
+/**
+ * A clause with no field (`foo`, `*:foo`) compiles to a `multi_match` or `query_string` over every
+ * field, which the allowlist of run fields exists to prevent.
+ */
+const hasFieldlessClause = (node: KueryNode): boolean => {
+  if (node.type !== 'function') return false;
+  const args: KueryNode[] = node.arguments ?? [];
+  if (node.function === 'is') {
+    const [field] = args;
+    return field?.type === 'wildcard' || (field?.type === 'literal' && field.value === null);
+  }
+  return args.some(hasFieldlessClause);
+};
+
 const kqlToQuery = (kql: string): estypes.QueryDslQueryContainer => {
+  let node: KueryNode;
   try {
-    return toElasticsearchQuery(fromKueryExpression(kql));
+    node = fromKueryExpression(kql);
   } catch (error) {
     throw new InvalidRunsQueryError(`Invalid KQL: ${error instanceof Error ? error.message : ''}`);
   }
+  if (hasFieldlessClause(node)) {
+    throw new InvalidRunsQueryError('Invalid KQL: every clause needs a field, as in field:value');
+  }
+  return toElasticsearchQuery(node, RUNS_DATA_VIEW);
 };
 
 /**

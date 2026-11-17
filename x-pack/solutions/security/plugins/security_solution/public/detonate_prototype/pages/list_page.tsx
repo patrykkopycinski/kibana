@@ -59,6 +59,24 @@ import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useIsFetching, useQueryClient } from '@kbn/react-query';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
+import type {
+  DynamicGroupingProps,
+  GroupOption,
+  GroupSettings,
+  GroupStatsItem,
+} from '@kbn/grouping';
+import type {
+  GetGroupStats,
+  GroupChildComponentRenderer,
+  GroupMap,
+  GroupPanelRenderer,
+  GroupsById,
+  GroupingBucket,
+  RawBucket,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 
 import {
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
@@ -66,6 +84,12 @@ import {
   DETONATION_RUNS_SORT_FIELDS,
   DETONATION_RUN_FIELDS,
   detonateResultsIndexName,
+  DETONATION_GROUPS_DEFAULT_PAGE_SIZE,
+  DETONATION_GROUPS_MAX_LEVELS,
+  DETONATION_RUNS_DEFAULT_GROUP_FIELD,
+  DETONATION_RUNS_GROUP_FIELDS,
+  DETONATION_RUNS_MULTI_VALUE_GROUP_FIELDS,
+  quoteQueryValue,
 } from '../../../common/detonate_prototype';
 import type {
   DetonationRecord,
@@ -74,16 +98,26 @@ import type {
   DetonationRunStatsQuery,
   DetonationRunsSortField,
   DetonateTask,
+  DetonateVerdictName,
+  DetonationRunGroup,
+  DetonationRunGroupsQuery,
+  DetonationRunGroupsResponse,
+  DetonationRunsGroupField,
+  DetonationRunsGroupParent,
 } from '../../../common/detonate_prototype';
 import {
+  DETONATE_QUERY_KEY,
   useDetonateHealthcheck,
+  useDetonationRunGroups,
   useDetonationRuns,
   useDetonationRunStats,
+  useDetonationTask,
 } from '../hooks/use_detonate';
 import { isRejectedFilter } from '../hooks/is_client_error';
 import { DetonationsDashboard } from '../components/detonations_dashboard';
 import { DetonationStateBadge } from '../components/detonation_state_badge';
 import { DetonateVerdictNameBadge } from '../components/verdict_badge';
+import { DetectionAlertGroups, EndpointAlertGroups } from '../components/alert_groups';
 import { SubmitModal } from '../components/submit_modal';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
@@ -479,6 +513,475 @@ const RunsTable = ({
   );
 };
 
+export const GROUPING_ID = 'securitySolution.detonatePrototype.runsGrouping';
+
+const GROUP_OPTIONS: GroupOption[] = [
+  { key: 'detonate.task_id', label: i18n.GROUP_BY_DETONATION },
+  { key: 'detonate.verdict', label: i18n.GROUP_BY_VERDICT },
+  { key: 'file.hash.sha256', label: i18n.GROUP_BY_SAMPLE_HASH },
+  { key: 'detonate.source', label: i18n.GROUP_BY_SOURCE },
+  { key: 'host.name', label: i18n.GROUP_BY_HOST },
+  { key: 'user.name', label: i18n.GROUP_BY_USER },
+  // Epic #20877 wants the rules taken from the sandbox SIEM alerts store; the run's own
+  // `detonate.detection_rule_names` stands in until Q-B/Q2 are answered.
+  { key: 'detonate.detection_rule_names', label: i18n.GROUP_BY_RULE },
+];
+
+// The route accepts only the seven fields above, so a custom field would only ever be rejected.
+const GROUPING_SETTINGS: GroupSettings = { hideCustomFieldOption: true };
+
+const NO_PARENTS: DetonationRunsGroupParent[] = [];
+
+const DETONATION_TASK_ID_FIELD: DetonationRunsGroupField = 'detonate.task_id';
+const DETONATION_VERDICT_FIELD: DetonationRunsGroupField = 'detonate.verdict';
+const SHORT_HASH_LENGTH = 8;
+const VERDICT_ORDER: readonly DetonateVerdictName[] = ['malicious', 'benign', 'inconclusive'];
+
+/**
+ * @kbn/grouping persists every grouping in the `groups` localStorage key, keyed by grouping id, and
+ * merges storage only when the selection changes: the first render uses `initialGroupings` as
+ * given. So the saved selection is read here, once, and the Detonation grouping is the fallback.
+ */
+const readInitialGroupings = (): GroupMap => {
+  const fallback: GroupMap = {
+    groupById: {
+      [GROUPING_ID]: {
+        activeGroups: [DETONATION_RUNS_DEFAULT_GROUP_FIELD],
+        options: GROUP_OPTIONS,
+      },
+    },
+  };
+  try {
+    const saved = (JSON.parse(window.localStorage.getItem('groups') ?? '{}') as GroupsById)[
+      GROUPING_ID
+    ];
+    if (!saved || !Array.isArray(saved.activeGroups) || saved.activeGroups.length === 0) {
+      return fallback;
+    }
+    const known = new Set<string>([...DETONATION_RUNS_GROUP_FIELDS, 'none']);
+    const activeGroups = saved.activeGroups.filter(
+      (field): field is string => typeof field === 'string' && known.has(field)
+    );
+    if (activeGroups.length === 0 || activeGroups.length > DETONATION_GROUPS_MAX_LEVELS) {
+      return fallback;
+    }
+    return { groupById: { [GROUPING_ID]: { activeGroups, options: GROUP_OPTIONS } } };
+  } catch {
+    return fallback;
+  }
+};
+
+/** What the run groups share: the table's filters, without the grouping. */
+interface GroupsBaseQuery {
+  kql?: string;
+  search?: string;
+  start: string;
+  end: string;
+}
+
+/** The group fields apart from the key, which kbn-grouping wants as an array. */
+type RunGroupStats = Omit<DetonationRunGroup, 'key'>;
+type GetGrouping = (props: DynamicGroupingProps<RunGroupStats>) => React.ReactElement;
+
+const parentsKql = (parents: DetonationRunsGroupParent[]): string =>
+  parents
+    .map(({ field, value }) =>
+      value === null ? `not ${field}:*` : `${field}:${quoteQueryValue(value)}`
+    )
+    .join(' and ');
+
+const toParsedGroups = (
+  response: DetonationRunGroupsResponse,
+  selectedGroup: string
+): ParsedGroupingAggregation<RunGroupStats> => ({
+  groupByFields: {
+    buckets: response.groups.map(
+      ({ key, ...group }): GroupingBucket<RunGroupStats> => ({
+        ...group,
+        key: [key ?? ''],
+        // An empty `key_as_string` hides the group panel, so a missing value gets a label.
+        key_as_string: key === null || key === '' ? i18n.NO_VALUE_GROUP : key,
+        doc_count: group.runCount,
+        selectedGroup,
+        isNullGroup: key === null,
+      })
+    ),
+  },
+  groupsCount: { value: response.groupsCount },
+  unitsCount: { value: response.runsCount },
+});
+
+/** Why a group of runs has no verdict: they failed, they are still running, or they never got one. */
+const noVerdictLabel = ({ states }: Pick<RunGroupStats, 'states'>): string =>
+  states.failed > 0
+    ? i18n.STATUS_FAILED
+    : states.running > 0
+    ? i18n.STATUS_RUNNING
+    : i18n.NO_VERDICT;
+
+const isVerdictName = (value: string | null): value is DetonateVerdictName =>
+  VERDICT_ORDER.some((verdict) => verdict === value);
+
+/** The grouping component marks a bucket with no value, but its renderers are typed with the raw bucket. */
+const isNullBucket = (bucket: RawBucket<RunGroupStats>): boolean =>
+  'isNullGroup' in bucket && bucket.isNullGroup === true;
+
+/** The group's value, or null for the bucket of runs that have none. */
+const bucketValue = (bucket: RawBucket<RunGroupStats>): string | null => {
+  if (isNullBucket(bucket)) return null;
+  return Array.isArray(bucket.key) ? bucket.key[0] ?? null : bucket.key;
+};
+
+const useGroupPanelRenderer = (): GroupPanelRenderer<RunGroupStats> => {
+  const { openDetonationFlyout } = useFlyoutApi();
+
+  return useCallback<GroupPanelRenderer<RunGroupStats>>(
+    (selectedGroup, bucket) => {
+      const value = bucketValue(bucket);
+
+      if (selectedGroup === DETONATION_TASK_ID_FIELD && value !== null) {
+        const verdict = VERDICT_ORDER.find((name) => bucket.verdicts[name] > 0);
+        const sample = bucket.fileName ?? (bucket.sha256 ?? value).slice(0, SHORT_HASH_LENGTH);
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              {verdict ? (
+                <DetonateVerdictNameBadge verdict={verdict} />
+              ) : (
+                <EuiBadge color="hollow">{noVerdictLabel(bucket)}</EuiBadge>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                aria-label={i18n.GROUP_OPEN_DETONATION(sample)}
+                onClick={(event: React.MouseEvent) => {
+                  // The header is the accordion's toggle: opening the result must not also open the group.
+                  event.stopPropagation();
+                  openDetonationFlyout({ taskId: value });
+                }}
+                data-test-subj="detonatePrototypeGroupOpenDetonation"
+              >
+                {sample}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+
+      // Epic #20877 §1: verdict groups should follow the epic's verdict set; pending product answer (Q-D).
+      if (selectedGroup === DETONATION_VERDICT_FIELD) {
+        return isVerdictName(value) ? (
+          <DetonateVerdictNameBadge verdict={value} />
+        ) : (
+          <EuiBadge color="hollow">{noVerdictLabel(bucket)}</EuiBadge>
+        );
+      }
+
+      return <EuiText size="s">{value ?? i18n.NO_VALUE_GROUP}</EuiText>;
+    },
+    [openDetonationFlyout]
+  );
+};
+
+const getGroupStats: GetGroupStats<RunGroupStats> = (selectedGroup, bucket) => {
+  if (selectedGroup === DETONATION_TASK_ID_FIELD) {
+    return [{ title: i18n.GROUP_STAT_ALERTS, badge: { value: bucket.alertsTotal } }];
+  }
+  const withVerdict = VERDICT_ORDER.reduce((sum, name) => sum + bucket.verdicts[name], 0);
+  // A missing or `unknown` verdict is no verdict.
+  const withoutVerdict = Math.max(bucket.runCount - withVerdict, 0);
+  const stats: GroupStatsItem[] = [
+    { title: i18n.GROUP_STAT_RUNS, badge: { value: bucket.runCount } },
+    {
+      title: i18n.GROUP_STAT_VERDICTS,
+      component: (
+        <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
+          {VERDICT_ORDER.filter((name) => bucket.verdicts[name] > 0).map((name) => (
+            <EuiFlexItem grow={false} key={name}>
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <DetonateVerdictNameBadge verdict={name} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">{bucket.verdicts[name]}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ))}
+          {withoutVerdict > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{`${i18n.NO_VERDICT} ${withoutVerdict}`}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
+    },
+  ];
+  return stats;
+};
+
+/**
+ * The body of a Detonation group: the run's own alerts, as the result flyout shows them.
+ * Epic #20877 §1: the group should open the standard alerts table over sandbox SIEM alerts; pending product answer (Q-B).
+ */
+const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
+  const { data: task, isLoading } = useDetonationTask(taskId);
+
+  if (isLoading || !task) {
+    return (
+      <EuiSkeletonText
+        lines={3}
+        isLoading
+        contentAriaLabel={i18n.RUNS_TABLE_LOADING}
+        data-test-subj="detonatePrototypeGroupBodyLoading"
+      />
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="detonatePrototypeGroupBody">
+      <EuiFlexItem>
+        <EndpointAlertGroups
+          title={i18n.PRODUCTION_ENDPOINT_ALERTS}
+          total={task.production_endpoint_alerts_count}
+          groups={task.production_endpoint_alert_groups}
+          testSubj="detonatePrototypeProductionEndpointAlerts"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <DetectionAlertGroups
+          title={i18n.PRODUCTION_DETECTION_ALERTS}
+          total={task.production_detection_alerts_count}
+          groups={task.production_detection_alert_groups}
+          testSubj="detonatePrototypeProductionDetectionAlerts"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EndpointAlertGroups
+          title={i18n.DIAGNOSTIC_ENDPOINT_ALERTS}
+          total={task.diagnostic_endpoint_alerts_count}
+          groups={task.diagnostic_endpoint_alert_groups}
+          testSubj="detonatePrototypeDiagnosticEndpointAlerts"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+interface FilteredRunsTableProps {
+  dataView: DataView;
+  baseQuery: GroupsBaseQuery;
+  parents: DetonationRunsGroupParent[];
+  titleId: string;
+}
+
+/** The runs of one group: the runs table narrowed to the group's values, with its own sort and paging. */
+const FilteredRunsTable = ({ dataView, baseQuery, parents, titleId }: FilteredRunsTableProps) => {
+  const [sort, setSort] = useState<SortOrder>(DEFAULT_SORT);
+  const [pageSize, setPageSize] = useState(DETONATION_RUNS_DEFAULT_PAGE_SIZE);
+  const kql = andKql(baseQuery.kql, parentsKql(parents));
+  const query = useMemo<Omit<DetonationRunsQuery, 'from'>>(
+    () => ({
+      ...(kql ? { kql } : {}),
+      ...(baseQuery.search ? { search: baseQuery.search } : {}),
+      start: baseQuery.start,
+      end: baseQuery.end,
+      sort_field: sort[0] as DetonationRunsSortField,
+      sort_direction: sort[1] === 'asc' ? 'asc' : 'desc',
+      size: pageSize,
+    }),
+    [kql, baseQuery.search, baseQuery.start, baseQuery.end, sort, pageSize]
+  );
+  const { data, isLoading, isError, error, isFetchingNextPage, fetchNextPage, refetch } =
+    useDetonationRuns(query);
+  const hits = useMemo(() => data?.pages.flatMap((page) => page.hits) ?? [], [data]);
+  const totalHits = data?.pages[0]?.total ?? 0;
+  const lastPageIsEmpty = data?.pages[data.pages.length - 1]?.hits.length === 0;
+
+  const loadMore = useCallback(() => {
+    if (hits.length + pageSize > DETONATION_RUNS_MAX_RESULT_WINDOW) return;
+    if (lastPageIsEmpty) {
+      refetch({
+        refetchPage: (_page, index, allPages) => index === 0 || index === allPages.length - 1,
+      });
+      return;
+    }
+    fetchNextPage({ pageParam: hits.length });
+  }, [fetchNextPage, hits.length, pageSize, refetch, lastPageIsEmpty]);
+
+  if (isError && !data) {
+    return (
+      <KbnWarningCallout
+        announceOnMount
+        title={i18n.RUNS_ERROR_TITLE}
+        text={serviceErrorMessage(error)}
+        data-test-subj="detonatePrototypeGroupRunsError"
+      />
+    );
+  }
+
+  return (
+    <div data-test-subj="detonatePrototypeGroupRuns">
+      <RunsTable
+        dataView={dataView}
+        hits={hits}
+        totalHits={totalHits}
+        sort={sort}
+        onSortChange={setSort}
+        pageSize={pageSize}
+        onPageSizeChange={setPageSize}
+        loadingState={
+          isLoading
+            ? DataLoadingState.loading
+            : isFetchingNextPage
+            ? DataLoadingState.loadingMore
+            : DataLoadingState.loaded
+        }
+        onFetchMore={loadMore}
+        titleId={titleId}
+      />
+    </div>
+  );
+};
+
+interface GroupLevelProps {
+  /** Zero-based depth; the groups at this level are `selectedGroups[level]`. */
+  level: number;
+  selectedGroups: string[];
+  /** The values chosen at the levels above, outermost first. */
+  parents: DetonationRunsGroupParent[];
+  baseQuery: GroupsBaseQuery;
+  getGrouping: GetGrouping;
+  dataView: DataView;
+  titleId: string;
+}
+
+/**
+ * One level of the nested grouping. Each level asks the route for its own page of groups, narrowed
+ * by the parents above it; the last level shows the group's content instead of another level.
+ * A bad KQL fails every level alike and the page says so once, so this shows nothing for it.
+ */
+const GroupLevel = ({
+  level,
+  selectedGroups,
+  parents,
+  baseQuery,
+  getGrouping,
+  dataView,
+  titleId,
+}: GroupLevelProps) => {
+  const selectedGroup = selectedGroups[level] as DetonationRunsGroupField;
+  const parentsJson = parents.length > 0 ? JSON.stringify(parents) : undefined;
+  // A page index means nothing once the groups under it change, so paging belongs to one key.
+  const pagingKey = JSON.stringify([selectedGroup, parentsJson, baseQuery]);
+  const [paging, setPaging] = useState({
+    key: pagingKey,
+    index: 0,
+    size: DETONATION_GROUPS_DEFAULT_PAGE_SIZE,
+  });
+  const pageIndex = paging.key === pagingKey ? paging.index : 0;
+
+  const query = useMemo<DetonationRunGroupsQuery>(
+    () => ({
+      group_by: selectedGroup,
+      ...(parentsJson ? { parents: parentsJson } : {}),
+      ...(baseQuery.kql ? { kql: baseQuery.kql } : {}),
+      ...(baseQuery.search ? { search: baseQuery.search } : {}),
+      start: baseQuery.start,
+      end: baseQuery.end,
+      page: pageIndex,
+      size: paging.size,
+    }),
+    [selectedGroup, parentsJson, baseQuery, pageIndex, paging.size]
+  );
+  const { data, isError, error, isPreviousData } = useDetonationRunGroups(query);
+
+  const parsed = useMemo(
+    () => (data && !isPreviousData ? toParsedGroups(data, selectedGroup) : undefined),
+    [data, isPreviousData, selectedGroup]
+  );
+
+  const onChangePage = useCallback(
+    (index: number) => setPaging((current) => ({ ...current, key: pagingKey, index })),
+    [pagingKey]
+  );
+  const onChangeItemsPerPage = useCallback(
+    (size: number) => setPaging({ key: pagingKey, index: 0, size }),
+    [pagingKey]
+  );
+
+  const renderChildComponent = useCallback<GroupChildComponentRenderer<RunGroupStats>>(
+    (_filters, group, bucket) => {
+      const value = bucket ? bucketValue(bucket) : null;
+      const childParents = [...parents, { field: selectedGroup, value }];
+      if (level + 1 < selectedGroups.length) {
+        return (
+          <GroupLevel
+            level={level + 1}
+            selectedGroups={selectedGroups}
+            parents={childParents}
+            baseQuery={baseQuery}
+            getGrouping={getGrouping}
+            dataView={dataView}
+            titleId={titleId}
+          />
+        );
+      }
+      if (group === DETONATION_TASK_ID_FIELD && value !== null) {
+        return <DetonationGroupBody taskId={value} />;
+      }
+      return (
+        <FilteredRunsTable
+          dataView={dataView}
+          baseQuery={baseQuery}
+          parents={childParents}
+          titleId={titleId}
+        />
+      );
+    },
+    [parents, selectedGroup, level, selectedGroups, baseQuery, getGrouping, dataView, titleId]
+  );
+
+  if (isError && !data) {
+    return isRejectedFilter(error) ? null : (
+      <KbnWarningCallout
+        announceOnMount
+        title={i18n.GROUPS_ERROR_TITLE}
+        text={serviceErrorMessage(error)}
+        data-test-subj={`detonatePrototypeGroupsError-${level}`}
+      />
+    );
+  }
+
+  // Until the first page arrives the grouping gets a one-group stand-in, so the page does not
+  // jump from nothing to a full list.
+  if (!parsed) {
+    return getGrouping({
+      activePage: 0,
+      data: { groupsCount: { value: 1 }, unitsCount: { value: 1 } },
+      groupingLevel: level,
+      isLoading: true,
+      itemsPerPage: paging.size,
+      renderChildComponent: () => <></>,
+      onGroupClose: () => {},
+      selectedGroup: '',
+    });
+  }
+
+  return getGrouping({
+    activePage: pageIndex,
+    data: parsed,
+    groupingLevel: level,
+    isLoading: false,
+    itemsPerPage: paging.size,
+    onChangeGroupsItemsPerPage: onChangeItemsPerPage,
+    onChangeGroupsPage: onChangePage,
+    renderChildComponent,
+    onGroupClose: () => {},
+    selectedGroup,
+  });
+};
+
 export const DetonateListPage = React.memo(() => {
   const { openDetonationFlyout } = useFlyoutApi();
   const { services } = useKibana();
@@ -496,6 +999,9 @@ export const DetonateListPage = React.memo(() => {
   // into the Security URL state or the global KQL header, so the global picker would not drive it.
   const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
   const [userKql, setUserKql] = useState('');
+  const [initialGroupings] = useState(readInitialGroupings);
+  const queryClient = useQueryClient();
+  const groupPanelRenderer = useGroupPanelRenderer();
 
   /**
    * The alert action arrives here with the hash it extracted. Reading it from
@@ -536,6 +1042,37 @@ export const DetonateListPage = React.memo(() => {
     }),
     [kql, search, timeRange]
   );
+  const componentProps = useMemo(
+    () => ({
+      groupPanelRenderer,
+      getGroupStats,
+      unit: i18n.GROUP_RUNS_UNIT,
+      groupsUnit: i18n.GROUPS_UNIT,
+      multiValueFields: [...DETONATION_RUNS_MULTI_VALUE_GROUP_FIELDS],
+      emptyGroupingComponent: <EuiEmptyPrompt body={<p>{i18n.GROUPS_EMPTY}</p>} titleSize="xs" />,
+    }),
+    [groupPanelRenderer]
+  );
+  const grouping = useGrouping<RunGroupStats>({
+    groupingId: GROUPING_ID,
+    maxGroupingLevels: DETONATION_GROUPS_MAX_LEVELS,
+    initialGroupings,
+    defaultGroupingOptions: GROUP_OPTIONS,
+    fields: [],
+    settings: GROUPING_SETTINGS,
+    componentProps,
+  });
+  const isFlat = isNoneGroup(grouping.selectedGroups);
+  const groupsBaseQuery = useMemo<GroupsBaseQuery>(
+    () => ({
+      ...(kql ? { kql } : {}),
+      ...(search ? { search } : {}),
+      start: timeRange.from,
+      end: timeRange.to,
+    }),
+    [kql, search, timeRange]
+  );
+  const groupsFetching = useIsFetching({ queryKey: [DETONATE_QUERY_KEY, 'tasks', 'groups'] });
   const stats = useDetonationRunStats(statsQuery);
   const { refetch: refetchStats } = stats;
   const {
@@ -547,7 +1084,7 @@ export const DetonateListPage = React.memo(() => {
     isFetchingNextPage,
     fetchNextPage,
     refetch,
-  } = useDetonationRuns(runsQuery);
+  } = useDetonationRuns(runsQuery, { enabled: isFlat });
 
   // A rejected filter (400) fails the table and every panel alike: say so once, above them all.
   const rejectedFilterError = [error, stats.error].find(
@@ -629,12 +1166,13 @@ export const DetonateListPage = React.memo(() => {
         // Submitting an unchanged bar is a refresh.
         refetch();
         refetchStats();
+        queryClient.invalidateQueries([DETONATE_QUERY_KEY, 'tasks', 'groups']);
         return;
       }
       setTimeRange(dateRange);
       setUserKql(typeof query?.query === 'string' ? query.query : '');
     },
-    [refetch, refetchStats]
+    [refetch, refetchStats, queryClient]
   );
   const {
     unifiedSearch: {
@@ -767,7 +1305,7 @@ export const DetonateListPage = React.memo(() => {
         query={{ query: userKql, language: 'kuery' }}
         placeholder={i18n.DASHBOARD_KQL_PLACEHOLDER}
         onQuerySubmit={onQuerySubmit}
-        isLoading={isFetching || stats.isFetching}
+        isLoading={isFetching || stats.isFetching || groupsFetching > 0}
       />
       <EuiSpacer size="m" />
 
@@ -811,6 +1349,7 @@ export const DetonateListPage = React.memo(() => {
               data-test-subj="detonatePrototypeRunsSearch"
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>{grouping.groupSelector}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
@@ -829,7 +1368,32 @@ export const DetonateListPage = React.memo(() => {
 
         <div data-test-subj={RUNS_TABLE_TEST_ID}>
           <EuiProgress size="xs" color="accent" css={{ opacity: isFetching ? 1 : 0 }} />
-          {isError && !data && isRejectedFilter(error) ? null : isError && !data ? (
+          {!isFlat ? (
+            dataView ? (
+              <GroupLevel
+                level={0}
+                selectedGroups={grouping.selectedGroups}
+                parents={NO_PARENTS}
+                baseQuery={groupsBaseQuery}
+                getGrouping={grouping.getGrouping}
+                dataView={dataView}
+                titleId={titleId}
+              />
+            ) : dataViewFailed ? (
+              <KbnWarningCallout
+                announceOnMount
+                title={i18n.RUNS_DATA_VIEW_ERROR}
+                data-test-subj={`${RUNS_TABLE_TEST_ID}-data-view-error`}
+              />
+            ) : (
+              <EuiSkeletonText
+                lines={6}
+                isLoading
+                contentAriaLabel={i18n.RUNS_TABLE_LOADING}
+                data-test-subj={`${RUNS_TABLE_TEST_ID}-loading`}
+              />
+            )
+          ) : isError && !data && isRejectedFilter(error) ? null : isError && !data ? (
             <KbnWarningCallout
               announceOnMount
               title={i18n.RUNS_ERROR_TITLE}

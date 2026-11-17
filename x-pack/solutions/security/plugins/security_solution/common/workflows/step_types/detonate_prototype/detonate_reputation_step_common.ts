@@ -79,7 +79,7 @@ export const detonateReputationStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.detonateReputation.documentation.details',
       {
         defaultMessage:
-          'Prototype step. Answers `known-malicious` when the newest completed run of the sample in this space was malicious, otherwise `unknown` — there is no benign answer, so a workflow must route `unknown` to a detonation rather than reading it as clean. Use it as the switch before `detonate.prototype.detonateSample` so malware this space has already detonated is not detonated again.',
+          'Prototype step. Answers `known-malicious` when this space has a completed malicious run of the sample as its newest completed run, otherwise `unknown` — there is no benign answer, so a workflow must route `unknown` to a detonation rather than reading it as clean. Use it as the switch before `detonate.prototype.detonateSample` so malware this space has already detonated is not detonated again.',
       }
     ),
     examples: [

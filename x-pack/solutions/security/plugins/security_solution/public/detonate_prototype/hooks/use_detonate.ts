@@ -36,6 +36,8 @@ import type {
   DetonateTaskUpdate,
   DetonateUsage,
   DetonationRecord,
+  DetonationRunGroupsQuery,
+  DetonationRunGroupsResponse,
   DetonationRunsQuery,
   DetonationRunsResponse,
   DetonationRunStatsQuery,
@@ -176,12 +178,16 @@ const isRunInFlight = (run: DetonationRecord): boolean =>
  * while a loaded row is running, so an idle table makes no requests. The key sits under
  * `[DETONATE_QUERY_KEY, 'tasks']`, so a submit invalidates it with the task lists.
  */
-export const useDetonationRuns = (query: Omit<DetonationRunsQuery, 'from'>) => {
+export const useDetonationRuns = (
+  query: Omit<DetonationRunsQuery, 'from'>,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
   const result = useInfiniteQuery<DetonationRunsResponse, Error>({
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'runs', query],
+    enabled,
     queryFn: ({ signal, pageParam = 0 }: { signal?: AbortSignal; pageParam?: number }) =>
       detonateApi.searchRuns(http, { ...query, from: pageParam }, signal),
     getNextPageParam: (lastPage, pages) => {
@@ -254,6 +260,26 @@ export const useDetonationRunStats = (query: DetonationRunStatsQuery) => {
   return useQuery<DetonationRunStatsResponse, Error>({
     queryKey: [DETONATE_QUERY_KEY, 'tasks', 'stats', query],
     queryFn: ({ signal }) => detonateApi.getRunStats(http, query, signal),
+    keepPreviousData: true,
+    retry: shouldRetry,
+  });
+};
+
+/**
+ * One page of run groups for the Detonations table's Group by. Under `[DETONATE_QUERY_KEY,
+ * 'tasks']`, so a submit refreshes it with the lists; `useDetonationRuns` polls in-flight runs and
+ * invalidates the stats, so a flat table is the one that keeps moving.
+ */
+export const useDetonationRunGroups = (
+  query: DetonationRunGroupsQuery,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonationRunGroupsResponse, Error>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'groups', query],
+    queryFn: ({ signal }) => detonateApi.getRunGroups(http, query, signal),
+    enabled,
     keepPreviousData: true,
     retry: shouldRetry,
   });

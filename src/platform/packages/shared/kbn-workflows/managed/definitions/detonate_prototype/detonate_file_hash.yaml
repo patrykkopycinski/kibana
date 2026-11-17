@@ -17,6 +17,7 @@ triggers:
           type: string
           minLength: 64
           maxLength: 64
+          pattern: "^[a-fA-F0-9]{64}$"
           description: sha256 of the sample to detonate.
         vm_os_family:
           type: string

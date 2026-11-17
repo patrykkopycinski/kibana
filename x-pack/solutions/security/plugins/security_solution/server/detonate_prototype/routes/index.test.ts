@@ -20,10 +20,13 @@ import {
   DETONATE_SUBMIT_HASH_PATH,
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_RUNS_PATH,
+  DETONATE_RUNS_GROUPS_PATH,
   DETONATE_RUNS_STATS_PATH,
   DETONATE_TASKS_PATH,
   DETONATE_USAGE_PATH,
+  DETONATION_RUNS_GROUP_FIELDS,
   DETONATION_RUNS_SORT_FIELDS,
+  DETONATION_RUN_FIELDS,
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { createRunRecorder } from '../results_store';
@@ -1736,6 +1739,331 @@ describe('registerDetonatePrototypeRoutes', () => {
         await stats({ kql: 'detonate.state: running' });
 
         expect(mockResponse.ok).not.toHaveBeenCalled();
+        expect(mockResponse.badRequest).not.toHaveBeenCalled();
+        expect(mockResponse.customError).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('runs groups', () => {
+    const groupsRoute = () =>
+      router.versioned.getRoute('get', DETONATE_RUNS_GROUPS_PATH).versions['1'];
+    const groupsQuerySchema = () => {
+      const { config } = groupsRoute();
+      const validation =
+        typeof config.validate === 'function' ? config.validate() : config.validate;
+      return (validation as { request: { query: { validate(q: unknown): unknown } } }).request
+        .query;
+    };
+    const groups = (query: Record<string, unknown> = {}) =>
+      groupsRoute().handler(
+        createContext(),
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: DETONATE_RUNS_GROUPS_PATH,
+          query: groupsQuerySchema().validate({
+            group_by: 'detonate.task_id',
+            start: 'now-30d',
+            end: 'now',
+            ...query,
+          }) as never,
+        }),
+        mockResponse
+      );
+    const searchArgs = () => esClient.search.mock.calls[0][0];
+    const selectedGroup = () => searchArgs().runtime_mappings.groupByField.script.params;
+
+    beforeEach(() => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+      esClient.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          groupsCount: { value: 3 },
+          unitsCount: { value: 6 },
+          groupByFields: {
+            buckets: [
+              {
+                key: 'task-1',
+                doc_count: 2,
+                verdicts: {
+                  buckets: [
+                    { key: 'malicious', doc_count: 1 },
+                    { key: 'unknown', doc_count: 1 },
+                  ],
+                },
+                states: {
+                  buckets: [
+                    { key: 'complete', doc_count: 1 },
+                    { key: 'running', doc_count: 1 },
+                  ],
+                },
+                file_names: { buckets: [{ key: 'evil.exe', doc_count: 2 }] },
+                hashes: { buckets: [{ key: 'a'.repeat(64), doc_count: 2 }] },
+                alerts_total: { value: 5 },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('groups by exactly the fields the shared allowlist names, each one a mapped run field', () => {
+      const schemaOf = groupsQuerySchema();
+
+      DETONATION_RUNS_GROUP_FIELDS.forEach((field) => {
+        expect(DETONATION_RUN_FIELDS).toHaveProperty([field]);
+        expect(schemaOf.validate({ group_by: field })).toEqual(
+          expect.objectContaining({ group_by: field })
+        );
+      });
+      expect(() => schemaOf.validate({})).toThrow();
+      expect(() => schemaOf.validate({ group_by: 'tags' })).toThrow();
+      expect(() => schemaOf.validate({ group_by: 'detonate.doc_kind' })).toThrow();
+      expect(() => schemaOf.validate({ group_by: 'detonate.alert_id' })).toThrow();
+    });
+
+    it('bounds page, size, kql, search, the time strings and the parents', () => {
+      const schemaOf = groupsQuerySchema();
+      const base = { group_by: 'host.name' };
+
+      expect(schemaOf.validate(base)).toEqual(base);
+      expect(() => schemaOf.validate({ ...base, size: 0 })).toThrow();
+      expect(() => schemaOf.validate({ ...base, size: 101 })).toThrow();
+      expect(() => schemaOf.validate({ ...base, page: -1 })).toThrow();
+      expect(() => schemaOf.validate({ ...base, page: 1001 })).toThrow();
+      expect(() => schemaOf.validate({ ...base, kql: 'a'.repeat(1025) })).toThrow();
+      expect(() => schemaOf.validate({ ...base, search: 'a'.repeat(129) })).toThrow();
+      expect(() => schemaOf.validate({ ...base, start: 'not a date' })).toThrow(/date math/);
+      expect(() => schemaOf.validate({ ...base, parents: 'x'.repeat(2049) })).toThrow();
+    });
+
+    it.each([
+      ['not JSON', '{'],
+      ['not an array', '{"field":"host.name","value":"h"}'],
+      [
+        'too many levels',
+        JSON.stringify([
+          { field: 'host.name', value: 'a' },
+          { field: 'user.name', value: 'b' },
+          { field: 'detonate.source', value: 'c' },
+        ]),
+      ],
+      ['a field outside the allowlist', JSON.stringify([{ field: 'tags', value: 'a' }])],
+      ['a value that is not a string', JSON.stringify([{ field: 'host.name', value: 3 }])],
+      ['an over-long value', JSON.stringify([{ field: 'host.name', value: 'a'.repeat(513) }])],
+    ])('rejects parents that are %s', (_name, parents) => {
+      expect(() => groupsQuerySchema().validate({ group_by: 'user.name', parents })).toThrow(
+        /Invalid parents/
+      );
+    });
+
+    it.each(DETONATION_RUNS_GROUP_FIELDS.map((field) => [field] as const))(
+      "builds a terms aggregation over this space's run documents when grouping by %s",
+      async (field) => {
+        await groups({ group_by: field });
+
+        const args = searchArgs();
+        expect(args).toEqual(
+          expect.objectContaining({
+            index: '.kibana-detonate-results-team-a',
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            track_total_hits: false,
+            size: 0,
+          })
+        );
+        expect(selectedGroup().selectedGroup).toBe(field);
+        expect(args.aggs.groupByFields.terms.field).toBe('groupByField');
+        expect(JSON.stringify(args.query)).toContain('"detonate.doc_kind":"run"');
+        expect(mockResponse.ok).toHaveBeenCalled();
+      }
+    );
+
+    it('counts the runs behind a multi-valued rule field, not its values', async () => {
+      await groups({ group_by: 'detonate.detection_rule_names' });
+      expect(JSON.stringify(searchArgs().aggs)).toContain('detonate.task_id');
+      const ruleScript = JSON.stringify(searchArgs().runtime_mappings);
+
+      esClient.search.mockClear();
+      await groups({ group_by: 'host.name' });
+      expect(JSON.stringify(searchArgs().aggs)).not.toContain('detonate.task_id');
+      // Only the rule field emits one group per value; a single-valued field keeps the whole value.
+      expect(JSON.stringify(searchArgs().runtime_mappings)).not.toEqual(ruleScript);
+    });
+
+    it('sorts single-run groups newest first and the others by size', async () => {
+      await groups({ group_by: 'detonate.task_id' });
+      expect(searchArgs().aggs.groupByFields.aggs.bucket_truncate.bucket_sort.sort).toEqual([
+        { latest: { order: 'desc' } },
+      ]);
+
+      esClient.search.mockClear();
+      await groups({ group_by: 'host.name' });
+      expect(searchArgs().aggs.groupByFields.aggs.bucket_truncate.bucket_sort.sort).toEqual([
+        { _count: { order: 'desc' } },
+      ]);
+    });
+
+    it('pages by group, offsetting by page times size', async () => {
+      await groups({ group_by: 'host.name', page: 2, size: 5 });
+
+      expect(searchArgs().aggs.groupByFields.aggs.bucket_truncate.bucket_sort).toEqual(
+        expect.objectContaining({ from: 10, size: 5 })
+      );
+    });
+
+    it("keeps a run with no verdict in the group's mix, as the unknown bucket", async () => {
+      await groups({ group_by: 'host.name' });
+
+      expect(searchArgs().aggs.groupByFields.aggs.verdicts.terms).toEqual({
+        field: 'detonate.verdict',
+        missing: 'unknown',
+        size: 4,
+      });
+    });
+
+    it('answers each group with its run count, verdict mix, states and sample', async () => {
+      await groups();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          groupsCount: 3,
+          runsCount: 6,
+          groups: [
+            {
+              key: 'task-1',
+              runCount: 2,
+              verdicts: { malicious: 1, benign: 0, inconclusive: 0, unknown: 1 },
+              states: { running: 1, complete: 1, failed: 0 },
+              fileName: 'evil.exe',
+              sha256: 'a'.repeat(64),
+              alertsTotal: 5,
+            },
+          ],
+        },
+      });
+    });
+
+    it('answers a run with no value for the field as the null group', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          groupsCount: { value: 1 },
+          unitsCount: { value: 2 },
+          groupByFields: {
+            buckets: [
+              {
+                key: '\u0001detonate-no-value\u0001',
+                doc_count: 2,
+                verdicts: { buckets: [{ key: 'unknown', doc_count: 2 }] },
+              },
+            ],
+          },
+        },
+      });
+
+      await groups({ group_by: 'host.name' });
+
+      const body = mockResponse.ok.mock.calls[0][0]?.body as {
+        groups: Array<{ key: string | null; runCount: number }>;
+      };
+      expect(body.groups).toEqual([expect.objectContaining({ key: null, runCount: 2 })]);
+    });
+
+    it('narrows to the opened parent groups, a null parent meaning no value', async () => {
+      await groups({
+        group_by: 'user.name',
+        parents: JSON.stringify([
+          { field: 'host.name', value: 'host-1' },
+          { field: 'detonate.source', value: null },
+        ]),
+      });
+
+      const filter = JSON.stringify(searchArgs().query);
+      expect(filter).toContain('{"term":{"host.name":"host-1"}}');
+      expect(filter).toContain('{"bool":{"must_not":[{"exists":{"field":"detonate.source"}}]}}');
+    });
+
+    it('applies the time range and KQL the table applies', async () => {
+      await groups({
+        start: '2026-01-01T00:00:00.000Z',
+        end: '2026-01-31T00:00:00.000Z',
+        kql: 'detonate.state: "running"',
+      });
+
+      const filter = JSON.stringify(searchArgs().query);
+      expect(filter).toContain('detonate.state');
+      expect(filter).toContain(String(Date.parse('2026-01-01T00:00:00.000Z')));
+      expect(filter).toContain(String(Date.parse('2026-01-31T00:00:00.000Z')));
+    });
+
+    it.each([
+      ['an invalid KQL', { kql: 'detonate.state: (' }],
+      ['a clause without a field', { kql: 'foo' }],
+    ])('answers 400 for %s without querying', async (_name, query) => {
+      await groups(query);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Invalid KQL') },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('answers an empty shape for a missing index', async () => {
+      const { errors } = jest.requireActual<{
+        errors: typeof import('@elastic/elasticsearch').errors;
+      }>('@elastic/elasticsearch');
+      esClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+          headers: {},
+          meta: {},
+          warnings: [],
+        } as unknown as ConstructorParameters<typeof errors.ResponseError>[0])
+      );
+
+      await groups();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { groups: [], groupsCount: 0, runsCount: 0 },
+      });
+    });
+
+    describe('when the groups search rejects', () => {
+      const responseError = (statusCode: number) => {
+        const { errors } = jest.requireActual<{
+          errors: typeof import('@elastic/elasticsearch').errors;
+        }>('@elastic/elasticsearch');
+        const type = 'search_phase_execution_exception';
+        return new errors.ResponseError({
+          statusCode,
+          body: { error: { type, reason: 'boom', root_cause: [{ type, reason: 'boom root' }] } },
+          headers: {},
+          meta: {},
+          warnings: [],
+        } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
+      };
+
+      it.each([[{ kql: '@timestamp > "not-a-date"' }], [{ search: 'abc' }]])(
+        'answers 400 when Elasticsearch rejects a user filter (%j)',
+        async (query) => {
+          esClient.search.mockRejectedValue(responseError(400));
+
+          await groups(query);
+
+          expect(mockResponse.ok).not.toHaveBeenCalled();
+          expect(mockResponse.badRequest).toHaveBeenCalledWith({
+            body: { message: 'Invalid runs query: boom root' },
+          });
+        }
+      );
+
+      it('does not blame the caller for a 400 on a request with no filter', async () => {
+        esClient.search.mockRejectedValue(responseError(400));
+
+        await groups();
+
         expect(mockResponse.badRequest).not.toHaveBeenCalled();
         expect(mockResponse.customError).toHaveBeenCalled();
       });

@@ -39,6 +39,10 @@ import {
   alertRunTag,
   DETONATION_DURATION_REPAIR_MAX_AGE_MS,
   DETONATION_RUN_MAX_AGE_MS,
+  DETONATION_GROUPS_DEFAULT_PAGE_SIZE,
+  DETONATION_GROUPS_MAX_PAGE,
+  DETONATION_GROUPS_MAX_PAGE_SIZE,
+  DETONATION_GROUPS_MAX_PARENTS_LENGTH,
   DETONATION_RUNS_MAX_KQL_LENGTH,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
   DETONATION_RUNS_MAX_PAGE_SIZE,
@@ -53,6 +57,7 @@ import {
   DETONATE_PRIOR_RUNS_PATH,
   DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
+  DETONATE_RUNS_GROUPS_PATH,
   DETONATE_RUNS_STATS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
   DETONATE_SUBMIT_HASH_PATH,
@@ -78,6 +83,7 @@ import type {
   DetonateRunDiffEmpty,
   DetonateRunDiffResult,
   DetonateRunSessionResult,
+  DetonationRunGroupsResponse,
   DetonationRunStatsResponse,
   DetonationRunsResponse,
   DetonateSandboxCountResult,
@@ -126,6 +132,7 @@ import {
 import { buildDetonateCountQueries, validateSandboxCountRuleQuery } from '../esql_draft_guard';
 import type { DetonationRecord } from '../detonation_record';
 import { InvalidRunsQueryError, searchRunStats, searchRuns, statsTimeError } from '../runs_search';
+import { parseGroupParents, searchRunGroups } from '../runs_groups';
 
 /**
  * Either privilege opens the routes: an analyst's Security Solution access, or the dedicated Detonate
@@ -1745,6 +1752,90 @@ export const registerDetonatePrototypeRoutes = ({
             query: request.query,
           });
           return response.ok<DetonationRunStatsResponse>({ body: stats });
+        } catch (error) {
+          if (error instanceof InvalidRunsQueryError) {
+            return response.badRequest({ body: { message: error.message } });
+          }
+          return toErrorResponse(error, response);
+        }
+      }
+    );
+
+  /**
+   * The Detonations table's groups: one bucket per value of the chosen run field, over the same filtered
+   * runs as the table, with each group's verdict mix. `parents` narrows to the groups an analyst opened.
+   */
+  router.versioned
+    .get({
+      access: 'internal',
+      path: DETONATE_RUNS_GROUPS_PATH,
+      security: DETONATE_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              // The allowlist keeps a caller from grouping on an unmapped field; it mirrors
+              // DETONATION_RUNS_GROUP_FIELDS, which the route test pins.
+              group_by: schema.oneOf([
+                schema.literal('detonate.task_id'),
+                schema.literal('detonate.verdict'),
+                schema.literal('file.hash.sha256'),
+                schema.literal('detonate.source'),
+                schema.literal('host.name'),
+                schema.literal('user.name'),
+                schema.literal('detonate.detection_rule_names'),
+              ]),
+              parents: schema.maybe(
+                schema.string({
+                  maxLength: DETONATION_GROUPS_MAX_PARENTS_LENGTH,
+                  validate: (value) => {
+                    try {
+                      parseGroupParents(value);
+                    } catch (error) {
+                      return error instanceof Error ? error.message : 'invalid parents';
+                    }
+                  },
+                })
+              ),
+              kql: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_KQL_LENGTH })),
+              search: schema.maybe(schema.string({ maxLength: DETONATION_RUNS_MAX_SEARCH_LENGTH })),
+              page: schema.maybe(
+                schema.number({ min: 0, max: DETONATION_GROUPS_MAX_PAGE, defaultValue: 0 })
+              ),
+              size: schema.maybe(
+                schema.number({
+                  min: 1,
+                  max: DETONATION_GROUPS_MAX_PAGE_SIZE,
+                  defaultValue: DETONATION_GROUPS_DEFAULT_PAGE_SIZE,
+                })
+              ),
+              start: schema.maybe(
+                schema.string({
+                  maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
+                  validate: statsTimeError,
+                })
+              ),
+              end: schema.maybe(
+                schema.string({
+                  maxLength: DETONATION_STATS_MAX_TIME_LENGTH,
+                  validate: statsTimeError,
+                })
+              ),
+            }),
+          },
+        },
+      },
+      async (_context, request, response): Promise<IKibanaResponse> => {
+        try {
+          const groups = await searchRunGroups({
+            esClient: await getInternalEsClient(),
+            spaceId: spaceIdFromRequest(request),
+            query: request.query,
+          });
+          return response.ok<DetonationRunGroupsResponse>({ body: groups });
         } catch (error) {
           if (error instanceof InvalidRunsQueryError) {
             return response.badRequest({ body: { message: error.message } });

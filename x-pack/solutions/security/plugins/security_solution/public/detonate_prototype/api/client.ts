@@ -21,6 +21,7 @@ import type { HttpSetup } from '@kbn/core/public';
 
 import {
   DETONATE_HEALTHCHECK_PATH,
+  DETONATE_RUNS_GROUPS_PATH,
   DETONATE_RUNS_PATH,
   DETONATE_RUNS_STATS_PATH,
   DETONATE_SUBMIT_FILE_PATH,
@@ -42,6 +43,8 @@ import type {
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
   DetonationRecord,
+  DetonationRunGroupsQuery,
+  DetonationRunGroupsResponse,
   DetonationRunsQuery,
   DetonationRunsResponse,
   DetonationRunStatsQuery,
@@ -141,6 +144,14 @@ export const detonateApi = {
   /** The dashboard's aggregates over the same filtered runs as the table. */
   getRunStats: (http: HttpSetup, query: DetonationRunStatsQuery, signal?: AbortSignal) =>
     http.get<DetonationRunStatsResponse>(DETONATE_RUNS_STATS_PATH, {
+      version: VERSION.version,
+      query: { ...query },
+      signal,
+    }),
+
+  /** One page of run groups for a group-by field, under the same filters as the table. */
+  getRunGroups: (http: HttpSetup, query: DetonationRunGroupsQuery, signal?: AbortSignal) =>
+    http.get<DetonationRunGroupsResponse>(DETONATE_RUNS_GROUPS_PATH, {
       version: VERSION.version,
       query: { ...query },
       signal,

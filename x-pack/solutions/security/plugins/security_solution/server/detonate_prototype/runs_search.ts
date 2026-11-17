@@ -148,12 +148,14 @@ export const buildRunsQuery = ({
   return buildRunsFilter({ kql, search }, timeRangeFilter(startMs, endMs));
 };
 
-const hasUserFilter = ({ kql, search }: Pick<DetonationRunsQuery, 'kql' | 'search'>): boolean =>
-  Boolean(kql?.trim() || search?.trim());
+export const hasUserFilter = ({
+  kql,
+  search,
+}: Pick<DetonationRunsQuery, 'kql' | 'search'>): boolean => Boolean(kql?.trim() || search?.trim());
 
 const MAX_REJECTION_REASON_LENGTH = 200;
 
-const rejectionReason = (error: errors.ResponseError): string =>
+export const rejectionReason = (error: errors.ResponseError): string =>
   (error.body?.error?.root_cause?.[0]?.reason ?? error.body?.error?.reason ?? error.message).slice(
     0,
     MAX_REJECTION_REASON_LENGTH
@@ -308,11 +310,11 @@ const zeroVerdicts = (): DetonationStatsVerdictCounts => ({
   [DETONATION_STATS_UNKNOWN_VERDICT]: 0,
 });
 
-interface TermsBuckets {
+export interface TermsBuckets {
   buckets: Array<{ key: string | number; doc_count: number }>;
 }
 
-const verdictCounts = (terms: TermsBuckets | undefined): DetonationStatsVerdictCounts => {
+export const verdictCounts = (terms: TermsBuckets | undefined): DetonationStatsVerdictCounts => {
   const counts = zeroVerdicts();
   for (const { key, doc_count: count } of terms?.buckets ?? []) {
     // A verdict this build does not know (written by a newer one) still counts, as unknown.

@@ -35,7 +35,10 @@ interface YamlWorkflow {
     type: string;
     with?: { every?: string };
     inputs?: {
-      properties?: Record<string, { type?: string; enum?: string[]; default?: unknown }>;
+      properties?: Record<
+        string,
+        { type?: string; enum?: string[]; default?: unknown; pattern?: string }
+      >;
       required?: string[];
     };
   }>;
@@ -74,6 +77,16 @@ describe('Detonate file hash workflow', () => {
     expect(properties?.vm_os_family?.default).toBe('linux');
   });
 
+  it('accepts only a 64-character hex sha256 as input', () => {
+    const { pattern } = workflow.triggers[0].inputs?.properties?.sha256 ?? {};
+    expect(pattern).toBe('^[a-fA-F0-9]{64}$');
+    const sha256 = new RegExp(pattern as string);
+    expect(sha256.test('a'.repeat(64))).toBe(true);
+    expect(sha256.test('A1'.repeat(32))).toBe(true);
+    expect(sha256.test('g'.repeat(64))).toBe(false);
+    expect(sha256.test(`${'a'.repeat(63)}-`)).toBe(false);
+  });
+
   it('calls the detonate step directly with the input hash', () => {
     const detonate = stepNamed(workflow, 'detonate');
     expect(detonate?.type).toBe('detonate.prototype.detonateSample');
@@ -103,14 +116,14 @@ describe('Detonate high severity alerts workflow', () => {
     expect(DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW.yaml).toContain('Epic #20877 §7');
   });
 
-  it('detonates only a sample with no earlier run in this space', () => {
+  it('detonates only a sample with no completed run in this space', () => {
     expect(stepNamed(workflow, 'reputation')?.type).toBe('detonate.prototype.detonateReputation');
     const detonate = stepNamed(workflow, 'detonate');
     expect(detonate?.type).toBe('detonate.prototype.detonateSample');
     expect(detonate?.if).toContain('steps.reputation.output.last_task_id == blank');
   });
 
-  it('does not detonate when the lookup failed, and only for an unknown, never-run hash', () => {
+  it('does not detonate when the lookup failed, and only for an unknown hash with no completed run', () => {
     const condition = stepNamed(workflow, 'detonate')?.if;
     const ctx = (output: Record<string, unknown>) => ({ steps: { reputation: { output } } });
     expect(evaluateIf(condition, { steps: { reputation: {} } })).toBeFalsy();

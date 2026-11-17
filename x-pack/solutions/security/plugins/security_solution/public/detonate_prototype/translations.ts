@@ -1254,3 +1254,91 @@ export const RESPONSE_RUNS_OPEN = i18n.translate(
   'xpack.securitySolution.detonatePrototype.responseRuns.open',
   { defaultMessage: 'Open' }
 );
+
+export const GROUP_BY_DETONATION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupByDetonation',
+  { defaultMessage: 'Detonation' }
+);
+
+export const GROUP_BY_VERDICT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupByVerdict',
+  { defaultMessage: 'Verdict' }
+);
+
+export const GROUP_BY_SAMPLE_HASH = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupBySampleHash',
+  { defaultMessage: 'Sample hash' }
+);
+
+export const GROUP_BY_SOURCE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupBySource',
+  { defaultMessage: 'Source' }
+);
+
+export const GROUP_BY_HOST = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupByHost',
+  { defaultMessage: 'Originating host' }
+);
+
+export const GROUP_BY_USER = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupByUser',
+  { defaultMessage: 'Originating user' }
+);
+
+export const GROUP_BY_RULE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupByRule',
+  { defaultMessage: 'Rule' }
+);
+
+export const NO_VERDICT = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.noVerdict',
+  { defaultMessage: 'No verdict' }
+);
+
+export const NO_VALUE_GROUP = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.noValueGroup',
+  { defaultMessage: 'Not set' }
+);
+
+export const GROUP_STAT_RUNS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupStatRuns',
+  { defaultMessage: 'Runs' }
+);
+
+export const GROUP_STAT_VERDICTS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupStatVerdicts',
+  { defaultMessage: 'Verdicts' }
+);
+
+export const GROUP_STAT_ALERTS = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupStatAlerts',
+  { defaultMessage: 'Alerts' }
+);
+
+export const GROUP_RUNS_UNIT = (count: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.runs.groupRunsUnit', {
+    defaultMessage: '{count, plural, one {run} other {runs}}',
+    values: { count },
+  });
+
+export const GROUPS_UNIT = (count: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.runs.groupsUnit', {
+    defaultMessage: '{count, plural, one {group} other {groups}}',
+    values: { count },
+  });
+
+export const GROUPS_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupsErrorTitle',
+  { defaultMessage: 'Could not load the groups' }
+);
+
+export const GROUPS_EMPTY = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupsEmpty',
+  { defaultMessage: 'No detonations match.' }
+);
+
+export const GROUP_OPEN_DETONATION = (name: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.runs.groupOpenDetonation', {
+    defaultMessage: 'Open the result for {name}',
+    values: { name },
+  });

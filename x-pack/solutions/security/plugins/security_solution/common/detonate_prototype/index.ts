@@ -36,6 +36,8 @@ export const DETONATE_HEALTHCHECK_PATH = `${DETONATE_PROTOTYPE_API}/healthcheck`
 export const DETONATE_RUNS_PATH = `${DETONATE_PROTOTYPE_API}/runs` as const;
 /** The Detonations dashboard's aggregates over the same filtered runs as the table. */
 export const DETONATE_RUNS_STATS_PATH = `${DETONATE_RUNS_PATH}/stats` as const;
+/** The Detonations table's server-side groups, over the same filtered runs as the table. */
+export const DETONATE_RUNS_GROUPS_PATH = `${DETONATE_RUNS_PATH}/groups` as const;
 
 /** The prototype's app route, registered as a deep link under Security. */
 export const DETONATE_PROTOTYPE_APP_PATH = '/detonate_prototype' as const;
@@ -1337,6 +1339,77 @@ export const DETONATION_STATS_UNKNOWN_VERDICT = 'unknown' as const;
 
 export type DetonationStatsVerdict = DetonateVerdictName | typeof DETONATION_STATS_UNKNOWN_VERDICT;
 export type DetonationStatsVerdictCounts = Record<DetonationStatsVerdict, number>;
+
+/** Run fields the Detonations table may group by; the route rejects any other. */
+export const DETONATION_RUNS_GROUP_FIELDS = [
+  'detonate.task_id',
+  'detonate.verdict',
+  'file.hash.sha256',
+  'detonate.source',
+  'host.name',
+  'user.name',
+  'detonate.detection_rule_names',
+] as const;
+export type DetonationRunsGroupField = (typeof DETONATION_RUNS_GROUP_FIELDS)[number];
+
+/** The group-by whose run field holds several values per run; each value is its own group. */
+export const DETONATION_RUNS_MULTI_VALUE_GROUP_FIELDS: readonly DetonationRunsGroupField[] = [
+  'detonate.detection_rule_names',
+];
+
+/** The grouping the table opens with: one group per run. */
+export const DETONATION_RUNS_DEFAULT_GROUP_FIELD: DetonationRunsGroupField = 'detonate.task_id';
+
+/** Group levels the table can nest; every level above the last arrives as a parent filter. */
+export const DETONATION_GROUPS_MAX_LEVELS = 3;
+export const DETONATION_GROUPS_MAX_PARENT_FILTERS = DETONATION_GROUPS_MAX_LEVELS - 1;
+export const DETONATION_GROUPS_MAX_VALUE_LENGTH = 512;
+/** The serialized parent filters: count and value length bound it, this keeps the query string sane. */
+export const DETONATION_GROUPS_MAX_PARENTS_LENGTH = 2048;
+export const DETONATION_GROUPS_MAX_PAGE_SIZE = 100;
+export const DETONATION_GROUPS_DEFAULT_PAGE_SIZE = 10;
+export const DETONATION_GROUPS_MAX_PAGE = 1000;
+
+/** A level above the one being asked for: the run field and the value the analyst opened (null = no value). */
+export interface DetonationRunsGroupParent {
+  field: DetonationRunsGroupField;
+  value: string | null;
+}
+
+/** What the Detonations table asks of the groups route: the table's filters plus the grouping. */
+export interface DetonationRunGroupsQuery {
+  group_by: DetonationRunsGroupField;
+  /** A JSON array of {@link DetonationRunsGroupParent}, outermost level first. */
+  parents?: string;
+  kql?: string;
+  search?: string;
+  /** Zero-based page of groups. */
+  page?: number;
+  size?: number;
+  start?: string;
+  end?: string;
+}
+
+export interface DetonationRunGroup {
+  /** The group value; null for runs that have none. */
+  key: string | null;
+  runCount: number;
+  verdicts: DetonationStatsVerdictCounts;
+  /** Run counts per state; used to say why a group of no-verdict runs has none. */
+  states: Record<DetonationRunStatus, number>;
+  /** A sample of the group's runs; meaningful when the group is one run. */
+  fileName: string | null;
+  sha256: string | null;
+  alertsTotal: number;
+}
+
+export interface DetonationRunGroupsResponse {
+  groups: DetonationRunGroup[];
+  /** Groups across all pages. */
+  groupsCount: number;
+  /** Runs across all pages. */
+  runsCount: number;
+}
 
 /** What the Detonations dashboard asks of the stats route: a time range plus the table's filters. */
 export interface DetonationRunStatsQuery {

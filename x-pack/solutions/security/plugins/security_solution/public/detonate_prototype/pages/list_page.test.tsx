@@ -16,19 +16,27 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { useHistory } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-import type { DetonateTask, DetonationRecord } from '../../../common/detonate_prototype';
+import type {
+  DetonateTask,
+  DetonationRecord,
+  DetonationRunGroup,
+} from '../../../common/detonate_prototype';
 import { useKibana } from '../../common/lib/kibana';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import {
   useDetonateHealthcheck,
+  useDetonationRunGroups,
   useDetonationRuns,
   useDetonationRunStats,
+  useDetonationTask,
 } from '../hooks/use_detonate';
 import type { SubmitModal as SubmitModalType } from '../components/submit_modal';
 import {
   DetonateListPage,
   FILTER_ERROR_TEST_ID,
+  GROUPING_ID,
   RUNS_TABLE_TEST_ID,
   SUBMIT_SAMPLE_BUTTON_TEST_ID,
 } from './list_page';
@@ -220,14 +228,46 @@ const lastRunsQuery = () => {
 const renderPage = (url = '/detonate_prototype') =>
   render(
     <I18nProvider>
-      <MemoryRouter initialEntries={[url]}>
-        <Route path="/detonate_prototype">
-          <HistoryProbe />
-          <DetonateListPage />
-        </Route>
-      </MemoryRouter>
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={[url]}>
+          <Route path="/detonate_prototype">
+            <HistoryProbe />
+            <DetonateListPage />
+          </Route>
+        </MemoryRouter>
+      </QueryClientProvider>
     </I18nProvider>
   );
+
+/** The saved grouping selection @kbn/grouping keeps in the `groups` localStorage key. */
+const saveGrouping = (activeGroups: string[]) =>
+  window.localStorage.setItem(
+    'groups',
+    JSON.stringify({ [GROUPING_ID]: { activeGroups, options: [] } })
+  );
+
+const makeGroup = (overrides: Partial<DetonationRunGroup> = {}): DetonationRunGroup => ({
+  key: 'run-1',
+  runCount: 1,
+  verdicts: { malicious: 1, benign: 0, inconclusive: 0, unknown: 0 },
+  states: { running: 0, complete: 1, failed: 0 },
+  fileName: 'evil.exe',
+  sha256: 'c'.repeat(64),
+  alertsTotal: 3,
+  ...overrides,
+});
+
+const mockGroups = (groups: DetonationRunGroup[]) =>
+  jest.mocked(useDetonationRunGroups).mockReturnValue({
+    data: { groups, groupsCount: groups.length, runsCount: groups.length },
+    isError: false,
+    isPreviousData: false,
+  } as never);
+
+const lastGroupsQuery = () => {
+  const { calls } = jest.mocked(useDetonationRunGroups).mock;
+  return calls[calls.length - 1][0];
+};
 
 let pushUrl: (url: string) => void = () => {};
 
@@ -271,6 +311,109 @@ describe('DetonateListPage', () => {
     jest.mocked(useDetonateHealthcheck).mockReturnValue({ isError: false } as never);
     mockRuns([]);
     mockStats();
+    mockGroups([]);
+    jest.mocked(useDetonationTask).mockReturnValue({ data: undefined, isLoading: true } as never);
+    // The runs table tests below are about the flat table; grouping has its own describe.
+    saveGrouping(['none']);
+  });
+
+  describe('group by', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    it('groups by Detonation by default and shows no flat table', async () => {
+      mockGroups([makeGroup()]);
+      mockRuns([makeRun()]);
+      renderPage();
+
+      expect(await screen.findByTestId('level-0-group-0')).toBeInTheDocument();
+      expect(lastGroupsQuery()).toMatchObject({ group_by: 'detonate.task_id' });
+      expect(screen.queryByTestId('mockTable')).not.toBeInTheDocument();
+      expect(
+        jest.mocked(useDetonationRuns).mock.calls.every(([, options]) => !options?.enabled)
+      ).toBe(true);
+    });
+
+    it('shows the verdict, the sample and the alert count in a Detonation header', async () => {
+      mockGroups([makeGroup()]);
+      renderPage();
+
+      const header = await screen.findByTestId('level-0-group-0');
+
+      expect(header).toHaveTextContent(/malicious/i);
+      expect(screen.getByTestId('detonatePrototypeGroupOpenDetonation')).toHaveTextContent(
+        'evil.exe'
+      );
+      expect(header).toHaveTextContent('3');
+    });
+
+    it('opens the result flyout from the header link without opening the group', async () => {
+      mockGroups([makeGroup()]);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('detonatePrototypeGroupOpenDetonation'));
+
+      expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'run-1' });
+      expect(screen.queryByTestId('detonatePrototypeGroupBodyLoading')).not.toBeInTheDocument();
+    });
+
+    it('shows the flat table when grouping is None', async () => {
+      saveGrouping(['none']);
+      mockRuns([makeRun()]);
+      renderPage();
+
+      expect(await screen.findByTestId('mockTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('level-0-group-0')).not.toBeInTheDocument();
+    });
+
+    it('expands a non-Detonation group to the runs table narrowed to that group', async () => {
+      saveGrouping(['detonate.verdict']);
+      mockGroups([makeGroup({ key: 'malicious', runCount: 2 })]);
+      mockRuns([makeRun()]);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('group-panel-toggle'));
+
+      expect(await screen.findByTestId('detonatePrototypeGroupRuns')).toBeInTheDocument();
+      expect(await screen.findByTestId('mockTable')).toBeInTheDocument();
+      expect(lastRunsQuery().kql).toBe('detonate.verdict:"malicious"');
+    });
+
+    it('narrows a runs group that has no value to the runs without one', async () => {
+      saveGrouping(['host.name']);
+      mockGroups([makeGroup({ key: null })]);
+      mockRuns([makeRun()]);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('group-panel-toggle'));
+      await screen.findByTestId('mockTable');
+
+      expect(lastRunsQuery().kql).toBe('not host.name:*');
+    });
+
+    it('nests a second level under the first and applies the parent as a filter', async () => {
+      saveGrouping(['detonate.source', 'host.name']);
+      mockGroups([makeGroup({ key: 'manual' })]);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('group-panel-toggle'));
+
+      await waitFor(() =>
+        expect(lastGroupsQuery()).toMatchObject({
+          group_by: 'host.name',
+          parents: JSON.stringify([{ field: 'detonate.source', value: 'manual' }]),
+        })
+      );
+    });
+
+    it('sends the table filters with the group query', async () => {
+      mockGroups([makeGroup()]);
+      renderPage();
+      await screen.findByTestId('level-0-group-0');
+
+      expect(lastGroupsQuery()).toMatchObject({ start: 'now-30d', end: 'now' });
+    });
   });
 
   describe('search bar', () => {

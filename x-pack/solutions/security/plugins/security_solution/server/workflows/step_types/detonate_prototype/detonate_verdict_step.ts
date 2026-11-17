@@ -16,6 +16,9 @@
  * for a finished run: this step takes only a task id, so it covers runs the
  * workflow did not start, and it reports the in-flight and failed statuses
  * that a timed-out sample step has no verdict for.
+ *
+ * `alert_id` is optional input, defaulting to the task's `alert:<id>` tag, and is
+ * echoed in the output when given so a later step can act on that alert.
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';

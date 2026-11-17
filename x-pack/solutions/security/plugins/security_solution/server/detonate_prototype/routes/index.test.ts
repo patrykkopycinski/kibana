@@ -2005,7 +2005,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         },
       ]);
       // The pinned doc_kind is the first clause of the table's own filter: dropping it widens to alert decisions.
-      expect(buildRunsQuery(params).bool?.filter).toEqual(
+      expect(buildRunsQuery(params)?.bool?.filter).toEqual(
         expect.arrayContaining([{ term: { 'detonate.doc_kind': 'run' } }])
       );
       expect(searchArgs().index).toBe('.kibana-detonate-results-team-a');

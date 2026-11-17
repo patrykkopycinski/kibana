@@ -26,7 +26,10 @@ const createMockContext = (input: Record<string, unknown>) =>
     config: {},
     rawInput: input,
     contextManager: {
-      getContext: jest.fn(() => ({ execution: { id: 'exec-1' }, workflow: { id: 'wf-1' } })),
+      getContext: jest.fn(() => ({
+        execution: { id: 'exec-1' },
+        workflow: { id: 'wf-1', spaceId: 'default' },
+      })),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn(),
       getFakeRequest: jest.fn(),
@@ -220,6 +223,58 @@ describe('detonateSampleStepDefinition', () => {
       expect(decode(searchParams.get('flyoutV2') ?? '')).toEqual([
         { kind: 'detonation', taskId: 'task-1' },
       ]);
+    });
+
+    describe('run_url across spaces', () => {
+      const runUrlFor = async (context: Record<string, unknown>) => {
+        const pollCtx = pollContext({
+          taskId: 'task-1',
+          submittedAt: new Date().toISOString(),
+          deadlineAt: new Date(Date.now() + 60_000).toISOString(),
+        });
+        (pollCtx.contextManager.getContext as jest.Mock).mockReturnValue(context);
+        (pollCtx.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+          status: 200,
+          body: createTaskFixture({ id: 'task-1' }),
+        });
+        const result = (await detonateSampleStepDefinition.poll(pollCtx)) as {
+          output: { run_url: string };
+        };
+        return result.output.run_url;
+      };
+
+      it('prefixes a non-default space so the run opens where it was submitted', async () => {
+        const runUrl = await runUrlFor({
+          execution: { id: 'exec-1' },
+          workflow: { id: 'wf-1', spaceId: 'team-a_1' },
+        });
+        expect(runUrl.startsWith('/s/team-a_1/app/security/detonate_prototype?flyoutV2=')).toBe(
+          true
+        );
+      });
+
+      it('adds no prefix in the default space', async () => {
+        const runUrl = await runUrlFor({
+          execution: { id: 'exec-1' },
+          workflow: { id: 'wf-1', spaceId: 'default' },
+        });
+        expect(runUrl.startsWith('/app/security/detonate_prototype?flyoutV2=')).toBe(true);
+      });
+
+      it('is absolute, with the space prefix, when the context has a Kibana URL', async () => {
+        const runUrl = await runUrlFor({
+          execution: { id: 'exec-1' },
+          workflow: { id: 'wf-1', spaceId: 'sec' },
+          kibanaUrl: 'https://kibana.example.com/base/',
+        });
+        const url = new URL(runUrl);
+        expect(url.origin + url.pathname).toBe(
+          'https://kibana.example.com/base/s/sec/app/security/detonate_prototype'
+        );
+        expect(decode(url.searchParams.get('flyoutV2') ?? '')).toEqual([
+          { kind: 'detonation', taskId: 'task-1' },
+        ]);
+      });
     });
 
     describe('extracted IOCs', () => {

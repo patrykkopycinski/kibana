@@ -22,6 +22,7 @@
 
 import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { encode } from '@kbn/rison';
 import { z, lazySchema } from '@kbn/zod/v4';
 
@@ -88,16 +89,32 @@ const readExtractedIocs = (
       )
   );
 
-/** Result-flyout deep link; `encode` is what the flyout's own URL state reads back. */
-const toRunUrl = (taskId: string): string =>
-  `/app/security${DETONATE_PROTOTYPE_APP_PATH}?flyoutV2=${encodeURIComponent(
-    encode([{ kind: 'detonation', taskId }])
-  )}`;
+interface RunUrlContext {
+  spaceId: string;
+  kibanaUrl?: string;
+}
+
+/**
+ * Result-flyout deep link; `encode` is what the flyout's own URL state reads back.
+ * A run is readable only in the space that submitted it, so the link carries
+ * that space's `/s/<id>` prefix. It is absolute when the engine knows the
+ * Kibana URL (which already includes the server base path), else path-only.
+ */
+const toRunUrl = (taskId: string, { spaceId, kibanaUrl }: RunUrlContext): string => {
+  const appPath = addSpaceIdToPath(
+    '/',
+    spaceId === DEFAULT_SPACE_ID ? undefined : spaceId,
+    `/app/security${DETONATE_PROTOTYPE_APP_PATH}`
+  );
+  const query = `?flyoutV2=${encodeURIComponent(encode([{ kind: 'detonation', taskId }]))}`;
+  return `${kibanaUrl ? kibanaUrl.replace(/\/+$/, '') : ''}${appPath}${query}`;
+};
 
 /** Shape the task into the step's output contract. */
 const toOutput = (
   task: DetonateTask,
   completed: boolean,
+  runUrlContext: RunUrlContext,
   extractedIocs?: DetonateExtractedIocs
 ) => {
   const failed = isDetonationFailed(task);
@@ -105,7 +122,7 @@ const toOutput = (
   const { verdict } = deriveDetonateVerdict(task);
   return {
     task_id: task.id,
-    run_url: toRunUrl(task.id),
+    run_url: toRunUrl(task.id, runUrlContext),
     completed,
     failed,
     last_worker_name: task.last_worker_name,
@@ -196,6 +213,9 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       throw new Error('Poll ran before start() seeded durable state — check engine wiring.');
     }
 
+    const { workflow, kibanaUrl } = contextManager.getContext();
+    const runUrlContext = { spaceId: workflow.spaceId, kibanaUrl };
+
     let task: DetonateTask;
     try {
       ({ body: task } = await contextManager.callKibanaApi<DetonateTask>({
@@ -217,7 +237,12 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       // is a result the workflow should be able to branch on, and throwing
       // would lose the alert counts a partial run did produce.
       return {
-        output: toOutput(task, true, await readExtractedIocs(task, { contextManager, logger })),
+        output: toOutput(
+          task,
+          true,
+          runUrlContext,
+          await readExtractedIocs(task, { contextManager, logger })
+        ),
       };
     }
 
@@ -228,7 +253,7 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
       );
       // The run itself is left alone — it may still finish, and the task id in
       // the output is how the analyst finds it.
-      return { output: toOutput(task, false) };
+      return { output: toOutput(task, false, runUrlContext) };
     }
 
     logger.debug(

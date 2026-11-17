@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toValue } from 'liquidjs';
 import { parse } from 'yaml';
 
 import {
@@ -75,6 +76,17 @@ describe('Detonate file hash workflow', () => {
     expect(detonate?.type).toBe('detonate.prototype.detonateSample');
     expect(detonate?.with?.sample_hash).toBe('{{ inputs.sha256 }}');
   });
+
+  it('leaves the verdict null, not an empty string, when the run has none', async () => {
+    const verdict = expressionOf(String(stepNamed(workflow, 'emit_result')?.with?.verdict));
+    expect(String(stepNamed(workflow, 'emit_result')?.with?.verdict)).toMatch(/^\$\{\{/);
+    // The engine renders `${{ }}` as `toValue(evalValueSync(<expression>))`.
+    const evaluate = (expression: string, ctx: Record<string, unknown>) =>
+      toValue(createWorkflowLiquidEngine().evalValueSync(expression.slice(2, -2).trim(), ctx));
+    const context = (output: Record<string, unknown>) => ({ steps: { detonate: { output } } });
+    expect(evaluate(verdict, context({ completed: false }))).toBeNull();
+    expect(evaluate(verdict, context({ verdict: 'malicious' }))).toBe('malicious');
+  });
 });
 
 describe('Detonate high severity alerts workflow', () => {
@@ -95,7 +107,12 @@ describe('Detonate high severity alerts workflow', () => {
     expect(detonate?.if).toContain('steps.reputation.output.last_task_id == blank');
   });
 
-  it('keeps high and critical alerts that carry a hash, capped at 10', async () => {
+  it('lets one failed hash skip, not stop, the rest of the loop', () => {
+    expect(stepNamed(workflow, 'reputation')?.['on-failure']?.continue).toBe(true);
+    expect(stepNamed(workflow, 'detonate')?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('keeps the distinct hashes of high and critical alerts, capped at 10', async () => {
     const [loop] = workflow.steps;
     const alert = (severity: string, hash?: string) => ({
       kibana: { alert: { severity } },
@@ -108,20 +125,31 @@ describe('Detonate high severity alerts workflow', () => {
       alert('high'),
       ...Array.from({ length: 20 }, () => alert('high', SHA256)),
     ];
+    // 20 alerts share one hash and must not use up the cap: h, c and that hash.
     const rendered = await createWorkflowLiquidEngine().parseAndRender(
       `{{ ${expressionOf(loop.foreach).slice(3, -2)} | size }}`,
       { event: { alerts } }
     );
-    expect(rendered).toBe('10');
+    expect(rendered).toBe('3');
+
+    const manyDistinct = Array.from({ length: 25 }, (_, i) =>
+      alert('high', String(i).padStart(64, '0'))
+    );
+    expect(
+      await createWorkflowLiquidEngine().parseAndRender(
+        `{{ ${expressionOf(loop.foreach).slice(3, -2)} | size }}`,
+        { event: { alerts: [...manyDistinct, ...manyDistinct] } }
+      )
+    ).toBe('10');
 
     const kept = await createWorkflowLiquidEngine().parseAndRender(
       `{% assign kept = ${expressionOf(loop.foreach).slice(
         3,
         -2
-      )} %}{{ kept[0].file.hash.sha256 | slice: 0, 1 }}{{ kept[1].file.hash.sha256 | slice: 0, 1 }}`,
+      )} %}{{ kept[0] | slice: 0, 1 }}{{ kept[1] | slice: 0, 1 }}{{ kept[2] | slice: 0, 1 }}`,
       { event: { alerts } }
     );
-    expect(kept).toBe('hc');
+    expect(kept).toBe('hca');
   });
 });
 
@@ -139,9 +167,20 @@ describe('Detonate email attachments workflow', () => {
   it('searches at most 10 distinct hashes from the last hour', () => {
     const search = stepNamed(workflow, 'find_attachments');
     expect(search?.type).toBe('elasticsearch.search');
-    expect(search?.with?.size).toBe(10);
-    expect(search?.with?.collapse).toEqual({ field: 'email.attachments.file.hash.sha256' });
+    // `email.attachments` is nested, so hashes come from a nested terms aggregation.
+    expect(search?.with?.size).toBe(0);
+    expect(search?.with?.aggregations).toEqual({
+      attachments: {
+        nested: { path: 'email.attachments' },
+        aggregations: {
+          hashes: { terms: { field: 'email.attachments.file.hash.sha256', size: 10 } },
+        },
+      },
+    });
     expect(JSON.stringify(search?.with?.query)).toContain('now-1h');
+    expect(stepNamed(workflow, 'detonate_each_hash')?.foreach).toContain(
+      'steps.find_attachments.output.aggregations.attachments.hashes.buckets'
+    );
   });
 
   it('detonates only unknown samples, and one bad hash does not stop the others', async () => {
@@ -153,11 +192,7 @@ describe('Detonate email attachments workflow', () => {
 
     const hash = await createWorkflowLiquidEngine().parseAndRender(
       String(stepNamed(workflow, 'reputation')?.with?.sha256),
-      {
-        foreach: {
-          item: { fields: { 'email.attachments.file.hash.sha256': [SHA256] } },
-        },
-      }
+      { foreach: { item: { key: SHA256, doc_count: 3 } } }
     );
     expect(hash).toBe(SHA256);
   });

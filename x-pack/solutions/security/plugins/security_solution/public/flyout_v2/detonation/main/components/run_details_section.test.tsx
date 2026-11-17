@@ -19,7 +19,8 @@ import { RunDetailsSection } from './run_details_section';
 
 jest.mock('../../../../common/lib/kibana');
 
-const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => `/app/${appId}${path}`);
+const defaultGetUrlForApp = (appId: string, { path }: { path: string }) => `/app/${appId}${path}`;
+const getUrlForApp = jest.fn(defaultGetUrlForApp);
 
 const task = {
   id: 'task-1',
@@ -44,6 +45,8 @@ const renderSection = (record?: Partial<DetonationRecord>) => {
 describe('<RunDetailsSection />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // clearAllMocks keeps implementations, so a throwing one would leak into later tests.
+    getUrlForApp.mockImplementation(defaultGetUrlForApp);
     jest.mocked(useKibana).mockReturnValue({
       services: {
         application: { getUrlForApp },

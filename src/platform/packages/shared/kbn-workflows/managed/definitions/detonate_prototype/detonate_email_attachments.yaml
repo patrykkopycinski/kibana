@@ -23,24 +23,26 @@ steps:
     with:
       index: "logs-*"
       ignore_unavailable: true
-      size: 10
-      _source: false
-      fields:
-        - email.attachments.file.hash.sha256
-      collapse:
-        field: email.attachments.file.hash.sha256
+      # `email.attachments` is `nested` in ECS, so hashes are only reachable
+      # through a nested aggregation, not `collapse`, `exists` or `fields`.
+      size: 0
       query:
-        bool:
-          filter:
-            - exists:
+        range:
+          "@timestamp":
+            gte: "now-1h"
+      aggregations:
+        attachments:
+          nested:
+            path: email.attachments
+          aggregations:
+            hashes:
+              terms:
                 field: email.attachments.file.hash.sha256
-            - range:
-                "@timestamp":
-                  gte: "now-1h"
+                size: 10
 
   - name: detonate_each_hash
     type: foreach
-    foreach: "${{ steps.find_attachments.output.hits.hits }}"
+    foreach: "${{ steps.find_attachments.output.aggregations.attachments.hashes.buckets }}"
     steps:
       # A hash that is not a sha256 fails the step; the next hash still runs.
       - name: reputation
@@ -48,7 +50,7 @@ steps:
         on-failure:
           continue: true
         with:
-          sha256: '{{ foreach.item.fields["email.attachments.file.hash.sha256"][0] }}'
+          sha256: "{{ foreach.item.key }}"
 
       - name: detonate
         type: detonate.prototype.detonateSample
@@ -56,6 +58,6 @@ steps:
         on-failure:
           continue: true
         with:
-          sample_hash: '{{ foreach.item.fields["email.attachments.file.hash.sha256"][0] }}'
+          sample_hash: "{{ foreach.item.key }}"
           tags:
             - email-attachment

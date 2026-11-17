@@ -49,4 +49,4 @@ steps:
     with:
       task_id: "{{ steps.detonate.output.task_id }}"
       completed: "${{ steps.detonate.output.completed }}"
-      verdict: "{{ steps.detonate.output.verdict }}"
+      verdict: "${{ steps.detonate.output.verdict | default: nil }}"

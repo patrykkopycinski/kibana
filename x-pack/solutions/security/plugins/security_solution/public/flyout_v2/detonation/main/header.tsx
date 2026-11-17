@@ -36,6 +36,7 @@ import {
   useShowDocumentPagination,
 } from '../../document/main/components/document_pagination';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
@@ -180,6 +181,7 @@ export const Header: FC<HeaderProps> = memo(
     const showPagination = useShowDocumentPagination();
 
     const { openDetonationSessionView, openDetonationNotes } = useFlyoutApi();
+    const { notesPrivileges } = useUserPrivileges();
     const onOpenSessionView = useCallback(() => {
       if (task) {
         openDetonationSessionView({ task, origin: FLYOUT_ORIGIN.FLYOUT_HEADER });
@@ -205,7 +207,7 @@ export const Header: FC<HeaderProps> = memo(
               />
             </EuiToolTip>
           )}
-          {task && (
+          {task && notesPrivileges.read && (
             <EuiToolTip content={OPEN_NOTES_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="comment"

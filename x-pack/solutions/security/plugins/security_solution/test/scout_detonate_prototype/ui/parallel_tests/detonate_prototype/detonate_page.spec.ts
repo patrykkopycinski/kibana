@@ -132,11 +132,12 @@ const expectToolClosesWithResult = async (
   await expect(tool, `${name} opens`).toBeVisible();
   await expect(result, `the result stays open under ${name}`).toBeVisible();
 
-  // With a child open there are two close buttons; the result's is the first in the DOM
-  // (it opened first), the child's is the last.
-  await page.testSubj
-    .locator(FLYOUT_CLOSE)
-    .first() // eslint-disable-line playwright/no-nth-methods -- the result flyout's close button is the first of the stacked pair
+  // With a child open there are two close buttons: scope to the dialog holding the result's
+  // header so the child's close button is never matched.
+  await page
+    .getByRole('dialog')
+    .filter({ has: result })
+    .locator(`[data-test-subj="${FLYOUT_CLOSE}"]`)
     .click();
   await expect(result, 'the result closes').toBeHidden();
   await expect(tool, `${name} closes with the result`).toBeHidden();

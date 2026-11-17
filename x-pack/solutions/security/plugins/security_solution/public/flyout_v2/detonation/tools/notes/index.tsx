@@ -15,15 +15,10 @@ import {
   EuiFlyoutHeader,
   useEuiTheme,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux-v7';
 import type { DetonateTask } from '../../../../../common/detonate_prototype';
-import type { State } from '../../../../common/store';
-import { timelineSelectors } from '../../../../timelines/store';
-import { TimelineId } from '../../../../../common/types';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { NOTES_TITLE } from '../../../shared/constants/flyout_titles';
-import { useTimelineConfig } from '../../../shared/tools/notes/hooks/use_timeline_config';
 import { NotesDetailsContent } from '../../../shared/tools/notes/components/notes_details_content';
 import { buildDetonationRecord } from '../../main/utils/build_detonation_record';
 import { SandboxBadge } from '../sandbox_badge';
@@ -43,10 +38,6 @@ export interface DetonationNotesProps {
 export const DetonationNotes: FC<DetonationNotesProps> = memo(({ task }) => {
   const { euiTheme } = useEuiTheme();
   const hit = useMemo(() => buildDetonationRecord(task), [task]);
-  const isTimelineOpen = useSelector(
-    (state: State) => timelineSelectors.selectTimelineById(state, TimelineId.active)?.show ?? false
-  );
-  const timelineConfig = useTimelineConfig(task.id, isTimelineOpen);
   const isInSecurityApp = useIsInSecurityApp();
 
   return (
@@ -67,11 +58,8 @@ export const DetonationNotes: FC<DetonationNotesProps> = memo(({ task }) => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={DETONATION_NOTES_TOOL_TEST_ID}>
-        <NotesDetailsContent
-          hit={hit}
-          timelineConfig={timelineConfig}
-          hideTimelineIcon={!isInSecurityApp}
-        />
+        {/* Epic #20877 §5: notes on a run are not attached to Timeline pending a product answer. */}
+        <NotesDetailsContent hit={hit} hideTimelineIcon={!isInSecurityApp} />
       </EuiFlyoutBody>
     </>
   );

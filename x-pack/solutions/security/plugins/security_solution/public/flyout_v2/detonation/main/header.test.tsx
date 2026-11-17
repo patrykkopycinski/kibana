@@ -10,6 +10,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../use_flyout_api';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import { useDetonationTaskUpdates } from '../../../detonate_prototype/hooks/use_detonate';
@@ -29,6 +30,7 @@ import {
 
 jest.mock('../../../detonate_prototype/hooks/use_detonate');
 jest.mock('../../use_flyout_api');
+jest.mock('../../../common/components/user_privileges');
 jest.mock('../../shared/components/flyout_header_actions', () => ({
   FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -83,6 +85,9 @@ describe('<Header />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useUserPrivileges).mockReturnValue({
+      notesPrivileges: { read: true },
+    } as ReturnType<typeof useUserPrivileges>);
     jest
       .mocked(useDetonationTaskUpdates)
       .mockReturnValue({ data: undefined } as ReturnType<typeof useDetonationTaskUpdates>);
@@ -169,6 +174,15 @@ describe('<Header />', () => {
         task,
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
+    });
+
+    it('offers no Notes button without the notes read privilege', () => {
+      jest.mocked(useUserPrivileges).mockReturnValue({
+        notesPrivileges: { read: false },
+      } as ReturnType<typeof useUserPrivileges>);
+      renderHeader(makeTask());
+
+      expect(screen.queryByTestId(DETONATION_DETAILS_OPEN_NOTES_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('offers no Notes button until the run has loaded', () => {

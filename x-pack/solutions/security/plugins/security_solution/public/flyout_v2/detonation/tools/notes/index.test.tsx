@@ -14,9 +14,10 @@ import { useTimelineConfig } from '../../../shared/tools/notes/hooks/use_timelin
 import { DetonationNotes } from '.';
 import { DETONATION_NOTES_TOOL_TEST_ID, DETONATION_TOOL_SANDBOX_BADGE_TEST_ID } from '../test_ids';
 
+const mockUseSelector = jest.fn();
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
-  useSelector: jest.fn(() => false),
+  useSelector: (selector: unknown) => mockUseSelector(selector),
 }));
 jest.mock('../../../../common/hooks/is_in_security_app');
 jest.mock('../../../shared/tools/notes/hooks/use_timeline_config');
@@ -39,6 +40,7 @@ describe('<DetonationNotes />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    mockUseSelector.mockReturnValue(true);
     jest.mocked(useTimelineConfig).mockReturnValue(timelineConfig as never);
   });
 
@@ -48,7 +50,6 @@ describe('<DetonationNotes />', () => {
     expect(screen.getByTestId(DETONATION_NOTES_TOOL_TEST_ID)).toBeInTheDocument();
     const { hit } = mockNotesDetailsContent.mock.calls[0][0] as { hit: DataTableRecord };
     expect(hit.raw._id).toBe('task-1');
-    expect(useTimelineConfig).toHaveBeenCalledWith('task-1', false);
   });
 
   it('marks the tool as showing sandbox data', () => {
@@ -57,11 +58,18 @@ describe('<DetonationNotes />', () => {
     expect(screen.getByTestId(DETONATION_TOOL_SANDBOX_BADGE_TEST_ID)).toHaveTextContent('sandbox');
   });
 
-  it('passes the timeline config and shows the timeline icon in the security app', () => {
+  it('never attaches notes to Timeline, even while the active Timeline is shown', () => {
+    render(<DetonationNotes task={task} />);
+
+    const props = mockNotesDetailsContent.mock.calls[0][0] as { timelineConfig?: unknown };
+    expect(props.timelineConfig).toBeUndefined();
+  });
+
+  it('shows the timeline icon in the security app', () => {
     render(<DetonationNotes task={task} />);
 
     expect(mockNotesDetailsContent).toHaveBeenCalledWith(
-      expect.objectContaining({ timelineConfig, hideTimelineIcon: false })
+      expect.objectContaining({ hideTimelineIcon: false })
     );
   });
 

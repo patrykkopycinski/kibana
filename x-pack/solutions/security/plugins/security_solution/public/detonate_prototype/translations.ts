@@ -1342,3 +1342,26 @@ export const GROUP_OPEN_DETONATION = (name: string) =>
     defaultMessage: 'Open the result for {name}',
     values: { name },
   });
+
+export const ORIGINATING_ALERTS_TITLE = (count: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.runs.originatingAlertsTitle', {
+    defaultMessage: '{count, plural, one {Originating alert} other {Originating alerts}}',
+    values: { count },
+  });
+
+export const ORIGINATING_ALERT_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.originatingAlertNotAvailable',
+  { defaultMessage: 'Originating alert not available' }
+);
+
+export const ORIGINATING_ALERTS_MORE = (count: number) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.runs.originatingAlertsMore', {
+    defaultMessage: '+{count} more',
+    values: { count },
+  });
+
+export const ORIGINATING_ALERT_OPEN = (name: string) =>
+  i18n.translate('xpack.securitySolution.detonatePrototype.runs.originatingAlertOpen', {
+    defaultMessage: 'Open the alert {name}',
+    values: { name },
+  });

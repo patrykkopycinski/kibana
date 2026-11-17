@@ -289,6 +289,30 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const CARD_ALERT_RUNS_SIZE = 10;
 
 /**
+ * The production alerts a run was submitted from (`detonate.origin.alert_ids`). The task route does
+ * not carry them, so they come from the run's stored record; unlike {@link useDetonationRecord}
+ * this only reads, and works before the run is over.
+ */
+export const useDetonationOriginAlertIds = (taskId: string | undefined) => {
+  const { http } = useKibana().services;
+
+  return useQuery<DetonationRunsResponse, Error, string[]>({
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'origin-alert-ids', taskId ?? ''],
+    enabled: Boolean(taskId),
+    queryFn: ({ signal }) =>
+      detonateApi.searchRuns(
+        http,
+        { kql: `detonate.task_id: ${quoteQueryValue(taskId ?? '')}`, size: 1 },
+        signal
+      ),
+    select: (response) => response.hits[0]?.['detonate.origin.alert_ids'] ?? [],
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: shouldRetry,
+  });
+};
+
+/**
  * The alert flyout card's two runs reads: this alert's runs, and the newest run of the same file
  * from any alert. Keys sit under `[DETONATE_QUERY_KEY, 'tasks']` so a submit refreshes them.
  * The cross-alert query matches `file.hash.sha256`, so it only runs for a SHA-256.

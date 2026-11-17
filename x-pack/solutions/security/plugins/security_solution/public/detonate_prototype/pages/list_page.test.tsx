@@ -25,8 +25,11 @@ import type {
 } from '../../../common/detonate_prototype';
 import { useKibana } from '../../common/lib/kibana';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
+import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
 import {
   useDetonateHealthcheck,
+  useDetonationOriginAlertIds,
   useDetonationRunGroups,
   useDetonationRuns,
   useDetonationRunStats,
@@ -59,6 +62,8 @@ jest.mock('../components/submit_modal', () => ({
 jest.mock('../../common/lib/kibana');
 jest.mock('../../flyout_v2/use_flyout_api');
 jest.mock('../hooks/use_detonate');
+jest.mock('../../detections/containers/detection_engine/alerts/use_query');
+jest.mock('../../data_view_manager/hooks/use_signal_index_name');
 jest.mock('@kbn/cell-actions', () => ({
   CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -313,6 +318,11 @@ describe('DetonateListPage', () => {
     mockStats();
     mockGroups([]);
     jest.mocked(useDetonationTask).mockReturnValue({ data: undefined, isLoading: true } as never);
+    jest.mocked(useDetonationOriginAlertIds).mockReturnValue({ data: undefined } as never);
+    jest.mocked(useSignalIndexName).mockReturnValue('.alerts-security.alerts-default');
+    jest
+      .mocked(useQueryAlerts)
+      .mockReturnValue({ loading: false, data: null, refetch: null } as never);
     // The runs table tests below are about the flat table; grouping has its own describe.
     saveGrouping(['none']);
   });
@@ -356,6 +366,51 @@ describe('DetonateListPage', () => {
 
       expect(openDetonationFlyout).toHaveBeenCalledWith({ taskId: 'run-1' });
       expect(screen.queryByTestId('detonatePrototypeGroupBodyLoading')).not.toBeInTheDocument();
+    });
+
+    describe('originating alerts', () => {
+      const openGroup = async (originAlertIds: string[] = ['alert-1', 'alert-2']) => {
+        mockGroups([makeGroup()]);
+        jest.mocked(useDetonationTask).mockReturnValue({
+          data: {
+            production_endpoint_alert_groups: [],
+            production_detection_alert_groups: [],
+            diagnostic_endpoint_alert_groups: [],
+          },
+          isLoading: false,
+        } as never);
+        jest.mocked(useDetonationOriginAlertIds).mockReturnValue({ data: originAlertIds } as never);
+        renderPage();
+        return screen.findByTestId('group-panel-toggle');
+      };
+      const fetchesAlerts = () =>
+        jest.mocked(useQueryAlerts).mock.calls.some(([params]) => !params.skip);
+
+      it('reads nothing while the group is collapsed', async () => {
+        await openGroup();
+
+        expect(useDetonationOriginAlertIds).not.toHaveBeenCalled();
+        expect(useQueryAlerts).not.toHaveBeenCalled();
+        expect(screen.queryByTestId('detonatePrototypeOriginatingAlerts')).not.toBeInTheDocument();
+      });
+
+      it('reads the origin alerts of that Detonation once the group is expanded', async () => {
+        fireEvent.click(await openGroup());
+
+        expect(await screen.findByTestId('detonatePrototypeOriginatingAlerts')).toBeInTheDocument();
+        expect(useDetonationOriginAlertIds).toHaveBeenCalledWith('run-1');
+        expect(fetchesAlerts()).toBe(true);
+        expect(jest.mocked(useQueryAlerts).mock.lastCall?.[0].query).toMatchObject({
+          query: { ids: { values: ['alert-1', 'alert-2'] } },
+        });
+      });
+
+      it('shows no section for a Detonation that did not come from an alert', async () => {
+        fireEvent.click(await openGroup([]));
+
+        expect(await screen.findByTestId('detonatePrototypeGroupBody')).toBeInTheDocument();
+        expect(screen.queryByTestId('detonatePrototypeOriginatingAlerts')).not.toBeInTheDocument();
+      });
     });
 
     it('shows the flat table when grouping is None', async () => {

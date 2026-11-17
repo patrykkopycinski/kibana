@@ -111,6 +111,7 @@ import {
   useDetonationRunGroups,
   useDetonationRuns,
   useDetonationRunStats,
+  useDetonationOriginAlertIds,
   useDetonationTask,
 } from '../hooks/use_detonate';
 import { isRejectedFilter } from '../hooks/is_client_error';
@@ -118,6 +119,7 @@ import { DetonationsDashboard } from '../components/detonations_dashboard';
 import { DetonationStateBadge } from '../components/detonation_state_badge';
 import { DetonateVerdictNameBadge } from '../components/verdict_badge';
 import { DetectionAlertGroups, EndpointAlertGroups } from '../components/alert_groups';
+import { OriginatingAlerts } from '../components/originating_alerts';
 import { SubmitModal } from '../components/submit_modal';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
@@ -726,6 +728,8 @@ const getGroupStats: GetGroupStats<RunGroupStats> = (selectedGroup, bucket) => {
  */
 const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
   const { data: task, isLoading } = useDetonationTask(taskId);
+  // This body only mounts while its group is open, so the origin alerts are read on expand only.
+  const { data: originAlertIds } = useDetonationOriginAlertIds(taskId);
 
   if (isLoading || !task) {
     return (
@@ -740,6 +744,11 @@ const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="detonatePrototypeGroupBody">
+      {originAlertIds && originAlertIds.length > 0 && (
+        <EuiFlexItem>
+          <OriginatingAlerts key={originAlertIds.join(',')} ids={originAlertIds} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EndpointAlertGroups
           title={i18n.PRODUCTION_ENDPOINT_ALERTS}

@@ -13,11 +13,6 @@
  * plugin's own internal routes rather than holding a `DetonateClient`, so the
  * service address, privilege checks and error shaping stay in one place and
  * the workflow engine's request scoping is preserved.
- *
- * This step and `detonate.detonateVerdict` both exist on purpose: a run that
- * timed out or failed has no stable verdict, so this step reports one only for
- * a finished, non-failed run, while `detonateVerdict` serves callers that hold
- * just a task id.
  */
 
 import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -118,7 +113,6 @@ const toOutput = (
   extractedIocs?: DetonateExtractedIocs
 ) => {
   const failed = isDetonationFailed(task);
-  // `deriveDetonateVerdict` yields a verdict only for a finished, non-failed run.
   const { verdict } = deriveDetonateVerdict(task);
   return {
     task_id: task.id,

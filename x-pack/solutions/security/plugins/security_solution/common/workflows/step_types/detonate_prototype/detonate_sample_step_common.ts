@@ -83,11 +83,6 @@ export const detonateSampleInputSchema = lazySchema(() =>
  * returned: a workflow step output is rendered, logged and passed between
  * steps, and a detonation's alert documents are large and contain sample
  * content. A workflow that needs them reads the task through the API.
- *
- * `verdict` is set only for a run that finished without failing. A timed-out
- * or failed run has no stable verdict, so the field is absent rather than a
- * guess. `detonate.detonateVerdict` stays as a separate step because it also
- * serves callers that hold only a task id (a run this workflow did not start).
  */
 export const detonateSampleOutputSchema = lazySchema(() =>
   z.object({

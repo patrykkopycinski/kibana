@@ -30,6 +30,7 @@ import {
 } from '../../../common/detonate_prototype';
 import type { DetonateClient, DetonateServiceError } from '../client';
 import { createRunRecorder } from '../results_store';
+import { buildRunsQuery } from '../runs_search';
 import { registerDetonatePrototypeRoutes } from '.';
 
 /** The results writes are fire-and-forget, so a test waits for them to settle before asserting. */
@@ -1982,6 +1983,37 @@ describe('registerDetonatePrototypeRoutes', () => {
       const filter = JSON.stringify(searchArgs().query);
       expect(filter).toContain('{"term":{"host.name":"host-1"}}');
       expect(filter).toContain('{"bool":{"must_not":[{"exists":{"field":"detonate.source"}}]}}');
+    });
+
+    it("carries exactly the table's run filter plus the parents, and reads only the active space", async () => {
+      const parents = [{ field: 'host.name' as const, value: 'host-1' }];
+      const params = {
+        group_by: 'user.name' as const,
+        kql: 'detonate.state: "running"',
+        start: '2026-01-01T00:00:00.000Z',
+        end: '2026-01-31T00:00:00.000Z',
+        parents: JSON.stringify(parents),
+      };
+      await groups(params);
+
+      const { bool } = searchArgs().query;
+      expect(bool.filter).toEqual([
+        {
+          bool: expect.objectContaining({
+            filter: [buildRunsQuery(params), { term: { 'host.name': 'host-1' } }],
+          }),
+        },
+      ]);
+      // The pinned doc_kind is the first clause of the table's own filter: dropping it widens to alert decisions.
+      expect(buildRunsQuery(params).bool?.filter).toEqual(
+        expect.arrayContaining([{ term: { 'detonate.doc_kind': 'run' } }])
+      );
+      expect(searchArgs().index).toBe('.kibana-detonate-results-team-a');
+
+      esClient.search.mockClear();
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-b');
+      await groups(params);
+      expect(searchArgs().index).toBe('.kibana-detonate-results-team-b');
     });
 
     it('applies the time range and KQL the table applies', async () => {

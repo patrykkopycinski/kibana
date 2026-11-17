@@ -122,7 +122,11 @@ export const detonateSampleOutputSchema = lazySchema(() =>
      * execution detail next to the step output.
      */
     // Epic #20877 §7: an output field, not a button in the Workflows execution UI (it has no extension point); pending product answer.
-    run_url: z.string().describe("Relative Kibana URL of this run's detonation result flyout."),
+    run_url: z
+      .string()
+      .describe(
+        "Kibana URL of this run's detonation result flyout, with the space prefix; absolute when the Kibana URL is known."
+      ),
     /**
      * IOCs read from this run's alert documents — DNS domains, public IPs,
      * and non-sample file hashes. Empty arrays mean the alerts contained

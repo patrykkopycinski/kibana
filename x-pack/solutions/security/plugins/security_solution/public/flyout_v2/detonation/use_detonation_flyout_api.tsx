@@ -77,15 +77,9 @@ export interface DetonationFlyoutApi {
    * stays on it, e.g. an alert).
    */
   openDetonationFlyoutAsChild: (params: OpenDetonationFlyoutParams) => void;
-  /**
-   * Opens Session View over the run's recorded process events as a child of the result flyout
-   * (`session: 'inherit'`), so closing the result closes it.
-   */
+  /** Opens Session View over the run's recorded process events as a child of the result. */
   openDetonationSessionView: (params: OpenDetonationSessionViewParams) => void;
-  /**
-   * Opens Notes for the run as a child of the result flyout (`session: 'inherit'`). Notes are
-   * keyed on the run's task id.
-   */
+  /** Opens Notes for the run as a child of the result. */
   openDetonationNotes: (params: OpenDetonationNotesParams) => void;
 }
 

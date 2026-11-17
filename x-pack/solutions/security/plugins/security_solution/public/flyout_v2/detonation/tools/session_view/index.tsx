@@ -107,6 +107,7 @@ export const DetonationSessionView: FC<DetonationSessionViewProps> = memo(({ tas
             </p>
           )}
           {!isLoading &&
+            !isError &&
             sessionEntityId &&
             sessionStartTime &&
             session &&

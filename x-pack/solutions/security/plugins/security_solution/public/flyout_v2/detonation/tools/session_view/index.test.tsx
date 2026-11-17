@@ -85,6 +85,23 @@ describe('<DetonationSessionView />', () => {
     expect(getSessionView).not.toHaveBeenCalled();
   });
 
+  it('shows only the error callout when a refetch fails while cached data is present', () => {
+    jest.mocked(useRunSession).mockReturnValue({
+      data: {
+        index: 'detonate-events',
+        session_entity_id: 'entity-1',
+        session_start_time: '2026-11-16T10:00:00.000Z',
+      },
+      isLoading: false,
+      isError: true,
+    } as never);
+    renderTool();
+
+    expect(screen.getByTestId(DETONATION_SESSION_VIEW_TOOL_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId('sessionViewMock')).not.toBeInTheDocument();
+    expect(getSessionView).not.toHaveBeenCalled();
+  });
+
   it('renders Session View with the run session entity, index and start time', () => {
     jest.mocked(useRunSession).mockReturnValue({
       data: {

@@ -131,7 +131,7 @@ describe('useDetonationFlyoutApi', () => {
     it('openDetonationSessionView opens a tools-size child that inherits the result session', () => {
       const { result } = renderHook(() => useDetonationFlyoutApi());
       result.current.openDetonationSessionView({
-        taskId: 'task-1',
+        task,
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
 
@@ -155,10 +155,28 @@ describe('useDetonationFlyoutApi', () => {
 
     it('openDetonationSessionView renders Session View for the given run', () => {
       const { result } = renderHook(() => useDetonationFlyoutApi());
-      result.current.openDetonationSessionView({ taskId: 'task-1' });
+      result.current.openDetonationSessionView({ task });
 
       expect(openedBody().props).toEqual({ taskId: 'task-1' });
     });
+
+    it.each([
+      ['the sample filename', task, 'invoice.pdf'],
+      [
+        'the run id when there is no sample filename',
+        { id: 'task-2' } as unknown as DetonateTask,
+        'task-2',
+      ],
+    ])(
+      'openDetonationSessionView titles the child menu entry with %s',
+      (_, openedTask, expected) => {
+        const { result } = renderHook(() => useDetonationFlyoutApi());
+        result.current.openDetonationSessionView({ task: openedTask });
+
+        const [, properties] = mockOpenSystemFlyout.mock.calls[0];
+        expect(properties.title).toContain(`Session view: ${expected}`);
+      }
+    );
 
     it('openDetonationNotes opens a tools-size child that inherits the result session', () => {
       const { result } = renderHook(() => useDetonationFlyoutApi());
@@ -192,7 +210,7 @@ describe('useDetonationFlyoutApi', () => {
       const replace = jest.fn();
       useHistoryMock.mockReturnValue({ replace, location: { search: '' } });
       const { result } = renderHook(() => useDetonationFlyoutApi());
-      result.current.openDetonationSessionView({ taskId: 'task-1' });
+      result.current.openDetonationSessionView({ task });
       result.current.openDetonationNotes({ task });
 
       expect(replace).not.toHaveBeenCalled();

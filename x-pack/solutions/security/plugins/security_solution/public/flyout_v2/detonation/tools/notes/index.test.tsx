@@ -12,7 +12,7 @@ import type { DetonateTask } from '../../../../../common/detonate_prototype';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useTimelineConfig } from '../../../shared/tools/notes/hooks/use_timeline_config';
 import { DetonationNotes } from '.';
-import { DETONATION_NOTES_TOOL_TEST_ID } from '../test_ids';
+import { DETONATION_NOTES_TOOL_TEST_ID, DETONATION_TOOL_SANDBOX_BADGE_TEST_ID } from '../test_ids';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -49,6 +49,12 @@ describe('<DetonationNotes />', () => {
     const { hit } = mockNotesDetailsContent.mock.calls[0][0] as { hit: DataTableRecord };
     expect(hit.raw._id).toBe('task-1');
     expect(useTimelineConfig).toHaveBeenCalledWith('task-1', false);
+  });
+
+  it('marks the tool as showing sandbox data', () => {
+    render(<DetonationNotes task={task} />);
+
+    expect(screen.getByTestId(DETONATION_TOOL_SANDBOX_BADGE_TEST_ID)).toHaveTextContent('sandbox');
   });
 
   it('passes the timeline config and shows the timeline icon in the security app', () => {

@@ -90,8 +90,8 @@ export interface DetonationFlyoutApi {
 }
 
 export interface OpenDetonationSessionViewParams {
-  /** Id of the detonation run. */
-  taskId: string;
+  /** The detonation run; its filename (or id) titles the child menu entry. */
+  task: DetonateTask;
   /** Which UI trigger opened the tool, when known. */
   origin?: FlyoutOrigin;
 }
@@ -245,10 +245,10 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
   );
 
   const openDetonationSessionView = useCallback(
-    ({ taskId, origin }: OpenDetonationSessionViewParams) =>
+    ({ task, origin }: OpenDetonationSessionViewParams) =>
       openToolAsChild(
-        <DetonationSessionView taskId={taskId} />,
-        formatFlyoutTitle(SESSION_VIEW_TITLE, taskId),
+        <DetonationSessionView taskId={task.id} />,
+        formatFlyoutTitle(SESSION_VIEW_TITLE, task.sample_filename ?? task.id),
         FLYOUT_TOOL.SESSION_VIEW,
         origin
       ),

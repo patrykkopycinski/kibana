@@ -8,7 +8,13 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux-v7';
 import type { DetonateTask } from '../../../../../common/detonate_prototype';
 import type { State } from '../../../../common/store';
@@ -20,6 +26,7 @@ import { NOTES_TITLE } from '../../../shared/constants/flyout_titles';
 import { useTimelineConfig } from '../../../shared/tools/notes/hooks/use_timeline_config';
 import { NotesDetailsContent } from '../../../shared/tools/notes/components/notes_details_content';
 import { buildDetonationRecord } from '../../main/utils/build_detonation_record';
+import { SandboxBadge } from '../sandbox_badge';
 import { DETONATION_NOTES_TOOL_TEST_ID } from '../test_ids';
 
 export interface DetonationNotesProps {
@@ -31,6 +38,7 @@ export interface DetonationNotesProps {
  * Notes tool for a detonation run, opened as a child of the result flyout. The shared
  * `NotesDetails` is not reused: its header would offer to open the run's `detonate-tasks`
  * document as a document flyout, which is not a document the alert flyout can show.
+ * Epic #20877 §5: reuse of the shared tool is pending a product answer.
  */
 export const DetonationNotes: FC<DetonationNotesProps> = memo(({ task }) => {
   const { euiTheme } = useEuiTheme();
@@ -49,7 +57,14 @@ export const DetonationNotes: FC<DetonationNotesProps> = memo(({ task }) => {
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader title={NOTES_TITLE} />
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <ToolsFlyoutHeader title={NOTES_TITLE} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SandboxBadge />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={DETONATION_NOTES_TOOL_TEST_ID}>
         <NotesDetailsContent

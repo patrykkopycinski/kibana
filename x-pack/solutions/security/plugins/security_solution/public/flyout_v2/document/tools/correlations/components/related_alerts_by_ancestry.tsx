@@ -50,6 +50,8 @@ export interface RelatedAlertsByAncestryProps {
   useLegacyExpandableFlyout: boolean;
   /**
    * Optional index patterns to search. Defaults to the security default patterns when omitted.
+   * Pass a stable array reference: it feeds memoized search indices, so a new array on every
+   * render re-runs the search on every render.
    */
   indexPatterns?: string[];
 }

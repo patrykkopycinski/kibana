@@ -16,7 +16,9 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '../../../common/lib/kibana';
 import { useRunSession } from '../../../detonate_prototype/hooks/use_detonate';
 import { DETONATION_DETAILS_SESSION_TAB_TEST_ID } from './test_ids';
@@ -44,11 +46,24 @@ const sessionViewContainerCss = css({
 
 /** Session View in the detonation flyout, over the sandbox stream. */
 export const SessionTab: FC<SessionTabProps> = memo(({ taskId }) => {
-  const { data: session, isLoading } = useRunSession(taskId);
+  const { data: session, isLoading, isError } = useRunSession(taskId);
   const { sessionView } = useKibana().services;
 
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj={`${SESSION_TAB_TEST_ID}Loading`} size="l" />;
+  }
+
+  if (isError) {
+    return (
+      <KbnDangerCallout
+        announceOnMount
+        size="s"
+        title={i18n.translate('xpack.securitySolution.flyout.detonation.session.error', {
+          defaultMessage: 'Unable to load the process events for this run.',
+        })}
+        data-test-subj={`${SESSION_TAB_TEST_ID}Error`}
+      />
+    );
   }
 
   // No events recorded is a fact about the run, not an error: older

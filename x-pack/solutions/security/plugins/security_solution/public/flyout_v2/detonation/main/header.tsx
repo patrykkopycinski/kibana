@@ -180,10 +180,11 @@ export const Header: FC<HeaderProps> = memo(
     const showPagination = useShowDocumentPagination();
 
     const { openDetonationSessionView, openDetonationNotes } = useFlyoutApi();
-    const onOpenSessionView = useCallback(
-      () => openDetonationSessionView({ taskId, origin: FLYOUT_ORIGIN.FLYOUT_HEADER }),
-      [openDetonationSessionView, taskId]
-    );
+    const onOpenSessionView = useCallback(() => {
+      if (task) {
+        openDetonationSessionView({ task, origin: FLYOUT_ORIGIN.FLYOUT_HEADER });
+      }
+    }, [openDetonationSessionView, task]);
     const onOpenNotes = useCallback(() => {
       if (task) {
         openDetonationNotes({ task, origin: FLYOUT_ORIGIN.FLYOUT_HEADER });
@@ -193,15 +194,17 @@ export const Header: FC<HeaderProps> = memo(
     return (
       <>
         <FlyoutHeaderActions>
-          <EuiToolTip content={OPEN_SESSION_VIEW_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="commandLine"
-              color="text"
-              aria-label={OPEN_SESSION_VIEW_LABEL}
-              onClick={onOpenSessionView}
-              data-test-subj={DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID}
-            />
-          </EuiToolTip>
+          {task && (
+            <EuiToolTip content={OPEN_SESSION_VIEW_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="commandLine"
+                color="text"
+                aria-label={OPEN_SESSION_VIEW_LABEL}
+                onClick={onOpenSessionView}
+                data-test-subj={DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID}
+              />
+            </EuiToolTip>
+          )}
           {task && (
             <EuiToolTip content={OPEN_NOTES_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon

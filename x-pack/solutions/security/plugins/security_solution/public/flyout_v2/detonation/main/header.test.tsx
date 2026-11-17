@@ -140,24 +140,23 @@ describe('<Header />', () => {
 
   describe('tool openers', () => {
     it('opens Session View for the run from the header', () => {
-      renderHeader(makeTask());
+      const task = makeTask();
+      renderHeader(task);
 
       fireEvent.click(screen.getByTestId(DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID));
 
       expect(flyoutApi.openDetonationSessionView).toHaveBeenCalledWith({
-        taskId: 'task-1',
+        task,
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
     });
 
-    it('opens Session View before the run has loaded, keyed on the task id', () => {
+    it('offers no Session View button until the run has loaded', () => {
       renderHeader(undefined);
 
-      fireEvent.click(screen.getByTestId(DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID));
-
-      expect(flyoutApi.openDetonationSessionView).toHaveBeenCalledWith(
-        expect.objectContaining({ taskId: 'task-1' })
-      );
+      expect(
+        screen.queryByTestId(DETONATION_DETAILS_OPEN_SESSION_VIEW_TEST_ID)
+      ).not.toBeInTheDocument();
     });
 
     it('opens Notes with the loaded run', () => {

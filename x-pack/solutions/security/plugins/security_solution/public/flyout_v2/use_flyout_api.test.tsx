@@ -103,7 +103,7 @@ describe('useFlyoutApi', () => {
     result.current.openIocFlyoutAsChild(iocParams);
     result.current.openDetonationFlyout(detonationParams);
     result.current.openDetonationFlyoutAsChild(detonationParams);
-    result.current.openDetonationSessionView({ taskId: 'task-1' });
+    result.current.openDetonationSessionView({ task: detonationTask });
     result.current.openDetonationNotes({ task: detonationTask });
     result.current.openNetworkFlyout(networkParams);
     result.current.openNetworkFlyoutAsChild(networkParams);
@@ -132,7 +132,9 @@ describe('useFlyoutApi', () => {
     expect(iocApi.openIocFlyoutAsChild).toHaveBeenCalledWith(iocParams);
     expect(detonationApi.openDetonationFlyout).toHaveBeenCalledWith(detonationParams);
     expect(detonationApi.openDetonationFlyoutAsChild).toHaveBeenCalledWith(detonationParams);
-    expect(detonationApi.openDetonationSessionView).toHaveBeenCalledWith({ taskId: 'task-1' });
+    expect(detonationApi.openDetonationSessionView).toHaveBeenCalledWith({
+      task: detonationTask,
+    });
     expect(detonationApi.openDetonationNotes).toHaveBeenCalledWith({ task: detonationTask });
     expect(networkApi.openNetworkFlyout).toHaveBeenCalledWith(networkParams);
     expect(networkApi.openNetworkFlyoutAsChild).toHaveBeenCalledWith(networkParams);

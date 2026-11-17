@@ -11,7 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRunSession } from '../../../../detonate_prototype/hooks/use_detonate';
 import { DetonationSessionView } from '.';
-import { DETONATION_SESSION_VIEW_TOOL_TEST_ID } from '../test_ids';
+import {
+  DETONATION_SESSION_VIEW_TOOL_ERROR_TEST_ID,
+  DETONATION_SESSION_VIEW_TOOL_TEST_ID,
+  DETONATION_TOOL_SANDBOX_BADGE_TEST_ID,
+} from '../test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detonate_prototype/hooks/use_detonate');
@@ -58,6 +62,26 @@ describe('<DetonationSessionView />', () => {
     renderTool();
 
     expect(screen.getByTestId(`${DETONATION_SESSION_VIEW_TOOL_TEST_ID}Empty`)).toBeInTheDocument();
+    expect(getSessionView).not.toHaveBeenCalled();
+  });
+
+  it('marks the tool as showing sandbox data', () => {
+    jest.mocked(useRunSession).mockReturnValue({ data: undefined, isLoading: true } as never);
+    renderTool();
+
+    expect(screen.getByTestId(DETONATION_TOOL_SANDBOX_BADGE_TEST_ID)).toHaveTextContent('sandbox');
+  });
+
+  it('shows an error callout, not the empty state, when the process events fail to load', () => {
+    jest
+      .mocked(useRunSession)
+      .mockReturnValue({ data: undefined, isLoading: false, isError: true } as never);
+    renderTool();
+
+    expect(screen.getByTestId(DETONATION_SESSION_VIEW_TOOL_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`${DETONATION_SESSION_VIEW_TOOL_TEST_ID}Empty`)
+    ).not.toBeInTheDocument();
     expect(getSessionView).not.toHaveBeenCalled();
   });
 

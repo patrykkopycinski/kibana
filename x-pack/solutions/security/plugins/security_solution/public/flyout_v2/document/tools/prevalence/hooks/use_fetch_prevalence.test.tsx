@@ -106,12 +106,26 @@ describe('useFetchPrevalence', () => {
     );
   });
 
+  it('keeps the original query key when no index patterns are passed', () => {
+    renderHook(() => useFetchPrevalence({ highlightedFieldsFilters, interval }));
+
+    const [queryKey] = (useQuery as jest.Mock).mock.calls[0];
+    expect(queryKey).toHaveLength(4);
+    expect(queryKey).toEqual([
+      'useFetchFieldValuePairWithAggregation',
+      highlightedFieldsFilters,
+      'now-30d',
+      'now',
+    ]);
+  });
+
   it('searches the provided index patterns instead of the defaults when overridden', async () => {
     renderHook(() =>
       useFetchPrevalence({ highlightedFieldsFilters, interval, indexPatterns: ['custom-*'] })
     );
 
     const [queryKey, queryFn] = (useQuery as jest.Mock).mock.calls[0];
+    expect(queryKey).toHaveLength(5);
     expect(queryKey).toContainEqual(['custom-*']);
     await queryFn();
 

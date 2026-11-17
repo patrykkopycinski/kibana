@@ -62,7 +62,8 @@ export interface UseFetchPrevalenceParams {
   interval: { from: string; to: string };
   /**
    * Optional index patterns to search. Defaults to the security default patterns (detections and
-   * non-detections indices) when omitted.
+   * non-detections indices) when omitted. Pass a stable array reference: it is part of the query
+   * key, so a new array on every render refetches on every render.
    */
   indexPatterns?: string[];
 }
@@ -128,7 +129,10 @@ export const useFetchPrevalence = ({
   );
 
   const { data, isLoading, isError } = useQuery(
-    [QUERY_KEY, highlightedFieldsFilters, from, to, indexPatterns],
+    // The override joins the key only when passed, so callers without one keep the original key.
+    indexPatternsOverride
+      ? [QUERY_KEY, highlightedFieldsFilters, from, to, indexPatternsOverride]
+      : [QUERY_KEY, highlightedFieldsFilters, from, to],
     () => createFetchData<RawAggregatedDataResponse>(searchService, searchRequest)
   );
 

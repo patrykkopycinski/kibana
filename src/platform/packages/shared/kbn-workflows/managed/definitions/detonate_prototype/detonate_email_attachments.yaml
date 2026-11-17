@@ -2,7 +2,7 @@ version: "1"
 name: Detonate email attachments
 description: >
   Detonate prototype: every hour, finds email attachment hashes seen in the
-  last hour and detonates each one this space has not already detonated. At
+  last hour and detonates each one this space has no completed run of. At
   most 10 distinct hashes per run. Detonation sends a file out and uses
   allowance, so this workflow is off by default.
 # Epic #20877 §7: off by default because each run uses detonation allowance; pending product answer.
@@ -52,6 +52,7 @@ steps:
         with:
           sha256: "{{ foreach.item.key }}"
 
+      # Epic #20877 §7: a run still in flight is not seen by the lookup, so overlapping events can submit the same hash twice; pending product answer.
       - name: detonate
         type: detonate.prototype.detonateSample
         if: "${{ steps.reputation.output.status == 'unknown' and steps.reputation.output.last_task_id == blank }}"

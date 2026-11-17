@@ -208,8 +208,8 @@ export const DETONATE_FILE_HASH_WORKFLOW = {
 
 /**
  * Detonate prototype: alert-triggered. Detonates the file hash on high or
- * critical alerts (at most 10 per execution) when the space has not run the
- * sample before. Off by default because each detonation uses allowance.
+ * critical alerts (at most 10 per execution) when the space has no completed
+ * run of the sample. Off by default because each detonation uses allowance.
  */
 export const DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW = {
   id: DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW_ID,
@@ -227,7 +227,7 @@ export const DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW = {
 /**
  * Detonate prototype: hourly sweep over email attachment hashes seen in the
  * last hour (at most 10 distinct hashes), detonating each one the space has
- * not run before. Off by default because each detonation uses allowance.
+ * no completed run of. Off by default because each detonation uses allowance.
  */
 export const DETONATE_EMAIL_ATTACHMENTS_WORKFLOW = {
   id: DETONATE_EMAIL_ATTACHMENTS_WORKFLOW_ID,

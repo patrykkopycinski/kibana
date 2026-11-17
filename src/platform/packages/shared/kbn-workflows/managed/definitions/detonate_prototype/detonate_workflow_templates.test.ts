@@ -49,6 +49,9 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
   steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
 const stepNamed = (workflow: YamlWorkflow, name: string) =>
   flatten(workflow.steps).find((step) => step.name === name);
+// The engine renders `${{ }}` as `toValue(evalValueSync(<expression>))`.
+const evaluateIf = (template: string | undefined, ctx: Record<string, unknown>) =>
+  toValue(createWorkflowLiquidEngine().evalValueSync(String(template).slice(3, -2).trim(), ctx));
 const expressionOf = (template: string | undefined) =>
   String(template)
     .replace(/^\$\{\{/, '{{')
@@ -105,6 +108,14 @@ describe('Detonate high severity alerts workflow', () => {
     const detonate = stepNamed(workflow, 'detonate');
     expect(detonate?.type).toBe('detonate.prototype.detonateSample');
     expect(detonate?.if).toContain('steps.reputation.output.last_task_id == blank');
+  });
+
+  it('does not detonate when the lookup failed, and only for an unknown, never-run hash', () => {
+    const condition = stepNamed(workflow, 'detonate')?.if;
+    const ctx = (output: Record<string, unknown>) => ({ steps: { reputation: { output } } });
+    expect(evaluateIf(condition, { steps: { reputation: {} } })).toBeFalsy();
+    expect(evaluateIf(condition, ctx({ status: 'unknown' }))).toBeTruthy();
+    expect(evaluateIf(condition, ctx({ status: 'unknown', last_task_id: 't1' }))).toBeFalsy();
   });
 
   it('lets one failed hash skip, not stop, the rest of the loop', () => {
@@ -189,6 +200,12 @@ describe('Detonate email attachments workflow', () => {
     expect(detonate?.if).toContain('steps.reputation.output.last_task_id == blank');
     expect(stepNamed(workflow, 'reputation')?.['on-failure']?.continue).toBe(true);
     expect(detonate?.['on-failure']?.continue).toBe(true);
+
+    const condition = detonate?.if;
+    const ctx = (output: Record<string, unknown>) => ({ steps: { reputation: { output } } });
+    expect(evaluateIf(condition, { steps: { reputation: {} } })).toBeFalsy();
+    expect(evaluateIf(condition, ctx({ status: 'unknown' }))).toBeTruthy();
+    expect(evaluateIf(condition, ctx({ status: 'unknown', last_task_id: 't1' }))).toBeFalsy();
 
     const hash = await createWorkflowLiquidEngine().parseAndRender(
       String(stepNamed(workflow, 'reputation')?.with?.sha256),

@@ -2,7 +2,7 @@ version: "1"
 name: Auto-detonate high severity malware alerts
 description: >
   Detonate prototype: when a rule produces high or critical alerts that carry
-  a file sha256, detonates each sample this space has not already detonated.
+  a file sha256, detonates each sample this space has no completed run of.
   At most 10 distinct hashes per rule execution are considered. Detonation sends a
   file out and uses allowance, so this workflow is off by default.
 # Epic #20877 §7: off by default because each run uses detonation allowance; pending product answer.
@@ -27,10 +27,11 @@ steps:
         with:
           sha256: "{{ foreach.item }}"
 
-      # Any earlier run of this sample in this space is enough to skip it.
+      # A completed run of this sample in this space is enough to skip it.
+      # Epic #20877 §7: a run still in flight is not seen by the lookup, so overlapping events can submit the same hash twice; pending product answer.
       - name: detonate
         type: detonate.prototype.detonateSample
-        if: "${{ steps.reputation.output.last_task_id == blank }}"
+        if: "${{ steps.reputation.output.status == 'unknown' and steps.reputation.output.last_task_id == blank }}"
         on-failure:
           continue: true
         with:

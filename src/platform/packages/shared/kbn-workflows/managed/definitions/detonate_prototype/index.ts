@@ -9,7 +9,10 @@
 
 import DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_YAML from './action_create_threat_match_rule.yaml';
 import DETONATE_COVERAGE_GAP_YAML from './detonate_coverage_gap.yaml';
+import DETONATE_EMAIL_ATTACHMENTS_YAML from './detonate_email_attachments.yaml';
+import DETONATE_FILE_HASH_YAML from './detonate_file_hash.yaml';
 import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
+import DETONATE_HIGH_SEVERITY_ALERTS_YAML from './detonate_high_severity_alerts.yaml';
 import DETONATE_IOC_HUNT_YAML from './detonate_ioc_hunt.yaml';
 import DETONATE_IOC_RULE_YAML from './detonate_ioc_rule.yaml';
 import DETONATE_RULE_CREATION_YAML from './detonate_rule_creation.yaml';
@@ -175,5 +178,66 @@ export const DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW = {
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const DETONATE_FILE_HASH_WORKFLOW_ID = 'system-security-detonate-file-hash';
+
+export const DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW_ID =
+  'system-security-detonate-high-severity-alerts';
+
+export const DETONATE_EMAIL_ATTACHMENTS_WORKFLOW_ID = 'system-security-detonate-email-attachments';
+
+/**
+ * Detonate prototype: detonates the sample a sha256 names and returns the
+ * verdict. Manual trigger, so it runs from the Run dialog or as a child of
+ * another workflow. The run is recorded with this workflow as its origin.
+ */
+export const DETONATE_FILE_HASH_WORKFLOW = {
+  id: DETONATE_FILE_HASH_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_FILE_HASH_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * Detonate prototype: alert-triggered. Detonates the file hash on high or
+ * critical alerts (at most 10 per execution) when the space has not run the
+ * sample before. Off by default because each detonation uses allowance.
+ */
+export const DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW = {
+  id: DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_HIGH_SEVERITY_ALERTS_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * Detonate prototype: hourly sweep over email attachment hashes seen in the
+ * last hour (at most 10 distinct hashes), detonating each one the space has
+ * not run before. Off by default because each detonation uses allowance.
+ */
+export const DETONATE_EMAIL_ATTACHMENTS_WORKFLOW = {
+  id: DETONATE_EMAIL_ATTACHMENTS_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: DETONATE_EMAIL_ATTACHMENTS_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
   },
 } as const satisfies ManagedWorkflowDefinition;

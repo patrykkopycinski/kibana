@@ -1,0 +1,33 @@
+version: "1"
+name: Auto-detonate high severity malware alerts
+description: >
+  Detonate prototype: when a rule produces high or critical alerts that carry
+  a file sha256, detonates each sample this space has not already detonated.
+  At most 10 alerts per rule execution are considered. Detonation sends a
+  file out and uses allowance, so this workflow is off by default.
+# Epic #20877 §7: off by default because each run uses detonation allowance; pending product answer.
+enabled: false
+tags:
+  - security
+  - detonate_prototype
+triggers:
+  - type: alert
+steps:
+  # Epic #20877 §7: capped at 10 alerts per event so one noisy rule cannot spend the allowance; pending product answer.
+  - name: detonate_each_alert
+    type: foreach
+    foreach: "${{ event.alerts | where_exp: 'a', \"(a.kibana.alert.severity == 'high' or a.kibana.alert.severity == 'critical') and a.file.hash.sha256 != blank\" | slice: 0, 10 }}"
+    steps:
+      - name: reputation
+        type: detonate.prototype.detonateReputation
+        with:
+          sha256: "{{ foreach.item.file.hash.sha256 }}"
+
+      # Any earlier run of this sample in this space is enough to skip it.
+      - name: detonate
+        type: detonate.prototype.detonateSample
+        if: "${{ steps.reputation.output.last_task_id == blank }}"
+        with:
+          sample_hash: "{{ foreach.item.file.hash.sha256 }}"
+          tags:
+            - auto-detonate

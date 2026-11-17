@@ -1,0 +1,52 @@
+version: "1"
+name: Detonate suspicious file hash
+description: >
+  Detonate prototype: detonates the sample a sha256 names in a sandbox VM and
+  returns the verdict. Calls the detonate step directly, so the run is
+  recorded with the workflow as its source and this execution as its origin.
+  Run it from the Run dialog or call it from another workflow.
+enabled: true
+tags:
+  - security
+  - detonate_prototype
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        sha256:
+          type: string
+          minLength: 64
+          maxLength: 64
+          description: sha256 of the sample to detonate.
+        vm_os_family:
+          type: string
+          enum:
+            - linux
+            - windows
+            - darwin
+          default: linux
+          description: Operating system of the sandbox VM.
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+          description: Tags to record on the run.
+      required:
+        - sha256
+      additionalProperties: false
+steps:
+  - name: detonate
+    type: detonate.prototype.detonateSample
+    with:
+      sample_hash: "{{ inputs.sha256 }}"
+      vm_os_family: "{{ inputs.vm_os_family }}"
+      tags: "${{ inputs.tags }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      task_id: "{{ steps.detonate.output.task_id }}"
+      completed: "${{ steps.detonate.output.completed }}"
+      verdict: "{{ steps.detonate.output.verdict }}"

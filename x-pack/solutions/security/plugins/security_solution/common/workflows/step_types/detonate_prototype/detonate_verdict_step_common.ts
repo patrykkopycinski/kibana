@@ -11,7 +11,9 @@
  * Pure: turns a detonation task's output into a verdict object and writes
  * nothing. Workflows that only want the conclusion (or want to branch on it
  * before deciding whether to touch the alert) use this step; the writing
- * half is `apply_detonation_verdict`.
+ * half is `apply_detonation_verdict`. `detonate.detonateSample` returns the
+ * same verdict inline for a finished run; this step remains for task-id-only
+ * callers.
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';

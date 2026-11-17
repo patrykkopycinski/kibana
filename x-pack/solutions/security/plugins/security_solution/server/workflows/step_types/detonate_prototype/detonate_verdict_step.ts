@@ -11,6 +11,11 @@
  * Reads the task through the same internal route the poller uses and runs the
  * shared derivation. No writes: this step exists so a workflow can branch on
  * the verdict (or log it) before deciding to touch the alert.
+ *
+ * Kept separate from `detonate.detonateSample`, which also returns a verdict
+ * for a finished run: this step takes only a task id, so it covers runs the
+ * workflow did not start, and it reports the in-flight and failed statuses
+ * that a timed-out sample step has no verdict for.
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';

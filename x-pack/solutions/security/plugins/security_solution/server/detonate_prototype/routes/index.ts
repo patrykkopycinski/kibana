@@ -234,6 +234,7 @@ const originSchema = schema.object({
   user_name: schema.maybe(schema.string({ maxLength: ORIGIN_TEXT_MAX_LENGTH.user_name })),
   file_path: schema.maybe(schema.string({ maxLength: ORIGIN_TEXT_MAX_LENGTH.file_path })),
   workflow_execution_id: schema.maybe(schema.string({ maxLength: 128 })),
+  workflow_id: schema.maybe(schema.string({ maxLength: 128 })),
   conversation_id: schema.maybe(schema.string({ maxLength: 128 })),
 });
 

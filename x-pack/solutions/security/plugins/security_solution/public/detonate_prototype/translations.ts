@@ -865,6 +865,26 @@ export const OVERVIEW_DETAIL_SUBMITTER = i18n.translate(
   { defaultMessage: 'Submitter' }
 );
 
+export const OVERVIEW_DETAIL_WORKFLOW_RUN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailWorkflowRun',
+  { defaultMessage: 'Workflow run' }
+);
+
+export const OVERVIEW_DETAIL_CONVERSATION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailConversation',
+  { defaultMessage: 'Conversation' }
+);
+
+export const OVERVIEW_DETAIL_OPEN_WORKFLOW_RUN = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailOpenWorkflowRun',
+  { defaultMessage: 'Open workflow run' }
+);
+
+export const OVERVIEW_DETAIL_OPEN_CONVERSATION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.overview.detailOpenConversation',
+  { defaultMessage: 'Open conversation' }
+);
+
 export const OVERVIEW_DETAIL_SUBMITTED = i18n.translate(
   'xpack.securitySolution.detonatePrototype.overview.detailSubmitted',
   { defaultMessage: 'Submitted' }

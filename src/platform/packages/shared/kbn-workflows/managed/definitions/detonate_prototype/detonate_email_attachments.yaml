@@ -1,0 +1,61 @@
+version: "1"
+name: Detonate email attachments
+description: >
+  Detonate prototype: every hour, finds email attachment hashes seen in the
+  last hour and detonates each one this space has not already detonated. At
+  most 10 distinct hashes per run. Detonation sends a file out and uses
+  allowance, so this workflow is off by default.
+# Epic #20877 §7: off by default because each run uses detonation allowance; pending product answer.
+enabled: false
+tags:
+  - security
+  - detonate_prototype
+triggers:
+  - type: scheduled
+    with:
+      every: "1h"
+steps:
+  # Epic #20877 §7: the `logs-*` index pattern and the ECS field
+  # `email.attachments.file.hash.sha256` are assumptions about where email
+  # telemetry lands; pending product answer.
+  - name: find_attachments
+    type: elasticsearch.search
+    with:
+      index: "logs-*"
+      ignore_unavailable: true
+      size: 10
+      _source: false
+      fields:
+        - email.attachments.file.hash.sha256
+      collapse:
+        field: email.attachments.file.hash.sha256
+      query:
+        bool:
+          filter:
+            - exists:
+                field: email.attachments.file.hash.sha256
+            - range:
+                "@timestamp":
+                  gte: "now-1h"
+
+  - name: detonate_each_hash
+    type: foreach
+    foreach: "${{ steps.find_attachments.output.hits.hits }}"
+    steps:
+      # A hash that is not a sha256 fails the step; the next hash still runs.
+      - name: reputation
+        type: detonate.prototype.detonateReputation
+        on-failure:
+          continue: true
+        with:
+          sha256: '{{ foreach.item.fields["email.attachments.file.hash.sha256"][0] }}'
+
+      - name: detonate
+        type: detonate.prototype.detonateSample
+        if: "${{ steps.reputation.output.status == 'unknown' and steps.reputation.output.last_task_id == blank }}"
+        on-failure:
+          continue: true
+        with:
+          sample_hash: '{{ foreach.item.fields["email.attachments.file.hash.sha256"][0] }}'
+          tags:
+            - email-attachment

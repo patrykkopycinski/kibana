@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import {
   DETONATE_PROTOTYPE_NAMESPACE,
   DETONATE_SAMPLE_SOURCES,
+  DETONATE_VERDICTS,
   DETONATE_VM_OS_FAMILIES,
   DETONATE_WORKERS,
   DETONATE_WORKER_STATUSES,
@@ -82,6 +83,11 @@ export const detonateSampleInputSchema = lazySchema(() =>
  * returned: a workflow step output is rendered, logged and passed between
  * steps, and a detonation's alert documents are large and contain sample
  * content. A workflow that needs them reads the task through the API.
+ *
+ * `verdict` is set only for a run that finished without failing. A timed-out
+ * or failed run has no stable verdict, so the field is absent rather than a
+ * guess. `detonate.detonateVerdict` stays as a separate step because it also
+ * serves callers that hold only a task id (a run this workflow did not start).
  */
 export const detonateSampleOutputSchema = lazySchema(() =>
   z.object({
@@ -107,6 +113,16 @@ export const detonateSampleOutputSchema = lazySchema(() =>
      */
     endpoint_alert_event_codes: z.array(z.string()),
     detection_rule_names: z.array(z.string()),
+    verdict: z
+      .enum(DETONATE_VERDICTS)
+      .optional()
+      .describe('Absent when the run timed out or failed; see `detonate.detonateVerdict`.'),
+    /**
+     * Deep link to this run's result flyout, so the link shows in the workflow
+     * execution detail next to the step output.
+     */
+    // Epic #20877 §7: an output field, not a button in the Workflows execution UI (it has no extension point); pending product answer.
+    run_url: z.string().describe("Relative Kibana URL of this run's detonation result flyout."),
     /**
      * IOCs read from this run's alert documents — DNS domains, public IPs,
      * and non-sample file hashes. Empty arrays mean the alerts contained

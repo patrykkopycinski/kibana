@@ -225,6 +225,7 @@ describe('toDetonationRecord', () => {
         file_path: '/tmp/x',
         conversation_id: 'conv-1',
         workflow_execution_id: 'exec-1',
+        workflow_id: 'wf-1',
         file: { size: 12, mime_type: 'text/plain' },
       },
     });
@@ -238,6 +239,7 @@ describe('toDetonationRecord', () => {
       'file.path': '/tmp/x',
       'detonate.conversation_id': 'conv-1',
       'detonate.workflow.execution_id': 'exec-1',
+      'detonate.workflow.id': 'wf-1',
       'file.size': 12,
       'file.mime_type': 'text/plain',
     });
@@ -269,6 +271,7 @@ describe('toDetonationRecord', () => {
           file_path: '/tmp/x',
           conversation_id: 'conv-1',
           workflow_execution_id: 'exec-1',
+          workflow_id: 'wf-1',
           file: { size: 12, mime_type: 'text/plain' },
         },
       }

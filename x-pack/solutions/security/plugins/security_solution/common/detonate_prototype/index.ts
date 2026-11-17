@@ -347,6 +347,8 @@ export interface DetonateSubmitOrigin {
   user_name?: string;
   file_path?: string;
   workflow_execution_id?: string;
+  /** The workflow that ran, so the flyout can link to the execution. */
+  workflow_id?: string;
   conversation_id?: string;
 }
 
@@ -1220,6 +1222,7 @@ export interface DetonationRecord {
   'file.size'?: number;
   'file.mime_type'?: string;
   'detonate.workflow.execution_id'?: string;
+  'detonate.workflow.id'?: string;
   'detonate.conversation_id'?: string;
   /** The run's tags without its space tags. */
   tags?: string[];
@@ -1277,6 +1280,7 @@ export const DETONATION_RUN_FIELDS: Readonly<
   'file.size': 'long',
   'file.mime_type': 'keyword',
   'detonate.workflow.execution_id': 'keyword',
+  'detonate.workflow.id': 'keyword',
   'detonate.conversation_id': 'keyword',
   tags: 'keyword',
 };

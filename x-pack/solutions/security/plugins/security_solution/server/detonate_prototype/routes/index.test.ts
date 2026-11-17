@@ -442,6 +442,7 @@ describe('registerDetonatePrototypeRoutes', () => {
         ['too many alert ids', { alert_ids: Array.from({ length: 33 }, (_, i) => `a${i}`) }],
         ['an oversized alert id', { alert_ids: ['a'.repeat(129)] }],
         ['an oversized conversation id', { conversation_id: 'c'.repeat(129) }],
+        ['an oversized workflow id', { workflow_id: 'w'.repeat(129) }],
       ])('rejects %s in the origin', (_name, origin) => {
         expect(() =>
           submitHashBodySchema().validate({ sample_hash: 'a'.repeat(64), origin })
@@ -478,6 +479,7 @@ describe('registerDetonatePrototypeRoutes', () => {
               user_name: 'user-1',
               file_path: '/tmp/x',
               workflow_execution_id: 'exec-1',
+              workflow_id: 'wf-1',
               conversation_id: 'conv-1',
             },
           })

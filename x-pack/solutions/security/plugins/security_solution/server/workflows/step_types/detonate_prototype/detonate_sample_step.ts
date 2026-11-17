@@ -13,15 +13,23 @@
  * plugin's own internal routes rather than holding a `DetonateClient`, so the
  * service address, privilege checks and error shaping stay in one place and
  * the workflow engine's request scoping is preserved.
+ *
+ * This step and `detonate.detonateVerdict` both exist on purpose: a run that
+ * timed out or failed has no stable verdict, so this step reports one only for
+ * a finished, non-failed run, while `detonateVerdict` serves callers that hold
+ * just a task id.
  */
 
 import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { encode } from '@kbn/rison';
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   DETONATE_SUBMIT_HASH_PATH,
+  DETONATE_PROTOTYPE_APP_PATH,
   DETONATE_TASKS_PATH,
+  deriveDetonateVerdict,
   isDetonationComplete,
   isDetonationFailed,
   totalDetonationAlerts,
@@ -80,39 +88,54 @@ const readExtractedIocs = (
       )
   );
 
+/** Result-flyout deep link; `encode` is what the flyout's own URL state reads back. */
+const toRunUrl = (taskId: string): string =>
+  `/app/security${DETONATE_PROTOTYPE_APP_PATH}?flyoutV2=${encodeURIComponent(
+    encode([{ kind: 'detonation', taskId }])
+  )}`;
+
 /** Shape the task into the step's output contract. */
 const toOutput = (
   task: DetonateTask,
   completed: boolean,
   extractedIocs?: DetonateExtractedIocs
-) => ({
-  task_id: task.id,
-  completed,
-  failed: isDetonationFailed(task),
-  last_worker_name: task.last_worker_name,
-  last_worker_status: task.last_worker_status,
-  last_worker_status_details: task.last_worker_status_details,
-  // sample_hash is deliberately not echoed (see output schema).
-  sample_source: task.sample_source,
-  production_endpoint_alerts_count: task.production_endpoint_alerts_count ?? 0,
-  diagnostic_endpoint_alerts_count: task.diagnostic_endpoint_alerts_count ?? 0,
-  production_detection_alerts_count: task.production_detection_alerts_count ?? 0,
-  total_alerts_count: totalDetonationAlerts(task),
-  // De-duplicated: a detonation commonly raises the same `event.code` from
-  // several groups, and a workflow branching on "did Defend see X" wants the
-  // set, not the multiset.
-  endpoint_alert_event_codes: [
-    ...new Set(
-      [...task.production_endpoint_alert_groups, ...task.diagnostic_endpoint_alert_groups].map(
-        (group) => group.event_code
-      )
-    ),
-  ],
-  detection_rule_names: [
-    ...new Set(task.production_detection_alert_groups.map((group) => group.kibana_alert_rule_name)),
-  ],
-  ...(extractedIocs ? { extracted_iocs: extractedIocs } : {}),
-});
+) => {
+  const failed = isDetonationFailed(task);
+  // `deriveDetonateVerdict` yields a verdict only for a finished, non-failed run.
+  const { verdict } = deriveDetonateVerdict(task);
+  return {
+    task_id: task.id,
+    run_url: toRunUrl(task.id),
+    completed,
+    failed,
+    last_worker_name: task.last_worker_name,
+    last_worker_status: task.last_worker_status,
+    last_worker_status_details: task.last_worker_status_details,
+    // sample_hash is deliberately not echoed (see output schema).
+    sample_source: task.sample_source,
+    production_endpoint_alerts_count: task.production_endpoint_alerts_count ?? 0,
+    diagnostic_endpoint_alerts_count: task.diagnostic_endpoint_alerts_count ?? 0,
+    production_detection_alerts_count: task.production_detection_alerts_count ?? 0,
+    total_alerts_count: totalDetonationAlerts(task),
+    // De-duplicated: a detonation commonly raises the same `event.code` from
+    // several groups, and a workflow branching on "did Defend see X" wants the
+    // set, not the multiset.
+    endpoint_alert_event_codes: [
+      ...new Set(
+        [...task.production_endpoint_alert_groups, ...task.diagnostic_endpoint_alert_groups].map(
+          (group) => group.event_code
+        )
+      ),
+    ],
+    detection_rule_names: [
+      ...new Set(
+        task.production_detection_alert_groups.map((group) => group.kibana_alert_rule_name)
+      ),
+    ],
+    ...(verdict ? { verdict } : {}),
+    ...(extractedIocs ? { extracted_iocs: extractedIocs } : {}),
+  };
+};
 
 export const detonateSampleStepDefinition = createPollServerStepDefinition({
   ...detonateSampleStepCommonDefinition,
@@ -146,6 +169,8 @@ export const detonateSampleStepDefinition = createPollServerStepDefinition({
           origin: {
             source: 'workflow',
             workflow_execution_id: contextManager.getContext().execution.id,
+            // Epic #20877 §7: recorded so the flyout can link the run back to its workflow execution; pending product answer.
+            workflow_id: contextManager.getContext().workflow.id,
           },
         },
       });

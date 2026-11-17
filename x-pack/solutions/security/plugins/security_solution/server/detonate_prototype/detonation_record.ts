@@ -116,6 +116,7 @@ const originFields = (
     ...(origin.workflow_execution_id
       ? { 'detonate.workflow.execution_id': origin.workflow_execution_id }
       : {}),
+    ...(origin.workflow_id ? { 'detonate.workflow.id': origin.workflow_id } : {}),
     ...(origin.conversation_id ? { 'detonate.conversation_id': origin.conversation_id } : {}),
     ...(origin.file
       ? {

@@ -40,6 +40,7 @@ describe('<DetonationNotes />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    // Simulates an open Timeline on purpose, so the test fails if the component reads the active Timeline again.
     mockUseSelector.mockReturnValue(true);
     jest.mocked(useTimelineConfig).mockReturnValue(timelineConfig as never);
   });

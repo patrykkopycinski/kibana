@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { decode } from '@kbn/rison';
 import {
   detonateSampleStepDefinition,
   extractIocsFromAlertDocs,
@@ -25,7 +26,7 @@ const createMockContext = (input: Record<string, unknown>) =>
     config: {},
     rawInput: input,
     contextManager: {
-      getContext: jest.fn(() => ({ execution: { id: 'exec-1' } })),
+      getContext: jest.fn(() => ({ execution: { id: 'exec-1' }, workflow: { id: 'wf-1' } })),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn(),
       getFakeRequest: jest.fn(),
@@ -81,7 +82,7 @@ describe('detonateSampleStepDefinition', () => {
         headers: { 'elastic-api-version': '1' },
         body: {
           sample_hash: 'a'.repeat(64),
-          origin: { source: 'workflow', workflow_execution_id: 'exec-1' },
+          origin: { source: 'workflow', workflow_execution_id: 'exec-1', workflow_id: 'wf-1' },
         },
       });
     });
@@ -183,6 +184,8 @@ describe('detonateSampleStepDefinition', () => {
       });
       expect(result.output).toEqual({
         task_id: 'task-1',
+        run_url: expect.any(String),
+        verdict: 'malicious',
         completed: true,
         failed: false,
         last_worker_name: 'detonate.workers.make_summary',
@@ -195,6 +198,28 @@ describe('detonateSampleStepDefinition', () => {
         endpoint_alert_event_codes: ['malicious_file', 'process_injection'],
         detection_rule_names: ['Malware detection'],
       });
+    });
+
+    it('links the run flyout in run_url, keyed on the task id', async () => {
+      const context = pollContext({
+        taskId: 'task-1',
+        submittedAt: new Date().toISOString(),
+        deadlineAt: new Date(Date.now() + 60_000).toISOString(),
+      });
+      (context.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        body: createTaskFixture({ id: 'task-1' }),
+      });
+
+      const result = (await detonateSampleStepDefinition.poll(context)) as {
+        output: { run_url: string };
+      };
+
+      const { pathname, searchParams } = new URL(result.output.run_url, 'http://localhost');
+      expect(pathname).toBe('/app/security/detonate_prototype');
+      expect(decode(searchParams.get('flyoutV2') ?? '')).toEqual([
+        { kind: 'detonation', taskId: 'task-1' },
+      ]);
     });
 
     describe('extracted IOCs', () => {
@@ -355,7 +380,7 @@ describe('detonateSampleStepDefinition', () => {
         expect.objectContaining({
           body: {
             sample_hash: 'a'.repeat(64),
-            origin: { source: 'workflow', workflow_execution_id: 'exec-1' },
+            origin: { source: 'workflow', workflow_execution_id: 'exec-1', workflow_id: 'wf-1' },
           },
         })
       );
@@ -390,6 +415,7 @@ describe('detonateSampleStepDefinition', () => {
         last_worker_status_details: 'vm boot failed',
         endpoint_alert_event_codes: ['startup'],
       });
+      expect(result.output).not.toHaveProperty('verdict');
     });
 
     it('returns completed: false when the deadline has passed, without throwing', async () => {
@@ -412,6 +438,7 @@ describe('detonateSampleStepDefinition', () => {
       };
 
       expect(result.output).toMatchObject({ task_id: 'task-1', completed: false, failed: false });
+      expect(result.output).not.toHaveProperty('verdict');
     });
 
     it('continues polling while the run is in flight and the deadline has not passed', async () => {

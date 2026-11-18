@@ -1181,7 +1181,7 @@ export const ALERT_CARD_IOCS = i18n.translate(
 
 export const ALERT_CARD_NOT_ANALYZED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detonatePrototype.alertCard.notAnalyzedDescription',
-  { defaultMessage: 'This file has not been detonated yet.' }
+  { defaultMessage: "This file hasn't been detonated." }
 );
 
 export const ALERT_CARD_PRIOR_RUN_ELSEWHERE = i18n.translate(

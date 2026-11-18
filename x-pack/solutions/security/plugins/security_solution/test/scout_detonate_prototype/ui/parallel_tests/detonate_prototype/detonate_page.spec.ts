@@ -40,7 +40,10 @@ const DETONATE_APP = 'security/detonate_prototype';
 
 const LIST_PAGE = 'detonatePrototypeListPage';
 const SERVICE_UNAVAILABLE = 'detonatePrototypeServiceUnavailable';
-const RUNS_TABLE_LINK = 'detonatePrototypeRunsTable-link';
+// The list opens grouped by Detonation; each group header links to its result. The link
+// shows the file name, or the first characters of the hash when the run has no file name.
+const GROUP_OPEN_DETONATION_LINK = 'detonatePrototypeGroupOpenDetonation';
+const GROUP_LINK_HASH_LENGTH = 8;
 const SUBMIT_SAMPLE_BUTTON = 'detonatePrototypeSubmitSample';
 const SUBMIT_MODAL = 'detonatePrototypeSubmitModal';
 const SAMPLE_HASH_INPUT = 'detonatePrototypeSampleHash';
@@ -105,6 +108,17 @@ const confirmSubmitAndOpenResult = async (page: ScoutPage) => {
   await expect(page.testSubj.locator(SUBMIT_TOAST)).toBeVisible();
   await page.testSubj.click(SUBMIT_TOAST_VIEW_RESULT);
 };
+
+/**
+ * The submitted sample's Detonation group header link on the default grouped list. Parallel
+ * specs share the list and submit this same sample, so several headers can match: the hash
+ * filter pins the sample, not one run, and the first match is as good as any.
+ */
+const submittedRunLink = (page: ScoutPage) =>
+  page.testSubj
+    .locator(GROUP_OPEN_DETONATION_LINK)
+    .filter({ hasText: SAMPLE_SHA256.slice(0, GROUP_LINK_HASH_LENGTH) })
+    .first(); // eslint-disable-line playwright/no-nth-methods -- parallel specs share the list; the hash filter already pins the sample
 
 /** Opens the submit modal from the page header and enters the sample hash. */
 const openModalAndEnterHash = async (page: ScoutPage) => {
@@ -213,7 +227,7 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
   );
 
   spaceTest(
-    'lists a run of the submitted sample and reopens it from the runs table',
+    'lists a run of the submitted sample and reopens it from its Detonation group',
     async ({ page }) => {
       await page.gotoApp(DETONATE_APP);
       await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
@@ -231,15 +245,11 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
       await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeHidden();
       await expect(page.testSubj.locator(LIST_PAGE)).toBeVisible();
 
-      // The runs table lists newest first. Filtering by the sample hash pins the sample,
-      // not this specific run: leftover runs of the same sample from other specs can match
-      // too, but a run list without this sample cannot satisfy the assertion.
-      const submittedRun = page.testSubj
-        .locator(RUNS_TABLE_LINK)
-        .filter({ hasText: SAMPLE_SHA256 })
-        .first(); // eslint-disable-line playwright/no-nth-methods -- parallel specs share the table; the text filter already pins the sample
-      await expect(submittedRun).toBeVisible();
-      await submittedRun.click();
+      // The list opens grouped by Detonation, so the run is a group header, not a table row.
+      // Filtering by the sample hash pins the sample, not this specific run: runs of the same
+      // sample from other specs can match too, but a list without this sample cannot satisfy it.
+      await expect(submittedRunLink(page)).toBeVisible();
+      await submittedRunLink(page).click();
 
       await expect(page.testSubj.locator(DETONATION_FLYOUT)).toBeVisible();
       await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
@@ -265,12 +275,8 @@ spaceTest.describe('Detonate prototype', { tag: [...tags.stateful.classic] }, ()
         SESSION_VIEW_TOOL
       );
 
-      // The result is closed now: reopen it from the runs table for the second tool.
-      await page.testSubj
-        .locator(RUNS_TABLE_LINK)
-        .filter({ hasText: SAMPLE_SHA256 })
-        .first() // eslint-disable-line playwright/no-nth-methods -- parallel specs share the table; the text filter already pins the sample
-        .click();
+      // The result is closed now: reopen it from the grouped list for the second tool.
+      await submittedRunLink(page).click();
       await expect(page.testSubj.locator(DETONATION_TITLE)).toHaveText(SAMPLE_SHA256);
 
       await expectToolClosesWithResult(page, 'Notes', OPEN_NOTES_BUTTON, NOTES_TOOL);

@@ -77,6 +77,7 @@ Output Requirements:
 - Think through the problem step by step. Show your reasoning before the json output section. This is the only output that is allowed outside of the defined json schema.
 - Provide a narrative summary for each identified attack chain
 - Explain connections between events with concrete evidence
+- If you suggest a response action that contains an entity (block, isolate, revoke, rotate, disable, quarantine, and similar), make it conditional on the investigation confirming that entity is malicious, for example "If {{ host.name example-host }} is confirmed compromised, isolate it." Never recommend containing an entity unconditionally: a shared or benign entity may appear in the same alerts.
 - Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
 
 export const ATTACK_DISCOVERY_REFINE = `

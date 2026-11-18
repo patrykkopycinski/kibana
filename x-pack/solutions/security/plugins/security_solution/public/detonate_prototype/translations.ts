@@ -274,6 +274,11 @@ export const DETONATION_NOT_FOUND = i18n.translate(
   { defaultMessage: 'Detonation not found' }
 );
 
+export const GROUP_BODY_ERROR = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupBodyError',
+  { defaultMessage: 'Could not load this detonation' }
+);
+
 export const BENIGN_RUN_TITLE = i18n.translate(
   'xpack.securitySolution.detonatePrototype.detail.benignRunTitle',
   { defaultMessage: 'This detonation produced no alerts' }

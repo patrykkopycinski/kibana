@@ -33,13 +33,13 @@ export const DetonateVerdictStepId = `${DETONATE_PROTOTYPE_NAMESPACE}.detonateVe
 export const detonateVerdictInputSchema = lazySchema(() =>
   z.object({
     task_id: z.string().min(1).max(128).describe('The detonation task to derive a verdict from.'),
-    /** Optional because the derivation also reads the task's `alert:<id>` tag. */
+    /** Optional: it is only echoed in the output when given, never derived from the task. */
     alert_id: z
       .string()
       .min(1)
       .max(128)
       .optional()
-      .describe("Alert the run was started from. Defaults to the task's `alert:<id>` tag."),
+      .describe('Alert the run was started from. Echoed in the output when given.'),
   })
 );
 

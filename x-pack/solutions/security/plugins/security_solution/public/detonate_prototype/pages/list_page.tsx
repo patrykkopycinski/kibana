@@ -38,7 +38,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
@@ -739,10 +739,21 @@ const getGroupStats: GetGroupStats<RunGroupStats> = (selectedGroup, bucket) => {
  * Epic #20877 §1: the group should open the standard alerts table over sandbox SIEM alerts; pending product answer (Q-B).
  */
 const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
-  const { data: task, isLoading } = useDetonationTask(taskId);
+  const { data: task, isLoading, isError, error } = useDetonationTask(taskId);
   // This body only mounts while its group is open, so the origin alerts are read on expand only.
   const { data: originAlertIds, isError: originAlertIdsFailed } =
     useDetonationOriginAlertIds(taskId);
+
+  if (isError && !task) {
+    const body = (error as { body?: { message?: string } } | null)?.body;
+    return (
+      <KbnDangerCallout
+        announceOnMount
+        title={body?.message ?? i18n.GROUP_BODY_ERROR}
+        data-test-subj="detonatePrototypeGroupBodyError"
+      />
+    );
+  }
 
   if (isLoading || !task) {
     return (
@@ -1203,8 +1214,11 @@ export const DetonateListPage = React.memo(() => {
   const onQuerySubmit = useCallback(
     ({ dateRange, query }: { dateRange: TimeRange; query?: Query }, isUpdated?: boolean) => {
       if (!isUpdated) {
-        // Submitting an unchanged bar is a refresh.
-        refetch();
+        // Submitting an unchanged bar is a refresh. The flat runs query is disabled in
+        // grouped mode, and a manual refetch would ignore that.
+        if (isFlat) {
+          refetch();
+        }
         refetchStats();
         queryClient.invalidateQueries([DETONATE_QUERY_KEY, 'tasks', 'groups']);
         return;
@@ -1212,7 +1226,7 @@ export const DetonateListPage = React.memo(() => {
       setTimeRange(dateRange);
       setUserKql(typeof query?.query === 'string' ? query.query : '');
     },
-    [refetch, refetchStats, queryClient]
+    [isFlat, refetch, refetchStats, queryClient]
   );
   const {
     unifiedSearch: {

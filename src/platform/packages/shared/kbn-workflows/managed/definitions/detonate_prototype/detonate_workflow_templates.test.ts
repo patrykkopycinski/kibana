@@ -87,10 +87,18 @@ describe('Detonate file hash workflow', () => {
     expect(sha256.test(`${'a'.repeat(63)}-`)).toBe(false);
   });
 
-  it('calls the detonate step directly with the input hash', () => {
+  it('calls the detonate step directly with the input hash, lowercased', () => {
     const detonate = stepNamed(workflow, 'detonate');
     expect(detonate?.type).toBe('detonate.prototype.detonateSample');
-    expect(detonate?.with?.sample_hash).toBe('{{ inputs.sha256 }}');
+    expect(detonate?.with?.sample_hash).toBe('{{ inputs.sha256 | downcase }}');
+  });
+
+  it('renders an uppercase input hash lowercase, since the rest of the feature matches lowercase', () => {
+    const template = String(stepNamed(workflow, 'detonate')?.with?.sample_hash);
+    const render = (sha256: string) =>
+      createWorkflowLiquidEngine().parseAndRenderSync(template, { inputs: { sha256 } });
+    expect(render(`${'ABCDEF'.repeat(10)}ABCD`)).toBe(`${'abcdef'.repeat(10)}abcd`);
+    expect(render(SHA256)).toBe(SHA256);
   });
 
   it('leaves the verdict null, not an empty string, when the run has none', async () => {

@@ -368,6 +368,25 @@ describe('DetonateListPage', () => {
       expect(screen.queryByTestId('detonatePrototypeGroupBodyLoading')).not.toBeInTheDocument();
     });
 
+    it('shows an error, not a skeleton forever, when an open Detonation fails to load', async () => {
+      mockGroups([makeGroup()]);
+      jest.mocked(useDetonationTask).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: { body: { message: 'Detonation task failed to load' } },
+      } as never);
+      renderPage();
+
+      fireEvent.click(await screen.findByTestId('group-panel-toggle'));
+
+      expect(await screen.findByTestId('detonatePrototypeGroupBodyError')).toHaveTextContent(
+        'Detonation task failed to load'
+      );
+      expect(screen.queryByTestId('detonatePrototypeGroupBodyLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('detonatePrototypeGroupBody')).not.toBeInTheDocument();
+    });
+
     describe('originating alerts', () => {
       const openGroup = async (originAlertIds: string[] = ['alert-1', 'alert-2']) => {
         mockGroups([makeGroup()]);
@@ -861,6 +880,19 @@ describe('DetonateListPage', () => {
         expect(refetch).toHaveBeenCalledTimes(1);
         expect(statsRefetch).toHaveBeenCalledTimes(1);
         expect(lastRunsQuery()).toEqual(expect.objectContaining({ start: 'now-30d' }));
+      });
+
+      it('does not read the flat runs when grouped and the bar is submitted unchanged', () => {
+        saveGrouping(['detonate.task_id']);
+        mockGroups([makeGroup()]);
+        mockRuns([], { refetch });
+        renderPage();
+        refetch.mockClear();
+
+        submit('', false);
+
+        expect(refetch).not.toHaveBeenCalled();
+        expect(statsRefetch).toHaveBeenCalledTimes(1);
       });
 
       it('sends KQL that does not parse alone by itself, so it cannot widen the preset', () => {

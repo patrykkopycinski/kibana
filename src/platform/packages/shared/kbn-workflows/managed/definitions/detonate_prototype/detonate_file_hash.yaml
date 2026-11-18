@@ -40,7 +40,7 @@ steps:
   - name: detonate
     type: detonate.prototype.detonateSample
     with:
-      sample_hash: "{{ inputs.sha256 }}"
+      sample_hash: "{{ inputs.sha256 | downcase }}"
       vm_os_family: "{{ inputs.vm_os_family }}"
       tags: "${{ inputs.tags }}"
 

@@ -17,8 +17,8 @@
  * workflow did not start, and it reports the in-flight and failed statuses
  * that a timed-out sample step has no verdict for.
  *
- * `alert_id` is optional input, defaulting to the task's `alert:<id>` tag, and is
- * echoed in the output when given so a later step can act on that alert.
+ * `alert_id` is optional input and is echoed in the output only when given, so a
+ * later step can act on that alert. It is never derived from the task.
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';

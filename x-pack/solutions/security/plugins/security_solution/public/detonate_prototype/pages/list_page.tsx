@@ -1216,11 +1216,15 @@ export const DetonateListPage = React.memo(() => {
       if (!isUpdated) {
         // Submitting an unchanged bar is a refresh. The flat runs query is disabled in
         // grouped mode, and a manual refetch would ignore that.
+        refetchStats();
         if (isFlat) {
           refetch();
+          return;
         }
-        refetchStats();
-        queryClient.invalidateQueries([DETONATE_QUERY_KEY, 'tasks', 'groups']);
+        // Grouped: every open group's run table and body reads sit under these two prefixes.
+        // The body's task query is keyed `task`, apart from the `tasks` lists.
+        queryClient.invalidateQueries([DETONATE_QUERY_KEY, 'tasks']);
+        queryClient.invalidateQueries([DETONATE_QUERY_KEY, 'task']);
         return;
       }
       setTimeRange(dateRange);

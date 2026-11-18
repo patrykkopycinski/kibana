@@ -20,7 +20,7 @@
 
 import pMap from 'p-map';
 import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import type { Type, TypeOf } from '@kbn/config-schema';
 import type {
   ElasticsearchClient,
   IKibanaResponse,
@@ -43,6 +43,7 @@ import {
   DETONATION_GROUPS_MAX_PAGE,
   DETONATION_GROUPS_MAX_PAGE_SIZE,
   DETONATION_GROUPS_MAX_PARENTS_LENGTH,
+  DETONATION_RUNS_GROUP_FIELDS,
   DETONATION_RUNS_MAX_KQL_LENGTH,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
   DETONATION_RUNS_MAX_PAGE_SIZE,
@@ -84,6 +85,7 @@ import type {
   DetonateRunDiffResult,
   DetonateRunSessionResult,
   DetonationRunGroupsResponse,
+  DetonationRunsGroupField,
   DetonationRunStatsResponse,
   DetonationRunsResponse,
   DetonateSandboxCountResult,
@@ -1777,17 +1779,13 @@ export const registerDetonatePrototypeRoutes = ({
         validate: {
           request: {
             query: schema.object({
-              // The allowlist keeps a caller from grouping on an unmapped field; it mirrors
-              // DETONATION_RUNS_GROUP_FIELDS, which the route test pins.
-              group_by: schema.oneOf([
-                schema.literal('detonate.task_id'),
-                schema.literal('detonate.verdict'),
-                schema.literal('file.hash.sha256'),
-                schema.literal('detonate.source'),
-                schema.literal('host.name'),
-                schema.literal('user.name'),
-                schema.literal('detonate.detection_rule_names'),
-              ]),
+              // The allowlist keeps a caller from grouping on an unmapped field; the accepted
+              // values are derived from DETONATION_RUNS_GROUP_FIELDS so they cannot drift.
+              group_by: schema.oneOf(
+                DETONATION_RUNS_GROUP_FIELDS.map((field) => schema.literal(field)) as [
+                  Type<DetonationRunsGroupField>
+                ]
+              ),
               parents: schema.maybe(
                 schema.string({
                   maxLength: DETONATION_GROUPS_MAX_PARENTS_LENGTH,

@@ -230,10 +230,13 @@ const lastRunsQuery = () => {
   return calls[calls.length - 1][0];
 };
 
-const renderPage = (url = '/detonate_prototype') =>
-  render(
+let queryClient = new QueryClient();
+
+const renderPage = (url = '/detonate_prototype') => {
+  queryClient = new QueryClient();
+  return render(
     <I18nProvider>
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={[url]}>
           <Route path="/detonate_prototype">
             <HistoryProbe />
@@ -243,6 +246,7 @@ const renderPage = (url = '/detonate_prototype') =>
       </QueryClientProvider>
     </I18nProvider>
   );
+};
 
 /** The saved grouping selection @kbn/grouping keeps in the `groups` localStorage key. */
 const saveGrouping = (activeGroups: string[]) =>
@@ -893,6 +897,29 @@ describe('DetonateListPage', () => {
 
         expect(refetch).not.toHaveBeenCalled();
         expect(statsRefetch).toHaveBeenCalledTimes(1);
+      });
+
+      it('invalidates the task lists and the task bodies when grouped and the bar is submitted unchanged', () => {
+        saveGrouping(['detonate.task_id']);
+        mockGroups([makeGroup()]);
+        mockRuns([], { refetch });
+        renderPage();
+        const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+
+        submit('', false);
+
+        expect(invalidate).toHaveBeenCalledWith(['detonate_prototype', 'tasks']);
+        expect(invalidate).toHaveBeenCalledWith(['detonate_prototype', 'task']);
+      });
+
+      it('does not invalidate the task queries when flat and the bar is submitted unchanged', () => {
+        mockRuns([], { refetch });
+        renderPage();
+        const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+
+        submit('', false);
+
+        expect(invalidate).not.toHaveBeenCalled();
       });
 
       it('sends KQL that does not parse alone by itself, so it cannot widen the preset', () => {

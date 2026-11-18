@@ -94,6 +94,7 @@ export const detonateVerdictStepCommonDefinition: BaseStepDefinition<
   type: ${DetonateVerdictStepId}
   with:
     task_id: "{{ steps.detonate.output.task_id }}"
+    alert_id: "{{ event.alert_id }}"
 
 - name: tag_alert
   type: detonate.prototype.applyDetonationVerdict

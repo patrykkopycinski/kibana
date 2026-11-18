@@ -1260,6 +1260,11 @@ export const RESPONSE_RUNS_OPEN = i18n.translate(
   { defaultMessage: 'Open' }
 );
 
+export const GROUP_BY_TITLE = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.runs.groupByTitle',
+  { defaultMessage: 'Group detonations by' }
+);
+
 export const GROUP_BY_DETONATION = i18n.translate(
   'xpack.securitySolution.detonatePrototype.runs.groupByDetonation',
   { defaultMessage: 'Detonation' }

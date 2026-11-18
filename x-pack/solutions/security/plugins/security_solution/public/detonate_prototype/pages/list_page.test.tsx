@@ -349,6 +349,16 @@ describe('DetonateListPage', () => {
       ).toBe(true);
     });
 
+    it('titles the group selector in detonation terms, not the alerts default', async () => {
+      mockGroups([makeGroup()]);
+      renderPage();
+
+      await screen.findByTestId('level-0-group-0');
+
+      expect(screen.getAllByText(/Group detonations by/).length).toBeGreaterThan(0);
+      expect(screen.queryByText(/Group alerts by/)).not.toBeInTheDocument();
+    });
+
     it('shows the verdict, the sample and the alert count in a Detonation header', async () => {
       mockGroups([makeGroup()]);
       renderPage();

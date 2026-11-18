@@ -1112,6 +1112,7 @@ export const DetonateListPage = React.memo(() => {
     fields: [],
     settings: GROUPING_SETTINGS,
     componentProps,
+    title: i18n.GROUP_BY_TITLE,
   });
   const isFlat = isNoneGroup(grouping.selectedGroups);
   const groupsBaseQuery = useMemo<GroupsBaseQuery>(

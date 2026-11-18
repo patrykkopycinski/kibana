@@ -120,7 +120,7 @@ export const detonateSampleOutputSchema = lazySchema(() =>
     run_url: z
       .string()
       .describe(
-        "Kibana URL of this run's detonation result flyout, with the space prefix; absolute when the Kibana URL is known."
+        "Absolute URL of this run's detonation result flyout, with the space prefix. Falls back to the path alone when the workflow engine does not know the Kibana URL."
       ),
     /**
      * IOCs read from this run's alert documents — DNS domains, public IPs,

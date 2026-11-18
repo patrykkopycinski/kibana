@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 import {
   DETONATION_RUN_MAX_AGE_MS,
   DETONATION_RUNS_DEFAULT_PAGE_SIZE,
@@ -295,10 +296,11 @@ const CARD_ALERT_RUNS_SIZE = 10;
  */
 export const useDetonationOriginAlertIds = (taskId: string | undefined) => {
   const { http } = useKibana().services;
+  const spaceId = useSpaceId();
 
   return useQuery<DetonationRunsResponse, Error, string[]>({
-    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'origin-alert-ids', taskId ?? ''],
-    enabled: Boolean(taskId),
+    queryKey: [DETONATE_QUERY_KEY, 'tasks', 'origin-alert-ids', spaceId ?? '', taskId ?? ''],
+    enabled: Boolean(taskId) && Boolean(spaceId),
     queryFn: ({ signal }) =>
       detonateApi.searchRuns(
         http,

@@ -1913,6 +1913,31 @@ describe('registerDetonatePrototypeRoutes', () => {
       );
     });
 
+    it.each([
+      [10, 25_000, 10_000],
+      [30, 25_000, 9_990],
+      [100, 10_001, 10_000],
+      [10, 9_999, 9_999],
+    ])(
+      'with %i per page, a %i-group answer is counted as %i, so the pager stays within the 10,000 offset cap',
+      async (size, groupsCount, expected) => {
+        esClient.search.mockResolvedValue({
+          hits: { hits: [] },
+          aggregations: {
+            groupsCount: { value: groupsCount },
+            unitsCount: { value: 50_000 },
+            groupByFields: { buckets: [] },
+          },
+        });
+
+        await groups({ group_by: 'host.name', size });
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: expect.objectContaining({ groupsCount: expected }),
+        });
+      }
+    );
+
     it("keeps a run with no verdict in the group's mix, as the unknown bucket", async () => {
       await groups({ group_by: 'host.name' });
 

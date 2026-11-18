@@ -8,7 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { estypes } from '@elastic/elasticsearch';
-import { getGroupingQuery, parseGroupingQuery } from '@kbn/grouping/src/containers/query';
+import {
+  MAX_QUERY_SIZE,
+  getGroupingQuery,
+  parseGroupingQuery,
+} from '@kbn/grouping/src/containers/query';
 import {
   DETONATE_VERDICTS,
   DETONATION_GROUPS_DEFAULT_PAGE_SIZE,
@@ -213,9 +217,13 @@ export const searchRunGroups = async ({
     UNIQUE_VALUE,
     aggregations as never
   ) as { groupByFields?: { buckets?: GroupBucket[] } };
+  // `@kbn/grouping` caps the offset at `MAX_QUERY_SIZE - size`, so a page past that would repeat the
+  // last one. The count is clamped to the groups reachable in whole pages, and the pager never offers them.
+  const size = query.size ?? DETONATION_GROUPS_DEFAULT_PAGE_SIZE;
+  const reachableGroups = Math.floor(MAX_QUERY_SIZE / size) * size;
   return {
     groups: (parsed.groupByFields?.buckets ?? []).map(toGroup),
-    groupsCount: aggregations.groupsCount?.value ?? 0,
+    groupsCount: Math.min(aggregations.groupsCount?.value ?? 0, reachableGroups),
     runsCount: aggregations.unitsCount?.value ?? 0,
   };
 };

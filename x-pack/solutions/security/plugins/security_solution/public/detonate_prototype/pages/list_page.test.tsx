@@ -405,6 +405,20 @@ describe('DetonateListPage', () => {
         });
       });
 
+      it('says the originating alert is not available when its ids could not be read', async () => {
+        await openGroup();
+        jest
+          .mocked(useDetonationOriginAlertIds)
+          .mockReturnValue({ data: undefined, isError: true } as never);
+        fireEvent.click(await screen.findByTestId('group-panel-toggle'));
+
+        expect(
+          await screen.findByTestId('detonatePrototypeOriginatingAlertsUnavailable')
+        ).toHaveTextContent('Originating alert not available');
+        expect(screen.queryByTestId('detonatePrototypeOriginatingAlerts')).not.toBeInTheDocument();
+        expect(await screen.findByTestId('detonatePrototypeGroupBody')).toBeInTheDocument();
+      });
+
       it('shows no section for a Detonation that did not come from an alert', async () => {
         fireEvent.click(await openGroup([]));
 
@@ -433,6 +447,30 @@ describe('DetonateListPage', () => {
       expect(await screen.findByTestId('detonatePrototypeGroupRuns')).toBeInTheDocument();
       expect(await screen.findByTestId('mockTable')).toBeInTheDocument();
       expect(lastRunsQuery().kql).toBe('detonate.verdict:"malicious"');
+    });
+
+    it("keeps the page's KQL inside the group's filter, so an `or` cannot escape the group", async () => {
+      saveGrouping(['detonate.verdict']);
+      mockGroups([makeGroup({ key: 'malicious', runCount: 2 })]);
+      mockRuns([makeRun()]);
+      renderPage();
+      await screen.findByTestId('group-panel-toggle');
+      act(() =>
+        lastSearchBarProps().onQuerySubmit(
+          {
+            dateRange: { from: 'now-7d', to: 'now-1h' },
+            query: { query: 'file.name:a or file.name:b' },
+          },
+          true
+        )
+      );
+
+      fireEvent.click(await screen.findByTestId('group-panel-toggle'));
+      await screen.findByTestId('mockTable');
+
+      expect(lastRunsQuery().kql).toBe(
+        '(file.name:a or file.name:b) and (detonate.verdict:"malicious")'
+      );
     });
 
     it('narrows a runs group that has no value to the runs without one', async () => {

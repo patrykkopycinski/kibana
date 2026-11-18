@@ -33,6 +33,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -250,6 +251,18 @@ const andKql = (presetKql: string | undefined, userKql: string): string | undefi
   if (!presetKql) return user;
   if (!user) return presetKql;
   return parses(user) ? `(${presetKql}) and (${user})` : user;
+};
+
+/**
+ * The group's filter narrows the page's query: `(page) and (group)`, so an `or` in the page's KQL
+ * cannot widen the group. The group's KQL is built here from quoted values, so it always parses;
+ * a plain join therefore never drops the page's filter. The page's own KQL was already accepted
+ * by the groups request that produced this group.
+ */
+const andGroupKql = (pageKql: string | undefined, groupKql: string): string | undefined => {
+  const page = pageKql?.trim() ? pageKql : undefined;
+  if (!groupKql) return page;
+  return page ? `(${page}) and (${groupKql})` : groupKql;
 };
 
 const serviceErrorMessage = (error: unknown): string => {
@@ -524,8 +537,7 @@ const GROUP_OPTIONS: GroupOption[] = [
   { key: 'detonate.source', label: i18n.GROUP_BY_SOURCE },
   { key: 'host.name', label: i18n.GROUP_BY_HOST },
   { key: 'user.name', label: i18n.GROUP_BY_USER },
-  // Epic #20877 wants the rules taken from the sandbox SIEM alerts store; the run's own
-  // `detonate.detection_rule_names` stands in until Q-B/Q2 are answered.
+  // Epic #20877 §1: Rule groups should come from the sandbox SIEM alerts store; detonate.detection_rule_names stands in; pending product answer (Q-B/Q2).
   { key: 'detonate.detection_rule_names', label: i18n.GROUP_BY_RULE },
 ];
 
@@ -729,7 +741,8 @@ const getGroupStats: GetGroupStats<RunGroupStats> = (selectedGroup, bucket) => {
 const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
   const { data: task, isLoading } = useDetonationTask(taskId);
   // This body only mounts while its group is open, so the origin alerts are read on expand only.
-  const { data: originAlertIds } = useDetonationOriginAlertIds(taskId);
+  const { data: originAlertIds, isError: originAlertIdsFailed } =
+    useDetonationOriginAlertIds(taskId);
 
   if (isLoading || !task) {
     return (
@@ -744,6 +757,11 @@ const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="detonatePrototypeGroupBody">
+      {originAlertIdsFailed && (
+        <EuiFlexItem>
+          <OriginatingAlertsUnavailable />
+        </EuiFlexItem>
+      )}
       {originAlertIds && originAlertIds.length > 0 && (
         <EuiFlexItem>
           <OriginatingAlerts key={originAlertIds.join(',')} ids={originAlertIds} />
@@ -777,6 +795,19 @@ const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
   );
 };
 
+/** The origin-alert ids could not be read, so the section says so rather than vanishing. */
+const OriginatingAlertsUnavailable = () => (
+  <EuiPanel hasBorder data-test-subj="detonatePrototypeOriginatingAlertsUnavailable">
+    <EuiTitle size="xs">
+      <h3>{i18n.ORIGINATING_ALERTS_TITLE(1)}</h3>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiText size="s" color="subdued">
+      {i18n.ORIGINATING_ALERT_NOT_AVAILABLE}
+    </EuiText>
+  </EuiPanel>
+);
+
 interface FilteredRunsTableProps {
   dataView: DataView;
   baseQuery: GroupsBaseQuery;
@@ -788,7 +819,7 @@ interface FilteredRunsTableProps {
 const FilteredRunsTable = ({ dataView, baseQuery, parents, titleId }: FilteredRunsTableProps) => {
   const [sort, setSort] = useState<SortOrder>(DEFAULT_SORT);
   const [pageSize, setPageSize] = useState(DETONATION_RUNS_DEFAULT_PAGE_SIZE);
-  const kql = andKql(baseQuery.kql, parentsKql(parents));
+  const kql = andGroupKql(baseQuery.kql, parentsKql(parents));
   const query = useMemo<Omit<DetonationRunsQuery, 'from'>>(
     () => ({
       ...(kql ? { kql } : {}),

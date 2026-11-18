@@ -36,6 +36,7 @@ import {
   DETONATION_FOOTER_FAILED_NOTE_TEST_ID,
   DETONATION_FOOTER_RERUN_TEST_ID,
   DETONATION_FOOTER_SHARE_LINK_TEST_ID,
+  DETONATION_FOOTER_TAKE_ACTION_MENU_TEST_ID,
   DETONATION_FOOTER_TAKE_ACTION_TEST_ID,
 } from './test_ids';
 
@@ -377,10 +378,8 @@ describe('<Footer />', () => {
       renderFooter(task);
       openTakeAction();
 
-      const menu = screen
-        .getByTestId(DETONATION_FOOTER_SHARE_LINK_TEST_ID)
-        .closest('[role="dialog"], [data-popover-panel], .euiPopover__panel');
-      expect(menu).not.toBeNull();
+      const menu = screen.getByTestId(DETONATION_FOOTER_TAKE_ACTION_MENU_TEST_ID);
+      expect(menu).toContainElement(screen.getByTestId(DETONATION_FOOTER_SHARE_LINK_TEST_ID));
       expect(menu).toHaveTextContent(/Share link/);
       expect(menu).not.toHaveTextContent(/VM logs|prevalence|exception/i);
     });

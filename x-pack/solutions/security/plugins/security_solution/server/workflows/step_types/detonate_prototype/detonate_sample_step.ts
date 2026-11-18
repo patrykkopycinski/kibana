@@ -121,7 +121,7 @@ const toOutput = (
     // Also not covered from the inventory's execution surface:
     // - "current step of four" and "started time": the output carries only the raw
     //   `last_worker_name` / `last_worker_status`; no step number or total is emitted, and
-    //   `task.created_at` is not echoed. Gap.
+    //   `task.created_at` is not echoed; pending product answer (P-11).
     // - on failure, "the error": `failed` plus `last_worker_status_details` carry it today; there
     //   is no dedicated error field.
     // - on failure, "Re-run with longer timeout" and "View VM logs": not built; pending product

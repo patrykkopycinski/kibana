@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { DETONATE_VM_OS_FAMILIES } from '../../../common/detonate_prototype';
 import type { DetonateTask, DetonateUsage } from '../../../common/detonate_prototype';
@@ -33,6 +33,7 @@ import {
   SUBMIT_MODAL_LIMITATIONS_TEST_ID,
   SUBMIT_MODAL_PRIOR_RUN_TEST_ID,
   SUBMIT_MODAL_READ_ONLY_TEST_ID,
+  SUBMIT_MODAL_TEST_ID,
   SUBMIT_MODAL_ERROR_TEST_ID,
   SUBMIT_MODAL_EXEC_WAIT_TEST_ID,
   SUBMIT_MODAL_USAGE_ERROR_TEST_ID,
@@ -259,7 +260,16 @@ describe('SubmitModal', () => {
         screen.getByTestId('detonatePrototypeOsFamily').querySelectorAll('option')
       ).map((option) => option.getAttribute('value'));
       expect(options).toEqual(['', ...DETONATE_VM_OS_FAMILIES]);
-      expect(screen.queryByText(/hash only|look up/i)).toBeNull();
+
+      // A hash-only path would show up as one more way to submit: another tab or footer action.
+      const modal = within(screen.getByTestId(SUBMIT_MODAL_TEST_ID));
+      expect(modal.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+        i18n.SUBMIT_BY_HASH,
+        i18n.SUBMIT_BY_FILE,
+      ]);
+      expect(
+        modal.getAllByRole('button').map((button) => button.textContent || 'close-icon')
+      ).toEqual([i18n.SUBMIT_MODAL_CANCEL, i18n.DETONATE_BUTTON, 'close-icon']);
     });
 
     it('pre-fills the OS family and the exec wait of a run being repeated and sends them', () => {

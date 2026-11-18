@@ -57,6 +57,7 @@ import {
   DETONATION_FOOTER_FAILED_NOTE_TEST_ID,
   DETONATION_FOOTER_RERUN_TEST_ID,
   DETONATION_FOOTER_SHARE_LINK_TEST_ID,
+  DETONATION_FOOTER_TAKE_ACTION_MENU_TEST_ID,
   DETONATION_FOOTER_TAKE_ACTION_TEST_ID,
   DETONATION_FOOTER_TEST_ID,
 } from './test_ids';
@@ -406,7 +407,10 @@ export const Footer = memo(({ task }: FooterProps) => {
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <EuiContextMenuPanel items={menuItems} />
+            <EuiContextMenuPanel
+              items={menuItems}
+              data-test-subj={DETONATION_FOOTER_TAKE_ACTION_MENU_TEST_ID}
+            />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

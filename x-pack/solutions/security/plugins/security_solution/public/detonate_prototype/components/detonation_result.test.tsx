@@ -261,6 +261,30 @@ describe('DetonationResult overview', () => {
       );
     });
 
+    it('renders a benign fallback line for a finished run with no alerts', () => {
+      renderResult(createTask());
+
+      expect(screen.getByTestId(DETONATION_AI_SUMMARY_FALLBACK_TEST_ID)).toHaveTextContent(
+        /benign/i
+      );
+      expect(screen.getByTestId(DETONATION_AI_SUMMARY_FALLBACK_TEST_ID)).not.toHaveTextContent(
+        /Detonate: malicious/i
+      );
+    });
+
+    it('renders an inconclusive fallback line for a run with diagnostic alerts only', () => {
+      renderResult(
+        createTask({
+          diagnostic_endpoint_alerts_count: 3,
+          diagnostic_endpoint_alert_groups: [{ event_code: 'diag-1', alerts_count: 3 }],
+        } as Partial<DetonateTask>)
+      );
+
+      expect(screen.getByTestId(DETONATION_AI_SUMMARY_FALLBACK_TEST_ID)).toHaveTextContent(
+        /inconclusive/i
+      );
+    });
+
     it('still renders a fallback line while the run has no verdict', () => {
       renderResult(running());
 
@@ -391,6 +415,18 @@ describe('DetonationResult overview', () => {
       expect(screen.getByTestId(DETONATION_SANDBOX_ALERTS_EMPTY_TEST_ID)).toHaveTextContent(
         /No alerts yet/
       );
+    });
+
+    // Epic #20877 §State inventory: the Copy section's response statement is not built yet.
+    it('does not show the "We observed {N} sandbox SIEM alerts" statement (pending product answer)', () => {
+      renderResult(
+        createTask({
+          production_endpoint_alerts_count: 3,
+          production_detection_alerts_count: 2,
+        } as Partial<DetonateTask>)
+      );
+
+      expect(document.body).not.toHaveTextContent(/We observed/);
     });
 
     it('says the sandbox raised none once the run is over', () => {

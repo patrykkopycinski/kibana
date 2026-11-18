@@ -116,6 +116,8 @@ const toOutput = (
   const { verdict } = deriveDetonateVerdict(task);
   return {
     task_id: task.id,
+    // Epic #20877 §State inventory: the execution surface gets a link only, not an "Open run" button
+    // (the Workflows execution view has no extension point); pending product answer.
     run_url: toRunUrl(task.id, runUrlContext),
     completed,
     failed,

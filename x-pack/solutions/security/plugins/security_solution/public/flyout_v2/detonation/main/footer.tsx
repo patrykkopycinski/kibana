@@ -92,11 +92,14 @@ export interface FooterProps {
 /**
  * Footer of the detonation result flyout: Add to chat, Re-run and a Take action menu.
  *
- * Not built here, on purpose:
- * - "View VM logs": the submit/task contract has no VM log source to link to.
+ * Epic #20877 §State inventory: not built here, pending product answer (pinned in footer.test.tsx):
+ * - "View VM logs" (failed): the submit/task contract has no VM log source to link to.
+ * - Prevalence lookup and the evasion checks observed (inconclusive): the contract carries neither.
+ * - The trusted-application exception link (benign, on an alert): nothing creates one today.
+ *
+ * Also not built here:
  * - The partial-telemetry link on a failed run: the task's telemetry metadata has no public
  *   fetch, and adding a server route is out of scope for this footer.
- * - The prevalence lookup and the evasion-check list: they belong to later phases.
  */
 export const Footer = memo(({ task }: FooterProps) => {
   const { http, cases } = useKibana().services;

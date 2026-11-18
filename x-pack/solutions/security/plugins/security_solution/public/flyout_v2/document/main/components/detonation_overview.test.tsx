@@ -180,6 +180,19 @@ describe('DetonationOverview', () => {
     expect(queryByTestId(DETONATION_OVERVIEW_COUNTS_TEST_ID)).not.toBeInTheDocument();
   });
 
+  // Epic #20877 §State inventory: the card's queued cell ("waiting for a VM") is not built. A run
+  // record has no `queued` status (only running/complete/failed), so a run still waiting for a VM
+  // reads as running here. Pending product answer.
+  it('shows a run still waiting for a VM as running, never as queued, with Open result and no counts', () => {
+    setRuns([run({ 'detonate.state': 'running', 'detonate.verdict': undefined })]);
+    const { getByTestId, queryByTestId } = renderCard();
+    expect(queryByTestId('detonatePrototypeStatus-queued')).not.toBeInTheDocument();
+    expect(getByTestId('detonatePrototypeStatus-running')).toBeInTheDocument();
+    expect(getByTestId(DETONATION_OVERVIEW_OPEN_RESULT_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(DETONATION_OVERVIEW_COUNTS_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(DETONATION_OVERVIEW_DETONATE_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('shows the failure details with a Re-run for a failed run', () => {
     setRuns([run({ 'detonate.state': 'failed', 'detonate.step.details': 'VM boot timed out' })]);
     const { getByTestId } = renderCard();

@@ -365,6 +365,22 @@ describe('<Footer />', () => {
       expect(screen.getByTestId(DETONATION_FOOTER_SHARE_LINK_TEST_ID)).toBeInTheDocument();
     });
 
+    // Epic #20877 §State inventory: these offers are not built (pending product answer).
+    it.each([
+      ['failed', failedTask()],
+      ['inconclusive', inconclusiveTask()],
+      [
+        'benign',
+        makeTask({ production_endpoint_alerts_count: 0, production_endpoint_alert_groups: [] }),
+      ],
+    ])('offers no VM logs, prevalence lookup or exception link for a %s run', (_name, task) => {
+      renderFooter(task);
+      openTakeAction();
+
+      const footerText = document.body.textContent ?? '';
+      expect(footerText).not.toMatch(/VM logs|prevalence|exception/i);
+    });
+
     describe('add to case', () => {
       it('attaches the indicators comment to a case', () => {
         renderFooter(makeTask());

@@ -445,6 +445,8 @@ const RunsTable = ({
           {sourceOf(rows, rowIndex)?.['detonate.alerts.total'] ?? 0}
         </span>
       ),
+      // Epic #20877 §State inventory: a run waiting for a VM (worker prepare_task_data) is shown as
+      // running here, not queued. Pending product answer (P-18).
       [STATUS_COLUMN]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
         const run = sourceOf(rows, rowIndex);
         if (!run) return null;

@@ -377,8 +377,12 @@ describe('<Footer />', () => {
       renderFooter(task);
       openTakeAction();
 
-      const footerText = document.body.textContent ?? '';
-      expect(footerText).not.toMatch(/VM logs|prevalence|exception/i);
+      const menu = screen
+        .getByTestId(DETONATION_FOOTER_SHARE_LINK_TEST_ID)
+        .closest('[role="dialog"], [data-popover-panel], .euiPopover__panel');
+      expect(menu).not.toBeNull();
+      expect(menu).toHaveTextContent(/Share link/);
+      expect(menu).not.toHaveTextContent(/VM logs|prevalence|exception/i);
     });
 
     describe('add to case', () => {

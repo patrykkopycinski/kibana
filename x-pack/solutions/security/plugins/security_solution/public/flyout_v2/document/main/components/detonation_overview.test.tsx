@@ -145,8 +145,13 @@ describe('DetonationOverview', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  // Epic #20877 §State inventory: not analyzed reads "plus the reason when known"; the card shows
+  // the description only, with no reason. Pending product answer (P-5).
   it('offers to detonate a file that has not been analyzed', () => {
     const { getByTestId, queryByTestId } = renderCard();
+    expect(getByTestId(`${DETONATION_OVERVIEW_TEST_ID}Panel`)).toHaveTextContent(
+      "This file hasn't been detonated."
+    );
     expect(getByTestId(DETONATION_OVERVIEW_DETONATE_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(DETONATION_OVERVIEW_OPEN_RESULT_TEST_ID)).not.toBeInTheDocument();
   });
@@ -182,9 +187,18 @@ describe('DetonationOverview', () => {
 
   // Epic #20877 §State inventory: the card's queued cell ("waiting for a VM") is not built. A run
   // record has no `queued` status (only running/complete/failed), so a run still waiting for a VM
-  // reads as running here. Pending product answer.
+  // reads as running here. Pending product answer (P-18).
   it('shows a run still waiting for a VM as running, never as queued, with Open result and no counts', () => {
-    setRuns([run({ 'detonate.state': 'running', 'detonate.verdict': undefined })]);
+    setRuns([
+      run({
+        'detonate.state': 'running',
+        'detonate.verdict': undefined,
+        'detonate.step.number': 1,
+        'detonate.step.label': 'Preparing task data',
+        'detonate.step.worker': 'detonate.workers.prepare_task_data',
+        'detonate.step.status': 'started',
+      }),
+    ]);
     const { getByTestId, queryByTestId } = renderCard();
     expect(queryByTestId('detonatePrototypeStatus-queued')).not.toBeInTheDocument();
     expect(getByTestId('detonatePrototypeStatus-running')).toBeInTheDocument();

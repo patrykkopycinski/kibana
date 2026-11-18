@@ -17,6 +17,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
+import { DETONATE_VM_OS_FAMILIES } from '../../../common/detonate_prototype';
 import type { DetonateTask, DetonateUsage } from '../../../common/detonate_prototype';
 import * as kibana from '../../common/lib/kibana';
 import * as useDetonate from '../hooks/use_detonate';
@@ -247,6 +248,18 @@ describe('SubmitModal', () => {
       expect(mutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({ vm_os_family: 'windows' })
       );
+    });
+
+    // Epic #20877 §State inventory: an alert on an unsupported OS gets no hash-only path
+    // (pending product answer, P-2); the form offers only the supported VM families.
+    it('offers only the supported OS families and no hash-only lookup', () => {
+      renderModal({ initialHash: SHA256 });
+
+      const options = Array.from(
+        screen.getByTestId('detonatePrototypeOsFamily').querySelectorAll('option')
+      ).map((option) => option.getAttribute('value'));
+      expect(options).toEqual(['', ...DETONATE_VM_OS_FAMILIES]);
+      expect(screen.queryByText(/hash only|look up/i)).toBeNull();
     });
 
     it('pre-fills the OS family and the exec wait of a run being repeated and sends them', () => {

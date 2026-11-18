@@ -19,6 +19,7 @@ import { downloadBlob } from '../../common/utils/download_blob';
 import { useCanAttachToCase } from '../../cases/attachments/hooks/use_can_attach_to_case';
 import {
   DETONATION_AI_SUMMARY_FALLBACK_TEST_ID,
+  DETONATION_AI_SUMMARY_LIMITATIONS_TEST_ID,
   DETONATION_AI_SUMMARY_TEST_ID,
   DETONATION_BEHAVIOR_TEST_ID,
   DETONATION_BEHAVIOR_UNAVAILABLE_TEST_ID,
@@ -53,6 +54,7 @@ import {
   useDetonationTaskUpdates,
 } from '../hooks/use_detonate';
 import { ProgressSection } from '../../flyout_v2/detonation/main/components/progress_section';
+import { SUBMIT_MODAL_LIMITATIONS } from '../translations';
 import { DETAIL_FAILURE_TEST_ID, DetonationResult } from './detonation_result';
 
 const mockStorageGet = jest.fn();
@@ -283,6 +285,39 @@ describe('DetonationResult overview', () => {
       expect(screen.getByTestId(DETONATION_AI_SUMMARY_FALLBACK_TEST_ID)).toHaveTextContent(
         /inconclusive/i
       );
+    });
+
+    // Epic #20877 Copy: the Limitations notice appears in the modal and the inconclusive summary.
+    it('shows the Limitations notice for an inconclusive run only', () => {
+      renderResult(
+        createTask({
+          diagnostic_endpoint_alerts_count: 3,
+          diagnostic_endpoint_alert_groups: [{ event_code: 'diag-1', alerts_count: 3 }],
+        } as Partial<DetonateTask>)
+      );
+
+      expect(screen.getByTestId(DETONATION_AI_SUMMARY_LIMITATIONS_TEST_ID)).toHaveTextContent(
+        SUBMIT_MODAL_LIMITATIONS
+      );
+    });
+
+    it('does not show the Limitations notice for a benign run', () => {
+      renderResult(createTask());
+
+      expect(screen.queryByTestId(DETONATION_AI_SUMMARY_LIMITATIONS_TEST_ID)).toBeNull();
+      expect(document.body).not.toHaveTextContent(SUBMIT_MODAL_LIMITATIONS);
+    });
+
+    it('does not show the Limitations notice for a malicious run', () => {
+      renderResult(
+        createTask({
+          production_endpoint_alerts_count: 1,
+          production_endpoint_alert_groups: [{ event_code: 'proc-1', alerts_count: 1 }],
+        } as Partial<DetonateTask>)
+      );
+
+      expect(screen.queryByTestId(DETONATION_AI_SUMMARY_LIMITATIONS_TEST_ID)).toBeNull();
+      expect(document.body).not.toHaveTextContent(SUBMIT_MODAL_LIMITATIONS);
     });
 
     it('still renders a fallback line while the run has no verdict', () => {

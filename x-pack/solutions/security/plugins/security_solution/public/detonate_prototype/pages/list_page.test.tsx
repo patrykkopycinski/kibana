@@ -709,6 +709,25 @@ describe('DetonateListPage', () => {
       expect(screen.getByTestId('mockCell-0-tags')).toHaveTextContent('alert:1');
     });
 
+    // Epic #20877 §State inventory: the table has no queued state yet (pending product answer, P-18).
+    it('shows a run waiting for a VM as running, not queued', async () => {
+      mockRuns([
+        makeRun({
+          'detonate.state': 'running',
+          'detonate.verdict': undefined,
+          'detonate.step.number': 1,
+          'detonate.step.of': 8,
+          'detonate.step.label': 'Preparing task data',
+          'detonate.step.worker': 'detonate.workers.prepare_task_data',
+          'detonate.step.status': 'started',
+        }),
+      ]);
+      renderPage();
+
+      expect(await screen.findByTestId('detonatePrototypeStatus-running')).toBeInTheDocument();
+      expect(screen.queryByTestId('detonatePrototypeStatus-queued')).toBeNull();
+    });
+
     it('falls back to the hash when the sample has no name', async () => {
       mockRuns([makeRun({ 'file.name': undefined })]);
       renderPage();

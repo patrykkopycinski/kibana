@@ -87,6 +87,8 @@ type SubmitMode = 'hash' | 'file';
  */
 const UNSET = '' as const;
 
+// Epic #20877 §State inventory: an alert on an unsupported OS still gets the full submit form,
+// with no "look up hash only" path. Pending product answer (P-2).
 const osOptions = [
   { value: UNSET, text: i18n.SERVICE_DEFAULT },
   ...DETONATE_VM_OS_FAMILIES.map((value) => ({ value, text: value })),

@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   deriveDetonateVerdict,
   detonationConfidence,
@@ -15,7 +16,11 @@ import {
 import type { DetonateTask } from '../../../../../common/detonate_prototype';
 import * as i18n from '../../../../detonate_prototype/translations';
 import { DocumentSummarySection } from '../../../document/main/components/document_summary_section';
-import { DETONATION_AI_SUMMARY_FALLBACK_TEST_ID, DETONATION_AI_SUMMARY_TEST_ID } from '../test_ids';
+import {
+  DETONATION_AI_SUMMARY_FALLBACK_TEST_ID,
+  DETONATION_AI_SUMMARY_LIMITATIONS_TEST_ID,
+  DETONATION_AI_SUMMARY_TEST_ID,
+} from '../test_ids';
 import { CONFIDENCE_LABEL, VERDICT_LABEL } from '../utils/detonation_labels';
 
 interface AiSummarySectionProps {
@@ -65,6 +70,9 @@ export const AiSummarySection = ({ task }: AiSummarySectionProps) => {
     return context;
   }, [task]);
 
+  // Epic #20877 Copy: the Limitations notice also appears in the inconclusive summary.
+  const isInconclusive = deriveDetonateVerdict(task).verdict === 'inconclusive';
+
   return (
     <>
       <DocumentSummarySection
@@ -78,6 +86,15 @@ export const AiSummarySection = ({ task }: AiSummarySectionProps) => {
       <EuiText size="s" data-test-subj={DETONATION_AI_SUMMARY_FALLBACK_TEST_ID}>
         {fallbackLine(task)}
       </EuiText>
+      {isInconclusive && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            title={i18n.SUBMIT_MODAL_LIMITATIONS}
+            data-test-subj={DETONATION_AI_SUMMARY_LIMITATIONS_TEST_ID}
+          />
+        </>
+      )}
     </>
   );
 };

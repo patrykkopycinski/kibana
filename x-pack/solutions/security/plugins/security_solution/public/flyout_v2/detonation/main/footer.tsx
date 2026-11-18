@@ -28,10 +28,11 @@ import {
   deriveDetonateVerdict,
   isDetonationComplete,
   isDetonationFailed,
+  parseAlertTags,
 } from '../../../../common/detonate_prototype';
 import type { DetonateTask } from '../../../../common/detonate_prototype';
 import type { ConditionEntry } from '../../../../common/endpoint/types';
-import { SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName, APP_PATH, TRUSTED_APPS_PATH } from '../../../../common/constants';
 import { useCanAttachToCase } from '../../../cases/attachments/hooks/use_can_attach_to_case';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -54,6 +55,7 @@ import {
   DETONATION_FOOTER_ADD_TO_CASE_TEST_ID,
   DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID,
   DETONATION_FOOTER_BLOCK_HASH_TEST_ID,
+  DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID,
   DETONATION_FOOTER_FAILED_NOTE_TEST_ID,
   DETONATION_FOOTER_RERUN_TEST_ID,
   DETONATION_FOOTER_SHARE_LINK_TEST_ID,
@@ -96,14 +98,17 @@ export interface FooterProps {
  * Epic #20877 §State inventory: not built here, pending product answer (pinned in footer.test.tsx):
  * - "View VM logs" (failed): the submit/task contract has no VM log source to link to.
  * - Prevalence lookup and the evasion checks observed (inconclusive): the contract carries neither.
- * - The trusted-application exception link (benign, on an alert): nothing creates one today.
  *
  * Also not built here:
  * - The partial-telemetry link on a failed run: the task's telemetry metadata has no public
  *   fetch, and adding a server route is out of scope for this footer.
  */
 export const Footer = memo(({ task }: FooterProps) => {
-  const { http, cases } = useKibana().services;
+  const {
+    http,
+    cases,
+    application: { navigateToUrl },
+  } = useKibana().services;
   const { addSuccess, addError, addInfo, addWarning } = useAppToasts();
   const { getAppUrl } = useAppUrl();
   const { openDetonationFlyout } = useFlyoutApi();
@@ -119,6 +124,14 @@ export const Footer = memo(({ task }: FooterProps) => {
   const failed = isDetonationFailed(task);
   const conclusion = useMemo(() => deriveDetonateVerdict(task), [task]);
   const inconclusive = conclusion.status === 'complete' && conclusion.verdict === 'inconclusive';
+  // The exception offer mirrors the blocklist gate: only a finished, benign run that came
+  // from an alert, and only for users who may write trusted applications.
+  const hasOriginAlerts = parseAlertTags(task.tags).length > 0;
+  const showCreateException =
+    complete &&
+    conclusion.verdict === 'benign' &&
+    hasOriginAlerts &&
+    Boolean(endpointPrivileges?.canWriteTrustedApplications);
   const needsLongerTimeout = failed || inconclusive;
 
   const { data: record } = useDetonationRecord(taskId, complete);
@@ -222,8 +235,23 @@ export const Footer = memo(({ task }: FooterProps) => {
     }
   }, [addSuccess, addWarning, closePopover, getAppUrl, taskId]);
 
-  // Block hash: needs both blocklist privileges and an explicit confirmation.
   const hash = task.sample_hash ?? '';
+
+  // Trusted-app exception for the sample: opens the Trusted apps create flyout. Default follows
+  // the incompatible-antivirus insight link (plain URL, no prefill); pending product confirmation.
+  // The artifact flyout's location.state prefill only applies to real workflow insights (a truthy
+  // insight id also marks a remediation on save), so the hash is copied to the clipboard instead.
+  const onCreateException = useCallback(() => {
+    closePopover();
+    if (hash && copyToClipboard(hash)) {
+      addInfo(i18n.FOOTER_CREATE_EXCEPTION_HASH_COPIED);
+    } else {
+      addWarning(i18n.FOOTER_CREATE_EXCEPTION_HASH_COPY_FAILED);
+    }
+    navigateToUrl(`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`);
+  }, [addInfo, addWarning, closePopover, hash, navigateToUrl]);
+
+  // Block hash: needs both blocklist privileges and an explicit confirmation.
   const blockDisabledReason = !canWriteBlocklist
     ? i18n.FOOTER_BLOCK_HASH_NO_PRIVILEGE
     : !canManageGlobalArtifacts
@@ -350,8 +378,29 @@ export const Footer = memo(({ task }: FooterProps) => {
         {i18n.FOOTER_BLOCK_HASH}
       </EuiContextMenuItem>
     );
+    if (showCreateException) {
+      items.push(
+        <EuiContextMenuItem
+          key="createException"
+          icon="plusInCircle"
+          onClick={onCreateException}
+          data-test-subj={DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID}
+        >
+          {i18n.FOOTER_CREATE_EXCEPTION}
+        </EuiContextMenuItem>
+      );
+    }
     return items;
-  }, [blockDisabledReason, canAttachToCase, hasIndicators, onAddToCase, onBlockHash, onShareLink]);
+  }, [
+    blockDisabledReason,
+    canAttachToCase,
+    hasIndicators,
+    onAddToCase,
+    onBlockHash,
+    onCreateException,
+    onShareLink,
+    showCreateException,
+  ]);
 
   const takeActionButton = (
     <EuiButton

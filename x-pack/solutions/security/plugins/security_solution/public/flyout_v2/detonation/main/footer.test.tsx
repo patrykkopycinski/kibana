@@ -32,6 +32,7 @@ import { Footer } from './footer';
 import {
   DETONATION_FOOTER_ADD_TO_CASE_TEST_ID,
   DETONATION_FOOTER_BLOCK_CONFIRM_TEST_ID,
+  DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID,
   DETONATION_FOOTER_BLOCK_HASH_TEST_ID,
   DETONATION_FOOTER_FAILED_NOTE_TEST_ID,
   DETONATION_FOOTER_RERUN_TEST_ID,
@@ -116,21 +117,28 @@ const mockAddWarning = jest.fn();
 const mockOpenCaseModal = jest.fn();
 const mockOpenAgentBuilderFlyout = jest.fn();
 const mockCreateBlocklist = jest.fn();
+const mockNavigateToUrl = jest.fn();
 
 const setup = ({
   canAttachToCase = true,
   canWriteBlocklist = true,
   canManageGlobalArtifacts = true,
   chatAvailable = true,
+  canWriteTrustedApplications = true,
 }: {
   canAttachToCase?: boolean;
   canWriteBlocklist?: boolean;
   canManageGlobalArtifacts?: boolean;
   chatAvailable?: boolean;
+  canWriteTrustedApplications?: boolean;
 } = {}) => {
   jest.mocked(useCanAttachToCase).mockReturnValue(canAttachToCase);
   jest.mocked(useUserPrivileges).mockReturnValue({
-    endpointPrivileges: { canWriteBlocklist, canManageGlobalArtifacts },
+    endpointPrivileges: {
+      canWriteBlocklist,
+      canManageGlobalArtifacts,
+      canWriteTrustedApplications,
+    },
   } as ReturnType<typeof useUserPrivileges>);
   jest.mocked(useAgentBuilderAvailability).mockReturnValue({
     hasAgentBuilderPrivilege: chatAvailable,
@@ -166,6 +174,7 @@ describe('<Footer />', () => {
       services: {
         http: { post: jest.fn() },
         cases: { hooks: { useCasesAddToExistingCaseModal: () => ({ open: mockOpenCaseModal }) } },
+        application: { navigateToUrl: mockNavigateToUrl },
       },
     } as unknown as ReturnType<typeof useKibana>);
     jest.mocked(useAgentBuilderAttachment).mockReturnValue({
@@ -374,14 +383,66 @@ describe('<Footer />', () => {
         'benign',
         makeTask({ production_endpoint_alerts_count: 0, production_endpoint_alert_groups: [] }),
       ],
-    ])('offers no VM logs, prevalence lookup or exception link for a %s run', (_name, task) => {
+    ])('offers no VM logs or prevalence lookup for a %s run', (_name, task) => {
       renderFooter(task);
       openTakeAction();
 
       const menu = screen.getByTestId(DETONATION_FOOTER_TAKE_ACTION_MENU_TEST_ID);
       expect(menu).toContainElement(screen.getByTestId(DETONATION_FOOTER_SHARE_LINK_TEST_ID));
       expect(menu).toHaveTextContent(/Share link/);
-      expect(menu).not.toHaveTextContent(/VM logs|prevalence|exception/i);
+      expect(menu).not.toHaveTextContent(/VM logs|prevalence/i);
+    });
+
+    describe('create trusted app exception', () => {
+      it('copies the hash and opens the trusted apps create page for a benign run from an alert', () => {
+        renderFooter(
+          makeTask({
+            production_endpoint_alerts_count: 0,
+            production_endpoint_alert_groups: [],
+            tags: ['alert:doc-7', 'space:default'],
+          })
+        );
+        openTakeAction();
+
+        fireEvent.click(screen.getByTestId(DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID));
+
+        expect(copyToClipboard).toHaveBeenCalledWith(SHA256);
+        expect(mockAddInfo).toHaveBeenCalledTimes(1);
+        expect(mockNavigateToUrl).toHaveBeenCalledWith(
+          '/app/security/administration/trusted_apps?show=create'
+        );
+      });
+
+      it.each([
+        ['malicious', makeTask({ production_endpoint_alerts_count: 5 })],
+        [
+          'a benign run without originating alerts',
+          makeTask({
+            production_endpoint_alerts_count: 0,
+            production_endpoint_alert_groups: [],
+            tags: ['space:default'],
+          }),
+        ],
+        ['a failed run', failedTask()],
+        ['an inconclusive run', inconclusiveTask()],
+      ])('is not offered for %s', (_name, task) => {
+        renderFooter(task);
+        openTakeAction();
+
+        expect(
+          screen.queryByTestId(DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID)
+        ).not.toBeInTheDocument();
+      });
+
+      it('is not offered without the trusted apps write privilege', () => {
+        setup({ canWriteTrustedApplications: false });
+        renderFooter(makeTask());
+        openTakeAction();
+
+        expect(
+          screen.queryByTestId(DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID)
+        ).not.toBeInTheDocument();
+      });
     });
 
     describe('add to case', () => {

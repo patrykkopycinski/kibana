@@ -821,7 +821,7 @@ export const OVERVIEW_INDICATORS_CREATE_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detonatePrototype.overview.indicatorsCreateRuleTooltip',
   {
     defaultMessage:
-      'Not available yet. A rule needs its threat mapping and indicator index drafted and approved first.',
+      'Opens rule creation. The indicator match rule type and threat mapping must be filled in there.',
   }
 );
 
@@ -970,6 +970,21 @@ export const FOOTER_BLOCK_HASH_NO_GLOBAL_PRIVILEGE = i18n.translate(
     defaultMessage:
       'Blocking a hash for all policies requires the global artifact management privilege.',
   }
+);
+
+export const FOOTER_CREATE_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.createException',
+  { defaultMessage: 'Create trusted app exception' }
+);
+
+export const FOOTER_CREATE_EXCEPTION_HASH_COPIED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.createExceptionHashCopied',
+  { defaultMessage: 'File hash copied. Paste it into the hash field of the new trusted app.' }
+);
+
+export const FOOTER_CREATE_EXCEPTION_HASH_COPY_FAILED = i18n.translate(
+  'xpack.securitySolution.detonatePrototype.footer.createExceptionHashCopyFailed',
+  { defaultMessage: 'Could not copy the file hash. Copy it from the run details.' }
 );
 
 export const FOOTER_BLOCK_HASH_CONFIRM_TITLE = i18n.translate(

@@ -55,15 +55,19 @@ import {
 } from '../hooks/use_detonate';
 import { ProgressSection } from '../../flyout_v2/detonation/main/components/progress_section';
 import { SUBMIT_MODAL_LIMITATIONS } from '../translations';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useNavigateTo } from '../../common/lib/kibana';
 import { DETAIL_FAILURE_TEST_ID, DetonationResult } from './detonation_result';
 
 const mockStorageGet = jest.fn();
 const mockStorageSet = jest.fn();
 const mockOpenCaseModal = jest.fn();
+const mockNavigateTo = jest.fn();
 
 jest.mock('../hooks/use_detonate');
 jest.mock('../../common/utils/download_blob', () => ({ downloadBlob: jest.fn() }));
 jest.mock('../../cases/attachments/hooks/use_can_attach_to_case');
+jest.mock('../../common/components/user_privileges');
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -73,6 +77,7 @@ jest.mock('../../common/lib/kibana', () => ({
       },
     },
   }),
+  useNavigateTo: () => ({ navigateTo: mockNavigateTo }),
 }));
 jest.mock('../../flyout_v2/document/main/components/document_summary_section', () => ({
   DocumentSummarySection: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
@@ -137,6 +142,10 @@ const queued = (overrides: Partial<DetonateTask> = {}) =>
     ...overrides,
   });
 
+jest.mocked(useUserPrivileges).mockReturnValue({
+  rulesPrivileges: { rules: { edit: true } },
+} as never);
+
 const renderResult = (
   task: DetonateTask,
   {
@@ -190,6 +199,9 @@ describe('DetonationResult overview', () => {
     jest.clearAllMocks();
     mockStorageGet.mockReturnValue(undefined);
     jest.mocked(useCanAttachToCase).mockReturnValue(true);
+    jest.mocked(useUserPrivileges).mockReturnValue({
+      rulesPrivileges: { rules: { edit: true } },
+    } as never);
     jest
       .mocked(useDetonationTaskUpdates)
       .mockReturnValue({ data: undefined } as ReturnType<typeof useDetonationTaskUpdates>);
@@ -593,10 +605,23 @@ describe('DetonationResult overview', () => {
       expect(screen.getByTestId(DETONATION_INDICATORS_EXPORT_STIX_TEST_ID)).toBeInTheDocument();
     });
 
-    it('shows create indicator match rule disabled', () => {
-      renderResult(createTask(), { record: withIndicators() });
+    it('navigates to rule creation and is disabled without rule-create privilege', () => {
+      const { unmount } = renderResult(createTask(), { record: withIndicators() });
 
-      expect(screen.getByTestId(DETONATION_INDICATORS_CREATE_RULE_TEST_ID)).toBeDisabled();
+      fireEvent.click(screen.getByTestId(DETONATION_INDICATORS_CREATE_RULE_TEST_ID));
+      expect(useNavigateTo().navigateTo).toHaveBeenCalledWith({
+        deepLinkId: 'rules-create',
+      });
+
+      unmount();
+      jest.mocked(useUserPrivileges).mockReturnValue({
+        rulesPrivileges: { rules: { edit: false } },
+      } as never);
+      renderResult(createTask(), { record: withIndicators() });
+      const button = screen.getByTestId(DETONATION_INDICATORS_CREATE_RULE_TEST_ID);
+      expect(button).toBeDisabled();
+      fireEvent.click(button);
+      expect(useNavigateTo().navigateTo).not.toHaveBeenCalledTimes(2);
     });
   });
 

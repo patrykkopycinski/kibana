@@ -287,7 +287,7 @@ describe('DetonationResult overview', () => {
       );
     });
 
-    // Epic #20877 Copy: the Limitations notice appears in the modal and the inconclusive summary.
+    // Epic #20877 §Copy: the Limitations notice appears in the modal and the inconclusive summary.
     it('shows the Limitations notice for an inconclusive run only', () => {
       renderResult(
         createTask({
@@ -452,7 +452,7 @@ describe('DetonationResult overview', () => {
       );
     });
 
-    // Epic #20877 §State inventory: the Copy section's response statement is not built yet.
+    // Epic #20877 §Copy: the response statement is not shown; pending product answer (P-14).
     it('does not show the "We observed {N} sandbox SIEM alerts" statement (pending product answer)', () => {
       renderResult(
         createTask({

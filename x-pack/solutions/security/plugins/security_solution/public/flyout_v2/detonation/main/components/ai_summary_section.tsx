@@ -70,7 +70,7 @@ export const AiSummarySection = ({ task }: AiSummarySectionProps) => {
     return context;
   }, [task]);
 
-  // Epic #20877 Copy: the Limitations notice also appears in the inconclusive summary.
+  // Epic #20877 §Copy: the Limitations notice also appears in the inconclusive summary.
   const isInconclusive = deriveDetonateVerdict(task).verdict === 'inconclusive';
 
   return (

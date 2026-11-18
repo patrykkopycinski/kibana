@@ -146,7 +146,7 @@ describe('DetonationOverview', () => {
   });
 
   // Epic #20877 §State inventory: not analyzed reads "plus the reason when known"; the card shows
-  // the description only, with no reason. Pending product answer (P-5).
+  // the description only, with no reason. Pending product answer (P-19).
   it('offers to detonate a file that has not been analyzed', () => {
     const { getByTestId, queryByTestId } = renderCard();
     expect(getByTestId(`${DETONATION_OVERVIEW_TEST_ID}Panel`)).toHaveTextContent(

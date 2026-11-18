@@ -32,10 +32,10 @@ interface SandboxAlertsSectionProps {
  * so their counts are always there to read. The "Open in Correlations" link is
  * left out: Correlations does not exist yet.
  *
- * Epic #20877 §State inventory: the Copy section's response statement ("We observed {N} sandbox
+ * Epic #20877 §Copy: the response statement ("We observed {N} sandbox
  * SIEM alerts from {M} rules during this detonation. {K} of those rules are disabled in this
  * cluster.") is not shown: the run carries no rule count and no disabled-rule count; pending
- * product answer.
+ * product answer (P-14).
  */
 export const SandboxAlertsSection = ({ task }: SandboxAlertsSectionProps) => {
   const noAlerts = totalDetonationAlerts(task) === 0;

@@ -117,7 +117,15 @@ const toOutput = (
   return {
     task_id: task.id,
     // Epic #20877 §State inventory: the execution surface gets a link only, not an "Open run" button
-    // (the Workflows execution view has no extension point); pending product answer.
+    // (the Workflows execution view has no extension point); pending product answer (P-11).
+    // Also not covered from the inventory's execution surface:
+    // - "current step of four" and "started time": the output carries only the raw
+    //   `last_worker_name` / `last_worker_status`; no step number or total is emitted, and
+    //   `task.created_at` is not echoed. Gap.
+    // - on failure, "the error": `failed` plus `last_worker_status_details` carry it today; there
+    //   is no dedicated error field.
+    // - on failure, "Re-run with longer timeout" and "View VM logs": not built; pending product
+    //   answer (P-11 for the re-run action, P-15 for VM logs).
     run_url: toRunUrl(task.id, runUrlContext),
     completed,
     failed,

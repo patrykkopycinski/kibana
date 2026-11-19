@@ -21,9 +21,10 @@ import { useBulkUpdateDocumentSummary } from '../hooks/use_bulk_update_document_
 import { HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
-jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [
+jest.mock('@kbn/inference-connectors', () => ({
+  ...jest.requireActual('@kbn/inference-connectors'),
+  useLoadConnectors: jest.fn().mockReturnValue({
+    data: [
       {
         id: 'test-connector-id',
         name: 'Test Connector',
@@ -31,7 +32,6 @@ jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
       },
     ],
     isLoading: false,
-    error: null,
   }),
 }));
 

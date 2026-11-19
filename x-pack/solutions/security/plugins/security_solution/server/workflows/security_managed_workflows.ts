@@ -21,6 +21,8 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
+import type { EndpointWorkflowConsumerFlags } from './endpoint/install';
+import { syncEndpointWorkflows } from './endpoint/install';
 import {
   initSecurityManagedWorkflowsClient,
   type SecurityManagedWorkflowsClient,
@@ -59,6 +61,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   workflowsExtensions,
   logger,
   threatIntelSupplyEnabled,
+  experimentalFeatures,
   bootstrapReady,
   core,
   detonatePrototypeEnabled = false,
@@ -71,6 +74,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    * managed workflows are uninstalled.
    */
   threatIntelSupplyEnabled: boolean;
+  experimentalFeatures: EndpointWorkflowConsumerFlags;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
    * supply is enabled; ignored otherwise.
@@ -130,6 +134,16 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     logger.warn('Failed to install or uninstall threat intelligence managed workflows', {
       error,
     });
+  }
+
+  try {
+    await syncEndpointWorkflows({
+      managedWorkflowsClient,
+      experimentalFeatures,
+      logger,
+    });
+  } catch (error) {
+    logger.warn('Failed to install or uninstall the endpoint managed workflows', { error });
   }
 
   try {

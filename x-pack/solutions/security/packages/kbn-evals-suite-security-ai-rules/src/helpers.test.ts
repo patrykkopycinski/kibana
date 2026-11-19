@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { validateEsqlSyntax, hasRequiredFields, extractMitreTechniques } from './helpers';
+import {
+  validateEsqlSyntax,
+  hasRequiredFields,
+  extractMitreTechniques,
+  isMissingIndexError,
+} from './helpers';
 
 import type { ReferenceRule } from '../datasets/sample_rules';
 
@@ -136,6 +141,25 @@ describe('helpers', () => {
       const rule: Partial<ReferenceRule> = {};
       const techniques = extractMitreTechniques(rule);
       expect(techniques.size).toBe(0);
+    });
+  });
+
+  describe('isMissingIndexError', () => {
+    it('matches the legacy index discovery wording', () => {
+      expect(isMissingIndexError('Could not discover a suitable index for the query')).toBe(true);
+    });
+
+    it('matches the "No relevant data found" wording', () => {
+      expect(
+        isMissingIndexError(
+          'No relevant data found in your indices for "Detect credential access".'
+        )
+      ).toBe(true);
+    });
+
+    it('does not match unrelated agent errors or an empty error', () => {
+      expect(isMissingIndexError('Last action is not a generate_query action')).toBe(false);
+      expect(isMissingIndexError(undefined)).toBe(false);
     });
   });
 });

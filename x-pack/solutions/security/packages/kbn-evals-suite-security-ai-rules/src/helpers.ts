@@ -9,6 +9,18 @@ import { Parser } from '@elastic/esql';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 /**
+ * Agent Builder reports a missing data source in different words across versions
+ * ("could not discover a suitable index", "No relevant data found in your indices").
+ * Both are environment constraints, not model-quality failures.
+ */
+const MISSING_INDEX_ERROR_PATTERN =
+  /could not discover a suitable index|no relevant data found in your indices/i;
+
+export function isMissingIndexError(error: string | undefined): boolean {
+  return Boolean(error && MISSING_INDEX_ERROR_PATTERN.test(error));
+}
+
+/**
  * Extract MITRE ATT&CK technique IDs from a rule.
  *
  * Collects both `technique` and `subtechnique` fields. When a subtechnique is

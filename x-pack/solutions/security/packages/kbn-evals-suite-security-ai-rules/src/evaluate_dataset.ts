@@ -26,6 +26,7 @@ import {
   parseDateMathSeconds,
   extractMitreTechniques,
   hasRequiredFields,
+  isMissingIndexError,
 } from './helpers';
 
 export interface RuleGenerationTaskOutput {
@@ -139,7 +140,7 @@ function skipMissingIndexFailures(
     ...evaluator,
     evaluate: async (args) => {
       const error = (args.output as RuleGenerationTaskOutput)?.error;
-      if (error && /could not discover a suitable index/i.test(error)) {
+      if (isMissingIndexError(error)) {
         return MISSING_INDEX_NA;
       }
       return evaluator.evaluate(args);
@@ -160,7 +161,7 @@ function skipAgentErrors(
     ...evaluator,
     evaluate: async (args) => {
       const output = args.output as RuleGenerationTaskOutput;
-      if (output?.error && !/could not discover a suitable index/i.test(output.error)) {
+      if (output?.error && !isMissingIndexError(output.error)) {
         return AGENT_ERROR_NA;
       }
       return evaluator.evaluate(args);
@@ -531,9 +532,7 @@ export function createEvaluateDataset({
                 return {};
               }
 
-              const isMissingIndex =
-                taskResult.error && /could not discover a suitable index/i.test(taskResult.error);
-              if (isMissingIndex) {
+              if (isMissingIndexError(taskResult.error)) {
                 missingIndexFailures++;
                 log.warning(
                   `[Task] Skipped — missing index (all evaluators will return N/A). Error: ${taskResult.error}`

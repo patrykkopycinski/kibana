@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_YAML from './action_create_threat_match_rule.yaml';
-import DETONATE_COVERAGE_GAP_YAML from './detonate_coverage_gap.yaml';
-import DETONATE_EMAIL_ATTACHMENTS_YAML from './detonate_email_attachments.yaml';
-import DETONATE_FILE_HASH_YAML from './detonate_file_hash.yaml';
-import DETONATE_FP_VALIDATION_YAML from './detonate_fp_validation.yaml';
-import DETONATE_HIGH_SEVERITY_ALERTS_YAML from './detonate_high_severity_alerts.yaml';
-import DETONATE_IOC_HUNT_YAML from './detonate_ioc_hunt.yaml';
-import DETONATE_IOC_RULE_YAML from './detonate_ioc_rule.yaml';
-import DETONATE_RULE_CREATION_YAML from './detonate_rule_creation.yaml';
-import DETONATE_TRIAGE_YAML from './detonate_triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const DETONATE_FP_VALIDATION_WORKFLOW_ID = 'system-security-detonate-fp-validation';
 
@@ -41,7 +32,9 @@ export const DETONATE_COVERAGE_GAP_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 8,
   billable: false,
-  yaml: DETONATE_COVERAGE_GAP_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_coverage_gap.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -60,7 +53,9 @@ export const DETONATE_FP_VALIDATION_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 5,
   billable: false,
-  yaml: DETONATE_FP_VALIDATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_fp_validation.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -80,7 +75,9 @@ export const DETONATE_TRIAGE_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 15,
   billable: false,
-  yaml: DETONATE_TRIAGE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_triage.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -105,7 +102,9 @@ export const DETONATE_RULE_CREATION_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 8,
   billable: false,
-  yaml: DETONATE_RULE_CREATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_rule_creation.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -127,7 +126,9 @@ export const DETONATE_IOC_HUNT_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 3,
   billable: false,
-  yaml: DETONATE_IOC_HUNT_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_ioc_hunt.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -152,7 +153,9 @@ export const DETONATE_IOC_RULE_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 1,
   billable: false,
-  yaml: DETONATE_IOC_RULE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_ioc_rule.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -173,7 +176,9 @@ export const DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 2,
   billable: false,
-  yaml: DETONATE_ACTION_CREATE_THREAT_MATCH_RULE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_create_threat_match_rule.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -198,7 +203,9 @@ export const DETONATE_FILE_HASH_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 1,
   billable: false,
-  yaml: DETONATE_FILE_HASH_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_file_hash.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -216,7 +223,9 @@ export const DETONATE_HIGH_SEVERITY_ALERTS_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 1,
   billable: false,
-  yaml: DETONATE_HIGH_SEVERITY_ALERTS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_high_severity_alerts.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -234,7 +243,9 @@ export const DETONATE_EMAIL_ATTACHMENTS_WORKFLOW = {
   pluginId: 'securitySolution',
   version: 1,
   billable: false,
-  yaml: DETONATE_EMAIL_ATTACHMENTS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'detonate_email_attachments.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

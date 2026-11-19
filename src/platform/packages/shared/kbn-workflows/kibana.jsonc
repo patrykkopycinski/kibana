@@ -14,6 +14,7 @@
       "!managed/definitions/alertzero/detection_rule_tuning.yaml",
       "!managed/definitions/alertzero/floor_alert_triage.yaml",
       "!managed/definitions/alertzero/floor_attack_discovery.yaml",
+      "!managed/definitions/alertzero/forensics_detonate_sample.yaml",
       "!managed/definitions/alertzero/forensics_endpoint_analysis.yaml",
       "!managed/definitions/alertzero/hunt/hunt_continuous_threat_hunt.yaml",
       "!managed/definitions/context_engine/dreaming.yaml",

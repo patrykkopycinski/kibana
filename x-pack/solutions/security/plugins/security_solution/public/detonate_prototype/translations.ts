@@ -821,7 +821,7 @@ export const OVERVIEW_INDICATORS_CREATE_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detonatePrototype.overview.indicatorsCreateRuleTooltip',
   {
     defaultMessage:
-      'Opens rule creation. The indicator match rule type and threat mapping must be filled in there.',
+      'Opens rule creation with an indicator match rule prefilled from these indicators. It matches only once threat intelligence with the same values is published to the threat indices.',
   }
 );
 

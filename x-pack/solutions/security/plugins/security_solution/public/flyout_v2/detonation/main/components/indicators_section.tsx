@@ -18,11 +18,14 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { encode } from '@kbn/rison';
 import { useKibana, useNavigateTo } from '../../../../common/lib/kibana';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_attach_to_case';
 import * as i18n from '../../../../detonate_prototype/translations';
+import { RULE_FROM_DETONATION_URL_PARAM } from '../../../../detections/hooks/use_rule_from_detonation';
+import { sanitizeDetonationIndicators } from '../../../../detections/utils/rule_from_detonation';
 import {
   DETONATION_INDICATORS_ADD_TO_CASE_TEST_ID,
   DETONATION_INDICATORS_CREATE_RULE_TEST_ID,
@@ -89,11 +92,17 @@ export const IndicatorsSection = ({
   const canCreateRules = Boolean(useUserPrivileges().rulesPrivileges.rules.edit);
   const { rows, state } = indicators;
 
-  // Rule creation is prefilled only for timeline/EQL sources; threat_match prefill needs a
-  // detection-engine change, so this opens the create-rule page as a plain navigation.
+  // Opens create-rule with an indicator match rule prefilled from this run's indicators; the
+  // detections `createRuleFromDetonation` param builds the threat query and mapping from them.
   const onCreateRule = useCallback(
-    () => navigateTo({ deepLinkId: SecurityPageName.rulesCreate }),
-    [navigateTo]
+    () =>
+      navigateTo({
+        deepLinkId: SecurityPageName.rulesCreate,
+        path: `?${RULE_FROM_DETONATION_URL_PARAM}=${encode({
+          indicators: sanitizeDetonationIndicators(rows),
+        })}`,
+      }),
+    [navigateTo, rows]
   );
 
   const caseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -198,9 +207,6 @@ export const IndicatorsSection = ({
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {/* Opens the rule creation page without a threat_match prefill: default follows the
-                createRuleFromTimeline precedent (a plain deep link, no rule-type prefill exists
-                in the creation UI); prefilling threat_match needs a detection-engine change. */}
             <EuiToolTip content={i18n.OVERVIEW_INDICATORS_CREATE_RULE_TOOLTIP}>
               <EuiButtonEmpty
                 size="s"

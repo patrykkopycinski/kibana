@@ -27,6 +27,8 @@ import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SetRuleQuery } from '../../../../detections/hooks/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/hooks/use_rule_from_timeline';
+import type { SetRuleFromDetonation } from '../../../../detections/hooks/use_rule_from_detonation';
+import { useRuleFromDetonation } from '../../../../detections/hooks/use_rule_from_detonation';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../common/types';
@@ -275,6 +277,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const { onOpenTimeline, loading: timelineQueryLoading } =
     useRuleFromTimeline(handleSetRuleFromTimeline);
+
+  const handleSetRuleFromDetonation = useCallback<SetRuleFromDetonation>(
+    ({ threatQueryBar, threatMapping }) => {
+      setFieldValue('ruleType', 'threat_match');
+
+      // The threat match fields only exist once the rule type specific components have
+      // rendered, which takes more than one re-render (same wait as the EQL timeline case).
+      setTimeout(() => {
+        setFieldValue('threatQueryBar', threatQueryBar);
+        setFieldValue('threatMapping', threatMapping);
+      });
+    },
+    [setFieldValue]
+  );
+
+  useRuleFromDetonation(handleSetRuleFromDetonation);
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution

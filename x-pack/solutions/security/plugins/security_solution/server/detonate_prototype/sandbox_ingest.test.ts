@@ -97,6 +97,83 @@ describe('toSandboxDoc', () => {
     expect(JSON.stringify(result)).not.toMatch(/sandbox-host|sandbox-agent|policy|10\.1\.2\.3/);
   });
 
+  it('keeps the process fields Session View renders and drops the rest of the user objects', () => {
+    const user = { id: '1000', name: 'analyst', email: 'a@example.test', domain: 'corp' };
+    const leader = {
+      entity_id: 'lead-1',
+      pid: 7,
+      name: 'bash',
+      args: ['bash', '-l'],
+      working_directory: '/home/analyst',
+      user,
+      real_user: { id: '0', name: 'root' },
+      executable: '/usr/bin/bash',
+    };
+    const result = toSandboxDoc(TASK, 'process-events', {
+      '@timestamp': '2026-11-01T10:00:00.000Z',
+      event: { id: 'proc-event-2', kind: 'event' },
+      process: {
+        entity_id: 'proc-2',
+        command_line: 'curl http://example.test',
+        args: ['curl', 'http://example.test'],
+        args_count: 2,
+        working_directory: '/tmp/work',
+        user,
+        real_user: { id: '0', name: 'root', domain: 'corp' },
+        parent: { entity_id: 'proc-1', args: ['sh'], working_directory: '/', user },
+        entry_leader: leader,
+        session_leader: leader,
+        group_leader: leader,
+      },
+    });
+
+    const kept = { id: '1000', name: 'analyst' };
+    const keptLeader = {
+      entity_id: 'lead-1',
+      pid: 7,
+      name: 'bash',
+      args: ['bash', '-l'],
+      working_directory: '/home/analyst',
+      user: kept,
+    };
+    expect(result?.doc.process).toEqual({
+      entity_id: 'proc-2',
+      command_line: 'curl http://example.test',
+      args: ['curl', 'http://example.test'],
+      args_count: 2,
+      working_directory: '/tmp/work',
+      user: kept,
+      real_user: { id: '0', name: 'root' },
+      parent: { entity_id: 'proc-1', args: 'sh', working_directory: '/', user: kept },
+      entry_leader: keptLeader,
+      session_leader: keptLeader,
+      group_leader: keptLeader,
+    });
+    expect(JSON.stringify(result)).not.toMatch(/a@example\.test|corp|executable/);
+  });
+
+  it('maps the process user and working directory fields as keyword', () => {
+    const properties = sandboxIndexTemplate().template?.mappings?.properties as Record<
+      string,
+      { properties: Record<string, { properties?: Record<string, unknown> }> }
+    >;
+    const keyword = { type: 'keyword' };
+    const userMapping = { properties: { id: keyword, name: keyword } };
+
+    expect(properties.process.properties.args_count).toEqual({ type: 'long' });
+    expect(properties.process.properties.working_directory).toEqual(keyword);
+    expect(properties.process.properties.user).toEqual(userMapping);
+    expect(properties.process.properties.real_user).toEqual(userMapping);
+    ['parent', 'entry_leader', 'session_leader', 'group_leader'].forEach((leader) => {
+      expect(properties.process.properties[leader].properties).toMatchObject({
+        args: keyword,
+        working_directory: keyword,
+        user: userMapping,
+      });
+    });
+    expect(properties.process.properties).not.toHaveProperty('supplemental_groups');
+  });
+
   it('reads flattened keys and a full search hit', () => {
     const result = toSandboxDoc(TASK, 'production-detection-alerts', {
       _id: 'hit-1',

@@ -10,6 +10,7 @@
  * nothing to show.
  */
 
+import { encode } from '@kbn/rison';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -611,6 +612,13 @@ describe('DetonationResult overview', () => {
       fireEvent.click(screen.getByTestId(DETONATION_INDICATORS_CREATE_RULE_TEST_ID));
       expect(useNavigateTo().navigateTo).toHaveBeenCalledWith({
         deepLinkId: 'rules-create',
+        path: `?createRuleFromDetonation=${encode({
+          indicators: [
+            { type: 'domain', value: 'evil.example' },
+            { type: 'ip', value: '10.0.0.1' },
+            { type: 'file_hash', value: 'b'.repeat(64) },
+          ],
+        })}`,
       });
 
       unmount();

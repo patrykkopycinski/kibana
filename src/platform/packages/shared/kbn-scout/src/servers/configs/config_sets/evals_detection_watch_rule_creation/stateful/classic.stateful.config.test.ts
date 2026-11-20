@@ -34,8 +34,8 @@ describe('evals_detection_watch_rule_creation config set', () => {
         'alertzero installs its managed workflows only with service accounts enabled (#295215)',
       ],
       [
-        '--xpack.alertzero.enabled=true',
-        'alertzero owns initialize_managed_workflows; disabled means no workflow is installed',
+        '--xpack.inbox.enabled=true',
+        'the inbox plugin is disabled by default and the suite shares its server shape with main',
       ],
       [
         '--xpack.agenticInvestigations.enabled=true',

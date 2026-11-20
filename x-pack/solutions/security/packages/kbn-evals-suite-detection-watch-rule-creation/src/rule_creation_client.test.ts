@@ -289,10 +289,10 @@ describe('extractDraftFromSteps', () => {
     ).toEqual({ rule: undefined, skipped: true, skipReason: 'The data source does not exist.' });
   });
 
-  it('reports a refusal without a reason as skipped with no reason', () => {
+  it('does not report a refusal without a reason as skipped', () => {
     expect(
       extractDraftFromSteps(draftSteps({ rule: emptyRule, attachment_id: '', reason: '' }))
-    ).toEqual({ rule: undefined, skipped: true, skipReason: undefined });
+    ).toEqual({ rule: undefined, skipped: false, skipReason: undefined });
   });
 
   it('keeps a partial draft that has a query, so evaluators can score it', () => {

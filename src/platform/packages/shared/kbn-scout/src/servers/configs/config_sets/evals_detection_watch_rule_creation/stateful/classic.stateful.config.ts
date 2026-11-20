@@ -21,6 +21,10 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * (default `false`) is overridden on. The workflow's ai.agent step additionally requires the
  * Workflows UI and agent settings.
  *
+ * AlertZero routes also 404 outside a Security solution space (#300822), and a stateful stack
+ * creates its Default space with no solution. `xpack.spaces.defaultSolution=security` makes the
+ * Default space a Security space when it is created at boot.
+ *
  * `agenticInvestigations` and `proposals` are required by the rule-creation flow: the workflow
  * raises its draft as a proposal and the approval-gate specs decide it through the proposals API.
  * Both default to on in stateful; the flags stay explicit so a default change cannot silently
@@ -37,6 +41,7 @@ export const servers: ScoutServerConfig = {
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       ...serviceAccountsServerArgs,
       '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+      '--xpack.spaces.defaultSolution=security',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--xpack.inbox.enabled=true',

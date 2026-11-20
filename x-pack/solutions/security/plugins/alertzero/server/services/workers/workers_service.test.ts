@@ -817,7 +817,7 @@ describe('WorkersService', () => {
       const { workers } = await harness.createService().list(request, SPACE);
 
       expect(workers.map(({ id, workflowOutdated }) => [id, workflowOutdated])).toEqual(
-        WORKERS_WITHOUT_FORENSIC_SKILL.map((id) => [id, id === TRIAGE])
+        WORKERS_WITHOUT_GATING_SKILLS.map((id) => [id, id === TRIAGE])
       );
     });
   });

@@ -910,9 +910,10 @@ export const registerDetonatePrototypeRoutes = ({
     );
 
   /**
-   * Session View config for one run (N1). The service has no process-event
-   * read today, so this answers the null-shaped result (no tree root, no time
-   * floor) and the Session tab renders its "telemetry unavailable" state.
+   * Session View config for one run (N1). The service exposes no process-event
+   * read (only the three alert kinds), so this answers the null-shaped result
+   * (no tree root, no time floor) and the Session tab renders its "telemetry
+   * unavailable" state.
    */
   router.versioned
     .get({
@@ -944,9 +945,6 @@ export const registerDetonatePrototypeRoutes = ({
           const spaceId = spaceIdFromRequest(request);
           const task = await getTaskInSpace(client, request.params.id, spaceId);
 
-          // The detonation service exposes no process-event read (only the
-          // three alert kinds), so there is no tree to root yet: the tab
-          // renders its "telemetry unavailable" state.
           return response.ok<DetonateRunSessionResult>({
             body: {
               task_id: task.id,
@@ -965,10 +963,11 @@ export const registerDetonatePrototypeRoutes = ({
 
   /**
    * Behavior diff between two runs of the same sample (N2). Copies both runs'
-   * alerts into the space's sandbox stream (idempotent, same as /ingest), then answers one ES|QL per run: per-category doc
-   * counts, union-diffed server-side. `against` omitted: the most recent
-   * earlier completed run of the same hash in this space; a first run answers
-   * a null-shaped `{ reason: 'no-prior-run' }`, not a zero-delta fabrication.
+   * alerts into the space's sandbox stream (idempotent, same as /ingest), then
+   * answers one ES|QL per run: per-category doc counts, union-diffed
+   * server-side. `against` omitted: the most recent earlier completed run of
+   * the same hash in this space; a first run answers a null-shaped
+   * `{ reason: 'no-prior-run' }`, not a zero-delta fabrication.
    */
   router.versioned
     .get({

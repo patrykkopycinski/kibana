@@ -8,8 +8,8 @@
 /**
  * Detonate prototype — behavior diff between two runs of the same sample (N2).
  *
- * The sandbox stream is the shared record: once both runs' alerts and events
- * are copied into it (the copy is idempotent), one ES|QL `STATS … BY
+ * The sandbox stream is the shared record: once both runs' alerts are copied
+ * into it (the copy is idempotent), one ES|QL `STATS … BY
  * event.category` per run answers "what did this run do that the previous one
  * did not". ES|QL expands multivalue categories per value, and docs without a
  * category group under a JSON null — verified live — which the diff keeps as
@@ -20,10 +20,18 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { DetonateCategoryCount } from '../../common/detonate_prototype';
-import { DETONATE_UNCATEGORIZED } from '../../common/detonate_prototype';
+import { DETONATE_ALERT_KINDS, DETONATE_UNCATEGORIZED } from '../../common/detonate_prototype';
 
 /** Task ids are uuid-shaped; quoting needs no escaping beyond the quotes. */
 const quoteString = (value: string): string => `"${value.replace(/"/g, '\\"')}"`;
+
+/**
+ * The stream retains 30 days of docs per task id, so a run copied before the
+ * stream held alerts only still has process-event docs under it. Those carry no
+ * `detonate.alert_kind`; membership in the supported kinds keeps them out of
+ * the counts.
+ */
+const ALERT_KINDS_LITERAL = DETONATE_ALERT_KINDS.map(quoteString).join(', ');
 
 const isMissingStreamError = (error: unknown, stream: string): boolean => {
   if (!(error instanceof Error) || error.name !== 'ResponseError') return false;
@@ -65,7 +73,7 @@ export const categoryCountsForRun = async (
     ({ values: rows } = await esClient.esql.query({
       query: `FROM ${stream} | WHERE detonate.task_id == ${quoteString(
         taskId
-      )} | STATS count = COUNT(*) BY event.category`,
+      )} AND detonate.alert_kind IN (${ALERT_KINDS_LITERAL}) | STATS count = COUNT(*) BY event.category`,
       format: 'json',
     }));
   } catch (error) {

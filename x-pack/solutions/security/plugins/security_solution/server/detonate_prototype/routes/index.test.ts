@@ -224,7 +224,6 @@ describe('registerDetonatePrototypeRoutes', () => {
       getTask: jest.fn(),
       getTaskUpdates: jest.fn(),
       getTaskAlerts: jest.fn(),
-      getTaskProcessEvents: jest.fn(),
       listTasks: jest.fn(),
       findTasksByHash: jest.fn(),
     };
@@ -1152,6 +1151,15 @@ describe('registerDetonatePrototypeRoutes', () => {
       last_worker_name: 'detonate.workers.make_summary',
       last_worker_status: 'success',
       vm_has_internet: false,
+      agent_integrations_extra: [],
+      agent_integration_policies_patches: {},
+      agent_defend_integration_policy_artifacts_url: 'https://artifacts.security.elastic.co/',
+      ancillary_files: [],
+      files: [],
+      vm_tags: [],
+      vm_globs_to_collect: [],
+      vm_provision_retries: 0,
+      vm_infra_cleanup_attempted: false,
       vm_instance_name: 'sandbox-vm-secret-name',
       elastic_agent_id: 'sandbox-agent-secret-id',
       elastic_endpoint_id: 'sandbox-endpoint-secret-id',
@@ -4025,6 +4033,38 @@ describe('registerDetonatePrototypeRoutes', () => {
     });
   });
 
+  describe('run session', () => {
+    const SESSION_PATH = `${DETONATE_RUNS_PATH}/{id}/session`;
+
+    it('answers the null-shaped result without reading or copying anything', async () => {
+      endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
+      client.getTask.mockResolvedValue({ id: 'run-1', tags: ['space:team-a'] } as never);
+
+      await router.versioned.getRoute('get', SESSION_PATH).versions['1'].handler(
+        createContext(),
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: `${DETONATE_RUNS_PATH}/run-1/session`,
+          params: { id: 'run-1' },
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          task_id: 'run-1',
+          index: '.kibana-detonate-sandbox-team-a',
+          ingested: 0,
+          duplicates: 0,
+          dropped: 0,
+          failed: 0,
+        },
+      });
+      expect(client.getTaskAlerts).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
   describe('behavior diff', () => {
     const DIFF_PATH = `${DETONATE_RUNS_PATH}/{id}/diff`;
     const diffHandler = () => router.versioned.getRoute('get', DIFF_PATH).versions['1'].handler;
@@ -4081,7 +4121,6 @@ describe('registerDetonatePrototypeRoutes', () => {
     beforeEach(() => {
       endpointAppContextService.getActiveSpaceId.mockReturnValue('team-a');
       client.getTaskAlerts.mockResolvedValue([]);
-      client.getTaskProcessEvents.mockResolvedValue([]);
       esClient.bulk.mockResolvedValue({ items: [] });
     });
 

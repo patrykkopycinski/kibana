@@ -33,7 +33,10 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { DETONATE_WORKER_LABELS, DETONATE_WORKERS } from '../../../common/detonate_prototype';
+import {
+  DETONATE_PIPELINE_WORKERS,
+  DETONATE_WORKER_LABELS,
+} from '../../../common/detonate_prototype';
 import type { DetonateTaskUpdate, DetonateWorkerStatus } from '../../../common/detonate_prototype';
 import { useDetonationTaskUpdates } from '../hooks/use_detonate';
 import { DETONATE_ICONS } from '../icons';
@@ -78,7 +81,7 @@ export const WorkerTimeline = React.memo<Props>(({ taskId, isComplete }) => {
   return (
     <EuiPanel hasBorder data-test-subj={WORKER_TIMELINE_TEST_ID}>
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-        {DETONATE_WORKERS.map((worker) => {
+        {DETONATE_PIPELINE_WORKERS.map((worker) => {
           const entry = byWorker.get(worker);
           return (
             <EuiFlexItem key={worker} grow={false}>

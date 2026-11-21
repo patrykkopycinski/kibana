@@ -47,11 +47,11 @@ export const DETONATE_PROTOTYPE_APP_PATH = '/detonate_prototype' as const;
 /* -------------------------------------------------------------------------- */
 
 /**
- * The four workers the detonation service runs, in order. Copied verbatim,
- * including the `detonate.workers.` prefix and `prepare_task_data` (not
- * `prepare`).
+ * Every worker name the detonation service writes to `last_worker_name`,
+ * verbatim: `detonate.server` (the submit itself) and then the queue workers.
  */
 export const DETONATE_WORKERS = [
+  'detonate.server',
   'detonate.workers.prepare_task_data',
   'detonate.workers.start_vm',
   'detonate.workers.stop_vm',
@@ -60,8 +60,21 @@ export const DETONATE_WORKERS = [
 
 export type DetonateWorkerName = (typeof DETONATE_WORKERS)[number];
 
-/** Worker outcomes, verbatim from the service. */
-export const DETONATE_WORKER_STATUSES = ['started', 'success', 'failure'] as const;
+/** The four queue workers a run moves through after submit, in order. Progress counts these. */
+export const DETONATE_PIPELINE_WORKERS = [
+  'detonate.workers.prepare_task_data',
+  'detonate.workers.start_vm',
+  'detonate.workers.stop_vm',
+  'detonate.workers.make_summary',
+] as const;
+
+export type DetonatePipelineWorkerName = (typeof DETONATE_PIPELINE_WORKERS)[number];
+
+/**
+ * Worker outcomes, verbatim from the service. `retrying` means the worker put
+ * the task back on its queue: still in progress, not failed.
+ */
+export const DETONATE_WORKER_STATUSES = ['started', 'success', 'failure', 'retrying'] as const;
 export type DetonateWorkerStatus = (typeof DETONATE_WORKER_STATUSES)[number];
 
 /** The last worker that must succeed for a run to be complete. */
@@ -87,10 +100,11 @@ export const isDetonationFailed = (task: Pick<DetonateTask, 'last_worker_status'
 export const detonationProgress = (
   task: Pick<DetonateTask, 'last_worker_name' | 'last_worker_status'>
 ): { step: number; of: number; label: string } => {
-  const index = DETONATE_WORKERS.indexOf(task.last_worker_name);
+  // `detonate.server` (just submitted) is step 0: no queue worker has run yet.
+  const index = (DETONATE_PIPELINE_WORKERS as readonly string[]).indexOf(task.last_worker_name);
   return {
     step: index < 0 ? 0 : index + 1,
-    of: DETONATE_WORKERS.length,
+    of: DETONATE_PIPELINE_WORKERS.length,
     label: task.last_worker_name.replace('detonate.workers.', ''),
   };
 };
@@ -101,6 +115,7 @@ export const detonationProgress = (
  * the service.
  */
 export const DETONATE_WORKER_LABELS: Readonly<Record<DetonateWorkerName, string>> = {
+  'detonate.server': 'Submitted',
   'detonate.workers.prepare_task_data': 'Preparing the sample',
   'detonate.workers.start_vm': 'Running in the sandbox',
   'detonate.workers.stop_vm': 'Stopping the sandbox',
@@ -144,9 +159,24 @@ export type DetonateSampleSource = (typeof DETONATE_SAMPLE_SOURCES)[number];
 export const DETONATE_VM_OS_FAMILIES = ['linux', 'windows', 'darwin'] as const;
 export type DetonateVmOsFamily = (typeof DETONATE_VM_OS_FAMILIES)[number];
 
-/** Read-side only: the service reports the VM architecture on a task but takes no such input on submit. */
-export const DETONATE_VM_ARCHITECTURES = ['x86_64', 'aarch64'] as const;
+/** FIDELITY: the service spells it `arm64`, not `aarch64`. Accepted on submit and reported on the task. */
+export const DETONATE_VM_ARCHITECTURES = ['arm64', 'x86_64'] as const;
 export type DetonateVmArchitecture = (typeof DETONATE_VM_ARCHITECTURES)[number];
+
+/** Where the sandbox VM runs, set by `start_vm`. */
+export const DETONATE_VM_PROVIDERS = ['gcp', 'aws', 'azure'] as const;
+export type DetonateVmProvider = (typeof DETONATE_VM_PROVIDERS)[number];
+
+/** Extra Fleet integrations the service can add to the sandbox agent policy. */
+export const DETONATE_EXTRA_AGENT_INTEGRATIONS = [
+  'windows',
+  'system',
+  'auditd',
+  'fim',
+  'auditd_manager',
+  'network_traffic',
+] as const;
+export type DetonateExtraAgentIntegration = (typeof DETONATE_EXTRA_AGENT_INTEGRATIONS)[number];
 
 export const DETONATE_DETECTION_SEVERITIES = ['low', 'medium', 'high'] as const;
 export type DetonateDetectionSeverity = (typeof DETONATE_DETECTION_SEVERITIES)[number];
@@ -158,14 +188,6 @@ export type DetonateDetectionSeverity = (typeof DETONATE_DETECTION_SEVERITIES)[n
 /** Raw alert documents are ES documents; the contract does not narrow them. */
 export type DetonateAlertDoc = Record<string, unknown>;
 
-/**
- * A process (or other behavioral) event recorded in the sandbox, as ECS docs.
- * Kept as a loose record like `DetonateAlertDoc`: the mapper projects a
- * bounded field set into the sandbox stream, and Session View's server route
- * queries it through its own typed pipeline.
- */
-export type DetonateSandboxEventDoc = Record<string, unknown>;
-
 /** The service's per-task alert reads. Each 404s until the sandbox agent enrolls. */
 export const DETONATE_ALERT_KINDS = [
   'production-endpoint-alerts',
@@ -174,30 +196,21 @@ export const DETONATE_ALERT_KINDS = [
 ] as const;
 export type DetonateAlertKind = (typeof DETONATE_ALERT_KINDS)[number];
 
-/**
- * The service's per-task process-event read: the sandbox's behavioral
- * telemetry (`event.kind: 'event'` docs), Session View's raw material. Same
- * read shape as the alert kinds — count on the task, docs through the route —
- * but not an alert kind: it must never reach IOC extraction, which reads only
- * {@link DETONATE_ALERT_KINDS}.
- */
-export const DETONATE_PROCESS_EVENTS_KIND = 'process-events' as const;
-export type DetonateProcessEventsKind = typeof DETONATE_PROCESS_EVENTS_KIND;
-
 /** The service defaults an alert read to 5000 documents; nothing here needs that many. */
 export const DETONATE_MAX_ALERT_DOCS = 1000;
 
 /**
  * Endpoint alerts (production and diagnostic) group by `event.code`.
- * `alert_docs` is only present on the per-task alert reads, not on the task.
+ * `alert_docs` is null on the task; only the per-task `/groups` reads carry docs.
  */
 export interface DetonateEndpointAlertsGroup {
   alerts_count: number;
-  alert_docs?: DetonateAlertDoc[];
+  alert_docs?: DetonateAlertDoc[] | null;
   event_code: string;
-  rule_id?: string;
-  rule_name?: string;
-  message?: string;
+  rule_id?: string | null;
+  rule_name?: string | null;
+  message?: string | null;
+  file_hash_sha256?: string | null;
 }
 
 /**
@@ -207,9 +220,9 @@ export interface DetonateEndpointAlertsGroup {
  */
 export interface DetonateDetectionAlertsGroup {
   alerts_count: number;
-  alert_docs?: DetonateAlertDoc[];
+  alert_docs?: DetonateAlertDoc[] | null;
   kibana_alert_rule_name: string;
-  kibana_alert_rule_uuid?: string;
+  kibana_alert_rule_uuid?: string | null;
   kibana_alert_rule_parameters_severity: DetonateDetectionSeverity;
 }
 
@@ -225,61 +238,91 @@ export interface DetonateExtractedIocs {
 /* DetonateTask                                                                */
 /* -------------------------------------------------------------------------- */
 
-/** A detonation task, as the service returns it. */
+/** A file placed in the VM before detonation. */
+export interface DetonateAncillaryFile {
+  source_url: string;
+  filename: string;
+}
+
+/** A file staged for the VM by `prepare_task_data`. */
+export interface DetonateTaskFile {
+  blob_path: string;
+  vm_dest_path: string;
+}
+
+/** `{<integration package name>: {<JSONPath>: <new value>}}` */
+export type DetonateIntegrationPolicyPatches = Record<string, Record<string, unknown>>;
+
+/**
+ * A detonation task, as the service returns it. Optional fields may come back
+ * as `null` (the service serializes unset fields); lists are always present.
+ */
 export interface DetonateTask {
   id: string;
   created_at: string;
   tags: string[];
 
-  sample_hash?: string;
-  sample_url?: string;
-  sample_filename?: string;
-  sample_ext?: string;
-  sample_source?: DetonateSampleSource;
+  sample_hash?: string | null;
+  sample_url?: string | null;
+  sample_filename?: string | null;
+  sample_ext?: string | null;
+  sample_source?: DetonateSampleSource | null;
 
   agent_version: string;
-  agent_dist_base_url?: string;
+  agent_dist_base_url?: string | null;
   telemetry_cluster_version: string;
+  agent_integrations_extra: DetonateExtraAgentIntegration[];
+  agent_integration_policies_patches: DetonateIntegrationPolicyPatches;
+  agent_defend_integration_policy_artifacts_url: string;
 
+  /**
+   * A plain string in the service (room for worker-specific statuses); these
+   * unions are every value it writes today.
+   */
   last_worker_name: DetonateWorkerName;
   last_worker_status: DetonateWorkerStatus;
-  last_worker_status_details?: string;
+  last_worker_status_details?: string | null;
 
   exec_wait_secs: number;
   pre_exec_commands: string[];
   exec_commands: string[];
-  exec_sample_arguments?: string;
+  exec_sample_arguments?: string | null;
+  otel_parent_trace_obj?: Record<string, string> | null;
 
-  vm_os_family?: DetonateVmOsFamily;
-  vm_architecture?: DetonateVmArchitecture;
-  vm_disk_image?: string;
+  ancillary_files: DetonateAncillaryFile[];
+  files: DetonateTaskFile[];
+
+  vm_os_family?: DetonateVmOsFamily | null;
+  vm_architecture?: DetonateVmArchitecture | null;
+  vm_disk_image?: string | null;
   vm_has_internet: boolean;
-  vm_instance_name?: string;
+  vm_tags: string[];
+  vm_globs_to_collect: string[];
+  vm_termination_time?: string | null;
+  vm_provider?: DetonateVmProvider | null;
+  vm_instance_name?: string | null;
+  vm_instance_ip?: string | null;
+  vm_firewall_rule_name?: string | null;
+  vm_zone?: string | null;
+  vm_location?: string | null;
+  vm_provision_retries: number;
+  vm_infra_cleanup_attempted: boolean;
 
-  elastic_agent_id?: string;
-  elastic_endpoint_id?: string;
+  elastic_agent_id?: string | null;
+  elastic_endpoint_id?: string | null;
   /**
    * SECURITY: the service returns the sandbox's Fleet enrollment token in
    * clear. Declared only so `redactDetonateTask` can strip it; nothing in
    * Kibana may read or forward it.
    */
-  agent_fleet_enrollment_token?: string;
+  agent_fleet_enrollment_token?: string | null;
 
-  production_endpoint_alerts_count?: number;
+  production_endpoint_alerts_count?: number | null;
   production_endpoint_alert_groups: DetonateEndpointAlertsGroup[];
-  diagnostic_endpoint_alerts_count?: number;
+  diagnostic_endpoint_alerts_count?: number | null;
   diagnostic_endpoint_alert_groups: DetonateEndpointAlertsGroup[];
-  production_detection_alerts_count?: number;
+  production_detection_alerts_count?: number | null;
   production_detection_alert_groups: DetonateDetectionAlertsGroup[];
-
-  /**
-   * Process events recorded for the run (`event.kind: 'event'` docs), the raw
-   * material Session View renders in the detonation flyout. Detail-read only:
-   * the service strips this array from list responses, where the count below
-   * is what the list rows show.
-   */
-  process_events?: DetonateSandboxEventDoc[];
-  process_events_count?: number;
 }
 
 /** The task without fields Kibana must never surface. */
@@ -320,18 +363,31 @@ export const DETONATION_DURATION_REPAIR_MAX_AGE_MS = 24 * 60 * 60 * 1000;
  */
 export const DETONATE_DEFAULT_EXEC_WAIT_SECS = 60;
 
-/** Fields every submit-* request carries. */
+/**
+ * Fields every submit-* request carries; all optional (the service defaults
+ * them). `POST /submit-file`'s multipart `request_json` field is exactly this,
+ * beside a `sample_file` file part. `exec_commands` is not here: only the
+ * commands and extended submits take it.
+ */
 export interface DetonateBaseRequest {
   tags?: string[];
-  agent_version?: string;
-  agent_dist_base_url?: string;
-  exec_wait_secs?: number;
+  agent_version?: string | null;
+  agent_dist_base_url?: string | null;
+  agent_defend_integration_policy_artifacts_url?: string;
+  agent_integrations_extra?: DetonateExtraAgentIntegration[];
+  agent_integration_policies_patches?: DetonateIntegrationPolicyPatches;
+  ancillary_files?: DetonateAncillaryFile[];
+  exec_wait_secs?: number | null;
   pre_exec_commands?: string[];
-  exec_commands?: string[];
-  exec_sample_arguments?: string;
-  vm_os_family?: DetonateVmOsFamily;
-  vm_disk_image?: string;
+  exec_sample_arguments?: string | null;
+  sample_filename?: string | null;
+  vm_os_family?: DetonateVmOsFamily | null;
+  vm_architecture?: DetonateVmArchitecture | null;
+  /** One of the service's known images (`/meta` lists them); anything else goes in `custom_vm_disk_image`. */
+  vm_disk_image?: string | null;
+  custom_vm_disk_image?: string | null;
   vm_has_internet?: boolean;
+  vm_globs_to_collect?: string[];
 }
 
 /** Where a submit came from. */
@@ -358,13 +414,21 @@ export interface DetonateHashRequest extends DetonateBaseRequest {
   sample_hash: string;
 }
 
-/**
- * `POST /submit-file` is multipart: a `request_json` form field holding this,
- * plus a `sample_file` file part.
- */
-export interface DetonateFileRequest extends DetonateBaseRequest {
-  sample_filename?: string;
-  sample_ext?: string;
+/** `POST /submit-url`. */
+export interface DetonateUrlRequest extends DetonateBaseRequest {
+  sample_url: string;
+}
+
+/** `POST /submit-commands`: needs `vm_os_family` or `vm_disk_image`. */
+export interface DetonateCommandsRequest extends DetonateBaseRequest {
+  exec_commands: string[];
+}
+
+/** `POST /submit-with-files`: this in `request_json`, plus `ancillary_files[]` file parts. */
+export interface DetonateExtendedRequest extends DetonateBaseRequest {
+  sample_hash?: string | null;
+  sample_url?: string | null;
+  exec_commands?: string[];
 }
 
 /** Both submits answer with the created task. */
@@ -379,14 +443,22 @@ export interface DetonateTaskSearchResponse {
   order: 'asc' | 'desc';
 }
 
-/** Deep links back into the telemetry cluster for one task. */
+/**
+ * Deep links for one task (`/tasks/{id}/meta`). The `telemetry_*` links exist
+ * once the sandbox agent id is known, `monitoring_*` only with a trace, and
+ * `gcp_vpc_logs_url` only with a VM instance name.
+ */
 export interface DetonateTaskMeta {
-  task_id: string;
-  telemetry_cluster_version: string;
-  production_endpoint_alerts_url?: string;
-  diagnostic_endpoint_alerts_url?: string;
-  production_detection_alerts_url?: string;
-  events_url?: string;
+  task_url: string;
+  task_updates_url: string;
+  telemetry_production_endpoint_alerts_url?: string | null;
+  telemetry_security_alerts_url?: string | null;
+  telemetry_events_url?: string | null;
+  monitoring_trace_url?: string | null;
+  monitoring_logs_url?: string | null;
+  gcp_bucket_folder_url: string;
+  gcp_vpc_logs_url?: string | null;
+  created_at: string;
 }
 
 /* -------------------------------------------------------------------------- */

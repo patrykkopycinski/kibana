@@ -58,6 +58,15 @@ const createTaskFixture = (overrides: Partial<DetonateTask> = {}): DetonateTask 
   pre_exec_commands: [],
   exec_commands: [],
   vm_has_internet: false,
+  agent_integrations_extra: [],
+  agent_integration_policies_patches: {},
+  agent_defend_integration_policy_artifacts_url: 'https://artifacts.security.elastic.co/',
+  ancillary_files: [],
+  files: [],
+  vm_tags: [],
+  vm_globs_to_collect: [],
+  vm_provision_retries: 0,
+  vm_infra_cleanup_attempted: false,
   production_endpoint_alert_groups: [],
   diagnostic_endpoint_alert_groups: [],
   production_detection_alert_groups: [],
@@ -422,7 +431,7 @@ describe('detonateSampleStepDefinition', () => {
       const context = createMockContext({
         sample_hash: 'a'.repeat(64),
         force_fresh: true,
-        vm_architecture: 'aarch64',
+        vm_architecture: 'arm64',
       });
       (context.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,

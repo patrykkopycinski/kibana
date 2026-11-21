@@ -34,15 +34,6 @@ describe('buildDetonationRecord', () => {
     expect(record.flattened.agent_fleet_enrollment_token).toBeUndefined();
   });
 
-  it('drops the bulky process events', () => {
-    const record = buildDetonationRecord(
-      makeTask({ process_events: [{ pid: 1 }] } as unknown as Partial<DetonateTask>)
-    );
-
-    expect(record.flattened.process_events).toBeUndefined();
-    expect(JSON.stringify(record.raw)).not.toContain('process_events');
-  });
-
   it('flattens scalar and array fields and stringifies arrays of objects', () => {
     const record = buildDetonationRecord(
       makeTask({

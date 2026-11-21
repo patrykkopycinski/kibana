@@ -66,15 +66,14 @@ export const SessionTab: FC<SessionTabProps> = memo(({ taskId }) => {
     );
   }
 
-  // No events recorded is a fact about the run, not an error: older
-  // recordings predate event capture, and the negative-control runs carry
-  // none. The empty state says exactly that.
+  // The sandbox service exposes no process telemetry yet, so this is the
+  // expected state for every run, not an error.
   if (!session?.session_entity_id || !session.session_start_time) {
     return (
       <p data-test-subj={`${SESSION_TAB_TEST_ID}Empty`}>
         <FormattedMessage
           id="xpack.securitySolution.flyout.detonation.session.noEvents"
-          defaultMessage="No process events were recorded for this run."
+          defaultMessage="Process telemetry is not available from the sandbox service yet."
         />
       </p>
     );

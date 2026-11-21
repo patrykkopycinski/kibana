@@ -118,8 +118,17 @@ const createTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
   sample_hash: SHA,
   sample_filename: 'invoice.exe',
   vm_os_family: 'windows',
-  vm_architecture: 'aarch64',
+  vm_architecture: 'arm64',
   vm_has_internet: true,
+  agent_integrations_extra: [],
+  agent_integration_policies_patches: {},
+  agent_defend_integration_policy_artifacts_url: 'https://artifacts.security.elastic.co/',
+  ancillary_files: [],
+  files: [],
+  vm_tags: [],
+  vm_globs_to_collect: [],
+  vm_provision_retries: 0,
+  vm_infra_cleanup_attempted: false,
   exec_wait_secs: 30,
   pre_exec_commands: [],
   exec_commands: [],
@@ -399,7 +408,7 @@ describe('DetonationResult overview', () => {
       expect(list).toHaveTextContent(SHA);
       expect(list).toHaveTextContent('invoice.exe');
       expect(list).toHaveTextContent('windows');
-      expect(list).toHaveTextContent('aarch64');
+      expect(list).toHaveTextContent('arm64');
       expect(list).toHaveTextContent('agent-123');
       expect(list).toHaveTextContent('evil.example');
       expect(list).toHaveTextContent('10.0.0.1');
@@ -641,7 +650,7 @@ describe('DetonationResult overview', () => {
       const details = screen.getByTestId('detonatePrototypeDetails');
       expect(details).toHaveTextContent('task-1');
       expect(details).toHaveTextContent(SHA);
-      expect(details).toHaveTextContent('windows · aarch64 · ');
+      expect(details).toHaveTextContent('windows · arm64 · ');
       expect(details).toHaveTextContent('8.0.0');
       expect(details).toHaveTextContent('8.1.0');
       expect(details).toHaveTextContent('malwarebazaar');
@@ -661,7 +670,7 @@ describe('DetonationResult overview', () => {
       renderResult(createTask({ vm_architecture: undefined }));
       expand(DETONATION_RUN_DETAILS_TEST_ID);
 
-      expect(screen.getByTestId('detonatePrototypeDetails')).not.toHaveTextContent('aarch64');
+      expect(screen.getByTestId('detonatePrototypeDetails')).not.toHaveTextContent('arm64');
       expect(screen.getByTestId('detonatePrototypeDetails')).toHaveTextContent('windows');
     });
 

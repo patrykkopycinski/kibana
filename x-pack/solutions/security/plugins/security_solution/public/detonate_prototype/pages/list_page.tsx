@@ -783,7 +783,7 @@ const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
       <EuiFlexItem>
         <EndpointAlertGroups
           title={i18n.PRODUCTION_ENDPOINT_ALERTS}
-          total={task.production_endpoint_alerts_count}
+          total={task.production_endpoint_alerts_count ?? undefined}
           groups={task.production_endpoint_alert_groups}
           testSubj="detonatePrototypeProductionEndpointAlerts"
         />
@@ -791,7 +791,7 @@ const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
       <EuiFlexItem>
         <DetectionAlertGroups
           title={i18n.PRODUCTION_DETECTION_ALERTS}
-          total={task.production_detection_alerts_count}
+          total={task.production_detection_alerts_count ?? undefined}
           groups={task.production_detection_alert_groups}
           testSubj="detonatePrototypeProductionDetectionAlerts"
         />
@@ -799,7 +799,7 @@ const DetonationGroupBody = ({ taskId }: { taskId: string }) => {
       <EuiFlexItem>
         <EndpointAlertGroups
           title={i18n.DIAGNOSTIC_ENDPOINT_ALERTS}
-          total={task.diagnostic_endpoint_alerts_count}
+          total={task.diagnostic_endpoint_alerts_count ?? undefined}
           groups={task.diagnostic_endpoint_alert_groups}
           testSubj="detonatePrototypeDiagnosticEndpointAlerts"
         />

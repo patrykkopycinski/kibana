@@ -131,9 +131,9 @@ const toOutput = (
     failed,
     last_worker_name: task.last_worker_name,
     last_worker_status: task.last_worker_status,
-    last_worker_status_details: task.last_worker_status_details,
+    last_worker_status_details: task.last_worker_status_details ?? undefined,
     // sample_hash is deliberately not echoed (see output schema).
-    sample_source: task.sample_source,
+    sample_source: task.sample_source ?? undefined,
     production_endpoint_alerts_count: task.production_endpoint_alerts_count ?? 0,
     diagnostic_endpoint_alerts_count: task.diagnostic_endpoint_alerts_count ?? 0,
     production_detection_alerts_count: task.production_detection_alerts_count ?? 0,

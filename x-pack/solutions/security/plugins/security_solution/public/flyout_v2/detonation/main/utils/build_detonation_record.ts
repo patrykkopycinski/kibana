@@ -34,18 +34,17 @@ const flattenInto = (target: Record<string, FieldValues>, value: unknown, path: 
 /**
  * Builds the `DataTableRecord` the shared flyout Table tab renders for a run.
  * The task is flattened to dot-path fields (arrays of objects become JSON
- * strings), the Fleet enrollment token is redacted, and the bulky process
- * events are left to the Session tab.
+ * strings) and the Fleet enrollment token is redacted.
  */
 export const buildDetonationRecord = (task: DetonateTask): DataTableRecord => {
-  const { process_events: _processEvents, ...rest } = redactDetonateTask(task);
+  const rest = redactDetonateTask(task);
   const fields: Record<string, FieldValues> = {};
   flattenInto(fields, rest, '');
 
   return buildDataTableRecord({
     _id: task.id,
     _index: DETONATION_INDEX,
-    _source: rest,
+    _source: { ...rest },
     fields,
   } as EsHitRecord);
 };

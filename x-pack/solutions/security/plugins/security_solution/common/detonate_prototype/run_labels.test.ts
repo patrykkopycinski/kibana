@@ -6,6 +6,7 @@
  */
 
 import {
+  DETONATE_PIPELINE_WORKERS,
   DETONATE_VERDICTS,
   DETONATE_WORKERS,
   DETONATE_WORKER_LABELS,
@@ -17,6 +18,7 @@ import type { DetonateWorkerName } from '.';
 describe('detonationStep', () => {
   it('labels every worker in plain words and keeps the raw name beside it', () => {
     expect(DETONATE_WORKERS.map((worker) => DETONATE_WORKER_LABELS[worker])).toEqual([
+      'Submitted',
       'Preparing the sample',
       'Running in the sandbox',
       'Stopping the sandbox',
@@ -32,6 +34,17 @@ describe('detonationStep', () => {
       of: 4,
       label: 'Stopping the sandbox',
       worker: 'detonate.workers.stop_vm',
+    });
+  });
+
+  it('counts the submit step as step 0 of the pipeline', () => {
+    expect(
+      detonationStep({ last_worker_name: 'detonate.server', last_worker_status: 'success' })
+    ).toEqual({
+      step: 0,
+      of: DETONATE_PIPELINE_WORKERS.length,
+      label: 'Submitted',
+      worker: 'detonate.server',
     });
   });
 

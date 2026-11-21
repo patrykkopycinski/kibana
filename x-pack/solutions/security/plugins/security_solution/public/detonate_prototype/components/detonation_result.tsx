@@ -75,7 +75,7 @@ export const DetonationResult = React.memo<DetonationResultProps>(({ taskId }) =
 
   // The run history needs the hash, which the task carries — the hook is
   // disabled until the task resolves and re-fetches once it does.
-  const historyByHash = useCompletedDetonationHistoryByHash(task?.sample_hash);
+  const historyByHash = useCompletedDetonationHistoryByHash(task?.sample_hash ?? undefined);
 
   const complete = task ? isDetonationComplete(task) : false;
   // Indicators come from alerts, which are final only when the run is, so the

@@ -22,7 +22,6 @@ import type {
   DetonateAlertDoc,
   DetonateAlertKind,
   DetonateBaseRequest,
-  DetonateFileRequest,
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
@@ -51,9 +50,6 @@ const ALERT_SOURCE_BY_KIND: Record<DetonateAlertKind, string> = {
   'production-detection-alerts': 'production_detection',
 };
 
-/** The events read's source name, in the connector's snake_case convention. */
-const PROCESS_EVENTS_SOURCE = 'process_events';
-
 /** Run options the connector's submit actions declare. Its params schema rejects any other key. */
 const RUN_OPTION_KEYS = [
   'tags',
@@ -64,11 +60,20 @@ const RUN_OPTION_KEYS = [
   'vm_os_family',
   'vm_disk_image',
   'vm_has_internet',
+  'vm_globs_to_collect',
   'agent_version',
 ] as const;
 
 /** Accepted by the direct client but not by the connector's sample submits. */
-const UNSUPPORTED_KEYS = ['exec_commands', 'agent_dist_base_url', 'sample_ext'] as const;
+const UNSUPPORTED_KEYS = [
+  'agent_dist_base_url',
+  'agent_defend_integration_policy_artifacts_url',
+  'agent_integrations_extra',
+  'agent_integration_policies_patches',
+  'ancillary_files',
+  'custom_vm_disk_image',
+  'vm_architecture',
+] as const;
 
 /** The connector leads every handler error with the service's status in this shape. */
 const SERVICE_STATUS_PATTERN = /\(status (\d{3})\)/;
@@ -123,15 +128,16 @@ export interface ConnectorDetonateClientOptions {
 const invalidRequest = (message: string) => new DetonateServiceError(message, 400);
 
 const hasValue = (value: unknown): boolean =>
-  value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0);
+  value !== undefined &&
+  value !== null &&
+  !(Array.isArray(value) && value.length === 0) &&
+  !(isRecord(value) && Object.keys(value).length === 0);
 
 /**
  * Silently dropping an option would run a different detonation from the one
  * the analyst asked for, so options the connector cannot carry are refused.
  */
-const toRunOptions = (
-  request: DetonateBaseRequest & { sample_filename?: string; sample_ext?: string }
-): Record<string, unknown> => {
+const toRunOptions = (request: DetonateBaseRequest): Record<string, unknown> => {
   const unsupported = UNSUPPORTED_KEYS.filter((key) => hasValue(request[key]));
   if (unsupported.length > 0) {
     throw invalidRequest(
@@ -141,7 +147,7 @@ const toRunOptions = (
 
   const { exec_wait_secs: execWaitSecs } = request;
   if (
-    execWaitSecs !== undefined &&
+    execWaitSecs != null &&
     (!Number.isInteger(execWaitSecs) ||
       execWaitSecs < 0 ||
       execWaitSecs > CONNECTOR_MAX_EXEC_WAIT_SECS)
@@ -271,7 +277,7 @@ export const createConnectorDetonateClient = ({
         : unexpected('healthcheck');
     },
 
-    submitFile: async (request: DetonateFileRequest, file) => {
+    submitFile: async (request: DetonateBaseRequest, file) => {
       if (file.body.length > CONNECTOR_MAX_SAMPLE_BYTES) {
         throw invalidRequest(
           `Samples over ${
@@ -304,16 +310,6 @@ export const createConnectorDetonateClient = ({
       const data = await execute('getTaskAlerts', {
         taskId,
         source: ALERT_SOURCE_BY_KIND[kind],
-        ...(limit !== undefined ? { limit } : {}),
-      });
-      if (!isRecord(data) || !Array.isArray(data.alerts)) return unexpected('getTaskAlerts');
-      return data.alerts as DetonateAlertDoc[];
-    },
-
-    getTaskProcessEvents: async (taskId, limit) => {
-      const data = await execute('getTaskAlerts', {
-        taskId,
-        source: PROCESS_EVENTS_SOURCE,
         ...(limit !== undefined ? { limit } : {}),
       });
       if (!isRecord(data) || !Array.isArray(data.alerts)) return unexpected('getTaskAlerts');

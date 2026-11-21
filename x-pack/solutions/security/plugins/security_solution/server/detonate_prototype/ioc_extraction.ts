@@ -178,7 +178,7 @@ export const readTaskIocs = async (
   return failedKinds.length < kinds.length
     ? extractIocsFromAlertDocs(
         docs.map(({ doc }) => doc),
-        task.sample_hash
+        task.sample_hash ?? undefined
       )
     : undefined;
 };

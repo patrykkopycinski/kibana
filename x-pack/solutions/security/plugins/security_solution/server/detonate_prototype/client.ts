@@ -24,17 +24,13 @@ import type { Logger } from '@kbn/core/server';
 import type {
   DetonateAlertDoc,
   DetonateAlertKind,
-  DetonateFileRequest,
+  DetonateBaseRequest,
   DetonateHashRequest,
   DetonateTask,
   DetonateTaskSearchResponse,
   DetonateTaskUpdate,
 } from '../../common/detonate_prototype';
-import {
-  DETONATE_PROCESS_EVENTS_KIND,
-  quoteQueryValue,
-  redactDetonateTask,
-} from '../../common/detonate_prototype';
+import { quoteQueryValue, redactDetonateTask } from '../../common/detonate_prototype';
 
 /** Service paths, relative to the configured base URL. */
 const API_PREFIX = '/v1/detonate';
@@ -81,8 +77,9 @@ export interface DetonateTaskSearchQuery {
 
 export interface DetonateClient {
   healthcheck(): Promise<{ status: string }>;
+  /** `request` is the multipart `request_json` field. */
   submitFile(
-    request: DetonateFileRequest,
+    request: DetonateBaseRequest,
     file: { filename: string; body: Buffer }
   ): Promise<DetonateTask>;
   submitHash(request: DetonateHashRequest): Promise<DetonateTask>;
@@ -97,12 +94,6 @@ export interface DetonateClient {
     kind: DetonateAlertKind,
     limit?: number
   ): Promise<DetonateAlertDoc[]>;
-  /**
-   * The sandbox's process events for a run — Session View's raw material.
-   * A dedicated read, not a fourth alert kind: alert kinds feed IOC extraction
-   * and the connector's source mapping, and events must reach neither.
-   */
-  getTaskProcessEvents(taskId: string, limit?: number): Promise<DetonateAlertDoc[]>;
   listTasks(query?: DetonateTaskSearchQuery): Promise<DetonateTaskSearchResponse>;
   /** The newest runs of one sample, before any Kibana-side space filtering. */
   findTasksByHash(sha256: string, size?: number): Promise<DetonateTask[]>;
@@ -205,13 +196,6 @@ export const createDetonateClient = ({
     getTaskAlerts: (taskId, kind, limit) =>
       call<DetonateAlertDoc[]>(
         `/tasks/${encodeURIComponent(taskId)}/${kind}${
-          limit !== undefined ? `?limit=${encodeURIComponent(String(limit))}` : ''
-        }`
-      ),
-
-    getTaskProcessEvents: (taskId, limit) =>
-      call<DetonateAlertDoc[]>(
-        `/tasks/${encodeURIComponent(taskId)}/${DETONATE_PROCESS_EVENTS_KIND}${
           limit !== undefined ? `?limit=${encodeURIComponent(String(limit))}` : ''
         }`
       ),

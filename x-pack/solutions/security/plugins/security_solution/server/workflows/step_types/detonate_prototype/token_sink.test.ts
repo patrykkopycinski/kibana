@@ -44,6 +44,15 @@ const TASK: DetonateTask = {
   pre_exec_commands: [],
   exec_commands: [],
   vm_has_internet: false,
+  agent_integrations_extra: [],
+  agent_integration_policies_patches: {},
+  agent_defend_integration_policy_artifacts_url: 'https://artifacts.security.elastic.co/',
+  ancillary_files: [],
+  files: [],
+  vm_tags: [],
+  vm_globs_to_collect: [],
+  vm_provision_retries: 0,
+  vm_infra_cleanup_attempted: false,
   production_endpoint_alerts_count: 1,
   production_endpoint_alert_groups: [{ alerts_count: 1, event_code: 'malicious_file' }],
   diagnostic_endpoint_alert_groups: [],
@@ -106,7 +115,10 @@ describe('the enrollment token and sandbox identifiers', () => {
         deadlineAt: new Date(Date.now() + 60_000).toISOString(),
       },
       attempt: 0,
-      contextManager: { callKibanaApi },
+      contextManager: {
+        callKibanaApi,
+        getContext: () => ({ workflow: { id: 'wf-1', spaceId: 'default' } }),
+      },
       logger,
     } as unknown as PollContext;
 

@@ -465,9 +465,9 @@ export const Footer = memo(({ task }: FooterProps) => {
       </EuiFlexGroup>
       {isRerunOpen && (
         <SubmitModal
-          initialHash={task.sample_hash}
+          initialHash={task.sample_hash ?? undefined}
           initialTags={rerunInitialTags}
-          initialOsFamily={task.vm_os_family}
+          initialOsFamily={task.vm_os_family ?? undefined}
           initialExecWaitSecs={rerunExecWaitSecs}
           // `DetonateSubmitSource` has no flyout value; a re-run is a plain submit.
           source="detonate_page"

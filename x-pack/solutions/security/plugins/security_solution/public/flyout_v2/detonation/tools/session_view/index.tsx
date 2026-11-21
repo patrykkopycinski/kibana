@@ -102,7 +102,7 @@ export const DetonationSessionView: FC<DetonationSessionViewProps> = memo(({ tas
             <p data-test-subj={`${DETONATION_SESSION_VIEW_TOOL_TEST_ID}Empty`}>
               <FormattedMessage
                 id="xpack.securitySolution.flyout.detonation.sessionViewTool.noEvents"
-                defaultMessage="No process events were recorded for this run."
+                defaultMessage="Process telemetry is not available from the sandbox service yet."
               />
             </p>
           )}

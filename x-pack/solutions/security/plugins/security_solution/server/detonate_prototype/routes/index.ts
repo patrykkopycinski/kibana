@@ -56,7 +56,6 @@ import {
   DETONATE_MAX_ALERT_DOCS,
   DETONATE_PRIOR_RUNS_LOOKBACK,
   DETONATE_PRIOR_RUNS_PATH,
-  DETONATE_PROCESS_EVENTS_KIND,
   DETONATE_RUNS_PATH,
   DETONATE_RUNS_GROUPS_PATH,
   DETONATE_RUNS_STATS_PATH,
@@ -74,11 +73,10 @@ import {
   diffCategoryCounts,
 } from '../../../common/detonate_prototype';
 import type {
-  DetonateAlertDoc,
   DetonateAlertOutcomes,
+  DetonateBaseRequest,
   DetonateSweepCandidates,
   DetonateDecisionWrite,
-  DetonateFileRequest,
   DetonateHandoffList,
   DetonateHandoffUpdate,
   DetonateRunDiffEmpty,
@@ -116,13 +114,7 @@ import {
   getAlertOutcomes,
   writeAlertDecisions,
 } from '../results_store';
-import {
-  IOC_ALERT_READ_LIMIT,
-  alertDocSource,
-  readField,
-  readTaskAlerts,
-  readTaskIocs,
-} from '../ioc_extraction';
+import { IOC_ALERT_READ_LIMIT, readTaskAlerts, readTaskIocs } from '../ioc_extraction';
 import { categoryCountsForRun, countsByCategory } from '../behavior_diff';
 import { ingestSandboxDocs, installSandboxTemplate } from '../sandbox_ingest';
 import {
@@ -272,7 +264,6 @@ const submitOptionsSchema = {
   pre_exec_commands: schema.maybe(
     schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 64 })
   ),
-  exec_commands: schema.maybe(schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 64 })),
   exec_sample_arguments: schema.maybe(schema.string({ maxLength: 4096 })),
   vm_os_family: schema.maybe(
     schema.oneOf([schema.literal('linux'), schema.literal('windows'), schema.literal('darwin')])
@@ -677,7 +668,7 @@ export const registerDetonatePrototypeRoutes = ({
 
           const { origin, ...serviceOptions } = options;
           const client = getClient(request);
-          const task = await submitInSpace<DetonateFileRequest>(
+          const task = await submitInSpace<DetonateBaseRequest>(
             (scoped) => client.submitFile(scoped, { filename: sampleFilename, body }),
             { ...serviceOptions, sample_filename: sampleFilename },
             spaceId
@@ -919,12 +910,9 @@ export const registerDetonatePrototypeRoutes = ({
     );
 
   /**
-   * Session View config for one run (N1). Copies the run's process events
-   * into the space's sandbox stream (idempotent) and returns the config the
-   * detonation flyout's Session tab renders: the stream as the index, the
-   * run's entry leader as the tree root, and the earliest event as the
-   * time-range floor. A run without recorded events is a null-shaped result,
-   * not an error — the tab renders its empty state.
+   * Session View config for one run (N1). The service has no process-event
+   * read today, so this answers the null-shaped result (no tree root, no time
+   * floor) and the Session tab renders its "telemetry unavailable" state.
    */
   router.versioned
     .get({
@@ -955,52 +943,18 @@ export const registerDetonatePrototypeRoutes = ({
           const client = getClient(request);
           const spaceId = spaceIdFromRequest(request);
           const task = await getTaskInSpace(client, request.params.id, spaceId);
-          const stream = detonateSandboxStreamName(spaceId);
 
-          // Events ride the same read as the alert kinds; a 404 until the
-          // agent enrolls means "not yet", same as alerts.
-          let events: Array<Record<string, unknown>> = [];
-          try {
-            events = await client.getTaskProcessEvents(task.id, DETONATE_MAX_ALERT_DOCS);
-          } catch (error) {
-            logger.debug(`Detonation ${task.id}: could not read process events: ${error}`);
-          }
-
-          const counts = { ingested: 0, duplicates: 0, dropped: 0, failed: 0 };
-          if (events.length > 0) {
-            const esClient = await getInternalEsClient();
-            await ensureSandboxTemplate(esClient);
-            const result = await ingestSandboxDocs(
-              esClient,
-              stream,
-              task,
-              events.map((doc) => ({ kind: DETONATE_PROCESS_EVENTS_KIND, doc }))
-            );
-            Object.assign(counts, result);
-          }
-
-          // The tree root is the entry leader shared by the run's events;
-          // the time floor is the earliest event of the run.
-          const firstStringField = (
-            docs: Array<Record<string, unknown>>,
-            path: string
-          ): string | undefined => {
-            for (const doc of docs) {
-              const value = readField(alertDocSource(doc as DetonateAlertDoc), path)[0];
-              if (typeof value === 'string') return value;
-            }
-            return undefined;
-          };
-          const sessionEntityId = firstStringField(events, 'process.entry_leader.entity_id');
-          const sessionStartTime = firstStringField(events, '@timestamp');
-
+          // The detonation service exposes no process-event read (only the
+          // three alert kinds), so there is no tree to root yet: the tab
+          // renders its "telemetry unavailable" state.
           return response.ok<DetonateRunSessionResult>({
             body: {
               task_id: task.id,
-              index: stream,
-              ...(sessionEntityId ? { session_entity_id: sessionEntityId } : {}),
-              ...(sessionStartTime ? { session_start_time: sessionStartTime } : {}),
-              ...counts,
+              index: detonateSandboxStreamName(spaceId),
+              ingested: 0,
+              duplicates: 0,
+              dropped: 0,
+              failed: 0,
             },
           });
         } catch (error) {
@@ -1011,8 +965,7 @@ export const registerDetonatePrototypeRoutes = ({
 
   /**
    * Behavior diff between two runs of the same sample (N2). Copies both runs'
-   * alerts and events into the space's sandbox stream (idempotent, same as
-   * /session and /ingest), then answers one ES|QL per run: per-category doc
+   * alerts into the space's sandbox stream (idempotent, same as /ingest), then answers one ES|QL per run: per-category doc
    * counts, union-diffed server-side. `against` omitted: the most recent
    * earlier completed run of the same hash in this space; a first run answers
    * a null-shaped `{ reason: 'no-prior-run' }`, not a zero-delta fabrication.
@@ -1095,8 +1048,8 @@ export const registerDetonatePrototypeRoutes = ({
             });
           }
 
-          // Both runs' telemetry must be in the stream or the diff answers
-          // against absence: copy first, idempotently, exactly like /session.
+          // Both runs' alerts must be in the stream or the diff answers
+          // against absence: copy first, idempotently, exactly like /ingest.
           const stream = detonateSandboxStreamName(spaceId);
           const esClient = await getInternalEsClient();
           await ensureSandboxTemplate(esClient);
@@ -1107,16 +1060,7 @@ export const registerDetonatePrototypeRoutes = ({
               (kind, reason) =>
                 logger.debug(`Detonation ${run.id}: could not read ${kind}: ${reason}`)
             );
-            let events: Array<Record<string, unknown>> = [];
-            try {
-              events = await client.getTaskProcessEvents(run.id, DETONATE_MAX_ALERT_DOCS);
-            } catch (error) {
-              logger.debug(`Detonation ${run.id}: could not read process events: ${error}`);
-            }
-            await ingestSandboxDocs(esClient, stream, run, [
-              ...docs,
-              ...events.map((doc) => ({ kind: DETONATE_PROCESS_EVENTS_KIND, doc })),
-            ]);
+            await ingestSandboxDocs(esClient, stream, run, docs);
           }
 
           // The copies above land in bulk's refresh interval, but the ES|QL

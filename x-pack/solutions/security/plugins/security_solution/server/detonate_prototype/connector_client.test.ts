@@ -30,6 +30,15 @@ const rawTask = (overrides: Partial<DetonateTask> = {}): DetonateTask => ({
   pre_exec_commands: [],
   exec_commands: [],
   vm_has_internet: false,
+  agent_integrations_extra: [],
+  agent_integration_policies_patches: {},
+  agent_defend_integration_policy_artifacts_url: 'https://artifacts.security.elastic.co/',
+  ancillary_files: [],
+  files: [],
+  vm_tags: [],
+  vm_globs_to_collect: [],
+  vm_provision_retries: 0,
+  vm_infra_cleanup_attempted: false,
   agent_fleet_enrollment_token: TOKEN,
   production_endpoint_alert_groups: [],
   diagnostic_endpoint_alert_groups: [],
@@ -113,7 +122,7 @@ describe('createConnectorDetonateClient', () => {
       execute.mockResolvedValue(ok(rawTask()));
 
       await client().submitFile(
-        { sample_filename: 'sample.exe', exec_commands: [] },
+        { sample_filename: 'sample.exe', ancillary_files: [] },
         { filename: 'sample.exe', body: Buffer.from('MZ') }
       );
 
@@ -211,7 +220,7 @@ describe('createConnectorDetonateClient', () => {
 
   describe('options the connector cannot carry', () => {
     it.each([
-      ['exec_commands', { exec_commands: ['whoami'] }],
+      ['vm_architecture', { vm_architecture: 'arm64' as const }],
       ['agent_dist_base_url', { agent_dist_base_url: 'https://example.invalid' }],
     ])('refuses %s instead of dropping it', async (key, options) => {
       const error = await expectServiceError(
@@ -222,9 +231,12 @@ describe('createConnectorDetonateClient', () => {
       expect(execute).not.toHaveBeenCalled();
     });
 
-    it('refuses sample_ext on a file submission', async () => {
+    it('refuses ancillary_files on a file submission', async () => {
       await expectServiceError(
-        client().submitFile({ sample_ext: 'dll' }, { filename: 's', body: Buffer.from('MZ') }),
+        client().submitFile(
+          { ancillary_files: [{ source_url: 'https://example.invalid/a', filename: 'a' }] },
+          { filename: 's', body: Buffer.from('MZ') }
+        ),
         400
       );
       expect(execute).not.toHaveBeenCalled();

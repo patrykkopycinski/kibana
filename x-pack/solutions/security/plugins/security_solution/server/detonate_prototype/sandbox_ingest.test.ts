@@ -109,9 +109,9 @@ describe('toSandboxDoc', () => {
       real_user: { id: '0', name: 'root' },
       executable: '/usr/bin/bash',
     };
-    const result = toSandboxDoc(TASK, 'process-events', {
+    const result = toSandboxDoc(TASK, 'production-endpoint-alerts', {
       '@timestamp': '2026-11-01T10:00:00.000Z',
-      event: { id: 'proc-event-2', kind: 'event' },
+      event: { id: 'proc-alert-2', kind: 'alert' },
       process: {
         entity_id: 'proc-2',
         command_line: 'curl http://example.test',
@@ -291,11 +291,6 @@ describe('sandbox alerts as signals', () => {
     ],
     ['production-endpoint-alerts' as const, 'alert', endpointAlert()],
     ['diagnostic-endpoint-alerts' as const, 'alert', endpointAlert()],
-    [
-      'process-events' as const,
-      'event',
-      { '@timestamp': '2026-11-01T10:00:00.000Z', event: { id: 'proc-event-1', kind: 'event' } },
-    ],
   ])(
     'keeps %s docs tagged, attributed and out of SIEM index patterns (event.kind %s)',
     async (kind, eventKind, source) => {

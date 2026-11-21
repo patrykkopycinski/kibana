@@ -6,14 +6,19 @@
  */
 
 import type { DetonateTask } from '../../../../../common/detonate_prototype';
-import { DETONATE_WORKERS, isDetonationComplete } from '../../../../../common/detonate_prototype';
+import {
+  DETONATE_PIPELINE_WORKERS,
+  isDetonationComplete,
+} from '../../../../../common/detonate_prototype';
 
 /**
- * True while no VM work has begun: no worker has reported yet, or the first
- * worker (task preparation) is still running. The service has no "queued"
+ * True while no VM work has begun: no worker has reported yet, only the
+ * service's own submit step has, or task preparation is still running. The service has no "queued"
  * status of its own, so this is derived from the last worker update.
  */
 export const isDetonationQueued = (task: DetonateTask): boolean =>
   !isDetonationComplete(task) &&
   (!task.last_worker_name ||
-    (task.last_worker_name === DETONATE_WORKERS[0] && task.last_worker_status === 'started'));
+    task.last_worker_name === 'detonate.server' ||
+    (task.last_worker_name === DETONATE_PIPELINE_WORKERS[0] &&
+      task.last_worker_status === 'started'));

@@ -20,7 +20,6 @@ import type {
   DetonateAlertDoc,
   DetonateAlertKind,
   DetonateTask,
-  DETONATE_PROCESS_EVENTS_KIND,
 } from '../../common/detonate_prototype';
 import {
   DETONATE_SANDBOX_RETENTION,
@@ -193,13 +192,12 @@ export interface SandboxDoc {
 /**
  * One sandbox doc as an allow-listed copy, or `undefined` when it has no
  * `@timestamp`. The `_id` is stable per run and doc, so re-copying a run
- * creates no duplicates. `kind` tags the doc (`detonate.alert_kind`): an
- * alert kind, or `process-events` for the behavioral telemetry Session View
- * reads — the tag keeps events queryable apart from alerts in the stream.
+ * creates no duplicates. `kind` tags the doc (`detonate.alert_kind`) with
+ * the alert kind it was read as.
  */
 export const toSandboxDoc = (
   task: DetonateTask,
-  kind: DetonateAlertKind | typeof DETONATE_PROCESS_EVENTS_KIND,
+  kind: DetonateAlertKind,
   alertDoc: DetonateAlertDoc
 ): SandboxDoc | undefined => {
   const source = alertDocSource(alertDoc);
@@ -241,7 +239,7 @@ export const ingestSandboxDocs = async (
   stream: string,
   task: DetonateTask,
   alerts: Array<{
-    kind: DetonateAlertKind | typeof DETONATE_PROCESS_EVENTS_KIND;
+    kind: DetonateAlertKind;
     doc: DetonateAlertDoc;
   }>
 ): Promise<SandboxIngestCounts> => {

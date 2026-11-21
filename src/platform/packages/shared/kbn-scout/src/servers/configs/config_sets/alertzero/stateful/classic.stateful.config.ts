@@ -8,7 +8,32 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { buildEisServerConfig } from '../shared';
+import { buildEisServerConfig } from '../../shared/eis';
+
+const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
+const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill', 'investigateRuleSkill'];
+
+/**
+ * Kibana reads a single `enableExperimental` value, so a value already set by a base config set
+ * is merged into, not repeated.
+ */
+const withExperimentalFeatures = (baseArgs: string[]): string[] => {
+  const features = new Set<string>(REQUIRED_EXPERIMENTAL_FEATURES);
+  baseArgs
+    .filter((arg) => arg.startsWith(ENABLE_EXPERIMENTAL_ARG))
+    .forEach((arg) => {
+      (JSON.parse(arg.slice(ENABLE_EXPERIMENTAL_ARG.length)) as string[]).forEach((feature) =>
+        features.add(feature)
+      );
+    });
+  return [
+    ...baseArgs.filter((arg) => !arg.startsWith(ENABLE_EXPERIMENTAL_ARG)),
+    `${ENABLE_EXPERIMENTAL_ARG}${JSON.stringify([...features])}`,
+  ];
+};
+
+// Opportunistic EIS base: plain `defaultConfig` when no connector source exists (see below).
+const eisConfig = buildEisServerConfig({ required: false });
 
 /**
  * Scout server config for everything under `test/scout_alertzero`: the AlertZero API suites
@@ -21,9 +46,8 @@ import { buildEisServerConfig } from '../shared';
  * `applyRuntimeSettings` in the security_solution suite's `api/tests/global.setup.ts` and
  * `applyAlertAnalysisSetting` in the alertzero suite's).
  *
- * Base flags — `alertzero` plus `agenticInvestigations` and `proposals`, which alertzero
- * requires and which default off; without them Kibana cascade-disables alertzero. On top of
- * that, what the managed workflows and the e2e flows need:
+ * `alertzero`, `agenticInvestigations` and `proposals` are all on by default in stateful, so no
+ * plugin flags are needed here. What the managed workflows and the e2e flows need on top:
  *
  * - service accounts: alertzero installs no managed workflows without them, and a Worker
  *   cannot be enabled without a service account to run as.
@@ -59,42 +83,12 @@ import { buildEisServerConfig } from '../shared';
  *   ALERTZERO_E2E_AI_CONNECTOR=eis-gpt-5-6-sol \
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet alertzero
  */
-const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
-const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill', 'investigateRuleSkill'];
-
-/**
- * Kibana reads a single `enableExperimental` value, so a value already set by a base config set
- * is merged into, not repeated.
- */
-const withExperimentalFeatures = (baseArgs: string[]): string[] => {
-  const features = new Set<string>(REQUIRED_EXPERIMENTAL_FEATURES);
-  baseArgs
-    .filter((arg) => arg.startsWith(ENABLE_EXPERIMENTAL_ARG))
-    .forEach((arg) => {
-      (JSON.parse(arg.slice(ENABLE_EXPERIMENTAL_ARG.length)) as string[]).forEach((feature) =>
-        features.add(feature)
-      );
-    });
-  return [
-    ...baseArgs.filter((arg) => !arg.startsWith(ENABLE_EXPERIMENTAL_ARG)),
-    `${ENABLE_EXPERIMENTAL_ARG}${JSON.stringify([...features])}`,
-  ];
-};
-
-// Opportunistic EIS base: plain `defaultConfig` when no connector source exists (see above).
-const eisConfig = buildEisServerConfig({ required: false });
-
 export const servers: ScoutServerConfig = {
   ...eisConfig,
   kbnTestServer: {
     ...eisConfig.kbnTestServer,
     serverArgs: [
       ...withExperimentalFeatures(eisConfig.kbnTestServer.serverArgs),
-      // Plugin enable flags: all three default off, and alertzero cascade-disables without the
-      // other two.
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
       // Falls back to true already; pinned so a feature-flag provider cannot turn it off, since
       // Discoveries installs its managed workflows only when the flag is on at plugin start.
       // Mirrors the evals_attack_discovery_agent_builder set.

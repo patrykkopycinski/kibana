@@ -20,6 +20,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { timeoutSignal } from '@kbn/std';
 
 import type {
   DetonateAlertDoc,
@@ -116,39 +117,44 @@ export const createDetonateClient = ({
   const call = async <T>(path: string, init?: RequestInit): Promise<T> => {
     const target = url(path);
     let response: Response;
+    const signal = timeoutSignal(requestTimeoutMs);
 
     try {
-      response = await fetch(target, {
-        ...init,
-        headers: { ...authHeaders, ...(init?.headers as Record<string, string> | undefined) },
-        signal: AbortSignal.timeout(requestTimeoutMs),
-      });
-    } catch (error) {
-      const reason =
-        error instanceof Error && error.name === 'TimeoutError'
-          ? `did not respond within ${requestTimeoutMs}ms`
-          : `is unreachable (${error instanceof Error ? error.message : String(error)})`;
-      // The URL is operator-supplied configuration, so it is safe to log for
-      // diagnosis, but it never reaches the analyst-facing response body.
-      logger.error(`Detonation service at ${target} ${reason}`);
-      throw new DetonateServiceError(
-        `The detonation sandbox is unavailable: the service ${reason}.`,
-        DETONATE_SANDBOX_UNAVAILABLE_STATUS
-      );
-    }
+      try {
+        response = await fetch(target, {
+          ...init,
+          headers: { ...authHeaders, ...(init?.headers as Record<string, string> | undefined) },
+          signal,
+        });
+      } catch (error) {
+        const reason =
+          error instanceof Error && error.name === 'TimeoutError'
+            ? `did not respond within ${requestTimeoutMs}ms`
+            : `is unreachable (${error instanceof Error ? error.message : String(error)})`;
+        // The URL is operator-supplied configuration, so it is safe to log for
+        // diagnosis, but it never reaches the analyst-facing response body.
+        logger.error(`Detonation service at ${target} ${reason}`);
+        throw new DetonateServiceError(
+          `The detonation sandbox is unavailable: the service ${reason}.`,
+          DETONATE_SANDBOX_UNAVAILABLE_STATUS
+        );
+      }
 
-    if (!response.ok) {
-      const body = await response.text().catch(() => '');
-      logger.error(
-        `Detonation service ${target} answered ${response.status}: ${body.slice(0, 500)}`
-      );
-      throw new DetonateServiceError(
-        `The detonation service answered ${response.status}.`,
-        toDetonateStatusCode(response.status)
-      );
-    }
+      if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        logger.error(
+          `Detonation service ${target} answered ${response.status}: ${body.slice(0, 500)}`
+        );
+        throw new DetonateServiceError(
+          `The detonation service answered ${response.status}.`,
+          toDetonateStatusCode(response.status)
+        );
+      }
 
-    return (await response.json()) as T;
+      return (await response.json()) as T;
+    } finally {
+      signal.dispose();
+    }
   };
 
   const listTasks = async (query: DetonateTaskSearchQuery = {}) => {

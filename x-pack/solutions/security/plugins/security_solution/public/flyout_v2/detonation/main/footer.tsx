@@ -368,7 +368,7 @@ export const Footer = memo(({ task }: FooterProps) => {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="blockHash"
-        icon="crossInCircle"
+        icon="crossCircle"
         disabled={Boolean(blockDisabledReason)}
         hasAriaDisabled
         toolTipContent={blockDisabledReason}
@@ -382,7 +382,7 @@ export const Footer = memo(({ task }: FooterProps) => {
       items.push(
         <EuiContextMenuItem
           key="createException"
-          icon="plusInCircle"
+          icon="plusCircle"
           onClick={onCreateException}
           data-test-subj={DETONATION_FOOTER_CREATE_EXCEPTION_TEST_ID}
         >

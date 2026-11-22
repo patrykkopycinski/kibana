@@ -16,6 +16,7 @@
 
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
+import { timeoutSignal } from '@kbn/std';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type {
@@ -183,10 +184,9 @@ export const createConnectorDetonateClient = ({
     subActionParams: Record<string, unknown>
   ): Promise<unknown> => {
     let result;
-    let deadline: AbortSignal | undefined;
+    const deadline = timeoutSignal(requestTimeoutMs);
     try {
       const actionsClient = await getActionsClient();
-      deadline = AbortSignal.timeout(requestTimeoutMs);
       result = await actionsClient.execute({
         actionId: connectorId,
         params: {
@@ -217,6 +217,8 @@ export const createConnectorDetonateClient = ({
         throw unavailable();
       }
       throw new DetonateServiceError('The Detonate connector could not be run.', 502);
+    } finally {
+      deadline.dispose();
     }
 
     if (result.status === 'ok') {

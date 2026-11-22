@@ -1317,7 +1317,7 @@ export const DetonateListPage = React.memo(() => {
         rightSideItems={[
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={openSubmitModal}
             data-test-subj={SUBMIT_SAMPLE_BUTTON_TEST_ID}
           >

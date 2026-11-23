@@ -416,6 +416,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       ...(agentPackages ? { packages: agentPackages } : {}),
       policy_revision_idx: 1,
       policy_id: policyId,
+      updated_at: now,
     },
   });
 

@@ -6,6 +6,7 @@
  */
 
 import { FLEET_SERVER_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutLogger } from '@kbn/scout-security';
 import { deleteAllEndpointData } from '../../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import {
@@ -60,11 +61,19 @@ export const hasExistingFleetServerPolicy = async (kbnClient: KbnClient): Promis
   return Boolean(existing.items[0]);
 };
 
+const CHECKED_IN_AGENT_STATUSES: ReadonlySet<AgentStatus> = new Set([
+  'online',
+  'degraded',
+  'error',
+  'updating',
+]);
+
 /**
  * `/api/status` alone cannot tell whether a running Fleet Server belongs to this stack: a
  * container left behind by a previous stack still answers healthy but cannot enroll agents.
+ * Serverless runs a standalone Fleet Server with no agent, so this is always false there.
  */
-export const hasOnlineFleetServerAgent = async (kbnClient: KbnClient): Promise<boolean> => {
+export const hasCheckedInFleetServerAgent = async (kbnClient: KbnClient): Promise<boolean> => {
   const policies = await fetchIntegrationPolicyList(kbnClient, {
     perPage: 100,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
@@ -79,7 +88,9 @@ export const hasOnlineFleetServerAgent = async (kbnClient: KbnClient): Promise<b
     kuery: agentPolicyIds.map((id) => `policy_id:"${id}"`).join(' or '),
     showInactive: false,
   });
-  return agents.items.some(({ status }) => status === 'online');
+  return agents.items.some(
+    ({ status }) => status !== undefined && CHECKED_IN_AGENT_STATUSES.has(status)
+  );
 };
 
 /**

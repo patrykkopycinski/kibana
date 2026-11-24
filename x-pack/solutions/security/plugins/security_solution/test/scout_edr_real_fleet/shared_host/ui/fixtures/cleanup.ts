@@ -61,6 +61,28 @@ export const hasExistingFleetServerPolicy = async (kbnClient: KbnClient): Promis
 };
 
 /**
+ * `/api/status` alone cannot tell whether a running Fleet Server belongs to this stack: a
+ * container left behind by a previous stack still answers healthy but cannot enroll agents.
+ */
+export const hasOnlineFleetServerAgent = async (kbnClient: KbnClient): Promise<boolean> => {
+  const policies = await fetchIntegrationPolicyList(kbnClient, {
+    perPage: 100,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
+  });
+  const agentPolicyIds = [...new Set(policies.items.flatMap(({ policy_ids: ids }) => ids ?? []))];
+  if (agentPolicyIds.length === 0) {
+    return false;
+  }
+
+  const agents = await fetchFleetAgents(kbnClient, {
+    perPage: 100,
+    kuery: agentPolicyIds.map((id) => `policy_id:"${id}"`).join(' or '),
+    showInactive: false,
+  });
+  return agents.items.some(({ status }) => status === 'online');
+};
+
+/**
  * Stops the Fleet Server container this worker started. Deletes the agent policy
  * only when this run created it — a reused policy and its service tokens are left
  * for the stack that already owned them.

@@ -19,6 +19,7 @@ import { startFleetServerIfNecessary } from '../../../scripts/endpoint/common/fl
 import {
   deleteEndpointDataAndTestSuperuser,
   hasExistingFleetServerPolicy,
+  hasOnlineFleetServerAgent,
   stopAndDeleteFleetServer,
 } from '../shared_host/ui/fixtures/cleanup';
 import {
@@ -63,9 +64,19 @@ export const withFleetServerForEndpoint = async (
       log.warning(`[edr_real_fleet] Fleet Server policy lookup failed: ${error}`);
       return true;
     });
+    const hasOnlineFleetServer = await hasOnlineFleetServerAgent(kbnClient).catch((error) => {
+      log.warning(`[edr_real_fleet] Fleet Server agent lookup failed, forcing a restart: ${error}`);
+      return false;
+    });
+    log.info(
+      hasOnlineFleetServer
+        ? '[edr_real_fleet] reusing running Fleet Server: this stack has an online Fleet Server agent'
+        : '[edr_real_fleet] (re)starting Fleet Server: no online Fleet Server agent on this stack'
+    );
     fleetServer = await startFleetServerIfNecessary({
       kbnClient,
       logger: log,
+      force: !hasOnlineFleetServer,
     });
     deleteFleetServerPolicy = Boolean(fleetServer) && !hadFleetServerPolicy;
 

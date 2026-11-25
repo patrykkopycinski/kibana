@@ -181,6 +181,10 @@ telemetry.tracing.exporters:
 
 </details>
 
+### Reading what two experiments answered
+
+`node scripts/evals compare` says how much two experiments differ. To see why, `node scripts/evals transcript <experiment-id> <experiment-id>` prints the same examples side by side (question, expected answer, each experiment's answer per repetition, tool trail, token totals, evaluator scores), largest score gap first, as markdown or HTML (`--format md|html`, `--output <file>`, `--sort-evaluator <name>`, default `Factuality`). See [CLI.md](./CLI.md#transcript----read-experiments-side-by-side).
+
 ---
 
 ### 1.2 Running evals on PRs (CI)

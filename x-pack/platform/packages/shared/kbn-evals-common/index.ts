@@ -53,3 +53,5 @@ export {
   DEFAULT_JUDGE_SCORE_DIRECTION,
   getJudgeScoreDirection,
 } from './impl/judge_score_direction';
+export { summarizeTraceSpans } from './impl/summarize_trace_spans';
+export type { TraceSummary, TraceSummaryStep } from './impl/summarize_trace_spans';

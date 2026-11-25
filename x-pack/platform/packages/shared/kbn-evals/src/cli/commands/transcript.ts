@@ -8,13 +8,11 @@
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { KbnClient } from '@kbn/kbn-client';
+import pLimit from 'p-limit';
 import { summarizeTraceSpans } from '@kbn/evals-common';
 import type { TraceSummary } from '@kbn/evals-common';
-import { EvalsClient } from '../../utils/evals_client';
-import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
-import { readSpaceIdsFlag } from '../run_helpers';
+import { createEvalsClientFromEnv, readSpaceIdsFlag } from '../run_helpers';
 import type {
   StoredExampleDetails,
   TranscriptExperiment,
@@ -23,15 +21,16 @@ import type {
 import {
   buildTranscriptReport,
   collectRepetitionRefs,
+  collectScoredExamples,
   DEFAULT_SORT_EVALUATOR,
+  exampleDetailsFilters,
   expectedOutputsByExample,
-  filterToOverlappingDatasets,
+  filterToOverlappingExamples,
   renderTranscriptHtml,
   renderTranscriptMarkdown,
   repetitionKey,
 } from '../../utils/reporting/transcript_report';
 
-const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 const FETCH_CONCURRENCY = 4;
 const RETRY_DELAY_MS = 1000;
 
@@ -47,28 +46,13 @@ const withOneRetry = async <T>(task: () => Promise<T>): Promise<T> => {
   }
 };
 
-/** Maps `items` with at most `limit` calls in flight; each result is the value or the error. */
-const mapWithConcurrency = async <T, R>(
+/** Runs `fn` over `items`, at most FETCH_CONCURRENCY at a time, without failing on one error. */
+const settleAll = <T, R>(
   items: T[],
-  limit: number,
   fn: (item: T) => Promise<R>
-): Promise<Array<{ ok: true; value: R } | { ok: false; error: unknown }>> => {
-  const results: Array<{ ok: true; value: R } | { ok: false; error: unknown }> = new Array(
-    items.length
-  );
-  let next = 0;
-  const worker = async (): Promise<void> => {
-    while (next < items.length) {
-      const index = next++;
-      try {
-        results[index] = { ok: true, value: await fn(items[index]) };
-      } catch (error) {
-        results[index] = { ok: false, error };
-      }
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
+): Promise<Array<PromiseSettledResult<R>>> => {
+  const limit = pLimit(FETCH_CONCURRENCY);
+  return Promise.allSettled(items.map((item) => limit(() => fn(item))));
 };
 
 export const transcriptCmd: Command<void> = {
@@ -121,37 +105,7 @@ export const transcriptCmd: Command<void> = {
       );
     }
 
-    const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
-    if (!evaluationsKbnUrl) {
-      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
-    }
-
-    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL });
-    const kbnClient = getEvaluationsKbnClient({
-      kbnClient: defaultKbnClient,
-      log,
-      evaluationsKbnUrl,
-      evaluationsKbnApiKey: process.env.EVAL_KBN_API_KEY,
-    });
-    const evalsClient = new EvalsClient(kbnClient, log, { spaceIds });
-
-    try {
-      await evalsClient.assertPluginEnabled();
-    } catch (error) {
-      throw createFlagError(
-        [
-          error instanceof Error ? error.message : String(error),
-          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true and xpack.evals.mode=full.',
-          'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
-        ].join('\n')
-      );
-    }
-
-    try {
-      await evalsClient.assertSpacesExist();
-    } catch (error) {
-      throw createFlagError(error instanceof Error ? error.message : String(error));
-    }
+    const evalsClient = await createEvalsClientFromEnv(log, spaceIds);
 
     // A base build ID (no "::" parts) is resolved to the full composite execution ID so the
     // server's exact-term metadata.execution_id query finds the scores.
@@ -184,35 +138,27 @@ export const transcriptCmd: Command<void> = {
       })
     );
 
-    const experiments = filterToOverlappingDatasets(loaded);
-    if (experiments.every((experiment) => experiment.scores.length === 0)) {
-      throw new Error('No overlapping datasets found between the experiments.');
-    }
-    log.info(
-      `Found ${
-        new Set(experiments.flatMap((e) => e.scores.map((s) => s.example.dataset.id))).size
-      } overlapping dataset(s).`
-    );
+    const { experiments } = filterToOverlappingExamples(loaded);
 
     // Stored input/output per repetition. Missing output is not an error: the trace is the fallback.
     const refs = collectRepetitionRefs(experiments);
     log.info(`Reading stored output for ${refs.length} example repetition(s)...`);
     const details = new Map<string, StoredExampleDetails | null>();
-    const detailResults = await mapWithConcurrency(refs, FETCH_CONCURRENCY, (ref) =>
+    const detailResults = await settleAll(refs, (ref) =>
       withOneRetry(() =>
         evalsClient.getExperimentExampleDetails(
           ref.experimentId,
           ref.datasetId,
           ref.exampleId,
           ref.repetitionIndex,
-          { executionId: ref.experimentId }
+          exampleDetailsFilters(suiteId, ref.experimentId)
         )
       )
     );
     let detailFailures = 0;
     detailResults.forEach((result, index) => {
       const key = repetitionKey(refs[index]);
-      if (!result.ok) {
+      if (result.status === 'rejected') {
         detailFailures++;
         details.set(key, null);
         return;
@@ -239,13 +185,13 @@ export const transcriptCmd: Command<void> = {
     const traceIds = [...traceModels.keys()];
     log.info(`Reading ${traceIds.length} trace(s)...`);
     const traces = new Map<string, TraceSummary | null>();
-    const traceResults = await mapWithConcurrency(traceIds, FETCH_CONCURRENCY, (traceId) =>
+    const traceResults = await settleAll(traceIds, (traceId) =>
       withOneRetry(() => evalsClient.getTrace(traceId))
     );
     let traceFailures = 0;
     traceResults.forEach((result, index) => {
       const traceId = traceIds[index];
-      if (!result.ok) {
+      if (result.status === 'rejected') {
         traceFailures++;
         traces.set(traceId, null);
         return;
@@ -256,22 +202,22 @@ export const transcriptCmd: Command<void> = {
       log.warning(`Could not read ${traceFailures} trace(s); they are shown as unavailable.`);
     }
 
-    // Expected answers come from the dataset definition.
-    const datasetIds = [...new Set(refs.map((ref) => ref.datasetId))];
+    const scoredByDataset = collectScoredExamples(experiments);
     const expected = new Map<string, unknown>();
-    for (const datasetId of datasetIds) {
-      const dataset = await evalsClient.getDatasetById(datasetId);
+    const expectedByPosition = new Set<string>();
+    for (const [datasetId, scoredExamples] of scoredByDataset) {
+      const dataset = await evalsClient.fetchDatasetById(datasetId);
       if (!dataset) {
         log.warning(`Dataset ${datasetId} was not found; its expected answers are omitted.`);
         continue;
       }
-      expectedOutputsByExample(datasetId, dataset.examples).forEach((output, key) =>
-        expected.set(key, output)
-      );
+      const matched = expectedOutputsByExample(datasetId, dataset.examples, scoredExamples);
+      matched.expected.forEach((output, key) => expected.set(key, output));
+      matched.byPosition.forEach((key) => expectedByPosition.add(key));
     }
 
-    const hydration: TranscriptHydration = { details, traces, expected };
-    const report = buildTranscriptReport({ experiments, hydration, sortEvaluator });
+    const hydration: TranscriptHydration = { details, traces, expected, expectedByPosition };
+    const report = buildTranscriptReport({ experiments: loaded, hydration, sortEvaluator });
     for (const warning of report.warnings) {
       log.warning(warning);
     }

@@ -308,11 +308,7 @@ export class EvalsClient {
     }
   }
 
-  /**
-   * Like `getExperimentScores`, but lets errors through and returns the document count the
-   * server reported. The server stops at `MAX_SCORES_PER_QUERY`, so a count at the cap means
-   * the experiment may hold more scores than were returned.
-   */
+  /** Like `getExperimentScores`, but throws on failure and flags a read that reached `MAX_SCORES_PER_QUERY`. */
   async getExperimentScoresWithTotal(
     experimentId: string,
     options?: GetExperimentFilters
@@ -331,7 +327,6 @@ export class EvalsClient {
     return { scores, total, capped: Math.max(total, scores.length) >= MAX_SCORES_PER_QUERY };
   }
 
-  /** Fetches the OTel spans of one trace. */
   async getTrace(traceId: string): Promise<GetTraceResponse> {
     const response = await this.kbnClient.request({
       path: this.path(EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId))),
@@ -412,7 +407,8 @@ export class EvalsClient {
     return UpsertEvaluationDatasetResponse.parse(getResponseData(response)).dataset_id;
   }
 
-  private async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
+  /** Reads a dataset, with its examples, by the id score documents carry. `null` when unknown. */
+  async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
     try {
       const response = await this.kbnClient.request({
         path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),
@@ -442,11 +438,6 @@ export class EvalsClient {
       }
       throw error;
     }
-  }
-
-  /** Reads a dataset, with its examples, by the id score documents carry. `null` when unknown. */
-  async getDatasetById(datasetId: string): Promise<DatasetWithId | null> {
-    return this.fetchDatasetById(datasetId);
   }
 
   /**

@@ -38,6 +38,8 @@ export interface TranscriptHydration {
   traces: Map<string, TraceSummary | null>;
   /** The dataset's expected output per example, by `exampleKey`. */
   expected: Map<string, unknown>;
+  /** `exampleKey`s whose expected output was matched by position in the dataset only. */
+  expectedByPosition?: Set<string>;
 }
 
 export type AnswerSource = 'output' | 'trace' | 'unavailable';
@@ -50,7 +52,7 @@ export interface TranscriptCell {
   answer?: string;
   answerSource: AnswerSource;
   toolTrail: string[];
-  toolTrailSource: 'output' | 'trace' | 'unavailable';
+  toolTrailSource: AnswerSource;
   inputTokens?: number;
   outputTokens?: number;
   trace: TraceStatus;
@@ -79,7 +81,10 @@ export interface TranscriptExample {
 
 export interface TranscriptReport {
   experimentIds: string[];
+  /** The evaluator the gaps are computed from; may differ from the requested one. */
   sortEvaluator: string;
+  /** False when no example has a gap, so the order is by dataset and example index. */
+  sorted: boolean;
   warnings: string[];
   examples: TranscriptExample[];
 }
@@ -89,23 +94,79 @@ const SEP = '\u0000';
 export const exampleKey = (datasetId: string, exampleId: string): string =>
   `${datasetId}${SEP}${exampleId}`;
 
+export interface ScoredExampleRef {
+  id: string;
+  index: number;
+  input?: Record<string, unknown>;
+}
+
+const stableStringify = (value: unknown): string => {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'undefined';
+};
+
 /**
- * Expected outputs of a dataset's examples, keyed for `TranscriptHydration.expected`. Score
- * documents number an example by its position in the dataset ("0", "1", ...) while the dataset
- * stores each example under a generated id, so each output is keyed by both.
+ * Score docs number an example by position and the dataset may have been reordered since, so match
+ * by input first, then id, and by position only as a last resort (`byPosition`).
  */
 export const expectedOutputsByExample = (
   datasetId: string,
-  examples: Array<{ id: string; output?: unknown }>
-): Map<string, unknown> => {
+  datasetExamples: Array<{ id: string; input?: Record<string, unknown>; output?: unknown }>,
+  scoredExamples: ScoredExampleRef[]
+): { expected: Map<string, unknown>; byPosition: Set<string> } => {
   const expected = new Map<string, unknown>();
-  examples.forEach(({ output }, position) => {
-    expected.set(exampleKey(datasetId, String(position)), output);
-  });
-  for (const { id, output } of examples) {
-    expected.set(exampleKey(datasetId, id), output);
+  const byPosition = new Set<string>();
+
+  const unusedByInput = new Map<string, typeof datasetExamples>();
+  for (const example of datasetExamples) {
+    if (!example.input) continue;
+    const input = stableStringify(example.input);
+    unusedByInput.set(input, [...(unusedByInput.get(input) ?? []), example]);
   }
-  return expected;
+  const ids = new Map(datasetExamples.map((example) => [example.id, example]));
+
+  for (const scored of scoredExamples) {
+    const inputMatches = scored.input
+      ? unusedByInput.get(stableStringify(scored.input))
+      : undefined;
+    const match = inputMatches?.shift() ?? ids.get(scored.id);
+    const matched = match ?? datasetExamples[scored.index];
+    if (!matched) continue;
+    const key = exampleKey(datasetId, scored.id);
+    expected.set(key, matched.output);
+    if (!match) byPosition.add(key);
+  }
+  return { expected, byPosition };
+};
+
+/** The distinct examples the experiments scored, per dataset. */
+export const collectScoredExamples = (
+  experiments: TranscriptExperiment[]
+): Map<string, ScoredExampleRef[]> => {
+  const byDataset = new Map<string, Map<string, ScoredExampleRef>>();
+  for (const { scores } of experiments) {
+    for (const { example } of scores) {
+      const examples = byDataset.get(example.dataset.id) ?? new Map<string, ScoredExampleRef>();
+      if (!examples.has(example.id)) {
+        examples.set(example.id, {
+          id: example.id,
+          index: example.index,
+          input: example.input ?? undefined,
+        });
+      }
+      byDataset.set(example.dataset.id, examples);
+    }
+  }
+  return new Map(
+    [...byDataset].map(([datasetId, examples]) => [datasetId, [...examples.values()]])
+  );
 };
 
 export const repetitionKey = ({
@@ -119,19 +180,34 @@ export const repetitionKey = ({
 const repetitionIndexOf = (score: EvaluationScoreDocument): number =>
   score.task.repetition_index ?? 0;
 
-/** Keeps only the datasets every experiment has scores for. */
-export const filterToOverlappingDatasets = (
+/** Keeps only the examples every experiment scored; throws when no example is shared. */
+export const filterToOverlappingExamples = (
   experiments: TranscriptExperiment[]
-): TranscriptExperiment[] => {
-  const [first, ...rest] = experiments.map(
-    (experiment) => new Set(experiment.scores.map((score) => score.example.dataset.id))
-  );
-  const shared = new Set([...(first ?? [])].filter((id) => rest.every((ids) => ids.has(id))));
-  return experiments.map((experiment) => ({
-    ...experiment,
-    scores: experiment.scores.filter((score) => shared.has(score.example.dataset.id)),
-  }));
+): { experiments: TranscriptExperiment[]; droppedExamples: number } => {
+  const keysOf = (experiment: TranscriptExperiment): Set<string> =>
+    new Set(experiment.scores.map(({ example }) => exampleKey(example.dataset.id, example.id)));
+  const keySets = experiments.map(keysOf);
+  const all = new Set(keySets.flatMap((keys) => [...keys]));
+  const shared = new Set([...all].filter((key) => keySets.every((keys) => keys.has(key))));
+  if (shared.size === 0) {
+    throw new Error('No overlapping examples found between the experiments.');
+  }
+  return {
+    experiments: experiments.map((experiment) => ({
+      ...experiment,
+      scores: experiment.scores.filter(({ example }) =>
+        shared.has(exampleKey(example.dataset.id, example.id))
+      ),
+    })),
+    droppedExamples: all.size - shared.size,
+  };
 };
+
+/** Filters for reading stored example details; mirrors how the scores were filtered. */
+export const exampleDetailsFilters = (
+  suiteId: string | undefined,
+  experimentId: string
+): { executionId: string } | undefined => (suiteId ? { executionId: experimentId } : undefined);
 
 /** Every distinct example repetition the experiments scored. */
 export const collectRepetitionRefs = (experiments: TranscriptExperiment[]): RepetitionRef[] => {
@@ -208,8 +284,8 @@ const buildCell = ({
 
   const answer = storedAnswer || traceSummary?.answer;
   const answerSource: AnswerSource = storedAnswer ? 'output' : answer ? 'trace' : 'unavailable';
-  const toolTrailSource =
-    storedTools.length > 0 ? 'output' : traceSummary ? 'trace' : ('unavailable' as const);
+  const toolTrailSource: AnswerSource =
+    storedTools.length > 0 ? 'output' : traceSummary ? 'trace' : 'unavailable';
 
   const byEvaluator = new Map<string, number[]>();
   const missing = new Set<string>();
@@ -240,15 +316,44 @@ const buildCell = ({
   };
 };
 
+/** The requested sort evaluator, or the one with the most scored examples when it has no scores. */
+const resolveSortEvaluator = (
+  scores: EvaluationScoreDocument[],
+  requested: string
+): { sortEvaluator: string; warning?: string } => {
+  const scoredExamples = new Map<string, Set<string>>();
+  for (const { evaluator, example } of scores) {
+    const examples = scoredExamples.get(evaluator.name) ?? new Set<string>();
+    if (typeof evaluator.score === 'number' && Number.isFinite(evaluator.score)) {
+      examples.add(exampleKey(example.dataset.id, example.id));
+    }
+    scoredExamples.set(evaluator.name, examples);
+  }
+  if ((scoredExamples.get(requested)?.size ?? 0) > 0 || scoredExamples.size === 0) {
+    return { sortEvaluator: requested };
+  }
+  const available = [...scoredExamples.keys()].sort((a, b) => a.localeCompare(b));
+  const [fallback] = [...scoredExamples.entries()].sort(
+    ([nameA, a], [nameB, b]) => b.size - a.size || nameA.localeCompare(nameB)
+  )[0];
+  return {
+    sortEvaluator: fallback,
+    warning: `Sort evaluator "${requested}" has no scores in these experiments; sorted by "${fallback}" instead (available: ${available.join(
+      ', '
+    )}).`,
+  };
+};
+
 export const buildTranscriptReport = ({
-  experiments,
+  experiments: allExperiments,
   hydration,
-  sortEvaluator = DEFAULT_SORT_EVALUATOR,
+  sortEvaluator: requestedSortEvaluator = DEFAULT_SORT_EVALUATOR,
 }: {
   experiments: TranscriptExperiment[];
   hydration: TranscriptHydration;
   sortEvaluator?: string;
 }): TranscriptReport => {
+  const { experiments, droppedExamples } = filterToOverlappingExamples(allExperiments);
   const experimentIds = experiments.map((experiment) => experiment.experimentId);
   const warnings = experiments
     .filter((experiment) => experiment.capped)
@@ -258,6 +363,18 @@ export const buildTranscriptReport = ({
           'en-US'
         )}-score-document cap of the scores API; examples beyond it are missing from this report.`
     );
+
+  if (droppedExamples > 0) {
+    warnings.push(
+      `${droppedExamples} example(s) were not scored by every experiment and are left out.`
+    );
+  }
+
+  const { sortEvaluator, warning: sortWarning } = resolveSortEvaluator(
+    experiments.flatMap(({ scores }) => scores),
+    requestedSortEvaluator
+  );
+  if (sortWarning) warnings.push(sortWarning);
 
   const docsByExample = new Map<
     string,
@@ -352,13 +469,21 @@ export const buildTranscriptReport = ({
     );
   });
 
-  if (!examples.some((example) => example.gap !== undefined)) {
+  const sorted = examples.some((example) => example.gap !== undefined);
+  if (!sorted) {
     warnings.push(
       `No example has a "${sortEvaluator}" score in two or more experiments, so examples are not sorted by score gap.`
     );
   }
 
-  return { experimentIds, sortEvaluator, warnings, examples };
+  const byPosition = [...docsByExample.keys()].filter((key) =>
+    hydration.expectedByPosition?.has(key)
+  ).length;
+  if (byPosition > 0) {
+    warnings.push(`expected answer for ${byPosition} example(s) matched by position only`);
+  }
+
+  return { experimentIds, sortEvaluator, sorted, warnings, examples };
 };
 
 const formatScore = (value: number | null | undefined): string =>
@@ -393,9 +518,17 @@ const escapeMarkdownCell = (value: string): string =>
     .replaceAll('|', '\\|')
     .replace(/\r?\n/g, '<br>');
 
+const codeSpan = (value: string): string => {
+  const longestRun = Math.max(0, ...(value.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = '`'.repeat(longestRun + 1);
+  return longestRun > 0 ? `${fence} ${value} ${fence}` : `${fence}${value}${fence}`;
+};
+
 const quote = (value: string): string =>
   value
     ? value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
         .split(/\r?\n/)
         .map((line) => `> ${line}`)
         .join('\n')
@@ -405,13 +538,17 @@ const markdownRow = (label: string, values: string[]): string =>
   `| ${[label, ...values.map(escapeMarkdownCell)].join(' | ')} |`;
 
 export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
-  const { experimentIds, sortEvaluator, warnings, examples } = report;
+  const { experimentIds, sortEvaluator, sorted, warnings, examples } = report;
   const lines: string[] = [
     '# Evaluation transcripts',
     '',
-    ...experimentIds.map((id, index) => `- **${String.fromCharCode(65 + index)}**: \`${id}\``),
+    ...experimentIds.map(
+      (id, index) => `- **${String.fromCharCode(65 + index)}**: ${codeSpan(id)}`
+    ),
     '',
-    `${examples.length} example(s), sorted by the largest ${sortEvaluator} gap between experiments.`,
+    sorted
+      ? `${examples.length} example(s), sorted by the largest ${sortEvaluator} gap between experiments.`
+      : `${examples.length} example(s), in dataset order.`,
     '',
   ];
 
@@ -491,7 +628,7 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
   return lines.join('\n').trimEnd() + '\n';
 };
 
-export const escapeHtml = (value: string): string =>
+const escapeHtml = (value: string): string =>
   value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -514,7 +651,7 @@ table{border-collapse:collapse}td,th{border:1px solid #d3dae6;padding:2px 8px;te
 `;
 
 export const renderTranscriptHtml = (report: TranscriptReport): string => {
-  const { experimentIds, sortEvaluator, warnings, examples } = report;
+  const { experimentIds, sortEvaluator, sorted, warnings, examples } = report;
   const letter = (index: number): string => String.fromCharCode(65 + index);
   const columns = `grid-template-columns:repeat(${experimentIds.length},minmax(0,1fr))`;
 
@@ -582,9 +719,13 @@ export const renderTranscriptHtml = (report: TranscriptReport): string => {
     `<ul>${experimentIds
       .map((id, index) => `<li><b>${letter(index)}</b>: <code>${escapeHtml(id)}</code></li>`)
       .join('')}</ul>`,
-    `<p>${examples.length} example(s), sorted by the largest ${escapeHtml(
-      sortEvaluator
-    )} gap between experiments.</p>`,
+    `<p>${
+      sorted
+        ? `${examples.length} example(s), sorted by the largest ${escapeHtml(
+            sortEvaluator
+          )} gap between experiments.`
+        : `${examples.length} example(s), in dataset order.`
+    }</p>`,
     ...warnings.map((warning) => `<div class="warning">${escapeHtml(warning)}</div>`),
     ...body,
     '</body></html>',

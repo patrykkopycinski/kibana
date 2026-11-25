@@ -416,7 +416,7 @@ describe('EvalsClient', () => {
     });
   });
 
-  it('getDatasetById reads a dataset by the id score documents carry', async () => {
+  it('fetchDatasetById reads a dataset by the id score documents carry', async () => {
     const kbnClient = createMockKbnClient();
     kbnClient.request.mockResolvedValue(
       asKbnResponse({
@@ -439,7 +439,7 @@ describe('EvalsClient', () => {
     );
     const client = new EvalsClient(kbnClient, createLog());
 
-    const result = await client.getDatasetById('ds/uuid');
+    const result = await client.fetchDatasetById('ds/uuid');
 
     expect(kbnClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -452,12 +452,12 @@ describe('EvalsClient', () => {
     ]);
   });
 
-  it('getDatasetById returns null on 404', async () => {
+  it('fetchDatasetById returns null on 404', async () => {
     const kbnClient = createMockKbnClient();
     kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 }));
     const client = new EvalsClient(kbnClient, createLog());
 
-    await expect(client.getDatasetById('missing')).resolves.toBeNull();
+    await expect(client.fetchDatasetById('missing')).resolves.toBeNull();
   });
 
   it('upsertDataset posts to the upsert route', async () => {

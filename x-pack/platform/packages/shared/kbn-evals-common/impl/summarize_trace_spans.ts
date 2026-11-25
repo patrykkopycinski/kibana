@@ -12,24 +12,18 @@ export type TraceSummaryStep =
   | { type: 'tool'; toolId: string }
   | { type: 'reasoning'; text: string };
 
-/** What the matrix keeps from an OTel trace fetched via the evals trace route. */
+/** Tool trail, narration, token totals, latency and final answer of one OTel trace. */
 export interface TraceSummary {
   /** Tool names in call order, from `execute_tool` spans. */
   toolIds: string[];
-  /**
-   * Tool calls interleaved with the subject model's narration before each tool-calling turn
-   * (`reasoning`), ordered by span start time. `toolIds` is exactly the `tool` entries.
-   */
+  /** Tool calls interleaved with the model's narration, in span start order. */
   steps: TraceSummaryStep[];
   /** Summed over `chat *` spans; undefined when no span reported usage. */
   inputTokens?: number;
   outputTokens?: number;
   /** Root span duration in ms. */
   latencyMs?: number;
-  /**
-   * Final answer: the text parts of the last `chat <subjectModelId>` span  that ended with
-   * `finish_reason: stop`. Undefined when no such span exists; never taken from helper-model spans.
-   */
+  /** Text of the last subject-model `chat` span that ended with `finish_reason: stop`; never from helper models. */
   answer?: string;
   /** Number of `chat` spans whose model matches the subject model id (0 = id mismatch). */
   subjectChatSpans?: number;
@@ -43,11 +37,7 @@ const toNumber = (value: unknown): number | undefined => {
   return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : undefined;
 };
 
-/**
- * Score docs for EIS cells carry `eis-<provider>-<model>-<major>-<minor>` while trace spans are
- * named `chat <provider>-<model>-<major>.<minor>`. Strip the `eis-` marker and fold `.` into `-`
- * on both sides; this only ever equates ids that differ by those two characters.
- */
+/** EIS score docs say `eis-<model>-<major>-<minor>`, span names `chat <model>-<major>.<minor>`. */
 const canonicalModelId = (id: string): string => id.replace(/^eis-/, '').replace(/\./g, '-');
 
 interface OutputMessage {
@@ -55,10 +45,7 @@ interface OutputMessage {
   parts?: unknown;
 }
 
-/**
- * Text of a `gen_ai.output.messages` attribute when its message finished with `stop`; undefined
- * for tool-call turns, malformed JSON, or messages without text.
- */
+/** Text of a message that finished with `stop`; undefined for tool-call turns or bad JSON. */
 const finalTextOf = (raw: unknown): string | undefined => {
   if (typeof raw !== 'string') return undefined;
   let messages: unknown;
@@ -85,11 +72,7 @@ const finalTextOf = (raw: unknown): string | undefined => {
   return text.length > 0 ? text : undefined;
 };
 
-/**
- * Concatenated text parts of a `gen_ai.output.messages` attribute when a message finished with
- * `tool_calls` (the model's narration before calling tools); undefined for other finish reasons,
- * malformed JSON, or whitespace-only text.
- */
+/** Narration text of a message that finished with `tool_calls`; undefined if blank or bad JSON. */
 const narrationOf = (raw: unknown): string | undefined => {
   if (typeof raw !== 'string') return undefined;
   let messages: unknown;
@@ -113,11 +96,7 @@ const narrationOf = (raw: unknown): string | undefined => {
   return text.trim().length > 0 ? text : undefined;
 };
 
-/**
- * Reduces a trace's spans to the tool trail, token totals and root latency. A trace with
- * no spans carries no evidence about what the run did, so it yields `undefined` rather than
- * a summary whose empty trail would read as "the agent called no tools".
- */
+/** `undefined` for a trace with no spans, so an empty trail never reads as "no tools called". */
 export const summarizeTraceSpans = (
   { spans, duration_ms: durationMs }: GetTraceResponse,
   subjectModelId?: string

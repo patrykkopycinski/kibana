@@ -33,6 +33,8 @@ const createScore = ({
   evaluator = 'Factuality',
   traceId,
   datasetId = 'ds-1',
+  direction,
+  kind,
 }: {
   experimentId: string;
   exampleId: string;
@@ -41,6 +43,8 @@ const createScore = ({
   evaluator?: string;
   traceId?: string | null;
   datasetId?: string;
+  direction?: 'maximize' | 'minimize' | 'neutral';
+  kind?: 'llm' | 'code';
 }): EvaluationScoreDocument => ({
   '@timestamp': '2026-05-01T11:00:00.000Z',
   experiment_id: experimentId,
@@ -55,7 +59,12 @@ const createScore = ({
     repetition_index: repetitionIndex,
     model: { id: 'model-x', family: 'x', provider: 'p' },
   },
-  evaluator: { name: evaluator, score },
+  evaluator: {
+    name: evaluator,
+    score,
+    ...(direction ? { direction } : {}),
+    ...(kind ? { kind } : {}),
+  },
   metadata: { execution_id: experimentId, suite_id: 'suite', total_repetitions: 1 },
 });
 
@@ -283,58 +292,133 @@ describe('transcript report', () => {
       );
     });
 
-    it('prefers a [0,1] quality evaluator over a metric with more scored examples', () => {
-      const docs = (experimentId: string, cost: number[], criteria: number[]) =>
-        experiment(experimentId, [
-          ...cost.map((value, i) =>
-            createScore({
-              experimentId,
-              exampleId: `ex-${i + 1}`,
-              score: value,
-              evaluator: 'Estimated Cost (USD)',
-            })
-          ),
-          ...criteria.map((value, i) =>
-            createScore({
-              experimentId,
-              exampleId: `ex-${i + 1}`,
-              score: value,
-              evaluator: 'criteria',
-            })
-          ),
+    describe('when the requested sort evaluator has no scores', () => {
+      interface EvaluatorSpec {
+        name: string;
+        values: number[];
+        direction?: 'maximize' | 'minimize' | 'neutral';
+        kind?: 'llm' | 'code';
+      }
+      const sortedBy = (specs: EvaluatorSpec[]): string => {
+        const docs = (experimentId: string) =>
+          experiment(
+            experimentId,
+            specs.flatMap(({ name, values, direction, kind }) =>
+              values.map((score, i) =>
+                createScore({
+                  experimentId,
+                  exampleId: `ex-${i + 1}`,
+                  score,
+                  evaluator: name,
+                  direction,
+                  kind,
+                })
+              )
+            )
+          );
+        return buildTranscriptReport({
+          experiments: [docs('exp-a'), docs('exp-b')],
+          hydration: createHydration(),
+        }).sortEvaluator;
+      };
+
+      it('prefers a maximize judge over a minimize cost metric with more scored examples', () => {
+        const docs = (experimentId: string) =>
+          experiment(experimentId, [
+            ...[0.5, 0.4, 0.6].map((score, i) =>
+              createScore({
+                experimentId,
+                exampleId: `ex-${i + 1}`,
+                score,
+                evaluator: 'Estimated Cost (USD)',
+                direction: 'minimize',
+                kind: 'code',
+              })
+            ),
+            ...[1, 0.5].map((score, i) =>
+              createScore({
+                experimentId,
+                exampleId: `ex-${i + 1}`,
+                score,
+                evaluator: 'criteria',
+                direction: 'maximize',
+                kind: 'llm',
+              })
+            ),
+          ]);
+
+        const report = buildTranscriptReport({
+          experiments: [docs('exp-a'), docs('exp-b')],
+          hydration: createHydration(),
+        });
+
+        expect(report.sortEvaluator).toBe('criteria');
+        expect(report.warnings).toEqual([
+          'Sort evaluator "Factuality" has no scores in these experiments; sorted by "criteria" instead (available: criteria, Estimated Cost (USD)).',
         ]);
-      const a = docs('exp-a', [0.4, 0.2, 2.5], [1, 0.5]);
-      const b = docs('exp-b', [0.1, 0.9, 0.3], [0.5, 1]);
+      });
 
-      const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+      it('ranks a maximize judge above a maximize code check', () => {
+        expect(
+          sortedBy([
+            { name: 'Compliance', values: [1, 1, 1], direction: 'maximize', kind: 'code' },
+            { name: 'criteria', values: [1, 0], direction: 'maximize', kind: 'llm' },
+          ])
+        ).toBe('criteria');
+      });
 
-      expect(report.sortEvaluator).toBe('criteria');
-      expect(report.warnings).toEqual([
-        'Sort evaluator "Factuality" has no scores in these experiments; sorted by "criteria" instead (available: criteria, Estimated Cost (USD)).',
-      ]);
-    });
+      it('uses the [0,1] tier for documents without a direction or kind', () => {
+        expect(
+          sortedBy([
+            { name: 'Tool Calls', values: [3, 12, 5] },
+            { name: 'Old Quality', values: [1, 0.5] },
+          ])
+        ).toBe('Old Quality');
+      });
 
-    it('falls back to a metric evaluator when no [0,1] evaluator exists', () => {
-      const a = experiment('exp-a', [
-        createScore({
-          experimentId: 'exp-a',
-          exampleId: 'ex-1',
-          score: 12,
-          evaluator: 'Tool Calls',
-        }),
-      ]);
-      const b = experiment('exp-b', [
-        createScore({
-          experimentId: 'exp-b',
-          exampleId: 'ex-1',
-          score: 3,
-          evaluator: 'Tool Calls',
-        }),
-      ]);
+      it('ranks a [0,1] maximize evaluator above another maximize evaluator', () => {
+        expect(
+          sortedBy([
+            { name: 'Rows', values: [10, 20, 30], direction: 'maximize', kind: 'code' },
+            { name: 'Ratio', values: [0.2, 0.9], direction: 'maximize', kind: 'code' },
+          ])
+        ).toBe('Ratio');
+      });
 
-      expect(
-        buildTranscriptReport({ experiments: [a, b], hydration: createHydration() }).sortEvaluator
-      ).toBe('Tool Calls');
+      it('skips neutral and minimize evaluators while a maximize one exists', () => {
+        expect(
+          sortedBy([
+            { name: 'Latency', values: [1, 2, 3], direction: 'minimize', kind: 'code' },
+            { name: 'Tool Calls', values: [1, 2, 3], direction: 'neutral', kind: 'code' },
+            { name: 'Rows', values: [10, 20], direction: 'maximize', kind: 'code' },
+          ])
+        ).toBe('Rows');
+      });
+
+      it('breaks ties by scored-example count, then by name', () => {
+        expect(
+          sortedBy([
+            { name: 'B', values: [1, 1], direction: 'maximize', kind: 'llm' },
+            { name: 'A', values: [1, 1], direction: 'maximize', kind: 'llm' },
+            { name: 'C', values: [1], direction: 'maximize', kind: 'llm' },
+          ])
+        ).toBe('A');
+        expect(
+          sortedBy([
+            { name: 'A', values: [1], direction: 'maximize', kind: 'llm' },
+            { name: 'B', values: [1, 1], direction: 'maximize', kind: 'llm' },
+          ])
+        ).toBe('B');
+      });
+
+      it('falls back to a minimize metric when nothing else exists', () => {
+        expect(
+          sortedBy([
+            { name: 'Estimated Cost (USD)', values: [0.5, 0.4], direction: 'minimize' },
+            { name: 'Latency', values: [1, 2, 3], direction: 'minimize' },
+          ])
+        ).toBe('Latency');
+      });
     });
 
     it('does not claim a sort in the header when no example has a gap', () => {

@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationScoreDocument, TraceSummary } from '@kbn/evals-common';
-import { MAX_SCORES_PER_QUERY } from '@kbn/evals-common';
+import { MAX_SCORES_PER_QUERY, getJudgeScoreDirection } from '@kbn/evals-common';
 import { getFinalAssistantMessage, getToolCallSteps } from '../evaluation_helpers';
 
 export const DEFAULT_SORT_EVALUATOR = 'Factuality';
@@ -331,33 +331,56 @@ const buildCell = ({
   };
 };
 
+interface SortCandidate {
+  examples: Set<string>;
+  isHigherBetter: boolean;
+  isLlm: boolean;
+  isUnitRange: boolean;
+}
+
 /**
- * The requested sort evaluator, or when it has no scores the best fallback: a quality evaluator
- * (every score in [0,1]) beats a metric (cost, tokens, latency, counts), then most scored examples,
- * then name.
+ * Lower is better. Judges (higher-is-better, model-scored) rank first, then higher-is-better
+ * evaluators scoring only within [0,1] (documents without a declared direction or kind land here),
+ * then any other higher-is-better evaluator. Metrics (cost, tokens, latency: minimize or neutral)
+ * come last, and an evaluator with no scores after those.
+ */
+const sortTier = ({ examples, isHigherBetter, isLlm, isUnitRange }: SortCandidate): number => {
+  if (examples.size === 0) return 4;
+  if (!isHigherBetter) return 3;
+  if (isLlm) return 0;
+  return isUnitRange ? 1 : 2;
+};
+
+/**
+ * The requested sort evaluator, or when it has no scores the best fallback by `sortTier`, then
+ * most scored examples, then name.
  */
 const resolveSortEvaluator = (
   scores: EvaluationScoreDocument[],
   requested: string
 ): { sortEvaluator: string; warning?: string } => {
-  const stats = new Map<string, { examples: Set<string>; isQuality: boolean }>();
+  const candidates = new Map<string, SortCandidate>();
   for (const { evaluator, example } of scores) {
-    const stat = stats.get(evaluator.name) ?? { examples: new Set<string>(), isQuality: true };
+    const candidate = candidates.get(evaluator.name) ?? {
+      examples: new Set<string>(),
+      isHigherBetter: getJudgeScoreDirection(evaluator) === 'maximize',
+      isLlm: false,
+      isUnitRange: true,
+    };
+    candidate.isLlm = candidate.isLlm || evaluator.kind === 'llm';
     if (typeof evaluator.score === 'number' && Number.isFinite(evaluator.score)) {
-      stat.examples.add(exampleKey(example.dataset.id, example.id));
-      if (evaluator.score < 0 || evaluator.score > 1) stat.isQuality = false;
+      candidate.examples.add(exampleKey(example.dataset.id, example.id));
+      if (evaluator.score < 0 || evaluator.score > 1) candidate.isUnitRange = false;
     }
-    stats.set(evaluator.name, stat);
+    candidates.set(evaluator.name, candidate);
   }
-  if ((stats.get(requested)?.examples.size ?? 0) > 0 || stats.size === 0) {
+  if ((candidates.get(requested)?.examples.size ?? 0) > 0 || candidates.size === 0) {
     return { sortEvaluator: requested };
   }
-  const available = [...stats.keys()].sort((a, b) => a.localeCompare(b));
-  const [fallback] = [...stats.entries()].sort(
+  const available = [...candidates.keys()].sort((a, b) => a.localeCompare(b));
+  const [fallback] = [...candidates.entries()].sort(
     ([nameA, a], [nameB, b]) =>
-      Number(b.isQuality && b.examples.size > 0) - Number(a.isQuality && a.examples.size > 0) ||
-      b.examples.size - a.examples.size ||
-      nameA.localeCompare(nameB)
+      sortTier(a) - sortTier(b) || b.examples.size - a.examples.size || nameA.localeCompare(nameB)
   )[0];
   return {
     sortEvaluator: fallback,

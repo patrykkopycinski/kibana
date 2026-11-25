@@ -99,7 +99,7 @@ function computeDelayMs({
 
 const RETRYABLE_SERVER_STATUSES = new Set<number>([502, 503, 504]);
 
-function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
+export function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   const status = getStatusCode(error);
   const message = toErrorMessage(error);
   const retryAfterMs = parseRetryAfterMsFromMessage(message);

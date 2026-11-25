@@ -134,6 +134,14 @@ export const expectedOutputsByExample = (
   // Shared by the input, id and position paths: a dataset example answers one scored example.
   const consumed = new Set<(typeof datasetExamples)[number]>();
 
+  const assign = (scored: ScoredExampleRef, matched: (typeof datasetExamples)[number]) => {
+    consumed.add(matched);
+    expected.set(exampleKey(datasetId, scored.id), matched.output);
+  };
+
+  // Pass 1: exact matches for every scored example, so a position guess can never take a dataset
+  // example that a later scored example matches by input or id.
+  const unmatched: ScoredExampleRef[] = [];
   for (const scored of scoredExamples) {
     const inputMatches = scored.input
       ? unusedByInput.get(stableStringify(scored.input))
@@ -142,13 +150,19 @@ export const expectedOutputsByExample = (
     const idMatch = byInput ? undefined : ids.get(scored.id);
     const byId = idMatch && !consumed.has(idMatch) ? idMatch : undefined;
     const match = byInput ?? byId;
+    if (match) {
+      assign(scored, match);
+    } else {
+      unmatched.push(scored);
+    }
+  }
+
+  // Pass 2: position, only for what is still unmatched and still free.
+  for (const scored of unmatched) {
     const positional = datasetExamples[scored.index];
-    const matched = match ?? (positional && !consumed.has(positional) ? positional : undefined);
-    if (!matched) continue;
-    consumed.add(matched);
-    const key = exampleKey(datasetId, scored.id);
-    expected.set(key, matched.output);
-    if (!match) byPosition.add(key);
+    if (!positional || consumed.has(positional)) continue;
+    assign(scored, positional);
+    byPosition.add(exampleKey(datasetId, scored.id));
   }
   return { expected, byPosition };
 };
@@ -304,8 +318,13 @@ const buildCell = ({
 
   const answer = storedAnswer || traceSummary?.answer;
   const answerSource: AnswerSource = storedAnswer ? 'output' : answer ? 'trace' : 'unavailable';
-  const toolTrailSource: AnswerSource =
-    storedTools.length > 0 ? 'output' : traceSummary ? 'trace' : 'unavailable';
+  // A stored output that records its steps (even none) is the authority on tool calls.
+  const storedToolsKnown = Boolean(stored) && (Array.isArray(stored?.steps) || storedAnswer !== '');
+  const toolTrailSource: AnswerSource = storedToolsKnown
+    ? 'output'
+    : traceSummary
+    ? 'trace'
+    : 'unavailable';
 
   const byEvaluator = new Map<string, number[]>();
   const missing = new Set<string>();
@@ -327,7 +346,7 @@ const buildCell = ({
     model: first.task.model?.id,
     answer,
     answerSource,
-    toolTrail: storedTools.length > 0 ? storedTools : traceSummary?.toolIds ?? [],
+    toolTrail: toolTrailSource === 'output' ? storedTools : traceSummary?.toolIds ?? [],
     toolTrailSource,
     inputTokens: traceSummary?.inputTokens,
     outputTokens: traceSummary?.outputTokens,
@@ -612,7 +631,7 @@ const quote = (value: string): string =>
     : '> (none)';
 
 const markdownRow = (label: string, values: string[]): string =>
-  `| ${[label, ...values.map(escapeMarkdownCell)].join(' | ')} |`;
+  `| ${[label, ...values].map(escapeMarkdownCell).join(' | ')} |`;
 
 export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
   const { experimentIds, sortEvaluator, sorted, warnings, examples } = report;
@@ -624,13 +643,15 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
     ),
     '',
     sorted
-      ? `${examples.length} example(s), sorted by the largest ${sortEvaluator} gap between experiments.`
+      ? `${examples.length} example(s), sorted by the largest ${escapeMarkdownCell(
+          sortEvaluator
+        )} gap between experiments.`
       : `${examples.length} example(s), in dataset order.`,
     '',
   ];
 
   if (warnings.length > 0) {
-    lines.push(...warnings.map((warning) => `> **Warning:** ${warning}`), '');
+    lines.push(...warnings.map((warning) => `> **Warning:** ${escapeMarkdownCell(warning)}`), '');
   }
 
   const columns = experimentIds.map((_, index) => `**${String.fromCharCode(65 + index)}**`);
@@ -643,7 +664,7 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
         example.exampleIndex
       }`,
       '',
-      `${sortEvaluator} gap: ${formatScore(example.gap)}`,
+      `${escapeMarkdownCell(sortEvaluator)} gap: ${formatScore(example.gap)}`,
       '',
       '**Question**',
       '',
@@ -686,7 +707,7 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
           cells.map((cell) => (cell ? formatTools(cell) : '-'))
         ),
         markdownRow(
-          'Tokens',
+          'Tokens (all models)',
           cells.map((cell) => (cell ? formatTokens(cell) : '-'))
         ),
         markdownRow(
@@ -737,7 +758,7 @@ export const renderTranscriptHtml = (report: TranscriptReport): string => {
       return `<div class="cell"><h4>${letter(index)}</h4><p class="muted">no run</p></div>`;
     }
     const scores = cell.scores
-      .map(({ name, score }) => `${escapeHtml(name)}: ${formatScore(score)}`)
+      .map(({ name, score }) => `${name}: ${formatScore(score)}`)
       .join('\n');
     return [
       '<div class="cell">',
@@ -746,7 +767,7 @@ export const renderTranscriptHtml = (report: TranscriptReport): string => {
       `<pre>${escapeHtml(formatAnswer(cell))}</pre>`,
       '<div class="label">Tools</div>',
       `<pre>${escapeHtml(formatTools(cell))}</pre>`,
-      '<div class="label">Tokens</div>',
+      '<div class="label">Tokens (all models)</div>',
       `<pre>${escapeHtml(formatTokens(cell))}</pre>`,
       '<div class="label">Scores</div>',
       `<pre>${escapeHtml(scores || '-')}</pre>`,

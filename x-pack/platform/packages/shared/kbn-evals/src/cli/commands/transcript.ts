@@ -11,6 +11,7 @@ import type { Command } from '@kbn/dev-cli-runner';
 import pLimit from 'p-limit';
 import { summarizeTraceSpans } from '@kbn/evals-common';
 import type { TraceSummary } from '@kbn/evals-common';
+import { isRetryable } from '../../utils/retry_utils';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
 import { createEvalsClientFromEnv, readSpaceIdsFlag } from '../run_helpers';
 import type {
@@ -36,11 +37,13 @@ const RETRY_DELAY_MS = 1000;
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Runs `task` once more after a short wait when the first attempt throws. */
+/** Runs `task` once more after a short wait when the first attempt fails with a transient error. */
 const withOneRetry = async <T>(task: () => Promise<T>): Promise<T> => {
   try {
     return await task();
-  } catch (firstError) {
+  } catch (error) {
+    // 404s and parse failures are deterministic: retrying only delays the same failure.
+    if (!isRetryable(error).retry) throw error;
     await sleep(RETRY_DELAY_MS);
     return task();
   }

@@ -240,11 +240,11 @@ Prints each example that every experiment scored: the question, the expected ans
 | ------------------ | --------------------------------------------------------------------------------------------------- |
 | `--format`         | `md` (default) or `html`. Model text is escaped in HTML.                                            |
 | `--output`         | Write the report to a file instead of stdout.                                                       |
-| `--sort-evaluator` | Evaluator whose gap orders the examples (default `Factuality`). Without it, order is by dataset and example. |
+| `--sort-evaluator` | Evaluator whose gap orders the examples (default `Factuality`). Used when 2+ experiments scored some example with it; otherwise the report ranks another evaluator by gap coverage and warns, and if no evaluator has a gap, examples stay in dataset order. |
 | `--suite`          | Suite ID; resolves base build IDs to full experiment IDs and filters scores.                        |
 | `--space-ids`      | Spaces the experiments were run in (same as `compare`).                                             |
 
-The answer is read from the stored task output (the last message). When that is missing, it comes from the trace: the last subject-model `chat` span that finished with `stop`. Token totals always come from the trace. A trace with no spans, or one that cannot be read, shows as `unavailable`, never as zero. The report warns when an experiment reached the 10,000-score-document cap of the scores API, because examples beyond it are missing.
+The answer is read from the stored task output (the last message). When that is missing, it comes from the trace: the last subject-model `chat` span that finished with `stop`. Token totals always come from the trace and cover every model in it, helper models included, while answers cover the subject model only. A trace with no spans, or one that cannot be read, shows as `unavailable`, never as zero. The report warns when an experiment reached the 10,000-score-document cap of the scores API, because examples beyond it are missing.
 
 ### `env` -- List environment variables
 

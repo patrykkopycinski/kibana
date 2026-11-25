@@ -599,6 +599,56 @@ describe('transcript report', () => {
       });
     });
 
+    describe('tool trail source', () => {
+      const build = (hydration: TranscriptHydration) =>
+        buildTranscriptReport({
+          droppedExamples: 0,
+          experiments: [experiment('exp-a', scores)],
+          hydration,
+        });
+
+      it('reports none, from the output, when a readable output made no tool calls and there is no trace', () => {
+        const noTrace = [createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 })];
+        const report = buildTranscriptReport({
+          droppedExamples: 0,
+          experiments: [experiment('exp-a', noTrace)],
+          hydration: createHydration({
+            details: new Map([[detailKey('exp-a', 'ex-1'), output('Stored answer')]]),
+          }),
+        });
+        const [cell] = report.examples[0].repetitions[0].cells;
+
+        expect(cell).toMatchObject({ toolTrail: [], toolTrailSource: 'output' });
+        expect(renderTranscriptMarkdown(report)).toContain('| Tools | none |');
+      });
+
+      it('keeps the output as the authority when the trace lists tools the output does not', () => {
+        const [cell] = build(
+          createHydration({
+            details: new Map([[detailKey('exp-a', 'ex-1'), output('Stored answer')]]),
+            traces: new Map([['trace-a', traceSummary()]]),
+          })
+        ).examples[0].repetitions[0].cells;
+
+        expect(cell).toMatchObject({ toolTrail: [], toolTrailSource: 'output' });
+      });
+
+      it('stays unavailable when neither the output nor a trace can be read', () => {
+        const noTrace = [createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 })];
+        const report = buildTranscriptReport({
+          droppedExamples: 0,
+          experiments: [experiment('exp-a', noTrace)],
+          hydration: createHydration({
+            details: new Map([[detailKey('exp-a', 'ex-1'), { input: null, output: null }]]),
+          }),
+        });
+        const [cell] = report.examples[0].repetitions[0].cells;
+
+        expect(cell).toMatchObject({ toolTrailSource: 'unavailable' });
+        expect(renderTranscriptMarkdown(report)).toContain('| Tools | unavailable |');
+      });
+    });
+
     it('falls back to the trace when the output has no final message', () => {
       const hydration = createHydration({
         details: new Map([[detailKey('exp-a', 'ex-1'), { input: null, output: { steps: [] } }]]),
@@ -744,6 +794,39 @@ describe('transcript report', () => {
         expect(expected.get(exampleKey('ds-1', 'd1'))).toEqual({ expected: 'Two' });
         expect(expected.has(exampleKey('ds-1', 'y'))).toBe(false);
         expect([...byPosition]).toEqual([exampleKey('ds-1', 'd1')]);
+      });
+
+      it('lets a later exact match keep the dataset example an earlier position guess points at', () => {
+        const dataset = [
+          { id: 'd1', input: { question: 'first' }, output: { expected: 'One' } },
+          { id: 'd2', input: { question: 'second' }, output: { expected: 'Two' } },
+        ];
+
+        // "early" has no input or id match and its index points at d2, which "late" matches by input.
+        const { expected, byPosition } = expectedOutputsByExample('ds-1', dataset, [
+          { id: 'early', index: 1, input: { question: 'unknown' } },
+          { id: 'late', index: 9, input: { question: 'second' } },
+        ]);
+
+        expect(expected.get(exampleKey('ds-1', 'late'))).toEqual({ expected: 'Two' });
+        expect(expected.has(exampleKey('ds-1', 'early'))).toBe(false);
+        expect(byPosition.size).toBe(0);
+      });
+
+      it('lets a later id match keep the dataset example an earlier position guess points at', () => {
+        const dataset = [
+          { id: 'd1', output: { expected: 'One' } },
+          { id: 'd2', output: { expected: 'Two' } },
+        ];
+
+        const { expected, byPosition } = expectedOutputsByExample('ds-1', dataset, [
+          { id: 'early', index: 1 },
+          { id: 'd2', index: 9 },
+        ]);
+
+        expect(expected.get(exampleKey('ds-1', 'd2'))).toEqual({ expected: 'Two' });
+        expect(expected.has(exampleKey('ds-1', 'early'))).toBe(false);
+        expect(byPosition.size).toBe(0);
       });
 
       it('warns how many expected answers were matched by position only', () => {
@@ -912,6 +995,38 @@ describe('transcript report', () => {
     });
   });
 
+  describe('evaluator names', () => {
+    const name = 'Fact <i> & "q" | x';
+    const report = buildTranscriptReport({
+      droppedExamples: 0,
+      experiments: [
+        experiment('exp-a', [
+          createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1, evaluator: name }),
+        ]),
+        experiment('exp-b', [
+          createScore({ experimentId: 'exp-b', exampleId: 'ex-1', score: 0, evaluator: name }),
+        ]),
+      ],
+      hydration: createHydration(),
+    });
+
+    it('escapes them once in html', () => {
+      const html = renderTranscriptHtml(report);
+
+      expect(html).toContain('Fact &lt;i&gt; &amp; &quot;q&quot; | x');
+      expect(html).not.toContain('&amp;lt;');
+      expect(html).not.toContain('&amp;amp;');
+      expect(html).not.toContain('<i>');
+    });
+
+    it('escapes them in the first column of the markdown tables', () => {
+      const markdown = renderTranscriptMarkdown(report);
+
+      expect(markdown).toContain('| Fact &lt;i> &amp; "q" \\| x | 1.00 | 0.00 |');
+      expect(markdown).not.toContain('<i>');
+    });
+  });
+
   describe('markdown', () => {
     it('escapes angle brackets and ampersands in questions and expected answers', () => {
       const hostile = '<script>alert(1)</script> & more';
@@ -999,8 +1114,8 @@ describe('transcript report', () => {
         | --- | --- | --- |
         | Model | model-x | model-x |
         | Answer | Skill answer \\\\| with a pipe | Plain answer<br>second line |
-        | Tools | 1. skill.load<br>2. alerts.search | unavailable |
-        | Tokens | in 1200 / out 300 | unavailable (no trace id) |
+        | Tools | 1. skill.load<br>2. alerts.search | none |
+        | Tokens (all models) | in 1200 / out 300 | unavailable (no trace id) |
         | Scores | Factuality: 1.00 | Factuality: 0.25 |
 
         ## 2. Alert triage · example 2
@@ -1027,8 +1142,8 @@ describe('transcript report', () => {
         | --- | --- | --- |
         | Model | model-x | model-x |
         | Answer | Same | Same |
-        | Tools | unavailable | unavailable |
-        | Tokens | unavailable (no trace id) | unavailable (no trace id) |
+        | Tools | none | none |
+        | Tokens (all models) | unavailable (no trace id) | unavailable (no trace id) |
         | Scores | Factuality: 0.50 | Factuality: 0.50 |
         "
       `);

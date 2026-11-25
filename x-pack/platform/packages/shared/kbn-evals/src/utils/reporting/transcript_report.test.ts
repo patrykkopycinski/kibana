@@ -160,7 +160,11 @@ describe('transcript report', () => {
       expect(droppedExamples).toBe(2);
       expect(collectRepetitionRefs(experiments)).toHaveLength(2);
 
-      const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+      const report = buildTranscriptReport({
+        experiments,
+        droppedExamples,
+        hydration: createHydration(),
+      });
       expect(report.examples.map((example) => example.exampleId)).toEqual(['ex-1']);
       expect(report.warnings).toContain(
         '2 example(s) were not scored by every experiment and are left out.'
@@ -177,8 +181,10 @@ describe('transcript report', () => {
         createScore({ experimentId: 'exp-b', exampleId: 'ex-3', score: 1 }),
       ]);
 
+      const { experiments, droppedExamples } = filterToOverlappingExamples([a, b]);
       const { examples } = buildTranscriptReport({
-        experiments: [a, b],
+        experiments,
+        droppedExamples,
         hydration: createHydration(),
       });
 
@@ -194,9 +200,6 @@ describe('transcript report', () => {
       ]);
 
       expect(() => filterToOverlappingExamples([a, b])).toThrow('No overlapping examples');
-      expect(() =>
-        buildTranscriptReport({ experiments: [a, b], hydration: createHydration() })
-      ).toThrow('No overlapping examples');
     });
   });
 
@@ -250,8 +253,10 @@ describe('transcript report', () => {
         createScore({ experimentId: 'exp-b', exampleId: 'ex-1', score: 1, evaluator: 'Other' }),
       ]);
 
+      const { experiments, droppedExamples } = filterToOverlappingExamples([a, b]);
       const { examples, warnings } = buildTranscriptReport({
-        experiments: [a, b],
+        experiments,
+        droppedExamples,
         hydration: createHydration(),
       });
 
@@ -356,6 +361,87 @@ describe('transcript report', () => {
         expect(report.warnings).toEqual([
           'Sort evaluator "Factuality" has no scores in these experiments; sorted by "criteria" instead (available: criteria, Estimated Cost (USD)).',
         ]);
+      });
+
+      it('skips an evaluator scored in only one experiment while another has gap coverage', () => {
+        const a = experiment('exp-a', [
+          createScore({
+            experimentId: 'exp-a',
+            exampleId: 'ex-1',
+            score: 1,
+            evaluator: 'OneSided',
+            direction: 'maximize',
+            kind: 'llm',
+          }),
+          createScore({
+            experimentId: 'exp-a',
+            exampleId: 'ex-1',
+            score: 1,
+            evaluator: 'Rows',
+            direction: 'maximize',
+            kind: 'code',
+          }),
+        ]);
+        const b = experiment('exp-b', [
+          createScore({
+            experimentId: 'exp-b',
+            exampleId: 'ex-1',
+            score: 0.5,
+            evaluator: 'Rows',
+            direction: 'maximize',
+            kind: 'code',
+          }),
+        ]);
+
+        expect(
+          buildTranscriptReport({ experiments: [a, b], hydration: createHydration() })
+        ).toMatchObject({ sortEvaluator: 'Rows', sorted: true });
+      });
+
+      it('falls back when the requested evaluator is scored in only one experiment', () => {
+        const a = experiment('exp-a', [
+          createScore({
+            experimentId: 'exp-a',
+            exampleId: 'ex-1',
+            score: 1,
+            evaluator: 'Factuality',
+          }),
+          createScore({
+            experimentId: 'exp-a',
+            exampleId: 'ex-1',
+            score: 1,
+            evaluator: 'criteria',
+          }),
+        ]);
+        const b = experiment('exp-b', [
+          createScore({
+            experimentId: 'exp-b',
+            exampleId: 'ex-1',
+            score: 0,
+            evaluator: 'criteria',
+          }),
+        ]);
+
+        const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+
+        expect(report.sortEvaluator).toBe('criteria');
+        expect(report.warnings).toEqual([
+          'Sort evaluator "Factuality" has no scores in these experiments; sorted by "criteria" instead (available: criteria, Factuality).',
+        ]);
+      });
+
+      it('keeps the requested evaluator once an example is scored by two experiments', () => {
+        const docs = (experimentId: string, score: number) =>
+          experiment(experimentId, [
+            createScore({ experimentId, exampleId: 'ex-1', score, evaluator: 'Factuality' }),
+          ]);
+
+        expect(
+          buildTranscriptReport({
+            experiments: [docs('exp-a', 1), docs('exp-b', 0)],
+            hydration: createHydration(),
+          })
+        ).toMatchObject({ sortEvaluator: 'Factuality', warnings: [] });
       });
 
       it('ranks a maximize judge above a maximize code check', () => {
@@ -594,15 +680,20 @@ describe('transcript report', () => {
         expect([...byPosition]).toEqual([exampleKey('ds-1', '0')]);
       });
 
-      it('does not match a dataset example by input after it was matched by id', () => {
-        const { expected, byPosition } = expectedOutputsByExample('ds-1', datasetExamples, [
-          { id: 'hash-a', index: 5 },
-          { id: '0', index: 1, input: { question: 'first' } },
+      it('does not hand the same duplicate-input dataset example to two scored examples', () => {
+        const duplicates = [
+          { id: 'd1', input: { question: 'same' }, output: { expected: 'One' } },
+          { id: 'd2', input: { question: 'same' }, output: { expected: 'Two' } },
+        ];
+
+        const { expected, byPosition } = expectedOutputsByExample('ds-1', duplicates, [
+          { id: 'd1', index: 7 },
+          { id: 'x', index: 0, input: { question: 'same' } },
         ]);
 
-        expect(expected.get(exampleKey('ds-1', 'hash-a'))).toEqual({ expected: 'First' });
-        expect(expected.get(exampleKey('ds-1', '0'))).toEqual({ expected: 'Second' });
-        expect([...byPosition]).toEqual([exampleKey('ds-1', '0')]);
+        expect(expected.get(exampleKey('ds-1', 'd1'))).toEqual({ expected: 'One' });
+        expect(expected.get(exampleKey('ds-1', 'x'))).toEqual({ expected: 'Two' });
+        expect(byPosition.size).toBe(0);
       });
 
       it('warns how many expected answers were matched by position only', () => {
@@ -697,18 +788,6 @@ describe('transcript report', () => {
           expect(report.warnings).toContain(
             'Expected answers for 1 example(s) were matched by dataset position only; they may be wrong if the dataset changed.'
           );
-        });
-
-        it('falls back to the score doc input when no details exist', () => {
-          const scored = collectScoredExamples([
-            experiment('exp-a', [
-              createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 }),
-            ]),
-          ]);
-
-          expect(scored.get('ds-1')).toEqual([
-            { id: 'ex-1', index: 1, input: { question: 'preview of ex-1' } },
-          ]);
         });
       });
     });

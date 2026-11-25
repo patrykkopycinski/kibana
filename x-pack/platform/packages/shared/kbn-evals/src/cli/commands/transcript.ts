@@ -138,9 +138,8 @@ export const transcriptCmd: Command<void> = {
       })
     );
 
-    // Filtered here too so an empty overlap fails before any detail or trace fetch;
-    // buildTranscriptReport re-applies the same filter and reports the dropped count.
-    const { experiments } = filterToOverlappingExamples(loaded);
+    // Filtered once, before any detail or trace fetch, so an empty overlap fails early.
+    const { experiments, droppedExamples } = filterToOverlappingExamples(loaded);
 
     // Stored input/output per repetition. Missing output is not an error: the trace is the fallback.
     const refs = collectRepetitionRefs(experiments);
@@ -219,7 +218,12 @@ export const transcriptCmd: Command<void> = {
     }
 
     const hydration: TranscriptHydration = { details, traces, expected, expectedByPosition };
-    const report = buildTranscriptReport({ experiments: loaded, hydration, sortEvaluator });
+    const report = buildTranscriptReport({
+      experiments,
+      droppedExamples,
+      hydration,
+      sortEvaluator,
+    });
     for (const warning of report.warnings) {
       log.warning(warning);
     }

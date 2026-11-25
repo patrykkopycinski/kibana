@@ -157,7 +157,7 @@ export const expectedOutputsByExample = (
 
 /**
  * The distinct examples the experiments scored, per dataset. The scores API drops `example.input`,
- * so the input comes from the stored details and only falls back to the score doc.
+ * so the input comes from the stored details.
  */
 export const collectScoredExamples = (
   experiments: TranscriptExperiment[],
@@ -175,9 +175,7 @@ export const collectScoredExamples = (
             exampleId: example.id,
             repetitionIndex: repetitionIndexOf(score),
           })
-        )?.input ??
-        example.input ??
-        undefined;
+        )?.input ?? undefined;
       const examples = byDataset.get(example.dataset.id) ?? new Map<string, ScoredExampleRef>();
       const known = examples.get(example.id);
       if (!known) {
@@ -341,74 +339,96 @@ const buildCell = ({
 };
 
 interface SortCandidate {
-  examples: Set<string>;
+  /** Experiment indexes that scored each example, by `exampleKey`. */
+  scoredBy: Map<string, Set<number>>;
   isHigherBetter: boolean;
   isLlm: boolean;
   isUnitRange: boolean;
 }
 
+/** Examples scored by 2+ experiments: the only ones that can produce a gap. */
+const gapCoverage = ({ scoredBy }: SortCandidate): number =>
+  [...scoredBy.values()].filter((experimentIndexes) => experimentIndexes.size >= 2).length;
+
 /**
  * Lower is better. Judges (higher-is-better, model-scored) rank first, then higher-is-better
  * evaluators scoring only within [0,1] (documents without a declared direction or kind land here),
  * then any other higher-is-better evaluator. Metrics (cost, tokens, latency: minimize or neutral)
- * come last, and an evaluator with no scores after those.
+ * come last.
  */
-const sortTier = ({ examples, isHigherBetter, isLlm, isUnitRange }: SortCandidate): number => {
-  if (examples.size === 0) return 4;
+const sortTier = ({ isHigherBetter, isLlm, isUnitRange }: SortCandidate): number => {
   if (!isHigherBetter) return 3;
   if (isLlm) return 0;
   return isUnitRange ? 1 : 2;
 };
 
 /**
- * The requested sort evaluator, or when it has no scores the best fallback by `sortTier`, then
- * most scored examples, then name.
+ * The requested sort evaluator when some example has a score from 2+ experiments, otherwise the
+ * best fallback: any evaluator with gap coverage first, then `sortTier`, then most examples with
+ * gap coverage, then name.
  */
 const resolveSortEvaluator = (
-  scores: EvaluationScoreDocument[],
+  experiments: TranscriptExperiment[],
   requested: string
 ): { sortEvaluator: string; warning?: string } => {
   const candidates = new Map<string, SortCandidate>();
-  for (const { evaluator, example } of scores) {
-    const candidate = candidates.get(evaluator.name) ?? {
-      examples: new Set<string>(),
-      isHigherBetter: getJudgeScoreDirection(evaluator) === 'maximize',
-      isLlm: false,
-      isUnitRange: true,
-    };
-    candidate.isLlm = candidate.isLlm || evaluator.kind === 'llm';
-    if (typeof evaluator.score === 'number' && Number.isFinite(evaluator.score)) {
-      candidate.examples.add(exampleKey(example.dataset.id, example.id));
-      if (evaluator.score < 0 || evaluator.score > 1) candidate.isUnitRange = false;
+  experiments.forEach(({ scores }, experimentIndex) => {
+    for (const { evaluator, example } of scores) {
+      const candidate = candidates.get(evaluator.name) ?? {
+        scoredBy: new Map<string, Set<number>>(),
+        isHigherBetter: getJudgeScoreDirection(evaluator) === 'maximize',
+        isLlm: false,
+        isUnitRange: true,
+      };
+      candidate.isLlm = candidate.isLlm || evaluator.kind === 'llm';
+      if (typeof evaluator.score === 'number' && Number.isFinite(evaluator.score)) {
+        const key = exampleKey(example.dataset.id, example.id);
+        candidate.scoredBy.set(
+          key,
+          (candidate.scoredBy.get(key) ?? new Set()).add(experimentIndex)
+        );
+        if (evaluator.score < 0 || evaluator.score > 1) candidate.isUnitRange = false;
+      }
+      candidates.set(evaluator.name, candidate);
     }
-    candidates.set(evaluator.name, candidate);
-  }
-  if ((candidates.get(requested)?.examples.size ?? 0) > 0 || candidates.size === 0) {
+  });
+  const requestedCandidate = candidates.get(requested);
+  if ((requestedCandidate && gapCoverage(requestedCandidate) > 0) || candidates.size === 0) {
     return { sortEvaluator: requested };
   }
   const available = [...candidates.keys()].sort((a, b) => a.localeCompare(b));
-  const [fallback] = [...candidates.entries()].sort(
-    ([nameA, a], [nameB, b]) =>
-      sortTier(a) - sortTier(b) || b.examples.size - a.examples.size || nameA.localeCompare(nameB)
-  )[0];
+  const [fallback] = [...candidates.entries()]
+    .map(([name, candidate]) => ({ name, candidate, coverage: gapCoverage(candidate) }))
+    .sort(
+      (a, b) =>
+        Number(b.coverage > 0) - Number(a.coverage > 0) ||
+        sortTier(a.candidate) - sortTier(b.candidate) ||
+        b.coverage - a.coverage ||
+        a.name.localeCompare(b.name)
+    );
   return {
-    sortEvaluator: fallback,
-    warning: `Sort evaluator "${requested}" has no scores in these experiments; sorted by "${fallback}" instead (available: ${available.join(
-      ', '
-    )}).`,
+    sortEvaluator: fallback.name,
+    warning: `Sort evaluator "${requested}" has no scores in these experiments; sorted by "${
+      fallback.name
+    }" instead (available: ${available.join(', ')}).`,
   };
 };
 
+/**
+ * `experiments` must already be reduced to the shared examples by `filterToOverlappingExamples`;
+ * pass its `droppedExamples` so the report can say how many were left out.
+ */
 export const buildTranscriptReport = ({
-  experiments: allExperiments,
+  experiments,
+  droppedExamples = 0,
   hydration,
   sortEvaluator: requestedSortEvaluator = DEFAULT_SORT_EVALUATOR,
 }: {
   experiments: TranscriptExperiment[];
+  droppedExamples?: number;
   hydration: TranscriptHydration;
   sortEvaluator?: string;
 }): TranscriptReport => {
-  const { experiments, droppedExamples } = filterToOverlappingExamples(allExperiments);
   const experimentIds = experiments.map((experiment) => experiment.experimentId);
   const warnings = experiments
     .filter((experiment) => experiment.capped)
@@ -426,7 +446,7 @@ export const buildTranscriptReport = ({
   }
 
   const { sortEvaluator, warning: sortWarning } = resolveSortEvaluator(
-    experiments.flatMap(({ scores }) => scores),
+    experiments,
     requestedSortEvaluator
   );
   if (sortWarning) warnings.push(sortWarning);

@@ -594,6 +594,17 @@ describe('transcript report', () => {
         expect([...byPosition]).toEqual([exampleKey('ds-1', '0')]);
       });
 
+      it('does not match a dataset example by input after it was matched by id', () => {
+        const { expected, byPosition } = expectedOutputsByExample('ds-1', datasetExamples, [
+          { id: 'hash-a', index: 5 },
+          { id: '0', index: 1, input: { question: 'first' } },
+        ]);
+
+        expect(expected.get(exampleKey('ds-1', 'hash-a'))).toEqual({ expected: 'First' });
+        expect(expected.get(exampleKey('ds-1', '0'))).toEqual({ expected: 'Second' });
+        expect([...byPosition]).toEqual([exampleKey('ds-1', '0')]);
+      });
+
       it('warns how many expected answers were matched by position only', () => {
         const report = buildTranscriptReport({
           experiments: [
@@ -607,7 +618,7 @@ describe('transcript report', () => {
         });
 
         expect(report.warnings).toContain(
-          'expected answer for 1 example(s) matched by position only'
+          'Expected answers for 1 example(s) were matched by dataset position only; they may be wrong if the dataset changed.'
         );
       });
 
@@ -684,7 +695,7 @@ describe('transcript report', () => {
             hydration: createHydration({ expectedByPosition: byPosition }),
           });
           expect(report.warnings).toContain(
-            'expected answer for 1 example(s) matched by position only'
+            'Expected answers for 1 example(s) were matched by dataset position only; they may be wrong if the dataset changed.'
           );
         });
 

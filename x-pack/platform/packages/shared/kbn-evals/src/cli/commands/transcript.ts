@@ -138,6 +138,8 @@ export const transcriptCmd: Command<void> = {
       })
     );
 
+    // Filtered here too so an empty overlap fails before any detail or trace fetch;
+    // buildTranscriptReport re-applies the same filter and reports the dropped count.
     const { experiments } = filterToOverlappingExamples(loaded);
 
     // Stored input/output per repetition. Missing output is not an error: the trace is the fallback.

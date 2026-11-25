@@ -136,7 +136,16 @@ export const expectedOutputsByExample = (
     const inputMatches = scored.input
       ? unusedByInput.get(stableStringify(scored.input))
       : undefined;
-    const match = inputMatches?.shift() ?? ids.get(scored.id);
+    const byInput = inputMatches?.shift();
+    const byId = byInput ? undefined : ids.get(scored.id);
+    if (byId?.input) {
+      // An id match consumes the example, so a later scored example with the same input
+      // cannot be matched to it again.
+      const bucket = unusedByInput.get(stableStringify(byId.input));
+      const position = bucket?.indexOf(byId) ?? -1;
+      if (bucket && position >= 0) bucket.splice(position, 1);
+    }
+    const match = byInput ?? byId;
     const matched = match ?? datasetExamples[scored.index];
     if (!matched) continue;
     const key = exampleKey(datasetId, scored.id);
@@ -526,7 +535,9 @@ export const buildTranscriptReport = ({
     hydration.expectedByPosition?.has(key)
   ).length;
   if (byPosition > 0) {
-    warnings.push(`expected answer for ${byPosition} example(s) matched by position only`);
+    warnings.push(
+      `Expected answers for ${byPosition} example(s) were matched by dataset position only; they may be wrong if the dataset changed.`
+    );
   }
 
   return { experimentIds, sortEvaluator, sorted, warnings, examples };

@@ -131,23 +131,21 @@ export const expectedOutputsByExample = (
     unusedByInput.set(input, [...(unusedByInput.get(input) ?? []), example]);
   }
   const ids = new Map(datasetExamples.map((example) => [example.id, example]));
+  // Shared by the input, id and position paths: a dataset example answers one scored example.
+  const consumed = new Set<(typeof datasetExamples)[number]>();
 
   for (const scored of scoredExamples) {
     const inputMatches = scored.input
       ? unusedByInput.get(stableStringify(scored.input))
       : undefined;
-    const byInput = inputMatches?.shift();
-    const byId = byInput ? undefined : ids.get(scored.id);
-    if (byId?.input) {
-      // An id match consumes the example, so a later scored example with the same input
-      // cannot be matched to it again.
-      const bucket = unusedByInput.get(stableStringify(byId.input));
-      const position = bucket?.indexOf(byId) ?? -1;
-      if (bucket && position >= 0) bucket.splice(position, 1);
-    }
+    const byInput = inputMatches?.find((candidate) => !consumed.has(candidate));
+    const idMatch = byInput ? undefined : ids.get(scored.id);
+    const byId = idMatch && !consumed.has(idMatch) ? idMatch : undefined;
     const match = byInput ?? byId;
-    const matched = match ?? datasetExamples[scored.index];
+    const positional = datasetExamples[scored.index];
+    const matched = match ?? (positional && !consumed.has(positional) ? positional : undefined);
     if (!matched) continue;
+    consumed.add(matched);
     const key = exampleKey(datasetId, scored.id);
     expected.set(key, matched.output);
     if (!match) byPosition.add(key);
@@ -408,9 +406,11 @@ const resolveSortEvaluator = (
     );
   return {
     sortEvaluator: fallback.name,
-    warning: `Sort evaluator "${requested}" has no scores in these experiments; sorted by "${
-      fallback.name
-    }" instead (available: ${available.join(', ')}).`,
+    warning: `Sort evaluator "${requested}" ${
+      requestedCandidate && requestedCandidate.scoredBy.size > 0
+        ? 'has no example scored by 2+ experiments'
+        : 'has no scores in these experiments'
+    }; sorted by "${fallback.name}" instead (available: ${available.join(', ')}).`,
   };
 };
 
@@ -420,12 +420,12 @@ const resolveSortEvaluator = (
  */
 export const buildTranscriptReport = ({
   experiments,
-  droppedExamples = 0,
+  droppedExamples,
   hydration,
   sortEvaluator: requestedSortEvaluator = DEFAULT_SORT_EVALUATOR,
 }: {
   experiments: TranscriptExperiment[];
-  droppedExamples?: number;
+  droppedExamples: number;
   hydration: TranscriptHydration;
   sortEvaluator?: string;
 }): TranscriptReport => {

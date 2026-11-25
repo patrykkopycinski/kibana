@@ -112,7 +112,11 @@ describe('transcript report', () => {
         createScore({ experimentId: 'exp-b', exampleId: 'ex-1', repetitionIndex: 1, score: 0 }),
       ]);
 
-      const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+      const report = buildTranscriptReport({
+        droppedExamples: 0,
+        experiments: [a, b],
+        hydration: createHydration(),
+      });
 
       expect(report.examples).toHaveLength(1);
       const [example] = report.examples;
@@ -137,6 +141,7 @@ describe('transcript report', () => {
       ]);
 
       const [example] = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [a, b],
         hydration: createHydration(),
       }).examples;
@@ -217,6 +222,7 @@ describe('transcript report', () => {
       ]);
 
       const { examples } = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [a, b],
         hydration: createHydration(),
       });
@@ -235,6 +241,7 @@ describe('transcript report', () => {
       ]);
 
       const { examples, warnings } = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [a, b],
         hydration: createHydration(),
         sortEvaluator: 'Other',
@@ -284,7 +291,11 @@ describe('transcript report', () => {
         createScore({ experimentId: 'exp-b', exampleId: 'ex-1', score: 1, evaluator: 'Rare' }),
       ]);
 
-      const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+      const report = buildTranscriptReport({
+        droppedExamples: 0,
+        experiments: [a, b],
+        hydration: createHydration(),
+      });
 
       expect(report.sortEvaluator).toBe('criteria');
       expect(report.sorted).toBe(true);
@@ -322,6 +333,7 @@ describe('transcript report', () => {
             )
           );
         return buildTranscriptReport({
+          droppedExamples: 0,
           experiments: [docs('exp-a'), docs('exp-b')],
           hydration: createHydration(),
         }).sortEvaluator;
@@ -353,6 +365,7 @@ describe('transcript report', () => {
           ]);
 
         const report = buildTranscriptReport({
+          droppedExamples: 0,
           experiments: [docs('exp-a'), docs('exp-b')],
           hydration: createHydration(),
         });
@@ -394,7 +407,11 @@ describe('transcript report', () => {
         ]);
 
         expect(
-          buildTranscriptReport({ experiments: [a, b], hydration: createHydration() })
+          buildTranscriptReport({
+            droppedExamples: 0,
+            experiments: [a, b],
+            hydration: createHydration(),
+          })
         ).toMatchObject({ sortEvaluator: 'Rows', sorted: true });
       });
 
@@ -422,11 +439,15 @@ describe('transcript report', () => {
           }),
         ]);
 
-        const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+        const report = buildTranscriptReport({
+          droppedExamples: 0,
+          experiments: [a, b],
+          hydration: createHydration(),
+        });
 
         expect(report.sortEvaluator).toBe('criteria');
         expect(report.warnings).toEqual([
-          'Sort evaluator "Factuality" has no scores in these experiments; sorted by "criteria" instead (available: criteria, Factuality).',
+          'Sort evaluator "Factuality" has no example scored by 2+ experiments; sorted by "criteria" instead (available: criteria, Factuality).',
         ]);
       });
 
@@ -438,6 +459,7 @@ describe('transcript report', () => {
 
         expect(
           buildTranscriptReport({
+            droppedExamples: 0,
             experiments: [docs('exp-a', 1), docs('exp-b', 0)],
             hydration: createHydration(),
           })
@@ -515,7 +537,11 @@ describe('transcript report', () => {
         createScore({ experimentId: 'exp-b', exampleId: 'ex-1', score: null }),
       ]);
 
-      const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+      const report = buildTranscriptReport({
+        droppedExamples: 0,
+        experiments: [a, b],
+        hydration: createHydration(),
+      });
 
       expect(renderTranscriptMarkdown(report)).toContain('1 example(s), in dataset order.');
       expect(renderTranscriptMarkdown(report)).not.toContain('sorted by the largest');
@@ -535,6 +561,7 @@ describe('transcript report', () => {
       });
 
       const [{ repetitions }] = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [experiment('exp-a', scores)],
         hydration,
       }).examples;
@@ -559,6 +586,7 @@ describe('transcript report', () => {
       });
 
       const [cell] = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [experiment('exp-a', scores)],
         hydration,
       }).examples[0].repetitions[0].cells;
@@ -578,6 +606,7 @@ describe('transcript report', () => {
       });
 
       const [cell] = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [experiment('exp-a', scores)],
         hydration,
       }).examples[0].repetitions[0].cells;
@@ -591,6 +620,7 @@ describe('transcript report', () => {
         traces: new Map([['trace-a', null]]),
       });
       const report = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [experiment('exp-a', scores)],
         hydration,
       });
@@ -610,6 +640,7 @@ describe('transcript report', () => {
 
     it('says when a score has no trace id at all', () => {
       const report = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [
           experiment('exp-a', [
             createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 }),
@@ -629,6 +660,7 @@ describe('transcript report', () => {
       });
 
       const [example] = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [experiment('exp-a', scores)],
         hydration,
       }).examples;
@@ -696,8 +728,27 @@ describe('transcript report', () => {
         expect(byPosition.size).toBe(0);
       });
 
+      it('does not re-match an input-matched dataset example by id or position', () => {
+        const dataset = [
+          { id: 'd1', input: { question: 'first' }, output: { expected: 'One' } },
+          { id: 'd2', input: { question: 'second' }, output: { expected: 'Two' } },
+        ];
+
+        const { expected, byPosition } = expectedOutputsByExample('ds-1', dataset, [
+          { id: 'x', index: 5, input: { question: 'first' } },
+          { id: 'd1', index: 1 },
+          { id: 'y', index: 0 },
+        ]);
+
+        expect(expected.get(exampleKey('ds-1', 'x'))).toEqual({ expected: 'One' });
+        expect(expected.get(exampleKey('ds-1', 'd1'))).toEqual({ expected: 'Two' });
+        expect(expected.has(exampleKey('ds-1', 'y'))).toBe(false);
+        expect([...byPosition]).toEqual([exampleKey('ds-1', 'd1')]);
+      });
+
       it('warns how many expected answers were matched by position only', () => {
         const report = buildTranscriptReport({
+          droppedExamples: 0,
           experiments: [
             experiment('exp-a', [
               createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 }),
@@ -782,6 +833,7 @@ describe('transcript report', () => {
           expect([...byPosition]).toEqual([exampleKey('ds-1', '0')]);
 
           const report = buildTranscriptReport({
+            droppedExamples: 0,
             experiments,
             hydration: createHydration({ expectedByPosition: byPosition }),
           });
@@ -803,6 +855,7 @@ describe('transcript report', () => {
   describe('cap warning', () => {
     it('names every experiment that hit the scores API cap', () => {
       const report = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [
           experiment(
             'exp-a',
@@ -840,6 +893,7 @@ describe('transcript report', () => {
 
       const html = renderTranscriptHtml(
         buildTranscriptReport({
+          droppedExamples: 0,
           experiments: [
             experiment('exp-<a>', [
               createScore({ experimentId: 'exp-<a>', exampleId: 'ex-1', score: 1 }),
@@ -862,6 +916,7 @@ describe('transcript report', () => {
     it('escapes angle brackets and ampersands in questions and expected answers', () => {
       const hostile = '<script>alert(1)</script> & more';
       const report = buildTranscriptReport({
+        droppedExamples: 0,
         experiments: [
           experiment('exp-`a`', [
             createScore({ experimentId: 'exp-`a`', exampleId: 'ex-1', score: 1 }),
@@ -908,8 +963,11 @@ describe('transcript report', () => {
         expected: new Map([[exampleKey('ds-1', 'ex-1'), { expected: 'Reference' }]]),
       });
 
-      expect(renderTranscriptMarkdown(buildTranscriptReport({ experiments: [a, b], hydration })))
-        .toMatchInlineSnapshot(`
+      expect(
+        renderTranscriptMarkdown(
+          buildTranscriptReport({ droppedExamples: 0, experiments: [a, b], hydration })
+        )
+      ).toMatchInlineSnapshot(`
         "# Evaluation transcripts
 
         - **A**: \`exp-a\`

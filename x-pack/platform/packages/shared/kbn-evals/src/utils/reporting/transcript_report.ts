@@ -146,20 +146,35 @@ export const expectedOutputsByExample = (
   return { expected, byPosition };
 };
 
-/** The distinct examples the experiments scored, per dataset. */
+/**
+ * The distinct examples the experiments scored, per dataset. The scores API drops `example.input`,
+ * so the input comes from the stored details and only falls back to the score doc.
+ */
 export const collectScoredExamples = (
-  experiments: TranscriptExperiment[]
+  experiments: TranscriptExperiment[],
+  details: Map<string, StoredExampleDetails | null> = new Map()
 ): Map<string, ScoredExampleRef[]> => {
   const byDataset = new Map<string, Map<string, ScoredExampleRef>>();
-  for (const { scores } of experiments) {
-    for (const { example } of scores) {
+  for (const { experimentId, scores } of experiments) {
+    for (const score of scores) {
+      const { example } = score;
+      const input =
+        details.get(
+          repetitionKey({
+            experimentId,
+            datasetId: example.dataset.id,
+            exampleId: example.id,
+            repetitionIndex: repetitionIndexOf(score),
+          })
+        )?.input ??
+        example.input ??
+        undefined;
       const examples = byDataset.get(example.dataset.id) ?? new Map<string, ScoredExampleRef>();
-      if (!examples.has(example.id)) {
-        examples.set(example.id, {
-          id: example.id,
-          index: example.index,
-          input: example.input ?? undefined,
-        });
+      const known = examples.get(example.id);
+      if (!known) {
+        examples.set(example.id, { id: example.id, index: example.index, input });
+      } else if (!known.input && input) {
+        known.input = input;
       }
       byDataset.set(example.dataset.id, examples);
     }
@@ -316,25 +331,33 @@ const buildCell = ({
   };
 };
 
-/** The requested sort evaluator, or the one with the most scored examples when it has no scores. */
+/**
+ * The requested sort evaluator, or when it has no scores the best fallback: a quality evaluator
+ * (every score in [0,1]) beats a metric (cost, tokens, latency, counts), then most scored examples,
+ * then name.
+ */
 const resolveSortEvaluator = (
   scores: EvaluationScoreDocument[],
   requested: string
 ): { sortEvaluator: string; warning?: string } => {
-  const scoredExamples = new Map<string, Set<string>>();
+  const stats = new Map<string, { examples: Set<string>; isQuality: boolean }>();
   for (const { evaluator, example } of scores) {
-    const examples = scoredExamples.get(evaluator.name) ?? new Set<string>();
+    const stat = stats.get(evaluator.name) ?? { examples: new Set<string>(), isQuality: true };
     if (typeof evaluator.score === 'number' && Number.isFinite(evaluator.score)) {
-      examples.add(exampleKey(example.dataset.id, example.id));
+      stat.examples.add(exampleKey(example.dataset.id, example.id));
+      if (evaluator.score < 0 || evaluator.score > 1) stat.isQuality = false;
     }
-    scoredExamples.set(evaluator.name, examples);
+    stats.set(evaluator.name, stat);
   }
-  if ((scoredExamples.get(requested)?.size ?? 0) > 0 || scoredExamples.size === 0) {
+  if ((stats.get(requested)?.examples.size ?? 0) > 0 || stats.size === 0) {
     return { sortEvaluator: requested };
   }
-  const available = [...scoredExamples.keys()].sort((a, b) => a.localeCompare(b));
-  const [fallback] = [...scoredExamples.entries()].sort(
-    ([nameA, a], [nameB, b]) => b.size - a.size || nameA.localeCompare(nameB)
+  const available = [...stats.keys()].sort((a, b) => a.localeCompare(b));
+  const [fallback] = [...stats.entries()].sort(
+    ([nameA, a], [nameB, b]) =>
+      Number(b.isQuality && b.examples.size > 0) - Number(a.isQuality && a.examples.size > 0) ||
+      b.examples.size - a.examples.size ||
+      nameA.localeCompare(nameB)
   )[0];
   return {
     sortEvaluator: fallback,

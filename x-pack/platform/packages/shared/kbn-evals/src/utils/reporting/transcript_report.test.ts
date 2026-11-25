@@ -283,6 +283,60 @@ describe('transcript report', () => {
       );
     });
 
+    it('prefers a [0,1] quality evaluator over a metric with more scored examples', () => {
+      const docs = (experimentId: string, cost: number[], criteria: number[]) =>
+        experiment(experimentId, [
+          ...cost.map((value, i) =>
+            createScore({
+              experimentId,
+              exampleId: `ex-${i + 1}`,
+              score: value,
+              evaluator: 'Estimated Cost (USD)',
+            })
+          ),
+          ...criteria.map((value, i) =>
+            createScore({
+              experimentId,
+              exampleId: `ex-${i + 1}`,
+              score: value,
+              evaluator: 'criteria',
+            })
+          ),
+        ]);
+      const a = docs('exp-a', [0.4, 0.2, 2.5], [1, 0.5]);
+      const b = docs('exp-b', [0.1, 0.9, 0.3], [0.5, 1]);
+
+      const report = buildTranscriptReport({ experiments: [a, b], hydration: createHydration() });
+
+      expect(report.sortEvaluator).toBe('criteria');
+      expect(report.warnings).toEqual([
+        'Sort evaluator "Factuality" has no scores in these experiments; sorted by "criteria" instead (available: criteria, Estimated Cost (USD)).',
+      ]);
+    });
+
+    it('falls back to a metric evaluator when no [0,1] evaluator exists', () => {
+      const a = experiment('exp-a', [
+        createScore({
+          experimentId: 'exp-a',
+          exampleId: 'ex-1',
+          score: 12,
+          evaluator: 'Tool Calls',
+        }),
+      ]);
+      const b = experiment('exp-b', [
+        createScore({
+          experimentId: 'exp-b',
+          exampleId: 'ex-1',
+          score: 3,
+          evaluator: 'Tool Calls',
+        }),
+      ]);
+
+      expect(
+        buildTranscriptReport({ experiments: [a, b], hydration: createHydration() }).sortEvaluator
+      ).toBe('Tool Calls');
+    });
+
     it('does not claim a sort in the header when no example has a gap', () => {
       const a = experiment('exp-a', [
         createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 }),
@@ -473,19 +527,94 @@ describe('transcript report', () => {
         );
       });
 
-      it('collects each scored example once with its input', () => {
-        const scored = collectScoredExamples([
-          experiment('exp-a', [
-            createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 }),
-          ]),
-          experiment('exp-b', [
-            createScore({ experimentId: 'exp-b', exampleId: 'ex-1', score: 1 }),
-          ]),
-        ]);
+      describe('with the scores API shape (score docs carry no example.input)', () => {
+        const withoutInput = (doc: EvaluationScoreDocument): EvaluationScoreDocument => ({
+          ...doc,
+          example: { ...doc.example, input: undefined },
+        });
+        const scoreDoc = (experimentId: string, exampleId: string) =>
+          withoutInput(createScore({ experimentId, exampleId, score: 1 }));
+        const detail = (question: string): StoredExampleDetails => ({
+          input: { question },
+          output: null,
+        });
+        const dataset = [
+          { id: 'hash-a', input: { question: 'first' }, output: { expected: 'First' } },
+          { id: 'hash-b', input: { question: 'second' }, output: { expected: 'Second' } },
+        ];
 
-        expect(scored.get('ds-1')).toEqual([
-          { id: 'ex-1', index: 1, input: { question: 'preview of ex-1' } },
-        ]);
+        it('takes each example input from the stored details', () => {
+          const experiments = [
+            experiment('exp-a', [scoreDoc('exp-a', '0'), scoreDoc('exp-a', '1')]),
+            experiment('exp-b', [scoreDoc('exp-b', '0'), scoreDoc('exp-b', '1')]),
+          ];
+          const details = new Map([
+            [detailKey('exp-b', '0'), detail('first')],
+            [detailKey('exp-a', '1'), detail('second')],
+          ]);
+
+          expect(collectScoredExamples(experiments, details).get('ds-1')).toEqual([
+            { id: '0', index: 0, input: { question: 'first' } },
+            { id: '1', index: 1, input: { question: 'second' } },
+          ]);
+        });
+
+        it('keeps the expected answer with its input when the dataset order differs', () => {
+          const experiments = [
+            experiment('exp-a', [scoreDoc('exp-a', '0'), scoreDoc('exp-a', '1')]),
+          ];
+          const details = new Map([
+            [detailKey('exp-a', '0'), detail('first')],
+            [detailKey('exp-a', '1'), detail('second')],
+          ]);
+
+          const { expected, byPosition } = expectedOutputsByExample(
+            'ds-1',
+            [...dataset].reverse(),
+            [...(collectScoredExamples(experiments, details).get('ds-1') ?? [])]
+          );
+
+          expect(expected.get(exampleKey('ds-1', '0'))).toEqual({ expected: 'First' });
+          expect(expected.get(exampleKey('ds-1', '1'))).toEqual({ expected: 'Second' });
+          expect(byPosition.size).toBe(0);
+        });
+
+        it('falls back to id, then position with a warning, when details are missing', () => {
+          const experiments = [
+            experiment('exp-a', [scoreDoc('exp-a', 'hash-b'), scoreDoc('exp-a', '0')]),
+          ];
+          const details = new Map<string, StoredExampleDetails | null>([
+            [detailKey('exp-a', 'hash-b'), null],
+          ]);
+
+          const scored = collectScoredExamples(experiments, details).get('ds-1') ?? [];
+          const { expected, byPosition } = expectedOutputsByExample('ds-1', dataset, scored);
+
+          expect(scored.every(({ input }) => input === undefined)).toBe(true);
+          expect(expected.get(exampleKey('ds-1', 'hash-b'))).toEqual({ expected: 'Second' });
+          expect(expected.get(exampleKey('ds-1', '0'))).toEqual({ expected: 'First' });
+          expect([...byPosition]).toEqual([exampleKey('ds-1', '0')]);
+
+          const report = buildTranscriptReport({
+            experiments,
+            hydration: createHydration({ expectedByPosition: byPosition }),
+          });
+          expect(report.warnings).toContain(
+            'expected answer for 1 example(s) matched by position only'
+          );
+        });
+
+        it('falls back to the score doc input when no details exist', () => {
+          const scored = collectScoredExamples([
+            experiment('exp-a', [
+              createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 }),
+            ]),
+          ]);
+
+          expect(scored.get('ds-1')).toEqual([
+            { id: 'ex-1', index: 1, input: { question: 'preview of ex-1' } },
+          ]);
+        });
       });
     });
   });

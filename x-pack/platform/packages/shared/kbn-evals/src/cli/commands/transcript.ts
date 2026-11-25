@@ -202,7 +202,7 @@ export const transcriptCmd: Command<void> = {
       log.warning(`Could not read ${traceFailures} trace(s); they are shown as unavailable.`);
     }
 
-    const scoredByDataset = collectScoredExamples(experiments);
+    const scoredByDataset = collectScoredExamples(experiments, details);
     const expected = new Map<string, unknown>();
     const expectedByPosition = new Set<string>();
     for (const [datasetId, scoredExamples] of scoredByDataset) {

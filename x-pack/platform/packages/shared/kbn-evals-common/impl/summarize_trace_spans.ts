@@ -104,10 +104,10 @@ export const summarizeTraceSpans = (
   if (spans.length === 0) {
     return undefined;
   }
-  // Spans with an unparseable start time sort last, keeping their relative order.
+  // Spans with an unparseable start time sort first, so they never win "last stop span".
   const startOf = (span: (typeof spans)[number]): number => {
     const time = Date.parse(span.start_time);
-    return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+    return Number.isNaN(time) ? Number.NEGATIVE_INFINITY : time;
   };
   const ordered = [...spans].sort((a, b) => {
     const [startA, startB] = [startOf(a), startOf(b)];

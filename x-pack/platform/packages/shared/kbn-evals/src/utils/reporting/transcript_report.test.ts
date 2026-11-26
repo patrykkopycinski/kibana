@@ -653,6 +653,19 @@ describe('transcript report', () => {
         });
       });
 
+      it('escapes a backslash before a pipe so the pipe cannot end the cell', () => {
+        const markdown = renderTranscriptMarkdown(
+          build(
+            createHydration({
+              details: new Map([[detailKey('exp-a', 'ex-1'), output('FROM logs \\| LIMIT 1')]]),
+            })
+          )
+        );
+
+        // Source `\|` renders as `\\\|`: an escaped backslash, then an escaped pipe.
+        expect(markdown).toContain('| Answer | FROM logs \\\\\\| LIMIT 1 |');
+      });
+
       it('renders an empty trace answer as unavailable', () => {
         const report = build(
           createHydration({ traces: new Map([['trace-a', traceSummary({ answer: '' })]]) })
@@ -822,6 +835,21 @@ describe('transcript report', () => {
         expect(expected.get(exampleKey('ds-1', 'x'))).toEqual({ expected: 'Three' });
         expect(expected.get(exampleKey('ds-1', 'd2'))).toEqual({ expected: 'Two' });
         expect(expected.get(exampleKey('ds-1', 'y'))).toEqual({ expected: 'One' });
+      });
+
+      it('lets a later input match keep the dataset example an earlier id match points at', () => {
+        const dataset = [
+          { id: 'd1', input: { question: 'first' }, output: { expected: 'One' } },
+          { id: 'd2', input: { question: 'second' }, output: { expected: 'Two' } },
+        ];
+
+        const { expected } = expectedOutputsByExample('ds-1', dataset, [
+          { id: 'd1', index: 9 },
+          { id: 'x', index: 8, input: { question: 'first' } },
+        ]);
+
+        expect(expected.get(exampleKey('ds-1', 'x'))).toEqual({ expected: 'One' });
+        expect(expected.has(exampleKey('ds-1', 'd1'))).toBe(false);
       });
 
       it('does not re-match an input-matched dataset example by id or position', () => {

@@ -131,6 +131,7 @@ export const expectedOutputsByExample = (
     unusedByInput.set(input, [...(unusedByInput.get(input) ?? []), example]);
   }
   const ids = new Map(datasetExamples.map((example) => [example.id, example]));
+  const scoredIds = new Set(scoredExamples.map((scored) => scored.id));
   // Shared by the input, id and position paths: a dataset example answers one scored example.
   const consumed = new Set<(typeof datasetExamples)[number]>();
 
@@ -139,32 +140,42 @@ export const expectedOutputsByExample = (
     expected.set(exampleKey(datasetId, scored.id), matched.output);
   };
 
-  // Pass 1: exact matches for every scored example, so a position guess can never take a dataset
-  // example that a later scored example matches by input or id.
+  // Pass 1: input matches for every scored example, so neither an id nor a position guess can take
+  // a dataset example that a later scored example matches by input.
   const unmatched: ScoredExampleRef[] = [];
   for (const scored of scoredExamples) {
     const inputMatches = scored.input
       ? unusedByInput.get(stableStringify(scored.input))
       : undefined;
     const free = inputMatches?.filter((candidate) => !consumed.has(candidate)) ?? [];
-    // Duplicate inputs: prefer the same id, then the same position, so two identical questions
-    // with different expected answers do not swap.
+    // Duplicate inputs: prefer the same id, then candidates no other scored example names by id,
+    // then the same position, so two identical questions with different answers do not swap.
+    const unclaimed = free.filter((candidate) => !scoredIds.has(candidate.id));
     const byInput =
       free.find((candidate) => candidate.id === scored.id) ??
-      free.find((candidate) => candidate === datasetExamples[scored.index]) ??
+      unclaimed.find((candidate) => candidate === datasetExamples[scored.index]) ??
+      unclaimed[0] ??
       free[0];
-    const idMatch = byInput ? undefined : ids.get(scored.id);
-    const byId = idMatch && !consumed.has(idMatch) ? idMatch : undefined;
-    const match = byInput ?? byId;
-    if (match) {
-      assign(scored, match);
+    if (byInput) {
+      assign(scored, byInput);
     } else {
       unmatched.push(scored);
     }
   }
 
-  // Pass 2: position, only for what is still unmatched and still free.
+  // Pass 1b: id, after every input match, so an id never takes an example another input names.
+  const unmatchedById: ScoredExampleRef[] = [];
   for (const scored of unmatched) {
+    const byId = ids.get(scored.id);
+    if (byId && !consumed.has(byId)) {
+      assign(scored, byId);
+    } else {
+      unmatchedById.push(scored);
+    }
+  }
+
+  // Pass 2: position, only for what is still unmatched and still free.
+  for (const scored of unmatchedById) {
     const positional = datasetExamples[scored.index];
     if (!positional || consumed.has(positional)) continue;
     assign(scored, positional);
@@ -617,6 +628,7 @@ const escapeMarkdownCell = (value: string): string =>
   value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
+    .replaceAll('\\', '\\\\')
     .replaceAll('|', '\\|')
     .replace(/\r?\n/g, '<br>');
 

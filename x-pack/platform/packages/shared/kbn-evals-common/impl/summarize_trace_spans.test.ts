@@ -72,7 +72,7 @@ describe('summarizeTraceSpans answer extraction', () => {
     expect(summary?.answer).toBe('final');
   });
 
-  it('sorts spans with an unparseable start time last', () => {
+  it('never lets a span with an unparseable start time override the final answer', () => {
     const summary = summarizeTraceSpans(
       trace([
         {
@@ -84,7 +84,7 @@ describe('summarizeTraceSpans answer extraction', () => {
       ]),
       SUBJECT
     );
-    expect(summary?.answer).toBe('draft');
+    expect(summary?.answer).toBe('final');
   });
 
   it('leaves answer undefined when the subject only ended on tool calls', () => {

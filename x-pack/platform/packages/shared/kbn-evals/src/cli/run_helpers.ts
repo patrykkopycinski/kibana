@@ -11,6 +11,7 @@ import inquirer from 'inquirer';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/kbn-client';
 import { resolveEvalSuites, type EvalSuiteDefinition } from './suites';
 import {
   promptForSuite,
@@ -41,6 +42,8 @@ import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { validateSuiteVaultConfig } from '../../scripts/vault/manage_secrets';
 import { parseSpaceIds } from '../utils/space_ids';
+import { EvalsClient } from '../utils/evals_client';
+import { getEvaluationsKbnClient } from '../utils/evaluations_kbn_client';
 import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
   runConfigInit,
@@ -213,6 +216,50 @@ export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined
   } catch (error) {
     throw createFlagError(error instanceof Error ? error.message : String(error));
   }
+};
+
+const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
+
+/**
+ * An `EvalsClient` for the Kibana named by `EVAL_KBN_URL` / `EVAL_KBN_API_KEY`, after checking
+ * the evals plugin is enabled and the given spaces exist.
+ */
+export const createEvalsClientFromEnv = async (
+  log: ToolingLog,
+  spaceIds: string[] | undefined
+): Promise<EvalsClient> => {
+  const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
+  if (!evaluationsKbnUrl) {
+    log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
+  }
+
+  const kbnClient = getEvaluationsKbnClient({
+    kbnClient: new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL }),
+    log,
+    evaluationsKbnUrl,
+    evaluationsKbnApiKey: process.env.EVAL_KBN_API_KEY,
+  });
+  const evalsClient = new EvalsClient(kbnClient, log, { spaceIds });
+
+  try {
+    await evalsClient.assertPluginEnabled();
+  } catch (error) {
+    throw createFlagError(
+      [
+        error instanceof Error ? error.message : String(error),
+        'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true and xpack.evals.mode=full.',
+        'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
+      ].join('\n')
+    );
+  }
+
+  try {
+    await evalsClient.assertSpacesExist();
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+
+  return evalsClient;
 };
 
 /** Reads `--concurrency`, failing on a bad flag or `EVAL_CONCURRENCY` before a stack boots. */

@@ -21,7 +21,9 @@ import {
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
+  EVALS_TRACE_URL,
   GetEvaluationDatasetResponse,
+  GetTraceResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentDatasetExamplesResponse,
   GetEvaluationExperimentExampleDetailsResponse,
@@ -306,6 +308,34 @@ export class EvalsClient {
     }
   }
 
+  /** Like `getExperimentScores`, but throws on failure and flags a read that reached `MAX_SCORES_PER_QUERY`. */
+  async getExperimentScoresWithTotal(
+    experimentId: string,
+    options?: GetExperimentFilters
+  ): Promise<{ scores: EvaluationScoreDocument[]; total: number; capped: boolean }> {
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', encodeURIComponent(experimentId))
+      ),
+      method: 'GET',
+      query: buildExperimentQuery(options),
+      headers: VERSIONED_HEADERS,
+    });
+    const { scores, total } = GetEvaluationExperimentScoresResponse.parse(
+      getResponseData(response)
+    );
+    return { scores, total, capped: Math.max(total, scores.length) >= MAX_SCORES_PER_QUERY };
+  }
+
+  async getTrace(traceId: string): Promise<GetTraceResponse> {
+    const response = await this.kbnClient.request({
+      path: this.path(EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId))),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetTraceResponse.parse(getResponseData(response));
+  }
+
   /** Reads complete per-example score evidence from the run's home Space. */
   async getExperimentDatasetExamples(
     experimentId: string,
@@ -332,7 +362,8 @@ export class EvalsClient {
     experimentId: string,
     datasetId: string,
     exampleId: string,
-    repetitionIndex: number
+    repetitionIndex: number,
+    options?: Pick<GetExperimentFilters, 'executionId'>
   ): Promise<GetEvaluationExperimentExampleDetailsResponse> {
     const response = await this.kbnClient.request({
       path: this.path(
@@ -345,6 +376,7 @@ export class EvalsClient {
           .replace('{repetitionIndex}', String(repetitionIndex))
       ),
       method: 'GET',
+      ...(options?.executionId ? { query: buildExperimentQuery(options) } : {}),
       headers: VERSIONED_HEADERS,
     });
     return GetEvaluationExperimentExampleDetailsResponse.parse(getResponseData(response));
@@ -375,7 +407,8 @@ export class EvalsClient {
     return UpsertEvaluationDatasetResponse.parse(getResponseData(response)).dataset_id;
   }
 
-  private async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
+  /** Reads a dataset, with its examples, by the id score documents carry. `null` when unknown. */
+  async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
     try {
       const response = await this.kbnClient.request({
         path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),

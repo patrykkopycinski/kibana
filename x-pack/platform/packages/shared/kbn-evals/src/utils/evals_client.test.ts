@@ -15,6 +15,7 @@ import {
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
+  EVALS_TRACE_URL,
   MAX_SCORES_PER_QUERY,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
@@ -343,6 +344,120 @@ describe('EvalsClient', () => {
     await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
 
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'));
+  });
+
+  describe('getExperimentScoresWithTotal', () => {
+    it('reports an uncapped result', async () => {
+      const kbnClient = createMockKbnClient();
+      const scores = [createScoreDocument('example-1')];
+      kbnClient.request.mockResolvedValue(asKbnResponse({ scores, total: scores.length }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.getExperimentScoresWithTotal('experiment-123')).resolves.toEqual({
+        scores,
+        total: 1,
+        capped: false,
+      });
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', 'experiment-123'),
+          query: {},
+        })
+      );
+    });
+
+    it('flags a result that reached MAX_SCORES_PER_QUERY', async () => {
+      const kbnClient = createMockKbnClient();
+      const scores = [createScoreDocument('example-1')];
+      kbnClient.request.mockResolvedValue(asKbnResponse({ scores, total: MAX_SCORES_PER_QUERY }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.getExperimentScoresWithTotal('experiment-123')).resolves.toMatchObject({
+        total: MAX_SCORES_PER_QUERY,
+        capped: true,
+      });
+    });
+
+    it('passes the filters and lets request errors through', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockRejectedValue(new Error('boom'));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(
+        client.getExperimentScoresWithTotal('experiment-123', { suiteId: 'my-suite' })
+      ).rejects.toThrow('boom');
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({ query: { suite_id: 'my-suite' } })
+      );
+    });
+  });
+
+  describe('getTrace', () => {
+    it('reads one trace with an encoded id', async () => {
+      const kbnClient = createMockKbnClient();
+      const trace = { trace_id: 'trace/1', spans: [], total_spans: 0 };
+      kbnClient.request.mockResolvedValue(asKbnResponse(trace));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.getTrace('trace/1')).resolves.toEqual(trace);
+      expect(kbnClient.request).toHaveBeenCalledWith({
+        path: EVALS_TRACE_URL.replace('{traceId}', 'trace%2F1'),
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+      });
+    });
+
+    it('rejects an invalid trace response', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ spans: 'nope' }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.getTrace('trace-1')).rejects.toThrow();
+    });
+  });
+
+  it('fetchDatasetById reads a dataset by the id score documents carry', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({
+        id: 'ds-uuid',
+        name: 'My Dataset',
+        description: 'Test dataset',
+        examples: [
+          {
+            id: 'ex-1',
+            input: { question: 'What?' },
+            output: { expected: '42' },
+            metadata: {},
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+      })
+    );
+    const client = new EvalsClient(kbnClient, createLog());
+
+    const result = await client.fetchDatasetById('ds/uuid');
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: EVALS_DATASET_URL.replace('{datasetId}', 'ds%2Fuuid'),
+        method: 'GET',
+      })
+    );
+    expect(result?.examples).toEqual([
+      { id: 'ex-1', input: { question: 'What?' }, output: { expected: '42' }, metadata: {} },
+    ]);
+  });
+
+  it('fetchDatasetById returns null on 404', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 }));
+    const client = new EvalsClient(kbnClient, createLog());
+
+    await expect(client.fetchDatasetById('missing')).resolves.toBeNull();
   });
 
   it('upsertDataset posts to the upsert route', async () => {
@@ -888,6 +1003,20 @@ describe('EvalsClient', () => {
         });
       }
     );
+
+    it('scopes the read to an execution when given one', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse(details));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await client.getExperimentExampleDetails('exp', 'ds', 'ex', 0, {
+        executionId: 'bk-1::suite::model',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({ query: { execution_id: 'bk-1::suite::model' } })
+      );
+    });
 
     it('rejects an invalid details response', async () => {
       const kbnClient = createMockKbnClient();

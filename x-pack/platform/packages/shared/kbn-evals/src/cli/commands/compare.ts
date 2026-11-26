@@ -8,18 +8,13 @@
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { KbnClient } from '@kbn/kbn-client';
 import { compareScores, pairScores, RepetitionPolicy } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
-import { EvalsClient } from '../../utils/evals_client';
-import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
 import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
-import { readSpaceIdsFlag } from '../run_helpers';
+import { createEvalsClientFromEnv, readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
-
-const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -94,37 +89,7 @@ export const compareCmd: Command<void> = {
     }
     const repetitionPolicy = parsedPolicy.data;
 
-    const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
-    if (!evaluationsKbnUrl) {
-      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
-    }
-
-    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL });
-    const kbnClient = getEvaluationsKbnClient({
-      kbnClient: defaultKbnClient,
-      log,
-      evaluationsKbnUrl,
-      evaluationsKbnApiKey: process.env.EVAL_KBN_API_KEY,
-    });
-    const evalsClient = new EvalsClient(kbnClient, log, { spaceIds });
-
-    try {
-      await evalsClient.assertPluginEnabled();
-    } catch (error) {
-      throw createFlagError(
-        [
-          error instanceof Error ? error.message : String(error),
-          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true and xpack.evals.mode=full.',
-          'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
-        ].join('\n')
-      );
-    }
-
-    try {
-      await evalsClient.assertSpacesExist();
-    } catch (error) {
-      throw createFlagError(error instanceof Error ? error.message : String(error));
-    }
+    const evalsClient = await createEvalsClientFromEnv(log, spaceIds);
 
     let targetExperimentId: string;
     let baselineExperimentId: string;
@@ -309,7 +274,7 @@ export const compareCmd: Command<void> = {
     }
 
     if (format === 'markdown') {
-      const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
+      const effectiveKibanaUrl = kibanaUrl ?? process.env.EVAL_KBN_URL;
       const comparePageUrl = effectiveKibanaUrl
         ? buildExecutionCompareUrl({
             kibanaUrl: effectiveKibanaUrl,

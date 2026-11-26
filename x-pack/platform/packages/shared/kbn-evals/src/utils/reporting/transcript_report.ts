@@ -628,8 +628,9 @@ const escapeMarkdownCell = (value: string): string =>
   value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
-    .replaceAll('\\', '\\\\')
-    .replaceAll('|', '\\|')
+    // Only backslashes right before a pipe are doubled, so `\|` cannot end the cell; doubling every
+    // backslash would show `C:\\Win` inside code spans, where GFM keeps backslashes literal.
+    .replace(/(\\*)\|/g, (_match, slashes: string) => `${slashes}${slashes}\\|`)
     .replace(/\r?\n/g, '<br>');
 
 const codeSpan = (value: string): string => {

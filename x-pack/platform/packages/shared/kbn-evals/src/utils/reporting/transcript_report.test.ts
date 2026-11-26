@@ -666,6 +666,18 @@ describe('transcript report', () => {
         expect(markdown).toContain('| Answer | FROM logs \\\\\\| LIMIT 1 |');
       });
 
+      it('leaves backslashes that are not before a pipe alone', () => {
+        const markdown = renderTranscriptMarkdown(
+          build(
+            createHydration({
+              details: new Map([[detailKey('exp-a', 'ex-1'), output('Path `C:\\Windows\\Temp`')]]),
+            })
+          )
+        );
+
+        expect(markdown).toContain('| Answer | Path `C:\\Windows\\Temp` |');
+      });
+
       it('renders an empty trace answer as unavailable', () => {
         const report = build(
           createHydration({ traces: new Map([['trace-a', traceSummary({ answer: '' })]]) })

@@ -146,7 +146,13 @@ export const expectedOutputsByExample = (
     const inputMatches = scored.input
       ? unusedByInput.get(stableStringify(scored.input))
       : undefined;
-    const byInput = inputMatches?.find((candidate) => !consumed.has(candidate));
+    const free = inputMatches?.filter((candidate) => !consumed.has(candidate)) ?? [];
+    // Duplicate inputs: prefer the same id, then the same position, so two identical questions
+    // with different expected answers do not swap.
+    const byInput =
+      free.find((candidate) => candidate.id === scored.id) ??
+      free.find((candidate) => candidate === datasetExamples[scored.index]) ??
+      free[0];
     const idMatch = byInput ? undefined : ids.get(scored.id);
     const byId = idMatch && !consumed.has(idMatch) ? idMatch : undefined;
     const match = byInput ?? byId;
@@ -319,7 +325,7 @@ const buildCell = ({
   const answer = storedAnswer || traceSummary?.answer;
   const answerSource: AnswerSource = storedAnswer ? 'output' : answer ? 'trace' : 'unavailable';
   // A stored output that records its steps (even none) is the authority on tool calls.
-  const storedToolsKnown = Boolean(stored) && (Array.isArray(stored?.steps) || storedAnswer !== '');
+  const storedToolsKnown = Array.isArray(stored?.steps);
   const toolTrailSource: AnswerSource = storedToolsKnown
     ? 'output'
     : traceSummary
@@ -601,7 +607,7 @@ const formatTools = (cell: TranscriptCell): string => {
 };
 
 const formatAnswer = (cell: TranscriptCell): string => {
-  if (cell.answer === undefined) return 'unavailable';
+  if (!cell.answer) return 'unavailable';
   return cell.answerSource === 'trace'
     ? `${cell.answer}\n\n(answer read from the trace)`
     : cell.answer;

@@ -633,6 +633,34 @@ describe('transcript report', () => {
         expect(cell).toMatchObject({ toolTrail: [], toolTrailSource: 'output' });
       });
 
+      it('reads the tool trail from the trace when the output has an answer but no steps', () => {
+        const [cell] = build(
+          createHydration({
+            details: new Map([
+              [
+                detailKey('exp-a', 'ex-1'),
+                { input: null, output: { messages: [{ message: 'Stored answer' }] } },
+              ],
+            ]),
+            traces: new Map([['trace-a', traceSummary()]]),
+          })
+        ).examples[0].repetitions[0].cells;
+
+        expect(cell).toMatchObject({
+          answerSource: 'output',
+          toolTrail: ['platform.core.search'],
+          toolTrailSource: 'trace',
+        });
+      });
+
+      it('renders an empty trace answer as unavailable', () => {
+        const report = build(
+          createHydration({ traces: new Map([['trace-a', traceSummary({ answer: '' })]]) })
+        );
+
+        expect(renderTranscriptMarkdown(report)).toContain('| Answer | unavailable |');
+      });
+
       it('stays unavailable when neither the output nor a trace can be read', () => {
         const noTrace = [createScore({ experimentId: 'exp-a', exampleId: 'ex-1', score: 1 })];
         const report = buildTranscriptReport({
@@ -776,6 +804,24 @@ describe('transcript report', () => {
         expect(expected.get(exampleKey('ds-1', 'd1'))).toEqual({ expected: 'One' });
         expect(expected.get(exampleKey('ds-1', 'x'))).toEqual({ expected: 'Two' });
         expect(byPosition.size).toBe(0);
+      });
+
+      it('keeps duplicate-input examples on their own id or position, whatever the score order', () => {
+        const duplicates = [
+          { id: 'd1', input: { question: 'same' }, output: { expected: 'One' } },
+          { id: 'd2', input: { question: 'same' }, output: { expected: 'Two' } },
+          { id: 'd3', input: { question: 'same' }, output: { expected: 'Three' } },
+        ];
+
+        const { expected } = expectedOutputsByExample('ds-1', duplicates, [
+          { id: 'x', index: 2, input: { question: 'same' } },
+          { id: 'd2', index: 9, input: { question: 'same' } },
+          { id: 'y', index: 0, input: { question: 'same' } },
+        ]);
+
+        expect(expected.get(exampleKey('ds-1', 'x'))).toEqual({ expected: 'Three' });
+        expect(expected.get(exampleKey('ds-1', 'd2'))).toEqual({ expected: 'Two' });
+        expect(expected.get(exampleKey('ds-1', 'y'))).toEqual({ expected: 'One' });
       });
 
       it('does not re-match an input-matched dataset example by id or position', () => {

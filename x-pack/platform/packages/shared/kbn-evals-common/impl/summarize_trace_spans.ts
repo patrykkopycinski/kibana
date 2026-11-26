@@ -104,7 +104,15 @@ export const summarizeTraceSpans = (
   if (spans.length === 0) {
     return undefined;
   }
-  const ordered = [...spans].sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time));
+  // Spans with an unparseable start time sort last, keeping their relative order.
+  const startOf = (span: (typeof spans)[number]): number => {
+    const time = Date.parse(span.start_time);
+    return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+  };
+  const ordered = [...spans].sort((a, b) => {
+    const [startA, startB] = [startOf(a), startOf(b)];
+    return startA === startB ? 0 : startA - startB;
+  });
 
   const toolIds: string[] = [];
   const steps: TraceSummaryStep[] = [];

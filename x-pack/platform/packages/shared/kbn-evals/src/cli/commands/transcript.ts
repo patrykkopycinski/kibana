@@ -210,7 +210,17 @@ export const transcriptCmd: Command<void> = {
     const expected = new Map<string, unknown>();
     const expectedByPosition = new Set<string>();
     for (const [datasetId, scoredExamples] of scoredByDataset) {
-      const dataset = await evalsClient.fetchDatasetById(datasetId);
+      let dataset: Awaited<ReturnType<typeof evalsClient.fetchDatasetById>>;
+      try {
+        dataset = await withOneRetry(() => evalsClient.fetchDatasetById(datasetId));
+      } catch (error) {
+        log.warning(
+          `Could not read dataset ${datasetId} (${
+            error instanceof Error ? error.message : String(error)
+          }); its expected answers are omitted.`
+        );
+        continue;
+      }
       if (!dataset) {
         log.warning(`Dataset ${datasetId} was not found; its expected answers are omitted.`);
         continue;

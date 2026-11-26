@@ -72,6 +72,21 @@ describe('summarizeTraceSpans answer extraction', () => {
     expect(summary?.answer).toBe('final');
   });
 
+  it('sorts spans with an unparseable start time last', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        {
+          ...span(`chat ${SUBJECT}`, 'broken', 0, output('stop', [text('draft')])),
+          start_time: '',
+        },
+        span(`chat ${SUBJECT}`, 'b', 20, output('stop', [text('final')])),
+        span(`chat ${SUBJECT}`, 'a', 10, output('stop', [text('earlier')])),
+      ]),
+      SUBJECT
+    );
+    expect(summary?.answer).toBe('draft');
+  });
+
   it('leaves answer undefined when the subject only ended on tool calls', () => {
     const summary = summarizeTraceSpans(
       trace([span(`chat ${SUBJECT}`, 'a', 10, output('tool_calls', [toolCall]))]),

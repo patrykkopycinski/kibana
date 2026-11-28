@@ -670,6 +670,7 @@ describe('transcript report', () => {
         const report = build(createHydration());
         const markdown = renderTranscriptMarkdown({
           ...report,
+          sorted: true,
           sortEvaluator: 'A|B',
           warnings: ['saw a | pipe\nand a <tag>'],
         });

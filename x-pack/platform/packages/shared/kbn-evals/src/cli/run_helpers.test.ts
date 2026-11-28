@@ -10,6 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import {
   buildEvalRunArgs,
   buildEvalRunEnv,
+  createEvalsClientFromEnv,
   evalRunFlags,
   loadScoutHookConfig,
   readConcurrencyFlag,
@@ -22,6 +23,8 @@ import {
   resolveDefaultJudgeConnectorId,
 } from './profiles';
 import { isTTY, promptForConnector } from './prompts';
+import { EvalsClient } from '../utils/evals_client';
+import { getEvaluationsKbnClient } from '../utils/evaluations_kbn_client';
 
 jest.mock('./profiles', () => ({
   ...jest.requireActual('./profiles'),
@@ -34,6 +37,15 @@ jest.mock('./prompts', () => ({
   ...jest.requireActual('./prompts'),
   isTTY: jest.fn(),
   promptForConnector: jest.fn(),
+}));
+
+jest.mock('../utils/evals_client', () => ({
+  ...jest.requireActual('../utils/evals_client'),
+  EvalsClient: jest.fn(),
+}));
+
+jest.mock('../utils/evaluations_kbn_client', () => ({
+  getEvaluationsKbnClient: jest.fn(),
 }));
 
 const mockedLoadVaultConfig = jest.mocked(loadVaultConfig);
@@ -294,5 +306,107 @@ describe('resolveEvaluationConnectorId', () => {
 
     await expect(resolve([], undefined, 'dev-vault')).resolves.toBe(DEFAULT_JUDGE);
     expect(promptForConnector).not.toHaveBeenCalled();
+  });
+});
+
+describe('createEvalsClientFromEnv', () => {
+  const originalEnv = { url: process.env.EVAL_KBN_URL, apiKey: process.env.EVAL_KBN_API_KEY };
+  const evaluationsKbnClient = { evaluations: 'kbn-client' };
+  const assertPluginEnabled = jest.fn();
+  const assertSpacesExist = jest.fn();
+  let log: ToolingLog;
+
+  const restore = (name: 'EVAL_KBN_URL' | 'EVAL_KBN_API_KEY', value: string | undefined) => {
+    if (value === undefined) {
+      delete process.env[name];
+    } else {
+      process.env[name] = value;
+    }
+  };
+
+  beforeEach(() => {
+    delete process.env.EVAL_KBN_URL;
+    delete process.env.EVAL_KBN_API_KEY;
+    log = new ToolingLog();
+    jest.spyOn(log, 'warning').mockImplementation(() => true);
+    assertPluginEnabled.mockReset().mockResolvedValue(undefined);
+    assertSpacesExist.mockReset().mockResolvedValue(undefined);
+    jest
+      .mocked(getEvaluationsKbnClient)
+      .mockReset()
+      .mockReturnValue(evaluationsKbnClient as never);
+    jest
+      .mocked(EvalsClient)
+      .mockReset()
+      .mockImplementation(
+        () => ({ assertPluginEnabled, assertSpacesExist } as unknown as EvalsClient)
+      );
+  });
+
+  afterEach(() => {
+    restore('EVAL_KBN_URL', originalEnv.url);
+    restore('EVAL_KBN_API_KEY', originalEnv.apiKey);
+  });
+
+  it('builds the client from EVAL_KBN_URL and EVAL_KBN_API_KEY and passes the spaces on', async () => {
+    process.env.EVAL_KBN_URL = 'https://kbn.example';
+    process.env.EVAL_KBN_API_KEY = 'secret-key';
+
+    const client = await createEvalsClientFromEnv(log, ['team-a']);
+
+    expect(getEvaluationsKbnClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        log,
+        evaluationsKbnUrl: 'https://kbn.example',
+        evaluationsKbnApiKey: 'secret-key',
+      })
+    );
+    expect(EvalsClient).toHaveBeenCalledWith(evaluationsKbnClient, log, { spaceIds: ['team-a'] });
+    expect(client).toBe(jest.mocked(EvalsClient).mock.results[0].value);
+    expect(assertPluginEnabled).toHaveBeenCalledTimes(1);
+    expect(assertSpacesExist).toHaveBeenCalledTimes(1);
+    expect(log.warning).not.toHaveBeenCalled();
+  });
+
+  it('warns that it is defaulting to the local Kibana when EVAL_KBN_URL is unset', async () => {
+    await createEvalsClientFromEnv(log, undefined);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      'EVAL_KBN_URL not set; defaulting to http://elastic:changeme@localhost:5601.'
+    );
+    expect(getEvaluationsKbnClient).toHaveBeenCalledWith(
+      expect.objectContaining({ evaluationsKbnUrl: undefined, evaluationsKbnApiKey: undefined })
+    );
+  });
+
+  it('turns a disabled evals plugin into a flag error that names the env vars to set', async () => {
+    assertPluginEnabled.mockRejectedValue(new Error('evals plugin is disabled'));
+
+    const error = await createEvalsClientFromEnv(log, undefined).catch((e) => e);
+
+    expect(error.message).toContain('evals plugin is disabled');
+    expect(error.message).toContain('Set EVAL_KBN_URL to a Kibana instance');
+    expect(error.message).toContain('Set EVAL_KBN_API_KEY');
+    expect(assertSpacesExist).not.toHaveBeenCalled();
+  });
+
+  it('stringifies a non-Error rejection from the plugin check', async () => {
+    assertPluginEnabled.mockRejectedValue('plain failure');
+
+    await expect(createEvalsClientFromEnv(log, undefined)).rejects.toThrow('plain failure');
+  });
+
+  it('turns a missing space into a flag error carrying the original message', async () => {
+    assertSpacesExist.mockRejectedValue(new Error('space "nope" does not exist'));
+
+    await expect(createEvalsClientFromEnv(log, ['nope'])).rejects.toThrow(
+      'space "nope" does not exist'
+    );
+  });
+
+  it('stringifies a non-Error rejection from the space check', async () => {
+    assertSpacesExist.mockRejectedValue('no such space');
+
+    await expect(createEvalsClientFromEnv(log, ['nope'])).rejects.toThrow('no such space');
   });
 });

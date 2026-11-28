@@ -9,7 +9,6 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
-import type { RunContext } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { transcriptCmd } from './transcript';
@@ -63,7 +62,7 @@ describe('transcriptCmd', () => {
 
   const run = (argv: string[]) => {
     const flagsReader = new FlagsReader(getFlags(argv, transcriptCmd.flags));
-    return transcriptCmd.run({ log, flagsReader } as RunContext);
+    return transcriptCmd.run({ log, flagsReader } as never);
   };
 
   const printed = () => stdout.mock.calls.map(([chunk]) => String(chunk)).join('');

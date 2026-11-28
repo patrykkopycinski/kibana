@@ -37,13 +37,14 @@ const RETRY_DELAY_MS = 1000;
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Runs `task` once more after a short wait when the first attempt fails with a transient error. */
+/** Status and message of a rejected request, so a 401 or 500 is not mistaken for a 404. */
 const describeFailure = (reason: unknown): string => {
   const message = reason instanceof Error ? reason.message : String(reason);
   const status = (reason as { response?: { status?: number } } | undefined)?.response?.status;
   return status ? `${status} ${message}` : message;
 };
 
+/** Runs `task` once more after a short wait when the first attempt fails with a transient error. */
 const withOneRetry = async <T>(task: () => Promise<T>): Promise<T> => {
   try {
     return await task();

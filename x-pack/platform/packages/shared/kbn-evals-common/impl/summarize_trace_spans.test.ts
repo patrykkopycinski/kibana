@@ -48,6 +48,17 @@ const trace = (spans: ReturnType<typeof span>[]): GetTraceResponse =>
   } as unknown as GetTraceResponse);
 
 describe('summarizeTraceSpans answer extraction', () => {
+  it('keeps whitespace-only text parts so joined words stay apart', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        span(`chat ${SUBJECT}`, 'a', 10, output('stop', [text('Hello'), text(' '), text('world')])),
+      ]),
+      SUBJECT
+    );
+
+    expect(summary?.answer).toBe('Hello world');
+  });
+
   it('picks the subject stop span over a later helper stop span', () => {
     const summary = summarizeTraceSpans(
       trace([

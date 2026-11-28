@@ -45,7 +45,7 @@ interface OutputMessage {
   parts?: unknown;
 }
 
-/** Concatenated non-empty text parts of the messages that ended with `finishReason`; undefined for none or bad JSON. */
+/** Concatenated text parts (whitespace-only parts kept so words stay apart) of the messages that ended with `finishReason`; undefined for none or bad JSON. */
 const textOfMessages = (raw: unknown, finishReason: string): string | undefined => {
   if (typeof raw !== 'string') return undefined;
   let messages: unknown;
@@ -65,11 +65,11 @@ const textOfMessages = (raw: unknown, finishReason: string): string | undefined 
         Boolean(part) &&
         part.type === 'text' &&
         typeof part.content === 'string' &&
-        part.content.trim().length > 0
+        part.content.length > 0
     )
     .map((part) => part.content)
     .join('');
-  return text.length > 0 ? text : undefined;
+  return text.trim().length > 0 ? text : undefined;
 };
 
 /** Text of a message that finished with `stop`; undefined for tool-call turns or bad JSON. */

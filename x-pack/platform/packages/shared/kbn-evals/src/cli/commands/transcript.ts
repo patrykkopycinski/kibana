@@ -38,6 +38,12 @@ const RETRY_DELAY_MS = 1000;
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Runs `task` once more after a short wait when the first attempt fails with a transient error. */
+const describeFailure = (reason: unknown): string => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+  const status = (reason as { response?: { status?: number } } | undefined)?.response?.status;
+  return status ? `${status} ${message}` : message;
+};
+
 const withOneRetry = async <T>(task: () => Promise<T>): Promise<T> => {
   try {
     return await task();
@@ -160,10 +166,12 @@ export const transcriptCmd: Command<void> = {
       )
     );
     let detailFailures = 0;
+    let firstDetailFailure: string | undefined;
     detailResults.forEach((result, index) => {
       const key = repetitionKey(refs[index]);
       if (result.status === 'rejected') {
         detailFailures++;
+        firstDetailFailure ??= describeFailure(result.reason);
         details.set(key, null);
         return;
       }
@@ -172,7 +180,7 @@ export const transcriptCmd: Command<void> = {
     });
     if (detailFailures > 0) {
       log.warning(
-        `Could not read stored output for ${detailFailures} repetition(s); falling back to traces.`
+        `Could not read stored output for ${detailFailures} repetition(s) (first failure: ${firstDetailFailure}); falling back to traces.`
       );
     }
 
@@ -193,17 +201,29 @@ export const transcriptCmd: Command<void> = {
       withOneRetry(() => evalsClient.getTrace(traceId))
     );
     let traceFailures = 0;
+    let firstTraceFailure: string | undefined;
+    let modelMismatches = 0;
     traceResults.forEach((result, index) => {
       const traceId = traceIds[index];
       if (result.status === 'rejected') {
         traceFailures++;
+        firstTraceFailure ??= describeFailure(result.reason);
         traces.set(traceId, null);
         return;
       }
-      traces.set(traceId, summarizeTraceSpans(result.value, traceModels.get(traceId)) ?? null);
+      const summary = summarizeTraceSpans(result.value, traceModels.get(traceId)) ?? null;
+      if (summary?.subjectChatSpans === 0) modelMismatches++;
+      traces.set(traceId, summary);
     });
     if (traceFailures > 0) {
-      log.warning(`Could not read ${traceFailures} trace(s); they are shown as unavailable.`);
+      log.warning(
+        `Could not read ${traceFailures} trace(s) (first failure: ${firstTraceFailure}); they are shown as unavailable.`
+      );
+    }
+    if (modelMismatches > 0) {
+      log.warning(
+        `${modelMismatches} trace(s) have no chat span for the model they were scored under; their answers are unavailable.`
+      );
     }
 
     const scoredByDataset = collectScoredExamples(experiments, details);

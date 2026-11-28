@@ -633,6 +633,10 @@ const escapeMarkdownCell = (value: string): string =>
     .replace(/(\\*)\|/g, (_match, slashes: string) => `${slashes}${slashes}\\|`)
     .replace(/\r?\n/g, '<br>');
 
+/** For prose outside tables: no pipe or line-break handling, so a `|` never shows a stray backslash. */
+const escapeMarkdownText = (value: string): string =>
+  value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replace(/\r?\n/g, ' ');
+
 const codeSpan = (value: string): string => {
   const longestRun = Math.max(0, ...(value.match(/`+/g) ?? []).map((run) => run.length));
   const fence = '`'.repeat(longestRun + 1);
@@ -662,7 +666,7 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
     ),
     '',
     sorted
-      ? `${examples.length} example(s), sorted by the largest ${escapeMarkdownCell(
+      ? `${examples.length} example(s), sorted by the largest ${escapeMarkdownText(
           sortEvaluator
         )} gap between experiments.`
       : `${examples.length} example(s), in dataset order.`,
@@ -670,7 +674,7 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
   ];
 
   if (warnings.length > 0) {
-    lines.push(...warnings.map((warning) => `> **Warning:** ${escapeMarkdownCell(warning)}`), '');
+    lines.push(...warnings.map((warning) => `> **Warning:** ${escapeMarkdownText(warning)}`), '');
   }
 
   const columns = experimentIds.map((_, index) => `**${String.fromCharCode(65 + index)}**`);
@@ -679,11 +683,11 @@ export const renderTranscriptMarkdown = (report: TranscriptReport): string => {
 
   examples.forEach((example, index) => {
     lines.push(
-      `## ${index + 1}. ${escapeMarkdownCell(example.datasetName)} · example ${
+      `## ${index + 1}. ${escapeMarkdownText(example.datasetName)} · example ${
         example.exampleIndex
       }`,
       '',
-      `${escapeMarkdownCell(sortEvaluator)} gap: ${formatScore(example.gap)}`,
+      `${escapeMarkdownText(sortEvaluator)} gap: ${formatScore(example.gap)}`,
       '',
       '**Question**',
       '',

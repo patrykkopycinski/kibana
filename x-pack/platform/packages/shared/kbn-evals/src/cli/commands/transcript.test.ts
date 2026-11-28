@@ -232,7 +232,7 @@ describe('transcriptCmd', () => {
 
       expect(getExperimentExampleDetails).toHaveBeenCalledTimes(4);
       expect(log.warning).toHaveBeenCalledWith(
-        'Could not read stored output for 4 repetition(s); falling back to traces.'
+        'Could not read stored output for 4 repetition(s) (first failure: 404 not found); falling back to traces.'
       );
       expect(printed()).not.toContain('answer from exp-a');
     });
@@ -270,7 +270,7 @@ describe('transcriptCmd', () => {
 
       expect(getExperimentExampleDetails).toHaveBeenCalledTimes(4);
       expect(log.warning).toHaveBeenCalledWith(
-        'Could not read stored output for 2 repetition(s); falling back to traces.'
+        'Could not read stored output for 2 repetition(s) (first failure: 404 Not Found); falling back to traces.'
       );
     });
 
@@ -290,7 +290,35 @@ describe('transcriptCmd', () => {
       expect(getTrace).toHaveBeenCalledWith('trace-shared');
       expect(log.info).toHaveBeenCalledWith('Reading 1 trace(s)...');
       expect(log.warning).toHaveBeenCalledWith(
-        'Could not read 1 trace(s); they are shown as unavailable.'
+        'Could not read 1 trace(s) (first failure: 404 Not Found); they are shown as unavailable.'
+      );
+    });
+
+    it('warns when a trace has no chat span for the model it was scored under', async () => {
+      getExperimentScoresWithTotal.mockImplementation(async (experimentId: string) => ({
+        scores: [score(experimentId, 'ex-1', 1, `trace-${experimentId}`)],
+        total: 1,
+        capped: false,
+      }));
+      getTrace.mockResolvedValue({
+        trace_id: 't',
+        total_spans: 1,
+        duration_ms: 100,
+        spans: [
+          {
+            name: 'chat some-other-model',
+            span_id: 's1',
+            start_time: '2026-09-05T19:30:58.391Z',
+            duration_ms: 10,
+            attributes: {},
+          },
+        ],
+      });
+
+      await run(['exp-a', 'exp-b']);
+
+      expect(log.warning).toHaveBeenCalledWith(
+        '2 trace(s) have no chat span for the model they were scored under; their answers are unavailable.'
       );
     });
 

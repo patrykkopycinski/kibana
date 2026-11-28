@@ -666,6 +666,20 @@ describe('transcript report', () => {
         expect(markdown).toContain('| Answer | FROM logs \\\\\\| LIMIT 1 |');
       });
 
+      it('does not add backslashes to a sort evaluator name or warning outside tables', () => {
+        const report = build(createHydration());
+        const markdown = renderTranscriptMarkdown({
+          ...report,
+          sortEvaluator: 'A|B',
+          warnings: ['saw a | pipe\nand a <tag>'],
+        });
+
+        expect(markdown).toContain('sorted by the largest A|B gap');
+        expect(markdown).toContain('A|B gap:');
+        expect(markdown).toContain('> **Warning:** saw a | pipe and a &lt;tag>');
+        expect(markdown).not.toContain('A\\|B');
+      });
+
       it('leaves backslashes that are not before a pipe alone', () => {
         const markdown = renderTranscriptMarkdown(
           build(

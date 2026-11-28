@@ -45,35 +45,8 @@ interface OutputMessage {
   parts?: unknown;
 }
 
-/** Text of a message that finished with `stop`; undefined for tool-call turns or bad JSON. */
-const finalTextOf = (raw: unknown): string | undefined => {
-  if (typeof raw !== 'string') return undefined;
-  let messages: unknown;
-  try {
-    messages = JSON.parse(raw);
-  } catch {
-    return undefined;
-  }
-  if (!Array.isArray(messages)) return undefined;
-  const stopped = (messages as OutputMessage[]).filter(
-    (message) => message && typeof message === 'object' && message.finish_reason === 'stop'
-  );
-  const text = stopped
-    .flatMap((message) => (Array.isArray(message.parts) ? message.parts : []))
-    .filter(
-      (part): part is { type: 'text'; content: string } =>
-        Boolean(part) &&
-        part.type === 'text' &&
-        typeof part.content === 'string' &&
-        part.content.length > 0
-    )
-    .map((part) => part.content)
-    .join('');
-  return text.length > 0 ? text : undefined;
-};
-
-/** Narration text of a message that finished with `tool_calls`; undefined if blank or bad JSON. */
-const narrationOf = (raw: unknown): string | undefined => {
+/** Concatenated non-empty text parts of the messages that ended with `finishReason`; undefined for none or bad JSON. */
+const textOfMessages = (raw: unknown, finishReason: string): string | undefined => {
   if (typeof raw !== 'string') return undefined;
   let messages: unknown;
   try {
@@ -84,17 +57,26 @@ const narrationOf = (raw: unknown): string | undefined => {
   if (!Array.isArray(messages)) return undefined;
   const text = (messages as OutputMessage[])
     .filter(
-      (message) => message && typeof message === 'object' && message.finish_reason === 'tool_calls'
+      (message) => message && typeof message === 'object' && message.finish_reason === finishReason
     )
     .flatMap((message) => (Array.isArray(message.parts) ? message.parts : []))
     .filter(
       (part): part is { type: 'text'; content: string } =>
-        Boolean(part) && part.type === 'text' && typeof part.content === 'string'
+        Boolean(part) &&
+        part.type === 'text' &&
+        typeof part.content === 'string' &&
+        part.content.trim().length > 0
     )
     .map((part) => part.content)
     .join('');
-  return text.trim().length > 0 ? text : undefined;
+  return text.length > 0 ? text : undefined;
 };
+
+/** Text of a message that finished with `stop`; undefined for tool-call turns or bad JSON. */
+const finalTextOf = (raw: unknown): string | undefined => textOfMessages(raw, 'stop');
+
+/** Narration text of a message that finished with `tool_calls`; undefined if blank or bad JSON. */
+const narrationOf = (raw: unknown): string | undefined => textOfMessages(raw, 'tool_calls');
 
 /** `undefined` for a trace with no spans, so an empty trail never reads as "no tools called". */
 export const summarizeTraceSpans = (
